@@ -1,0 +1,17 @@
+instances:
+<% @instances.each do |i| -%>
+  - host: <%= i["server"] %>
+    port: <%= i["port"] || 6379 %>
+    <% if i.key?("password") -%>
+    password: <%= i["password"] %>
+    <% end -%>
+    <% if i.key?("tags") -%>
+    tags:
+      <% i["tags"].each do |t| -%>
+      - <%= t %>
+      <% end -%>
+    <% end -%>
+<% end -%>
+
+init_config:
+# nothing to add here
