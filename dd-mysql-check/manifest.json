@@ -1,0 +1,7 @@
+{
+  "manifest_version": 1,
+  "name": "mysql",
+  "display_name": "mysql check",
+  "version": "0.1",
+  "support": "core",
+}
