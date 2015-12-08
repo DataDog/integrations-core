@@ -1,2 +1,9 @@
 # dd-mysql-check
-some prototyping
+
+- overview
+- how to install
+- how to configure
+- troubleshooting 
+- compatibility (agent 5.6+)
+- metadata (pulled from external file containing the metrics)
+
