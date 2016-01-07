@@ -1,14 +1,11 @@
 {
   "manifest_version": 1,
-  "name": "official",
-  "display_name": "official check",
+  "name": "foo",
+  "display_name": Foo",
   "version": "0.1",
-  "source": "https://github.com/tmichelet/dd-official-check",
 
-  "short_description": "Cacti is an open-source web-based network monitoring and graphing tool",
-  "description": "Cacti is an open-source web-based network monitoring and graphing tool, ...",
-  "overview": "now hello, soon resources/overview.md",
-  "config": "now world, soon resources/config.md",
+  "short_description": "Foo collects the dd.tristan metric for all your Tristan monitoring needs",
+  "description": "Foo collects the dd.tristan metric for all your Tristan monitoring needs",
 
   "resources": {
     "small": "resources/small_cacti.png",

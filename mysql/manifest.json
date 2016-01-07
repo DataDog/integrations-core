@@ -1,7 +1,18 @@
 {
   "manifest_version": 1,
-  "name": "mysql",
-  "display_name": "mysql check",
+  "name": "MySQL",
+  "display_name": MySQL",
   "version": "0.1",
   "support": "core"
+
+  "short_description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances."
+  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
+
+  "resources": {
+    "small": "resources/small_mysql.png",
+    "bot": "resources/bot_mysql.png",
+    "monitor_editor": "resources/monitor_mysql.png",
+    "my_image": "resources/mysql.png"
+  }
+
 }
