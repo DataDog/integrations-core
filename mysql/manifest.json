@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
   "name": "MySQL",
-  "display_name": MySQL",
+  "display_name": "MySQL",
   "version": "0.1",
   "support": "core"
 
