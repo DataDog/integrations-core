@@ -44,7 +44,7 @@ A few parameters can be changed with environment variables.
     NOTE: Always refer to the instructions in the app for the latest version of the install command.
 
 
-## Validate Installation
+# Validation
 
 1. Restart the agent.
 2. Execute the info command and verify that the integration check has passed. The output of the command should contain a section similar to the following:
