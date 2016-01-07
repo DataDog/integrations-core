@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
   "name": "foo",
-  "display_name": Foo",
+  "display_name": "Foo",
   "version": "0.1",
 
   "short_description": "Foo collects the dd.tristan metric for all your Tristan monitoring needs",
