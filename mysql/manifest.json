@@ -3,9 +3,9 @@
   "name": "MySQL",
   "display_name": "MySQL",
   "version": "0.1",
-  "support": "core"
+  "support": "core",
 
-  "short_description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances."
+  "short_description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
   "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
 
   "resources": {
