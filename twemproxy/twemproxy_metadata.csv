@@ -1,0 +1,12 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+twemproxy.client_connections,guage,,,The number of client connections,0,twemproxy,client connections
+twemproxy.client_eof,guage,,,something,0,twemproxy,client eof
+twemproxy.client_err,guage,,,something,0,twemproxy,client err
+twemproxy.forward_error,guage,,,something,0,twemproxy,forward error
+twemproxy.in_queue,guage,,,something,0,twemproxy,in queue
+twemproxy.out_queue,guage,,,something,0,twemproxy,out queue
+twemproxy.server_connections,guage,,,something,0,twemproxy,server connections
+twemproxy.server_ejects,guage,,,something,0,twemproxy,server ejects
+twemproxy.server_eof,guage,,,something,0,twemproxy,server eof
+twemproxy.server_err,guage,,,something,0,twemproxy,server errors
+twemproxy.server_timedout,guage,,,something,0,twemproxy,server timed out
