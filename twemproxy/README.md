@@ -7,7 +7,7 @@ Get metrics from Twitter's twemproxy in real time to:
 
 # Installation
 
-Install the integration using `apt-get install twemproxy`
+Install the integration using `apt-get install dd-check-twemproxy`
 
 # Configuration
 
