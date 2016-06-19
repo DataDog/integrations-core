@@ -36,6 +36,7 @@ test:
         - bundle exec rake lint
         - rake ci:run[default]
         - rake ci:run[mysql]
+        - rake ci:run[twemproxy]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

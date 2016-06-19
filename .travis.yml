@@ -27,10 +27,11 @@ env:
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 
 before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git
+  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools
 
 install:
   - gem install bundler
