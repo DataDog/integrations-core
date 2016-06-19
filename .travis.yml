@@ -1,0 +1,47 @@
+sudo: required
+
+language: python
+python:
+  - "2.7"
+
+branches:
+  only:
+    - master
+    - /jaime.*/  # for now - whitelisting
+    - /tristan.*/ # for now - whitelisting
+
+services:
+  - docker
+
+env:
+  global:
+    - NOSE_FILTER="not windows"
+    - VOLATILE_DIR=/tmp/integration-sdk-testing
+    - SKIP_CLEANUP=true
+    - INTEGRATIONS_DIR=$HOME/embedded
+    - PIP_CACHE=$HOME/.cache/pip
+    - SDK_TESTING=true
+
+before_install:
+  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git
+
+install:
+  - gem install bundler
+  - bundle install
+  - git clone https://github.com/DataDog/dd-agent.git ~/dd-agent
+  - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
+  - pip install docker-compose
+  - pip install pylint
+  - if [ -e $TRAVIS_BUILD_DIR/requirements.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements.txt; fi
+  - if [ -e $TRAVIS_BUILD_DIR/requirements-test.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-test.txt; fi
+  - if [ -e $TRAVIS_BUILD_DIR/requirements-opt.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-opt.txt; fi
+  - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
+  - if [ -e $TRAVIS_BUILD_DIR/Gemfile ]; then cd $TRAVIS_BUILD_DIR ; bundle install; cd - ; fi
+
+script:
+  - bundle exec rake lint
+  - rake ci:run[default]
+  - bundle exec rake requirements
+
+after_script:
+  - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
