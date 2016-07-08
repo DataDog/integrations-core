@@ -1,5 +1,6 @@
 init_config:
 
 instances:
-    - url: http://localhost:22222
+    - host: localhost
+      port: 2222
 

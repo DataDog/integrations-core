@@ -1,5 +1,5 @@
 # stdlib
-import urllib2
+import socket
 
 # 3rd party
 import simplejson as json
@@ -74,12 +74,16 @@ class Twemproxy(AgentCheck):
 
     """
     def check(self, instance):
-        if 'url' not in instance:
-            raise Exception('Twemproxy instance missing "url" value.')
+        if 'host' not in instance:
+            raise Exception('Twemproxy instance missing "host" value.')
         tags = instance.get('tags', [])
 
         response = self._get_data(instance)
         self.log.debug(u"Nginx status `response`: {0}".format(response))
+
+        if not response:
+            self.log.warning(u"No response received from twemproxy.")
+            return
 
         metrics = self.parse_json(response, tags)
         for row in metrics:
@@ -89,15 +93,27 @@ class Twemproxy(AgentCheck):
             except Exception, e:
                 self.log.error(
                     u'Could not submit metric: %s: %s',
-                    (repr(row), str(e))
+                    repr(row), str(e)
                 )
 
     def _get_data(self, instance):
-        url = instance.get('url')
+        host = instance.get('host')
+        port = int(instance.get('port', 2222)) # 2222 is default
 
-        self.log.debug(u"Querying URL: {0}".format(url))
-        response = urllib2.urlopen(url)
-        return response.read()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((host, port))
+
+        response = ""
+        self.log.debug(u"Querying: {0}:{1}".format(host, port))
+        while 1:
+            data = client.recv(1024)
+            if not data:
+                break
+            response = ''.join([response, data])
+
+        client.close()
+
+        return response
 
     @classmethod
     def parse_json(cls, raw, tags=None):
