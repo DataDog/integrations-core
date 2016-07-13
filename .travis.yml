@@ -23,7 +23,7 @@ env:
     - SDK_TESTING=true
 
 before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat
+  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools
 
 install:
   - gem install bundler

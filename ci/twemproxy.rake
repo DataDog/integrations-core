@@ -49,6 +49,7 @@ namespace :ci do
       Wait.for 6222
       sleep_for 30
       sh %(nc localhost 6222)
+      sh %(netstat -ntplu)
     end
 
     task :script, [:mocked] => ['ci:common:script'] do |_, attr|
