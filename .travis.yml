@@ -23,7 +23,7 @@ env:
     - SDK_TESTING=true
 
 before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git
+  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools
 
 install:
   - gem install bundler
@@ -41,6 +41,7 @@ install:
 script:
   - bundle exec rake lint
   - rake ci:run[default]
+  - rake ci:run[twemproxy]
   - bundle exec rake requirements
 
 after_script:
