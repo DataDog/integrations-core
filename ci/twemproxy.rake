@@ -49,6 +49,7 @@ namespace :ci do
       Wait.for 6222
       sleep_for 15
       sh %(netstat -ntplu)
+      sh %(curl -L -X GET http://127.0.0.1:6222)
     end
 
     task :script, [:mocked] => ['ci:common:script'] do |_, attr|
