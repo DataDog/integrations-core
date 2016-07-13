@@ -47,11 +47,11 @@ namespace :ci do
     task before_script: ['ci:common:before_script'] do
       Wait.for 6100
       Wait.for 6222
-      sleep_for 30
-      sh %(nc localhost 6222)
-      sh %(nc -6 ::1 6222)
-      sh %(nc --help)
+      sleep_for 15
+      sh %(nc --help || echo)
       sh %(netstat -ntplu)
+      sh %(nc localhost 6222 || echo)
+      sh %(nc -6 ::1 6222 || echo)
     end
 
     task :script, [:mocked] => ['ci:common:script'] do |_, attr|

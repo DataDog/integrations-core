@@ -100,18 +100,26 @@ class Twemproxy(AgentCheck):
         host = instance.get('host')
         port = int(instance.get('port', 2222)) # 2222 is default
 
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((host, port))
+        client = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+
+        try:
+            addrs = socket.getaddrinfo(host, port, socket.AF_INET6, 0, socket.IPPROTO_TCP)
+        except socket.gaierror as e:
+            self.log.warning("unable to retrieve address info for %s:%s - %s", host, port, e)
+            return None
 
         response = ""
-        self.log.debug(u"Querying: {0}:{1}".format(host, port))
-        while 1:
-            data = client.recv(1024)
-            if not data:
-                break
-            response = ''.join([response, data])
+        if addrs:
+            client.connect(addrs[0][-1])
 
-        client.close()
+            self.log.debug(u"Querying: {0}:{1}".format(host, port))
+            while 1:
+                data = client.recv(1024)
+                if not data:
+                    break
+                response = ''.join([response, data])
+
+            client.close()
 
         return response
 
