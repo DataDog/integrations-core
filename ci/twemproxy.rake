@@ -50,7 +50,8 @@ namespace :ci do
       sleep_for 15
       sh %(netstat -ntplu)
       sh %(ifconfig -a)
-      sh %(curl -L -X GET http://127.0.0.1:6222)
+      sh %(curl -L -X GET http://127.0.0.1:6222 || echo)
+      sh %(curl -L -X GET http://172.17.42.1:6222 || echo)
     end
 
     task :script, [:mocked] => ['ci:common:script'] do |_, attr|
