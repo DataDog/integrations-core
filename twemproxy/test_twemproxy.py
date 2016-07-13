@@ -8,7 +8,7 @@ from tests.checks.common import AgentCheckTest
 
 
 instance = {
-    'host': 'localhost',
+    'host': '::1',
     'port': 6222,
 }
 
