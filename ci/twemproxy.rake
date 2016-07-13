@@ -47,7 +47,7 @@ namespace :ci do
     task before_script: ['ci:common:before_script'] do
       Wait.for 6100
       Wait.for 6222
-      sleep_for 15
+      sleep_for 30
     end
 
     task :script, [:mocked] => ['ci:common:script'] do |_, attr|
