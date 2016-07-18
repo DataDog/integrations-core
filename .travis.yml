@@ -41,6 +41,7 @@ env:
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=gearmand FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=redis
     # END OF TRAVIS MATRIX
 
 before_install:
