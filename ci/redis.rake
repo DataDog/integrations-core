@@ -18,7 +18,7 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      sh %(docker run -p 6379:6379  --name redis redis:#{redis_version})
+      sh %(docker run -d -p 6379:6379  --name redis redis:#{redis_version})
     end
 
     task before_script: ['ci:common:before_script']
