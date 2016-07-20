@@ -1,5 +1,4 @@
 # stdlib
-import logging
 import pprint
 import random
 import time
@@ -13,20 +12,59 @@ import redis
 # project
 from tests.checks.common import AgentCheckTest, load_check
 
-logger = logging.getLogger()
-
-MAX_WAIT = 20
 NOAUTH_PORT = 16379
 AUTH_PORT = 26379
 SLAVE_HEALTHY_PORT = 36379
 SLAVE_UNHEALTHY_PORT = 46379
-DEFAULT_PORT = 6379
 MISSING_KEY_TOLERANCE = 0.6
 
 
 @attr(requires='redis')
 class TestRedis(AgentCheckTest):
     CHECK_NAME = "redisdb"
+
+    def test_redis_auth(self):
+        # correct password
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+        instance = {
+            'host': 'localhost',
+            'port': AUTH_PORT,
+            'password': 'datadog-is-devops-best-friend'
+        }
+        r.check(instance)
+        metrics = self._sort_metrics(r.get_metrics())
+        assert len(metrics) > 0, "No metrics returned"
+
+        # wrong passwords
+        instances = [
+            {
+                'host': 'localhost',
+                'port': AUTH_PORT,
+                'password': ''
+            },
+            {
+                'host': 'localhost',
+                'port': AUTH_PORT,
+                'password': 'badpassword'
+            }
+        ]
+
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+        try:
+            r.check(instances[0])
+        except Exception as e:
+            self.assertTrue(
+                # 2.8
+                'noauth authentication required' in str(e).lower()
+                # previously
+                or 'operation not permitted' in str(e).lower(),
+                str(e))
+
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+        try:
+            r.check(instances[1])
+        except Exception as e:
+            self.assertTrue('invalid password' in str(e).lower(), str(e))
 
     def test_redis_default(self):
         port = NOAUTH_PORT
@@ -42,7 +80,7 @@ class TestRedis(AgentCheckTest):
         db.set("key2", "value")
         db.setex("expirekey", "expirevalue", 1000)
 
-        r = load_check('redisdb', {}, {})
+        r = load_check('redisdb', {}, {}, is_sdk=True)
         r.check(instance)
         metrics = self._sort_metrics(r.get_metrics())
         assert metrics, "No metrics returned"
@@ -110,6 +148,91 @@ class TestRedis(AgentCheckTest):
         self.assertTrue(service_metadata_count > 0)
         for meta_dict in service_metadata:
             assert meta_dict
+
+    def test_redis_replication_link_metric(self):
+        metric_name = 'redis.replication.master_link_down_since_seconds'
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+
+        def extract_metric(instance):
+            r.check(instance)
+            metrics = [m for m in r.get_metrics() if m[0] == metric_name]
+            return (metrics and metrics[0]) or None
+
+        # Healthy host
+        metric = extract_metric({
+            'host': 'localhost',
+            'port': SLAVE_HEALTHY_PORT
+        })
+        assert metric, "%s metric not returned" % metric_name
+        self.assertEqual(metric[2], 0, "Value of %s should be 0" % metric_name)
+
+        # Unhealthy host
+        time.sleep(5)  # Give time for the replication failure metrics to build up
+        metric = extract_metric({
+            'host': 'localhost',
+            'port': SLAVE_UNHEALTHY_PORT
+        })
+        self.assert_(metric[2] > 0, "Value of %s should be greater than 0" % metric_name)
+
+    def test_redis_replication_service_check(self):
+        check_name = 'redis.replication.master_link_status'
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+
+        def extract_check(instance):
+            r.check(instance)
+            checks = [c for c in r.get_service_checks() if c['check'] == check_name]
+            return (checks and checks[0]) or None
+
+        # Healthy host
+        time.sleep(5)  # Give time for the replication failure metrics to build up
+        check = extract_check({
+            'host': 'localhost',
+            'port': SLAVE_HEALTHY_PORT
+        })
+        assert check, "%s service check not returned" % check_name
+        self.assertEqual(check['status'], AgentCheck.OK, "Value of %s service check should be OK" % check_name)
+
+        # Unhealthy host
+        check = extract_check({
+            'host': 'localhost',
+            'port': SLAVE_UNHEALTHY_PORT
+        })
+        self.assertEqual(check['status'], AgentCheck.CRITICAL, "Value of %s service check should be CRITICAL" % check_name)
+
+    def test_redis_repl(self):
+        master_instance = {
+            'host': 'localhost',
+            'port': NOAUTH_PORT
+        }
+
+        slave_instance = {
+            'host': 'localhost',
+            'port': AUTH_PORT,
+            'password': 'datadog-is-devops-best-friend'
+        }
+
+        repl_metrics = [
+            'redis.replication.delay',
+            'redis.replication.backlog_histlen',
+            'redis.replication.delay',
+            'redis.replication.master_repl_offset',
+        ]
+
+        master_db = redis.Redis(port=NOAUTH_PORT, db=14)
+        slave_db = redis.Redis(port=AUTH_PORT, password=slave_instance['password'], db=14)
+        master_db.flushdb()
+
+        # Assert that the replication works
+        master_db.set('replicated:test', 'true')
+        self.assertEquals(slave_db.get('replicated:test'), 'true')
+
+        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r.check(master_instance)
+        metrics = self._sort_metrics(r.get_metrics())
+
+        # Assert the presence of replication metrics
+        keys = [m[0] for m in metrics]
+        assert [x in keys for x in repl_metrics]
 
     def test_slowlog(self):
         port = NOAUTH_PORT
@@ -190,7 +313,7 @@ class TestRedis(AgentCheckTest):
 
         db = redis.Redis(port=port, db=14)  # Datadog's test db
 
-        r = load_check('redisdb', {}, {})
+        r = load_check('redisdb', {}, {}, is_sdk=True)
         r.check(instance)
 
         version = db.info().get('redis_version')

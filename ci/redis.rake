@@ -18,7 +18,11 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      sh %(docker run -d -p 16379:6379  --name redis redis:#{redis_version})
+      sh %(docker run -d -p 16379:6379 --name redis-master redis:#{redis_version})
+      sh %(docker run --name redis-auth -p 26379:6379 --link redis-master redis:#{redis_version} redis-server --requirepass datadog-is-devops-best-friend --slaveof redis-master 6379)
+      sh %(docker run --name redis-slave-healthy -p 36379:6379 --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 6379)
+      sh %(docker run --name redis-slave-unhealthy -p 46379:6379 --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 55555)
+
     end
 
     task before_script: ['ci:common:before_script']
