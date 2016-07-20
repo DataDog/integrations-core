@@ -1,2 +1,2 @@
 # integration pip requirements
-python-redis==2.10.3
+redis==2.10.5
