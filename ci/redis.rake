@@ -19,9 +19,9 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
       sh %(docker run -d -p 16379:6379 --name redis-master redis:#{redis_version})
-      sh %(docker run --name redis-auth -p 26379:6379 --link redis-master redis:#{redis_version} redis-server --requirepass datadog-is-devops-best-friend --slaveof redis-master 6379)
-      sh %(docker run --name redis-slave-healthy -p 36379:6379 --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 6379)
-      sh %(docker run --name redis-slave-unhealthy -p 46379:6379 --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 55555)
+      sh %(docker run -d -p 26379:6379 --name redis-auth --link redis-master redis:#{redis_version} redis-server --requirepass datadog-is-devops-best-friend --slaveof redis-master 6379)
+      sh %(docker run -d -p 36379:6379 --name redis-slave-healthy --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 6379)
+      sh %(docker run -d -p 46379:6379 --name redis-slave-unhealthy --link redis-master redis:#{redis_version} redis-server --slaveof redis-master 55555)
 
     end
 
