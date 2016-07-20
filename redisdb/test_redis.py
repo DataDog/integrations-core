@@ -10,6 +10,7 @@ from nose.plugins.skip import SkipTest
 import redis
 
 # project
+from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, load_check
 
 NOAUTH_PORT = 16379
