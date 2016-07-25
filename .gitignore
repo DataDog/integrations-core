@@ -60,3 +60,10 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+#sdk collateral
+venv/
+embedded/
+.bundle/
+Gemfile.lock
+.ropeproject/
