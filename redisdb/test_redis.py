@@ -5,6 +5,7 @@ import time
 
 # 3p
 from distutils.version import StrictVersion # pylint: disable=E0611,E0401
+from docker import Client
 from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 import redis
@@ -19,6 +20,7 @@ SLAVE_HEALTHY_PORT = 36379
 SLAVE_UNHEALTHY_PORT = 46379
 MISSING_KEY_TOLERANCE = 0.6
 
+REDIS_DOCKER_IMAGE = "redis:latest"
 
 @attr(requires='redis')
 class TestRedis(AgentCheckTest):
