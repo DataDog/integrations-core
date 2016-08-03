@@ -28,6 +28,7 @@ env:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=tokumx
     # END OF TRAVIS MATRIX
 
 before_install:
