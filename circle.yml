@@ -24,7 +24,7 @@ dependencies:
         - echo "$HOME/dd-agent/" > ~/virtualenvs/venv-2.7.3/lib/python2.7/site-packages/datadog-agent.pth
         - pip install pip --upgrade
         - pip install docker-compose
-        - pip install pylint 
+        - pip install pylint
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/requirements.txt ]; then pip install -r ~/$CIRCLE_PROJECT_REPONAME/requirements.txt; fi
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/requirements-test.txt ]; then pip install -r ~/$CIRCLE_PROJECT_REPONAME/requirements-test.txt; fi
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt ]; then pip install -r ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt; fi
@@ -35,6 +35,7 @@ test:
     override:
         - bundle exec rake lint
         - rake ci:run[default]
+        - rake ci:run[mysql]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

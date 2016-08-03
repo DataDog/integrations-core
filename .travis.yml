@@ -41,6 +41,7 @@ install:
 script:
   - bundle exec rake lint
   - rake ci:run[default]
+  - rake ci:run[mysql]
   - bundle exec rake requirements
 
 after_script:
