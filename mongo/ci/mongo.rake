@@ -27,12 +27,11 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
     end
 
-    task :script, [:mocked] => ['ci:common:script'] do |_, attr|
-      mocked = attr[:mocked] || false
+    task script: ['ci:common:script'] do
       this_provides = [
         'mongo'
       ]
-      Rake::Task['ci:common:run_tests'].invoke(this_provides, mocked)
+      Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
 
     task before_cache: ['ci:common:before_cache']
@@ -43,16 +42,13 @@ namespace :ci do
       sh %(bash mongo/ci/stop-docker.sh)
     end
 
-    task :execute, :mocked do |_, attr|
-      mocked = attr[:mocked] || false
+    task :execute do
       exception = nil
       begin
-        if not mocked
-          %w(before_install install before_script).each do |u|
-            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
-          end
+        %w(before_install install before_script).each do |u|
+          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke(mocked)
+        Rake::Task["#{flavor.scope.path}:script"].invoke
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e
