@@ -47,17 +47,29 @@ echo 'docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT'
 docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT
 echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "$SHARD00_IP:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
-docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
+docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = 'localhost:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
 
 sleep 2
 
 echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD01_IP:$PORT1\\')); printjson(rs.status());" localhost:$PORT'
-docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD01_IP:$PORT1')); printjson(rs.status());" localhost:$PORT
+docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT1')); printjson(rs.status());" localhost:$PORT
 
 echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD02_IP:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
-docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD02_IP:$PORT2')); printjson(rs.status());" localhost:$PORT
+docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT2')); printjson(rs.status());" localhost:$PORT
 
-echo 'docker exec -it $NAME mongo --eval "use test; db.bar.save({1: []}); db.foo.save({});" localhost:$PORT'
-docker exec -it $NAME mongo --eval "'use test'; 'db.bar.save({1: []})'; 'db.foo.save({})';" localhost:$PORT
+mongo_cmd=''
+t=0; bar_cmd='db.bar.save({1: []}); db.bar.save({});';
+until [ "$t" -eq "40" ]; do
+  mongo_cmd=$mongo_cmd' '$bar_cmd; (( t = t + 1 ));
+done
+t=0; foo_cmd='db.foo.save({1: []}); db.foo.save({}); db.foo.save({1: []});';
+until [ "$t" -eq "70" ]; do
+  mongo_cmd=$mongo_cmd' '$foo_cmd; (( t = t + 1 ));
+done
+echo 'docker exec -it $NAME mongo --eval "db.bar.save({1: []}); db.foo.save({});" localhost:$PORT/test'
+docker exec -it $NAME mongo --eval "$mongo_cmd" localhost:$PORT/test
+
+docker exec -it $NAME mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/test
+docker exec -it $NAME mongo --eval "db.getCollectionNames()" localhost:$PORT/test
 
 sleep 2
