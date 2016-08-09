@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PORT=37017
+PORT=47017
 PORT1=$(( $PORT + 1 ))
 PORT2=$(( $PORT + 2 ))
 

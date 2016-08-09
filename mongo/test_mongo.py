@@ -11,8 +11,8 @@ from nose.plugins.attrib import attr
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, load_check
 
-PORT1 = 37017
-PORT2 = 37018
+PORT1 = 47017
+PORT2 = 47018
 MAX_WAIT = 150
 
 GAUGE = AgentCheck.gauge
