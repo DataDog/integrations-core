@@ -45,16 +45,16 @@ done
 
 echo 'docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT'
 docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT
-echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "$SHARD00_IP:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
+echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
 docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = 'localhost:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
 
 sleep 2
 
-echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD01_IP:$PORT1\\')); printjson(rs.status());" localhost:$PORT'
+echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'localhost:$PORT1\\')); printjson(rs.status());" localhost:$PORT'
 docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT1')); printjson(rs.status());" localhost:$PORT
 
-echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD02_IP:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
+echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'localhost:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
 docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT2')); printjson(rs.status());" localhost:$PORT
 
 mongo_cmd=''
