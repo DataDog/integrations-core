@@ -57,15 +57,15 @@ docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT1')); print
 echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'localhost:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
 docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT2')); printjson(rs.status());" localhost:$PORT
 
-mongo_cmd=''
-t=0; bar_cmd='db.bar.save({1: []}); db.bar.save({});';
-until [ "$t" -eq "40" ]; do
-  mongo_cmd=$mongo_cmd' '$bar_cmd; (( t = t + 1 ));
-done
-t=0; foo_cmd='db.foo.save({1: []}); db.foo.save({}); db.foo.save({1: []});';
-until [ "$t" -eq "70" ]; do
-  mongo_cmd=$mongo_cmd' '$foo_cmd; (( t = t + 1 ));
-done
+# mongo_cmd=''
+# t=0; bar_cmd='db.bar.save({1: []}); db.bar.save({});';
+# until [ "$t" -eq "40" ]; do
+#   mongo_cmd=$mongo_cmd' '$bar_cmd; (( t = t + 1 ));
+# done
+# t=0; foo_cmd='db.foo.save({1: []}); db.foo.save({}); db.foo.save({1: []});';
+# until [ "$t" -eq "70" ]; do
+#   mongo_cmd=$mongo_cmd' '$foo_cmd; (( t = t + 1 ));
+# done
 echo 'docker exec -it $NAME mongo --eval "db.bar.save({1: []}); db.foo.save({});" localhost:$PORT/test'
 docker exec -it $NAME mongo --eval "$mongo_cmd" localhost:$PORT/test
 
