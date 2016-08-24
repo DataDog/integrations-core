@@ -47,6 +47,7 @@ install:
 
 script:
   - bundle exec rake lint
+  - bundle exec rake ci:run
   - bundle exec rake requirements
 
 after_script:
