@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def mysql_version
-  ENV['FLAVOR_VERSION'] || '2.4.12'
+  ENV['FLAVOR_VERSION'] || 'latest'
 end
 
 def mysql_rootdir
@@ -22,7 +22,7 @@ namespace :ci do
 
     task before_script: ['ci:common:before_script']
 
-    task script: ['ci:common:script'] do |_, attr|
+    task script: ['ci:common:script'] do
       this_provides = [
         'mysql'
       ]

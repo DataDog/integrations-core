@@ -13,6 +13,9 @@ branches:
 services:
   - docker
 
+matrix:
+  fast_finish: true
+
 env:
   global:
     - NOSE_FILTER="not windows"
@@ -21,6 +24,10 @@ env:
     - INTEGRATIONS_DIR=$HOME/embedded
     - PIP_CACHE=$HOME/.cache/pip
     - SDK_TESTING=true
+  matrix:
+    - TRAVIS_FLAVOR=default
+    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
+    # END OF TRAVIS MATRIX
 
 before_install:
   - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git
@@ -40,8 +47,6 @@ install:
 
 script:
   - bundle exec rake lint
-  - rake ci:run[default]
-  - rake ci:run[mysql]
   - bundle exec rake requirements
 
 after_script:
