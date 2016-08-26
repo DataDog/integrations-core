@@ -66,8 +66,8 @@ docker exec -it $NAME mongo --eval "printjson(rs.add('localhost:$PORT2')); print
 # until [ "$t" -eq "70" ]; do
 #   mongo_cmd=$mongo_cmd' '$foo_cmd; (( t = t + 1 ));
 # done
-echo 'docker exec -it $NAME mongo --eval "db.bar.save({1: []}); db.foo.save({});" localhost:$PORT/test'
-docker exec -it $NAME mongo --eval "$mongo_cmd" localhost:$PORT/test
+# echo 'docker exec -it $NAME mongo --eval "db.bar.save({1: []}); db.foo.save({});" localhost:$PORT/test'
+# docker exec -it $NAME mongo --eval "$mongo_cmd" localhost:$PORT/test
 
 docker exec -it $NAME mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/test
 docker exec -it $NAME mongo --eval "db.getCollectionNames()" localhost:$PORT/test
