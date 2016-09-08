@@ -1,0 +1,2 @@
+# integration pip requirements
+requests==2.6.0
