@@ -18,14 +18,14 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
 
-      sh %(docker create -p 3835:3835 --name haproxy haproxy:#{haproxy_version})
-      sh %(docker create -p 3836:3836 --name haproxy-open haproxy:#{haproxy_version})
+      sh %(docker create -p 3835:3835 --name dd-haproxy haproxy:#{haproxy_version})
+      sh %(docker create -p 3836:3836 --name dd-haproxy-open haproxy:#{haproxy_version})
 
-      sh %(docker cp haproxy/ci/haproxy.cfg haproxy:/usr/local/etc/haproxy/haproxy.cfg)
-      sh %(docker cp haproxy/ci/haproxy-open.cfg haproxy-open:/usr/local/etc/haproxy/haproxy.cfg)
+      sh %(docker cp `pwd`/haproxy/ci/haproxy.cfg dd-haproxy:/usr/local/etc/haproxy/haproxy.cfg)
+      sh %(docker cp `pwd`/haproxy/ci/haproxy-open.cfg dd-haproxy-open:/usr/local/etc/haproxy/haproxy.cfg)
 
-      sh %(docker start haproxy)
-      sh %(docker start haproxy-open)
+      sh %(docker start dd-haproxy)
+      sh %(docker start dd-haproxy-open)
     end
 
     task before_script: ['ci:common:before_script']
@@ -40,10 +40,10 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker stop haproxy)
-      sh %(docker stop haproxy-open)
-      sh %(docker rm haproxy)
-      sh %(docker rm haproxy-open)
+      sh %(docker kill dd-haproxy)
+      sh %(docker kill dd-haproxy-open)
+      sh %(docker rm dd-haproxy)
+      sh %(docker rm dd-haproxy-open)
     end
 
     task :execute do
