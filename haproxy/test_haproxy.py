@@ -306,14 +306,14 @@ class HaproxyTest(AgentCheckTest):
         for gauge in self.FRONTEND_CHECK_GAUGES:
             self.assertMetric(gauge, tags=frontend_tags, count=1)
 
-        if os.environ.get('FLAVOR_VERSION', '').split('.')[:2] >= ['1', '4']:
+        if os.environ.get('FLAVOR_VERSION','1.5.11').split('.')[:2] >= ['1', '4']:
             for gauge in self.FRONTEND_CHECK_GAUGES_POST_1_4:
                 self.assertMetric(gauge, tags=frontend_tags, count=1)
 
         for rate in self.FRONTEND_CHECK_RATES:
             self.assertMetric(rate, tags=frontend_tags, count=1)
 
-        if os.environ.get('FLAVOR_VERSION', '').split('.')[:2] >= ['1', '4']:
+        if os.environ.get('FLAVOR_VERSION','1.5.11').split('.')[:2] >= ['1', '4']:
             for rate in self.FRONTEND_CHECK_RATES_POST_1_4:
                 self.assertMetric(rate, tags=frontend_tags, count=1)
 
@@ -328,14 +328,14 @@ class HaproxyTest(AgentCheckTest):
                 for gauge in self.BACKEND_CHECK_GAUGES:
                     self.assertMetric(gauge, tags=tags, count=1)
 
-                if os.environ.get('FLAVOR_VERSION', '').split('.')[:2] >= ['1', '5']:
+                if os.environ.get('FLAVOR_VERSION','1.5.11').split('.')[:2] >= ['1', '5']:
                     for gauge in self.BACKEND_CHECK_GAUGES_POST_1_5:
                         self.assertMetric(gauge, tags=tags, count=1)
 
                 for rate in self.BACKEND_CHECK_RATES:
                     self.assertMetric(rate, tags=tags, count=1)
 
-                if os.environ.get('FLAVOR_VERSION', '').split('.')[:2] >= ['1', '4']:
+                if os.environ.get('FLAVOR_VERSION','1.5.11').split('.')[:2] >= ['1', '4']:
                     for rate in self.BACKEND_CHECK_RATES_POST_1_4:
                         self.assertMetric(rate, tags=tags, count=1)
 
