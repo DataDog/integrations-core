@@ -60,7 +60,6 @@ class Services(object):
 
 class HAProxy(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
-        self.default_integration_http_timeout = float(agentConfig.get('default_integration_http_timeout', 9))
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         # Host status needs to persist across all checks
