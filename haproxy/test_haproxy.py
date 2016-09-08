@@ -370,7 +370,7 @@ class HaproxyTest(AgentCheckTest):
         self._test_service_checks()
 
         # Make sure the service checks aren't tagged with an empty hostname.
-        self.assertEquals(self.service_checks[0]['host_name'], get_hostname())
+        self.assertEquals(self.service_checks[0]['host_name'], get_hostname(config=self.config))
 
         self.coverage_report()
 
