@@ -8,6 +8,8 @@ NAME='dd-test-mongo'
 NAME1='dd-test-mongo-1'
 NAME2='dd-test-mongo-2'
 
+MONGO_VERSION=${MONGO_VERSION-3.0.1}
+
 set -e
 
 if docker ps | grep dd-test-mongo >/dev/null; then
@@ -15,15 +17,15 @@ if docker ps | grep dd-test-mongo >/dev/null; then
   bash mongo/ci/stop-docker.sh
 fi
 
-SHARD00_ID=$(docker run -p $PORT:$PORT --expose $PORT --name $NAME -d mongo mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT)
+SHARD00_ID=$(docker run -p $PORT:$PORT --expose $PORT --name $NAME -d mongo:$MONGO_VERSION mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT)
 SHARD00_IP=$(docker inspect ${SHARD00_ID} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 SHARD00_IP=$(echo $SHARD00_IP | cut -d " " -f2)
 
-SHARD01_ID=$(docker run --link=$NAME --expose $PORT1 -p $PORT1:$PORT1 --name $NAME1 -d mongo mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT1)
+SHARD01_ID=$(docker run --link=$NAME --expose $PORT1 -p $PORT1:$PORT1 --name $NAME1 -d mongo:$MONGO_VERSION mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT1)
 SHARD01_IP=$(docker inspect ${SHARD01_ID} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 SHARD01_IP=$(echo $SHARD01_IP | cut -d " " -f2)
 
-SHARD02_ID=$(docker run --link=$NAME --expose $PORT2 -p $PORT2:$PORT2 --name $NAME2 -d mongo mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT2)
+SHARD02_ID=$(docker run --link=$NAME --expose $PORT2 -p $PORT2:$PORT2 --name $NAME2 -d mongo:$MONGO_VERSION mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT2)
 SHARD02_IP=$(docker inspect ${SHARD02_ID} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 SHARD02_IP=$(echo $SHARD02_IP | cut -d " " -f2)
 
