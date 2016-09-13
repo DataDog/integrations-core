@@ -16,8 +16,8 @@ import pymongo
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, load_check
 
-PORT1 = 37017
-PORT2 = 37018
+PORT1 = 47017
+PORT2 = 47018
 MAX_WAIT = 150
 
 GAUGE = AgentCheck.gauge
@@ -166,17 +166,20 @@ class TestMongo(unittest.TestCase):
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,)
 
-        db = cli['test']
-        foo = db.foo
+        foos = []
         for _ in range(70):
-            foo.insert_one({'1': []})
-            foo.insert_one({'1': []})
-            foo.insert_one({})
+            foos.append({'1': []})
+            foos.append({'1': []})
+            foos.append({})
 
-        bar = db.bar
+        bars = []
         for _ in range(50):
-            bar.insert_one({'1': []})
-            bar.insert_one({})
+            bars.append({'1': []})
+            bars.append({})
+
+        db = cli['test']
+        db.foo.insert_many(foos)
+        db.bar.insert_many(bars)
 
     def tearDown(self):
         server = "mongodb://localhost:%s/test" % PORT1
