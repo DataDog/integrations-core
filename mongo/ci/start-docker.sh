@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 PORT=47017
 PORT1=$(( $PORT + 1 ))
 PORT2=$(( $PORT + 2 ))
@@ -8,9 +10,7 @@ NAME='dd-test-mongo'
 NAME1='dd-test-mongo-1'
 NAME2='dd-test-mongo-2'
 
-MONGO_VERSION=${MONGO_VERSION-3.0.1}
-
-set -e
+MONGO_VERSION=${FLAVOR_VERSION-3.0.1}
 
 if docker ps | grep dd-test-mongo >/dev/null; then
   echo 'the containers already exist, we have to remove them'
@@ -47,6 +47,7 @@ done
 
 echo 'docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT'
 docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT
+
 echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
 docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
@@ -63,3 +64,15 @@ docker exec -it $NAME mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/
 docker exec -it $NAME mongo --eval "db.getCollectionNames()" localhost:$PORT/test
 
 sleep 2
+
+echo "Checking if shards are initialized and then waiting until they are initialized"
+until docker exec -it $NAME mongo --eval "printjson(rs.status());" localhost:$PORT | grep '"stateStr" : "SECONDARY"' >/dev/null;
+do
+    sleep 2
+done
+
+echo "The shards have been initialized"
+
+echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
+echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
+docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT

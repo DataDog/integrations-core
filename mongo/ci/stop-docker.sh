@@ -2,7 +2,7 @@
 
 set -e
 
-if docker ps | grep dd-test-mongo >/dev/null; then
+if docker ps -a | grep dd-test-mongo >/dev/null; then
   containers=`docker ps --format '{{.Names}}' --filter name=dd-test-mongo`
   stopped_containers=`docker ps -a --format '{{.Names}}' --filter name=dd-test-mongo`
 

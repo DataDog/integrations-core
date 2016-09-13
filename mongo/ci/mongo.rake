@@ -17,7 +17,7 @@ namespace :ci do
       install_requirements('mongo/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(MONGO_VERSION=#{mongo_version} bash mongo/ci/start-docker.sh)
+      sh %(bash mongo/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script'] do
