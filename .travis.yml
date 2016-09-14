@@ -58,6 +58,7 @@ env:
     - TRAVIS_FLAVOR=riak FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=apache FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=apache
     # END OF TRAVIS MATRIX
 
 before_install:
