@@ -2,7 +2,7 @@
   "manifest_version": 1,
   "name": "MySQL",
   "display_name": "MySQL",
-  "version": "0.1",
+  "version": "0.1.4",
   "support": "core",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
