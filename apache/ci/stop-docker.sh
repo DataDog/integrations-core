@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# A script to tear down the MySQL containers.
+# A script to tear down the Apache containers.
 
 set -e
 
