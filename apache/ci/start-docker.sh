@@ -21,4 +21,5 @@ docker start $NAME
 IP_ADDR=$(docker inspect ${NAME} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 IP_ADDR=$(echo $NAME | cut -d " " -f2)
 
+# It doesn't come up immediately, we have to wait to ensure it's up.
 sleep 10
