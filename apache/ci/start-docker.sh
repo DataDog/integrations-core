@@ -21,18 +21,4 @@ docker start $NAME
 IP_ADDR=$(docker inspect ${NAME} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 IP_ADDR=$(echo $NAME | cut -d " " -f2)
 
-echo `docker ps`
-echo 'running'
-
-for i in `seq 1 10`; do
-  echo `curl http://localhost:8180 || true`
-  echo `docker logs $NAME`
-  echo `docker ps`
-  sleep 2
-done
-
 sleep 10
-
-echo `docker ps`
-
-echo `curl http://localhost:8180 || true`
