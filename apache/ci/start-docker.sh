@@ -5,7 +5,7 @@
 set -e
 
 NAME='dd-test-apache'
-PORT=8080
+PORT=8180
 
 APACHE_VERSION=${APACHE_VERSION-2.4.23}
 
@@ -14,7 +14,7 @@ if docker ps -a | grep dd-test-apache >/dev/null; then
   bash apache/ci/stop-docker.sh
 fi
 
-docker create --expose 8080 -p $PORT:$PORT --name $NAME httpd:$APACHE_VERSION
+docker create --expose 8180 -p $PORT:$PORT --name $NAME httpd:$APACHE_VERSION
 docker cp ./apache/ci/httpd.conf $NAME:/usr/local/apache2/conf/httpd.conf
 docker start $NAME
 

@@ -15,11 +15,11 @@ class TestCheckApache(AgentCheckTest):
 
     CONFIG_STUBS = [
         {
-            'apache_status_url': 'http://localhost:8080/server-status',
+            'apache_status_url': 'http://localhost:8180/server-status',
             'tags': ['instance:first']
         },
         {
-            'apache_status_url': 'http://localhost:8080/server-status?auto',
+            'apache_status_url': 'http://localhost:8180/server-status?auto',
             'tags': ['instance:second']
         },
     ]
@@ -63,7 +63,7 @@ class TestCheckApache(AgentCheckTest):
 
         # Assert service checks
         self.assertServiceCheck('apache.can_connect', status=AgentCheck.OK,
-                                tags=['host:localhost', 'port:8080'], count=2)
+                                tags=['host:localhost', 'port:8180'], count=2)
 
         self.coverage_report()
 

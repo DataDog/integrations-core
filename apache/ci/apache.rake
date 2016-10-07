@@ -18,12 +18,12 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       sh %(bash apache/ci/start-docker.sh)
-      Wait.for 'http://localhost:8080', 15
+      Wait.for 'http://localhost:8180', 15
     end
 
     task before_script: ['ci:common:before_script'] do
       100.times do
-        sh %(curl --silent http://localhost:8080 > /dev/null)
+        sh %(curl --silent http://localhost:8180 > /dev/null)
       end
       sleep_for 2
     end
