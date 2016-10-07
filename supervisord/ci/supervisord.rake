@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def supervisord_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '3.3.0'
 end
 
 def supervisord_rootdir
@@ -26,13 +26,13 @@ namespace :ci do
 
     task before_script: ['ci:common:before_script'] do
       sh %(mkdir -p $VOLATILE_DIR/supervisor)
-      sh %(cp $TRAVIS_BUILD_DIR/ci/resources/supervisord/supervisord.conf\
+      sh %(cp $TRAVIS_BUILD_DIR/supervisord/ci/resources/supervisord.conf\
            $VOLATILE_DIR/supervisor/)
       sh %(sed -i -- 's/VOLATILE_DIR/#{ENV['VOLATILE_DIR'].gsub '/', '\/'}/g'\
          $VOLATILE_DIR/supervisor/supervisord.conf)
 
       3.times do |i|
-        sh %(cp $TRAVIS_BUILD_DIR/ci/resources/supervisord/program_#{i}.sh\
+        sh %(cp $TRAVIS_BUILD_DIR/supervisord/ci/resources/program_#{i}.sh\
              $VOLATILE_DIR/supervisor/)
       end
       sh %(chmod a+x $VOLATILE_DIR/supervisor/program_*.sh)

@@ -8,6 +8,7 @@ import unittest
 import xmlrpclib
 from socket import socket
 from nose.plugins.attrib import attr
+from time import sleep
 
 # 3p
 from mock import patch
