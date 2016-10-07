@@ -39,6 +39,7 @@ test:
         - rake ci:run[twemproxy]
         - rake ci:run[tokumx]
         - rake ci:run[directory]
+        - rake ci:run[postgres]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

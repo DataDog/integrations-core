@@ -30,6 +30,7 @@ env:
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=directory
+    - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 
 before_install:
