@@ -11,9 +11,9 @@ end
 namespace :ci do
   namespace :supervisord do |flavor|
     task before_install: ['ci:common:before_install'] do
-      unless Dir.exist? File.expand_path(supervisor_rootdir)
-        sh %(pip install supervisor==#{supervisor_version} --ignore-installed\
-             --install-option="--prefix=#{supervisor_rootdir}")
+      unless Dir.exist? File.expand_path(supervisord_rootdir)
+        sh %(pip install supervisor==#{supervisord_version} --ignore-installed\
+             --install-option="--prefix=#{supervisord_rootdir}")
       end
     end
 
@@ -37,7 +37,7 @@ namespace :ci do
       end
       sh %(chmod a+x $VOLATILE_DIR/supervisor/program_*.sh)
 
-      sh %(#{supervisor_rootdir}/bin/supervisord\
+      sh %(#{supervisord_rootdir}/bin/supervisord\
            -c $VOLATILE_DIR/supervisor/supervisord.conf)
       3.times { |i| Wait.for "#{ENV['VOLATILE_DIR']}/supervisor/started_#{i}" }
       # And we still have to sleep a little, because sometimes supervisor
