@@ -22,3 +22,7 @@ IP_ADDR=$(docker inspect ${NAME} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"
 IP_ADDR=$(echo $NAME | cut -d " " -f2)
 
 echo 'running'
+
+echo `docker logs $NAME`
+
+echo `curl http://localhost:8180 || true`
