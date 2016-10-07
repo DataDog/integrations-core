@@ -25,10 +25,13 @@ echo `docker ps`
 echo 'running'
 
 for i in `seq 1 10`; do
+  echo `curl http://localhost:8180 || true`
   echo `docker logs $NAME`
   echo `docker ps`
   sleep 2
 done
+
+sleep 10
 
 echo `docker ps`
 
