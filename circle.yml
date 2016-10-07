@@ -71,6 +71,7 @@ test:
         - rake ci:run[consul]
         - rake ci:run[activemq_xml]
         - rake ci:run[sqlserver]
+        - rake ci:run[openstack]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
