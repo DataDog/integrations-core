@@ -37,6 +37,7 @@ env:
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.5.0
+    - TRAVIS_FLAVOR=ceph FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 
 before_install:
