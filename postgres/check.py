@@ -643,7 +643,7 @@ SELECT s.schemaname,
                     raise CheckException("Collector method {0} is not known."
                         " Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
 
-                m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
+                m['metrics'][ref][1] = getattr(PostgresCheck, cap_mtype)
                 self.log.debug("Method: %s" % (str(mtype)))
 
         self.custom_metrics[key] = custom_metrics
