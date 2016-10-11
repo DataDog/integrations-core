@@ -12,13 +12,6 @@ from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 
 
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
-}
-
-
 # NOTE: Feel free to declare multiple test classes if needed
 
 @attr(requires='postgres')
