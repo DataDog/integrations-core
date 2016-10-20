@@ -15,7 +15,7 @@ if docker ps -a | grep dd-test-cassandra >/dev/null; then
   bash cassandra/ci/stop-docker.sh
 fi
 
-docker create --expose $PORT --expose 9042 --expose 7000 --expose 7001 --expose 9160 -p $PORT:$PORT -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=7199 -e LOCAL_JMX='no' --name $NAME cassandra:$CASSANDRA_VERSION
+docker create --expose $PORT --expose 9042 --expose 7000 --expose 7001 --expose 9160 -p $PORT:$PORT -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=7199 -e LOCAL_JMX='no' -e JVM_OPTS=-Djava.rmi.server.hostname=localhost --name $NAME cassandra:$CASSANDRA_VERSION
  # -e JVM_OPTS=-Djava.rmi.server.hostname=0.0.0.0
 # docker ps
 # docker ps -a
@@ -27,19 +27,20 @@ docker create --expose $PORT --expose 9042 --expose 7000 --expose 7001 --expose 
 # docker ps -a
 # docker logs $NAME
 
-docker cp ./cassandra/ci/cassandra-env_${CASSANDRA_VERSION}.sh $NAME:/etc/cassandra/cassandra-env.sh
+# docker cp ./cassandra/ci/cassandra-env_${CASSANDRA_VERSION}.sh $NAME:/etc/cassandra/cassandra-env.sh
 # docker cp $NAME:/etc/cassandra/cassandra-env.sh ./cassandra/ci/cassandra-env_${CASSANDRA_VERSION}.new.sh
 
 # docker ps
 # docker ps -a
 # docker logs $NAME
 
-# cp ./cassandra/ci/jmxremote.password ./cassandra/ci/jmxremote.password.tmp
-# chmod 400 ./cassandra/ci/jmxremote.password.tmp
-# docker cp ./cassandra/ci/jmxremote.password.tmp $NAME:/etc/cassandra/jmxremote.password
-# rm -f ./cassandra/ci/jmxremote.password.tmp
+cp ./cassandra/ci/jmxremote.password ./cassandra/ci/jmxremote.password.tmp
+chmod 400 ./cassandra/ci/jmxremote.password.tmp
+docker cp ./cassandra/ci/jmxremote.password.tmp $NAME:/etc/cassandra/jmxremote.password
+rm -f ./cassandra/ci/jmxremote.password.tmp
 
 docker start $NAME
+# docker exec -it $NAME /bin/bash
 docker ps
 docker ps -a
 docker logs $NAME

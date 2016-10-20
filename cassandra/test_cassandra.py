@@ -7,6 +7,7 @@ import threading
 import time
 from types import ListType
 import unittest
+import os
 
 # 3p
 from nose.plugins.attrib import attr
@@ -15,7 +16,6 @@ from nose.plugins.attrib import attr
 from aggregator import MetricsAggregator
 from dogstatsd import Server
 from jmxfetch import JMXFetch
-from tests.checks.common import Fixtures
 
 STATSD_PORT = 8121
 
@@ -50,7 +50,8 @@ class JMXTestCase(unittest.TestCase):
         self.t1 = threading.Thread(target=self.server.start)
         self.t1.start()
 
-        confd_path = Fixtures.directory()
+        # confd_path = os.path.join(os.path.dirname(__file__), 'ci', 'cassandra.yaml')
+        confd_path = os.path.join(os.path.dirname(__file__), 'ci')
 
         self.jmx_daemon = JMXFetch(confd_path, {'dogstatsd_port': STATSD_PORT})
         self.t2 = threading.Thread(target=self.jmx_daemon.run)
