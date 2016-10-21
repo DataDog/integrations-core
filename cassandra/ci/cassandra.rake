@@ -17,7 +17,7 @@ namespace :ci do
       install_requirements('cassandra/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash ./cassandra/ci/start-docker.sh)
+      # sh %(bash ./cassandra/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
@@ -34,7 +34,7 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash ./cassandra/ci/stop-docker.sh)
+      # sh %(bash ./cassandra/ci/stop-docker.sh)
     end
 
     task :execute do
