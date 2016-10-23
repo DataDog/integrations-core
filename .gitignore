@@ -73,3 +73,5 @@ Gemfile.lock
 setuptools-*.zip
 
 tmp
+# redis tmp config
+redisdb/ci/*.tmp.conf

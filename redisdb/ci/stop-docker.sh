@@ -11,3 +11,6 @@ if docker ps -a | grep dd-test-redis >/dev/null; then
   docker kill $containers || true
   docker rm $stopped_containers || true
 fi
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+rm $DIR/*.tmp.conf
