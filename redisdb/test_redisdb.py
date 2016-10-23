@@ -1,11 +1,11 @@
 # stdlib
+import logging
 import pprint
 import random
 import time
 
 # 3p
 from distutils.version import StrictVersion # pylint: disable=E0611,E0401
-from docker import Client
 from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 import redis
@@ -14,21 +14,24 @@ import redis
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, load_check
 
+logger = logging.getLogger()
+
+MAX_WAIT = 20
 NOAUTH_PORT = 16379
 AUTH_PORT = 26379
 SLAVE_HEALTHY_PORT = 36379
 SLAVE_UNHEALTHY_PORT = 46379
+DEFAULT_PORT = 6379
 MISSING_KEY_TOLERANCE = 0.6
 
-REDIS_DOCKER_IMAGE = "redis:latest"
 
-@attr(requires='redis')
+@attr(requires='redisdb')
 class TestRedis(AgentCheckTest):
     CHECK_NAME = "redisdb"
 
     def test_redis_auth(self):
         # correct password
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         instance = {
             'host': 'localhost',
             'port': AUTH_PORT,
@@ -52,7 +55,7 @@ class TestRedis(AgentCheckTest):
             }
         ]
 
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         try:
             r.check(instances[0])
         except Exception as e:
@@ -63,7 +66,7 @@ class TestRedis(AgentCheckTest):
                 or 'operation not permitted' in str(e).lower(),
                 str(e))
 
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         try:
             r.check(instances[1])
         except Exception as e:
@@ -83,7 +86,7 @@ class TestRedis(AgentCheckTest):
         db.set("key2", "value")
         db.setex("expirekey", "expirevalue", 1000)
 
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         r.check(instance)
         metrics = self._sort_metrics(r.get_metrics())
         assert metrics, "No metrics returned"
@@ -154,7 +157,7 @@ class TestRedis(AgentCheckTest):
 
     def test_redis_replication_link_metric(self):
         metric_name = 'redis.replication.master_link_down_since_seconds'
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
 
         def extract_metric(instance):
             r.check(instance)
@@ -179,7 +182,7 @@ class TestRedis(AgentCheckTest):
 
     def test_redis_replication_service_check(self):
         check_name = 'redis.replication.master_link_status'
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
 
         def extract_check(instance):
             r.check(instance)
@@ -229,7 +232,7 @@ class TestRedis(AgentCheckTest):
         master_db.set('replicated:test', 'true')
         self.assertEquals(slave_db.get('replicated:test'), 'true')
 
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         r.check(master_instance)
         metrics = self._sort_metrics(r.get_metrics())
 
@@ -316,7 +319,7 @@ class TestRedis(AgentCheckTest):
 
         db = redis.Redis(port=port, db=14)  # Datadog's test db
 
-        r = load_check('redisdb', {}, {}, is_sdk=True)
+        r = load_check('redisdb', {}, {})
         r.check(instance)
 
         version = db.info().get('redis_version')
