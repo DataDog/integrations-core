@@ -76,6 +76,7 @@ env:
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=gunicorn FLAVOR_VERSION=19.6.0
     - TRAVIS_FLAVOR=memcache FLAVOR_VERSION=1.4.22
+    - TRAVIS_FLAVOR=lighttpd
     # END OF TRAVIS MATRIX
 
 before_install:
