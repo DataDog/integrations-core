@@ -17,12 +17,11 @@ fi
 
 if [[ "$NGINX_VERSION" == "1.6.2" ]]; then
   DOCKER_REPO="centos/nginx-16-centos7"
-  VOLUMES="-v $DIR/nginx.conf:/opt/rh/nginx16/root/etc/nginx/nginx.conf -v $DIR/testing.crt:/opt/rh/nginx16/root/etc/nginx/testing.crt -v $DIR/testing.key:/opt/rh/nginx16/root/etc/nginx/testing.key"
+  # I cannot use volumes for this.
   docker create -p $PORT1:$PORT1 -p $PORT2:$PORT2 --name $NAME $DOCKER_REPO
   docker cp $DIR/nginx.conf $NAME:/opt/rh/nginx16/root/etc/nginx/nginx.conf
   docker cp $DIR/testing.key $NAME:/opt/rh/nginx16/root/etc/nginx/testing.key
   docker cp $DIR/testing.crt $NAME:/opt/rh/nginx16/root/etc/nginx/testing.crt
-
   docker start $NAME
 else
   DOCKER_REPO="nginx:1.7.11"
