@@ -53,6 +53,7 @@ test:
         - rake ci:run[haproxy]
         - rake ci:run[go_expvar]
         - rake ci:run[kong]
+        - rake ci:run[nginx]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
