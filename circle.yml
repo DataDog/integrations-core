@@ -43,6 +43,7 @@ test:
         - rake ci:run[supervisord]
         - rake ci:run[mongo]
         - rake ci:run[fluentd]
+        - rake ci:run[rabbitmq]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
