@@ -14,6 +14,8 @@ COUNT=1
 until [[ `docker logs $NAME 2>&1` =~ "*Server startup complete" || $COUNT -eq 20 ]]; do
   sleep 2
   COUNT=$(($COUNT+1))
+  echo `docker logs $NAME`
+  echo $COUNT
   if [[ $COUNT -eq 20 ]]; then
     exit 1
   fi
