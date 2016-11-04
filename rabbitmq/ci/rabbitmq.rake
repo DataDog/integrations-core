@@ -21,6 +21,8 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
+      sh %(mkdir -p tmp)
+      sh %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
       %w(test1 test5 tralala).each do |q|
         sh %(python tmp/rabbitmqadmin declare queue name=#{q})
         sh %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
