@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def rabbitmq_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '3.5.0'
 end
 
 def rabbitmq_rootdir
