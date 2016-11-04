@@ -17,12 +17,16 @@ namespace :ci do
       install_requirements('rabbitmq/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      # sample docker usage
-      # sh %(docker create -p XXX:YYY --name rabbitmq source/rabbitmq:rabbitmq_version)
-      # sh %(docker start rabbitmq)
+      sh %(bash rabbitmq/ci/start-docker.sh)
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      %w(test1 test5 tralala).each do |q|
+        sh %(python tmp/rabbitmqadmin declare queue name=#{q})
+        sh %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
+      end
+      sh %(python tmp/rabbitmqadmin list queues)
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
@@ -35,10 +39,10 @@ namespace :ci do
 
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop rabbitmq)
-    #   sh %(docker rm rabbitmq)
-    # end
+    task cleanup: ['ci:common:cleanup'] do
+      sh %(bash rabbitmq/ci/stop-docker.sh)
+      sh %(rm tmp/rabbitmqadmin)
+    end
 
     task :execute do
       exception = nil

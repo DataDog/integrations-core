@@ -68,3 +68,5 @@ embedded/
 Gemfile.lock
 .ropeproject/
 setuptools-*.zip
+
+tmp
