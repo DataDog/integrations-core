@@ -61,6 +61,7 @@ test:
         - rake ci:run[snmp]
         - rake ci:run[etcd]
         - rake ci:run[gunicorn]
+        - rake ci:run[memcache]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
