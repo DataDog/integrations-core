@@ -1,0 +1,39 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+yarn.metrics.apps_submitted,gauge,,task,,The number of submitted apps,0,yarn,yarn app submitted
+yarn.metrics.apps_completed,gauge,,task,,The number of completed apps,0,yarn,yarn app compleated
+yarn.metrics.apps_pending,gauge,,task,,The number of pending apps,0,yarn,yarn app pending
+yarn.metrics.apps_running,gauge,,task,,The number of running apps,0,yarn,yarn app running
+yarn.metrics.apps_failed,gauge,,task,,The number of failed apps,0,yarn,yarn app failed
+yarn.metrics.apps_killed,gauge,,task,,The number of killed apps,0,yarn,app klld
+yarn.metrics.reserved_mb,gauge,,mebibyte,,The size of reserved memory,0,yarn,mem rsvd
+yarn.metrics.available_mb,gauge,,mebibyte,,The amount of available memory,0,yarn,mem avbl
+yarn.metrics.allocated_mb,gauge,,mebibyte,,The amount of allocated memory,0,yarn,mem alloc
+yarn.metrics.total_mb,gauge,,mebibyte,,The amount of total memory,0,yarn,mem tot
+yarn.metrics.reserved_virtual_cores,gauge,,core,,The number of reserved virtual cores,0,yarn,cor rsvd
+yarn.metrics.available_virtual_cores,gauge,,core,,The number of available virtual cores,0,yarn,cor avail
+yarn.metrics.allocated_virtual_cores,gauge,,core,,The number of allocated virtual cores,0,yarn,cor alloc
+yarn.metrics.total_virtual_cores,gauge,,core,,The total number of virtual cores,0,yarn,cor tot
+yarn.metrics.containers_allocated,gauge,,,,The number of containers allocated,0,yarn,ctrs alloc
+yarn.metrics.containers_reserved,gauge,,,,The number of containers reserved,0,yarn,ctrs resv
+yarn.metrics.containers_pending,gauge,,,,The number of containers pending,0,yarn,ctrs pdg
+yarn.metrics.total_nodes,gauge,,node,,The total number of nodes,0,yarn,nds tot
+yarn.metrics.active_nodes,gauge,,node,,The number of active nodes,0,yarn,nds act
+yarn.metrics.lost_nodes,gauge,,node,,The number of lost nodes,0,yarn,nds lst
+yarn.metrics.unhealthy_nodes,gauge,,node,,The number of unhealthy nodes,0,yarn,nds unhlthy
+yarn.metrics.decommissioned_nodes,gauge,,node,,The number of decommissioned nodes,0,yarn,nds decomm
+yarn.metrics.rebooted_nodes,gauge,,node,,The number of rebooted nodes,0,yarn,nds rbtd
+yarn.apps.progress,rate,,percent,,The progress of the application as a percent,0,yarn,app prog
+yarn.apps.started_time,rate,,second,,The time in which application started (in ms since epoch),0,yarn,app strt tim
+yarn.apps.finished_time,rate,,second,,The time in which the application finished (in ms since epoch),0,yarn,app fin tim
+yarn.apps.elapsed_time,rate,,second,,The elapsed time since the application started (in ms),0,yarn,app elapsd tm
+yarn.apps.allocated_mb,rate,,mebibyte,,The sum of memory in MB allocated to the applications running containers,0,yarn,app mem alloc
+yarn.apps.allocated_vcores,rate,,core,,The sum of virtual cores allocated to the applications running containers,0,yarn,app cros alloc
+yarn.apps.running_containers,rate,,,,The number of containers currently running for the application,0,yarn,app ctrs rrun
+yarn.apps.memory_seconds,rate,,second,,The amount of memory the application has allocated (megabyte-seconds),0,yarn,app mem tm
+yarn.apps.vcore_seconds,rate,,second,,The amount of CPU resources the application has allocated (virtual core-seconds),0,yarn,app cor tm
+yarn.node.last_health_update,gauge,,millisecond,,The last time the node reported its health (in ms since epoch),0,yarn,nd lst hlth updt
+yarn.node.used_memory_mb,gauge,,mebibyte,,The total amount of memory currently used on the node (in MB),0,yarn,nd mem usd
+yarn.node.avail_memory_mb,gauge,,mebibyte,,The total amount of memory currently available on the node (in MB),0,yarn,nd mem avail
+yarn.node.used_virtual_cores,gauge,,core,,The total number of vCores currently used on the node,0,yarn,nd cor usd
+yarn.node.available_virtual_cores,gauge,,core,,The total number of vCores available on the node,0,yarn,nd cor avail
+yarn.node.num_containers,gauge,,,,The total number of containers currently running on the node,0,yarn,nd ctrs tot
