@@ -1,0 +1,93 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+couchbase.hdd.free,gauge,,byte,,Free hard disk space,1,couchbase,hdd free
+couchbase.hdd.used,gauge,,byte,,Used hard disk space,-1,couchbase,hdd used
+couchbase.hdd.total,gauge,,byte,,Total hard disk space,0,couchbase,hdd total
+couchbase.hdd.quota_total,gauge,,byte,,Hard disk quota,0,couchbase,hdd quota total
+couchbase.hdd.used_by_data,gauge,,byte,,Hard disk used for data,0,couchbase,hdd data used
+couchbase.ram.used,gauge,,byte,,RAM in use,1,couchbase,ram used
+couchbase.ram.total,gauge,,byte,,Total RAM,-1,couchbase,ram total
+couchbase.ram.quota_total,gauge,,byte,,RAM quota,0,couchbase,ram quota
+couchbase.ram.used_by_data,gauge,,byte,,RAM used for data,0,couchbase,ram data used
+couchbase.by_bucket.avg_bg_wait_time,gauge,,second,,Average background wait time,-1,couchbase,avg bg wait
+couchbase.by_bucket.avg_disk_commit_time,gauge,,second,,Average disk commit time,-1,couchbase,avg commit time
+couchbase.by_bucket.bytes_read,gauge,,byte,,Bytes read,0,couchbase,read
+couchbase.by_bucket.bytes_written,gauge,,byte,,Bytes written,0,couchbase,written
+couchbase.by_bucket.cas_hits,gauge,,hit,,Compare and Swap hits,1,couchbase,cas hits
+couchbase.by_bucket.cas_misses,gauge,,miss,,Compare and Swap misses,-1,couchbase,cas misses
+couchbase.by_bucket.cmd_get,gauge,,get,,Compare and Swap gets,0,couchbase,cas gets
+couchbase.by_bucket.cmd_set,gauge,,set,,Compare and swap sets,0,couchbase,cas sets
+couchbase.by_bucket.couch_docs_actual_disk_size,gauge,,byte,,Couch docs total size on disk in bytes,0,couchbase,doc actual disk size
+couchbase.by_bucket.couch_docs_data_size,gauge,,byte,,Couch docs data size in bytes,0,couchbase,doc data disk size
+couchbase.by_bucket.couch_docs_disk_size,gauge,,byte,,Couch docs total size in bytes,0,couchbase,doc disk size
+couchbase.by_bucket.couch_docs_fragmentation,gauge,,percent,,Couch docs fragmentation,-1,couchbase,doc fragmentation
+couchbase.by_bucket.couch_total_disk_size,gauge,,byte,,Couch total disk size,0,couchbase,total disk size
+couchbase.by_bucket.couch_views_fragmentation,gauge,,percent,,View fragmentation,-1,couchbase,view fragmentation
+couchbase.by_bucket.couch_views_ops,gauge,,operation,,View operations,0,couchbase,view ops
+couchbase.by_bucket.cpu_idle_ms,gauge,,millisecond,,CPU idle milliseconds,0,couchbase,cpu idle ms
+couchbase.by_bucket.cpu_utilization_rate,gauge,,percent,,CPU utilization percentage,0,couchbase,cpu util
+couchbase.by_bucket.curr_connections,gauge,,connection,,Current bucket connections,0,couchbase,conns
+couchbase.by_bucket.curr_items,gauge,,item,,Number of active items in memory,0,couchbase,mem items
+couchbase.by_bucket.curr_items_tot,gauge,,item,,Total number of items,0,couchbase,total items
+couchbase.by_bucket.decr_hits,gauge,,hit,,Decrement hits,1,couchbase,decr hits
+couchbase.by_bucket.decr_misses,gauge,,miss,,Decrement misses,-1,couchbase,decr misses
+couchbase.by_bucket.delete_hits,gauge,,hit,,Delete hits,1,couchbase,del hits
+couchbase.by_bucket.delete_misses,gauge,,miss,,Delete misses,-1,couchbase,del misses
+couchbase.by_bucket.disk_commit_count,gauge,,operation,,Disk commits,0,couchbase,commits
+couchbase.by_bucket.disk_update_count,gauge,,operation,,Disk updates,0,couchbase,updates
+couchbase.by_bucket.disk_write_queue,gauge,,operation,,Disk write queue depth,-1,couchbase,writes
+couchbase.by_bucket.ep_bg_fetched,gauge,,fetch,second,Disk reads per second,0,couchbase,reads
+couchbase.by_bucket.ep_cache_miss_rate,gauge,,miss,,Cache miss rate,-1,couchbase,miss rate
+couchbase.by_bucket.ep_cache_miss_ratio,gauge,,percent,,Cache miss ratio,-1,couchbase,miss ratio
+couchbase.by_bucket.ep_diskqueue_drain,gauge,,item,,Total Drained items on disk queue,0,couchbase,queue drained
+couchbase.by_bucket.ep_diskqueue_fill,gauge,,item,,Total enqueued items on disk queue,0,couchbase,queued
+couchbase.by_bucket.ep_flusher_todo,gauge,,item,,Number of items currently being written,0,couchbase,current flushing items
+couchbase.by_bucket.ep_item_commit_failed,gauge,,error,,Number of times a transaction failed to commit due to storage errors,1,couchbase,failed commits
+couchbase.by_bucket.ep_max_size,gauge,,byte,,The maximum amount of memory this bucket can use,0,couchbase,max size
+couchbase.by_bucket.ep_mem_high_wat,gauge,,byte,,Mem usage high water mark for auto-evictions,0,couchbase,mem high water mark
+couchbase.by_bucket.ep_mem_low_wat,gauge,,byte,,Mem usage low water mark for auto-evictions,0,couchbase,mem low water mark
+couchbase.by_bucket.ep_num_non_resident,gauge,,item,,Number of non-resident items,0,couchbase,non-resident items
+couchbase.by_bucket.ep_num_value_ejects,gauge,,item,,Number of times item values got ejected from memory to disk,0,couchbase,ejects
+couchbase.by_bucket.ep_oom_errors,gauge,,error,,Number of times unrecoverable OOMs happened while processing operations,-1,couchbase,ooms
+couchbase.by_bucket.ep_ops_create,gauge,,operation,,Create operations,0,couchbase,create ops
+couchbase.by_bucket.ep_ops_update,gauge,,operation,,Update operations,0,couchbase,update ops
+couchbase.by_bucket.ep_overhead,gauge,,byte,,Extra memory used by transient data like persistence queues or checkpoints,0,couchbase,overhead
+couchbase.by_bucket.ep_queue_size,gauge,,item,,Number of items queued for storage,0,couchbase,queue size
+couchbase.by_bucket.ep_resident_items_rate,gauge,,item,,Number of resident items,0,couchbase,resident items
+couchbase.by_bucket.ep_tap_replica_queue_drain,gauge,,item,,Total drained items in the replica queue,0,couchbase,drain items
+couchbase.by_bucket.ep_tap_total_queue_drain,gauge,,item,,Total drained items in the queue,0,couchbase,drain items
+couchbase.by_bucket.ep_tap_total_queue_fill,gauge,,item,,Total enqueued items in the queue,0,couchbase,queued
+couchbase.by_bucket.ep_tap_total_total_backlog_size,gauge,,item,,Number of remaining items for replication,-1,couchbase,backlog size
+couchbase.by_bucket.ep_tmp_oom_errors,gauge,,error,,Number of times recoverable OOMs happened while processing operations,-1,couchbase,ooms
+couchbase.by_bucket.evictions,gauge,,eviction,,Number of evictions,-1,couchbase,evictions
+couchbase.by_bucket.get_hits,gauge,,hit,,Number of get hits,1,couchbase,get hits
+couchbase.by_bucket.get_misses,gauge,,miss,,Number of get misses,-1,couchbase,get misses
+couchbase.by_bucket.hit_ratio,gauge,,percent,,Hit ratio,1,couchbase,hit ratio
+couchbase.by_bucket.incr_hits,gauge,,hit,,Number of increment hits,1,couchbase,increment hits
+couchbase.by_bucket.incr_misses,gauge,,miss,,Number of increment misses,-1,couchbase,increment misses
+couchbase.by_bucket.mem_free,gauge,,byte,,Free memory,0,couchbase,free
+couchbase.by_bucket.mem_total,gauge,,byte,,Total available memory,0,couchbase,total
+couchbase.by_bucket.mem_used,gauge,,byte,,Engine's total memory usage (deprecated),0,couchbase,used
+couchbase.by_bucket.misses,gauge,,miss,,Total number of misses,-1,couchbase,misses
+couchbase.by_bucket.ops,gauge,,operation,,Total number of operations,0,couchbase,ops
+couchbase.by_bucket.page_faults,gauge,,page,,Number of page faults,-1,couchbase,faults
+couchbase.by_bucket.replication_docs_rep_queue,gauge,,item,,,0,couchbase,repl docs queue
+couchbase.by_bucket.replication_meta_latency_aggr,gauge,,second,,,0,couchbase,repl meta latency aggr
+couchbase.by_bucket.vb_active_num,gauge,,item,,Number of active items,0,couchbase,vb active num
+couchbase.by_bucket.vb_active_queue_drain,gauge,,item,,Total drained items in the queue,0,couchbase,vb active queue drain
+couchbase.by_bucket.vb_active_queue_size,gauge,,item,,Number of active items in the queue,0,couchbase,vb active queue size
+couchbase.by_bucket.vb_active_resident_items_ratio,gauge,,item,,Number of resident items,0,couchbase,vb active resident items ratio
+couchbase.by_bucket.vb_avg_total_queue_age,gauge,,second,,Average age of items in the queue,0,couchbase,vb avg total queue age
+couchbase.by_bucket.vb_pending_ops_create,gauge,,operation,,Number of pending create operations,0,couchbase,vb pending ops create
+couchbase.by_bucket.vb_pending_queue_fill,gauge,,item,,Total enqueued items on disk queue,0,couchbase,vb pending queue fill
+couchbase.by_bucket.vb_replica_curr_items,gauge,,item,,Number of in memory items,0,couchbase,vb replica curr items
+couchbase.by_bucket.vb_replica_meta_data_memory,gauge,,byte,,Total metadata memory,0,couchbase,vb replica meta data mem
+couchbase.by_bucket.vb_replica_num,gauge,,item,,Number of replica vBuckets,0,couchbase,vb replica num
+couchbase.by_bucket.vb_replica_queue_size,gauge,,item,,Replica items in disk queue,0,couchbase,vb replica queue size
+couchbase.by_bucket.xdc_ops,gauge,,operation,,Number of cross-datacenter replication operations,0,couchbase,xdc ops
+couchbase.by_node.curr_items,gauge,,item,,Number of active items in memory,0,couchbase,mem items
+couchbase.by_node.curr_items_tot,gauge,,item,,Total number of items,0,couchbase,total items
+couchbase.by_node.couch_docs_data_size,gauge,,byte,,Couch docs data size in bytes,0,couchbase,doc size
+couchbase.by_node.couch_docs_actual_disk_size,gauge,,byte,,Couch docs total size on disk in bytes,0,couchbase,doc disk size
+couchbase.by_node.couch_views_data_size,gauge,,byte,,Couch views data size on disk in bytes,0,couchbase,views size
+couchbase.by_node.couch_views_actual_disk_size,gauge,,byte,,Couch views total size on disk in bytes,0,couchbase,views disk size
+couchbase.by_node.vb_replica_curr_items,gauge,,item,,Number of in memory items,0,couchbase,vb replica curr items
