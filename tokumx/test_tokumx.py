@@ -3,7 +3,7 @@ from nose.plugins.attrib import attr
 
 # project
 from checks import AgentCheck
-from tests.common import AgentCheckTest
+from test.common import AgentCheckTest
 
 
 GAUGES = [
