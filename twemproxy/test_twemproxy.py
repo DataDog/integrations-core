@@ -4,7 +4,7 @@ from nose.plugins.attrib import attr
 # 3p
 
 # project
-from test.common import AgentCheckTest
+from shared.test.common import AgentCheckTest
 
 
 instance = {

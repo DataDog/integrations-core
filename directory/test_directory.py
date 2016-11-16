@@ -10,7 +10,7 @@ import shutil
 import tempfile
 
 # project
-from test.common import AgentCheckTest
+from shared.test.common import AgentCheckTest
 
 
 @attr(requires='directory')
