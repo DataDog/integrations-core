@@ -117,7 +117,7 @@ class Fixtures(object):
 
     @staticmethod
     def directory():
-        return os.path.join(os.path.dirname(__file__), '..',
+        return os.path.join(os.path.dirname(__file__), os.pardir, os.pardir,
                             Fixtures.integration_name(), 'ci', 'fixtures')
 
     @staticmethod
