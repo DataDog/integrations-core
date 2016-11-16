@@ -45,6 +45,7 @@ env:
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.6.17
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.8.19
     - TRAVIS_FLAVOR=ssh
+    - TRAVIS_FLAVOR=disk
     # END OF TRAVIS MATRIX
 
 before_install:
