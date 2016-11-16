@@ -259,7 +259,7 @@ class TokuMX(AgentCheck):
             'ssl': instance.get('ssl', None),
             'ssl_keyfile': instance.get('ssl_keyfile', None),
             'ssl_certfile': instance.get('ssl_certfile', None),
-            'ssl_cert_reqs':  instance.get('ssl_cert_reqs', None),
+            'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
             'ssl_ca_certs': instance.get('ssl_ca_certs', None)
         }
 
@@ -352,7 +352,7 @@ class TokuMX(AgentCheck):
                 if current is not None and primary is not None:
                     lag = primary['optimeDate'] - current['optimeDate']
                     # Python 2.7 has this built in, python < 2.7 don't...
-                    if hasattr(lag,'total_seconds'):
+                    if hasattr(lag, 'total_seconds'):
                         data['replicationLag'] = lag.total_seconds()
                     else:
                         data['replicationLag'] = (
