@@ -10,7 +10,7 @@ import re
 import mock
 
 # project
-from tests.checks.common import AgentCheckTest, Fixtures
+from shared.test.common import AgentCheckTest, Fixtures
 
 DEFAULT_DEVICE_NAME = '/dev/sda1'
 
@@ -20,7 +20,6 @@ class MockPart(object):
         self.device = device
         self.fstype = fstype
         self.mountpoint = mountpoint
-
 
 class MockDiskMetrics(object):
     def __init__(self):
