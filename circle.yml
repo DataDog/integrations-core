@@ -63,6 +63,7 @@ test:
         - rake ci:run[gunicorn]
         - rake ci:run[memcache]
         - rake ci:run[lighttpd]
+        - rake ci:run[statsd]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
