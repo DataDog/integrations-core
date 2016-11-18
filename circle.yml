@@ -19,7 +19,7 @@ general:
 
 dependencies:
     pre:
-        - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git
+        - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git libpq-dev
         - git clone https://github.com/DataDog/dd-agent.git ~/dd-agent
         - echo "$HOME/dd-agent/" > ~/virtualenvs/venv-2.7.3/lib/python2.7/site-packages/datadog-agent.pth
         - pip install pip --upgrade
