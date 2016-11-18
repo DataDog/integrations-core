@@ -4,10 +4,6 @@ def postgres_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def postgres_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/postgres_#{postgres_version}"
-end
-
 namespace :ci do
   namespace :postgres do |flavor|
     task before_install: ['ci:common:before_install']
