@@ -30,10 +30,11 @@ env:
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=directory
+    - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 
 before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools
+  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools libpq-dev
 
 install:
   - gem install bundler

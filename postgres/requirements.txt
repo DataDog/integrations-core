@@ -1,0 +1,6 @@
+# integration pip requirements
+pg8000==1.10.1
+
+# optional - SDK question here
+# Require libpq
+psycopg2==2.6
