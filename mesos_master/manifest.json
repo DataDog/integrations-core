@@ -1,0 +1,10 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.6.3",
+  "name": "mesos_master",
+  "short_description": "The Mesos master integration collects metrics from the Mesos master API.",
+  "support": "contrib",
+  "version": "0.1.0"
+}
