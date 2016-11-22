@@ -1,1 +1,2 @@
 # integration pip requirements
+supervisor==3.3.0
