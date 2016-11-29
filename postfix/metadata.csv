@@ -1,0 +1,2 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+postfix.queue.size,gauge,,email,,The number of mails in this queue.,-1,postfix,queue size
