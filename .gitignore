@@ -1,3 +1,7 @@
+# We don't want this to get too large,
+# so don't put anything in here that's not either
+# specific to this project or a common problem
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -76,3 +80,7 @@ tmp
 # redis tmp config
 *.tmp
 *.tmp.conf
+
+# OS Specific
+*.DS_Store
+*.fuse_hidden*
