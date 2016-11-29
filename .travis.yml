@@ -32,6 +32,7 @@ env:
     - TRAVIS_FLAVOR=directory
     - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
+    - TRAVIS_FLAVOR=nagios FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 
 before_install:
