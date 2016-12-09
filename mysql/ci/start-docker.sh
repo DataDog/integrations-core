@@ -12,7 +12,7 @@ if docker ps | grep dd-test-mysql >/dev/null; then
   bash mysql/ci/stop-docker.sh
 fi
 
-MYSQL00_ID=$(docker run -p 3306:3306 --name $NAME -e MYSQL_ROOT_PASSWORD=datadog -d mysql:5.7)
+MYSQL00_ID=$(docker run -p $PORT:3306 --name $NAME -e MYSQL_ROOT_PASSWORD=datadog -d mysql:5.7)
 MYSQL00_IP=$(docker inspect ${MYSQL00_ID} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 MYSQL00_IP=$(echo $MYSQL00_IP | cut -d " " -f2)
 echo 'running'
