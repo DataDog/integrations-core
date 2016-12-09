@@ -4,10 +4,6 @@ def kafka_consumer_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def kafka_consumer_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/kafka_consumer_#{kafka_consumer_version}"
-end
-
 namespace :ci do
   namespace :kafka_consumer do |flavor|
     task before_install: ['ci:common:before_install']
@@ -18,8 +14,7 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name kafka_consumer source/kafka_consumer:kafka_consumer_version)
-      # sh %(docker start kafka_consumer)
+      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml up -d)
     end
 
     task before_script: ['ci:common:before_script']
@@ -33,12 +28,10 @@ namespace :ci do
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop kafka_consumer)
-    #   sh %(docker rm kafka_consumer)
-    # end
+    task cleanup: ['ci:common:cleanup'] do
+      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml stop)
+      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml rm)
+    end
 
     task :execute do
       exception = nil
