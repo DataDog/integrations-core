@@ -14,7 +14,7 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml up -d)
+      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml up -d)
     end
 
     task before_script: ['ci:common:before_script']
@@ -29,8 +29,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml stop)
-      sh %(docker-compose -f ./resources/docker-compose-single-broker.yml rm)
+      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml stop)
+      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml rm -f)
     end
 
     task :execute do
