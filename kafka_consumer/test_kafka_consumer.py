@@ -12,16 +12,26 @@ from tests.checks.common import AgentCheckTest
 
 
 instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
+    'kafka_connect_str': 'localhost:9092',
+    'zk_connect_str': 'localhost:2181',
+    'zk_prefix': '/0.8',
+    'consumer_groups': {
+        'my_consumer': {
+            'test': [0,1,4,12]
+        }
+    }
 }
 
+METRICS = [
+    'kafka.broker_offset',
+    'kafka.consumer_offset',
+    'kafka.consumer_lag',
+]
 
 # NOTE: Feel free to declare multiple test classes if needed
 
 @attr(requires='kafka_consumer')
-class TestKafka_consumer(AgentCheckTest):
+class TestKafka(AgentCheckTest):
     """Basic Test for kafka_consumer integration."""
     CHECK_NAME = 'kafka_consumer'
 
@@ -29,10 +39,9 @@ class TestKafka_consumer(AgentCheckTest):
         """
         Testing Kafka_consumer check.
         """
-        self.load_check({}, {})
+        self.run_check({'instances': instance})
 
-        # run your actual tests...
+        for mname in METRICS:
+            self.assertMetric(mname, at_least=1)
 
-        self.assertTrue(True)
-        # Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
