@@ -13,11 +13,17 @@ namespace :ci do
       install_requirements('kafka_consumer/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      # sample docker usage
       sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml up -d)
+      Wait.for 2181
+      Wait.for 9092
+      sleep_for 5
+      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` < /etc/group')
+      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      sleep_for 30
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
@@ -29,6 +35,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
+      sh %(docker rm -f kafka_consumer)
+      sh %(docker rm -f kafka_producer)
       sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml stop)
       sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml rm -f)
     end

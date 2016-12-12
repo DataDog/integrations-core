@@ -11,16 +11,16 @@ from nose.plugins.attrib import attr
 from tests.checks.common import AgentCheckTest
 
 
-instance = {
+instance = [{
     'kafka_connect_str': 'localhost:9092',
     'zk_connect_str': 'localhost:2181',
-    'zk_prefix': '/0.8',
+    # 'zk_prefix': '/0.8',
     'consumer_groups': {
         'my_consumer': {
-            'test': [0,1,4,12]
+            'test': [0]
         }
     }
-}
+}]
 
 METRICS = [
     'kafka.broker_offset',
