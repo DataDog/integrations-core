@@ -22,7 +22,7 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      sleep_for 30
+      sleep_for 120
     end
 
     task script: ['ci:common:script'] do
