@@ -1,0 +1,76 @@
+require 'ci/common'
+
+def kafka_version
+  ENV['FLAVOR_VERSION'] || 'latest'
+end
+
+namespace :ci do
+  namespace :kafka do |flavor|
+    task before_install: ['ci:common:before_install']
+
+    task install: ['ci:common:install'] do
+      use_venv = in_venv
+      install_requirements('kafka/requirements.txt',
+                           "--cache-dir #{ENV['PIP_CACHE']}",
+                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml up -d)
+      sh %(EXTERNAL_PORT=9091 EXTERNAL_JMX_PORT=9998 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml scale kafka=2)
+      Wait.for 2181
+      Wait.for 9092
+      wait_on_docker_logs('resources_kafka_1', 5, '[Kafka Server 1001], started')
+      wait_on_docker_logs('resources_kafka_2', 5, '[Kafka Server 1002], started')
+      wait_on_docker_logs('resources_zookeeper_1', 5, 'NodeExists for /brokers/ids')
+      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
+           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh \
+           --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
+      wait_on_docker_logs('resources_kafka_1', 30, 'Created log for partition [test,0]')
+      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
+           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh \
+           --create --topic test --partitions 4 --zookeeper $ZK --replication-factor 2 ; \
+           $KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` <<< "Doberman"')
+    end
+
+    task before_script: ['ci:common:before_script'] do
+      wait_on_docker_logs('kafka_consumer', 25, 'Doberman')
+      wait_on_docker_logs('resources_kafka_1', 15, 'Partition [test,0] on broker 1001')
+      wait_on_docker_logs('resources_zookeeper_1', 90, 'Error Path:/consumers/my_consumer/offsets')
+    end
+
+    task script: ['ci:common:script'] do
+      this_provides = [
+        'kafka'
+      ]
+      Rake::Task['ci:common:run_tests'].invoke(this_provides)
+    end
+
+    task before_cache: ['ci:common:before_cache']
+
+    task cleanup: ['ci:common:cleanup'] do
+      sh %(docker rm -f kafka_consumer)
+      sh %(docker rm -f kafka_producer)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml stop)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml rm -f)
+    end
+
+    task :execute do
+      exception = nil
+      begin
+        %w(before_install install before_script).each do |u|
+          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+        end
+        Rake::Task["#{flavor.scope.path}:script"].invoke
+        Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+      rescue => e
+        exception = e
+        puts "Failed task: #{e.class} #{e.message}".red
+      end
+      if ENV['SKIP_CLEANUP']
+        puts 'Skipping cleanup, disposable environments are great'.yellow
+      else
+        puts 'Cleaning up'
+        Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+      end
+      raise exception if exception
+    end
+  end
+end

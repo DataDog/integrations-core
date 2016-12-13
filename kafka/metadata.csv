@@ -1,0 +1,44 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kafka.net.bytes_out,gauge,10,byte,second,Outgoing byte rate.,0,kafka,bytes out
+kafka.net.bytes_in,gauge,10,byte,second,Incoming byte rate.,0,kafka,bytes in
+kafka.net.bytes_rejected,gauge,10,byte,second,Rejected byte rate.,-1,kafka,bytes rejected
+kafka.messages_in,gauge,10 ,message,,Incoming message rate.,0,kafka,messages in
+kafka.request.fetch.failed,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail
+kafka.request.fetch.failed_per_second,gauge,10,request,second,Rate of client fetch request failures per second.,-1,kafka,req fetch fail rate
+kafka.request.produce.time.avg,gauge,10,request,second,Average time for a produce request.,0,kafka,req prod time avg
+kafka.request.produce.time.99percentile,gauge,10,request,second,Time for produce requests for 99th percentile.,0,kafka,req prod time 99
+kafka.request.produce.failed_per_second,gauge,10,request,second,Rate of failed produce requests per second.,-1,kafka,req prod fail rate
+kafka.request.produce.failed,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail
+kafka.request.fetch.time.avg,gauge,10,request,second,Average time per fetch request.,0,kafka,req fetch time avg
+kafka.request.fetch.time.99percentile,gauge,10,request,second,Time for fetch requests for 99th percentile.,0,kafka,req fetch time 99
+kafka.request.update_metadata.time.avg,gauge,10,millisecond,,Average time for a request to update metadata.,0,kafka,req update meta time avg
+kafka.request.update_metadata.time.99percentile,gauge,10,millisecond,,Time for update metadata requests for 99th percentile.,0,kafka,req update meta time 99
+kafka.request.metadata.time.avg,gauge,10,millisecond,,Average time for metadata request.,0,kafka,req meta time avg
+kafka.request.metadata.time.99percentile,gauge,10,millisecond,,Time for metadata requests for 99th percentile.,0,kafka,req meta time 99
+kafka.request.offsets.time.avg,gauge,10,millisecond,,Average time for an offset request.,0,kafka,req offset time avg
+kafka.request.offsets.time.99percentile,gauge,10,millisecond,,Time for offset requests for 99th percentile.,0,kafka,req offset time 99
+kafka.request.handler.avg.idle.pct,gauge,10,fraction,,Average fraction of time the request handler threads are idle.,1,kafka,req handle avg idle
+kafka.replication.isr_shrinks,gauge,10,node,second,Rate of replicas leaving the ISR pool.,-1,kafka,rep isr shrinks
+kafka.replication.isr_expands,gauge,10,node,second,Rate of replicas joining the ISR pool.,-1,kafka,rep isr expands
+kafka.replication.leader_elections,gauge,10,event,second,Leader election rate.,0,kafka,rep leader elect
+kafka.replication.unclean_leader_elections,gauge,10,event,second,Unclean leader election rate.,-1,kafka,rep leader dirty elect
+kafka.replication.under_replicated_partitions,gauge,10,,,Number of unreplicated partitions.,-1,kafka,rep under replicated part
+kafka.log.flush_rate,gauge,10,flush,second,Log flush rate.,0,kafka,log flush rate
+kafka.consumer.delayed_requests,gauge,10,request,,Number of delayed consumer requests.,-1,kafka,con delayed req
+kafka.consumer.expires_per_second,gauge,10,eviction,second,Rate of delayed consumer request expiration.,-1,kafka,con expire rate
+kafka.expires_sec,gauge,10,eviction,second,Rate of delayed producer request expiration.,-1,kafka,expire rate
+kafka.follower.expires_per_second,gauge,10,eviction,second,Rate of request expiration on followers.,-1,kafka,follow expire rate
+kafka.producer.delayed_requests,gauge,10,request,,Number of producer requests delayed.,-1,kafka,prod expire rate
+kafka.producer.expires_per_seconds,gauge,10,eviction,second,Rate of producer request expiration.,-1,kafka,prod req expire
+kafka.producer.request_rate,gauge,10,request,second,Number of producer requests per second.,1,kafka,prod req
+kafka.producer.response_rate,gauge,10,response,second,Number of producer responses per second.,1,kafka,prod resp
+kafka.producer.request_latency_avg,gauge,10,millisecond,,Producer average request latency.,-1,kafka,prod req latency avg
+kafka.producer.bytes_out,gauge,10,byte,second,Producer bytes out rate.,1,kafka,prod bytes out
+kafka.producer.message_rate,gauge,10,message,second,Producer message rate.,1,kafka,prod msg rate
+kafka.producer.io_wait,gauge,10,nanosecond,,Producer I/O wait time.,-1,kafka,prod io wait
+kafka.consumer.max_lag,gauge,10,offset,,Maximum consumer lag.,-1,kafka,con max lag
+kafka.consumer.fetch_rate,gauge,10,request,,The minimum rate at which the consumer sends fetch requests to a broker.,1,kafka,con min fetch
+kafka.consumer.bytes_in,gauge,10,byte,second,Consumer bytes in rate.,1,kafka,con bytes in
+kafka.consumer.messages_in,gauge,10,message,second,Rate of consumer message consumption.,1,kafka,con msg rate
+kafka.consumer.zookeeper_commits,gauge,10,write,second,Rate of offset commits to ZooKeeper.,1,kafka,zoo offset commit
+kafka.consumer.kafka_commits,gauge,10,write,second,Rate of offset commits to Kafka.,1,kafka,kafka offset commit
