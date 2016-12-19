@@ -17,17 +17,17 @@ namespace :ci do
       install_requirements('rabbitmq/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash rabbitmq/ci/start-docker.sh)
+      run_shell_script %(rabbitmq/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script'] do
-      sh %(mkdir -p tmp)
-      sh %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
+      run_shell_script %(mkdir -p tmp)
+      run_shell_script %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
       %w(test1 test5 tralala).each do |q|
-        sh %(python tmp/rabbitmqadmin declare queue name=#{q})
-        sh %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        run_shell_script %(python tmp/rabbitmqadmin declare queue name=#{q})
+        run_shell_script %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
       end
-      sh %(python tmp/rabbitmqadmin list queues)
+      run_shell_script %(python tmp/rabbitmqadmin list queues)
     end
 
     task script: ['ci:common:script'] do
@@ -42,8 +42,8 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash rabbitmq/ci/stop-docker.sh)
-      sh %(rm tmp/rabbitmqadmin)
+      run_shell_script %(stop-docker dd-test-rabbitmq)
+      run_shell_script %(rm -rf tmp/rabbitmqadmin)
     end
 
     task :execute do

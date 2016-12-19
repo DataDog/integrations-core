@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source utils/bash/ci.sh
-
 NAME='dd-test-rabbitmq'
 
 stop-docker $NAME
