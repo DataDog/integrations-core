@@ -36,10 +36,11 @@ namespace :ci do
         logs = `docker logs dd-test-mysql 2>&1`
         count += 1
       end
-      puts "MySQL is up!"
+      if logs.include? 'MySQL init process done. Ready for start up'
+        puts "MySQL is up!"
+      end
 
       sh %(docker run -it --link dd-test-mysql:mysql --rm mysql:5.7 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" -e "create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; GRANT PROCESS, REPLICATION CLIENT ON *.* TO \\"dog\\"@\\"%\\" WITH MAX_USER_CONNECTIONS 5; CREATE DATABASE testdb; CREATE TABLE testdb.users (name VARCHAR(20), age INT); GRANT SELECT ON testdb.users TO \\"dog\\"@\\"%\\"; INSERT INTO testdb.users (name,age) VALUES(\\"Alice\\",25); INSERT INTO testdb.users (name,age) VALUES(\\"Bob\\",20); GRANT SELECT ON performance_schema.* TO \\"dog\\"@\\"%\\"; USE testdb; SELECT * FROM users ORDER BY name; "')
-
     end
 
     task script: ['ci:common:script'] do
