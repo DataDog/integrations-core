@@ -17,6 +17,10 @@ namespace :ci do
       install_requirements('go_expvar/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      sh %(docker build -t datadog-test-expvar #{ENV['TRAVIS_BUILD_DIR']}/go_expvar/ci/)
+      sh %(docker run -dt --name datadog-test-expvar -p 8079:8079 datadog-test-expvar)
+      sleep_for 5
+      sh %(while ! curl -s http://localhost:8079?user=123456; do echo "Waiting for application"; sleep 5; done)
     end
 
     task before_script: ['ci:common:before_script']
@@ -31,6 +35,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
+      sh %(docker rm -f datadog-test-expvar)
     end
 
     task :execute do
