@@ -8,16 +8,48 @@ def kong_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/kong_#{kong_version}"
 end
 
+container_name='dd-test-kong'
+container_name_db="#{container_name}-database"
+container_port1=8000
+container_port2=8443
+container_port3=8001
+container_port4=7946
+
+def wait_on_logs(c_name, *include_array)
+  count = 0
+  logs = `docker logs #{c_name} 2>&1`
+  puts "Waiting for #{c_name} to come up"
+  until count == 20 or include_array.any? { |phrase| logs.include?(phrase) }
+    sleep_for 2
+    logs = `docker logs #{c_name} 2>&1`
+    count += 1
+  end
+  if include_array.any? { |phrase| logs.include?(phrase) }
+    puts "#{c_name} is up!"
+  else
+    sh %(docker logs #{c_name} 2>&1)
+    raise
+  end
+end
+
 namespace :ci do
   namespace :kong do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      sh %(docker kill #{container_name} #{container_name_db} 2>/dev/null || true)
+      sh %(docker rm #{container_name} #{container_name_db} 2>/dev/null || true)
+    end
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
       install_requirements('kong/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash kong/ci/start-docker.sh)
+      sh %(docker run -d --name #{container_name_db} -p 9042:9042 cassandra:2.2)
+      wait_on_logs(container_name_db, "Listening for thrift clients", "Created default superuser role 'cassandra'")
+      sh %(docker run -d --name #{container_name} --link #{container_name_db}:kong-database \
+        -e "KONG_DATABASE=cassandra" -e "KONG_CASSANDRA_CONTACT_POINTS=#{container_name_db}" -e "KONG_PG_HOST=#{container_name_db}" \
+        -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}  -p #{container_port3}:#{container_port3}  -p #{container_port4}:#{container_port4}  -p 7946:7946/udp mashape/kong:0.8.1)
+      Wait.for 'http://localhost:8001/status', 100
     end
 
     task before_script: ['ci:common:before_script']
@@ -32,7 +64,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash kong/ci/stop-docker.sh)
+      sh %(docker kill #{container_name} #{container_name_db} 2>/dev/null || true)
+      sh %(docker rm #{container_name} #{container_name_db} 2>/dev/null || true)
     end
 
     task :execute do
