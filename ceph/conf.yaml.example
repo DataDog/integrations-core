@@ -1,11 +1,13 @@
 init_config:
-  # Any global configurable parameters should be added here
 
 instances:
-  #   A typical instance configuration might include a hostname and port
-  #   a set of customizable tags and other parameters we might need to
-  #   configure the behavior of our check.
-  #
-  # - host: localhost
-  #   port: 26379
-  #   tags: ['custom:tag']
+#  - tags:
+#    - name:mars_cluster
+#
+#    ceph_cmd: /usr/bin/ceph
+#
+# If your environment requires sudo, please add a line like:
+#          dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
+# to your sudoers file, and uncomment the below option.
+#
+#    use_sudo: True
