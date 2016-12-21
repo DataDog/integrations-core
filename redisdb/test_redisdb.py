@@ -61,9 +61,9 @@ class TestRedis(AgentCheckTest):
         except Exception as e:
             self.assertTrue(
                 # 2.8
-                'noauth authentication required' in str(e).lower()
+                'noauth authentication required' in str(e).lower() or \
                 # previously
-                or 'operation not permitted' in str(e).lower(),
+                'operation not permitted' in str(e).lower(),
                 str(e))
 
         r = load_check('redisdb', {}, {})
@@ -77,7 +77,8 @@ class TestRedis(AgentCheckTest):
 
         instance = {
             'host': 'localhost',
-            'port': port
+            'port': port,
+            'tags': ["foo:bar"]
         }
 
         db = redis.Redis(port=port, db=14)  # Datadog's test db
@@ -137,6 +138,10 @@ class TestRedis(AgentCheckTest):
             service_checks)
         self.assertEquals(
             len([sc for sc in service_checks if "redis_port:%s" % port in sc['tags']]),
+            service_checks_count,
+            service_checks)
+        self.assertEquals(
+            len([sc for sc in service_checks if "foo:bar" in sc['tags']]),
             service_checks_count,
             service_checks)
 
