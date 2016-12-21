@@ -8,6 +8,10 @@ def rabbitmq_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/rabbitmq_#{rabbitmq_version}"
 end
 
+container_name='dd-test-rabbitmq'
+container_port1 = 5672
+container_port2 = 15672
+
 namespace :ci do
   namespace :rabbitmq do |flavor|
     task before_install: ['ci:common:before_install']
@@ -17,17 +21,33 @@ namespace :ci do
       install_requirements('rabbitmq/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      run_shell_script %(rabbitmq/ci/start-docker.sh)
+      sh %(docker run -d --name #{container_name} -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} rabbitmq:#{rabbitmq_version}-management)
     end
 
     task before_script: ['ci:common:before_script'] do
-      run_shell_script %(mkdir -p tmp)
-      run_shell_script %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
-      %w(test1 test5 tralala).each do |q|
-        run_shell_script %(python tmp/rabbitmqadmin declare queue name=#{q})
-        run_shell_script %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
+      # Wait for RabbitMQ to come up
+      count = 0
+      logs = `docker logs #{container_name} 2>&1`
+      puts "Waiting for RabbitMQ to come up"
+      until count == 20 or logs.include?("Server startup complete")
+        sleep_for 2
+        logs = `docker logs #{container_name} 2>&1`
+        count += 1
       end
-      run_shell_script %(python tmp/rabbitmqadmin list queues)
+      if logs.include?("Server startup complete")
+        puts "RabbitMQ is up!"
+      else
+        sh %(docker logs #{container_name} 2>&1)
+        raise "RabbitMQ failed to come up"
+      end
+
+      sh %(mkdir -p tmp)
+      sh %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
+      %w(test1 test5 tralala).each do |q|
+        sh %(python tmp/rabbitmqadmin declare queue name=#{q})
+        sh %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
+      end
+      sh %(python tmp/rabbitmqadmin list queues)
     end
 
     task script: ['ci:common:script'] do
@@ -42,8 +62,9 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      run_shell_script %(stop-docker dd-test-rabbitmq)
-      run_shell_script %(rm -rf tmp/rabbitmqadmin)
+      sh %(docker kill #{container_name} 2>/dev/null || true)
+      sh %(docker rm #{container_name} 2>/dev/null || true)
+      sh %(rm -rf tmp/rabbitmqadmin)
     end
 
     task :execute do
