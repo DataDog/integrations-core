@@ -14,7 +14,10 @@ container_port2 = 15672
 
 namespace :ci do
   namespace :rabbitmq do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      sh %(docker kill #{container_name} 2>/dev/null || true)
+      sh %(docker rm #{container_name} 2>/dev/null || true)
+    end
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
@@ -41,13 +44,11 @@ namespace :ci do
         raise "RabbitMQ failed to come up"
       end
 
-      sh %(mkdir -p tmp)
-      sh %(wget localhost:15672/cli/rabbitmqadmin -O tmp/rabbitmqadmin)
       %w(test1 test5 tralala).each do |q|
-        sh %(python tmp/rabbitmqadmin declare queue name=#{q})
-        sh %(python tmp/rabbitmqadmin publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare queue name=#{q})
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=amq.default routing_key=#{q} payload="hello, world")
       end
-      sh %(python tmp/rabbitmqadmin list queues)
+      sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
     end
 
     task script: ['ci:common:script'] do
@@ -59,12 +60,9 @@ namespace :ci do
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
-      sh %(rm -rf tmp/rabbitmqadmin)
     end
 
     task :execute do
