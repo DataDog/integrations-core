@@ -17,7 +17,6 @@ from checks import AgentCheck
 
 OS_CHECK_NAME = 'openstack'
 
-import pdb ; pdb.set_trace()
 OpenStackProjectScope = load_class(OS_CHECK_NAME, "OpenStackProjectScope")
 KeystoneCatalog = load_class(OS_CHECK_NAME, "KeystoneCatalog")
 IncompleteConfig = load_class(OS_CHECK_NAME, "IncompleteConfig")
