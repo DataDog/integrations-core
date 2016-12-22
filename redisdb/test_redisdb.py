@@ -61,7 +61,7 @@ class TestRedis(AgentCheckTest):
         except Exception as e:
             self.assertTrue(
                 # 2.8
-                'noauth authentication required' in str(e).lower() or \
+                'noauth authentication required' in str(e).lower() or
                 # previously
                 'operation not permitted' in str(e).lower(),
                 str(e))
