@@ -33,6 +33,7 @@ dependencies:
 
 test:
     override:
+        - bundle exec rake prep_travis_ci
         - bundle exec rake lint
         - rake ci:run[default]
         - rake ci:run[mysql]
