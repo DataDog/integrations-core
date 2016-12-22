@@ -8,7 +8,7 @@ from nose.plugins.attrib import attr
 # project
 from checks import AgentCheck
 from utils.platform import Platform
-from shared.test.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest
 
 
 @attr(requires='mysql')

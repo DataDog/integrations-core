@@ -1,14 +1,15 @@
 # stdlib
+import os
 import json
 
 # project
 from checks import AgentCheck
-from shared.test.common import Fixtures
-from tests.checks.common import AgentCheckTest, get_check_class
+from tests.checks.common import AgentCheckTest, Fixtures, get_check_class
 
 
 class TestMesosSlave(AgentCheckTest):
     CHECK_NAME = 'mesos_slave'
+    FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
     def test_checks(self):
         config = {
@@ -22,8 +23,10 @@ class TestMesosSlave(AgentCheckTest):
         }
 
         mocks = {
-            '_get_stats': lambda x, y, z: json.loads(Fixtures.read_file('stats.json')),
-            '_get_state': lambda x, y, z: json.loads(Fixtures.read_file('state.json'))
+            '_get_stats': lambda x, y, z: json.loads(
+                Fixtures.read_file('stats.json', sdk_dir=self.FIXTURE_DIR)),
+            '_get_state': lambda x, y, z: json.loads(
+                Fixtures.read_file('state.json', sdk_dir=self.FIXTURE_DIR))
         }
 
         klass = get_check_class('mesos_slave')

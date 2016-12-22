@@ -9,7 +9,7 @@ import shutil
 import tempfile
 
 # project
-from shared.test.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest
 
 
 class DirectoryTestCase(AgentCheckTest):
