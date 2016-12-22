@@ -48,7 +48,6 @@ install:
   - gem install bundler
   - bundle install
   - git clone https://github.com/DataDog/dd-agent.git ~/dd-agent
-  - cp ~/dd-agent/datadog.conf.example ~/dd-agent/datadog.conf
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - pip install docker-compose
   - pip install pylint
