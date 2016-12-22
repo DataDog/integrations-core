@@ -18,11 +18,11 @@ from checks import AgentCheck
 OS_CHECK_NAME = 'openstack'
 
 import pdb ; pdb.set_trace()
-OpenStackProjectScope = load_class(OS_CHECK_NAME, "OpenStackProjectScope", is_sdk=True)
-KeystoneCatalog = load_class(OS_CHECK_NAME, "KeystoneCatalog", is_sdk=True)
-IncompleteConfig = load_class(OS_CHECK_NAME, "IncompleteConfig", is_sdk=True)
-IncompleteAuthScope = load_class(OS_CHECK_NAME, "IncompleteAuthScope", is_sdk=True)
-IncompleteIdentity = load_class(OS_CHECK_NAME, "IncompleteIdentity", is_sdk=True)
+OpenStackProjectScope = load_class(OS_CHECK_NAME, "OpenStackProjectScope")
+KeystoneCatalog = load_class(OS_CHECK_NAME, "KeystoneCatalog")
+IncompleteConfig = load_class(OS_CHECK_NAME, "IncompleteConfig")
+IncompleteAuthScope = load_class(OS_CHECK_NAME, "IncompleteAuthScope")
+IncompleteIdentity = load_class(OS_CHECK_NAME, "IncompleteIdentity")
 
 
 class MockHTTPResponse(object):
@@ -224,7 +224,7 @@ class OSProjectScopeTest(TestCase):
 
         self.assertRaises(IncompleteConfig, OpenStackProjectScope.from_config, init_config, bad_instance_config)
 
-        with patch("check.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
+        with patch("openstack.check.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
             append_config = good_instance_config.copy()
             append_config["append_tenant_id"] = True
             scope = OpenStackProjectScope.from_config(init_config, append_config)
@@ -280,7 +280,7 @@ class TestOpenstack(AgentCheckTest):
 
         self.assertRaises(KeyError, self.check.get_scope_for_instance, instance)
 
-        with patch("check.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
+        with patch("openstack.check.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
             scope = self.check.ensure_auth_scope(instance)
 
             self.assertEqual(self.check.get_scope_for_instance(instance), scope)
@@ -308,7 +308,7 @@ class TestOpenstack(AgentCheckTest):
         self.check.CACHE_TTL["aggregates"] = 1
         expected_aggregates = {"hyp_1": ["aggregate:staging", "availability_zone:test"]}
 
-        with patch("check.OpenStackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
+        with patch("openstack.check.OpenstackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
             self.assertEqual(self.check._get_and_set_aggregate_list(), expected_aggregates)
             sleep(1.5)
             self.assertTrue(self.check._is_expired("aggregates"))
