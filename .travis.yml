@@ -56,6 +56,7 @@ install:
   - if [ -e $TRAVIS_BUILD_DIR/Gemfile ]; then cd $TRAVIS_BUILD_DIR ; bundle install; cd - ; fi
 
 script:
+  - bundle exec rake prep_travis_ci
   - bundle exec rake lint
   - bundle exec rake ci:run
   - bundle exec rake requirements
