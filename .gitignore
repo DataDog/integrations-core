@@ -8,6 +8,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+venv/
+embedded/
 env/
 build/
 develop-eggs/
@@ -23,7 +25,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-
+*.zip
+Gemfile.lock
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -70,3 +73,6 @@ Gemfile.lock
 setuptools-*.zip
 
 tmp
+# redis tmp config
+*.tmp
+*.tmp.conf

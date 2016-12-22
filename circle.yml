@@ -48,6 +48,7 @@ test:
         - rake ci:run[cassandra]
         - rake ci:run[tomcat]
         - rake ci:run[gearmand]
+        - rake ci:run[redisdb]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
