@@ -1,0 +1,66 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+cassandra.active_tasks,gauge,10,task,,The number of tasks that the thread pool is actively executing.,0,cassandra,actv tsks
+cassandra.bloom_filter_disk_space_used,gauge,10,byte,,Disk space used by the Bloom filters.,0,cassandra,blm fltr disk
+cassandra.bloom_filter_false_positives,gauge,10,event,,The number of Bloom filter false positives.,-1,cassandra,bloom false pos
+cassandra.bloom_filter_false_ratio,gauge,10,fraction,,The ratio of Bloom filter false positives to total checks.,-1,cassandra,bloom false ratio
+cassandra.capacity,gauge,10,byte,,"The capacity of the caches, such as the key cache and row cache.",0,cassandra,cache cap
+cassandra.completed_tasks,gauge,10,task,,The number of tasks that the thread pool has completed.,0,cassandra,compl tsks
+cassandra.compression_ratio,gauge,10,fraction,,The compression ratio for all SSTables in a column family.,0,cassandra,compress ratio
+cassandra.currently_blocked_tasks.count,gauge,10,task,,The number of currently blocked tasks for the thread pool.,-1,cassandra,blkd tsks
+cassandra.exceptions.count,gauge,10,error,,The number of exceptions thrown.,-1,cassandra,excptns
+cassandra.hits.count,gauge,10,hit,,The number of hits to a cache.,1,cassandra,hits
+cassandra.latency.count,gauge,10,request,,The number of client requests.,0,cassandra,req
+cassandra.latency.one_minute_rate,gauge,10,request,second,"Recent rate of client requests, as an exponentially weighted moving average over a one-minute interval.",0,cassandra,req/s
+cassandra.live_disk_space_used.count,gauge,10,byte,,"Disk space used by ""live"" SSTables (only counts non-obsolete files).",0,cassandra,live disk used
+cassandra.live_ss_table_count,gauge,10,file,,"Number of ""live"" (non-obsolete) SSTables.",0,cassandra,live sstables
+cassandra.load.count,gauge,10,byte,,Disk space used on a node.,0,cassandra,load
+cassandra.max_row_size,gauge,10,byte,,Size of the largest compacted row.,0,cassandra,max row
+cassandra.mean_row_size,gauge,10,byte,,Average size of compacted rows.,0,cassandra,mean row
+cassandra.memtable_columns_count,gauge,10,column,,Number of columns in memtable.,0,cassandra,memtable col
+cassandra.memtable_live_data_size,gauge,10,byte,,Size of data stored in memtable.,0,cassandra,memtable size
+cassandra.memtable_switch_count.count,gauge,10,event,,Number of times a full memtable has been switched out for an empty one due to flushing.,0,cassandra,memtable switch
+cassandra.min_row_size,gauge,10,byte,,Size of the smallest compacted row.,0,cassandra,min row
+cassandra.pending_tasks,gauge,10,task,,The number of pending tasks for the thread pool.,-1,cassandra,pend tsks
+cassandra.requests.count,gauge,10,request,,The number of requests to a cache.,0,cassandra,cache req
+cassandra.size,gauge,10,byte,,Size of cache.,0,cassandra,cache size
+cassandra.timeouts.count,gauge,10,timeout,,Count of requests not acknowledged within configurable timeout window.,-1,cassandra,timeout
+cassandra.timeouts.one_minute_rate,gauge,10,timeout,second,"Recent timeout rate, as an exponentially weighted moving average over a one-minute interval.",-1,cassandra,timeout/s
+cassandra.total_disk_space_used.count,gauge,10,byte,,Disk space used by a column family.,0,cassandra,cf disk space
+cassandra.total_latency.count,gauge,10,microsecond,,Total latency for all client requests.,-1,cassandra,tot latency
+cassandra.unavailables.count,gauge,10,error,,Count of requests for which the required number of nodes was unavailable.,-1,cassandra,unavail
+cassandra.unavailables.one_minute_rate,gauge,10,error,second,"Recent rate of unavailable exceptions, as an exponentially weighted moving average over a one-minute interval. ",-1,cassandra,unavail/s
+cassandra.db.update_interval,gauge,10,millisecond,,"The configurable update interval for the dynamic snitch, which monitors read latency to route requests away from slow nodes. ",0,cassandra,dyn sntch intvl
+cassandra.db.write_count,gauge,10,write,,The number of local write requests for a column family. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.latency.count instead),0,cassandra,writes
+cassandra.db.read_count,gauge,10,read,,The number of local read requests for a column family. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.latency.count instead),0,cassandra,reads
+cassandra.db.live_ss_table_count,gauge,10,file,,"Number of ""live"" (non-obsolete) SSTables. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.live_ss_table_count instead)",0,cassandra,live sstables
+cassandra.db.total_disk_space_used,gauge,10,byte,,Disk space used by a column family. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.total_disk_space_used.count instead),0,cassandra,cf disk space
+cassandra.db.memtable_data_size,gauge,10,byte,,Size of data stored in memtable. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.memtable_live_data_size instead),0,cassandra,memtable size
+cassandra.internal.currently_blocked_tasks,gauge,10,task,,The number of currently blocked tasks for the thread pool. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.currently_blocked_tasks.count instead),-1,cassandra,blkd tsks
+cassandra.db.max_row_size,gauge,10,byte,,Size of the largest compacted row. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.max_row_size instead),0,cassandra,max row
+cassandra.db.live_disk_space_used,gauge,10,byte,,"Disk space used by ""live"" SSTables (only counts non-obsolete files). (Metric may not be available for Cassandra versions > 2.2. Use cassandra.live_disk_space_used.count instead)",0,cassandra,live disk used
+cassandra.internal.active_count,gauge,10,task,,The number of tasks that the thread pool is actively executing. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.active_tasks instead),0,cassandra,actv tsks
+cassandra.internal.completed_tasks,gauge,10,task,,The number of tasks that the thread pool has completed. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.completed_tasks instead),0,cassandra,compl tsks
+cassandra.db.total_write_latency_micros,gauge,10,microsecond,,Total latency for all write requests. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.total_latency.count instead),-1,cassandra,tot write lat
+cassandra.db.total_read_latency_micros,gauge,10,microsecond,,Total latency for all read requests. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.total_latency.count instead),-1,cassandra,tot read lat
+cassandra.internal.total_blocked_tasks,gauge,10,task,,The cumulative total of currently blocked tasks for the thread pool. (Metric may not be available for Cassandra versions > 2.2.),-1,cassandra,blkd tsks
+cassandra.db.mean_row_size,gauge,10,byte,,Average size of compacted rows. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.mean_row_size instead),0,cassandra,mean row
+cassandra.db.compression_ratio,gauge,10,fraction,,The compression ratio for all SSTables in a column family. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.compression_ratio instead),0,cassandra,compress ratio
+cassandra.db.memtable_switch_count,gauge,10,event,,Number of times a full memtable has been switched out for an empty one due to flushing. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.memtable_switch_count.count instead),0,cassandra,memtable switch
+cassandra.db.memtable_columns_count,gauge,10,column,,Number of columns in memtable. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.memtable_columns_count instead),0,cassandra,memtable col
+cassandra.db.min_row_size,gauge,10,byte,,Size of the smallest compacted row. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.min_row_size instead),0,cassandra,min row
+cassandra.db.bloom_filter_false_positives,gauge,10,event,,The number of Bloom filter false positives. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.bloom_filter_false_positives instead),-1,cassandra,bloom false pos
+cassandra.db.bloom_filter_disk_space_used,gauge,10,byte,,Disk space used by the Bloom filters. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.bloom_filter_disk_space_used instead),0,cassandra,blm fltr disk
+cassandra.db.bloom_filter_false_ratio,gauge,10,fraction,,The ratio of Bloom filter false positives to total checks. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.bloom_filter_false_ratio instead),-1,cassandra,bloom false ratio
+cassandra.net.total_timeouts,gauge,10,timeout,,Count of requests not acknowledged within configurable timeout window. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.timeouts.count instead),-1,cassandra,timeout
+cassandra.db.completed_tasks,gauge,10,task,,Completed compaction or commitlog tasks. (Metric may not be available for Cassandra versions > 2.2.),0,cassandra,compl db tasks
+cassandra.db.pending_tasks,gauge,10,task,,"Pending compaction, commitlog, or column family tasks. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.pending_tasks instead)",-1,cassandra,pend tsks
+cassandra.db.load,gauge,10,byte,,Disk space used on a node. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.load.count instead),0,cassandra,load
+cassandra.db.exception_count,gauge,10,error,,The number of exceptions thrown. (Metric may not be available for Cassandra versions > 2.2. Use cassandra.exceptions.count instead),-1,cassandra,excptns
+cassandra.db.recent_read_latency_micros,gauge,10,microsecond,,The latency of reads since the last time this attribute was read. (Metric may not be available for Cassandra versions > 2.2.),-1,cassandra,recent read lat
+cassandra.db.recent_write_latency_micros,gauge,10,microsecond,,The latency of writes since the last time this attribute was read. (Metric may not be available for Cassandra versions > 2.2.),-1,cassandra,recent wrt lat
+cassandra.db.key_cache_recent_hit_rate,gauge,10,fraction,,Ratio of key cache hits to key cache requests since the last time this attribute was read. (Metric may not be available for Cassandra versions > 2.2.),1,cassandra,key cache hit
+cassandra.db.recent_range_latency_micros,gauge,10,microsecond,,The latency of range scans since the last time this attribute was read. (Metric may not be available for Cassandra versions > 2.2.),-1,cassandra,recent range lat
+cassandra.db.total_range_latency_micros,gauge,10,microsecond,,Total latency for all range scans. (Metric may not be available for Cassandra versions > 2.2.),-1,cassandra,tot range lat
+cassandra.db.write_operations,gauge,10,operation,,Count of write operations. (Metric may not be available for Cassandra versions > 2.2.),0,cassandra,write ops
+cassandra.db.read_operations,gauge,10,operation,,Count of read operations. (Metric may not be available for Cassandra versions > 2.2.),0,cassandra,read ops
+cassandra.db.range_operations,gauge,10,operation,,Count of range scan operations. (Metric may not be available for Cassandra versions > 2.2.),0,cassandra,range ops
