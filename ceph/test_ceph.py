@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-from nose.plugins.attrib import attr
 import os
 
 # 3p
@@ -23,7 +22,6 @@ instance = {
 
 # NOTE: Feel free to declare multiple test classes if needed
 
-@attr(requires='ceph')
 class TestCeph(AgentCheckTest):
     """Basic Test for ceph integration."""
     CHECK_NAME = 'ceph'
