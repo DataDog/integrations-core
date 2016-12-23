@@ -1,13 +1,5 @@
 require 'ci/common'
 
-def ssh_version
-  ENV['FLAVOR_VERSION'] || 'latest'
-end
-
-def ssh_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/ssh_#{ssh_version}"
-end
-
 namespace :ci do
   namespace :ssh do |flavor|
     task before_install: ['ci:common:before_install']
