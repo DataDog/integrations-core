@@ -8,19 +8,40 @@ def mysql_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/mysql_#{mysql_version}"
 end
 
+container_name = 'dd-test-mysql'
+container_port = 13306
+
 namespace :ci do
   namespace :mysql do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      `docker kill $(docker ps -q --filter name=dd-test-mysql) || true`
+      `docker rm $(docker ps -aq --filter name=dd-test-mysql) || true`
+    end
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
       install_requirements('mysql/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash mysql/ci/start-docker.sh)
+      sh %(docker run -p #{container_port}:3306 --name #{container_name} -e MYSQL_ROOT_PASSWORD=datadog -d mysql:5.7)
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      Wait.for 13306
+      count = 0
+      logs = `docker logs dd-test-mysql 2>&1`
+      puts "Waiting for MySQL to come up"
+      until count == 20 or logs.include? 'MySQL init process done. Ready for start up'
+        sleep_for 2
+        logs = `docker logs dd-test-mysql 2>&1`
+        count += 1
+      end
+      if logs.include? 'MySQL init process done. Ready for start up'
+        puts "MySQL is up!"
+      end
+
+      sh %(docker run -it --link dd-test-mysql:mysql --rm mysql:5.7 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" -e "create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; GRANT PROCESS, REPLICATION CLIENT ON *.* TO \\"dog\\"@\\"%\\" WITH MAX_USER_CONNECTIONS 5; CREATE DATABASE testdb; CREATE TABLE testdb.users (name VARCHAR(20), age INT); GRANT SELECT ON testdb.users TO \\"dog\\"@\\"%\\"; INSERT INTO testdb.users (name,age) VALUES(\\"Alice\\",25); INSERT INTO testdb.users (name,age) VALUES(\\"Bob\\",20); GRANT SELECT ON performance_schema.* TO \\"dog\\"@\\"%\\"; USE testdb; SELECT * FROM users ORDER BY name; "')
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
@@ -32,7 +53,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash mysql/ci/stop-docker.sh)
+      `docker kill $(docker ps -q --filter name=dd-test-mysql) || true`
+      `docker rm $(docker ps -aq --filter name=dd-test-mysql) || true`
     end
 
     task :execute do
