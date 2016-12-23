@@ -18,7 +18,8 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
 
-      sh %(docker create -p 3835:3835 --name dd-haproxy haproxy:#{haproxy_version})
+      sh %(mkdir -p $VOLATILE_DIR/haproxy)
+      sh %(docker create -v $VOLATILE_DIR/haproxy:/tmp -p 3835:3835 --name dd-haproxy haproxy:#{haproxy_version})
       sh %(docker create -p 3836:3836 --name dd-haproxy-open haproxy:#{haproxy_version})
 
       sh %(docker cp `pwd`/haproxy/ci/haproxy.cfg dd-haproxy:/usr/local/etc/haproxy/haproxy.cfg)
@@ -26,6 +27,9 @@ namespace :ci do
 
       sh %(docker start dd-haproxy)
       sh %(docker start dd-haproxy-open)
+
+      # Allow CI user to access the haproxy unix socket
+      sh %(sudo chown $USER $VOLATILE_DIR/haproxy/datadog-haproxy-stats.sock)
     end
 
     task before_script: ['ci:common:before_script']

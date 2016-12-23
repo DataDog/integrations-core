@@ -10,11 +10,13 @@ import os
 # 3p
 import mock
 from nose.plugins.attrib import attr
+from unittest.case import SkipTest
 
 # project
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 from utils.hostname import get_hostname
+from utils.platform import Platform
 
 MOCK_DATA = """# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
 a,FRONTEND,,,1,2,12,1,11,11,0,0,0,,,,,OPEN,,,,,,,,,1,1,0,,,,0,1,0,2,,,,0,1,0,0,0,0,,1,1,1,,,
@@ -214,6 +216,19 @@ b,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,
                                  collect_status_metrics_by_host=True)
         self.assertEquals(self.check.hosts_statuses, expected_hosts_statuses)
 
+    @mock.patch('requests.get', return_value=mock.Mock(content=MOCK_DATA))
+    def test_optional_tags(self, mock_requests):
+        config = copy.deepcopy(self.BASE_CONFIG)
+        config['instances'][0]['tags'] = ['new-tag', 'my:new:tag']
+
+        self.run_check(config)
+
+        self.assertMetricTag('haproxy.backend.session.current', 'new-tag')
+        self.assertMetricTag('haproxy.backend.session.current', 'my:new:tag')
+        self.assertMetricTag('haproxy.count_per_status', 'my:new:tag')
+        self.assertServiceCheck('haproxy.backend_up', tags=['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND'])
+
+
 @attr(requires='haproxy')
 class HaproxyTest(AgentCheckTest):
     CHECK_NAME = 'haproxy'
@@ -297,6 +312,14 @@ class HaproxyTest(AgentCheckTest):
         self.config_open = {
             'instances': [{
                 'url': 'http://localhost:3836/stats',
+                'collect_aggregates_only': False,
+            }]
+        }
+        self.unixsocket_path = os.path.join(os.environ['VOLATILE_DIR'], 'haproxy/datadog-haproxy-stats.sock')
+        self.unixsocket_url = 'unix://{0}'.format(self.unixsocket_path)
+        self.config_unixsocket = {
+            'instances': [{
+                'url': self.unixsocket_url,
                 'collect_aggregates_only': False,
             }]
         }
@@ -407,5 +430,19 @@ class HaproxyTest(AgentCheckTest):
 
         # This time, make sure the hostname is empty
         self.assertEquals(self.service_checks[0]['host_name'], '')
+
+        self.coverage_report()
+
+    def test_unixsocket_config(self):
+        if not Platform.is_linux():
+            raise SkipTest("Can run only on Linux because of Docker limitations on unix socket sharing")
+
+        self.run_check_twice(self.config_unixsocket)
+
+        shared_tag = ['instance_url:{0}'.format(self.unixsocket_url)]
+
+        self._test_frontend_metrics(shared_tag)
+        self._test_backend_metrics(shared_tag)
+        self._test_service_checks()
 
         self.coverage_report()
