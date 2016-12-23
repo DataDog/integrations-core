@@ -4,10 +4,6 @@ def postfix_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def postfix_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/postfix_#{postfix_version}"
-end
-
 namespace :ci do
   namespace :postfix do |flavor|
     task before_install: ['ci:common:before_install']
