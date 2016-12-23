@@ -41,7 +41,6 @@ class MockIoCountersMetrics(object):
         self.read_time = 15
         self.write_time = 25
 
-@attr(requires='disk')
 class TestCheckDisk(AgentCheckTest):
     CHECK_NAME = 'disk'
 

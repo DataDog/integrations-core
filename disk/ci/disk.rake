@@ -4,10 +4,6 @@ def disk_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def disk_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/disk_#{disk_version}"
-end
-
 namespace :ci do
   namespace :disk do |flavor|
     task before_install: ['ci:common:before_install']
