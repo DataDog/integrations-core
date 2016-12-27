@@ -15,23 +15,6 @@ container_port2=8443
 container_port3=8001
 container_port4=7946
 
-def wait_on_logs(c_name, *include_array)
-  count = 0
-  logs = `docker logs #{c_name} 2>&1`
-  puts "Waiting for #{c_name} to come up"
-  until count == 20 or include_array.any? { |phrase| logs.include?(phrase) }
-    sleep_for 2
-    logs = `docker logs #{c_name} 2>&1`
-    count += 1
-  end
-  if include_array.any? { |phrase| logs.include?(phrase) }
-    puts "#{c_name} is up!"
-  else
-    sh %(docker logs #{c_name} 2>&1)
-    raise
-  end
-end
-
 namespace :ci do
   namespace :kong do |flavor|
     task before_install: ['ci:common:before_install'] do
@@ -45,7 +28,9 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       sh %(docker run -d --name #{container_name_db} -p 9042:9042 cassandra:2.2)
-      wait_on_logs(container_name_db, "Listening for thrift clients", "Created default superuser role 'cassandra'")
+
+      wait_on_docker_logs(container_name_db, 40, "Listening for thrift clients", "Created default superuser role 'cassandra'")
+
       sh %(docker run -d --name #{container_name} --link #{container_name_db}:kong-database \
         -e "KONG_DATABASE=cassandra" -e "KONG_CASSANDRA_CONTACT_POINTS=#{container_name_db}" -e "KONG_PG_HOST=#{container_name_db}" \
         -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}  -p #{container_port3}:#{container_port3}  -p #{container_port4}:#{container_port4}  -p 7946:7946/udp mashape/kong:0.8.1)
