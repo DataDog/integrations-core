@@ -27,16 +27,28 @@ class TestPgbouncer(AgentCheckTest):
             'instances': [
                 {
                     'host': 'localhost',
-                    'port': 15433,
+                    'port': 16432,
                     'username': 'datadog',
                     'password': 'datadog'
                 },
                 {
-                    'database_url': 'postgresql://datadog:datadog@localhost:15433/datadog_test',
+                    'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
                 }
             ]
         }
 
+        try:
+            connection = pg.connect(
+                host='localhost',
+                port='16432',
+                user='datadog',
+                password='datadog',
+                database='datadog_test')
+            connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            cur = connection.cursor()
+            cur.execute('SELECT * FROM persons;')
+        except Exception:
+            pass
         self.run_check(config)
 
         self.assertMetric('pgbouncer.pools.cl_active')
@@ -57,7 +69,7 @@ class TestPgbouncer(AgentCheckTest):
         try:
             connection = pg.connect(
                 host='localhost',
-                port='15433',
+                port='16432',
                 user='datadog',
                 password='datadog',
                 database='datadog_test')
@@ -78,5 +90,5 @@ class TestPgbouncer(AgentCheckTest):
         self.assertTrue(service_checks_count > 0)
         self.assertServiceCheckOK(
             'pgbouncer.can_connect',
-            tags=['host:localhost', 'port:15433', 'db:pgbouncer'],
+            tags=['host:localhost', 'port:16432', 'db:pgbouncer'],
             count=service_checks_count)

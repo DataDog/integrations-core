@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# A script to create the postgres and pgbouncer containers.
+# A script to create the postgres containers.
 
 function wait_for {
     while netstat -lnt | awk "\$4 ~ /:$1\$/ {exit 1}"; do sleep 1; done
@@ -28,6 +28,7 @@ do
 done
 
 echo 'Postgres is running, installing PgBouncer'
+
 docker run -d --name $PGBNAME --link $PGNAME:postgres -v $CI_PATH/resources/pgb:/etc/pgbouncer:ro -p 16432:6432 kotaimen/pgbouncer
 
 echo 'Docker setup finished'

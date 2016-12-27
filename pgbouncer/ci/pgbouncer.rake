@@ -17,8 +17,7 @@ namespace :ci do
       install_requirements('pgbouncer/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash pgbouncer/ci/start-docker-pg.sh)
-      sh %(docker run -d --name dd-test-pgbouncer --link dd-test-postgres:postgres -v resources:/etc/pgbouncer:ro -p 15433:6432 kotaimen/pgbouncer)
+      sh %(bash pgbouncer/ci/start-docker.sh)
       sleep_for 10
     end
 
