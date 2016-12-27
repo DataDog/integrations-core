@@ -55,6 +55,7 @@ test:
         - rake ci:run[nginx]
         - rake ci:run[zk]
         - rake ci:run[riak]
+        - rake ci:run[pgbouncer]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
