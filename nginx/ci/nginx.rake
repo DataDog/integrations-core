@@ -33,11 +33,9 @@ namespace :ci do
         sh %(docker start #{container_name})
       else
         repo = "nginx:1.7.11"
-        p __dir__
-        # volumes="-v $DIR/nginx.conf:/etc/nginx/nginx.conf -v $DIR/testing.crt:/etc/nginx/testing.crt -v $DIR/testing.key:/etc/nginx/testing.key"
-        sh %(docker run -d -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} --name #{container_name} -v #{__dir__}/nginx.conf:/etc/nginx/nginx.conf -v #{__dir__}/testing.crt:/etc/nginx/testing.crt -v #{__dir__}/testing.key:/etc/nginx/testing.key #{repo})
+        volumes=" -v #{__dir__}/nginx.conf:/etc/nginx/nginx.conf -v #{__dir__}/testing.crt:/etc/nginx/testing.crt -v #{__dir__}/testing.key:/etc/nginx/testing.key"
+        sh %(docker run -d -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} --name #{container_name} #{volumes} #{repo})
       end
-      # sh %(bash nginx/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
