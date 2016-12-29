@@ -10,7 +10,7 @@ from nose.plugins.attrib import attr
 
 # project
 from checks import AgentCheck
-from shared.test.common import load_check
+from tests.checks.common import load_check
 
 
 @attr(requires='ssh_check')

@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import os
 import re
 
 # 3p
@@ -10,9 +11,10 @@ import mock
 from nose.plugins.attrib import attr
 
 # project
-from shared.test.common import AgentCheckTest, Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 DEFAULT_DEVICE_NAME = '/dev/sda1'
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 class MockPart(object):
     def __init__(self, device=DEFAULT_DEVICE_NAME, fstype='ext4',
@@ -181,7 +183,8 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('check.get_subprocess_output', return_value=(Fixtures.read_file('debian-df-Tk'), "", 0))
+    @mock.patch('check.get_subprocess_output',
+                return_value=(Fixtures.read_file('debian-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_debian(self, mock_df_output, mock_statvfs):
         mock_statvfs.__name__ = "foo"
@@ -198,7 +201,8 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('check.get_subprocess_output', return_value=(Fixtures.read_file('freebsd-df-Tk'), "", 0))
+    @mock.patch('check.get_subprocess_output',
+                return_value=(Fixtures.read_file('freebsd-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_freebsd(self, mock_df_output, mock_statvfs):
         mock_statvfs.__name__ = "foo"
@@ -215,7 +219,8 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('check.get_subprocess_output', return_value=(Fixtures.read_file('centos-df-Tk'), "", 0))
+    @mock.patch('check.get_subprocess_output',
+                return_value=(Fixtures.read_file('centos-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_centos(self, mock_df_output, mock_statvfs):
         mock_statvfs.__name__ = "foo"
