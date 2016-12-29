@@ -32,7 +32,7 @@ namespace :ci do
         sh %(docker cp #{__dir__}/testing.crt #{container_name}:/opt/rh/nginx16/root/etc/nginx/testing.crt)
         sh %(docker start #{container_name})
       else
-        repo = "nginx:1.7.11"
+        repo = "nginx:#{nginx_version}"
         volumes=" -v #{__dir__}/nginx.conf:/etc/nginx/nginx.conf -v #{__dir__}/testing.crt:/etc/nginx/testing.crt -v #{__dir__}/testing.key:/etc/nginx/testing.key"
         sh %(docker run -d -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} --name #{container_name} #{volumes} #{repo})
       end
