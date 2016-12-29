@@ -78,6 +78,7 @@ env:
     - TRAVIS_FLAVOR=memcache FLAVOR_VERSION=1.4.22
     - TRAVIS_FLAVOR=lighttpd
     - TRAVIS_FLAVOR=statsd
+    - TRAVIS_FLAVOR=solr FLAVOR_VERSION=6.2
     # END OF TRAVIS MATRIX
 
 before_install:
