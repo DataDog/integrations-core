@@ -47,7 +47,7 @@ class SshTestCase(unittest.TestCase):
         }
 
         agentConfig = {}
-        self.check = load_check('ssh_check', config, agentConfig)
+        self.check = load_check('ssh', config, agentConfig)
 
         # Testing that connection will work
         self.check.check(config['instances'][0])
