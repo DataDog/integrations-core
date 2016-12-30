@@ -8,6 +8,7 @@ import unittest
 import xmlrpclib
 from socket import socket
 from nose.plugins.attrib import attr
+import time
 from time import sleep
 
 # 3p
@@ -26,6 +27,11 @@ instance = {
     'password': 'datadog-is-devops-best-friend'
 }
 
+if os.environ.get('INTEGRATIONS_DIR'):
+    socket_path = "unix://{0}/supervisor/supervisor.sock".format(os.environ['INTEGRATIONS_DIR'])
+else:
+    socket_path = "unix://{0}/supervisor/supervisor.sock".format(os.path.abspath('embedded'))
+
 
 @attr(requires='supervisord')
 class TestSupervisord(AgentCheckTest):
@@ -34,7 +40,8 @@ class TestSupervisord(AgentCheckTest):
 
     SUPERVISORD_CONFIG = [{
         'name': "travis",
-        'socket': "unix://{0}//supervisor.sock".format(os.environ['VOLATILE_DIR']),
+        'host': "localhost",
+        'port': '19001'
     }]
 
     BAD_SUPERVISORD_CONFIG = [{
@@ -42,6 +49,10 @@ class TestSupervisord(AgentCheckTest):
         'socket': "unix:///wrong/path/supervisor.sock",
         'host': "http://127.0.0.1",
     }]
+
+    def setUp(self):
+        server = xmlrpclib.Server('http://localhost:19001/RPC2')
+        server.supervisor.startAllProcesses()
 
     # Supervisord should run 3 programs for 10, 20 and 30 seconds
     # respectively.
@@ -103,6 +114,7 @@ class TestSupervisord(AgentCheckTest):
                                 tags=instance_tags, count=1)
         self.coverage_report()
 
+@attr(requires='supervisord')
 class TestSupervisordCheck(unittest.TestCase):
 
     TEST_CASES = [{
@@ -390,10 +402,16 @@ State: RUNNING
 Start time: 2014-11-01 04:16:28
 Stop time: \nExit Status: 0"""
 
-        check, _ = get_check('supervisord', self.TEST_CASES[0]['yaml'])
-        self.assertEquals(expected_message, check._build_message(process))
+
+        with patch('time.localtime',  self.mock_localtime):
+            check, _ = get_check('supervisord', self.TEST_CASES[0]['yaml'])
+            self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
+
+    @staticmethod
+    def mock_localtime(x):
+        return time.gmtime(x)
 
     @staticmethod
     def mock_server(url):
