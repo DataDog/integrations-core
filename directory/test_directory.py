@@ -4,7 +4,6 @@
 
 # stdlib
 from itertools import product
-from nose.plugins.attrib import attr
 import os
 import shutil
 import tempfile
@@ -13,7 +12,6 @@ import tempfile
 from shared.test.common import AgentCheckTest
 
 
-@attr(requires='directory')
 class DirectoryTestCase(AgentCheckTest):
     CHECK_NAME = 'directory'
 
