@@ -5,7 +5,6 @@
 # stdlib
 import contextlib
 import os
-from nose.plugins.attrib import attr
 
 # 3p
 from mock import patch, MagicMock
@@ -41,7 +40,6 @@ class MockProcess(object):
 def noop_get_pagefault_stats(pid):
     return None
 
-@attr(requires='process')
 class ProcessCheckTest(AgentCheckTest):
     CHECK_NAME = 'process'
 

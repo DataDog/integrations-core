@@ -51,7 +51,6 @@ test:
         - rake ci:run[redisdb]
         - rake ci:run[ssh]
         - rake ci:run[haproxy]
-        - rake ci:run[process]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
