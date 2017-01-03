@@ -8,20 +8,39 @@ def riak_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/riak_#{riak_version}"
 end
 
+container_name = 'dd-test-riak'
+resources_path = "#{ENV['TRAVIS_BUILD_DIR']}" + "/riak/ci/resources"
+
 namespace :ci do
   namespace :riak do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      sh %(docker rm -f #{container_name} 2>/dev/null || true)
+    end
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
       install_requirements('riak/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(bash riak/ci/start-docker.sh)
-      sleep_for 10
+      sh %(docker run -d --name #{container_name} -p 18098:8098 -v #{resources_path}:/etc/riak/ tutum/riak)
     end
 
     task before_script: ['ci:common:before_script'] do
+      count = 0
+      logs = `docker logs #{container_name} 2>&1`
+      puts "Waiting for Riak to come up"
+      until count == 20 or logs.include? "INFO success: riak entered RUNNING state"
+        sleep_for 2
+        logs = `docker logs #{container_name} 2>&1`
+        count += 1
+      end
+      if logs.include? "INFO success: riak entered RUNNING state"
+        puts "Riak is up!"
+      else
+        sh %(docker logs #{container_name} 2>&1)
+        raise
+      end
+      sleep_for 10
       10.times do
         sh %(curl -XPUT -H 'Content-Type: text/plain' -d 'herzlich willkommen' http://localhost:18098/riak/bucket/german)
         sh %(curl http://localhost:18098/riak/bucket/german)
@@ -38,7 +57,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash riak/ci/stop-docker.sh)
+      sh %(docker rm -f #{container_name} 2>/dev/null || true)
+      sh %(find #{resources_path}/ ! -name 'app.config' ! -name 'riak.conf' -type f -exec rm -f {} +)
     end
 
     task :execute do
