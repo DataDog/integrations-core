@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def apache_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '2.4.12'
 end
 
 def apache_rootdir
