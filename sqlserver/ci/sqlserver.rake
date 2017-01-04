@@ -18,7 +18,8 @@ namespace :ci do
       install_requirements('sqlserver/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} --name #{container_name} -d #{container_repo})
+
+      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
     end
 
     task before_script: ['ci:common:before_script']
@@ -33,8 +34,10 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker stop #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
-      sh %(docker rm #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
+      unless Gem.win_platform?
+        sh %(docker stop #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
+        sh %(docker rm #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
+      end
     end
 
     task :execute do

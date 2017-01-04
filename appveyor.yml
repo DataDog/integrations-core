@@ -51,6 +51,6 @@ build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - bundle exec rake ci:run[default]
-  - bundle exec rake ci:run[windows]
+  - bundle exec rake ci:run[sqlserver]
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

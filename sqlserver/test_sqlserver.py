@@ -79,6 +79,8 @@ EXPECTED_METRICS = [
 ]
 
 
+@attr('unix')
+@attr('fixme')
 @attr(requires='sqlserver')
 class TestSqlserverLinux(AgentCheckTest):
     """Basic Test for sqlserver integration."""
