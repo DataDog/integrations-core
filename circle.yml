@@ -4,7 +4,7 @@ machine:
     services:
         - docker
     environment:
-        NOSE_FILTER: 'not windows'
+        NOSE_FILTER: 'not windows and not fixme'
         VOLATILE_DIR: '/tmp/integration-sdk-testing'
         SKIP_CLEANUP: 'true'
         INTEGRATIONS_DIR: "$HOME/embedded"
