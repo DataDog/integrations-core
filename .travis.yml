@@ -78,7 +78,6 @@ install:
 
 script:
   - bundle exec rake prep_travis_ci
-  - bundle exec rake lint
   - bundle exec rake ci:run
   - bundle exec rake requirements
 
