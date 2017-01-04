@@ -15,7 +15,6 @@ from nose.plugins.attrib import attr
 
 # project
 from aggregator import MetricsAggregator
-from config import get_logging_config
 
 import logging
 
