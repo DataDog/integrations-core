@@ -70,24 +70,35 @@ namespace :ci do
     end
 
     task :execute do
-      exception = nil
-      begin
-        %w(before_install install before_script).each do |u|
-          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
-        end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
-        Rake::Task["#{flavor.scope.path}:before_cache"].invoke
-      rescue => e
-        exception = e
-        puts "Failed task: #{e.class} #{e.message}".red
-      end
-      if ENV['SKIP_CLEANUP']
-        puts 'Skipping cleanup, disposable environments are great'.yellow
+      if ENV['FLAVOR_VERSIONS']
+        flavor_versions = ENV['FLAVOR_VERSIONS'].split(',')
+      elsif ENV['FLAVOR_VERSION']
+        flavor_versions = [ENV['FLAVOR_VERSION']]
       else
-        puts 'Cleaning up'
-        Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+        flavor_versions = [nil]
       end
-      raise exception if exception
+
+      flavor_versions.each do |flavor_version|
+        ENV['FLAVOR_VERSION'] = flavor_version
+        exception = nil
+        begin
+          %w(before_install install before_script).each do |u|
+            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+          end
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+          Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+        rescue => e
+          exception = e
+          puts "Failed task: #{e.class} #{e.message}".red
+        end
+        if ENV['SKIP_CLEANUP']
+          puts 'Skipping cleanup, disposable environments are great'.yellow
+        else
+          puts 'Cleaning up'
+          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+        end
+        raise exception if exception
+      end
     end
   end
 end
