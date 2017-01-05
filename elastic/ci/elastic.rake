@@ -78,27 +78,27 @@ namespace :ci do
         flavor_versions = [nil]
       end
 
-      flavor_versions.each do |flavor_version|
-        ENV['FLAVOR_VERSION'] = flavor_version
-        exception = nil
-        begin
+      exception = nil
+      begin
+        flavor_versions.each do |flavor_version|
+          ENV['FLAVOR_VERSION'] = flavor_version
           %w(before_install install before_script).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end
           Rake::Task["#{flavor.scope.path}:script"].invoke
           Rake::Task["#{flavor.scope.path}:before_cache"].invoke
-        rescue => e
-          exception = e
-          puts "Failed task: #{e.class} #{e.message}".red
         end
-        if ENV['SKIP_CLEANUP']
-          puts 'Skipping cleanup, disposable environments are great'.yellow
-        else
-          puts 'Cleaning up'
-          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
-        end
-        raise exception if exception
+      rescue => e
+        exception = e
+        puts "Failed task: #{e.class} #{e.message}".red
       end
+      if ENV['SKIP_CLEANUP']
+        puts 'Skipping cleanup, disposable environments are great'.yellow
+      else
+        puts 'Cleaning up'
+        Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+      end
+      raise exception if exception
     end
   end
 end
