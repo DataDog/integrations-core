@@ -5,16 +5,20 @@ def supervisord_version
 end
 
 def supervisord_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/supervisord_#{supervisord_version}"
+  integrations_dir = ENV['INTEGRATIONS_DIR'] || 'embedded'
+  "#{integrations_dir}/supervisord"
 end
+
+container_name='dd-test-supervisord'
+container_port=19001
 
 namespace :ci do
   namespace :supervisord do |flavor|
     task before_install: ['ci:common:before_install'] do
-      unless Dir.exist? File.expand_path(supervisord_rootdir)
-        sh %(pip install supervisor==#{supervisord_version} --ignore-installed\
-             --install-option="--prefix=#{supervisord_rootdir}")
-      end
+      sh %(rm -rf #{supervisord_rootdir} || true)
+      sh %(mkdir -p #{supervisord_rootdir} || true)
+      sh %(docker kill #{container_name} 2>/dev/null || true)
+      sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
     task install: ['ci:common:install'] do
@@ -22,25 +26,12 @@ namespace :ci do
       install_requirements('supervisord/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      sh %(docker run -d --name #{container_name} -p #{container_port}:#{container_port} -v #{supervisord_rootdir}:/supervisor datadog/docker-library:supervisord_3_3_0)
     end
 
     task before_script: ['ci:common:before_script'] do
-      sh %(mkdir -p $VOLATILE_DIR/supervisor)
-      sh %(cp supervisord/ci/resources/supervisord.conf $VOLATILE_DIR/supervisor/)
-      sh %(sed -i -- 's/VOLATILE_DIR/#{ENV['VOLATILE_DIR'].gsub '/', '\/'}/g'\
-         $VOLATILE_DIR/supervisor/supervisord.conf)
-
-      3.times do |i|
-        sh %(cp supervisord/ci/resources/program_#{i}.sh $VOLATILE_DIR/supervisor/)
-      end
-      sh %(chmod a+x $VOLATILE_DIR/supervisor/program_*.sh)
-
-      sh %(#{supervisord_rootdir}/bin/supervisord\
-           -c $VOLATILE_DIR/supervisor/supervisord.conf)
-      3.times { |i| Wait.for "#{ENV['VOLATILE_DIR']}/supervisor/started_#{i}" }
-      # And we still have to sleep a little, because sometimes supervisor
-      # doesn't immediately realize that its processes are running
-      sleep_for 1
+      # we need to make sure that supervisor is running an the rpc port is up
+      Wait.for 19001
     end
 
     task script: ['ci:common:script'] do
@@ -53,8 +44,9 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(kill `cat $VOLATILE_DIR/supervisor/supervisord.pid`)
-      sh %(rm -rf $VOLATILE_DIR/supervisor)
+      sh %(docker kill #{container_name} 2>/dev/null || true)
+      sh %(docker rm #{container_name} 2>/dev/null || true)
+      sh %(rm -rf #{supervisord_rootdir})
     end
 
     task :execute do
