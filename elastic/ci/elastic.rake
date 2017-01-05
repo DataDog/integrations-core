@@ -24,6 +24,9 @@ namespace :ci do
       install_requirements('elastic/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    end
+
+    task docker_setup: do |t|
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = "datadog/docker-library:elasticsearch_" + elastic_version.split('.')[0..1].join('_')
@@ -65,8 +68,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      # sh %(docker kill #{container_name} 2>/dev/null || true)
-      # sh %(docker rm #{container_name} 2>/dev/null || true)
+      sh %(docker kill #{container_name} 2>/dev/null || true)
+      sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
     task :execute do
@@ -80,13 +83,27 @@ namespace :ci do
 
       exception = nil
       begin
+        %w(before_install install).each do |u|
+          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+        end
         flavor_versions.each do |flavor_version|
+          puts flavor_version
           ENV['FLAVOR_VERSION'] = flavor_version
-          %w(before_install install before_script).each do |u|
+          %w(docker_setup before_script cleanup).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end
           Rake::Task["#{flavor.scope.path}:script"].invoke
           Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+          puts 'Cleaning up'
+          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+          if flavor_version != flavor_versions.last
+            %w(before_install install before_script cleanup).each do |u|
+              Rake::Task["#{flavor.scope.path}:#{u}"].reenable
+            end
+            Rake::Task["#{flavor.scope.path}:script"].reenable
+            Rake::Task["#{flavor.scope.path}:before_cache"].reenable
+            Rake::Task["#{flavor.scope.path}:cleanup"].reenable
+          end
         end
       rescue => e
         exception = e
