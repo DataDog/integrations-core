@@ -27,6 +27,7 @@ namespace :ci do
     end
 
     task :docker_setup do |t|
+      section('DOCKER_SETUP')
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = "datadog/docker-library:elasticsearch_" + elastic_version.split('.')[0..1].join('_')
