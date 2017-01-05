@@ -14,20 +14,22 @@ container_port2 = 9300
 
 namespace :ci do
   namespace :elastic do |flavor|
-    task before_install: ['ci:common:before_install'] do
+    task before_install: ['ci:common:before_install'] do |t|
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
+      t.reenable
     end
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('elastic/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
     end
 
-    task :docker_setup do |t|
-      section('DOCKER_SETUP')
+    task :install_infrastructure do |t|
+      section('INSTALL_INFRASTRUCTURE')
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = "datadog/docker-library:elasticsearch_" + elastic_version.split('.')[0..1].join('_')
@@ -51,27 +53,30 @@ namespace :ci do
       t.reenable
     end
 
-    task before_script: ['ci:common:before_script'] do
+    task before_script: ['ci:common:before_script'] do |t|
       sh %(docker logs #{container_name})
       Wait.for 'http://localhost:9200', 20
       sh %(docker logs #{container_name})
       # Create an index in ES
       http = Net::HTTP.new('localhost', 9200)
       resp = http.send_request('PUT', '/datadog/')
+      t.reenable
     end
 
-    task script: ['ci:common:script'] do
+    task script: ['ci:common:script'] do |t|
       this_provides = [
         'elastic'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
+      t.reenable
     end
 
     task :execute do
@@ -91,21 +96,12 @@ namespace :ci do
         flavor_versions.each do |flavor_version|
           puts flavor_version
           ENV['FLAVOR_VERSION'] = flavor_version
-          %w(docker_setup before_script).each do |u|
+          %w(install_infrastructure before_script).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end
           Rake::Task["#{flavor.scope.path}:script"].invoke
           Rake::Task["#{flavor.scope.path}:before_cache"].invoke
-          puts 'Cleaning up'
           Rake::Task["#{flavor.scope.path}:cleanup"].invoke
-          if flavor_version != flavor_versions.last
-            %w(docker_setup before_script).each do |u|
-              Rake::Task["#{flavor.scope.path}:#{u}"].reenable
-            end
-            Rake::Task["#{flavor.scope.path}:script"].reenable
-            Rake::Task["#{flavor.scope.path}:before_cache"].reenable
-            Rake::Task["#{flavor.scope.path}:cleanup"].reenable
-          end
         end
       rescue => e
         exception = e
