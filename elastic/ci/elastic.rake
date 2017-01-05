@@ -26,7 +26,7 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
     end
 
-    task docker_setup: do |t|
+    task :docker_setup do |t|
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = "datadog/docker-library:elasticsearch_" + elastic_version.split('.')[0..1].join('_')
