@@ -47,6 +47,7 @@ namespace :ci do
       else
         ENV['DD_ELASTIC_LOCAL_HOSTNAME'] = `docker inspect dd-test-elastic | grep IPAddress`[/([0-9\.]+)/]
       end
+      t.reenable
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -97,7 +98,7 @@ namespace :ci do
           puts 'Cleaning up'
           Rake::Task["#{flavor.scope.path}:cleanup"].invoke
           if flavor_version != flavor_versions.last
-            %w(before_install install before_script).each do |u|
+            %w(docker_setup before_script).each do |u|
               Rake::Task["#{flavor.scope.path}:#{u}"].reenable
             end
             Rake::Task["#{flavor.scope.path}:script"].reenable
