@@ -1,0 +1,32 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+couchdb.by_db.disk_size,gauge,,byte,,Disk size per database,0,couchdb,disk size
+couchdb.by_db.doc_count,gauge,,document,,Document count per database,0,couchdb,docs
+couchdb.httpd.requests,gauge,,request,,Number of HTTP requests,0,couchdb,reqs
+couchdb.httpd.view_reads,gauge,,read,,Number of view reads,0,couchdb,view reads
+couchdb.couchdb.auth_cache_hits,gauge,,hit,,Number of authentication cache hits,1,couchdb,auth hits
+couchdb.couchdb.auth_cache_misses,gauge,,miss,,Number of authentication cache misses,-1,couchdb,auth misses
+couchdb.couchdb.database_reads,gauge,,read,,Number of times a document was read from a database,0,couchdb,reads
+couchdb.couchdb.database_writes,gauge,,write,,Number of times a document was changed,0,couchdb,writes
+couchdb.couchdb.open_databases,gauge,,item,,Number of open databases,0,couchdb,open dbs
+couchdb.couchdb.open_os_files,gauge,,file,,Number of file descriptors CouchDB has open,0,couchdb,fds
+couchdb.couchdb.request_time,gauge,,second,,Length of a request inside CouchDB without MochiWeb,0,couchdb,req time
+couchdb.httpd.bulk_requests,gauge,,request,,Number of bulk requests,0,couchdb,bulk reqs
+couchdb.httpd.clients_requesting_changes,gauge,,connection,,Number of clients requesting a change,0,couchdb,http cli req changes
+couchdb.httpd_request_methods.DELETE,gauge,,request,,Number of HTTP DELETE requests,0,couchdb,DELETEs
+couchdb.httpd_request_methods.GET,gauge,,request,,Number of HTTP GET requests,0,couchdb,GETs
+couchdb.httpd_request_methods.HEAD,gauge,,request,,Number of HTTP HEAD requests,0,couchdb,HEADs
+couchdb.httpd_request_methods.POST,gauge,,request,,Number of HTTP POST requests,0,couchdb,POSTs
+couchdb.httpd_request_methods.PUT,gauge,,request,,Number of HTTP PUT requests,0,couchdb,PUTs
+couchdb.httpd_status_codes.200,gauge,,request,,Number of HTTP 200 OK responses,0,couchdb,200s
+couchdb.httpd_status_codes.201,gauge,,request,,Number of HTTP 201 Created responses,0,couchdb,201s
+couchdb.httpd_status_codes.202,gauge,,request,,Number of HTTP 202 Accepted responses,0,couchdb,202s
+couchdb.httpd_status_codes.301,gauge,,request,,Number of HTTP 301 Moved Permanently responses,0,couchdb,301s
+couchdb.httpd_status_codes.304,gauge,,request,,Number of HTTP 304 Not Modified responses,0,couchdb,304s
+couchdb.httpd_status_codes.400,gauge,,request,,Number of HTTP 400 Bad Request responses,0,couchdb,400s
+couchdb.httpd_status_codes.401,gauge,,request,,Number of HTTP 401 Unauthorized responses,0,couchdb,401s
+couchdb.httpd_status_codes.403,gauge,,request,,Number of HTTP 403 Forbidden responses,0,couchdb,403s
+couchdb.httpd_status_codes.404,gauge,,request,,Number of HTTP 404 Not Found responses,0,couchdb,404s
+couchdb.httpd_status_codes.405,gauge,,request,,Number of HTTP 405 Method Not Allowed responses,0,couchdb,405s
+couchdb.httpd_status_codes.409,gauge,,request,,Number of HTTP 409 Conflict responses,0,couchdb,409s
+couchdb.httpd_status_codes.412,gauge,,request,,Number of HTTP 412 Precondition Failed responses,0,couchdb,412s
+couchdb.httpd_status_codes.500,gauge,,request,,Number of HTTP 500 Internal Server Error responses,0,couchdb,500s
