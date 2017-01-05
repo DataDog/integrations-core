@@ -307,7 +307,7 @@ CLUSTER_PENDING_TASKS = {
 def get_es_version():
     version = os.environ.get("FLAVOR_VERSION")
     if version is None:
-        return [1, 6, 0]
+        return [0, 90, 13]
     return [int(k) for k in version.split(".")]
 
 

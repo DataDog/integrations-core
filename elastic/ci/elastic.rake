@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def elastic_version
-  ENV['FLAVOR_VERSION'] || '1.3.9'
+  ENV['FLAVOR_VERSION'] || '0.90.13'
 end
 
 def elastic_rootdir
@@ -89,7 +89,7 @@ namespace :ci do
         flavor_versions.each do |flavor_version|
           puts flavor_version
           ENV['FLAVOR_VERSION'] = flavor_version
-          %w(docker_setup before_script cleanup).each do |u|
+          %w(docker_setup before_script).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end
           Rake::Task["#{flavor.scope.path}:script"].invoke
@@ -97,7 +97,7 @@ namespace :ci do
           puts 'Cleaning up'
           Rake::Task["#{flavor.scope.path}:cleanup"].invoke
           if flavor_version != flavor_versions.last
-            %w(before_install install before_script cleanup).each do |u|
+            %w(before_install install before_script).each do |u|
               Rake::Task["#{flavor.scope.path}:#{u}"].reenable
             end
             Rake::Task["#{flavor.scope.path}:script"].reenable
