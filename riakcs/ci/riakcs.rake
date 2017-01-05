@@ -4,10 +4,6 @@ def riakcs_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def riakcs_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/riakcs_#{riakcs_version}"
-end
-
 namespace :ci do
   namespace :riakcs do |flavor|
     task before_install: ['ci:common:before_install']
@@ -17,9 +13,6 @@ namespace :ci do
       install_requirements('riakcs/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      # sample docker usage
-      # sh %(docker create -p XXX:YYY --name riakcs source/riakcs:riakcs_version)
-      # sh %(docker start riakcs)
     end
 
     task before_script: ['ci:common:before_script']
@@ -34,11 +27,6 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop riakcs)
-    #   sh %(docker rm riakcs)
-    # end
 
     task :execute do
       exception = nil
