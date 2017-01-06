@@ -1,9 +1,5 @@
 require 'ci/common'
 
-def snmp_version
-  ENV['FLAVOR_VERSION'] || 'latest'
-end
-
 container_name = "dd-test-snmp"
 resources_path = "#{ENV['TRAVIS_BUILD_DIR']}" + "/snmp/ci/resources"
 
