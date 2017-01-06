@@ -7,9 +7,6 @@ from nose.plugins.attrib import attr
 import copy
 import time
 
-# 3rd party
-from nose.plugins.attrib import attr
-
 # agent
 from checks import AgentCheck
 from checks.metric_types import MetricTypes
