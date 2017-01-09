@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "spark",
-  "short_description": "spark description.",
-  "support": "contrib",
+  "short_description": "Apache Spark is an open source cluster computing framework.",
+  "support": "core",
   "version": "0.1.0"
 }
