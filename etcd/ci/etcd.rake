@@ -20,13 +20,13 @@ namespace :ci do
       install_requirements('etcd/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker create --expose 4001 --expose 2379 -p 4001:4001 -p 2379:2379 --name dd-test-etcd quay.io/coreos/etcd:v2.0.5 -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001)
+      sh %(docker create --expose 2379 -p 2379:2379 --name dd-test-etcd quay.io/coreos/etcd:v2.0.5 -listen-client-urls http://0.0.0.0:2379)
       sh %(docker start dd-test-etcd)
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for 'http://localhost:4001/v2/stats/self'
-      Wait.for 'http://localhost:4001/v2/stats/store'
+      Wait.for 'http://localhost:2379/v2/stats/self'
+      Wait.for 'http://localhost:2379/v2/stats/store'
       10.times do
         sh %(curl -s http://127.0.0.1:2379/v2/keys/message\
              -XPUT -d value="Hello world" >/dev/null)

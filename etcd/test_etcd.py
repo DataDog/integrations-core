@@ -34,12 +34,12 @@ class CheckEtcdTest(AgentCheckTest):
 
     def __init__(self, *args, **kwargs):
         AgentCheckTest.__init__(self, *args, **kwargs)
-        self.config = {"instances": [{"url": "http://localhost:4001"}]}
+        self.config = {"instances": [{"url": "http://localhost:2379"}]}
 
     def test_metrics(self):
         self.run_check_twice(self.config)
 
-        tags = ['url:http://localhost:4001', 'etcd_state:leader']
+        tags = ['url:http://localhost:2379', 'etcd_state:leader']
 
         for mname in self.STORE_METRICS:
             self.assertMetric('etcd.store.%s' % mname, tags=tags, count=1)
@@ -49,7 +49,7 @@ class CheckEtcdTest(AgentCheckTest):
 
         self.assertServiceCheckOK(self.check.SERVICE_CHECK_NAME,
                                   count=1,
-                                  tags=['url:http://localhost:4001'])
+                                  tags=['url:http://localhost:2379'])
         self.coverage_report()
 
 
@@ -94,7 +94,7 @@ class CheckEtcdTest(AgentCheckTest):
 
         self.run_check_twice(self.config, mocks=mocks)
 
-        common_leader_tags = ['url:http://localhost:4001', 'etcd_state:leader']
+        common_leader_tags = ['url:http://localhost:2379', 'etcd_state:leader']
         follower_tags = [
             common_leader_tags[:] + ['follower:etcd-node1'],
             common_leader_tags[:] + ['follower:etcd-node3'],
@@ -111,10 +111,10 @@ class CheckEtcdTest(AgentCheckTest):
 
     def test_bad_config(self):
         self.assertRaises(Exception,
-                          lambda: self.run_check({"instances": [{"url": "http://localhost:4001/test"}]}))
+                          lambda: self.run_check({"instances": [{"url": "http://localhost:2379/test"}]}))
 
         self.assertServiceCheckCritical(self.check.SERVICE_CHECK_NAME,
                                         count=1,
-                                        tags=['url:http://localhost:4001/test/v2/stats/self'])
+                                        tags=['url:http://localhost:2379/test/v2/stats/self'])
 
         self.coverage_report()
