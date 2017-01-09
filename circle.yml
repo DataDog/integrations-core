@@ -60,6 +60,7 @@ test:
         - rake ci:run[elastic]
         - rake ci:run[snmp]
         - rake ci:run[etcd]
+        - rake ci:run[gunicorn]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
