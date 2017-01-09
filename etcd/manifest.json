@@ -1,0 +1,10 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.6.3",
+  "name": "etcd",
+  "short_description": "etcd is a distributed reliable key-value store.",
+  "support": "core",
+  "version": "0.1.0"
+}
