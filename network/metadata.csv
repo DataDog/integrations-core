@@ -1,0 +1,22 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+system.net.bytes_rcvd,gauge,,byte,second,The number of bytes received on a device per second.,0,system,bytes rcvd
+system.net.bytes_sent,gauge,,byte,second,The number of bytes sent from a device per second.,0,system,bytes sent
+system.net.packets_in.count,gauge,,packet,second,The number of packets of data received by the interface.,0,system,packets in
+system.net.packets_in.error,gauge,,error,second,The number of packet receive errors detected by the device driver.,-1,system,pkts in err
+system.net.packets_out.count,gauge,,packet,second,The number of packets of data transmitted by the interface.,0,system,packets out
+system.net.packets_out.error,gauge,,error,second,The number of packet transmit errors detected by the device driver.,-1,system,pkts out err
+system.net.tcp.in_segs,gauge,,segment,second,The number of TCP segments received.,0,system,segs in
+system.net.tcp.out_segs,gauge,,segment,second,The number of TCP segments transmitted.,0,system,segs out
+system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received.,0,system,pkts rcvd
+system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted.,0,system,pkts retrans
+system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted.,0,system,segs retrans
+system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted.,0,system,pkts sent
+system.net.tcp.rtt,gauge,10,millisecond,,The TCP round trip time.,-1,system,tcp rtt
+system.net.tcp.rtt.avg,gauge,10,millisecond,,The average TCP round trip time as typically computed by the TCP stack.,-1,system,tcp rtt avg
+system.net.tcp.rtt.jitter,gauge,10,millisecond,,The TCP round trip time jitter.,-1,system,tcp rtt jitter
+system.net.udp.in_datagrams,gauge,,datagram,second,"The rate of UDP datagrams delivered to UDP users.",0,system,udp in datagrams
+system.net.udp.in_errors,gauge,,datagram,second,"The rate of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.",-1,system,udp in errors
+system.net.udp.no_ports,gauge,,datagram,second,"The rate of received UDP datagrams for which there was no application at the destination port.",-1,system,udp no_ports
+system.net.udp.out_datagrams,gauge,,datagram,second,"The rate of UDP datagrams sent from this entity.",0,system,udp out datagrams
+system.net.udp.rcv_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the receive buffer.,-1,system,udp rcv buf errs
+system.net.udp.snd_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the send buffer.,-1,system,udp snd buf errs
