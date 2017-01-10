@@ -11,7 +11,7 @@ import os
 import mock
 
 # project
-from shared.test.common import AgentCheckTest, Fixtures
+from shared.test.common import AgentCheckTest
 
 log = logging.getLogger()
 
@@ -41,10 +41,10 @@ ts = int(time.time())
 MOCK_FETCH = ((ts - 300, ts, 300), ('mem_buffers',), [(2048,), (None,)])
 
 MOCK_RRD_META = [('localhost', None, '/var/lib/cacti/rra/localhost_mem_buffers_3.rrd'),
-('localhost', None, '/var/lib/cacti/rra/localhost_mem_swap_4.rrd'),
-('localhost', None, '/var/lib/cacti/rra/localhost_load_1min_5.rrd'),
-('localhost', None, '/var/lib/cacti/rra/localhost_users_6.rrd'),
-('localhost', None, '/var/lib/cacti/rra/localhost_proc_7.rrd')]
+    ('localhost', None, '/var/lib/cacti/rra/localhost_mem_swap_4.rrd'),
+    ('localhost', None, '/var/lib/cacti/rra/localhost_load_1min_5.rrd'),
+    ('localhost', None, '/var/lib/cacti/rra/localhost_users_6.rrd'),
+    ('localhost', None, '/var/lib/cacti/rra/localhost_proc_7.rrd')]
 
 class TestCacti(AgentCheckTest):
     CHECK_NAME = 'cacti'
