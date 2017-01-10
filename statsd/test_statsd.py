@@ -8,13 +8,31 @@ from nose.plugins.attrib import attr
 # 3p
 
 # project
-from shared.test.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest
 
 
 instance = {
-    'host': 'localhost',
+    'host': '127.0.0.1',
     'port': 8126,
 }
+
+METRICS = [
+    'statsd.graphite.flush_length',
+    'statsd.messages.last_msg_seen',
+    'statsd.counters.count',
+    'statsd.graphite.last_exception',
+    'statsd.gauges.count',
+    'statsd.messages.bad_lines_seen',
+    'statsd.graphite.flush_time',
+    'statsd.graphite.last_flush',
+    'statsd.uptime',
+    'statsd.timers.count'
+]
+
+SERVICE_CHECKS = [
+    'statsd.is_up',
+    'statsd.can_connect'
+]
 
 # NOTE: Feel free to declare multiple test classes if needed
 @attr(requires='statsd')
@@ -28,6 +46,14 @@ class TestStatsd(AgentCheckTest):
         """
         Testing Statsd check.
         """
-        self.run_check(instance)
-        # There shouldn't be any metrics collected in a simple run.
+        config = {
+            "instances": [instance]
+        }
+        self.run_check(config)
+        for stat in METRICS:
+            self.assertMetric(stat, at_least=0)
+
+        for check in SERVICE_CHECKS:
+            self.assertServiceCheck(check)
+
         self.coverage_report()

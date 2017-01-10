@@ -24,7 +24,11 @@ namespace :ci do
       sleep 5
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      20.times do
+        sh %(echo "foo:1|c" | nc -u -w 1 127.0.0.1 8125)
+      end
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
