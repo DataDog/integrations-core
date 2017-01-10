@@ -123,7 +123,7 @@ class Cacti(AgentCheck):
     def _read_rrd(self, rrd_path, hostname, device_name):
         ''' Main metric fetching method '''
         metric_count = 0
-        
+
         try:
             info = self._get_rrd_info(rrd_path)
         except Exception:
