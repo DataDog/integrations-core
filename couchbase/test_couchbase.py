@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-from nose.plugins.attrib import attr
 from types import ListType
 from nose.plugins.skip import SkipTest
 
