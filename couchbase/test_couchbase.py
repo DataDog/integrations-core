@@ -12,7 +12,7 @@ from checks import AgentCheck
 from tests.checks.common import load_check
 from tests.checks.common import AgentCheckTest
 
-@attr(requires='couchbase')
+
 class TestCouchbase(AgentCheckTest):
     """Basic Test for couchbase integration."""
     CHECK_NAME = 'couchbase'
