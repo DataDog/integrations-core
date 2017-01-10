@@ -4,7 +4,6 @@
 
 # stdlib
 from urlparse import urljoin
-from nose.plugins.attrib import attr
 
 # 3rd party
 import mock
@@ -52,7 +51,7 @@ def requests_get_mock(*args, **kwargs):
             body = f.read()
             return MockResponse(body, 200)
 
-@attr(requires='yarn')
+
 class YARNCheck(AgentCheckTest):
     CHECK_NAME = 'yarn'
 
