@@ -1,1 +1,10 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+marathon.apps,gauge,,,,Number of defined apps,0,marathon,apps
+marathon.backoffFactor,gauge,,,,Backoff time multiplication factor for each consecutive failed task launch,0,marathon,backoff factor
+marathon.backoffSeconds,gauge,,second,,Task backoff period,0,marathon,backoff
+marathon.cpus,gauge,,,,Number of CPU's this application needs per instance,0,marathon,cpus
+marathon.disk,gauge,,mebibyte,,Disk that is needed for the application,0,marathon,disk
+marathon.instances,gauge,,,,Number of instances of this application to start,0,marathon,instances
+marathon.mem,gauge,,mebibyte,,Memory that is needed for the application per instance,0,marathon,mem
+marathon.tasksRunning,gauge,,task,,Number of tasks running,0,marathon,tasks running
+marathon.tasksStaged,gauge,,task,,Number of tasks staged to run,0,marathon,tasks staged
