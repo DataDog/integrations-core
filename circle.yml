@@ -65,6 +65,7 @@ test:
         - rake ci:run[lighttpd]
         - rake ci:run[statsd]
         - rake ci:run[solr]
+        - rake ci:run[powerdns_recursor]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
