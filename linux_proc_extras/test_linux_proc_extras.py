@@ -52,7 +52,7 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
             self.check.get_stat_info()
             self.check.get_stat_info()
 
-        with patch('check.get_subprocess_output', return_value=(Fixtures.read_file('process_stats'), "", 0)):
+        with patch('_linux_proc_extras.get_subprocess_output', return_value=(Fixtures.read_file('process_stats'), "", 0)):
             self.check.get_process_states()
 
         self.metrics = self.check.get_metrics()
