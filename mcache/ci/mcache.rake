@@ -1,18 +1,18 @@
 require 'ci/common'
 
-def memcache_version
+def mcache_version
   ENV['FLAVOR_VERSION'] || '1.4.22'
 end
 
-def memcache_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/memcache_#{memcache_version}"
+def mcache_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/mcache_#{mcache_version}"
 end
 
-container_name = 'dd-test-memcache'
+container_name = 'dd-test-mcache'
 container_port = 11212
 
 namespace :ci do
-  namespace :memcache do |flavor|
+  namespace :mcache do |flavor|
     task before_install: ['ci:common:before_install'] do
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
@@ -20,20 +20,20 @@ namespace :ci do
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
-      install_requirements('memcache/requirements.txt',
+      install_requirements('mcache/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d --name #{container_name} -p #{container_port}:11211 memcached:#{memcache_version})
+      sh %(docker run -d --name #{container_name} -p #{container_port}:11211 memcached:#{mcache_version})
 
-      memcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
+      mcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
       count = 0
-      until count == 20 || memcache_response.include?("loop: (timeout: 1) (elapsed:")
+      until count == 20 || mcache_response.include?("loop: (timeout: 1) (elapsed:")
         sleep_for 2
-        memcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
+        mcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
         count += 1
       end
-      if memcache_response.include?("loop: (timeout: 1) (elapsed:")
-        p "memcache is up!"
+      if mcache_response.include?("loop: (timeout: 1) (elapsed:")
+        p "mcache is up!"
       else
         print "Raw Memcache Stats for debugging:"
         sh %(mkdir -p embedded)
@@ -41,7 +41,7 @@ namespace :ci do
         sh %(./embedded/cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib))
         sh %(./embedded/cpanm --local-lib=~/perl5 Cache::Memcached)
         sh %(perl -I ~/perl5/lib/perl5/ -MCache::Memcached -MData::Dumper=Dumper -le  'print Dumper(Cache::Memcached->new(  servers => ["localhost:11212"])->stats);')
-        raise "memcache failed to come up!"
+        raise "mcache failed to come up!"
       end
     end
 
@@ -57,7 +57,7 @@ namespace :ci do
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'memcache'
+        'mcache'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
