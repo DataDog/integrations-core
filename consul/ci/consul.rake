@@ -1,16 +1,25 @@
 require 'ci/common'
 
 def consul_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '0.7.2'
 end
 
 def consul_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/consul_#{consul_version}"
 end
 
+container_name = 'dd-test-consul'
+
+container_name_1 = 'dd-test-consul-1'
+container_name_2 = 'dd-test-consul-2'
+container_name_3 = 'dd-test-consul-3'
+
 namespace :ci do
   namespace :consul do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+    end
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
@@ -18,8 +27,13 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name consul source/consul:consul_version)
-      # sh %(docker start consul)
+      sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
+      Wait.for 8500
+      wait_on_docker_logs(container_name_1, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
+
+      consul_first_ip = `docker inspect #{container_name_1} | grep '"IPAddress"'`[/([0-9\.]+)/]
+      sh %(docker run -d --expose 8301 --name #{container_name_2} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
+      sh %(docker run -d --expose 8301 --name #{container_name_3} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
     end
 
     task before_script: ['ci:common:before_script']
@@ -33,12 +47,10 @@ namespace :ci do
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop consul)
-    #   sh %(docker rm consul)
-    # end
+    task cleanup: ['ci:common:cleanup'] do
+      # sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      # sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+    end
 
     task :execute do
       exception = nil

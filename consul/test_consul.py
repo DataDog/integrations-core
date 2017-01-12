@@ -4,6 +4,9 @@
 
 import random
 
+# 3p
+from nose.plugins.attrib import attr
+
 from tests.checks.common import AgentCheckTest, load_check
 from utils.containers import hash_mutable
 
@@ -69,6 +72,7 @@ def _get_random_ip():
     rand_int = int(15 * random.random()) + 10
     return "10.0.2.{0}".format(rand_int)
 
+@attr(requires='consul')
 class TestCheckConsul(AgentCheckTest):
     CHECK_NAME = 'consul'
 
@@ -544,3 +548,49 @@ class TestCheckConsul(AgentCheckTest):
         node = [m for m in latency if '.node.latency.' in m[0]]
         self.assertEquals(16, len(node))
         self.assertEquals(0.26577747932995816, node[0][2])
+
+@attr(requires='consul')
+class TestIntegrationConsul(AgentCheckTest):
+    """Basic Test for consul integration."""
+    CHECK_NAME = 'statsd'
+
+    METRICS = [
+        'consul.catalog.nodes_up',
+        'consul.catalog.nodes_passing',
+        'consul.catalog.nodes_warning',
+        'consul.catalog.nodes_critical',
+        'consul.catalog.services_up',
+        'consul.catalog.services_passing',
+        'consul.catalog.services_warning',
+        'consul.catalog.services_critical'
+    ]
+
+    def simple_integration_test(self):
+        """
+        Testing Consul Integration
+        """
+
+        config = {
+            "instances": [{
+                'url': 'http://localhost:8500',
+                'catalog_checks': True,
+                'network_latency_checks': True,
+                'new_leader_checks': True,
+                'catalog_checks': True,
+                'self_leader_check': True
+            }]
+        }
+
+        self.run_check(config)
+
+        self.check.log.info(self.metrics)
+
+        for m in self.METRICS:
+            self.assertMetric(m)
+
+        self.assertMetric('consul.peers', value=3)
+
+        self.assertServiceCheck('consul.check')
+        self.assertServiceCheck('consul.up')
+
+        self.coverage_report()
