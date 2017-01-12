@@ -16,8 +16,8 @@ def activemq_rootdir
 end
 
 container_name = 'dd-test-activemq'
-container_port1 = 8161
-container_port2 = 61616
+admin_port = 8161
+listen_port = 61616
 
 namespace :ci do
   namespace :activemq do |flavor|
@@ -43,8 +43,8 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
 
       sh %(docker run -d \
-        -p #{container_port1}:#{container_port1} \
-        -p #{container_port2}:#{container_port2} \
+        -p #{admin_port}:#{admin_port} \
+        -p #{listen_port}:#{listen_port} \
         --name #{container_name} \
         -v #{activemq_rootdir}/data:/var/activemq/data \
         -e ACTIVEMQ_DATA=/var/activemq/data \
