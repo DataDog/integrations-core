@@ -1,0 +1,18 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+vsphere.cpu.extra,gauge,,millisecond,,Milliseconds of extra CPU time.,-1,vsphere,cpu extra
+vsphere.cpu.ready,gauge,,millisecond,,Milliseconds of CPU time spent in ready state.,-1,vsphere,cpu ready
+vsphere.cpu.usage,gauge,,percent,,Percentage of CPU capacity being used.,-1,vsphere,cpu usage
+vsphere.cpu.usagemhz,gauge,,megahertz,,Total megehertz of CPU being used.,-1,vsphere,cpu usagemhz
+vsphere.disk.commandsAborted,gauge,,occurrence,,Number of SCSI commands aborted.,-1,vsphere,disk cmd abort
+vsphere.disk.deviceLatency,gauge,,millisecond,,Average amount of time it takes to complete an SCSI command from physical device.,-1,vsphere,disk dev lat
+vsphere.disk.deviceReadLatency,gauge,,millisecond,,Average amount of time it takes to complete read from physical device.,-1,vsphere,disk dev read lat
+vsphere.disk.deviceWriteLatency,gauge,,millisecond,,Average amount of time it takes to complete write to the physical device (LUN).,-1,vsphere,disk dev write lat
+vsphere.disk.queueLatency,gauge,,millisecond,,Average amount of time spent in VMkernel queue (per SCSI command).,-1,vsphere,disk queue lat
+vsphere.disk.totalLatency,gauge,,millisecond,,Sum of average amount of time (in kernel and device) to process an SCSI command issued by the Guest OS to the vm.,-1,vsphere,disk total lat
+vsphere.mem.active,gauge,,kibibyte,,Kilobytes of memory that the VMkernel estimates is being actively used based on recently touched memory pages.,-1,vsphere,mem active
+vsphere.mem.compressed,gauge,,kibibyte,,Kilobytes of memory that have been compressed.,-1,vsphere,mem compressed
+vsphere.mem.consumed,gauge,,kibibyte,,Kilobytes of used memory.,-1,vsphere,mem consumed
+vsphere.mem.overhead,gauge,,kibibyte,,Kilobytes of memory allocated to a vm beyond its reserved amount.,-1,vsphere,mem overhead
+vsphere.mem.vmmemctl,gauge,,kibibyte,,Kilobytes of memory allocated by the virtual machine memory control driver (vmmemctl).,-1,vsphere,mem vmmemctl
+vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host.,-1,vsphere,net rx
+vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host.,-1,vsphere,net tx
