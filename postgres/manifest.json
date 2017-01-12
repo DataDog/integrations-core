@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "postgres",
-  "short_description": "postgres description.",
-  "support": "contrib",
+  "short_description": "PostgreSQL is an open-source, free object-relational database management system available on many platforms.",
+  "support": "core",
   "version": "0.1.0"
 }
