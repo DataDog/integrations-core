@@ -67,6 +67,7 @@ test:
         - rake ci:run[solr]
         - rake ci:run[powerdns_recursor]
         - rake ci:run[kyototycoon]
+        - rake ci:run[activemq]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
