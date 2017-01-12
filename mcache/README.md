@@ -2,10 +2,10 @@
 
 ## Overview
 
-Get metrics from mcache service in real time to:
+Get metrics from memcache service in real time to:
 
-* Visualize and monitor mcache states
-* Be notified about mcache failovers and events.
+* Visualize and monitor memcache states
+* Be notified about memcache failovers and events.
 
 ## Installation
 
