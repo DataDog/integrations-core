@@ -7,8 +7,6 @@ python:
 branches:
   only:
     - master
-    - /jaime.*/  # for now - whitelisting
-    - /tristan.*/ # for now - whitelisting
 
 services:
   - docker
