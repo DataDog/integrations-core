@@ -104,7 +104,7 @@ SERVICE_CHECK = 'memcache.can_connect'
 
 PORT = 11212
 
-@attr(requires='memcache')
+@attr(requires='mcache')
 class TestMemCache(AgentCheckTest):
 
     CHECK_NAME = "mcache"
