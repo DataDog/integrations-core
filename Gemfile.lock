@@ -1,0 +1,41 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.5.0)
+      public_suffix (~> 2.0, >= 2.0.2)
+    ast (2.3.0)
+    colorize (0.8.1)
+    datadog-sdk-testing (0.3.3)
+    httparty (0.14.0)
+      multi_xml (>= 0.5.2)
+    multi_xml (0.6.0)
+    parser (2.3.3.1)
+      ast (~> 2.2)
+    powerpack (0.1.1)
+    public_suffix (2.0.4)
+    rainbow (2.0.0)
+    rake (11.3.0)
+    rubocop (0.37.2)
+      parser (>= 2.3.0.4, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 1.99.1, < 2.2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (~> 0.3)
+    ruby-progressbar (1.8.1)
+    unicode-display_width (0.3.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  addressable
+  bundler
+  colorize
+  datadog-sdk-testing
+  httparty
+  rainbow (~> 2.0.0)
+  rake (~> 11.3.0)
+  rubocop (~> 0.37.0)
+
+BUNDLED WITH
+   1.13.7
