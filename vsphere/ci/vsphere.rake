@@ -17,9 +17,6 @@ namespace :ci do
       install_requirements('vsphere/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      # sample docker usage
-      # sh %(docker create -p XXX:YYY --name vsphere source/vsphere:vsphere_version)
-      # sh %(docker start vsphere)
     end
 
     task before_script: ['ci:common:before_script']
@@ -34,12 +31,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop vsphere)
-    #   sh %(docker rm vsphere)
-    # end
-
+    
     task :execute do
       exception = nil
       begin

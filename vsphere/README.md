@@ -13,7 +13,7 @@ Install the `dd-check-vsphere` package manually or with your favorite configurat
 
 ## Configuration
 
-Edit the `vsphere.yaml` file to point to your server and port, set the masters to monitor
+Edit the `vsphere.yaml` file to point to your server and port, add your username and password and restart the agent
 
 ## Validation
 
