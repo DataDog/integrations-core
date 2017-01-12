@@ -32,6 +32,7 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
     - SDK_TESTING=true
     - BUNDLE_PATH=$TRAVIS_BUILD_DIR/vendor/cache
+    - DD_AGENT_BRANCH=jaime/sdk_loadclass
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
@@ -101,7 +102,8 @@ before_install:
 install:
   - bundle install
   - bundle package
-  - git -C $HOME/dd-agent pull || git clone --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
+  - git -C $HOME/dd-agent pull || git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
+  - git clone -b $DD_AGENT_BRANCH https://github.com/DataDog/dd-agent.git ~/dd-agent
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - pip install 'docker-compose==1.9.0'
   - pip install pylint
