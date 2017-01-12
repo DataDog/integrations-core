@@ -1,12 +1,12 @@
 require 'ci/common'
 
 namespace :ci do
-  namespace :ssh do |flavor|
+  namespace :ssh_check do |flavor|
     task before_install: ['ci:common:before_install']
 
     task install: ['ci:common:install'] do
       use_venv = in_venv
-      install_requirements('ssh/requirements.txt',
+      install_requirements('ssh_check/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
@@ -18,7 +18,7 @@ namespace :ci do
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'ssh'
+        'ssh_check'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end

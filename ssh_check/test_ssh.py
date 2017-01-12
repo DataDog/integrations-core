@@ -13,7 +13,7 @@ from checks import AgentCheck
 from shared.test.common import load_check
 
 
-@attr(requires='ssh')
+@attr(requires='ssh_check')
 class SshTestCase(unittest.TestCase):
 
     def test_ssh(self):
