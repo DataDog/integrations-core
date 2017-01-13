@@ -107,7 +107,7 @@ PORT = 11212
 @attr(requires='mcache')
 class TestMemCache(AgentCheckTest):
 
-    CHECK_NAME = "mcache"
+    CHECK_NAME = "memcache"
 
     def setUp(self):
         c = memcache.Client(["localhost:{0}".format(PORT)])
