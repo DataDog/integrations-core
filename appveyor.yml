@@ -11,7 +11,7 @@ environment:
   DD_AGENT_BRANCH: jaime/sdk_loadclass
   matrix:
   - PYTHON: C:\\Python27
-    PYTHON_VERSION: 2.7.9
+    PYTHON_VERSION: 2.7.11
     PYTHON_ARCH: 32
     PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win32-py2.7.exe
     PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win32.egg
