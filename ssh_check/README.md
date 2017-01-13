@@ -9,11 +9,11 @@ Get metrics from ssh service in real time to:
 
 ## Installation
 
-Install the `dd-check-ssh` package manually or with your favorite configuration manager
+Install the `dd-check-ssh_check` package manually or with your favorite configuration manager
 
 ## Configuration
 
-Edit the `ssh.yaml` file to point to your server and port, set the masters to monitor
+Edit the `ssh_check.yaml` file to point to your server and port, set the masters to monitor
 
 ## Validation
 
