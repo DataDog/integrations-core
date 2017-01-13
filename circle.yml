@@ -67,7 +67,6 @@ test:
         - rake ci:run[solr]
         - rake ci:run[powerdns_recursor]
         - rake ci:run[kyototycoon]
-        - rake ci:run[activemq]
         - rake ci:run[consul]
         - rake ci:run[activemq_xml]
         - bundle exec rake requirements
