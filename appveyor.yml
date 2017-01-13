@@ -5,7 +5,7 @@ environment:
   INTEGRATIONS_DIR: c:\projects\integrations-core\embedded
   PIP_CACHE: c:\projects\integrations-core\.cache\pip
   VOLATILE_DIR: c:\projects
-  NOSE_FILTER: not unix and not fixme
+  NOSE_FILTER: not unix and not fixme and not winfixme
   PYWIN_PATH: C:\projects\integrations-core\.cache\pywin32-py2.7.exe
   SKIP_LINT: true
   DD_AGENT_BRANCH: jaime/sdk_loadclass
