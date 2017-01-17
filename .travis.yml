@@ -1,8 +1,17 @@
 sudo: required
 
 language: python
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/dd-agent
+    - vendor/cache
+
 python:
   - "2.7"
+
+git:
+  depth: 3
 
 branches:
   only:
@@ -22,6 +31,7 @@ env:
     - INTEGRATIONS_DIR=$HOME/embedded
     - PIP_CACHE=$HOME/.cache/pip
     - SDK_TESTING=true
+    - BUNDLE_PATH=$TRAVIS_BUILD_DIR/vendor/cache
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
@@ -88,9 +98,9 @@ before_install:
   - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools libpq-dev
 
 install:
-  - gem install bundler
   - bundle install
-  - git clone https://github.com/DataDog/dd-agent.git ~/dd-agent
+  - bundle package
+  - git -C $HOME/dd-agent pull || git clone --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - pip install 'docker-compose>=1.9.0'
   - pip install pylint
@@ -98,12 +108,19 @@ install:
   - if [ -e $TRAVIS_BUILD_DIR/requirements-test.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-test.txt; fi
   - if [ -e $TRAVIS_BUILD_DIR/requirements-opt.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-opt.txt; fi
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
-  - if [ -e $TRAVIS_BUILD_DIR/Gemfile ]; then cd $TRAVIS_BUILD_DIR ; bundle install; cd - ; fi
 
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
   - bundle exec rake requirements
+
+# we should clean generated files before we save the cache
+# We don't want to save .pyc files
+# Since clobber only cleans the project directory,
+# everything outside of it should be cleaned, too, so we'll use find and -delete
+before_cache:
+  - rake clobber
+  - find $HOME/.cache/pip $HOME/dd-agent -name *.pyc -delete
 
 after_script:
   - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
