@@ -7,18 +7,38 @@ import threading
 import time
 from types import ListType
 import unittest
+import mock
 
 # 3p
 from nose.plugins.attrib import attr
+import logging
 
 # project
 from aggregator import MetricsAggregator
-from dogstatsd import Server
-from jmxfetch import JMXFetch
-from shared.test.common import Fixtures
+from tests.checks.common import Fixtures
+
+
+LOG_INFO = {
+    'log_level': None,
+    'log_to_event_viewer': False,
+    'log_to_syslog': False,
+    'syslog_host': None,
+    'syslog_port': None,
+    'log_level': logging.INFO,
+    'disable_file_logging': True,
+    'collector_log_file': '/var/log/datadog/collector.log',
+    'forwarder_log_file': '/var/log/datadog/forwarder.log',
+    'dogstatsd_log_file': '/var/log/datadog/dogstatsd.log',
+    'jmxfetch_log_file': '/var/log/datadog/jmxfetch.log',
+    'go-metro_log_file': '/var/log/datadog/go-metro.log',
+}
+
+with mock.patch('config.get_logging_config', return_value=LOG_INFO):
+    from dogstatsd import Server
+    from jmxfetch import JMXFetch
+
 
 STATSD_PORT = 8127
-
 
 class DummyReporter(threading.Thread):
     def __init__(self, metrics_aggregator):
