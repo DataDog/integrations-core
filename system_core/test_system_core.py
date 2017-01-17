@@ -1,7 +1,8 @@
-import mock
+from mock import patch, MagicMock
+from nose.plugins.attrib import attr
 import psutil
 
-from tests.checks.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest, load_check
 from utils.platform import Platform
 
 if Platform.is_mac():
@@ -47,13 +48,22 @@ elif Platform.is_unix():
 else:
     MOCK_PSUTIL_CPU_TIMES = []
 
+@attr('winfixme')
 class SystemCoreTestCase(AgentCheckTest):
 
     CHECK_NAME = 'system_core'
 
-    @mock.patch('psutil.cpu_times', return_value=MOCK_PSUTIL_CPU_TIMES)
-    def test_system_core(self, mock_cpu_times):
-        self.run_check_twice({"instances": [{}]})
+    def __init__(self, *args, **kwargs):
+        super(SystemCoreTestCase, self).__init__(*args, **kwargs)
+
+        self.config = {"instances": [{}]}
+        self.check = load_check(self.CHECK_NAME, self.config, {})
+
+    def test_system_core(self):
+        psutil_mock = MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
+        with patch('_system_core.psutil.cpu_times', psutil_mock):
+            self.run_check_twice(self.config)
+
         self.assertMetric('system.core.count', value=4, count=1)
 
         for i in range(4):
