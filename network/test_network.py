@@ -5,6 +5,7 @@
 # stdlib
 from collections import namedtuple
 import socket
+from nose.plugins.attrib import attr
 
 # 3p
 import mock
@@ -25,7 +26,7 @@ def netstat_subprocess_mock(*args, **kwargs):
     elif args[0][0] == 'netstat':
         return (Fixtures.read_file('netstat'), "", 0)
 
-
+@attr('unix')
 class TestCheckNetwork(AgentCheckTest):
     CHECK_NAME = 'network'
 
