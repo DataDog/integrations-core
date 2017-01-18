@@ -12,7 +12,7 @@ from nose.plugins.attrib import attr
 from tests.checks.common import AgentCheckTest
 
 
-@attr(requires='activemq')
+@attr(requires='activemq_xml')
 class ActiveMQTestCase(AgentCheckTest):
     CHECK_NAME = 'activemq_xml'
 
