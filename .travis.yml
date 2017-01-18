@@ -102,7 +102,7 @@ install:
   - bundle package
   - git -C $HOME/dd-agent pull || git clone --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
-  - pip install 'docker-compose>=1.9.0'
+  - pip install 'docker-compose==1.9.0'
   - pip install pylint
   - if [ -e $TRAVIS_BUILD_DIR/requirements.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements.txt; fi
   - if [ -e $TRAVIS_BUILD_DIR/requirements-test.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-test.txt; fi

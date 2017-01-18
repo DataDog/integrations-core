@@ -33,7 +33,9 @@ namespace :ci do
 
       consul_first_ip = `docker inspect #{container_name_1} | grep '"IPAddress"'`[/([0-9\.]+)/]
       sh %(docker run -d --expose 8301 --name #{container_name_2} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
+      wait_on_docker_logs(container_name_2, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
       sh %(docker run -d --expose 8301 --name #{container_name_3} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
+      wait_on_docker_logs(container_name_3, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
     end
 
     task before_script: ['ci:common:before_script']
@@ -48,8 +50,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      # sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
-      # sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
     end
 
     task :execute do

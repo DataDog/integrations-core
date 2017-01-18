@@ -552,7 +552,7 @@ class TestCheckConsul(AgentCheckTest):
 @attr(requires='consul')
 class TestIntegrationConsul(AgentCheckTest):
     """Basic Test for consul integration."""
-    CHECK_NAME = 'statsd'
+    CHECK_NAME = 'consul'
 
     METRICS = [
         'consul.catalog.nodes_up',
@@ -562,7 +562,16 @@ class TestIntegrationConsul(AgentCheckTest):
         'consul.catalog.services_up',
         'consul.catalog.services_passing',
         'consul.catalog.services_warning',
-        'consul.catalog.services_critical'
+        'consul.catalog.services_critical',
+        'consul.net.node.latency.p95',
+        'consul.net.node.latency.min',
+        'consul.net.node.latency.p25',
+        'consul.net.node.latency.median',
+        'consul.net.node.latency.max',
+        'consul.net.node.latency.max',
+        'consul.net.node.latency.p99',
+        'consul.net.node.latency.p90',
+        'consul.net.node.latency.p75'
     ]
 
     def simple_integration_test(self):
@@ -586,7 +595,7 @@ class TestIntegrationConsul(AgentCheckTest):
         self.check.log.info(self.metrics)
 
         for m in self.METRICS:
-            self.assertMetric(m)
+            self.assertMetric(m, at_least=0)
 
         self.assertMetric('consul.peers', value=3)
 
