@@ -50,8 +50,8 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      # sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
-      # sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
     end
 
     task :execute do
