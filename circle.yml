@@ -21,7 +21,7 @@ general:
 dependencies:
     pre:
         - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git libpq-dev
-        - git clone -b $DD_AGENT_BRANCH https://github.com/DataDog/dd-agent.git ~/dd-agent
+        - git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
         - echo "$HOME/dd-agent/" > ~/virtualenvs/venv-2.7.3/lib/python2.7/site-packages/datadog-agent.pth
         - pip install pip --upgrade
         - pip install docker-compose
