@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
-from shared.test.common import AgentCheckTest, Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 DEPLOYMENT_METRICS_CONFIG = {
     'init_config': {
