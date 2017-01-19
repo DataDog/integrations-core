@@ -2,9 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
+@attr('unix')
 class TestBtrfs(AgentCheckTest):
     """Basic Test for btrfs integration."""
     CHECK_NAME = 'btrfs'

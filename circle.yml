@@ -1,15 +1,16 @@
 machine:
     python:
-        version: 2.7.3
+        version: 2.7.12
     services:
         - docker
     environment:
-        NOSE_FILTER: 'not windows'
+        NOSE_FILTER: 'not windows and not fixme'
         VOLATILE_DIR: '/tmp/integration-sdk-testing'
         SKIP_CLEANUP: 'true'
         INTEGRATIONS_DIR: "$HOME/embedded"
         PIP_CACHE: "$HOME/.cache/pip"
         SDK_TESTING: "true"
+        DD_AGENT_BRANCH: "jaime/sdk_loadclass"
 
 general:
   branches:
@@ -20,7 +21,7 @@ general:
 dependencies:
     pre:
         - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git libpq-dev
-        - git clone https://github.com/DataDog/dd-agent.git ~/dd-agent
+        - git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
         - echo "$HOME/dd-agent/" > ~/virtualenvs/venv-2.7.3/lib/python2.7/site-packages/datadog-agent.pth
         - pip install pip --upgrade
         - pip install docker-compose
@@ -69,6 +70,7 @@ test:
         - rake ci:run[kyototycoon]
         - rake ci:run[consul]
         - rake ci:run[activemq_xml]
+        - rake ci:run[sqlserver]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

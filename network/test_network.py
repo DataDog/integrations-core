@@ -8,9 +8,10 @@ import socket
 
 # 3p
 import mock
+from nose.plugins.attrib import attr
 
 # project
-from shared.test.common import AgentCheckTest, Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 def ss_subprocess_mock(*args, **kwargs):
     if args[0][-1] == '-4':
@@ -25,7 +26,7 @@ def netstat_subprocess_mock(*args, **kwargs):
     elif args[0][0] == 'netstat':
         return (Fixtures.read_file('netstat'), "", 0)
 
-
+@attr('winfixme')
 class TestCheckNetwork(AgentCheckTest):
     CHECK_NAME = 'network'
 
@@ -54,8 +55,9 @@ class TestCheckNetwork(AgentCheckTest):
         'system.net.tcp6.time_wait': 1,
     }
 
-    @mock.patch('check.get_subprocess_output', side_effect=ss_subprocess_mock)
-    @mock.patch('check.Platform.is_linux', return_value=True)
+    @attr('unix')
+    @mock.patch('_network.get_subprocess_output', side_effect=ss_subprocess_mock)
+    @mock.patch('_network.Platform.is_linux', return_value=True)
     def test_cx_state_linux_ss(self, mock_subprocess, mock_platform):
         self.run_check({})
 
@@ -63,8 +65,9 @@ class TestCheckNetwork(AgentCheckTest):
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
             self.assertMetric(metric, value=value)
 
-    @mock.patch('check.get_subprocess_output', side_effect=netstat_subprocess_mock)
-    @mock.patch('check.Platform.is_linux', return_value=True)
+    @attr('unix')
+    @mock.patch('_network.get_subprocess_output', side_effect=netstat_subprocess_mock)
+    @mock.patch('_network.Platform.is_linux', return_value=True)
     def test_cx_state_linux_netstat(self, mock_subprocess, mock_platform):
         self.run_check({})
 
@@ -72,17 +75,17 @@ class TestCheckNetwork(AgentCheckTest):
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
             self.assertMetric(metric, value=value)
 
-    @mock.patch('check.Platform.is_linux', return_value=False)
-    @mock.patch('check.Platform.is_bsd', return_value=False)
-    @mock.patch('check.Platform.is_solaris', return_value=False)
-    @mock.patch('check.Platform.is_windows', return_value=True)
+    @mock.patch('_network.Platform.is_linux', return_value=False)
+    @mock.patch('_network.Platform.is_bsd', return_value=False)
+    @mock.patch('_network.Platform.is_solaris', return_value=False)
+    @mock.patch('_network.Platform.is_windows', return_value=True)
     def test_win_uses_psutil(self, *args):
         self.check._check_psutil = mock.MagicMock()
         self.run_check({})
         self.check._check_psutil.assert_called_once_with()
 
-    @mock.patch('check.Network._cx_state_psutil')
-    @mock.patch('check.Network._cx_counters_psutil')
+    @mock.patch('_network.Network._cx_state_psutil')
+    @mock.patch('_network.Network._cx_counters_psutil')
     def test_check_psutil(self, state, counters):
         self.check._cx_state_psutil = state
         self.check._cx_counters_psutil = counters
@@ -128,7 +131,7 @@ class TestCheckNetwork(AgentCheckTest):
             'system.net.tcp6.opening': 0,
         }
 
-        with mock.patch('check.psutil') as mock_psutil:
+        with mock.patch('_network.psutil') as mock_psutil:
             mock_psutil.net_connections.return_value = conn
             self.check._cx_state_psutil()
             for _, m in self.check.aggregator.metrics.iteritems():
@@ -140,7 +143,7 @@ class TestCheckNetwork(AgentCheckTest):
             'Ethernet': snetio(bytes_sent=3096403230L, bytes_recv=3280598526L, packets_sent=6777924, packets_recv=32888147, errin=0, errout=0, dropin=0, dropout=0),
             'Loopback Pseudo-Interface 1': snetio(bytes_sent=0, bytes_recv=0, packets_sent=0, packets_recv=0, errin=0, errout=0, dropin=0, dropout=0),
         }
-        with mock.patch('check.psutil') as mock_psutil:
+        with mock.patch('_network.psutil') as mock_psutil:
             mock_psutil.net_io_counters.return_value = counters
             self.check._excluded_ifaces = ['Loopback Pseudo-Interface 1']
             self.check._exclude_iface_re = ''

@@ -1,0 +1,3 @@
+# integration pip requirements
+adodbapi==2.6.0.7
+pyro4==4.36

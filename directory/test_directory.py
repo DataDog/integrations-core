@@ -154,19 +154,19 @@ class DirectoryTestCase(AgentCheckTest):
             for mname in self.FILE_METRICS:
                 # 2 '*.log' files in 'temp_dir'
                 for i in xrange(1, 3):
-                    file_tag = [filetagname + ":%s" % self.temp_dir + "/log_" + str(i) + ".log"]
+                    file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/log_" + str(i) + ".log")]
                     self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
 
                 if not config.get('pattern'):
                     # Files in 'temp_dir'
                     for i in xrange(0, 10):
-                        file_tag = [filetagname + ":%s" % self.temp_dir + "/file_" + str(i)]
+                        file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/file_" + str(i))]
                         self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
 
                     # Files in 'temp_dir/subfolder'
                     if config.get('recursive'):
                         for i in xrange(0, 5):
-                            file_tag = [filetagname + ":%s" % self.temp_dir + "/subfolder" + "/file_" + str(i)]
+                            file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/subfolder" + "/file_" + str(i))]
                             self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
 
             # Common metrics

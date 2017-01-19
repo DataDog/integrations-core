@@ -9,7 +9,7 @@ unless ENV['CI']
   ENV['PIP_CACHE'] = File.join(rakefile_dir, '.cache/pip')
   ENV['VOLATILE_DIR'] = '/tmp/integration-sdk-testing'
   ENV['CONCURRENCY'] = ENV['CONCURRENCY'] || '2'
-  ENV['NOSE_FILTER'] = 'not windows'
+  ENV['NOSE_FILTER'] = ENV['NOSE_FILTER'] || 'not windows'
   ENV['RUN_VENV'] = 'true'
   ENV['SDK_TESTING'] = 'true'
 end

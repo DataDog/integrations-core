@@ -7,6 +7,7 @@ import re
 
 # 3p
 import mock
+from nose.plugins.attrib import attr
 
 # project
 from shared.test.common import AgentCheckTest, Fixtures
@@ -40,6 +41,7 @@ class MockIoCountersMetrics(object):
         self.read_time = 15
         self.write_time = 25
 
+@attr('unix')
 class TestCheckDisk(AgentCheckTest):
     CHECK_NAME = 'disk'
 

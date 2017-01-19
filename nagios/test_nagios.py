@@ -6,6 +6,9 @@
 import tempfile
 import time
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
@@ -36,6 +39,7 @@ class NagiosTestCase(AgentCheckTest):
         }
 
 
+@attr('unix')
 class EventLogTailerTestCase(NagiosTestCase):
     def test_line_parser(self):
         """
@@ -117,6 +121,7 @@ class EventLogTailerTestCase(NagiosTestCase):
         self.assertEquals(len(events), ITERATIONS * 503)
 
 
+@attr('unix')
 class PerfDataTailerTestCase(NagiosTestCase):
     POINT_TIME = (int(time.time()) / 15) * 15
 

@@ -7,6 +7,7 @@ import contextlib
 import os
 
 # 3p
+from nose.plugins.attrib import attr
 from mock import patch, MagicMock
 import psutil
 
@@ -170,6 +171,10 @@ class ProcessCheckTest(AgentCheckTest):
         'major_faults',
         'children_major_faults'
     ]
+
+    UNIX_TO_WINDOWS_MAP = {
+        'system.processes.open_file_descriptors': 'system.processes.open_handles'
+    }
 
     def get_psutil_proc(self):
         return psutil.Process(os.getpid())
@@ -353,6 +358,8 @@ class ProcessCheckTest(AgentCheckTest):
 
     def test_check_real_process(self):
         "Check that we detect python running (at least this process)"
+        from utils.platform import Platform
+
         config = {
             'instances': [{
                 'name': 'py',
@@ -375,7 +382,9 @@ class ProcessCheckTest(AgentCheckTest):
                     or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname)\
                     or mname == 'system.processes.cpu.pct':
                 continue
-            self.assertMetric(mname, at_least=1, tags=expected_tags)
+
+            metric = self.UNIX_TO_WINDOWS_MAP.get(mname, mname) if Platform.is_windows() else mname
+            self.assertMetric(metric, at_least=1, tags=expected_tags)
 
         self.assertServiceCheckOK('process.up', count=1, tags=expected_tags + ['process:py'])
 
@@ -385,6 +394,7 @@ class ProcessCheckTest(AgentCheckTest):
         self.run_check(config, mocks={'get_pagefault_stats': noop_get_pagefault_stats})
         self.assertMetric('system.processes.cpu.pct', count=1, tags=expected_tags)
 
+    @attr('unix')
     def test_relocated_procfs(self):
         from utils.platform import Platform
         import tempfile

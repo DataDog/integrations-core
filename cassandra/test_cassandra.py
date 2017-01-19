@@ -8,19 +8,40 @@ import time
 from types import ListType
 import unittest
 import os
+import mock
 
 # 3p
 from nose.plugins.attrib import attr
 
 # project
 from aggregator import MetricsAggregator
-from dogstatsd import Server
-from jmxfetch import JMXFetch
+
 import logging
+
+LOG_INFO = {
+    'log_level': None,
+    'log_to_event_viewer': False,
+    'log_to_syslog': False,
+    'syslog_host': None,
+    'syslog_port': None,
+    'log_level': logging.INFO,
+    'disable_file_logging': True,
+    'collector_log_file': '/var/log/datadog/collector.log',
+    'forwarder_log_file': '/var/log/datadog/forwarder.log',
+    'dogstatsd_log_file': '/var/log/datadog/dogstatsd.log',
+    'jmxfetch_log_file': '/var/log/datadog/jmxfetch.log',
+    'go-metro_log_file': '/var/log/datadog/go-metro.log',
+}
+
+with mock.patch('config.get_logging_config', return_value=LOG_INFO):
+    from dogstatsd import Server
+    from jmxfetch import JMXFetch
+
 
 log = logging.getLogger('cassandra_test')
 
 STATSD_PORT = 8121
+
 
 class DummyReporter(threading.Thread):
     def __init__(self, metrics_aggregator):
@@ -53,7 +74,6 @@ class JMXTestCase(unittest.TestCase):
         self.t1 = threading.Thread(target=self.server.start)
         self.t1.start()
 
-        # confd_path = os.path.join(os.path.dirname(__file__), 'ci', 'cassandra.yaml')
         confd_path = os.path.join(os.path.dirname(__file__), 'ci')
 
         self.jmx_daemon = JMXFetch(confd_path, {'dogstatsd_port': STATSD_PORT})

@@ -104,7 +104,7 @@ class ActiveMQXML(AgentCheck):
             if stats is None:
                 continue
 
-            el_tags = tags + ["{0}:{1}".format(el_type, name)]
+            el_tags = tags + ["{0}:{1}".format(el_type, name.strip())]
             for attr_name, alias in TOPIC_QUEUE_METRICS.iteritems():
                 metric_name = "activemq.{0}.{1}".format(el_type, alias)
                 value = stats.get(attr_name, 0)
