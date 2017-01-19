@@ -50,18 +50,23 @@ MOCK_RRD_META = [('localhost', None, '/var/lib/cacti/rra/localhost_mem_buffers_3
 @attr('winfixme')
 class TestCacti(AgentCheckTest):
     CHECK_NAME = 'cacti'
-    FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
     CACTI_CONFIG = {
         'mysql_host': 'nohost',
         'mysql_user': 'mocked',
         'rrd_path':   '/rrdtool/is/mocked'
     }
 
-    @mock.patch('check.pymysql')
-    @mock.patch('check.rrdtool')
-    @mock.patch('check.Cacti._get_rrd_info', return_value=MOCK_INFO)
-    @mock.patch('check.Cacti._get_rrd_fetch', return_value=MOCK_FETCH)
-    @mock.patch('check.Cacti._fetch_rrd_meta', return_value=MOCK_RRD_META)
+    def setUp(self):
+        """
+        Load the check so its ready for patching.
+        """
+        self.load_check({'instances': [self.CACTI_CONFIG]})
+
+    @mock.patch('_cacti.pymysql')
+    @mock.patch('_cacti.rrdtool')
+    @mock.patch('_cacti.Cacti._get_rrd_info', return_value=MOCK_INFO)
+    @mock.patch('_cacti.Cacti._get_rrd_fetch', return_value=MOCK_FETCH)
+    @mock.patch('_cacti.Cacti._fetch_rrd_meta', return_value=MOCK_RRD_META)
     def testCheck(self, mock_pymysql, mock_rrdtool, mock_rrdtool_info, mock_rrdtool_fetch, mock_rrdtool_meta):
         config = {
             'instances': [self.CACTI_CONFIG]
@@ -76,8 +81,8 @@ class TestCacti(AgentCheckTest):
         self.assertMetric('system.mem.buffered.max', value=2)
         self.assertMetric('system.mem.buffered', value=2)
 
-    @mock.patch('check.pymysql')
-    @mock.patch('check.rrdtool')
+    @mock.patch('_cacti.pymysql')
+    @mock.patch('_cacti.rrdtool')
     def testCactiMetrics(self, mock_pymysql, mock_rrdtool):
         config = {
             'instances': [self.CACTI_CONFIG]
