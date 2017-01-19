@@ -13,7 +13,7 @@ import requests
 
 # project
 from config import get_version
-from tests.checks.common import AgentCheckTest, load_check
+from shared.test.common import AgentCheckTest, load_check
 
 # Clusterwise metrics, pre aggregated on ES, compatible with all ES versions
 PRIMARY_SHARD_METRICS = {

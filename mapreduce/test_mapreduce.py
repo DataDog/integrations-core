@@ -9,7 +9,7 @@ from urlparse import urljoin
 import mock
 import json
 
-from tests.checks.common import AgentCheckTest, Fixtures
+from shared.test.common import AgentCheckTest, Fixtures
 
 # ID
 APP_ID = 'application_1453738555560_0001'

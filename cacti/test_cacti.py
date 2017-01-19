@@ -12,7 +12,7 @@ import mock
 from nose.plugins.attrib import attr
 
 # project
-from tests.checks.common import AgentCheckTest
+from shared.test.common import AgentCheckTest
 
 log = logging.getLogger()
 
