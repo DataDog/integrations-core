@@ -14,7 +14,7 @@ from tests.checks.common import AgentCheckTest
 
 @attr(requires='activemq_xml')
 class ActiveMQTestCase(AgentCheckTest):
-    CHECK_NAME = 'activemq'
+    CHECK_NAME = 'activemq_xml'
 
     CONFIG = {
         'url': "http://localhost:8161",
