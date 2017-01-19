@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# stdlib
+import os
+
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
@@ -35,11 +38,13 @@ class MarathonCheckTest(AgentCheckTest):
     CHECK_NAME = 'marathon'
 
     def test_default_configuration(self):
+        ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
+
         def side_effect(url, timeout, auth):
             if "v2/apps" in url:
-                return Fixtures.read_json_file("apps.json")
+                return Fixtures.read_json_file("apps.json", sdk_dir=ci_dir)
             elif "v2/deployments" in url:
-                return Fixtures.read_json_file("deployments.json")
+                return Fixtures.read_json_file("deployments.json", sdk_dir=ci_dir)
             else:
                 raise Exception("unknown url:" + url)
 

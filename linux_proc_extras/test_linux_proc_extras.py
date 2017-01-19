@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# stdlib
+import os
+
 # 3p
 from mock import mock_open, patch
 from nose.plugins.attrib import attr
@@ -38,15 +41,16 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
 
         self.load_check({'instances': []})
 
-        m = mock_open(read_data=Fixtures.read_file('entropy_avail'))
+        ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
+        m = mock_open(read_data=Fixtures.read_file('entropy_avail', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_entropy_info()
 
-        m = mock_open(read_data=Fixtures.read_file('inode-nr'))
+        m = mock_open(read_data=Fixtures.read_file('inode-nr', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_inode_info()
 
-        m = mock_open(read_data=Fixtures.read_file('proc-stat'))
+        m = mock_open(read_data=Fixtures.read_file('proc-stat', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_stat_info()
             self.check.get_stat_info()
