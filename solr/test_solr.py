@@ -8,6 +8,7 @@ import time
 from types import ListType
 import unittest
 import mock
+import os
 
 # 3p
 from nose.plugins.attrib import attr
@@ -71,7 +72,8 @@ class JMXTestCase(unittest.TestCase):
         self.t1 = threading.Thread(target=self.server.start)
         self.t1.start()
 
-        confd_path = Fixtures.directory()
+        fixture_dir = os.path.join(os.path.dirname(__file__), 'ci')
+        confd_path = Fixtures.directory(sdk_dir=fixture_dir)
         self.jmx_daemon = JMXFetch(confd_path, {'dogstatsd_port': STATSD_PORT})
         self.t2 = threading.Thread(target=self.jmx_daemon.run)
         self.t2.start()
