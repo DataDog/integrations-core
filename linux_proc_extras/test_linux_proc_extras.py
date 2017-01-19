@@ -7,8 +7,7 @@ from mock import mock_open, patch
 from nose.plugins.attrib import attr
 
 # project
-from tests.checks.common import AgentCheckTest
-from shared.test.common import Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 @attr('unix')
 class TestCheckLinuxProcExtras(AgentCheckTest):
