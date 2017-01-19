@@ -5,7 +5,6 @@
 # stdlib
 import logging
 import time
-import os
 
 # 3p
 import mock
