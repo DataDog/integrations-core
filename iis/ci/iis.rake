@@ -8,6 +8,14 @@ def iis_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/iis_#{iis_version}"
 end
 
+def iis_testsite_name
+  'Test-Website-1'
+end
+
+def iis_testsite_dir
+  File.join(ENV['INTEGRATIONS_DIR'], "iis_#{iis_testsite_name}")
+end
+
 namespace :ci do
   namespace :iis do |flavor|
     task before_install: ['ci:common:before_install']
@@ -17,12 +25,15 @@ namespace :ci do
       install_requirements('iis/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      # sample docker usage
-      # sh %(docker create -p XXX:YYY --name iis source/iis:iis_version)
-      # sh %(docker start iis)
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      # Set up an IIS website
+      sh %(powershell New-Item -ItemType Directory -Force #{iis_testsite_dir})
+      sh %(powershell Import-Module WebAdministration)
+      # Create the new website
+      sh %(powershell New-Website -Name #{iis_testsite_name} -Port 8080 -PhysicalPath #{iis_testsite_dir})
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
@@ -34,11 +45,6 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop iis)
-    #   sh %(docker rm iis)
-    # end
 
     task :execute do
       exception = nil
