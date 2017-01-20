@@ -10,7 +10,7 @@ from nose.plugins.attrib import attr
 
 # project
 from checks import AgentCheck
-from shared.test.common import load_check
+from tests.checks.common import load_check
 
 
 @attr(requires='ssh_check')
@@ -47,7 +47,7 @@ class SshTestCase(unittest.TestCase):
         }
 
         agentConfig = {}
-        self.check = load_check('ssh_check', config, agentConfig)
+        self.check = load_check('ssh', config, agentConfig)
 
         # Testing that connection will work
         self.check.check(config['instances'][0])

@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# stdlib
+import os
+
 # 3p
 from mock import mock_open, patch
 from nose.plugins.attrib import attr
 
 # project
-from tests.checks.common import AgentCheckTest
-from shared.test.common import Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 @attr('unix')
 class TestCheckLinuxProcExtras(AgentCheckTest):
@@ -39,20 +41,22 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
 
         self.load_check({'instances': []})
 
-        m = mock_open(read_data=Fixtures.read_file('entropy_avail'))
+        ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
+        m = mock_open(read_data=Fixtures.read_file('entropy_avail', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_entropy_info()
 
-        m = mock_open(read_data=Fixtures.read_file('inode-nr'))
+        m = mock_open(read_data=Fixtures.read_file('inode-nr', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_inode_info()
 
-        m = mock_open(read_data=Fixtures.read_file('proc-stat'))
+        m = mock_open(read_data=Fixtures.read_file('proc-stat', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
             self.check.get_stat_info()
             self.check.get_stat_info()
 
-        with patch('_linux_proc_extras.get_subprocess_output', return_value=(Fixtures.read_file('process_stats'), "", 0)):
+        with patch('_linux_proc_extras.get_subprocess_output', return_value=
+                   (Fixtures.read_file('process_stats', sdk_dir=ci_dir), "", 0)):
             self.check.get_process_states()
 
         self.metrics = self.check.get_metrics()

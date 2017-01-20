@@ -16,7 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_check
+from tests.checks.common import AgentCheckTest, get_check_class
 
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
@@ -345,8 +345,17 @@ instances:
 
     def test_check(self):
         """Integration test for supervisord check. Using a mocked supervisord."""
+        check_class = get_check_class('supervisord')
+        agentConfig = {
+            'version': '0.1',
+            'api_key': 'tota'
+        }
+
         for tc in self.TEST_CASES:
-            check, instances = get_check('supervisord', tc['yaml'])
+            check, instances = check_class.from_yaml(yaml_text=tc['yaml'],
+                                                     check_name='supervisord',
+                                                     agentConfig=agentConfig)
+
             self.assertTrue(check is not None, msg=check)
             self.assertEquals(tc['expected_instances'], instances)
             for instance in instances:
@@ -402,10 +411,15 @@ State: RUNNING
 Start time: 2014-11-01 04:16:28
 Stop time: \nExit Status: 0"""
 
-
-        with patch('time.localtime',  self.mock_localtime):
-            check, _ = get_check('supervisord', self.TEST_CASES[0]['yaml'])
-            self.assertEquals(expected_message, check._build_message(process))
+        check_class = get_check_class('supervisord')
+        agentConfig = {
+            'version': '0.1',
+            'api_key': 'tota'
+        }
+        check, _ = check_class.from_yaml(yaml_text=self.TEST_CASES[0]['yaml'],
+                                         check_name='supervisord',
+                                         agentConfig=agentConfig)
+        self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
 

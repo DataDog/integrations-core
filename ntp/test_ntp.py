@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
-from shared.test.common import AgentCheckTest, load_check
+from tests.checks.common import AgentCheckTest, load_check
 from utils.ntp import NTPUtil
 
 class TestNtp(AgentCheckTest):
