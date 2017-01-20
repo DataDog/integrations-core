@@ -51,3 +51,4 @@ test_script:
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
+  - bundle exec rake ci:run[windows_service]
