@@ -8,8 +8,6 @@ def consul_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/consul_#{consul_version}"
 end
 
-container_name = 'dd-test-consul'
-
 container_name_1 = 'dd-test-consul-1'
 container_name_2 = 'dd-test-consul-2'
 container_name_3 = 'dd-test-consul-3'
@@ -27,15 +25,16 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # sample docker usage
-      sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
+      sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} \
+            consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
       Wait.for 8500
-      wait_on_docker_logs(container_name_1, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
+      wait_on_docker_logs(container_name_1, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
 
       consul_first_ip = `docker inspect #{container_name_1} | grep '"IPAddress"'`[/([0-9\.]+)/]
       sh %(docker run -d --expose 8301 --name #{container_name_2} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
-      wait_on_docker_logs(container_name_2, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
+      wait_on_docker_logs(container_name_2, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
       sh %(docker run -d --expose 8301 --name #{container_name_3} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
-      wait_on_docker_logs(container_name_3, 30, "agent: Node info in sync", "agent: Synced service 'consul'")
+      wait_on_docker_logs(container_name_3, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
     end
 
     task before_script: ['ci:common:before_script']

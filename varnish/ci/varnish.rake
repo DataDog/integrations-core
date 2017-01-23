@@ -4,19 +4,18 @@ def varnish_version
   ENV['FLAVOR_VERSION'] || '4.1.4'
 end
 
-
 namespace :ci do
   namespace :varnish do |flavor|
     task before_install: ['ci:common:before_install']
 
     task install: ['ci:common:install'] do
-      target=varnish_version().split(".")[0]
+      target = varnish_version.split('.')[0]
       sh %(docker-compose -f varnish/ci/docker-compose.yml up -d varnish#{target})
     end
 
     task before_script: ['ci:common:before_script']
 
-    task script: ['ci:common:script'] do |_, attr|
+    task script: ['ci:common:script'] do |_, _attr|
       Rake::Task['ci:common:run_tests'].invoke(['varnish'])
     end
 

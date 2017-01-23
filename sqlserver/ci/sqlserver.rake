@@ -19,7 +19,8 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
 
-      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
+      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
+           --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
     end
 
     task before_script: ['ci:common:before_script']

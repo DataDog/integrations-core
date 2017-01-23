@@ -9,8 +9,8 @@ def supervisord_rootdir
   "#{integrations_dir}/supervisord"
 end
 
-container_name='dd-test-supervisord'
-container_port=19001
+container_name = 'dd-test-supervisord'
+container_port = 19_001
 
 namespace :ci do
   namespace :supervisord do |flavor|
@@ -26,12 +26,13 @@ namespace :ci do
       install_requirements('supervisord/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d --name #{container_name} -p #{container_port}:#{container_port} -v #{supervisord_rootdir}:/supervisor datadog/docker-library:supervisord_3_3_0)
+      sh %(docker run -d --name #{container_name} -p #{container_port}:#{container_port} \
+           -v #{supervisord_rootdir}:/supervisor datadog/docker-library:supervisord_3_3_0)
     end
 
     task before_script: ['ci:common:before_script'] do
       # we need to make sure that supervisor is running an the rpc port is up
-      Wait.for 19001
+      Wait.for 19_001
     end
 
     task script: ['ci:common:script'] do

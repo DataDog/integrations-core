@@ -8,12 +8,12 @@ def kong_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/kong_#{kong_version}"
 end
 
-container_name='dd-test-kong'
-container_name_db="#{container_name}-database"
-container_port1=8000
-container_port2=8443
-container_port3=8001
-container_port4=7946
+container_name = 'dd-test-kong'
+container_name_db = "#{container_name}-database"
+container_port1 = 8000
+container_port2 = 8443
+container_port3 = 8001
+container_port4 = 7946
 
 namespace :ci do
   namespace :kong do |flavor|
@@ -29,11 +29,12 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       sh %(docker run -d --name #{container_name_db} -p 9042:9042 cassandra:2.2)
 
-      wait_on_docker_logs(container_name_db, 40, "Listening for thrift clients", "Created default superuser role 'cassandra'")
+      wait_on_docker_logs(container_name_db, 40, 'Listening for thrift clients', "Created default superuser role 'cassandra'")
 
       sh %(docker run -d --name #{container_name} --link #{container_name_db}:kong-database \
         -e "KONG_DATABASE=cassandra" -e "KONG_CASSANDRA_CONTACT_POINTS=#{container_name_db}" -e "KONG_PG_HOST=#{container_name_db}" \
-        -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}  -p #{container_port3}:#{container_port3}  -p #{container_port4}:#{container_port4}  -p 7946:7946/udp mashape/kong:0.8.1)
+        -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}  -p #{container_port3}:#{container_port3} \
+        -p #{container_port4}:#{container_port4}  -p 7946:7946/udp mashape/kong:0.8.1)
       Wait.for 'http://localhost:8001/status', 100
     end
 

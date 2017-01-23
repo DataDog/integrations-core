@@ -24,8 +24,10 @@ namespace :ci do
       install_requirements('powerdns_recursor/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      pdns_tag = 'powerdns_recursor_' + powerdns_recursor_version.gsub('.', '_')
-      sh %(docker run -d --expose #{container_port2} --expose #{container_port1}/udp -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}/udp --name #{container_name} datadog/docker-library:#{pdns_tag})
+      pdns_tag = 'powerdns_recursor_' + powerdns_recursor_version.tr('.', '_')
+      sh %(docker run -d --expose #{container_port2} --expose #{container_port1}/udp \
+           -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}/udp \
+           --name #{container_name} datadog/docker-library:#{pdns_tag})
       Wait.for 8082, 5
     end
 

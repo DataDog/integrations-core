@@ -20,14 +20,14 @@ namespace :ci do
       # Wait for resonse from php ping
       count = 0
       logs = `curl http://localhost:181/ping 2>&1`
-      puts "Waiting for PHP-FPM to come up"
-      until count == 20 or logs.include? "pong"
+      puts 'Waiting for PHP-FPM to come up'
+      until count == 20 || logs.include?('pong')
         sleep_for 2
         logs = `curl http://localhost:181/ping 2>&1`
         count += 1
       end
-      if logs.include? "pong"
-        puts "PHP-FPM is up!"
+      if logs.include? 'pong'
+        puts 'PHP-FPM is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
         raise

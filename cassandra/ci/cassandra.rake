@@ -30,7 +30,9 @@ namespace :ci do
       install_requirements('cassandra/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker create --expose #{container_port} --expose 9042 --expose 7000 --expose 7001 --expose 9160 -p #{container_port}:#{container_port} -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=#{container_port} -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})
+      sh %(docker create --expose #{container_port} --expose 9042 --expose 7000 --expose 7001 --expose 9160 \
+           -p #{container_port}:#{container_port} -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=#{container_port} \
+           -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})
 
       sh %(cp #{__dir__}/jmxremote.password #{__dir__}/jmxremote.password.tmp)
       sh %(chmod 400 #{__dir__}/jmxremote.password.tmp)
@@ -44,14 +46,14 @@ namespace :ci do
       # Wait.for container_port
       count = 0
       logs = `docker logs #{container_name} 2>&1`
-      puts "Waiting for Cassandra to come up"
-      until count == 20 or logs.include? "Listening for thrift clients" or logs.include? "Created default superuser role 'cassandra'"
+      puts 'Waiting for Cassandra to come up'
+      until count == 20 || logs.include?('Listening for thrift clients') || logs.include?("Created default superuser role 'cassandra'")
         sleep_for 2
         logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      if logs.include? "Listening for thrift clients" or logs.include? "Created default superuser role 'cassandra'"
-        puts "Cassandra is up!"
+      if logs.include?('Listening for thrift clients') || logs.include?("Created default superuser role 'cassandra'")
+        puts 'Cassandra is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
         raise

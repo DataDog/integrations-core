@@ -9,7 +9,7 @@ def tomcat_rootdir
 end
 
 container_name = 'dd-test-tomcat'
-container_port = 8090 
+container_port = 8090
 java_opts = "-Dcom.sun.management.jmxremote
   -Dcom.sun.management.jmxremote.port=#{container_port}
   -Dcom.sun.management.jmxremote.rmi.port=#{container_port}
@@ -31,14 +31,14 @@ namespace :ci do
     task before_script: ['ci:common:before_script'] do
       count = 0
       logs = `docker logs #{container_name} 2>&1`
-      puts "Waiting for Tomcat to come up"
-      until count == 20 or logs.include? "INFO: Server startup"
+      puts 'Waiting for Tomcat to come up'
+      until count == 20 || logs.include?('INFO: Server startup')
         sleep_for 2
         logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      if logs.include? "INFO: Server startup"
-        puts "Tomcat is up!"
+      if logs.include? 'INFO: Server startup'
+        puts 'Tomcat is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
         raise

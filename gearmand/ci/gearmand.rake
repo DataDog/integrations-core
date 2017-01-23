@@ -9,7 +9,7 @@ def gearmand_rootdir
 end
 
 container_name = 'dd-test-gearmand'
-container_port = 15440
+container_port = 15_440
 
 namespace :ci do
   namespace :gearmand do |flavor|

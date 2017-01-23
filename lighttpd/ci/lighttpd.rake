@@ -24,7 +24,8 @@ namespace :ci do
       install_requirements('lighttpd/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d --name #{container_name} -v #{__dir__}/lighttpd.conf:/etc/lighttpd/lighttpd.conf -p #{container_port}:#{container_port} #{lighttpd_image})
+      sh %(docker run -d --name #{container_name} -v #{__dir__}/lighttpd.conf:/etc/lighttpd/lighttpd.conf \
+           -p #{container_port}:#{container_port} #{lighttpd_image})
     end
 
     task before_script: ['ci:common:before_script']

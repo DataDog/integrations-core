@@ -21,7 +21,7 @@ namespace :ci do
       install_requirements('gunicorn/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      section("GUNICORN_INSTALL")
+      section('GUNICORN_INSTALL')
       `mkdir -p #{gunicorn_rootdir}/venv`
       `mkdir -p #{gunicorn_rootdir}/app`
       `wget -q -O #{gunicorn_rootdir}/venv/virtualenv.py https://raw.github.com/pypa/virtualenv/1.11.6/virtualenv.py`

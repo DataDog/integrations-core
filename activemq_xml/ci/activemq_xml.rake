@@ -11,13 +11,13 @@ def activemq_xml_rootdir
   if ENV['VOLATILE_DIR']
     "#{ENV['VOLATILE_DIR']}/activemq_xml"
   else
-    "/tmp/integration-sdk-testing/activemq_xml"
+    '/tmp/integration-sdk-testing/activemq_xml'
   end
 end
 
 container_name = 'dd-test-activemq-xml'
 admin_port = 8161
-listen_port = 61616
+listen_port = 61_616
 
 namespace :ci do
   namespace :activemq_xml do |flavor|
