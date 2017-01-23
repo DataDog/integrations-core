@@ -8,9 +8,9 @@ def redisdb_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/redisdb_#{redisdb_version}"
 end
 
-base_container_name='dd-test-redis'
-container_port=16379
-redis_servers = ['noauth', 'auth', 'slave_healthy', 'slave_unhealthy']
+base_container_name = 'dd-test-redis'
+container_port = 16_379
+redis_servers = %w(noauth auth slave_healthy slave_unhealthy)
 
 namespace :ci do
   namespace :redisdb do |flavor|
@@ -28,29 +28,31 @@ namespace :ci do
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
 
-        if redisdb_version == "2.4.18"
-          redis_image = "mtirsel/redis-2.4"
-        else
-          redis_image = "redis:#{redisdb_version}"
-        end
+      redis_image = if redisdb_version == '2.4.18'
+                      'mtirsel/redis-2.4'
+                    else
+                      "redis:#{redisdb_version}"
+                    end
 
-        ['noauth', 'auth', 'slave_healthy', 'slave_unhealthy'].each do |server|
-          p container_port
-          container_name = "#{base_container_name}-#{server}"
-          sh %(cp -f #{__dir__}/#{server}.conf #{__dir__}/#{server}.tmp.conf)
+      %w(noauth auth slave_healthy slave_unhealthy).each do |server|
+        p container_port
+        container_name = "#{base_container_name}-#{server}"
+        sh %(cp -f #{__dir__}/#{server}.conf #{__dir__}/#{server}.tmp.conf)
 
-          if server != 'noauth'
-            redis_master_ip = `docker inspect dd-test-redis-noauth | grep '"IPAddress"'`[/([0-9\.]+)/]
-            link="--link #{base_container_name}-noauth:#{server}"
-            if server != "slave_unhealthy"
-              sh %(echo "slaveof #{redis_master_ip} 16379" >> #{__dir__}/#{server}.tmp.conf)
-            end
+        if server != 'noauth'
+          redis_master_ip = `docker inspect dd-test-redis-noauth | grep '"IPAddress"'`[/([0-9\.]+)/]
+          link = "--link #{base_container_name}-noauth:#{server}"
+          if server != 'slave_unhealthy'
+            sh %(echo "slaveof #{redis_master_ip} 16379" >> #{__dir__}/#{server}.tmp.conf)
           end
-
-          sh %(docker run -v #{__dir__}/#{server}.tmp.conf:/etc/redis.conf #{link} --expose #{container_port} -p #{container_port}:#{container_port} --name #{container_name} -d #{redis_image} redis-server /etc/redis.conf)
-
-          container_port += 10000
         end
+
+        sh %(docker run -v #{__dir__}/#{server}.tmp.conf:/etc/redis.conf #{link} --expose #{container_port} \
+             -p #{container_port}:#{container_port} \
+             --name #{container_name} -d #{redis_image} redis-server /etc/redis.conf)
+
+        container_port += 10_000
+      end
     end
 
     task before_script: ['ci:common:before_script']

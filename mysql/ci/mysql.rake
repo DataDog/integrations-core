@@ -9,7 +9,7 @@ def mysql_rootdir
 end
 
 container_name = 'dd-test-mysql'
-container_port = 13306
+container_port = 13_306
 
 namespace :ci do
   namespace :mysql do |flavor|
@@ -27,20 +27,31 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for 13306
+      Wait.for 13_306
       count = 0
       logs = `docker logs dd-test-mysql 2>&1`
-      puts "Waiting for MySQL to come up"
-      until count == 20 or logs.include? 'MySQL init process done. Ready for start up'
+      puts 'Waiting for MySQL to come up'
+      until count == 20 || logs.include?('MySQL init process done. Ready for start up')
         sleep_for 2
         logs = `docker logs dd-test-mysql 2>&1`
         count += 1
       end
       if logs.include? 'MySQL init process done. Ready for start up'
-        puts "MySQL is up!"
+        puts 'MySQL is up!'
       end
 
-      sh %(docker run -it --link dd-test-mysql:mysql --rm mysql:5.7 sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" -e "create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; GRANT PROCESS, REPLICATION CLIENT ON *.* TO \\"dog\\"@\\"%\\" WITH MAX_USER_CONNECTIONS 5; CREATE DATABASE testdb; CREATE TABLE testdb.users (name VARCHAR(20), age INT); GRANT SELECT ON testdb.users TO \\"dog\\"@\\"%\\"; INSERT INTO testdb.users (name,age) VALUES(\\"Alice\\",25); INSERT INTO testdb.users (name,age) VALUES(\\"Bob\\",20); GRANT SELECT ON performance_schema.* TO \\"dog\\"@\\"%\\"; USE testdb; SELECT * FROM users ORDER BY name; "')
+      sh %(docker run -it --link dd-test-mysql:mysql --rm mysql:5.7 \
+           sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" \
+           -e "create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; \
+           GRANT PROCESS, REPLICATION CLIENT ON *.* TO \\"dog\\"@\\"%\\" WITH MAX_USER_CONNECTIONS 5; \
+           CREATE DATABASE testdb; \
+           CREATE TABLE testdb.users (name VARCHAR(20), age INT); \
+           GRANT SELECT ON testdb.users TO \\"dog\\"@\\"%\\"; \
+           INSERT INTO testdb.users (name,age) VALUES(\\"Alice\\",25); \
+           INSERT INTO testdb.users (name,age) VALUES(\\"Bob\\",20); \
+           GRANT SELECT ON performance_schema.* TO \\"dog\\"@\\"%\\"; \
+           USE testdb; \
+           SELECT * FROM users ORDER BY name; "')
     end
 
     task script: ['ci:common:script'] do

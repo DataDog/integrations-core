@@ -26,20 +26,18 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
-        docker_image = "datadog/docker-library:elasticsearch_" + elastic_version.split('.')[0..1].join('_')
-        if elastic_version == '0.90.13'
-          docker_cmd += " -f"
-        end
+        docker_image = 'datadog/docker-library:elasticsearch_' + elastic_version.split('.')[0..1].join('_')
+        docker_cmd += ' -f' if elastic_version == '0.90.13'
       else
         docker_image = "elasticsearch:#{elastic_version}"
       end
       container_ports =  "-p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}"
       sh %(docker run -d #{container_ports} --name #{container_name} #{docker_image} #{docker_cmd})
-      if elastic_version[0].to_i < 2
-        ENV['DD_ELASTIC_LOCAL_HOSTNAME'] = `docker inspect dd-test-elastic | grep Id`[/([0-9a-f\.]{2,})/][0..11]
-      else
-        ENV['DD_ELASTIC_LOCAL_HOSTNAME'] = `docker inspect dd-test-elastic | grep IPAddress`[/([0-9\.]+)/]
-      end
+      ENV['DD_ELASTIC_LOCAL_HOSTNAME'] = if elastic_version[0].to_i < 2
+                                           `docker inspect dd-test-elastic | grep Id`[/([0-9a-f\.]{2,})/][0..11]
+                                         else
+                                           `docker inspect dd-test-elastic | grep IPAddress`[/([0-9\.]+)/]
+                                         end
     end
 
     task before_script: ['ci:common:before_script'] do

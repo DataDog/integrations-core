@@ -46,7 +46,7 @@ namespace :ci do
       sh %(twemproxy/ci/stop-docker.sh #{docker_addr})
     end
     # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do 
+    # task cleanup: ['ci:common:cleanup'] do
     #   sh %(docker stop twemproxy)
     #   sh %(docker rm twemproxy)
     # end
@@ -55,7 +55,7 @@ namespace :ci do
       mocked = attr[:mocked] || false
       exception = nil
       begin
-        if not mocked
+        unless mocked
           %w(before_install install before_script).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end

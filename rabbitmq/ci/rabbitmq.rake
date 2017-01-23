@@ -8,9 +8,9 @@ def rabbitmq_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/rabbitmq_#{rabbitmq_version}"
 end
 
-container_name='dd-test-rabbitmq'
+container_name = 'dd-test-rabbitmq'
 container_port1 = 5672
-container_port2 = 15672
+container_port2 = 15_672
 
 namespace :ci do
   namespace :rabbitmq do |flavor|
@@ -24,24 +24,27 @@ namespace :ci do
       install_requirements('rabbitmq/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d --name #{container_name} -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} rabbitmq:#{rabbitmq_version}-management)
+      sh %(docker run -d --name #{container_name} \
+           -p #{container_port1}:#{container_port1} \
+           -p #{container_port2}:#{container_port2} \
+           rabbitmq:#{rabbitmq_version}-management)
     end
 
     task before_script: ['ci:common:before_script'] do
       # Wait for RabbitMQ to come up
       count = 0
       logs = `docker logs #{container_name} 2>&1`
-      puts "Waiting for RabbitMQ to come up"
-      until count == 20 or logs.include?("Server startup complete")
+      puts 'Waiting for RabbitMQ to come up'
+      until count == 20 || logs.include?('Server startup complete')
         sleep_for 2
         logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      if logs.include?("Server startup complete")
-        puts "RabbitMQ is up!"
+      if logs.include?('Server startup complete')
+        puts 'RabbitMQ is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
-        raise "RabbitMQ failed to come up"
+        raise 'RabbitMQ failed to come up'
       end
 
       %w(test1 test5 tralala).each do |q|

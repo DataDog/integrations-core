@@ -10,8 +10,8 @@ end
 
 pgname = 'dd-test-postgres'
 pgbname = 'dd-test-pgbouncer'
-pg_resources_path = "#{ENV['TRAVIS_BUILD_DIR']}" + "/pgbouncer/ci/resources/pg"
-pgb_resources_path = "#{ENV['TRAVIS_BUILD_DIR']}" + "/pgbouncer/ci/resources/pgb"
+pg_resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/pgbouncer/ci/resources/pg'
+pgb_resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/pgbouncer/ci/resources/pgb'
 
 namespace :ci do
   namespace :pgbouncer do |flavor|
@@ -24,16 +24,16 @@ namespace :ci do
       install_requirements('pgbouncer/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      puts "Installing Postgres"
+      puts 'Installing Postgres'
       sh %(docker run --name #{pgname} -v #{pg_resources_path}:/docker-entrypoint-initdb.d -e POSTGRES_PASSWORD=datadog -d postgres:latest)
       count = 0
       logs = `docker logs #{pgname} 2>&1`
-      until count == 20 or logs.include? "PostgreSQL init process complete"
+      until count == 20 || logs.include?('PostgreSQL init process complete')
         sleep_for 2
         logs = `docker logs #{pgname} 2>&1`
         count += 1
       end
-      puts "Postgres is running, installing PgBouncer"
+      puts 'Postgres is running, installing PgBouncer'
       sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p 16432:6432 kotaimen/pgbouncer)
       sleep_for 10
     end

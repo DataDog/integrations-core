@@ -22,7 +22,7 @@ namespace :ci do
 
     task before_script: ['ci:common:before_script']
 
-    task script: ['ci:common:script'] do |_, attr|
+    task script: ['ci:common:script'] do |_, _attr|
       this_provides = [
         'tokumx'
       ]

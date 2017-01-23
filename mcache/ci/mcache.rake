@@ -9,7 +9,7 @@ def mcache_rootdir
 end
 
 container_name = 'dd-test-mcache'
-container_port = 11212
+container_port = 11_212
 
 namespace :ci do
   namespace :mcache do |flavor|
@@ -27,21 +27,22 @@ namespace :ci do
 
       mcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
       count = 0
-      until count == 20 || mcache_response.include?("loop: (timeout: 1) (elapsed:")
+      until count == 20 || mcache_response.include?('loop: (timeout: 1) (elapsed:')
         sleep_for 2
         mcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`
         count += 1
       end
-      if mcache_response.include?("loop: (timeout: 1) (elapsed:")
-        p "mcache is up!"
+      if mcache_response.include?('loop: (timeout: 1) (elapsed:')
+        p 'mcache is up!'
       else
-        print "Raw Memcache Stats for debugging:"
+        print 'Raw Memcache Stats for debugging:'
         sh %(mkdir -p embedded)
         sh %(curl -L https://cpanmin.us/ -o embedded/cpanm && chmod +x embedded/cpanm)
         sh %(./embedded/cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib))
         sh %(./embedded/cpanm --local-lib=~/perl5 Cache::Memcached)
-        sh %(perl -I ~/perl5/lib/perl5/ -MCache::Memcached -MData::Dumper=Dumper -le  'print Dumper(Cache::Memcached->new(  servers => ["localhost:11212"])->stats);')
-        raise "mcache failed to come up!"
+        sh %(perl -I ~/perl5/lib/perl5/ -MCache::Memcached -MData::Dumper=Dumper \
+             -le 'print Dumper(Cache::Memcached->new(  servers => ["localhost:11212"])->stats);')
+        raise 'mcache failed to come up!'
       end
     end
 
@@ -52,7 +53,8 @@ namespace :ci do
       # sh %(curl -L https://cpanmin.us/ -o embedded/cpanm && chmod +x embedded/cpanm)
       # sh %(./embedded/cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib))
       # sh %(./embedded/cpanm --local-lib=~/perl5 Cache::Memcached)
-      # sh %(perl -I ~/perl5/lib/perl5/ -MCache::Memcached -MData::Dumper=Dumper -le  'print Dumper(Cache::Memcached->new(  servers => ["localhost:11212"])->stats);')
+      # sh %(perl -I ~/perl5/lib/perl5/ -MCache::Memcached -MData::Dumper=Dumper \
+      #      -le 'print Dumper(Cache::Memcached->new(  servers => ["localhost:11212"])->stats);')
     end
 
     task script: ['ci:common:script'] do

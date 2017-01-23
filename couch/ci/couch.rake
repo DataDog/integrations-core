@@ -30,15 +30,13 @@ namespace :ci do
       Wait.for container_port
       count = 0
       logs = `docker logs dd-test-couch 2>&1`
-      puts "Waiting for couchdb to come up"
-      until count == 20 or logs.include? "CouchDB has started"
+      puts 'Waiting for couchdb to come up'
+      until count == 20 || logs.include?('CouchDB has started')
         sleep_for 2
         logs = `docker logs dd-test-couch 2>&1`
         count += 1
       end
-      if logs.include? "CouchDB has started"
-        puts "couchdb is up!"
-      end
+      puts 'couchdb is up!' if logs.include? 'CouchDB has started'
       # Create a test database
       sh %(curl -X PUT http://localhost:5984/kennel)
 

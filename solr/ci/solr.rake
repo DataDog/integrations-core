@@ -8,12 +8,18 @@ def solr_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/solr_#{solr_version}"
 end
 
-rmi_port = 18983
+rmi_port = 18_983
 container_port = 8983
 
 container_name = 'dd-test-solr'
 
-jmx_opts = "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=18983 -Dcom.sun.management.jmxremote.rmi.port=18983 -Djava.rmi.server.hostname=localhost"
+jmx_opts = %(-Dcom.sun.management.jmxremote \
+             -Dcom.sun.management.jmxremote.local.only=false \
+             -Dcom.sun.management.jmxremote.ssl=false \
+             -Dcom.sun.management.jmxremote.authenticate=false \
+             -Dcom.sun.management.jmxremote.port=18983 \
+             -Dcom.sun.management.jmxremote.rmi.port=18983 \
+             -Djava.rmi.server.hostname=localhost)
 
 namespace :ci do
   namespace :solr do |flavor|
@@ -29,8 +35,10 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       # docker_image = "harisekhon/solr:#{solr_version} java -jar /solr/server/solr/start.jar"
       docker_image = "solr:#{solr_version}"
-      sh %(docker run -d -e ENABLE_REMOTE_JMX_OPTS=true -e RMI_PORT=18983 -p #{rmi_port}:#{rmi_port} -p #{container_port}:#{container_port} --name #{container_name} #{docker_image} #{jmx_opts})
-      wait_on_docker_logs(container_name, 40, "Server Started")
+      sh %(docker run -d -e ENABLE_REMOTE_JMX_OPTS=true -e RMI_PORT=18983 \
+           -p #{rmi_port}:#{rmi_port} -p #{container_port}:#{container_port} \
+           --name #{container_name} #{docker_image} #{jmx_opts})
+      wait_on_docker_logs(container_name, 40, 'Server Started')
       sleep 10
       sh %(docker exec -it --user=solr #{container_name} bin/solr create_core -c gettingstarted)
       sleep 10

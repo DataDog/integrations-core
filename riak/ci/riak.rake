@@ -9,7 +9,7 @@ def riak_rootdir
 end
 
 container_name = 'dd-test-riak'
-resources_path = "#{ENV['TRAVIS_BUILD_DIR']}" + "/riak/ci/resources"
+resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/riak/ci/resources'
 
 namespace :ci do
   namespace :riak do |flavor|
@@ -28,14 +28,14 @@ namespace :ci do
     task before_script: ['ci:common:before_script'] do
       count = 0
       logs = `docker logs #{container_name} 2>&1`
-      puts "Waiting for Riak to come up"
-      until count == 20 or logs.include? "INFO success: riak entered RUNNING state"
+      puts 'Waiting for Riak to come up'
+      until count == 20 || logs.include?('INFO success: riak entered RUNNING state')
         sleep_for 2
         logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      if logs.include? "INFO success: riak entered RUNNING state"
-        puts "Riak is up!"
+      if logs.include? 'INFO success: riak entered RUNNING state'
+        puts 'Riak is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
         raise
