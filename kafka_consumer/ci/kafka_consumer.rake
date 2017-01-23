@@ -17,9 +17,13 @@ namespace :ci do
       Wait.for 2181
       Wait.for 9092
       wait_on_docker_logs('resources_kafka_1', 5, '[Kafka Server 1001], started')
-      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
+      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
+           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh \
+           --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
       wait_on_docker_logs('resources_kafka_1', 15, 'Created log for partition [test,0]')
-      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` <<< "boomshakalaka"')
+      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
+           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-producer.sh \
+           --topic=test --broker-list=`broker-list.sh` <<< "boomshakalaka"')
     end
 
     task before_script: ['ci:common:before_script'] do
