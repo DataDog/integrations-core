@@ -21,13 +21,14 @@ namespace :ci do
       wait_on_docker_logs('resources_kafka_2', 5, '[Kafka Server 1002], started')
       wait_on_docker_logs('resources_zookeeper_1', 5, 'NodeExists for /brokers/ids')
       sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh \
-           --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
+           -e ZK=172.17.0.1:2181 -e JMX_PORT=9999 -p 7777:9999 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c \
+           '$KAFKA_HOME/bin/kafka-console-consumer.sh --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
       wait_on_docker_logs('resources_kafka_1', 30, 'Created log for partition [test,0]')
       sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka /bin/bash -c '$KAFKA_HOME/bin/kafka-topics.sh \
-           --create --topic test --partitions 4 --zookeeper $ZK --replication-factor 2 ; \
-           $KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` <<< "Doberman"')
+           -e ZK=172.17.0.1:2181 -e JMX_PORT=9999 -p 7777:9999 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c \
+           '$KAFKA_HOME/bin/kafka-topics.sh --create --topic test --partitions 4 --zookeeper $ZK --replication-factor 2 ; \
+           while true; do $KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` <<< "Doberman" ; \
+           sleep 1 ; done')
     end
 
     task before_script: ['ci:common:before_script'] do
