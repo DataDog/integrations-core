@@ -97,8 +97,8 @@ env:
     - TRAVIS_FLAVOR=openstack
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
     - TRAVIS_FLAVOR=win32_event_log
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION="0.10.1.0-1"
-    - TRAVIS_FLAVOR=kafka FLAVOR_VERSION="0.10.1.0-1"
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.1.0-1
+    - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=0.10.1.0-1
     # END OF TRAVIS MATRIX
 
 before_install:

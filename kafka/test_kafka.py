@@ -105,13 +105,19 @@ class TestKafka(unittest.TestCase):
             len([t for t in metrics if "kafka.request." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) == 12, metrics)
         self.assertTrue(
             len([t for t in metrics if "kafka.replication." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) == 6, metrics)
+
+        # CLIENT metrics.
+        # kafka.producer.request_latency_avg
+        self.assertTrue(
+            len([t for t in metrics if "kafka.producer." in t['metric'] and "instance:kafka-172.17.0.1-7777" in t['tags']]) == 1, metrics)
+        # kafka.consumer.fetch_rate, kafka.consumer.max_lag
+        self.assertTrue(
+            len([t for t in metrics if "kafka.consumer." in t['metric'] and "instance:kafka-172.17.0.1-7777" in t['tags']]) == 2, metrics)
+
+
         # self.assertTrue(
         #     len([t for t in metrics if "kafka.follower." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) > 40, metrics)
         # self.assertTrue(
         #     len([t for t in metrics if "kafka.net." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) > 40, metrics)
         # self.assertTrue(
         #     len([t for t in metrics if "kafka.messages_in" in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) > 40, metrics)
-        # self.assertTrue(
-        #     len([t for t in metrics if "kafka.producer." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) > 40, metrics)
-        # self.assertTrue(
-        #     len([t for t in metrics if "kafka.consumer." in t['metric'] and "instance:kafka-172.17.0.1-9999" in t['tags']]) > 40, metrics)

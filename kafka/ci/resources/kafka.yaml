@@ -4,6 +4,12 @@ instances:
     tags:
       kafka: broker
       env: test
+  - host: 172.17.0.1
+    port: 7777 # This is the JMX port on which Kafka exposes its metrics (usually 9999)
+    tags:
+      kafka: consumer
+      env: test
+
       # newTag: test
     # user: username
     # password: password
