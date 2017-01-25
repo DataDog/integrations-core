@@ -97,7 +97,6 @@ class WMICheckTest(AgentCheckTest):
         self.coverage_report()
 
 
-@attr('winfixme')
 class WMITestCase(AgentCheckTest, TestCommonWMI):
     CHECK_NAME = 'wmi_check'
 

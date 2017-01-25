@@ -1,5 +1,4 @@
 from mock import patch, MagicMock
-from nose.plugins.attrib import attr
 import psutil
 
 from tests.checks.common import AgentCheckTest, load_check
@@ -48,7 +47,6 @@ elif Platform.is_unix():
 else:
     MOCK_PSUTIL_CPU_TIMES = []
 
-@attr('winfixme')
 class SystemCoreTestCase(AgentCheckTest):
 
     CHECK_NAME = 'system_core'
