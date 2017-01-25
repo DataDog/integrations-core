@@ -44,8 +44,24 @@ elif Platform.is_unix():
                                   iowait=2.43, irq=0.0, softirq=3.8, steal=0.0,
                                   guest=0.0, guest_nice=0.0)
     ]
-else:
-    MOCK_PSUTIL_CPU_TIMES = []
+else:  # windows
+    CHECK_RATES = [
+        'system.core.user',
+        'system.core.system',
+        'system.core.idle',
+        'system.core.interrupt',
+        'system.core.dpc',
+    ]
+    MOCK_PSUTIL_CPU_TIMES = [
+        psutil._pswindows.scputimes(user=7877.29, system=7469.72, idle=38164.81,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=3826.74, system=2701.61, idle=46981.39,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=7486.51, system=5991.36, idle=40031.88,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=3964.85, system=2862.37, idle=46682.50,
+                                    interrupt=0.05, dpc=0.0)
+    ]
 
 class SystemCoreTestCase(AgentCheckTest):
 
