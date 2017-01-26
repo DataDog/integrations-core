@@ -6,6 +6,6 @@
   "name": "mesos_master",
   "short_description": "The Mesos master integration collects metrics from the Mesos master API.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "os_supported": ["linux","apple"],
   "version": "0.1.0"
 }

@@ -6,6 +6,6 @@
   "name": "cacti",
   "short_description": "Visualize Cacti metrics and correlate with the rest of your applications in Datadog.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "os_supported": ["linux"],
   "version": "0.1.0"
 }

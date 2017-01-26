@@ -6,6 +6,6 @@
   "name": "kafka_consumer",
   "short_description": "Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "os_supported": ["linux","apple"],
   "version": "0.1.0"
 }
