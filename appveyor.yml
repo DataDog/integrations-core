@@ -9,6 +9,7 @@ environment:
   PYWIN_PATH: C:\projects\integrations-core\.cache\pywin32-py2.7.exe
   SKIP_LINT: true
   DD_AGENT_BRANCH: master
+  SDK_TESTING: true
   matrix:
   - PYTHON: C:\\Python27
     PYTHON_VERSION: 2.7.11

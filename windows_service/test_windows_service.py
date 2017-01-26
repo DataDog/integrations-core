@@ -40,7 +40,6 @@ class TestWindowsService(AgentCheckTest):
         self.coverage_report()
 
 
-@attr('winfixme')
 class WindowsServiceTestCase(AgentCheckTest, TestCommonWMI):
     CHECK_NAME = 'windows_service'
 

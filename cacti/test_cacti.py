@@ -8,7 +8,6 @@ import time
 
 # 3p
 import mock
-from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -46,7 +45,6 @@ MOCK_RRD_META = [('localhost', None, '/var/lib/cacti/rra/localhost_mem_buffers_3
     ('localhost', None, '/var/lib/cacti/rra/localhost_users_6.rrd'),
     ('localhost', None, '/var/lib/cacti/rra/localhost_proc_7.rrd')]
 
-@attr('winfixme')
 class TestCacti(AgentCheckTest):
     CHECK_NAME = 'cacti'
     CACTI_CONFIG = {

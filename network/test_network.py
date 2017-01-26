@@ -26,7 +26,6 @@ def netstat_subprocess_mock(*args, **kwargs):
     elif args[0][0] == 'netstat':
         return (Fixtures.read_file('netstat'), "", 0)
 
-@attr('winfixme')
 class TestCheckNetwork(AgentCheckTest):
     CHECK_NAME = 'network'
 
