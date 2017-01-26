@@ -6,5 +6,6 @@
   "name": "snmp",
   "short_description": "SNMP is a protocol for network management and monitoring.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

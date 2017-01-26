@@ -6,5 +6,6 @@
   "name": "network",
   "short_description": "network description.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

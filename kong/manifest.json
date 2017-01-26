@@ -6,5 +6,6 @@
   "name": "kong",
   "short_description": "Kong is an open-source management layer for APIs, delivering high performance and reliability.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

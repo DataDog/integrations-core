@@ -6,5 +6,6 @@
   "name": "mongo",
   "short_description": "MongoDB is an open-source, high-performance, schema-free, document-oriented database.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

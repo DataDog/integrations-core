@@ -6,4 +6,5 @@
   "max_agent_version": "6.0.0",
   "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
   "support": "core"
+  "os_supported": ["linux","apple","windows"],
 }

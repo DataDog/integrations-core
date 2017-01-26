@@ -6,5 +6,6 @@
   "name": "mesos_master",
   "short_description": "The Mesos slave integration collects metrics from the Mesos slave APIs.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

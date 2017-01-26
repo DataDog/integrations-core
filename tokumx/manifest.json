@@ -6,5 +6,6 @@
   "name": "tokumx",
   "short_description": "TokuMX is an open source, high-performance distribution of MongoDB",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

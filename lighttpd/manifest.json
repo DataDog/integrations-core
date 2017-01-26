@@ -6,5 +6,6 @@
   "name": "lighttpd",
   "short_description": "Lighttpd is a secure, fast, compliant, and very flexible web-server that has been optimized for high-performance environments.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

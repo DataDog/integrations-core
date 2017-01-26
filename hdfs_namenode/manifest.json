@@ -6,5 +6,6 @@
   "name": "hdfs_namenode",
   "short_description": "hdfs_namenode description.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

@@ -6,5 +6,6 @@
   "name": "tomcat",
   "short_description": "Visualize Tomcat performance and correlate with the rest of your applications",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

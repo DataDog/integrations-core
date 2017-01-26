@@ -6,5 +6,6 @@
   "name": "nagios",
   "short_description": "nagios description.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

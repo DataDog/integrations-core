@@ -6,5 +6,6 @@
   "name": "varnish",
   "short_description": "Visualize your cache performance in real-time and correlate the performance of Varnish with the rest of your applications",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }

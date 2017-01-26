@@ -6,5 +6,6 @@
   "name": "yarn",
   "short_description": "yarn description.",
   "support": "core",
+  "os_supported": ["linux","apple","windows"],
   "version": "0.1.0"
 }
