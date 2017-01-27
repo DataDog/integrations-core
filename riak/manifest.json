@@ -6,6 +6,6 @@
   "name": "riak",
   "short_description": "Get metrics from riak service in real time.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

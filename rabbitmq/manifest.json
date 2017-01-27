@@ -6,6 +6,6 @@
   "name": "rabbitmq",
   "short_description": "RabbitMQ is open source message broker software that implements the AMQP standard.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

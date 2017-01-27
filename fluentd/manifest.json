@@ -6,6 +6,6 @@
   "name": "fluentd",
   "short_description": "Fluentd is an open source data collector, which lets you unify the data collection and consumption for a better use and understanding of data.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

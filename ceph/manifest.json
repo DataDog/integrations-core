@@ -6,6 +6,6 @@
   "name": "ceph",
   "short_description": "Ceph is a distributed filesystem that provides scalable and redundant data access across multiple servers.",
   "support": "core",
-  "os_supported": ["linux","apple"],
+  "supported_os": ["linux","mac_os"],
   "version": "0.1.0"
 }

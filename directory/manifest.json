@@ -6,6 +6,6 @@
   "name": "directory",
   "short_description": "The Directory integration helps monitoring and reporting metrics on files for a provided directory.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

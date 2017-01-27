@@ -6,6 +6,6 @@
   "name": "php_fpm",
   "short_description": "PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI implementation.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

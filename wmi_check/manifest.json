@@ -6,6 +6,6 @@
   "name": "wmi_check",
   "short_description": "Get real time metrics from WMI queries.",
   "support": "core",
-  "os_supported": ["windows"],
+  "supported_os": ["windows"],
   "version": "0.1.0"
 }

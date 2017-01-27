@@ -6,6 +6,6 @@
   "name": "kyototycoon",
   "short_description": "Kyoto Tycoon is a lightweight database server with automatic expiration mechanism.",
   "support": "core",
-  "os_supported": ["linux","apple","windows"],
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }

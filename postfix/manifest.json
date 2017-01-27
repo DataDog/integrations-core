@@ -6,6 +6,6 @@
   "name": "postfix",
   "short_description": "Postfix is a free and open-source mail transfer agent that routes and delivers emails.",
   "support": "core",
-  "os_supported": ["linux","apple"],
+  "supported_os": ["linux","mac_os"],
   "version": "0.1.0"
 }

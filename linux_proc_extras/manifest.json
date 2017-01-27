@@ -6,6 +6,6 @@
   "name": "linux_proc_extras",
   "short_description": "linux_proc_extras description.",
   "support": "core",
-  "os_supported": ["linux"],
+  "supported_os": ["linux"],
   "version": "0.1.0"
 }

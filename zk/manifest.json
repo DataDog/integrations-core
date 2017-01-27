@@ -6,6 +6,6 @@
   "name": "zk",
   "short_description": "Collect zookeeper metrics.",
   "support": "core",
-  "os_supported": ["linux","apple"],
+  "supported_os": ["linux","mac_os"],
   "version": "0.1.0"
 }

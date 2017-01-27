@@ -6,6 +6,6 @@
   "name": "sqlserver",
   "short_description": "sqlserver description.",
   "support": "core",
-  "os_supported": ["linux","windows"],
+  "supported_os": ["linux","windows"],
   "version": "0.1.0"
 }

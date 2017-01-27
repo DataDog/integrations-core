@@ -6,6 +6,6 @@
   "name": "iis",
   "short_description": "iis description.",
   "support": "core",
-  "os_supported": ["windows"],
+  "supported_os": ["windows"],
   "version": "0.1.0"
 }
