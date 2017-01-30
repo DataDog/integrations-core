@@ -1,10 +1,11 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "nginx",
   "short_description": "Nginx is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.",
   "support": "core",
+  "supported_os": ["linux","mac_os","windows"],
   "version": "0.1.0"
 }
