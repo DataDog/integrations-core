@@ -1,6 +1,8 @@
 machine:
     python:
         version: 2.7.10
+    ruby:
+        version: 2.2.6
     services:
         - docker
     environment:
@@ -10,13 +12,7 @@ machine:
         INTEGRATIONS_DIR: "$HOME/embedded"
         PIP_CACHE: "$HOME/.cache/pip"
         SDK_TESTING: "true"
-        DD_AGENT_BRANCH: "jaime/sdk_loadclass"
-
-general:
-  branches:
-    only:
-      - /jaime.*/  # for now - whitelisting
-      - /tristan.*/ # for now - whitelisting
+        DD_AGENT_BRANCH: "master"
 
 dependencies:
     pre:
