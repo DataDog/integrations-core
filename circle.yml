@@ -1,6 +1,8 @@
 machine:
     python:
-        version: 2.7.12
+        version: 2.7.10
+    ruby:
+        version: 2.2.6
     services:
         - docker
     environment:
@@ -10,19 +12,13 @@ machine:
         INTEGRATIONS_DIR: "$HOME/embedded"
         PIP_CACHE: "$HOME/.cache/pip"
         SDK_TESTING: "true"
-        DD_AGENT_BRANCH: "jaime/sdk_loadclass"
-
-general:
-  branches:
-    only:
-      - /jaime.*/  # for now - whitelisting
-      - /tristan.*/ # for now - whitelisting
+        DD_AGENT_BRANCH: "master"
 
 dependencies:
     pre:
         - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git libpq-dev
         - git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
-        - echo "$HOME/dd-agent/" > ~/virtualenvs/venv-2.7.3/lib/python2.7/site-packages/datadog-agent.pth
+        - echo "$HOME/dd-agent/" > $(dirname $(pyenv which python))/../lib/python2.7/site-packages/datadog-agent.pth
         - pip install pip --upgrade
         - pip install docker-compose
         - pip install pylint
