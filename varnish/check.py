@@ -43,7 +43,6 @@ class Varnish(AgentCheck):
         if name == "stat":
             m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
-                self.log.error("Varnish (rate) %s %d" % (m_name, long(self._current_value)))
                 self.rate(m_name, long(self._current_value), tags=tags)
             elif self._current_type in ("i", "g"):
                 self.gauge(m_name, long(self._current_value), tags=tags)
@@ -58,7 +57,7 @@ class Varnish(AgentCheck):
             self._current_metric += "." + self._current_str
 
     def _char_data(self, data):
-        #self.log.debug("Data %s [%s]" % (data, self._current_element))
+        self.log.debug("Data %s [%s]" % (data, self._current_element))
         data = data.strip()
         if len(data) > 0 and self._current_element != "":
             if self._current_element == "value":
@@ -100,8 +99,6 @@ class Varnish(AgentCheck):
         # Parse service checks from varnishadm.
         varnishadm_path = instance.get('varnishadm')
         if varnishadm_path:
-            # TODO: "debug.health" has been removed since varnish 4.1+. We
-            # should check the version and use "backend.list -p" instead.
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
             cmd = ['sudo', varnishadm_path, '-S', secretfile_path, 'debug.health']
             output, _, _ = get_subprocess_output(cmd, self.log)
