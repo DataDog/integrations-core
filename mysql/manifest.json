@@ -1,24 +1,24 @@
 {
-  "manifest_version": 1,
+  "manifest_version": "0.1.2",
   "name": "MySQL",
   "display_name": "MySQL",
   "version": "0.1.4",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "manifest_version": "0.1.1",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
-
   "maintainer": "help@datadoghq.com",
-
   "short_description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
   "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
-
   "resources": {
     "small": "resources/small_mysql.png",
     "bot": "resources/bot_mysql.png",
     "monitor_editor": "resources/monitor_mysql.png",
     "my_image": "resources/mysql.png"
-  }
-
+  },
+  "guid": "056bfc7f-4775-4581-9442-502078593d10"
 }

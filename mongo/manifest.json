@@ -1,11 +1,16 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "mongo",
   "short_description": "MongoDB is an open-source, high-performance, schema-free, document-oriented database.",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c"
 }

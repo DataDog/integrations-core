@@ -1,11 +1,16 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "tcp_check",
   "short_description": "tcp_check description.",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "c514029e-0ed8-4c9f-abe5-2fd4096726ba"
 }

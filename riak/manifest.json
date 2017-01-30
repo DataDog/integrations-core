@@ -1,11 +1,16 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "riak",
   "short_description": "Get metrics from riak service in real time.",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "e1ed642c-8a15-420c-954b-6fb894905956"
 }

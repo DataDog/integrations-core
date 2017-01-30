@@ -1,15 +1,17 @@
 {
-  "manifest_version": 1,
+  "manifest_version": "0.1.2",
   "name": "haproxy",
   "display_name": "haproxy",
   "version": "0.1",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "manifest_version": "0.1.1",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
-
   "short_description": "The HAProxy integration helps to collect performance and avaialbility metrics from HAProxy instances.",
   "description": "The HAProxy integration helps to collect performance and avaialbility metrics from HAProxy instances.",
-
+  "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b"
 }

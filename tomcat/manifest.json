@@ -1,11 +1,16 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "tomcat",
   "short_description": "Visualize Tomcat performance and correlate with the rest of your applications",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997"
 }

@@ -1,11 +1,16 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "system_swap",
   "short_description": "Adds some optional swap memory checks.",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "4b3dcc12-7bc9-474a-960f-14680eb587a3"
 }

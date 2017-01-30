@@ -1,11 +1,14 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "iis",
   "short_description": "iis description.",
   "support": "core",
-  "supported_os": ["windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba"
 }

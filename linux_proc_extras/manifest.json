@@ -1,11 +1,14 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "linux_proc_extras",
   "short_description": "linux_proc_extras description.",
   "support": "core",
-  "supported_os": ["linux"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux"
+  ],
+  "version": "0.1.0",
+  "guid": "47f243d7-5df4-47b5-9f1a-923b4f7cefe7"
 }
