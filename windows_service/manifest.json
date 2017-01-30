@@ -1,11 +1,14 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "windows_service",
   "short_description": "windows_service description.",
   "support": "core",
-  "supported_os": ["windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "2289acf0-e413-4384-83f7-88157b430805"
 }

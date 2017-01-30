@@ -1,10 +1,15 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "0.1.2",
   "min_agent_version": "5.6.3",
   "name": "redisdb",
   "short_description": "Redis is an open-source, networked, in-memory, key-value data store with optional durability.",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "0.1.0",
+  "guid": "0e2f3ed1-d36b-47a4-b69c-fedb50adf240"
 }

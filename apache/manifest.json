@@ -1,16 +1,18 @@
 {
-  "manifest_version": 1,
+  "manifest_version": "0.1.2",
   "name": "Apache",
   "display_name": "Apache",
   "version": "0.1.0",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
-  "manifest_version": "0.1.1",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
-
   "maintainer": "help@datadoghq.com",
-
   "short_description": "Apache is a robust, commercial-grade, featureful, and freely-available source code implementation of an HTTP server.",
   "description": "Apache is a robust, commercial-grade, featureful, and freely-available source code implementation of an HTTP server.",
+  "guid": "cb2b4a06-4ede-465e-9478-a45f8b32058a"
 }
