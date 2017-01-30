@@ -57,7 +57,7 @@ CONFIG = {
         'url': 'https://ja.wikipedia.org/',
         'timeout': 1,
         'check_certificate_expiration': False,
-        'content_match': 'メインページ'
+        'content_match': u'メインページ'
     }, {
         'name': 'cnt_mismatch_unicode',
         'url': 'https://ja.wikipedia.org/',
@@ -276,7 +276,6 @@ class HTTPCheckTest(AgentCheckTest):
         tags = ['url:https://ja.wikipedia.org/', 'instance:cnt_match_unicode_reverse']
         self.assertServiceCheckCritical("http.can_connect", tags=tags)
         self.assertServiceCheckOK("http.can_connect", tags=tags, count=0)
-
 
         self.coverage_report()
 
