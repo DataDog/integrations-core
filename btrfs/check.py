@@ -15,7 +15,6 @@ import psutil
 
 # project
 from checks import AgentCheck
-from utils.platform import Platform
 
 MIXED = "mixed"
 DATA = "data"
@@ -99,8 +98,8 @@ class BTRFS(AgentCheck):
             _, total_spaces = TWO_LONGS_STRUCT.unpack(ret)
 
             # Allocate it
-            buffer_size = (TWO_LONGS_STRUCT.size +
-                        total_spaces * THREE_LONGS_STRUCT.size)
+            buffer_size = (TWO_LONGS_STRUCT.size
+                        + total_spaces * THREE_LONGS_STRUCT.size)
 
             data = sized_array(buffer_size)
             TWO_LONGS_STRUCT.pack_into(data, 0, total_spaces, 0)
@@ -121,13 +120,9 @@ class BTRFS(AgentCheck):
         btrfs_devices = {}
         excluded_devices = instance.get('excluded_devices', [])
 
-        if Platform.is_linux():
-            procfs_path = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
-            psutil.PROCFS_PATH = procfs_path
-
         for p in psutil.disk_partitions():
-            if (p.fstype == 'btrfs' and p.device not in btrfs_devices and
-                    p.device not in excluded_devices):
+            if (p.fstype == 'btrfs' and p.device not in btrfs_devices
+                    and p.device not in excluded_devices):
                 btrfs_devices[p.device] = p.mountpoint
 
         if len(btrfs_devices) == 0:
