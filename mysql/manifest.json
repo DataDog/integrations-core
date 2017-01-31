@@ -1,5 +1,5 @@
 {
-  "manifest_version": "0.1.2",
+  "manifest_version": "0.1.0",
   "name": "MySQL",
   "display_name": "MySQL",
   "version": "0.1.4",
