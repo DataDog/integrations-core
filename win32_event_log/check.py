@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+'''
+Monitor the Windows Event Log
+'''
 # stdlib
 import calendar
 from datetime import datetime, timedelta
-
-# 3rd party
 
 # project
 from checks.wmi_check import WinWMICheck, to_time, from_time
@@ -17,7 +18,7 @@ SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'
 
 
-class Win32EventLogCheck(WinWMICheck):
+class Win32EventLogWMI(WinWMICheck):
     # WMI information
     EVENT_PROPERTIES = [
         "EventCode",
