@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.2",
+  "manifest_version": "0.1.0",
   "name": "twemproxy",
   "min_agent_version": "5.6.3",
   "max_agent_version": "6.0.0",
