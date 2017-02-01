@@ -4,6 +4,7 @@
   "display_name": "haproxy",
   "version": "0.1",
   "support": "core",
+  "maintainer": "help@datadoghq.com",
   "supported_os": [
     "linux",
     "mac_os",
