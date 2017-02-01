@@ -6,6 +6,11 @@
   "name": "elastic",
   "short_description": "elastic description.",
   "support": "Elasticsearch is an Open Source, Distributed, Search Engine.",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "version": "0.1.0",
   "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a"
 }
