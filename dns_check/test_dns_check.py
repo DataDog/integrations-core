@@ -98,6 +98,18 @@ class MockDNSAnswer:
             return self._address
 
 
+# We need to mock the calls to `time.time` on Windows,
+# otherwise the consecutive calls are too close to one another in the check run with mocks,
+# the time difference is `0` and no response_time metric is sent
+class MockTime(object):
+    global_time = 1.
+
+    @classmethod
+    def time(cls):
+        cls.global_time += 0.1
+        return cls.global_time
+
+
 def success_query_mock(d_name, rdtype):
     if rdtype == 'A':
         return MockDNSAnswer('127.0.0.1')
@@ -132,7 +144,8 @@ class DNSCheckTest(AgentCheckTest):
                                 getattr(self.check, attribute)))
 
     @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
-    def test_success(self, mocked_query):
+    @mock.patch('time.time', side_effect=MockTime.time)
+    def test_success(self, mocked_query, mocked_time):
         self.run_check(CONFIG_SUCCESS)
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
@@ -148,7 +161,8 @@ class DNSCheckTest(AgentCheckTest):
         self.coverage_report()
 
     @mock.patch.object(Resolver, 'query', side_effect=nxdomain_query_mock)
-    def test_success_nxdomain(self, mocked_query):
+    @mock.patch('time.time', side_effect=MockTime.time)
+    def test_success_nxdomain(self, mocked_query, mocked_time):
         self.run_check(CONFIG_SUCCESS_NXDOMAIN)
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
@@ -161,7 +175,8 @@ class DNSCheckTest(AgentCheckTest):
         self.coverage_report()
 
     @mock.patch.object(Resolver, 'query', side_effect=Timeout())
-    def test_default_timeout(self, mocked_query):
+    @mock.patch('time.time', side_effect=MockTime.time)
+    def test_default_timeout(self, mocked_query, mocked_time):
         self.run_check(CONFIG_DEFAULT_TIMEOUT)
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
@@ -173,7 +188,8 @@ class DNSCheckTest(AgentCheckTest):
         self.coverage_report()
 
     @mock.patch.object(Resolver, 'query', side_effect=Timeout())
-    def test_instance_timeout(self, mocked_query):
+    @mock.patch('time.time', side_effect=MockTime.time)
+    def test_instance_timeout(self, mocked_query, mocked_time):
         self.run_check(CONFIG_INSTANCE_TIMEOUT)
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
