@@ -239,7 +239,7 @@ class HTTPCheckTest(AgentCheckTest):
         """
         self.run_check(CONFIG)
         # Overrides self.service_checks attribute when values are available\
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 5)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 6)
 
         # HTTP connection error
         tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
