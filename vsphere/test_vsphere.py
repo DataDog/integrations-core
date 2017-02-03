@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-from collections import defaultdict
 
 # 3p
 from mock import Mock, MagicMock
