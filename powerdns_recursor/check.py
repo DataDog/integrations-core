@@ -155,7 +155,7 @@ class PowerDNSRecursorCheck(AgentCheck):
     def _get_pdns_stats(self, config):
         fallback_url = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
         if config.version == 4:
-            url = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
+            url = fallback_url
         else:
             url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
 
@@ -168,7 +168,7 @@ class PowerDNSRecursorCheck(AgentCheck):
             try:
                 if fallback_url is url:
                     raise
-                request = requests.get(url2, headers=headers)
+                request = requests.get(fallback_url, headers=headers)
                 request.raise_for_status()
             except Exception:
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
