@@ -3,4 +3,4 @@ pg8000==1.10.1
 
 # optional - SDK question here
 # Require libpq
-psycopg2==2.6
+psycopg2==2.6.2
