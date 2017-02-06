@@ -15,7 +15,7 @@ from config import AGENT_VERSION
 from tests.checks.common import AgentCheckTest
 from util import headers as agent_headers
 
-RESULTS_TIMEOUT = 10
+RESULTS_TIMEOUT = 20
 
 AGENT_CONFIG = {
     'version': AGENT_VERSION,
