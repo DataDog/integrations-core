@@ -15,7 +15,7 @@ from config import AGENT_VERSION
 from tests.checks.common import AgentCheckTest
 from util import headers as agent_headers
 
-RESULTS_TIMEOUT = 10
+RESULTS_TIMEOUT = 20
 
 AGENT_CONFIG = {
     'version': AGENT_VERSION,
@@ -239,7 +239,8 @@ class HTTPCheckTest(AgentCheckTest):
         """
         self.run_check(CONFIG)
         # Overrides self.service_checks attribute when values are available\
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 6)
+        self.service_checks = self.wait_for_async(
+            'get_service_checks', 'service_checks', len(CONFIG['instances']))
 
         # HTTP connection error
         tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
