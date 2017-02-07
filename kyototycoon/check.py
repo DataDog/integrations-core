@@ -1,8 +1,4 @@
 # (C) Datadog, Inc. 2010-2016
-# All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# (C) Datadog, Inc. 2010-2016
 # (C) Dan Crosta <dcrosta@late.am> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -92,13 +88,11 @@ class KyotoTycoonCheck(AgentCheck):
         body = r.content
 
         totals = defaultdict(int)
-        self.log.info(body)
         for line in body.splitlines():
             if '\t' not in line:
                 continue
 
             key, value = line.strip().split('\t', 1)
-
             if key in self.GAUGES:
                 name = self.GAUGES[key]
                 self.gauge('kyototycoon.%s' % name, float(value), tags=tags)
