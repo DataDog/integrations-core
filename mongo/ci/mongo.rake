@@ -12,34 +12,42 @@ namespace :ci do
   namespace :mongo do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('mongo/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
+    end
+
+    task :install_infrastructure do |t|
       sh %(bash mongo/ci/start-docker.sh)
+      t.reenable
     end
 
-    task before_script: ['ci:common:before_script'] do
+    task before_script: ['ci:common:before_script'] do |t|
       use_venv = in_venv
       install_requirements('mongo/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
     end
 
-    task script: ['ci:common:script'] do
+    task script: ['ci:common:script'] do |t|
       this_provides = [
         'mongo'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
     # task cleanup: ['ci:common:cleanup']
     # sample cleanup task
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       sh %(bash mongo/ci/stop-docker.sh)
+      t.reenable
     end
 
     task :execute do

@@ -14,19 +14,24 @@ container_name_3 = 'dd-test-consul-3'
 
 namespace :ci do
   namespace :consul do |flavor|
-    task before_install: ['ci:common:before_install'] do
+    task before_install: ['ci:common:before_install'] do |t|
       sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
       sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      t.reenable
     end
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('consul/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
+    end
+
+    task :install_infrastructure do |t|
       # sample docker usage
       sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} \
-            consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
+      consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
       Wait.for 8500
       wait_on_docker_logs(container_name_1, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
 
@@ -35,22 +40,25 @@ namespace :ci do
       wait_on_docker_logs(container_name_2, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
       sh %(docker run -d --expose 8301 --name #{container_name_3} consul:#{consul_version} agent -dev -join=#{consul_first_ip} -bind=0.0.0.0)
       wait_on_docker_logs(container_name_3, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
+      t.reenable
     end
 
     task before_script: ['ci:common:before_script']
 
-    task script: ['ci:common:script'] do
+    task script: ['ci:common:script'] do |t|
       this_provides = [
         'consul'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       sh %(docker stop dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
       sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
+      t.reenable
     end
 
     task :execute do
