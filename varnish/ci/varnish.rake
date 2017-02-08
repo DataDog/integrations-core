@@ -26,13 +26,26 @@ namespace :ci do
     end
 
     task :execute do
+      if ENV['FLAVOR_VERSION']
+        flavor_versions = ENV['FLAVOR_VERSION'].split(',')
+      else
+        flavor_versions = [nil]
+      end
+
       exception = nil
       begin
-        %w(before_install install before_script).each do |u|
+        %w(before_install install).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
-        Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+        flavor_versions.each do |flavor_version|
+          ENV['FLAVOR_VERSION'] = flavor_version
+          %w(install_infrastructure before_script).each do |u|
+            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+          end
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+          Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+        end
       rescue => e
         exception = e
         puts "Failed task: #{e.class} #{e.message}".red
