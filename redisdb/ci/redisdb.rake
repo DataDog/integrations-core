@@ -79,6 +79,7 @@ namespace :ci do
         sh %(docker rm #{base_container_name}-#{server} 2>/dev/null || true)
         sh %(rm #{__dir__}/#{server}.tmp.conf 2>/dev/null || true)
       end
+      container_port = 16_379
       t.reenable
     end
 
