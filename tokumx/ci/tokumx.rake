@@ -12,27 +12,34 @@ namespace :ci do
   namespace :tokumx do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('tokumx/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
+    end
+
+    task :install_infrastructure do |t|
       sh %(bash tokumx/ci/start-docker.sh)
+      t.reenable
     end
 
     task before_script: ['ci:common:before_script']
 
-    task script: ['ci:common:script'] do |_, _attr|
+    task script: ['ci:common:script'] do |t, _attr|
       this_provides = [
         'tokumx'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       sh %(bash tokumx/ci/stop-docker.sh)
+      t.reenable
     end
 
     task :execute do
