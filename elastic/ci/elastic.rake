@@ -83,6 +83,7 @@ namespace :ci do
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
         flavor_versions.each do |flavor_version|
+          section("TESTING VERSION #{flavor_version}")
           ENV['FLAVOR_VERSION'] = flavor_version
           %w(install_infrastructure before_script).each do |u|
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
