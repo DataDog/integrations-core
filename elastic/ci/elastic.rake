@@ -71,11 +71,11 @@ namespace :ci do
     end
 
     task :execute do
-      if ENV['FLAVOR_VERSION']
-        flavor_versions = ENV['FLAVOR_VERSION'].split(',')
-      else
-        flavor_versions = [nil]
-      end
+      flavor_versions = if ENV['FLAVOR_VERSION']
+                          ENV['FLAVOR_VERSION'].split(',')
+                        else
+                          [nil]
+                        end
 
       exception = nil
       begin

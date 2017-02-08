@@ -32,10 +32,10 @@ namespace :ci do
 
     task :install_infrastructure do |t|
       redis_image = if redisdb_version == '2.4.18'
-        'mtirsel/redis-2.4'
-      else
-        "redis:#{redisdb_version}"
-      end
+                      'mtirsel/redis-2.4'
+                    else
+                      "redis:#{redisdb_version}"
+                    end
 
       %w(noauth auth slave_healthy slave_unhealthy).each do |server|
         p container_port
@@ -84,11 +84,11 @@ namespace :ci do
     end
 
     task :execute do
-      if ENV['FLAVOR_VERSION']
-        flavor_versions = ENV['FLAVOR_VERSION'].split(',')
-      else
-        flavor_versions = [nil]
-      end
+      flavor_versions = if ENV['FLAVOR_VERSION']
+                          ENV['FLAVOR_VERSION'].split(',')
+                        else
+                          [nil]
+                        end
 
       exception = nil
       begin
