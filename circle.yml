@@ -10,6 +10,7 @@ machine:
         VOLATILE_DIR: '/tmp/integration-sdk-testing'
         SKIP_CLEANUP: 'true'
         INTEGRATIONS_DIR: "$HOME/embedded"
+        CI_BUILD_DIR: "$HOME/$CIRCLE_PROJECT_REPONAME"
         PIP_CACHE: "$HOME/.cache/pip"
         SDK_TESTING: "true"
         DD_AGENT_BRANCH: "master"
@@ -19,6 +20,7 @@ dependencies:
         - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git libpq-dev
         - git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
         - echo "$HOME/dd-agent/" > $(dirname $(pyenv which python))/../lib/python2.7/site-packages/datadog-agent.pth
+        - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
         - pip install pip --upgrade
         - pip install docker-compose
         - pip install pylint
