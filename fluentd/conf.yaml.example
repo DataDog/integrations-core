@@ -10,3 +10,4 @@ instances:
     # Optional, set 'tag_by' to specify how to tag metrics. By default, metrics are tagged with `plugin_id`
     -  monitor_agent_url: http://example.com:24220/api/plugins.json
        tag_by: type
+

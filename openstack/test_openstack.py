@@ -307,7 +307,7 @@ class TestOpenstack(AgentCheckTest):
         self.check.CACHE_TTL["aggregates"] = 1
         expected_aggregates = {"hyp_1": ["aggregate:staging", "availability_zone:test"]}
 
-        with patch("_openstack.OpenstackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
+        with patch("_openstack.OpenStackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
             self.assertEqual(self.check._get_and_set_aggregate_list(), expected_aggregates)
             sleep(1.5)
             self.assertTrue(self.check._is_expired("aggregates"))

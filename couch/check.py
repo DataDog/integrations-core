@@ -12,7 +12,6 @@ import requests
 from checks import AgentCheck
 from util import headers
 
-EVENT_TYPE = SOURCE_TYPE_NAME = 'couch'
 
 class CouchDb(AgentCheck):
     """Extracts stats from CouchDB via its REST API
