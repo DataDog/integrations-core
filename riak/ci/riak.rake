@@ -26,21 +26,10 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      count = 0
-      logs = `docker logs #{container_name} 2>&1`
       puts 'Waiting for Riak to come up'
-      until count == 20 || logs.include?('INFO success: riak entered RUNNING state')
-        sleep_for 2
-        logs = `docker logs #{container_name} 2>&1`
-        count += 1
-      end
-      if logs.include? 'INFO success: riak entered RUNNING state'
-        puts 'Riak is up!'
-      else
-        sh %(docker logs #{container_name} 2>&1)
-        raise
-      end
-      sleep_for 10
+      wait_on_docker_logs('dd-test-riak', 60, 'You can now use riak Server')
+      sleep_for 20
+
       10.times do
         sh %(curl -XPUT -H 'Content-Type: text/plain' -d 'herzlich willkommen' http://localhost:18098/riak/bucket/german)
         sh %(curl http://localhost:18098/riak/bucket/german)
