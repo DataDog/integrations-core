@@ -21,11 +21,6 @@ from tests.checks.common import AgentCheckTest, get_check_class
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
 
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
-}
 
 if os.environ.get('INTEGRATIONS_DIR'):
     socket_path = "unix://{0}/supervisor/supervisor.sock".format(os.environ['INTEGRATIONS_DIR'])
