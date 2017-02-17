@@ -10,3 +10,4 @@ instances:
   #   options:
   #     items: false  # set to true if you wish to collect items memcached stats.
   #     slabs: false  # set to true if you wish to collect slabs memcached stats.
+
