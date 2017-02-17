@@ -13,6 +13,7 @@ from mock import Mock
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, Fixtures, load_check
 
+
 class RiakCSTest(AgentCheckTest):
 
         CHECK_NAME = "riakcs"
@@ -46,6 +47,7 @@ class RiakCSTest(AgentCheckTest):
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.CRITICAL,
                                     tags=['aggregation_key:localhost:8080'])
+
 
 class Riak21CSTest(AgentCheckTest):
 
