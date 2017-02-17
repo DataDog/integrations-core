@@ -156,7 +156,7 @@ class HTTPCheck(NetworkCheck):
         self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
 
         self.proxies['no'] = environ.get('no_proxy',
-                                         environ.get('NO_PROXY', '')
+                                         environ.get('NO_PROXY', None)
                                          )
 
     def _load_conf(self, instance):
