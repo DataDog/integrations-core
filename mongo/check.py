@@ -753,15 +753,6 @@ class MongoDb(AgentCheck):
                         message=message)
                     raise Exception(message)
 
-                # Replication set information
-                replset_name = replSet['set']
-                replset_state = self.get_state_name(replSet['myState']).lower()
-
-                tags.extend([
-                    u"replset_name:{0}".format(replset_name),
-                    u"replset_state:{0}".format(replset_state),
-                ])
-
                 # Find nodes: master and current node (ourself)
                 for member in replSet.get('members'):
                     if member.get('self'):
