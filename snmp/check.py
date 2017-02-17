@@ -217,9 +217,9 @@ class SnmpCheck(NetworkCheck):
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passeed is referring to a specific leaf.
         # For example:
-        # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
+        # snmpgetnext -v2c -c public localhost:11111 1.36.1.2.1.25.4.2.1.7.222
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
-        # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
+        # SOLUTION: perform a snmget command and fallback with snmpgetnext if not found
 
         # Set aliases for snmpget and snmpgetnext with logging
         snmpget = self.snmp_logger(cmd_generator.getCmd)
