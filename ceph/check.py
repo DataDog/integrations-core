@@ -2,29 +2,30 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+"""ceph check
+Collects metrics from ceph clusters
+"""
+
 # stdlib
 import os
 import re
 
-# 3rd party
-import simplejson as json
-
 # project
+from checks import AgentCheck
 from utils.subprocess_output import get_subprocess_output
 from config import _is_affirmative
-from checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ceph'
 
+# third party
+import simplejson as json
 
-class CephCheck(AgentCheck):
+
+class Ceph(AgentCheck):
     """ Collect metrics and events from ceph """
 
     DEFAULT_CEPH_CMD = '/usr/bin/ceph'
     NAMESPACE = "ceph"
-
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
     def _collect_raw(self, ceph_cmd, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))

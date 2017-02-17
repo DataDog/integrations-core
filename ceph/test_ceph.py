@@ -12,16 +12,6 @@ import simplejson as json
 from tests.checks.common import AgentCheckTest, Fixtures
 from checks import AgentCheck
 
-
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
-}
-
-
-# NOTE: Feel free to declare multiple test classes if needed
-
 class TestCeph(AgentCheckTest):
     """Basic Test for ceph integration."""
     CHECK_NAME = 'ceph'
