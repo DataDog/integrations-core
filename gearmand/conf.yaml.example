@@ -1,3 +1,5 @@
+init_config:
+
 instances:
   - server: localhost
     port: 4730

@@ -40,4 +40,4 @@ instances:
     #   - ifName
     #   - dskDevice
     #   - ifIndex
-    # rrd_whitelist: /path/to/rrd_whitelist.txt
+    rrd_whitelist: /path/to/rrd_whitelist.txt
