@@ -45,6 +45,8 @@ class PHPFPMCheck(AgentCheck):
         http_host = instance.get('http_host')
 
         timeout = instance.get('timeout')
+        if timeout is None:
+            timeout = 20
 
         if user and password:
             auth = (user, password)
