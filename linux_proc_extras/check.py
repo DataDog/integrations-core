@@ -25,17 +25,9 @@ PROCESS_PRIOS = {
 }
 
 class MoreUnixCheck(AgentCheck):
-    tags = []
-    proc_path_map = {
-        "inode_info": "/proc/sys/fs/inode-nr",
-        "stat_info": "/proc/stat",
-        "entropy_info": "/proc/sys/kernel/random/entropy_avail",
-    }
-
     def check(self, instance):
         self.tags = instance.get('tags', [])
         self.set_paths()
-
 
         self.get_inode_info()
         self.get_stat_info()
