@@ -89,6 +89,7 @@ class TCPCheckTest(AgentCheckTest):
 
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']))
+        self.metrics = self.check.get_metrics()
 
         expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530"]
         self.assertServiceCheckCritical("tcp.can_connect", tags=expected_tags)
