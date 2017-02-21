@@ -24,6 +24,9 @@ instances:
     # pass in a custom Host header like so
     # http_host: such.production.host
     #
+    # If you need to specify a custom timeout in seconds:
+    # timeout: 5
+    #
     # Array of custom tags
     # By default metrics and service check will be tagged by pool and host
     # tags:
