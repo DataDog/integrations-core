@@ -357,7 +357,7 @@ class ProcessCheck(AgentCheck):
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("no matching process was found")
+            self.warning("No matching process was found")
 
         for attr, mname in ATTR_TO_METRIC.iteritems():
             vals = [x for x in proc_state[attr] if x is not None]
