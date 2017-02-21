@@ -6,6 +6,7 @@ from nose.plugins.attrib import attr
 
 from tests.checks.common import AgentCheckTest
 
+
 @attr(requires='fluentd')
 class TestFluentd(AgentCheckTest):
     CHECK_NAME = 'fluentd'

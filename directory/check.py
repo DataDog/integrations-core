@@ -24,17 +24,13 @@ class DirectoryCheck(AgentCheck):
     WARNING: the user/group that dd-agent runs as must have access to stat the files in the desired directory
 
     Config options:
-        - "directory": string, the directory to gather stats for. required
-        - "name": string, the name to use when tagging the metrics. defaults to the "directory"
-        - "dirtagname": string, the name of the tag used for the directory. defaults to "name"
-        - "filetagname: string, the name of the tag used for each file. defaults to "filename"
-        - "filegauges": boolean, when true stats will be an individual gauge per
-                        file (max. 20 files!) and not a histogram of the whole directory.
-                        default False
-        - "pattern": string, the `fnmatch` pattern to use when reading the
-                     "directory"'s files. default "*"
-        - "recursive": boolean, when true the stats will recurse into
-                       directories. default False
+        "directory" - string, the directory to gather stats for. required
+        "name" - string, the name to use when tagging the metrics. defaults to the "directory"
+        "dirtagname" - string, the name of the tag used for the directory. defaults to "name"
+        "filetagname" - string, the name of the tag used for each file. defaults to "filename"
+        "filegauges" - boolean, when true stats will be an individual gauge per file (max. 20 files!) and not a histogram of the whole directory. default False
+        "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. default "*"
+        "recursive" - boolean, when true the stats will recurse into directories. default False
     """
 
     SOURCE_TYPE_NAME = 'system'
