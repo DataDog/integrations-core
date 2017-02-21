@@ -41,6 +41,13 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
 
         self.load_check({'instances': []})
 
+        self.check.proc_path_map = {
+            "inode_info": "/proc/sys/fs/inode-nr",
+            "stat_info": "/proc/stat",
+            "entropy_info": "/proc/sys/kernel/random/entropy_avail",
+        }
+        self.check.tags = []
+
         ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
         m = mock_open(read_data=Fixtures.read_file('entropy_avail', sdk_dir=ci_dir))
         with patch('__builtin__.open', m):
@@ -55,7 +62,7 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
             self.check.get_stat_info()
             self.check.get_stat_info()
 
-        with patch('_linux_proc_extras.get_subprocess_output', return_value=
+        with patch('linux_proc_extras.get_subprocess_output', return_value=
                    (Fixtures.read_file('process_stats', sdk_dir=ci_dir), "", 0)):
             self.check.get_process_states()
 
