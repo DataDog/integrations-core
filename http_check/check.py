@@ -227,7 +227,7 @@ class HTTPCheck(NetworkCheck):
             if skip_proxy:
                 instance_proxy.pop('http')
                 instance_proxy.pop('https')
-            else:
+            elif self.proxies['no']:
                 for url in self.proxies['no'].replace(';', ',').split(","):
                     if url in parsed_uri.netloc:
                         instance_proxy.pop('http')
