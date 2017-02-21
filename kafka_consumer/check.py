@@ -5,7 +5,7 @@
 # stdlib
 from collections import defaultdict
 
-# 3rd party
+# 3p
 from kafka import KafkaClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
 from kazoo.client import KazooClient
@@ -16,13 +16,14 @@ from checks import AgentCheck
 
 DEFAULT_KAFKA_TIMEOUT = 5
 DEFAULT_ZK_TIMEOUT = 5
-EVENT_TYPE = SOURCE_TYPE_NAME = 'kafka_consumer'
 
 
 class KafkaCheck(AgentCheck):
 
+    SOURCE_TYPE_NAME = 'kafka'
+
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
         self.zk_timeout = int(
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
