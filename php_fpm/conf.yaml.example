@@ -24,7 +24,7 @@ instances:
     # pass in a custom Host header like so
     # http_host: such.production.host
     #
-    # If you need to specify a custom timeout in seconds:
+    # If you need to specify a custom timeout in seconds (default is 20):
     # timeout: 5
     #
     # Array of custom tags
