@@ -69,9 +69,7 @@ class MoreUnixCheck(AgentCheck):
                     ctxt_count = float(line.split(' ')[1])
                     self.monotonic_count('system.linux.context_switches', ctxt_count, tags=self.tags)
                 elif line.startswith('processes'):
-                    self.log.info(line)
                     process_count = int(line.split(' ')[1])
-                    self.log.info(process_count)
                     self.monotonic_count('system.linux.processes_created', process_count, tags=self.tags)
                 elif line.startswith('intr'):
                     interrupts = int(line.split(' ')[1])
