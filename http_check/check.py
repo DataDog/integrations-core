@@ -156,7 +156,7 @@ class HTTPCheck(NetworkCheck):
         self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
 
         self.proxies['no'] = environ.get('no_proxy',
-                                         environ.get('NO_PROXY', '')
+                                         environ.get('NO_PROXY', None)
                                          )
 
     def _load_conf(self, instance):
@@ -231,7 +231,7 @@ class HTTPCheck(NetworkCheck):
             if skip_proxy:
                 instance_proxy.pop('http')
                 instance_proxy.pop('https')
-            else:
+            elif self.proxies['no']:
                 for url in self.proxies['no'].replace(';', ',').split(","):
                     if url in parsed_uri.netloc:
                         instance_proxy.pop('http')
