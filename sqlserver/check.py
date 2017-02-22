@@ -57,7 +57,7 @@ class SQLConnectionError(Exception):
     pass
 
 
-class SqlserverCheck(AgentCheck):
+class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
     # FIXME: 6.x, set default to 5s (like every check)
