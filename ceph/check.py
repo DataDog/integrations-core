@@ -15,8 +15,6 @@ from checks import AgentCheck
 from utils.subprocess_output import get_subprocess_output
 from config import _is_affirmative
 
-EVENT_TYPE = SOURCE_TYPE_NAME = 'ceph'
-
 # third party
 import simplejson as json
 
