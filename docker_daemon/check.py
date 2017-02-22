@@ -14,7 +14,9 @@ from math import ceil
 # project
 from checks import AgentCheck
 from config import _is_affirmative
-from utils.dockerutil import DockerUtil, MountException
+from utils.dockerutil import (DockerUtil,
+                              MountException,
+                              SWARM_SVC_LABEL)
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
@@ -104,7 +106,7 @@ DEFAULT_IMAGE_TAGS = [
 ]
 
 DEFAULT_LABELS_AS_TAGS = [
-    DockerUtil.SWARM_SVC_LABEL
+    SWARM_SVC_LABEL
 ]
 
 
@@ -393,7 +395,7 @@ class DockerDaemon(AgentCheck):
                                 tags.append("kube_replication_controller:%s" % replication_controller)
                                 tags.append("pod_name:%s" % pod_name)
 
-                        elif k == DockerUtil.SWARM_SVC_LABEL and Platform.is_swarm():
+                        elif k == SWARM_SVC_LABEL and Platform.is_swarm():
                             if v:
                                 tags.append("swarm_service:%s" % v)
 
