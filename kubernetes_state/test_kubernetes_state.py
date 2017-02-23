@@ -1,14 +1,20 @@
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
+# stdlib
+import mock
 import os
 
+# 3p
+from nose.plugins.attrib import attr
+
+# project
 from tests.checks.common import AgentCheckTest
 from utils.kubernetes import NAMESPACE
 
-import mock
 
-
+@attr(requires='containers')
 class TestKubernetesState(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes_state'

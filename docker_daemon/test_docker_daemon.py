@@ -37,7 +37,7 @@ def reset_docker_settings():
     DockerUtil().set_docker_settings({}, {})
 
 
-@attr(requires='docker_daemon')
+@attr(requires='containers')
 class TestCheckDockerDaemon(AgentCheckTest):
     """Basic Test for docker_daemon integration."""
     CHECK_NAME = 'docker_daemon'
