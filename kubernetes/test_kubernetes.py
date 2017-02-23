@@ -27,6 +27,8 @@ LIM = "limits"
 REQ = "requests"
 CAP = "capacity"
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+
 METRICS = [
     ('kubernetes.memory.usage', MEM),
     ('kubernetes.filesystem.usage', FS),
@@ -50,9 +52,9 @@ METRICS = [
 
 def KubeUtil_fake_retrieve_json_auth(url, timeout=10):
     if url.endswith("/namespaces"):
-        return json.loads(Fixtures.read_file("namespaces.json", string_escape=False))
+        return json.loads(Fixtures.read_file("namespaces.json", sdk_dir=FIXTURE_DIR, string_escape=False))
     if url.endswith("/events"):
-        return json.loads(Fixtures.read_file("events.json", string_escape=False))
+        return json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))
     return {}
 
 class TestKubernetes(AgentCheckTest):
@@ -62,9 +64,9 @@ class TestKubernetes(AgentCheckTest):
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_fail_1_1(self, *args):
         # To avoid the disparition of some gauges during the second check
         config = {
@@ -78,9 +80,9 @@ class TestKubernetes(AgentCheckTest):
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_metrics_1_1(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
@@ -136,9 +138,9 @@ class TestKubernetes(AgentCheckTest):
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.1.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_historate_1_1(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
@@ -185,11 +187,11 @@ class TestKubernetes(AgentCheckTest):
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info',
-                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_fail_1_2(self, *args):
         # To avoid the disparition of some gauges during the second check
         config = {
@@ -202,11 +204,11 @@ class TestKubernetes(AgentCheckTest):
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info',
-                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_metrics_1_2(self, *args):
         mocks = {
             '_perform_kubelet_checks': lambda x: None,
@@ -253,11 +255,11 @@ class TestKubernetes(AgentCheckTest):
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info',
-                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
-                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json")))
+                side_effect=lambda: json.loads(Fixtures.read_file("metrics_1.2.json", sdk_dir=FIXTURE_DIR)))
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_historate_1_2(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
@@ -309,7 +311,7 @@ class TestKubernetes(AgentCheckTest):
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
-                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False)))
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
     def test_events(self, *args):
         # default value for collect_events is False
         config = {'instances': [{'host': 'foo'}]}
@@ -405,7 +407,7 @@ class TestKubeutil(unittest.TestCase):
         res = self.kubeutil.extract_kube_labels({}, ['foo'])
         self.assertEqual(len(res), 0)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.extract_kube_labels(pods, ['foo'])
         labels = set(inn for out in res.values() for inn in out)
         self.assertEqual(len(labels), 8)
@@ -413,7 +415,7 @@ class TestKubeutil(unittest.TestCase):
         labels = set(inn for out in res.values() for inn in out)
         self.assertEqual(len(labels), 6)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.extract_kube_labels(pods, ['foo'])
         labels = set(inn for out in res.values() for inn in out)
         self.assertEqual(len(labels), 3)
@@ -428,13 +430,13 @@ class TestKubeutil(unittest.TestCase):
         res = self.kubeutil.extract_meta({}, 'foo')
         self.assertEqual(len(res), 0)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.extract_meta(pods, 'foo')
         self.assertEqual(len(res), 0)
         res = self.kubeutil.extract_meta(pods, 'uid')
         self.assertEqual(len(res), 6)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.extract_meta(pods, 'foo')
         self.assertEqual(len(res), 0)
         res = self.kubeutil.extract_meta(pods, 'uid')
@@ -462,19 +464,19 @@ class TestKubeutil(unittest.TestCase):
         res = self.kubeutil.filter_pods_list({}, 'foo')
         self.assertEqual(len(res.get('items')), 0)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.filter_pods_list(pods, '10.240.0.9')
         self.assertEqual(len(res.get('items')), 5)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.filter_pods_list(pods, 'foo')
         self.assertEqual(len(res.get('items')), 0)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.filter_pods_list(pods, '10.240.0.5')
         self.assertEqual(len(res.get('items')), 1)
 
-        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False))
+        pods = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
         res = self.kubeutil.filter_pods_list(pods, 'foo')
         self.assertEqual(len(res.get('items')), 0)
 
@@ -524,13 +526,13 @@ class TestKubeutil(unittest.TestCase):
         """
         with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
             self.kubeutil.host_name = 'dd-agent-1rxlh'
-            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.2.json", string_escape=False))
+            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
             self.assertEqual(self.kubeutil._node_name, 'kubernetes-massi-minion-k23m')
 
             self.kubeutil.host_name = 'heapster-v11-l8sh1'
-            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", string_escape=False))
+            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
             self.assertEqual(self.kubeutil._node_name, 'gke-cluster-1-8046fdfa-node-ld35')
@@ -548,7 +550,7 @@ class TestKubeutil(unittest.TestCase):
         self.assertTrue(Platform.is_k8s())
 
     def test_extract_event_tags(self):
-        events = json.loads(Fixtures.read_file("events.json", string_escape=False))['items']
+        events = json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))['items']
         for ev in events:
             tags = KubeUtil().extract_event_tags(ev)
             # there should be 4 tags except for some events where source.host is missing
