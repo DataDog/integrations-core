@@ -1,5 +1,9 @@
 # Docker Integration
 
+## Deprecated
+
+The "docker" check is deprecated and will be removed in a future version of the agent. Please use the "docker_daemon" one instead
+
 ## Overview
 
 Get metrics from docker service in real time to:
