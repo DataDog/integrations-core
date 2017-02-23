@@ -7,6 +7,9 @@
   "short_description": "docker description.",
   "guid": "dfb3ae17-ca9b-46fd-a952-346472e2608f",
   "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
   "version": "0.1.0"
 }

@@ -7,6 +7,9 @@
   "short_description": "kubernetes_state description.",
   "guid": "guid_replaceme",
   "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
   "version": "0.1.0"
 }
