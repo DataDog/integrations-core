@@ -561,6 +561,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
         }
 
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
+        DockerUtil().filtering_enabled = False
 
         self.run_check(config, force_reload=True)
         self.assertServiceCheck('docker.container_health', count=2)
