@@ -504,7 +504,7 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
-            if self._version_compatible(db, host, "5.6.6"):
+            if self._version_compatible(db, host, (5, 6, 6)):
                 metrics.update(OPTIONAL_STATUS_VARS_5_6_6)
 
         if _is_affirmative(options.get('galera_cluster', False)):
@@ -513,7 +513,7 @@ class MySql(AgentCheck):
             metrics.update(GALERA_VARS)
 
         performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
-        above_560 = self._version_compatible(db, host, "5.6.0")
+        above_560 = self._version_compatible(db, host, (5, 6, 0))
         if _is_affirmative(options.get('extra_performance_metrics', False)) and above_560 and \
                 performance_schema_enabled:
             # report avg query response time per schema to Datadog
@@ -541,7 +541,7 @@ class MySql(AgentCheck):
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
-            if self._version_compatible(db, host, "5.7.0"):
+            if self._version_compatible(db, host, (5, 7, 0)):
                 slave_io_running = self._collect_string('Slave_IO_Running', results)
                 slave_sql_running = self._collect_string('Slave_SQL_Running', results)
                 if slave_io_running:
