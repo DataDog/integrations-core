@@ -7,6 +7,7 @@ from collections import defaultdict
 import copy
 import time
 from nose.plugins.attrib import attr
+import os
 
 # 3p
 import simplejson as json
@@ -14,6 +15,7 @@ import simplejson as json
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def _get_data_mock(url):
     with open(url, 'r') as go_output:
@@ -62,7 +64,7 @@ class TestMockGoExpVar(AgentCheckTest):
 
     def __init__(self, *args, **kwargs):
         AgentCheckTest.__init__(self, *args, **kwargs)
-        self._expvar_url = Fixtures.file('expvar_output')
+        self._expvar_url = Fixtures.file('expvar_output', sdk_dir=FIXTURE_DIR)
         self.mock_config = {
             "instances": [{
                 "expvar_url": self._expvar_url,

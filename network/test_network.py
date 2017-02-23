@@ -5,6 +5,7 @@
 # stdlib
 from collections import namedtuple
 import socket
+import os
 
 # 3p
 import mock
@@ -13,18 +14,20 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+
 def ss_subprocess_mock(*args, **kwargs):
     if args[0][-1] == '-4':
-        return (Fixtures.read_file('ss_ipv4'), "", 0)
+        return (Fixtures.read_file('ss_ipv4', sdk_dir=FIXTURE_DIR), "", 0)
     elif args[0][-1] == '-6':
-        return (Fixtures.read_file('ss_ipv6'), "", 0)
+        return (Fixtures.read_file('ss_ipv6', sdk_dir=FIXTURE_DIR), "", 0)
 
 
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        return (Fixtures.read_file('netstat'), "", 0)
+        return (Fixtures.read_file('netstat', sdk_dir=FIXTURE_DIR), "", 0)
 
 class TestCheckNetwork(AgentCheckTest):
     CHECK_NAME = 'network'

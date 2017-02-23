@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import os
 
 # 3p
 from mock import Mock, MagicMock
@@ -12,6 +13,7 @@ import simplejson as json
 # datadog
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 class MockedMOR(Mock):
     """
@@ -145,7 +147,7 @@ def create_topology(topology_json):
 
         return mor
 
-    return rec_build(json.loads(Fixtures.read_file(topology_json)))
+    return rec_build(json.loads(Fixtures.read_file(topology_json, sdk_dir=FIXTURE_DIR)))
 
 
 

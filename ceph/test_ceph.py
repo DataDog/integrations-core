@@ -19,7 +19,7 @@ class TestCeph(AgentCheckTest):
 
     def test_simple_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(Fixtures.read_file('raw.json')),
+            '_collect_raw': lambda x,y: json.loads(Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
             'instances': [{'host': 'foo'}]
