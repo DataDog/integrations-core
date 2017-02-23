@@ -4,6 +4,7 @@
 
 # stdlib
 from urlparse import urljoin
+import os
 
 # 3rd party
 import mock
@@ -22,6 +23,7 @@ YARN_CLUSTER_METRICS_URL = urljoin(RM_ADDRESS, '/ws/v1/cluster/metrics')
 YARN_APPS_URL = urljoin(RM_ADDRESS, '/ws/v1/cluster/apps') + '?states=RUNNING'
 YARN_NODES_URL = urljoin(RM_ADDRESS, '/ws/v1/cluster/nodes')
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def requests_get_mock(*args, **kwargs):
 
@@ -37,17 +39,17 @@ def requests_get_mock(*args, **kwargs):
             return True
 
     if args[0] == YARN_CLUSTER_METRICS_URL:
-        with open(Fixtures.file('cluster_metrics'), 'r') as f:
+        with open(Fixtures.file('cluster_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == YARN_APPS_URL:
-        with open(Fixtures.file('apps_metrics'), 'r') as f:
+        with open(Fixtures.file('apps_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == YARN_NODES_URL:
-        with open(Fixtures.file('nodes_metrics'), 'r') as f:
+        with open(Fixtures.file('nodes_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 

@@ -9,6 +9,7 @@ import time
 
 # 3p
 import mock
+from nose.plugins.attrib import attr
 
 # project
 from config import AGENT_VERSION
@@ -196,7 +197,7 @@ CONFIG_POST_METHOD = {
     }]
 }
 
-
+@attr(requires='skip')
 class HTTPCheckTest(AgentCheckTest):
     CHECK_NAME = 'http_check'
 

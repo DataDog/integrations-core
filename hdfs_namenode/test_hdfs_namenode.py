@@ -1,3 +1,6 @@
+# stdlib
+import os
+
 # Project
 from tests.checks.common import AgentCheckTest, Fixtures
 
@@ -13,6 +16,8 @@ NAME_SYSTEM_STATE_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FS
 
 # Namesystem url
 NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesystem'
+
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def requests_get_mock(*args, **kwargs):
     class MockResponse:
@@ -32,13 +37,13 @@ def requests_get_mock(*args, **kwargs):
 
     if args[0] == NAME_SYSTEM_STATE_URL:
         print 'here'
-        with open(Fixtures.file('hdfs_namesystem_state'), 'r') as f:
+        with open(Fixtures.file('hdfs_namesystem_state', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == NAME_SYSTEM_URL:
         print 'here'
-        with open(Fixtures.file('hdfs_namesystem'), 'r') as f:
+        with open(Fixtures.file('hdfs_namesystem', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 

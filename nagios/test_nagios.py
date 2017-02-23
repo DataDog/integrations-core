@@ -5,6 +5,7 @@
 # stdlib
 import tempfile
 import time
+import os
 
 # 3p
 from nose.plugins.attrib import attr
@@ -12,12 +13,13 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 class NagiosTestCase(AgentCheckTest):
     CHECK_NAME = 'nagios'
-    NAGIOS_TEST_LOG = Fixtures.file('nagios.log')
-    NAGIOS_TEST_HOST = Fixtures.file('host-perfdata')
-    NAGIOS_TEST_SVC = Fixtures.file('service-perfdata')
+    NAGIOS_TEST_LOG = Fixtures.file('nagios.log', sdk_dir=FIXTURE_DIR)
+    NAGIOS_TEST_HOST = Fixtures.file('host-perfdata', sdk_dir=FIXTURE_DIR)
+    NAGIOS_TEST_SVC = Fixtures.file('service-perfdata', sdk_dir=FIXTURE_DIR)
     NAGIOS_TEST_HOST_TEMPLATE = "[HOSTPERFDATA]\t$TIMET$\t$HOSTNAME$\t$HOSTEXECUTIONTIME$\t$HOSTOUTPUT$\t$HOSTPERFDATA$"
     NAGIOS_TEST_SVC_TEMPLATE = "[SERVICEPERFDATA]\t$TIMET$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$"
 
