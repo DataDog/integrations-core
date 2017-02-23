@@ -1,5 +1,12 @@
 # Mesos Integration
 
+# DEPRECATED:
+
+This generic Mesosphere check is deprecated not actively developed anymore.
+It will be removed in a future version of the Datadog Agent.
+Please head over to the Mesosphere master and slave specific checks.
+
+
 ## Overview
 
 Get metrics from mesos service in real time to:
