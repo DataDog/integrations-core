@@ -1,5 +1,10 @@
 # Hdfs Integration
 
+## DEPRECATED:
+This check is deprecated and will be removed in a future version of the agent.
+Please use the `hdfs_namenode` and `hdfs_datanode` checks instead.
+
+
 ## Overview
 
 Get metrics from hdfs service in real time to:
