@@ -454,7 +454,7 @@ class Kubernetes(AgentCheck):
         # handle old config value
         if 'namespace' in instance and instance.get('namespace') not in (None, 'default'):
             self.log.warning('''The 'namespace' parameter is deprecated and will stop being supported starting '''
-                             '''from 5.12. Please use 'namespaces' and/or 'namespace_name_regexp' instead.''')
+                             '''from 5.13. Please use 'namespaces' and/or 'namespace_name_regexp' instead.''')
             k8s_namespaces.append(instance.get('namespace'))
 
         if self.k8s_namespace_regexp:
