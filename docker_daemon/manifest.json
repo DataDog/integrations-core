@@ -7,6 +7,10 @@
   "short_description": "Docker daemon and container metric collection.",
   "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
   "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "version": "1.0.0"
 }
