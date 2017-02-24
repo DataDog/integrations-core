@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
+# stdlib
+import mock
 import os
 
+# project
 from tests.checks.common import AgentCheckTest
 from utils.kubernetes import NAMESPACE
-
-import mock
 
 
 class TestKubernetesState(AgentCheckTest):
