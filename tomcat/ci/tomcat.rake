@@ -20,15 +20,20 @@ namespace :ci do
   namespace :tomcat do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('tomcat/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d -p #{container_port}:8090 --name #{container_name} -e JAVA_OPTS='#{java_opts}' tomcat:6.0.43)
+      t.reenable
     end
 
-    task before_script: ['ci:common:before_script'] do
+    task :install_infrastructure do |t|
+      sh %(docker run -d -p #{container_port}:8090 --name #{container_name} -e JAVA_OPTS='#{java_opts}' tomcat:6.0.43)
+      t.reenable
+    end
+
+    task before_script: ['ci:common:before_script'] do |t|
       count = 0
       logs = `docker logs #{container_name} 2>&1`
       puts 'Waiting for Tomcat to come up'
@@ -43,29 +48,46 @@ namespace :ci do
         sh %(docker logs #{container_name} 2>&1)
         raise
       end
+      t.reenable
     end
 
-    task script: ['ci:common:script'] do
+    task script: ['ci:common:script'] do |t|
       this_provides = [
         'tomcat'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       `docker rm -f #{container_name}`
+      t.reenable
     end
 
     task :execute do
+      flavor_versions = if ENV['FLAVOR_VERSION']
+                          ENV['FLAVOR_VERSION'].split(',')
+                        else
+                          [nil]
+                        end
+
       exception = nil
       begin
-        %w(before_install install before_script).each do |u|
+        %w(before_install install).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
-        Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+        flavor_versions.each do |flavor_version|
+          section("TESTING VERSION #{flavor_version}")
+          ENV['FLAVOR_VERSION'] = flavor_version
+          %w(install_infrastructure before_script).each do |u|
+            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+          end
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+          Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+        end
       rescue => e
         exception = e
         puts "Failed task: #{e.class} #{e.message}".red

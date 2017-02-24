@@ -14,16 +14,21 @@ container_port2 = 9300
 
 namespace :ci do
   namespace :elastic do |flavor|
-    task before_install: ['ci:common:before_install'] do
+    task before_install: ['ci:common:before_install'] do |t|
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
+      t.reenable
     end
 
-    task install: ['ci:common:install'] do
+    task install: ['ci:common:install'] do |t|
       use_venv = in_venv
       install_requirements('elastic/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+      t.reenable
+    end
+
+    task :install_infrastructure do |t|
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = 'datadog/docker-library:elasticsearch_' + elastic_version.split('.')[0..1].join('_')
@@ -38,37 +43,55 @@ namespace :ci do
                                          else
                                            `docker inspect dd-test-elastic | grep IPAddress`[/([0-9\.]+)/]
                                          end
+      t.reenable
     end
 
-    task before_script: ['ci:common:before_script'] do
+    task before_script: ['ci:common:before_script'] do |t|
       Wait.for 'http://localhost:9200', 20
       # Create an index in ES
       http = Net::HTTP.new('localhost', 9200)
       http.send_request('PUT', '/datadog/')
+      t.reenable
     end
 
-    task script: ['ci:common:script'] do
+    task script: ['ci:common:script'] do |t|
       this_provides = [
         'elastic'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      t.reenable
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
+    task cleanup: ['ci:common:cleanup'] do |t|
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
+      t.reenable
     end
 
     task :execute do
+      flavor_versions = if ENV['FLAVOR_VERSION']
+                          ENV['FLAVOR_VERSION'].split(',')
+                        else
+                          [nil]
+                        end
+
       exception = nil
       begin
-        %w(before_install install before_script).each do |u|
+        %w(before_install install).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
-        Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+        flavor_versions.each do |flavor_version|
+          section("TESTING VERSION #{flavor_version}")
+          ENV['FLAVOR_VERSION'] = flavor_version
+          %w(install_infrastructure before_script).each do |u|
+            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+          end
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+          Rake::Task["#{flavor.scope.path}:before_cache"].invoke
+          Rake::Task["#{flavor.scope.path}:cleanup"].invoke
+        end
       rescue => e
         exception = e
         puts "Failed task: #{e.class} #{e.message}".red
