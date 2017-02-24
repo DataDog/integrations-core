@@ -6,15 +6,11 @@
 import mock
 import os
 
-# 3p
-from nose.plugins.attrib import attr
-
 # project
 from tests.checks.common import AgentCheckTest
 from utils.kubernetes import NAMESPACE
 
 
-@attr(requires='containers')
 class TestKubernetesState(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes_state'

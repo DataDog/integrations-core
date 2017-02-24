@@ -76,7 +76,6 @@ test:
         - rake ci:run[win32_event_log]
         - rake ci:run[kafka_consumer]
         - rake ci:run[kafka]
-        - rake ci:run[containers]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

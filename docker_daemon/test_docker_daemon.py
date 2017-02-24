@@ -6,9 +6,6 @@
 import logging
 import mock
 
-# 3p
-from nose.plugins.attrib import attr
-
 # project
 from tests.checks.common import AgentCheckTest
 from utils.dockerutil import DockerUtil
@@ -37,7 +34,6 @@ def reset_docker_settings():
     DockerUtil().set_docker_settings({}, {})
 
 
-@attr(requires='containers')
 class TestCheckDockerDaemon(AgentCheckTest):
     """Basic Test for docker_daemon integration."""
     CHECK_NAME = 'docker_daemon'

@@ -9,7 +9,6 @@ import os
 
 # 3p
 import simplejson as json
-from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
@@ -59,7 +58,6 @@ def KubeUtil_fake_retrieve_json_auth(url, timeout=10):
         return json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))
     return {}
 
-@attr(requires='containers')
 class TestKubernetes(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes'
@@ -379,7 +377,6 @@ class TestKubernetes(AgentCheckTest):
         self.assertEvent('dd-agent-a769 SuccessfulDelete on Bar', count=1, exact_match=False)
         self.assertEvent('hello-node-47289321-91tfd Scheduled on Bar', count=0, exact_match=False)
 
-@attr(requires='containers')
 class TestKubeutil(unittest.TestCase):
     def setUp(self):
         self.kubeutil = KubeUtil()
