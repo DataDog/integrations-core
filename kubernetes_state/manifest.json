@@ -5,11 +5,12 @@
   "min_agent_version": "5.6.3",
   "name": "kubernetes_state",
   "short_description": "kubernetes_state description.",
-  "guid": "guid_replaceme",
+  "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
   "support": "contrib",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "use_omnibus_reqs": true
 }
