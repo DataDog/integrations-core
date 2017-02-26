@@ -541,7 +541,7 @@ class TestKubeutil(unittest.TestCase):
     def test_get_auth_token(self):
         KubeUtil.AUTH_TOKEN_PATH = '/foo/bar'
         self.assertIsNone(KubeUtil.get_auth_token())
-        KubeUtil.AUTH_TOKEN_PATH = Fixtures.file('events.json')  # any file could do the trick
+        KubeUtil.AUTH_TOKEN_PATH = Fixtures.file('events.json', sdk_dir=FIXTURE_DIR,)  # any file could do the trick
         self.assertIsNotNone(KubeUtil.get_auth_token())
 
     def test_is_k8s(self):
