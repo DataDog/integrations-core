@@ -25,8 +25,8 @@ class Skip(Exception):
 class Jenkins(AgentCheck):
     datetime_format = '%Y-%m-%d_%H-%M-%S'
 
-    def __init__(self, name, init_config, agentConfig):
-        AgentCheck.__init__(self, name, init_config, agentConfig)
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.high_watermarks = {}
 
     def _timestamp_from_build_file(self, dir_name, tree):

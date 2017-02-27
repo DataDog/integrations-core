@@ -40,18 +40,25 @@ def dict_to_xml(metadata_dict):
 
     return ET.tostring(build)
 
-
 def write_file(file_name, log_data):
     with open(file_name, 'w') as log_file:
         log_file.write(log_data)
 
 
 class TestJenkins(AgentCheckTest):
-    CHECK_NAME = 'tcp_check'
+    CHECK_NAME = 'jenkins'
 
     def setUp(self):
         super(TestJenkins, self).setUp()
         self.tmp_dir = tempfile.mkdtemp()
+        self.config = {
+            'init_config': {},
+            'instances': [{
+                'name': 'default',
+                'jenkins_home': self.tmp_dir
+            }]
+        }
+        self.instance = self.config['instances'][0]
         self.config_yaml = CONFIG.replace('<JENKINS_HOME>', self.tmp_dir)
         self._create_old_build()
 
@@ -70,10 +77,7 @@ class TestJenkins(AgentCheckTest):
 
     def _create_check(self):
         # Create the jenkins check
-        self.instance = {
-            'name': 'default',
-            'jenkins_home': self.tmp_dir
-        }
+        self.load_check(self.config)
 
     def _populate_build_dir(self, metadata, time=None):
         # The jenkins dd agent requires the build metadata file and a log file of results
@@ -99,7 +103,7 @@ class TestJenkins(AgentCheckTest):
 
         self._populate_build_dir(metadata)
         self._create_check()
-        self.check.check(self.instance)
+        self.run_check(self.config)
 
         # The check method does not return anything, so this testcase passes
         #  if the high_watermark was set and no exceptions were raised.
@@ -117,16 +121,14 @@ class TestJenkins(AgentCheckTest):
         # Set the high_water mark so that the next check will create events
         self.check.high_watermarks['default'] = defaultdict(lambda: 0)
 
-        self.check.check(self.instance)
+        self.run_check(self.config)
 
-        metrics = self.check.get_metrics()
-
-        metrics_names = [m[0] for m in metrics]
+        metrics_names = [m[0] for m in self.metrics]
         assert len(metrics_names) == 2
         assert 'jenkins.job.success' in metrics_names
         assert 'jenkins.job.duration' in metrics_names
 
-        metrics_tags = [m[3] for m in metrics]
+        metrics_tags = [m[3] for m in self.metrics]
         for tag in metrics_tags:
             assert 'job_name:foo' in tag.get('tags')
             assert 'result:SUCCESS' in tag.get('tags')
@@ -144,16 +146,14 @@ class TestJenkins(AgentCheckTest):
         # Set the high_water mark so that the next check will create events
         self.check.high_watermarks['default'] = defaultdict(lambda: 0)
 
-        self.check.check(self.instance)
+        self.run_check(self.config)
 
-        metrics = self.check.get_metrics()
-
-        metrics_names = [m[0] for m in metrics]
+        metrics_names = [m[0] for m in self.metrics]
         assert len(metrics_names) == 2
         assert 'jenkins.job.failure' in metrics_names
         assert 'jenkins.job.duration' in metrics_names
 
-        metrics_tags = [m[3] for m in metrics]
+        metrics_tags = [m[3] for m in self.metrics]
         for tag in metrics_tags:
             assert 'job_name:foo' in tag.get('tags')
             assert 'result:ABORTED' in tag.get('tags')
@@ -172,7 +172,7 @@ class TestJenkins(AgentCheckTest):
         # Set the high_water mark so that the next check will create events
         self.check.high_watermarks['default'] = defaultdict(lambda: 0)
 
-        self.check.check(self.instance)
+        self.run_check(self.config)
 
         # The check method does not return anything, so this testcase passes
         # if the high_watermark was NOT updated and no exceptions were raised.
