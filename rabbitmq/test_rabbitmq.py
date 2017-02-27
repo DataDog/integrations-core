@@ -4,6 +4,7 @@
 
 # stdlib
 import sys
+import os
 
 # 3p
 import mock
@@ -12,7 +13,7 @@ from nose.plugins.attrib import attr
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_checksd_path, get_os
+from tests.checks.common import AgentCheckTest
 
 CONFIG = {
     'init_config': {},
@@ -140,7 +141,7 @@ class TestRabbitMQ(AgentCheckTest):
 
     @classmethod
     def setUpClass(cls):
-        sys.path.append(get_checksd_path(get_os()))
+        sys.path.append(os.path.abspath('.'))
 
     @classmethod
     def tearDownClass(cls):
