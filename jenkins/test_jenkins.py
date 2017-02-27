@@ -5,13 +5,13 @@ import logging
 import os
 import shutil
 import tempfile
-import unittest
 
 # 3p
 import xml.etree.ElementTree as ET
 
 # project
-from tests.checks.common import get_check
+from tests.checks.common import AgentCheckTest
+
 
 logger = logging.getLogger(__file__)
 
@@ -46,14 +46,17 @@ def write_file(file_name, log_data):
         log_file.write(log_data)
 
 
-class TestJenkins(unittest.TestCase):
+class TestJenkins(AgentCheckTest):
+    CHECK_NAME = 'tcp_check'
 
     def setUp(self):
+        super(TestJenkins, self).setUp()
         self.tmp_dir = tempfile.mkdtemp()
         self.config_yaml = CONFIG.replace('<JENKINS_HOME>', self.tmp_dir)
         self._create_old_build()
 
     def tearDown(self):
+        super(TestJenkins, self).tearDown()
         # Clean up the temp directory
         shutil.rmtree(self.tmp_dir)
 
@@ -67,8 +70,10 @@ class TestJenkins(unittest.TestCase):
 
     def _create_check(self):
         # Create the jenkins check
-        self.check, instances = get_check('jenkins', self.config_yaml)
-        self.instance = instances[0]
+        self.instance = {
+            'name': 'default',
+            'jenkins_home': self.tmp_dir
+        }
 
     def _populate_build_dir(self, metadata, time=None):
         # The jenkins dd agent requires the build metadata file and a log file of results
