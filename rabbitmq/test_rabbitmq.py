@@ -13,7 +13,7 @@ from nose.plugins.attrib import attr
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_checksd_path, get_os
+from tests.checks.common import AgentCheckTest
 
 CONFIG = {
     'init_config': {},
