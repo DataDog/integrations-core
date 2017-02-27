@@ -4,6 +4,7 @@
 
 # stdlib
 import sys
+import os
 
 # 3p
 import mock
@@ -140,7 +141,7 @@ class TestRabbitMQ(AgentCheckTest):
 
     @classmethod
     def setUpClass(cls):
-        sys.path.append(get_checksd_path(get_os()))
+        sys.path.append(os.path.abspath('.'))
 
     @classmethod
     def tearDownClass(cls):
