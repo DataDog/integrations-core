@@ -14,7 +14,6 @@ import time
 import calendar
 
 # 3rd party
-import requests
 import simplejson as json
 
 # project
@@ -88,8 +87,8 @@ class Kubernetes(AgentCheck):
 
         inst = instances[0] if instances is not None else None
         self.kubeutil = KubeUtil(instance=inst)
-        if not self.kubeutil.host:
-            raise Exception('Unable to retrieve Docker hostname and host parameter is not set')
+        if not self.kubeutil.kubelet_api_url:
+            raise Exception('Unable to reach kubelet. Try setting the host parameter.')
 
         self.k8s_namespace_regexp = None
         if inst:
@@ -104,8 +103,8 @@ class Kubernetes(AgentCheck):
         service_check_base = NAMESPACE + '.kubelet.check'
         is_ok = True
         try:
-            r = requests.get(url, params={'verbose': True})
-            for line in r.iter_lines():
+            req = self.kubeutil.perform_kubelet_query(url)
+            for line in req.iter_lines():
 
                 # avoid noise; this check is expected to fail since we override the container hostname
                 if line.find('hostname') != -1:

@@ -1,24 +1,38 @@
 init_config:
 
 instances:
-  # The kubernetes check retrieves metrics from cadvisor running under kubelet.
-  # By default we will assume we're running under docker and will use the address
-  # of the default router to reach the cadvisor api unless the environment variable
-  # KUBERNETES_KUBELET_HOST is found.
+  # The kubernetes check retrieves metrics from cadvisor running under kubelet on each node.
+  # It also queries kubelet for its health and the list of local-running pods.
   #
-  # To override, e.g. in the case of a standalone cadvisor instance, use the following:
+  # By default we assume we're running under docker and
+  # that the kubelet read-only port with no auth is enabled.
+  #
+  # In this case we will use the address of the default router to
+  # reach the kubelet and cadvisor APIs unless the environment variable
+  # KUBERNETES_KUBELET_HOST is found (if your node names can be resolved by pods, we recommend you set this variable to spec.nodeName through the downward API).
+  #
+  # If the read-only endpoint is disabled, the check will query kubelet over HTTPS
+  #
+  # To override this behavior, e.g. in the case of a standalone cadvisor instance, use the following:
   #
   # host: localhost
   # port: 4194
   # method: http
+
+  # cAdvisor port
  - port: 4194
 
+  # cAdvisor host
+  # host: localhost
+
   # Authentication against the apiserver
+  #
   # By default the agent authenticates against the apiserver with its service account bearer token.
   # X509 certificate authentication is also supported.
   # To enable cert auth in place of bearer token auth, provide here the paths to
   # a client cert/key pair.
   # The recommended way to expose these files to the agent is by using Kubernetes Secrets.
+  #
   # apiserver_client_crt: /path/to/client.crt
   # apiserver_client_key: /path/to/client.key
   #
@@ -52,7 +66,39 @@ instances:
   #
   # use_histogram: false
 
+  # kubelet port. It needs to be set if you are not using a default one (10250 or 10255)
   # kubelet_port: 10255
+  #
+  # TLS configuration for querying kubelet.
+  #
+  # Available options are:
+  # (server auth)
+  # - simple TLS validation (with readily available certificates)
+  # - disabling TLS validation
+  # - providing the server certificate
+  # (client auth)
+  # - providing a client cert/key pair
+  # - using a service account bearer token
+  #
+  # The default is to try and use the read-only port that doesn't require TLS
+  # And to fall back to the HTTPS API with simple TLS validation.
+  #
+  # Explicitly disabling tls_verify should be used with caution:
+  # if an attacker sniffs the agent requests they will see the agent's service account bearer token.
+  #
+  # Providing a server cert enables TLS validation.
+  #
+  # It is possible to providing a client cert/key pair for client auth.
+  # If no such cert is passed, the agent authenticates using its pod bearer token (if available) when querying kubelet and the apiserver.
+  #
+  # The recommended way to pass certificates and keys to the agent is by using
+  # "Secret" Kubernetes object (and to mount them as volumes).
+  #
+  # kubelet_tls_verify: True
+  # kubelet_cert: /path/to/ca.pem
+  # kubelet_client_crt: /path/to/client.crt
+  # kubelet_client_key: /path/to/client.key
+  #
   #
   # We can define a whitelist of patterns that permit publishing raw metrics.
   # enabled_rates:
