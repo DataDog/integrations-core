@@ -6,7 +6,7 @@
   "name": "agent_metrics",
   "short_description": "agent_metrics description.",
   "guid": "032333e3-5272-4044-90d5-a05997667513",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
