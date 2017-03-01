@@ -149,18 +149,19 @@ class Kubernetes(AgentCheck):
 
         pods_list = self.kubeutil.retrieve_pods_list()
 
-        # kubelet health checks
-        self._perform_kubelet_checks(self.kubeutil.kube_health_url)
-
-        # kubelet metrics
-        self._update_metrics(instance, pods_list)
-
         # kubelet events
         if _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS)):
             try:
                 self._process_events(instance, pods_list)
             except Exception as ex:
                 self.log.error("Event collection failed: %s" % str(ex))
+        else:
+            # kubelet health checks
+            self._perform_kubelet_checks(self.kubeutil.kube_health_url)
+
+            # kubelet metrics
+            self._update_metrics(instance, pods_list)
+
 
     def _publish_raw_metrics(self, metric, dat, tags, depth=0):
         if depth >= self.max_depth:
