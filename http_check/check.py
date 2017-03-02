@@ -335,7 +335,12 @@ class HTTPCheck(NetworkCheck):
                 send_status_up("%s is UP" % addr)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+
+            tags_list = list(tags)
+            tags_list.append('url:%s' % addr)
+            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+
             service_checks.append((
                 self.SC_SSL_CERT, status, msg
             ))
@@ -469,15 +474,15 @@ class HTTPCheck(NetworkCheck):
         days_left = exp_date - datetime.utcnow()
 
         if days_left.days < 0:
-            return Status.DOWN, "Expired by {0} days".format(days_left.days)
+            return Status.DOWN, days_left.days,"Expired by {0} days".format(days_left.days)
 
         elif days_left.days < critical_days:
-            return Status.CRITICAL, "This cert TTL is critical: only {0} days before it expires"\
+            return Status.CRITICAL, days_left.days,"This cert TTL is critical: only {0} days before it expires"\
                 .format(days_left.days)
 
         elif days_left.days < warning_days:
-            return Status.WARNING, "This cert is almost expired, only {0} days left"\
+            return Status.WARNING,days_left.days, "This cert is almost expired, only {0} days left"\
                 .format(days_left.days)
 
         else:
-            return Status.UP, "Days left: {0}".format(days_left.days)
+            return Status.UP, days_left.days,"Days left: {0}".format(days_left.days)
