@@ -6,7 +6,9 @@ from utils.prometheus import parse_metric_family
 from utils.kubernetes import KubeStateProcessor
 
 import requests
+import socket
 
+KUBE_STATE_URL = 'kubernetes-state-metrics'
 
 class KubernetesState(AgentCheck):
     """
@@ -28,7 +30,11 @@ class KubernetesState(AgentCheck):
         """
         kube_state_url = instance.get('kube_state_url')
         if kube_state_url is None:
-            raise CheckException("Unable to find kube_state_url in config file.")
+            # Try if kube-state-metrics resolves
+            if socket.gethostbyname(KUBE_STATE_URL):
+                kube_state_url = KUBE_STATE_URL
+            else:
+                raise CheckException("Unable to find kube_state_url in config file.")
 
         try:
             payload = self._get_kube_state(kube_state_url)
