@@ -157,7 +157,7 @@ class TestCheckDisk(AgentCheckTest):
                            force_reload=True)
 
             # Assert metrics
-            tags = ['ext4'] if tag_by == 'yes' else []
+            tags = ['ext4', 'filesystem:ext4'] if tag_by == 'yes' else []
             for metric, value in self.GAUGES_VALUES.iteritems():
                 self.assertMetric(metric, value=value, tags=tags,
                                   device_name=DEFAULT_DEVICE_NAME)
