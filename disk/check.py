@@ -112,7 +112,7 @@ class Disk(AgentCheck):
             self._valid_disks[part.device] = (part.fstype, part.mountpoint)
             self.log.debug('Passed: {0}'.format(part.device))
 
-            tags = [part.fstype] if self._tag_by_filesystem else []
+            tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
             device_name = part.mountpoint if self._use_mount else part.device
 
             # legacy check names c: vs psutil name C:\\
@@ -215,7 +215,7 @@ class Disk(AgentCheck):
         self.log.debug(df_out)
         for device in self._list_devices(df_out):
             self.log.debug("Passed: {0}".format(device))
-            tags = [device[1]] if self._tag_by_filesystem else []
+            tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
             device_name = device[-1] if self._use_mount else device[0]
             for metric_name, value in self._collect_metrics_manually(device).iteritems():
                 self.gauge(metric_name, value, tags=tags,
