@@ -46,7 +46,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

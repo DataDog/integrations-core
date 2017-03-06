@@ -60,7 +60,11 @@ namespace :ci do
             Rake::Task["#{flavor.scope.path}:#{u}"].invoke
           end
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke(mocked)
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke(mocked)
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e
