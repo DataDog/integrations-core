@@ -372,7 +372,6 @@ class Kubernetes(AgentCheck):
                         self.publish_gauge(self, '{}.{}.limits'.format(NAMESPACE, limit), values[0], _tags)
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container limits for %s: %s", c_name, e)
-                    self.log.debug("Container object for {}: {}".format(c_name, container))
 
                 # requests
                 try:
@@ -384,7 +383,6 @@ class Kubernetes(AgentCheck):
                         self.publish_gauge(self, '{}.{}.requests'.format(NAMESPACE, request), values[0], _tags)
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
-                    self.log.debug("Container object for {}: {}".format(c_name, container))
 
         self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
