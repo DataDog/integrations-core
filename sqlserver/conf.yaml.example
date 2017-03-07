@@ -33,12 +33,58 @@ init_config:
     #   instance_name: ALL
     #   tag_by: db
 
+    # Additional counters can be retrieved from the following tables:
+    #   sys.dm_os_wait_stats
+    #   sys.dm_os_memory_clerks
+    #   sys.dm_io_virtual_file_stats
+
+    # - name: sqlserver.wait_LCK_M_S
+    #   counter_name: LCK_M_S
+    #   table: sys.dm_os_wait_stats 
+
+    # counters from the sys.dm_os_memory_clerks table will be tagged by the
+    # memory_node_id.  Retrieve multiple counters by listing
+    # which column(s) to retrieve.  The metric name will have the column
+    # name appended (the example below will create two metrics,
+    # sqlserver.MEMORYCLERK_SQLBUFFERPOOL.pages_kb and
+    # sqlserver.MEMORYCLERK_SQLBUFFERPOOL.virtual_memory_reserved_kb)
+    # - name: sqlserver.MEMORYCLERK_SQLBUFFERPOOL
+    #   counter_name: MEMORYCLERK_SQLBUFFERPOOL
+    #   table: sys.dm_os_memory_clerks
+    #   columns:
+    #     - pages_kb
+    #     - virtual_memory_reserved_kb
+
+    # counters from the sys.dm_io_virtual_file_stats table will be tagged by 
+    # database_id and file_id.  Retrieve multiple counters by listing
+    # which column(s) to retrieve.  The metric name will have the column
+    # name appended (the example below will create two metrics,
+    # sqlserver.IoFileStats.num_of_reads and sqlserver.IoFileStats.num_of_writes)
+    # - name: sqlserver.IoFileStats
+    #   counter_name: num_of_reads
+    #   table: sys.dm_io_virtual_file_stats
+    #   database_id: 1
+    #   columns:
+    #     - num_of_reads
+    #     - num_of_writes
+
 instances:
     # All '%' characters must be escaped as '%%'.
 
   - host: HOST,PORT
+    # Optional, change the connection method from adodbapi (the default) to
+    # odbc (valid connector names are 'odbc' and 'adodbapi')
+    # connector: odbc
+
+    # Optional, if using odbc, use the named driver.  If none is specified,
+    # the 'SQL Server' driver will be used
+    # driver: SQL Server
+
+    # Optional, if using odbc, configure a connection using a DSN
+    # dsn: DSN_NAME
     username: my_username
     password: my_password
+    
     # Optional, timeout in seconds for the connection and each command run
     # command_timeout: 30
     # database: my_database # Optional, defaults to "master"
