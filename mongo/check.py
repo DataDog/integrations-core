@@ -446,7 +446,7 @@ class MongoDb(AgentCheck):
             hostname = self.hostname
         return hostname
 
-    def create_event(self, last_state, state, clean_server_name, replset_name, replset_state, agentConfig):
+    def create_event(self, last_state, state, clean_server_name, replset_name, agentConfig):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
