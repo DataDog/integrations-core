@@ -35,7 +35,7 @@ class MoreUnixCheck(AgentCheck):
         self.get_process_states()
 
     def set_paths(self):
-        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/').lstrip('/')
+        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
 
         self.proc_path_map = {
             "inode_info": "sys/fs/inode-nr",
