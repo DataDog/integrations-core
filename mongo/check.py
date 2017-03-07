@@ -446,7 +446,7 @@ class MongoDb(AgentCheck):
             hostname = self.hostname
         return hostname
 
-    def create_event(self, last_state, state, clean_server_name, replset_name, agentConfig):
+    def create_event(self, last_state, state, clean_server_name, replset_name, replset_state, agentConfig):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
@@ -468,6 +468,7 @@ class MongoDb(AgentCheck):
                 'member_status:' + short_status,
                 'previous_member_status:' + last_short_status,
                 'replset:' + replset_name,
+                'replset_state:' + state
             ]
         })
 
@@ -774,7 +775,7 @@ class MongoDb(AgentCheck):
 
                 # Submit events
                 self._report_replica_set_state(
-                    data['state'], clean_server_name, replset_name, self.agentConfig
+                    data['state'], clean_server_name, replSet['set'], self.agentConfig
                 )
 
         except Exception as e:
