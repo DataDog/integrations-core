@@ -1,7 +1,7 @@
 <!--
 
 This issue queue is primarily intended for tracking features, bugs and work items associated with
-the dd-agent open-source project.
+the Datadog Agent open-source project.
 
 Prior to submitting an issue please review the following:
 
