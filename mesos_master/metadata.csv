@@ -44,6 +44,7 @@ mesos.registrar.state_store_ms.p95,gauge,,millisecond,,95th percentile registry 
 mesos.registrar.state_store_ms.p99,gauge,,millisecond,,99th percentile registry write latency,-1,mesos,latency p99
 mesos.registrar.state_store_ms.p999,gauge,,millisecond,,99.9th percentile registry write latency,-1,mesos,latency p999
 mesos.registrar.state_store_ms.p9999,gauge,,millisecond,,99.99th percentile registry write latency,-1,mesos,latency p9999
+mesos.registrar.log.recovered,gauge,,,,Registrar log recovered,1,mesos,registrar log recovered
 mesos.cluster.frameworks_active,gauge,,,,Number of active frameworks,0,mesos,active frameworks
 mesos.cluster.frameworks_connected,gauge,,,,Number of connected frameworks,0,mesos,connected frameworks
 mesos.cluster.frameworks_disconnected,gauge,,,,Number of disconnected frameworks,0,mesos,disconnected frameworks

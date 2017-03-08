@@ -110,6 +110,7 @@ class MesosMaster(AgentCheck):
         'system/mem_total_bytes'                            : ('mesos.stats.system.mem_total_bytes', GAUGE),
         'master/elected'                                    : ('mesos.stats.elected', GAUGE),
         'master/uptime_secs'                                : ('mesos.stats.uptime_secs', GAUGE),
+        'registrar/log/recovered'                           : ('mesos.registrar.log.recovered', GAUGE),
     }
 
     # These metrics are aggregated only on the elected master
