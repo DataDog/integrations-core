@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 '''
 Check the performance counters from SQL Server
 
@@ -14,6 +13,7 @@ from contextlib import contextmanager
 
 # 3rd party
 import adodbapi
+import pyodbc
 
 # project
 from checks import AgentCheck
@@ -63,6 +63,7 @@ class SQLServer(AgentCheck):
     # FIXME: 6.x, set default to 5s (like every check)
     DEFAULT_COMMAND_TIMEOUT = 30
     DEFAULT_DATABASE = 'master'
+    DEFAULT_DRIVER = 'SQL Server'
 
     METRICS = [
         ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
@@ -76,6 +77,7 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
+    valid_connectors = ['odbc', 'adodbapi']
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -84,6 +86,11 @@ class SQLServer(AgentCheck):
         self.connections = {}
         self.failed_connections = {}
         self.instances_metrics = {}
+        self.connector = init_config.get('connector', 'adodbapi')
+        if not self.connector.lower() in self.valid_connectors:
+            self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
+            self.connector = 'adodbapi'
+
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
@@ -104,7 +111,8 @@ class SQLServer(AgentCheck):
         for name, counter_name, instance_name in self.METRICS:
             try:
                 sql_type, base_name = self.get_sql_type(instance, counter_name)
-                metrics_to_collect.append(self.typed_metric(name,
+                metrics_to_collect.append(self.typed_metric(instance,
+                                                            name,
                                                             counter_name,
                                                             base_name,
                                                             None,
@@ -130,7 +138,8 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
                 continue
 
-            metrics_to_collect.append(self.typed_metric(row['name'],
+            metrics_to_collect.append(self.typed_metric(instance,
+                                                        row['name'],
                                                         row['counter_name'],
                                                         base_name,
                                                         user_type,
@@ -141,7 +150,7 @@ class SQLServer(AgentCheck):
         instance_key = self._conn_key(instance)
         self.instances_metrics[instance_key] = metrics_to_collect
 
-    def typed_metric(self, dd_name, sql_name, base_name, user_type, sql_type, instance_name, tag_by):
+    def typed_metric(self, instance, dd_name, sql_name, base_name, user_type, sql_type, instance_name, tag_by):
         '''
         Create the appropriate SqlServerMetric object, each implementing its method to
         fetch the metrics properly.
@@ -165,31 +174,78 @@ class SQLServer(AgentCheck):
         else:
             metric_type, cls = metric_type_mapping[sql_type]
 
-        return cls(dd_name, sql_name, base_name,
+        return cls(self._get_connector(instance), dd_name, sql_name, base_name,
                    metric_type, instance_name, tag_by, self.log)
+
+    def _get_connector(self, instance):
+        connector = instance.get('connector', self.connector)
+        if connector != self.connector:
+            if not connector.lower() in self.valid_connectors:
+                self.log.warning("Invalid database connector %s using default %s" ,
+                     connector, self.connector)
+                connector = self.connector
+            else:
+                self.log.debug("Overriding default connector for %s with %s", instance['host'], connector)
+        return connector
 
     def _get_access_info(self, instance):
         ''' Convenience method to extract info from instance
         '''
-        host = instance.get('host', '127.0.0.1,1433')
+        dsn = instance.get('dsn')
+        host = instance.get('host')
         username = instance.get('username')
         password = instance.get('password')
-        database = instance.get('database', self.DEFAULT_DATABASE)
-        return host, username, password, database
+        database = instance.get('database')
+        driver = instance.get('driver')
+        if not dsn:
+            if not host:
+                host = '127.0.0.1,1433'
+            if not database:
+                database = self.DEFAULT_DATABASE
+            if not driver:
+                driver = self.DEFAULT_DRIVER
+        return dsn, host, username, password, database, driver
 
     def _conn_key(self, instance):
         ''' Return a key to use for the connection cache
         '''
-        host, username, password, database = self._get_access_info(instance)
-        return '%s:%s:%s:%s' % (host, username, password, database)
+        dsn, host, username, password, database, driver = self._get_access_info(instance)
+        return '%s:%s:%s:%s:%s:%s' % (dsn, host, username, password, database, driver)
 
-    def _conn_string(self, instance=None, conn_key=None):
+    def _conn_string_odbc(self, instance=None, conn_key=None):
+        ''' Return a connection string to use with odbc
+        '''
+        if instance:
+            dsn, host, username, password, database, driver = self._get_access_info(instance)
+        elif conn_key:
+            dsn, host, username, password, database, driver = conn_key.split(":")
+
+        conn_str = ''
+        if dsn:
+            conn_str = 'DSN=%s;' % (dsn)
+
+        if driver:
+            conn_str += 'DRIVER={%s};' % (driver)
+        if host:
+            conn_str += 'Server=%s;' % (host)
+        if database:
+            conn_str += 'Database=%s;' % (database)
+
+        if username:
+            conn_str += 'UID=%s;' % (username)
+        self.log.debug("Connection string (before password) %s" , conn_str)
+        if password:
+            conn_str += 'PWD=%s;' % (password)
+
+        return conn_str
+
+    def _conn_string_adodbapi(self, instance=None, conn_key=None):
         ''' Return a connection string to use with adodbapi
         '''
         if instance:
-            host, username, password, database = self._get_access_info(instance)
+            _, host, username, password, database, _ = self._get_access_info(instance)
         elif conn_key:
-            host, username, password, database = conn_key.split(":")
+            _, host, username, password, database, _ = conn_key.split(":")
         conn_str = 'Provider=SQLOLEDB;Data Source=%s;Initial Catalog=%s;' \
             % (host, database)
         if username:
@@ -199,6 +255,7 @@ class SQLServer(AgentCheck):
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
+
 
     @contextmanager
     def get_managed_cursor(self, instance):
@@ -324,8 +381,13 @@ class SQLServer(AgentCheck):
         ]
 
         try:
-            rawconn = adodbapi.connect(self._conn_string(instance=instance),
-                                       timeout=timeout)
+            if self._get_connector(instance) == 'adodbapi':
+                cs = self._conn_string_adodbapi(instance=instance)
+                rawconn = adodbapi.connect(cs,  timeout=timeout)
+            else:
+                cs = self._conn_string_odbc(instance=instance)
+                rawconn = pyodbc.connect(cs, timeout=timeout)
+
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=service_check_tags)
             if conn_key not in self.connections:
@@ -357,8 +419,9 @@ class SqlServerMetric(object):
     '''General class for common methods, should never be instantiated directly
     '''
 
-    def __init__(self, datadog_name, sql_name, base_name,
+    def __init__(self, connector, datadog_name, sql_name, base_name,
                  report_function, instance, tag_by, logger):
+        self.connector = connector
         self.datadog_name = datadog_name
         self.sql_name = sql_name
         self.base_name = base_name
@@ -423,8 +486,12 @@ class SqlFractionMetric(SqlServerMetric):
                 self.log.warning("Missing counter to compute fraction for "
                                  "metric %s instance %s, skipping", self.sql_name, instance)
                 continue
-            value = rows[0, "cntr_value"]
-            base = rows[1, "cntr_value"]
+            if self.connector == 'odbc':
+                value = rows[0].cntr_value
+                base = rows[1].cntr_value
+            else:
+                value = rows[0, "cntr_value"]
+                base = rows[1, "cntr_value"]
 
             metric_tags = tags
             if self.instance == ALL_INSTANCES:

@@ -34,11 +34,22 @@ init_config:
     #   tag_by: db
 
 instances:
-    # All '%' characters must be escaped as '%%'.
+   # All '%' characters must be escaped as '%%'.
 
-  - host: HOST,PORT
+    - host: HOST,PORT
+    # Optional, change the connection method from adodbapi (the default) to
+    # odbc (valid connector names are 'odbc' and 'adodbapi')
+    # connector: odbc
+
+    # Optional, if using odbc, use the named driver.  If none is specified,
+    # the 'SQL Server' driver will be used
+    # driver: SQL Server
+
+    # Optional, if using odbc, configure a connection using a DSN
+    # dsn: DSN_NAME
     username: my_username
     password: my_password
+    
     # Optional, timeout in seconds for the connection and each command run
     # command_timeout: 30
     # database: my_database # Optional, defaults to "master"
