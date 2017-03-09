@@ -10,6 +10,7 @@
   "system/cpus_total": 1,
   "started_tasks": 0,
   "staged_tasks": 0,
+  "registrar/log/recovered": 1.0,
   "registrar/state_store_ms/p9999": 9.90120192,
   "registrar/state_store_ms/p999": 9.8956032,
   "registrar/state_store_ms/p99": 9.839616,
