@@ -171,9 +171,9 @@ class Disk(AgentCheck):
             metrics.update(self._collect_inodes_metrics(part.mountpoint))
 
         if self._adaptive_threshold:
-                         metrics[self.METRIC_DISK.format('adaptive_threshold')] = \
-                                 self._calculate_adaptive_threshold(metrics[self.METRIC_DISK.format('total')], \
-                                 metrics[self.METRIC_DISK.format('in_use')])
+            metrics[self.METRIC_DISK.format('adaptive_threshold')] = \
+                    self._calculate_adaptive_threshold(metrics[self.METRIC_DISK.format('total')], \
+                    metrics[self.METRIC_DISK.format('in_use')])
         return metrics
 
     def _collect_inodes_metrics(self, mountpoint):
