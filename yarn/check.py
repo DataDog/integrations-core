@@ -222,9 +222,11 @@ class YarnCheck(AgentCheck):
                 tags = []
                 for dd_tag, yarn_key in app_tags.iteritems():
                     try:
-                        tags.append("{tag}:{value}".format(
-                            tag=dd_tag, value=app_json[yarn_key]
-                        ))
+                        val = app_json[yarn_key]
+                        if val:
+                            tags.append("{tag}:{value}".format(
+                                tag=dd_tag, value=val
+                            ))
                     except KeyError:
                         self.log.error("Invalid value %s for application_tag", yarn_key)
 
