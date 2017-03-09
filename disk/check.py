@@ -61,6 +61,7 @@ class Disk(AgentCheck):
             instance.get('tag_by_filesystem', False))
         self._all_partitions = _is_affirmative(
             instance.get('all_partitions', False))
+        self._adaptive_threshold = instance.get('adaptive_threshold')
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
@@ -169,6 +170,10 @@ class Disk(AgentCheck):
         if Platform.is_unix():
             metrics.update(self._collect_inodes_metrics(part.mountpoint))
 
+        if self._adaptive_threshold:
+                         metrics[self.METRIC_DISK.format('adaptive_threshold')] = \
+                                 self._calculate_adaptive_threshold(metrics[self.METRIC_DISK.format('total')], \
+                                 metrics[self.METRIC_DISK.format('in_use')])
         return metrics
 
     def _collect_inodes_metrics(self, mountpoint):
@@ -236,8 +241,26 @@ class Disk(AgentCheck):
         # Rather than grabbing in_use, let's calculate it to be more precise
         result[self.METRIC_DISK.format('in_use')] = used / (used + free)
 
+        if self._adaptive_threshold:
+            result[self.METRIC_DISK.format('adaptive_threshold')] = \
+                    self._calculate_adaptive_threshold(float(device[2]), \
+                    result[self.METRIC_DISK.format('in_use')])
+
         result.update(self._collect_inodes_metrics(device[-1]))
         return result
+
+    def _calculate_adaptive_threshold(self, total, in_use):
+         adaptive_threshold = None
+         try:
+             adaptive_threshold = in_use - \
+                     self._adaptive_threshold['magic_number'] **\
+                     (self._adaptive_threshold['scale_factor'] / total)
+         except TypeError:
+             self.log.error('Magic number: {0} and/or scale factor: {1} undefined'.\
+                     format(self._adaptive_threshold['magic_number'], \
+                     self._adaptive_threshold['scale_factor']))
+
+         return adaptive_threshold
 
     def _keep_device(self, device):
         # device is for Unix

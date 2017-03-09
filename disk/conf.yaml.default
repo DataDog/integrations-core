@@ -35,3 +35,9 @@ instances:
     # get metrics for all partitions. use_mount should be set to yes (to avoid
     # collecting empty device names) when using this option.
     # all_partitions: no
+    #
+    # Please set both to calculate the adaptive threshold for this disk. Allows 
+    # easy comparison accross disaparate disk sizes
+    # adaptive_threshold:
+    #   magic_number:
+    #   scale_factor: 
