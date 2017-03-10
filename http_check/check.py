@@ -208,7 +208,6 @@ class HTTPCheck(NetworkCheck):
 
         def send_status_down(loginfo, message):
             self.log.info(loginfo)
-            self.log.debug("Content returned:\n%s" % content)
             if include_content:
                 message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
             service_checks.append((
