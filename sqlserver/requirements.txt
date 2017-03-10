@@ -1,4 +1,8 @@
 # integration pip requirements
 adodbapi==2.6.0.7
-pyodbc==4.0.13
 pyro4==4.36
+
+
+# optional - SDK question here
+# Requires unixodbc on Linux
+# pyodbc==4.0.13 is satisfied in 'integration-deps'

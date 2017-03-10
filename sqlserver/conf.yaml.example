@@ -39,6 +39,7 @@ instances:
     - host: HOST,PORT
     # Optional, change the connection method from adodbapi (the default) to
     # odbc (valid connector names are 'odbc' and 'adodbapi')
+    # odbc is only available on Windows
     # connector: odbc
 
     # Optional, if using odbc, use the named driver.  If none is specified,
