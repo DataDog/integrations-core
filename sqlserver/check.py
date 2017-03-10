@@ -13,7 +13,10 @@ from contextlib import contextmanager
 
 # 3rd party
 import adodbapi
-import pyodbc
+try:
+    import pyodbc
+except ImportError:
+    pyodbc = None
 
 # project
 from checks import AgentCheck
@@ -77,7 +80,9 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
-    valid_connectors = ['odbc', 'adodbapi']
+    valid_connectors = ['adodbapi']
+    if pyodbc is not None:
+        valid_connectors.append('odbc')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
