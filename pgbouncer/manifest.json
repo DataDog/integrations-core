@@ -8,8 +8,7 @@
   "support": "core",
   "supported_os": [
     "linux",
-    "mac_os",
-    "windows"
+    "mac_os"
   ],
   "version": "1.0.0",
   "guid": "51386802-4502-4991-b592-27eff1ca111c"
