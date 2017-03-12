@@ -4,7 +4,7 @@
 
 # stdlib
 from urlparse import urljoin
-import urllib
+from urllib import quote
 
 # 3rd party
 import requests
@@ -120,7 +120,7 @@ class CouchDb(AgentCheck):
             databases = list(databases)[:self.MAX_DB]
 
         for dbName in databases:
-            url = urljoin(server, urllib.quote(dbName, safe = ''))
+            url = urljoin(server, quote(dbName, safe = ''))
             try:
                 db_stats = self._get_stats(url, instance)
             except requests.exceptions.HTTPError as e:
