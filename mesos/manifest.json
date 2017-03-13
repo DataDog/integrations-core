@@ -9,8 +9,7 @@
   "support": "contrib",
   "supported_os": [
     "linux",
-    "mac_os",
-    "windows"
+    "mac_os"
   ],
   "version": "0.1.0"
 }
