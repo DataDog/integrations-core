@@ -380,11 +380,9 @@ class OpenStackCheck(AgentCheck):
             [re.compile(ex) for ex in init_config.get('exclude_network_ids', [])]
         )
 
-        self.exclude_server_id_rules = {}
-        for instance in instances:
-            self.exclude_server_id_rules[self._instance_key(instance)] = set(
-                [re.compile(ex) for ex in instance.get('exclude_server_ids', [])]
-            )
+        self.exclude_server_id_rules = set(
+            [re.compile(ex) for ex in init_config.get('exclude_server_ids', [])]
+        )
 
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
@@ -796,7 +794,7 @@ class OpenStackCheck(AgentCheck):
             project = self.get_scoped_project(instance)
 
             # Restrict monitoring to non-excluded servers
-            server_ids = self.get_servers_managed_by_hypervisor(instance)
+            server_ids = self.get_servers_managed_by_hypervisor()
 
             host_tags = self._get_tags_for_host()
 
@@ -883,14 +881,14 @@ class OpenStackCheck(AgentCheck):
         """
         return self.init_config.get("os_host") or self.hostname
 
-    def get_servers_managed_by_hypervisor(self, instance=None):
+    def get_servers_managed_by_hypervisor(self):
         server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname())
-        if instance and self.exclude_server_id_rules.get(self._instance_key(instance)):
+        if self.exclude_server_id_rules:
             # Filter out excluded servers
             server_ids = [
                 server_id for server_id in server_ids
                 if not any([re.match(exclude_id_rule, server_id)
-                            for exclude_id_rule in self.exclude_server_id_rules.get(self._instance_key(instance))])
+                            for exclude_id_rule in self.exclude_server_id_rules])
             ]
 
         return server_ids

@@ -329,11 +329,10 @@ class TestOpenstack(AgentCheckTest):
         Exclude networks using regular expressions.
         """
 
-        i_key = self.check._instance_key(self.MOCK_CONFIG['instances'][0])
-        self.check.exclude_server_id_rules[i_key] = set([re.compile(rule) for rule in self.EXCLUDED_SERVER_IDS])
+        self.check.exclude_server_id_rules = set([re.compile(rule) for rule in self.EXCLUDED_SERVER_IDS])
 
         # Retrieve servers
-        server_ids = self.check.get_servers_managed_by_hypervisor(self.MOCK_CONFIG['instances'][0])
+        server_ids = self.check.get_servers_managed_by_hypervisor()
 
         # Assert
         # .. 1 out of 4 server ids filtered
@@ -341,7 +340,7 @@ class TestOpenstack(AgentCheckTest):
         self.assertEqual(server_ids[0], self.FILTERED_SERVER_ID)
 
         # cleanup
-        self.check.exclude_server_id_rules = {}
+        self.check.exclude_server_id_rules = set([])
 
     @patch("_openstack.OpenStackCheck.get_all_network_ids", return_value=ALL_IDS)
     def test_network_exclusion(self, *args):
