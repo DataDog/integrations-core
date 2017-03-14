@@ -10,17 +10,11 @@ environment:
   SKIP_LINT: true
   DD_AGENT_BRANCH: master
   SDK_TESTING: true
-  matrix:
-  - PYTHON: C:\\Python27
-    PYTHON_VERSION: 2.7.11
-    PYTHON_ARCH: 32
-    PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win32-py2.7.exe
-    PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win32.egg
-  - PYTHON: C:\\Python27-x64
-    PYTHON_VERSION: 2.7.9
-    PYTHON_ARCH: 64
-    PYWIN32_URL: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe/download
-    PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
+  PYTHON: C:\\Python27-x64
+  PYTHON_VERSION: 2.7.13
+  PYTHON_ARCH: 64
+  PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
+  PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
 cache:
   - C:\projects\integrations-core\.cache
   - C:\projects\integrations-core\vendor\cache
