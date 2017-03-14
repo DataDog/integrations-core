@@ -592,8 +592,8 @@ class DockerDaemon(AgentCheck):
                     containers_without_proc_root.append(DockerUtil.container_name_extractor(container)[0])
                     continue
                 self._report_net_metrics(container, tags)
-            except BogusPIDException:
-                self.log.exception('Unable to report cgroup metrics.')
+            except BogusPIDException as e:
+                self.log.warning('Unable to report cgroup metrics: %s', e)
 
         if containers_without_proc_root:
             message = "Couldn't find pid directory for containers: {0}. They'll be missing network metrics".format(
