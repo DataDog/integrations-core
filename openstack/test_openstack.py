@@ -7,6 +7,7 @@ from nose.plugins.attrib import attr
 from time import sleep
 from unittest import TestCase
 from mock import patch
+import re
 
 # 3p
 
@@ -259,10 +260,12 @@ class TestOpenstack(AgentCheckTest):
     CHECK_NAME = OS_CHECK_NAME
 
     # Samples
-    # .. network
-    ALL_NETWORK_IDS = ["server-1", "server-2", "other-1", "other-2"]
+    # .. server/network
+    ALL_IDS = ["server-1", "server-2", "other-1", "other-2"]
     EXCLUDED_NETWORK_IDS = ["server-1", "other-.*"]
+    EXCLUDED_SERVER_IDS = ["server-2", "other-.*"]
     FILTERED_NETWORK_ID = "server-2"
+    FILTERED_SERVER_ID = "server-1"
 
     # .. config
     MOCK_CONFIG = {
@@ -320,13 +323,35 @@ class TestOpenstack(AgentCheckTest):
             sleep(1.5)
             self.assertTrue(self.check._is_expired("aggregates"))
 
-    @patch("openstack.OpenStackCheck.get_all_network_ids", return_value=ALL_NETWORK_IDS)
+    @patch("_openstack.OpenStackCheck.get_all_server_ids", return_value=ALL_IDS)
+    def test_server_exclusion(self, *args):
+        """
+        Exclude networks using regular expressions.
+        """
+
+        i_key = self.check._instance_key(self.MOCK_CONFIG['instances'][0])
+        self.check.exclude_server_id_rules[i_key] = set([re.compile(rule) for rule in self.EXCLUDED_SERVER_IDS])
+
+        # Retrieve servers
+        server_ids = self.check.get_servers_managed_by_hypervisor(self.MOCK_CONFIG['instances'][0])
+
+        # Assert
+        # .. 1 out of 4 server ids filtered
+        self.assertEqual(len(server_ids), 1)
+        self.assertEqual(server_ids[0], self.FILTERED_SERVER_ID)
+
+        # cleanup
+        self.check.exclude_server_id_rules = {}
+
+    @patch("_openstack.OpenStackCheck.get_all_network_ids", return_value=ALL_IDS)
     def test_network_exclusion(self, *args):
         """
         Exclude networks using regular expressions.
         """
-        with patch("openstack.OpenStackCheck.get_stats_for_single_network") \
+        with patch("_openstack.OpenStackCheck.get_stats_for_single_network") \
                 as mock_get_stats_single_network:
+
+            self.check.exclude_network_id_rules = set([re.compile(rule) for rule in self.EXCLUDED_NETWORK_IDS])
 
             # Retrieve network stats
             self.check.get_network_stats()
@@ -337,3 +362,6 @@ class TestOpenstack(AgentCheckTest):
             self.assertEqual(
                 mock_get_stats_single_network.call_args[0][0], self.FILTERED_NETWORK_ID
             )
+
+            # cleanup
+            self.check.exclude_network_id_rules = set([])

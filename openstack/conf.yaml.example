@@ -20,8 +20,10 @@ init_config:
       #    - 1
 
       # IDs of networks to exclude from monitoring (by default the agent will collect metrics from networks returned by the neutron:get_networks operation)
+      # Regex expressions for the network IDs to exclude are supported.
       # exclude_network_ids:
       #    - network_1
+      #    - other_.*
 
       # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
       # need to set to false when using self-signed certs
