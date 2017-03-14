@@ -10,6 +10,7 @@ from urlparse import urljoin
 from checks import AgentCheck
 
 # 3p
+import re
 import requests
 import simplejson as json
 
@@ -375,6 +376,14 @@ class OpenStackCheck(AgentCheck):
         # Mapping of Nova-managed servers to tags
         self.external_host_tags = {}
 
+        self.exclude_network_id_rules = set(
+            [re.compile(ex) for ex in init_config.get('exclude_network_ids', [])]
+        )
+
+        self.exclude_server_id_rules = set(
+            [re.compile(ex) for ex in init_config.get('exclude_server_ids', [])]
+        )
+
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
         Generic request handler for OpenStack API requests
@@ -433,7 +442,7 @@ class OpenStackCheck(AgentCheck):
 
         return self.get_scope_for_instance(instance).auth_token
 
-    ### Network
+    # Network
     def get_neutron_endpoint(self, instance=None):
         if not instance:
             # Assume instance scope is populated on self
@@ -448,7 +457,13 @@ class OpenStackCheck(AgentCheck):
 
         # FIXME: (aaditya) Check all networks defaults to true until we can reliably assign agents to networks to monitor
         if self.init_config.get('check_all_networks', True):
-            network_ids = list(set(self.get_all_network_ids()) - set(self.init_config.get('exclude_network_ids', [])))
+            all_network_ids = set(self.get_all_network_ids())
+
+            # Filter out excluded networks
+            network_ids = [
+                network_id for network_id in all_network_ids
+                if not any([re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules])
+            ]
         else:
             network_ids = self.init_config.get('network_ids', [])
 
@@ -779,14 +794,11 @@ class OpenStackCheck(AgentCheck):
             project = self.get_scoped_project(instance)
 
             # Restrict monitoring to non-excluded servers
-            excluded_server_ids = self.init_config.get("exclude_server_ids", [])
-            servers = list(
-                set(self.get_servers_managed_by_hypervisor()) - set(excluded_server_ids)
-            )
+            server_ids = self.get_servers_managed_by_hypervisor()
 
             host_tags = self._get_tags_for_host()
 
-            for sid in servers:
+            for sid in server_ids:
                 server_tags = ["nova_managed_server"]
                 if instance_scope.tenant_id:
                     server_tags.append("tenant_id:%s" % instance_scope.tenant_id)
@@ -870,7 +882,17 @@ class OpenStackCheck(AgentCheck):
         return self.init_config.get("os_host") or self.hostname
 
     def get_servers_managed_by_hypervisor(self):
-        return self.get_all_server_ids(filter_by_host=self.get_my_hostname())
+        server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname())
+        if self.exclude_server_id_rules:
+            # Filter out excluded servers
+            server_ids = [
+                server_id for server_id in server_ids
+                if not any([re.match(exclude_id_rule, server_id)
+                            for exclude_id_rule in self.exclude_server_id_rules])
+            ]
+
+        return server_ids
+
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()

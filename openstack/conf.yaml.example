@@ -19,9 +19,17 @@ init_config:
       # hypervisor_ids:
       #    - 1
 
+      # IDs of servers to exclude from monitoring. (by default the agent will collect metrics from all guest servers that are running on the host)
+      # Regex expressions for the server IDs are supported.
+      # exclude_server_ids:
+      #    - server_1
+      #    - other_.*
+
       # IDs of networks to exclude from monitoring (by default the agent will collect metrics from networks returned by the neutron:get_networks operation)
+      # Regex expressions for the network IDs to exclude are supported.
       # exclude_network_ids:
       #    - network_1
+      #    - other_.*
 
       # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
       # need to set to false when using self-signed certs
@@ -62,8 +70,3 @@ instances:
       # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
       # Setting append_tenant_id to true manually adds this suffix for downstream requests
       # append_tenant_id: false
-
-      # IDs of servers to exclude from monitoring (by default the agent will collect metrics from all guest servers for this project that are running on the host
-      # exclude_server_ids:
-      #    - server_1
-      #    - server_2
