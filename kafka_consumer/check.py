@@ -231,9 +231,9 @@ class KafkaCheck(AgentCheck):
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         if instance.get('monitor_unlisted_consumer_groups', False):
             consumer_groups = None
-        else:
-            consumer_groups = self._validate_consumer_groups(
-                self._read_config(instance, 'consumer_groups'))
+        elif consumer_groups in instance:
+            consumer_groups = self.read_config(instance, 'consumer_groups',
+                                               cast=self._validate_consumer_groups)
 
         consumer_offsets = self._get_zk_consumer_offsets(
             zk_hosts_ports, consumer_groups, zk_prefix)
