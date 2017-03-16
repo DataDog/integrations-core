@@ -1,8 +1,9 @@
 # CHANGELOG - statsd
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds statsd integration.
+* [FEATURE] adds statsd integration to integrations-core.
+

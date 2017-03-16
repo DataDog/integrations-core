@@ -1,8 +1,9 @@
 # CHANGELOG - cassandra
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds cassandra integration.
+* [FEATURE] adds cassandra integration to integrations-core.
+

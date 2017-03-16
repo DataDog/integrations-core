@@ -1,8 +1,9 @@
 # CHANGELOG - btrfs
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds btrfs integration.
+* [FEATURE] adds btrfs integration to integrations-core.
+

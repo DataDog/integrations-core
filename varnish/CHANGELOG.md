@@ -1,8 +1,9 @@
 # CHANGELOG - varnish
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds varnish integration.
+* [FEATURE] adds varnish integration to integrations-core.
+

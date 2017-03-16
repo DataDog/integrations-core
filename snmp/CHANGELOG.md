@@ -1,8 +1,9 @@
 # CHANGELOG - snmp
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds snmp integration.
+* [FEATURE] adds snmp integration to integrations-core.
+

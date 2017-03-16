@@ -1,8 +1,9 @@
 # CHANGELOG - ntp
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds ntp integration.
+* [FEATURE] adds ntp integration to integrations-core.
+

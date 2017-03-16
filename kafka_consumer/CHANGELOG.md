@@ -1,8 +1,9 @@
 # CHANGELOG - kafka_consumer
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds kafka_consumer integration.
+* [FEATURE] adds kafka_consumer integration to integrations-core.
+

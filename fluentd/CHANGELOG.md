@@ -1,8 +1,9 @@
 # CHANGELOG - fluentd
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds fluentd integration.
+* [FEATURE] adds fluentd integration to integrations-core.
+

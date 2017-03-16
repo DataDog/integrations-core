@@ -1,8 +1,9 @@
 # CHANGELOG - activemq_xml
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds activemq_xml integration.
+* [FEATURE] adds activemq_xml integration to integrations-core.
+

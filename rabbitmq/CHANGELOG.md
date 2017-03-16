@@ -1,8 +1,9 @@
 # CHANGELOG - rabbitmq
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds rabbitmq integration.
+* [FEATURE] adds rabbitmq integration to integrations-core.
+

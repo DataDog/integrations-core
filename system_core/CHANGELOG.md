@@ -1,8 +1,9 @@
 # CHANGELOG - system_core
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds system_core integration.
+* [FEATURE] adds system_core integration to integrations-core.
+

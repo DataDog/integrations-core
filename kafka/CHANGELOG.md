@@ -1,8 +1,9 @@
 # CHANGELOG - kafka
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds kafka integration.
+* [FEATURE] adds kafka integration to integrations-core.
+

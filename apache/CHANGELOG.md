@@ -1,8 +1,9 @@
 # CHANGELOG - apache
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds apache integration.
+* [FEATURE] adds apache integration to integrations-core.
+

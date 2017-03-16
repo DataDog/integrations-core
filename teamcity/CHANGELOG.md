@@ -1,8 +1,9 @@
 # CHANGELOG - teamcity
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds teamcity integration.
+* [FEATURE] adds teamcity integration to integrations-core.
+

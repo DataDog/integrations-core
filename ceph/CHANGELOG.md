@@ -1,8 +1,9 @@
 # CHANGELOG - ceph
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds ceph integration.
+* [FEATURE] adds ceph integration to integrations-core.
+

@@ -1,8 +1,11 @@
 # CHANGELOG - iis
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds iis integration.
+* [FEATURE] adds iis integration to integrations-core.
+
+* [Bugfix] Fix is_2008 option. See [dd-agent-3039](https://github.com/datadog/dd-agent/issues/3039)
+

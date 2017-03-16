@@ -1,8 +1,9 @@
 # CHANGELOG - gearmand
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds gearmand integration.
+* [FEATURE] adds gearmand integration to integrations-core.
+

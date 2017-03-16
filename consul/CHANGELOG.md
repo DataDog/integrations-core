@@ -1,8 +1,10 @@
 # CHANGELOG - consul
 
-0.1.0/ Unreleased
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds consul integration.
+* [FEATURE] adds consul integration to integrations-core.
+* [Improvement] Add configuration parameter that overrides `MAX_SERVICES`. See [integrations-core-140](https://github.com/DataDog/integrations-core/pull/140)
+
