@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds agent_metrics integration to integrations-core.
+* [SDK] adds agent_metrics integration to integrations-core.
 

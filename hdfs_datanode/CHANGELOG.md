@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds hdfs_datanode integration to integrations-core.
+* [SDK] adds hdfs_datanode integration to integrations-core.
 

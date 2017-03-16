@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds statsd integration to integrations-core.
+* [SDK] adds statsd integration to integrations-core.
 

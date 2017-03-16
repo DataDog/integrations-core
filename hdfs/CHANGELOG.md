@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds hdfs integration to integrations-core.
+* [SDK] adds hdfs integration to integrations-core.
 

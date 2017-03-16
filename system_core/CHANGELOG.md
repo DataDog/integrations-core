@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds system_core integration to integrations-core.
+* [SDK] adds system_core integration to integrations-core.
 

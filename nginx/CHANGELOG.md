@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds nginx integration to integrations-core.
+* [SDK] adds nginx integration to integrations-core.
 

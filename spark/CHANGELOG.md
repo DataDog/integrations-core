@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] adds spark integration to integrations-core.
+* [SDK] adds spark integration to integrations-core.
 
 * [Improvement] No events on job status change. See [dd-agent-3194](https://github.com/datadog/dd-agent/issues/3194). This is a potentially breaking change, but it was flooding event streams with what, for most people, was useless information.
 

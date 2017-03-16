@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds windows_service integration to integrations-core.
+* [SDK] adds windows_service integration to integrations-core.
 

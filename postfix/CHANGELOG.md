@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds postfix integration to integrations-core.
+* [SDK] adds postfix integration to integrations-core.
 

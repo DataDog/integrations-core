@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds supervisord integration to integrations-core.
+* [SDK] adds supervisord integration to integrations-core.
 

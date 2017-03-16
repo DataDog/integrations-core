@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds jenkins integration to integrations-core.
+* [SDK] adds jenkins integration to integrations-core.
 

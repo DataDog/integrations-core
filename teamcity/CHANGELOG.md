@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds teamcity integration to integrations-core.
+* [SDK] adds teamcity integration to integrations-core.
 

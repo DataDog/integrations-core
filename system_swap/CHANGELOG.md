@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds system_swap integration to integrations-core.
+* [SDK] adds system_swap integration to integrations-core.
 

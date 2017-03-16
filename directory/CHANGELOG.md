@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds directory integration to integrations-core.
+* [SDK] adds directory integration to integrations-core.
 

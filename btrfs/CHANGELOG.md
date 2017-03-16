@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds btrfs integration to integrations-core.
+* [SDK] adds btrfs integration to integrations-core.
 

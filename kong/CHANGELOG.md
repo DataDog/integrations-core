@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds kong integration to integrations-core.
+* [SDK] adds kong integration to integrations-core.
 

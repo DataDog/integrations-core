@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds mcache integration to integrations-core.
+* [SDK] adds mcache integration to integrations-core.
 

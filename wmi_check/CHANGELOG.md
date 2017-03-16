@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds wmi_check integration to integrations-core.
+* [SDK] adds wmi_check integration to integrations-core.
 

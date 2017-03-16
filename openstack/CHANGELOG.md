@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] adds openstack integration to integrations-core.
+* [SDK] adds openstack integration to integrations-core.
 
 * [Improvement] Support regex for Network ID exclusion. See [integrations-core-181](https://github.com/DataDog/integrations-core/pull/181)
 

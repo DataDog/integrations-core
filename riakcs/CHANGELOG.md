@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds riakcs integration to integrations-core.
+* [SDK] adds riakcs integration to integrations-core.
 

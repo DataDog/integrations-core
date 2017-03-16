@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds cassandra integration to integrations-core.
+* [SDK] adds cassandra integration to integrations-core.
 

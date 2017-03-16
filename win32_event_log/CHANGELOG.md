@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds win32_event_log integration to integrations-core.
+* [SDK] adds win32_event_log integration to integrations-core.
 

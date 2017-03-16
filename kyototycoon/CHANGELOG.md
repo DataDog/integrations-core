@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds kyototycoon integration to integrations-core.
+* [SDK] adds kyototycoon integration to integrations-core.
 

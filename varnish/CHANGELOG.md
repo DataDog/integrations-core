@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds varnish integration to integrations-core.
+* [SDK] adds varnish integration to integrations-core.
 

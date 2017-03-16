@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds fluentd integration to integrations-core.
+* [SDK] adds fluentd integration to integrations-core.
 

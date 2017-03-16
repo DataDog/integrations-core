@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds couch integration to integrations-core.
+* [SDK] adds couch integration to integrations-core.
 

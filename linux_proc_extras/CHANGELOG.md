@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds linux_proc_extras integration to integrations-core.
+* [SDK] adds linux_proc_extras integration to integrations-core.
 

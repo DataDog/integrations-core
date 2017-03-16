@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds kafka integration to integrations-core.
+* [SDK] adds kafka integration to integrations-core.
 

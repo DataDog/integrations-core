@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds mesos integration to integrations-core.
+* [SDK] adds mesos integration to integrations-core.
 

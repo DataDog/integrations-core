@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds rabbitmq integration to integrations-core.
+* [SDK] adds rabbitmq integration to integrations-core.
 

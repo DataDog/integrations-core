@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds twemproxy integration to integrations-core, twemproxy is a new integration.
+* [SDK] adds twemproxy integration to integrations-core, twemproxy is a new integration.
 

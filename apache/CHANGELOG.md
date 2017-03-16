@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds apache integration to integrations-core.
+* [SDK] adds apache integration to integrations-core.
 

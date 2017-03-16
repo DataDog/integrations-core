@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds mesos_slave integration to integrations-core.
+* [SDK] adds mesos_slave integration to integrations-core.
 

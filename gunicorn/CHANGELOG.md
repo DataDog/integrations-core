@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds gunicorn integration to integrations-core.
+* [SDK] adds gunicorn integration to integrations-core.
 

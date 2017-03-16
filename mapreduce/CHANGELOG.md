@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds mapreduce integration to integrations-core.
+* [SDK] adds mapreduce integration to integrations-core.
 

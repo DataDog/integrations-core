@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds lighttpd integration to integrations-core.
+* [SDK] adds lighttpd integration to integrations-core.
 

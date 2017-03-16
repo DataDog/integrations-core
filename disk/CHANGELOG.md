@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] adds disk integration to integrations-core.
+* [SDK] adds disk integration to integrations-core.
 
 * [Bugfix] Tag metrics with filesystem tag key instead of filesystem itself. See [integrations-core-252](https://github.com/DataDog/integrations-core/pull/252)
 

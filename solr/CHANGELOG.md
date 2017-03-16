@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds solr integration to integrations-core.
+* [SDK] adds solr integration to integrations-core.
 

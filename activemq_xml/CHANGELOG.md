@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds activemq_xml integration to integrations-core.
+* [SDK] adds activemq_xml integration to integrations-core.
 

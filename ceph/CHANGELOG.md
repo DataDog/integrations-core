@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds ceph integration to integrations-core.
+* [SDK] adds ceph integration to integrations-core.
 

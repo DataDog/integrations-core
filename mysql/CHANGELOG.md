@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] adds mysql integration to integrations-core.
+* [SDK] adds mysql integration to integrations-core.
 
 * [Improvement] Add another format for innodb writes innodb. See [dd-agent-3148](https://github.com/datadog/dd-agent/issues/3148)
 

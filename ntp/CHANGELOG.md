@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds ntp integration to integrations-core.
+* [SDK] adds ntp integration to integrations-core.
 

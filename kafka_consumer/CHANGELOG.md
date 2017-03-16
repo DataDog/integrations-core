@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds kafka_consumer integration to integrations-core.
+* [SDK] adds kafka_consumer integration to integrations-core.
 

@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds go_expvar integration to integrations-core.
+* [SDK] adds go_expvar integration to integrations-core.
 

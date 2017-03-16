@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds ssh_check integration to integrations-core.
+* [SDK] adds ssh_check integration to integrations-core.
 

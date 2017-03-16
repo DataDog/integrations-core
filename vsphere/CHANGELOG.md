@@ -5,6 +5,6 @@
 
 ### Changes
 
-* [FEATURE] adds vsphere integration to integrations-core.
-* [Feature] Improve tagging, v6 compatibility, infrastructure reporting and performance. See [dd-agent-3055](https://github.com/datadog/dd-agent/issues/3055)
+* [SDK] adds vsphere integration to integrations-core.
 
+* [Feature] Improve tagging, v6 compatibility, infrastructure reporting and performance. See [dd-agent-3055](https://github.com/datadog/dd-agent/issues/3055)

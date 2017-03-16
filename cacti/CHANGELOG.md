@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds cacti integration to integrations-core.
+* [SDK] adds cacti integration to integrations-core.
 

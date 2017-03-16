@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds gearmand integration to integrations-core.
+* [SDK] adds gearmand integration to integrations-core.
 

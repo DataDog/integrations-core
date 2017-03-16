@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds tomcat integration to integrations-core.
+* [SDK] adds tomcat integration to integrations-core.
 

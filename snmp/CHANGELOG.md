@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds snmp integration to integrations-core.
+* [SDK] adds snmp integration to integrations-core.
 

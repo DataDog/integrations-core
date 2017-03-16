@@ -5,5 +5,5 @@
 
 ### Changes
 
-* [FEATURE] adds nagios integration to integrations-core.
+* [SDK] adds nagios integration to integrations-core.
 
