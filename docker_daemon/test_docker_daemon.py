@@ -157,6 +157,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def setUp(self):
         self.docker_client = DockerUtil().client
+
+        self.second_network = self.docker_client.create_network("second", driver="bridge")['Id']
+
         for c in CONTAINERS_TO_RUN:
             images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"][0].startswith(c)]
             if len(images) == 0:
@@ -176,6 +179,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 c, detach=True, name=name, host_config=host_config, labels=labels)
             self.containers.append(cont)
 
+            if c == "nginx:latest":
+                self.docker_client.connect_container_to_network(cont['Id'], self.second_network)
+
         for c in self.containers:
             log.info("Starting container: {0}".format(c))
             self.docker_client.start(c)
@@ -184,6 +190,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
         for c in self.containers:
             log.info("Stopping container: {0}".format(c))
             self.docker_client.remove_container(c, force=True)
+        self.docker_client.remove_network(self.second_network)
 
     def test_basic_config_single(self):
         expected_metrics = [
@@ -652,3 +659,39 @@ class TestCheckDockerDaemon(AgentCheckTest):
         ]
         for co in containers:
             self.assertEqual(DockerUtil.container_name_extractor(co[0]), co[1])
+
+    def test_network_tagging(self):
+        expected_metrics = [
+            ('docker.net.bytes_rcvd',
+             ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx',
+              'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_rcvd',
+             ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx',
+              'image_tag:latest', 'docker_network:second']),
+            ('docker.net.bytes_sent',
+             ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx',
+              'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent',
+             ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx',
+              'image_tag:latest', 'docker_network:second'])
+        ]
+
+        custom_tags = ["extra_tag", "env:testing"]
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+                "tags": custom_tags,
+                "collect_image_size": True,
+                "collect_images_stats": True,
+            },
+            ],
+        }
+        DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
+
+        self.run_check_twice(config, force_reload=True)
+        for mname, tags in expected_metrics:
+            expected_tags = list(custom_tags)
+            if tags is not None:
+                expected_tags += tags
+            self.assertMetric(mname, tags=expected_tags, count=1, at_least=1)
