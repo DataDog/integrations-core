@@ -239,10 +239,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
             ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
 
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_sent', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest'])
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_rcvd', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'docker_network:bridge'])
         ]
 
         custom_tags = ["extra_tag", "env:testing"]
@@ -283,8 +283,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.io.write_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest'])
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
         ]
         config = {
             "init_config": {},
@@ -338,8 +338,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.io.write_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest'])
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
         ]
         config = {
             "init_config": {},
@@ -399,10 +399,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.mem.cache', ['container_command:docker-entrypoint.sh redis-server']),
             ('docker.mem.rss', ['container_command:docker-entrypoint.sh redis-server']),
             ('docker.mem.rss', ["container_command:nginx -g 'daemon off;'"]),
-            ('docker.net.bytes_rcvd', ['container_command:docker-entrypoint.sh redis-server']),
-            ('docker.net.bytes_rcvd', ["container_command:nginx -g 'daemon off;'"]),
-            ('docker.net.bytes_sent', ["container_command:nginx -g 'daemon off;'"]),
-            ('docker.net.bytes_sent', ['container_command:docker-entrypoint.sh redis-server'])
+            ('docker.net.bytes_rcvd', ['container_command:docker-entrypoint.sh redis-server', 'docker_network:bridge']),
+            ('docker.net.bytes_rcvd', ["container_command:nginx -g 'daemon off;'", 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ["container_command:nginx -g 'daemon off;'", 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_command:docker-entrypoint.sh redis-server', 'docker_network:bridge'])
         ]
         config = {
             "init_config": {},
