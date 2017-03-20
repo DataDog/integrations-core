@@ -17,7 +17,8 @@ from config import _is_affirmative
 from utils.dockerutil import (DockerUtil,
                               MountException,
                               BogusPIDException,
-                              SWARM_SVC_LABEL)
+                              SWARM_SVC_LABEL,
+                              RANCHER_CONTAINER_NAME)
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
@@ -26,7 +27,6 @@ from utils.service_discovery.sd_backend import get_sd_backend
 EVENT_TYPE = 'docker'
 SERVICE_CHECK_NAME = 'docker.service_up'
 HEALTHCHECK_SERVICE_CHECK_NAME = 'docker.container_health'
-RANCHER_CONTAINER_NAME = 'io.rancher.container.name'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
