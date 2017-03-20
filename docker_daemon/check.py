@@ -638,31 +638,6 @@ class DockerDaemon(AgentCheck):
                         if value is not None:
                             metric_func(self, mname, value, tags=tags)
 
-    def _build_network_mapping(self, container):
-        """Matches /proc/$PID/net/route and docker inspect to map interface names to docker network name.
-        Raises an exception on error, to be caught by the using method"""
-        proc_net_route_file = os.path.join(container['_proc_root'], 'net/route')
-
-        docker_gateways = {}
-        for netname, netconf in container.get(u'NetworkSettings').get(u'Networks').iteritems():
-            docker_gateways[netname] = struct.unpack('<L', socket.inet_aton(netconf.get(u'Gateway')))[0]
-
-        mapping = {}
-        with open(proc_net_route_file, 'r') as fp:
-            lines = fp.readlines()
-            for l in lines[1:]:
-                cols = l.split()
-                if cols[1] == '00000000':
-                    continue
-                destination = int(cols[1], 16)
-                mask = int(cols[7], 16)
-                for net, gw in docker_gateways.iteritems():
-                    if gw & mask == destination:
-                        mapping[cols[0]] = net
-
-            return mapping
-
-
     def _report_net_metrics(self, container, tags):
         """Find container network metrics by looking at /proc/$PID/net/dev of the container process."""
         if self._disable_net_metrics:
@@ -672,7 +647,7 @@ class DockerDaemon(AgentCheck):
         proc_net_file = os.path.join(container['_proc_root'], 'net/dev')
 
         try:
-            networks = self._build_network_mapping(container)
+            networks = self.docker_util.get_container_network_mapping(container)
         except Exception as e:
             # Revert to previous behaviour if the method is missing or failing
             self.warning("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
