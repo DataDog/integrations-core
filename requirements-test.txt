@@ -3,4 +3,3 @@ mock==2.0.0
 pep8==1.5.7
 pylint==1.6.4
 nose==1.3.4
-psycopg2==2.6.2 # required by postgres tests
