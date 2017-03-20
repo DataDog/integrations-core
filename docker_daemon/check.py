@@ -26,6 +26,7 @@ from utils.service_discovery.sd_backend import get_sd_backend
 EVENT_TYPE = 'docker'
 SERVICE_CHECK_NAME = 'docker.service_up'
 HEALTHCHECK_SERVICE_CHECK_NAME = 'docker.container_health'
+RANCHER_CONTAINER_NAME = 'io.rancher.container.name'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
@@ -371,9 +372,12 @@ class DockerDaemon(AgentCheck):
         if Platform.is_k8s() and KubeUtil.POD_NAME_LABEL not in self.collect_labels_as_tags:
             self.collect_labels_as_tags.append(KubeUtil.POD_NAME_LABEL)
 
+        # Collect container names as tags on rancher
+        if Platform.is_rancher() and RANCHER_CONTAINER_NAME not in self.collect_labels_as_tags:
+            self.collect_labels_as_tags.append(RANCHER_CONTAINER_NAME)
+
         if entity is not None:
             pod_name = None
-
             # Get labels as tags
             labels = entity.get("Labels")
             if labels is not None:
@@ -399,6 +403,9 @@ class DockerDaemon(AgentCheck):
                         elif k == SWARM_SVC_LABEL and Platform.is_swarm():
                             if v:
                                 tags.append("swarm_service:%s" % v)
+                        elif k == RANCHER_CONTAINER_NAME and Platform.is_rancher():
+                            if v:
+                                tags.append('rancher_service:%s' % v)
 
                         elif not v:
                             tags.append(k)
