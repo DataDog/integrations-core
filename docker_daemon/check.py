@@ -8,6 +8,7 @@ import re
 import requests
 import socket
 import urllib2
+import struct
 from collections import defaultdict, Counter, deque
 from math import ceil
 
@@ -637,6 +638,33 @@ class DockerDaemon(AgentCheck):
                         if value is not None:
                             metric_func(self, mname, value, tags=tags)
 
+    def _build_network_mapping(self, container):
+        """Matches /proc/$PID/net/route and docker inspect to map interface names to docker network name"""
+        try:
+            proc_net_route_file = os.path.join(container['_proc_root'], 'net/route')
+
+            docker_gateways = {}
+            for netname, netconf in container.get(u'NetworkSettings').get(u'Networks').iteritems():
+                docker_gateways[netname] = struct.unpack('<L', socket.inet_aton(netconf.get(u'Gateway')))[0]
+
+            mapping = {}
+            with open(proc_net_route_file, 'r') as fp:
+                lines = fp.readlines()
+                for l in lines[1:]:
+                    cols = l.split()
+                    if cols[1] == '00000000':
+                        continue
+                    destination = int(cols[1], 16)
+                    for net, gw in docker_gateways.iteritems():
+                        if gw & destination == destination:
+                            mapping[cols[0]] = net
+
+                return mapping
+        except Exception as e:
+            self.warning("Failed to build docker network mapping. Exception: {0}".format(e))
+            #TODO : should we return {eth0: default} to always handle eth0 on errors?
+            return {}
+
     def _report_net_metrics(self, container, tags):
         """Find container network metrics by looking at /proc/$PID/net/dev of the container process."""
         if self._disable_net_metrics:
@@ -644,7 +672,12 @@ class DockerDaemon(AgentCheck):
             return
 
         proc_net_file = os.path.join(container['_proc_root'], 'net/dev')
+
         try:
+            networks = self._build_network_mapping(container)
+            self.log.info(networks)
+            self.log.info(tags)
+
             with open(proc_net_file, 'r') as fp:
                 lines = fp.readlines()
                 """Two first lines are headers:
@@ -654,12 +687,13 @@ class DockerDaemon(AgentCheck):
                 for l in lines[2:]:
                     cols = l.split(':', 1)
                     interface_name = str(cols[0]).strip()
-                    if interface_name == 'eth0':
+                    if interface_name in networks:
+                        net_tags = tags + ['docker_network:'+networks[interface_name]]
                         x = cols[1].split()
                         m_func = FUNC_MAP[RATE][self.use_histogram]
-                        m_func(self, "docker.net.bytes_rcvd", long(x[0]), tags)
-                        m_func(self, "docker.net.bytes_sent", long(x[8]), tags)
-                        break
+                        m_func(self, "docker.net.bytes_rcvd", long(x[0]), net_tags)
+                        m_func(self, "docker.net.bytes_sent", long(x[8]), net_tags)
+
         except Exception as e:
             # It is possible that the container got stopped between the API call and now
             self.warning("Failed to report IO metrics from file {0}. Exception: {1}".format(proc_net_file, e))
