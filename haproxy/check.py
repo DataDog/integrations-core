@@ -270,7 +270,10 @@ class HAProxy(AgentCheck):
 
     def _line_to_dict(self, fields, line):
         data_dict = {}
-        for i, val in enumerate(line.split(',')[:]):
+        values = line.split(',')
+        if len(values) > len(fields):
+            values = self._gather_quoted_values(values)
+        for i, val in enumerate(values):
             if val:
                 try:
                     # Try converting to a long, if failure, just leave it
@@ -283,6 +286,22 @@ class HAProxy(AgentCheck):
             data_dict['status'] = self._normalize_status(data_dict['status'])
 
         return data_dict
+
+    def _gather_quoted_values(self, values):
+        gathered_values = []
+        previous = ''
+        for val in values:
+            if val.startswith('"') and not val.endswith('"'):
+                previous = val
+            elif previous:
+                if val.endswith('"'):
+                    gathered_values.append(previous + val)
+                    previous = ''
+                else:
+                    previous += val
+            else:
+                gathered_values.append(val)
+        return gathered_values
 
     def _update_data_dict(self, data_dict, back_or_front):
         """
