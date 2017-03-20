@@ -1,8 +1,11 @@
 # CHANGELOG - riakcs
 
-0.1.0/ Unreleased
+[Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
+
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds riakcs integration.
+* [SDK] adds riakcs integration to integrations-core.
+

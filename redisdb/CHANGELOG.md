@@ -1,8 +1,12 @@
 # CHANGELOG - redisdb
 
-0.1.0/ Unreleased
+[Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
+
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds redisdb integration.
+* [SDK] adds redisdb integration to integrations-core.
+
+* [Feature] Add some additional metrics. See [dd-agent-2749](https://github.com/datadog/dd-agent/issues/2749)

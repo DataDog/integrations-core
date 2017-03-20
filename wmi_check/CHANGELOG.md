@@ -1,8 +1,11 @@
 # CHANGELOG - wmi_check
 
-0.1.0/ Unreleased
+[Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
+
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds wmi_check integration.
+* [SDK] adds wmi_check integration to integrations-core.
+

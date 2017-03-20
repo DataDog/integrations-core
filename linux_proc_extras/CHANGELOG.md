@@ -1,8 +1,11 @@
 # CHANGELOG - linux_proc_extras
 
-0.1.0/ Unreleased
+[Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
+
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds linux_proc_extras integration.
+* [SDK] adds linux_proc_extras integration to integrations-core.
+

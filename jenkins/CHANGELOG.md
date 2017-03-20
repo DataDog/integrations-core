@@ -1,4 +1,4 @@
-# CHANGELOG - cassandra
+# CHANGELOG - jenkins
 
 [Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
 
@@ -7,5 +7,5 @@
 
 ### Changes
 
-* [SDK] adds cassandra integration to integrations-core.
+* [SDK] adds jenkins integration to integrations-core.
 

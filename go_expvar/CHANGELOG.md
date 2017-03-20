@@ -1,8 +1,11 @@
 # CHANGELOG - go_expvar
 
-0.1.0/ Unreleased
+[Agent Changelog](https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md)
+
+1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds go_expvar integration.
+* [SDK] adds go_expvar integration to integrations-core.
+
