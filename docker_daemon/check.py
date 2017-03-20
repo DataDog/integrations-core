@@ -651,7 +651,7 @@ class DockerDaemon(AgentCheck):
         except Exception as e:
             # Revert to previous behaviour if the method is missing or failing
             self.warning("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
-            networks = {'eth0': 'default'}
+            networks = {'eth0': 'bridge'}
 
         try:
             with open(proc_net_file, 'r') as fp:
