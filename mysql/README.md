@@ -67,7 +67,7 @@ instances:
 
 See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-Finally, restart the agent.
+Restart the agent to start sending MySQL metrics to Datadog.
 
 # Validation
 
