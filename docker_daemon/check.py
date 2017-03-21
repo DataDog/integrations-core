@@ -8,7 +8,6 @@ import re
 import requests
 import socket
 import urllib2
-import struct
 from collections import defaultdict, Counter, deque
 from math import ceil
 
