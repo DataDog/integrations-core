@@ -21,7 +21,7 @@ The MySQL check is included in the Datadog agent package, so simply install `dat
 
 ### Prepare MySQL
 
-On your MySQL server, create a database user for the Datadog agent:
+On each MySQL server, create a database user for the Datadog agent:
 
 ```
 mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<YOUR_CHOSEN_PASSWORD>';
@@ -89,7 +89,7 @@ If the status is not OK, see the Troubleshooting section.
 
 # Troubleshooting
 
-You may observe one of the following common problems in the output of the Datadog agent's `info` subcommand:
+You may observe one of these common problems in the output of the Datadog agent's `info` subcommand.
 
 ### Agent cannot authenticate
 ```
