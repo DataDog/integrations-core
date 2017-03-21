@@ -647,8 +647,6 @@ class DockerDaemon(AgentCheck):
 
         proc_net_file = os.path.join(container['_proc_root'], 'net/dev')
 
-        self.log.warning(str(container))
-
         try:
             if container['Id'] in self.network_mappings:
                 networks = self.network_mappings[container['Id']]
@@ -690,7 +688,6 @@ class DockerDaemon(AgentCheck):
                     if id in self.network_mappings:
                         self.log.debug("Removing network mapping cache for container %s" % id)
                         del self.network_mappings[id]
-                    self.log.info("Network event: " + str(ev))
             except Exception as e:
                 self.log.warning('Malformed network event: %s' % str(ev))
 
