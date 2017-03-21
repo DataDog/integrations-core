@@ -41,6 +41,8 @@ mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+If your MySQL server doesn't have the `performance_schema` database enabled, do not run the final GRANT. Also do not enable `extra_performance_metrics` in the agent's `mysql.yaml`. (see next subsection)
+
 ### Connect the Agent
 
 Create a basic `mysql.yaml` in the agent's `conf.d` directory to connect it to the MySQL server:
