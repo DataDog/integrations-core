@@ -11,7 +11,7 @@ And [many more](https://github.com/DataDog/integrations-core/blob/master/mysql/m
 
 The MySQL check sends one service check: whether or not the Agent is successfully connecting to MySQL.
 
-The does not send anything to your events stream.
+The check does not send anything to your events stream.
 
 # Installation
 
