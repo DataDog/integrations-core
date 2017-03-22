@@ -255,7 +255,7 @@ class DockerDaemon(AgentCheck):
         containers_by_id = self._crawl_container_pids(containers_by_id, custom_cgroups)
 
         # Send events from Docker API
-        if self.collect_events or self._service_discovery:
+        if self.collect_events or self._service_discovery or not self._disable_net_metrics:
             self._process_events(containers_by_id)
 
         # Report performance container metrics (cpu, mem, net, io)
