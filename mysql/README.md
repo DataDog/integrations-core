@@ -28,7 +28,7 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<YOUR_CHOSEN_PASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-The Agent needs a few permissions to collect metrics. Grant its user ONLY the following permissions:
+The Agent needs a few privileges to collect metrics. Grant its user ONLY the following privileges:
 
 ```
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
@@ -36,12 +36,22 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 
 mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
+```
+
+If the MySQL server has the `performance_schema` database enabled and you want to collect metrics from it, the Agent needs one more `GRANT`. Check that `performance_schema` exists and run the `GRANT` if so:
+
+```
+mysql> show databases like 'performance_schema';
++-------------------------------+
+| Database (performance_schema) |
++-------------------------------+
+| performance_schema            |
++-------------------------------+
+1 row in set (0.00 sec)
 
 mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
-
-If your MySQL server doesn't have the `performance_schema` database enabled, do not run the final GRANT. Also do not enable `extra_performance_metrics` in the Agent's `mysql.yaml`. (see next subsection)
 
 ### Connect the Agent
 
@@ -64,6 +74,8 @@ instances:
         schema_size_metrics: false
         disable_innodb_metrics: false
 ```
+
+If you found above that MySQL doesn't have `performance_schema` enabled, do not set `extra_performance_metrics` to `true`.
 
 See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
@@ -124,7 +136,7 @@ mysql> select user,host,process_priv from mysql.user where user='datadog';
 1 row in set (0.00 sec)
 ```
 
-Review the Configuration section and grant the datadog user all necessary permissions. Do NOT grant all privileges on all databases to this user.
+Review the Configuration section and grant the datadog user all necessary privileges. Do NOT grant all privileges on all databases to this user.
 
 # Compatibility
 
