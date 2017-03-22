@@ -96,6 +96,12 @@ instances:
     #
     # collect_disk_stats: true
 
+    # Collect containers exit codes
+    # This is useful to monitor if ephemeral containers exit with an error or not.
+    # Defaults to false.
+    #
+    # collect_exit_codes: true
+
 
     # Exclude containers based on their tags
     # An excluded container will not get any individual container metric reported for it.

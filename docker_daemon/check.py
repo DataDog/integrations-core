@@ -210,6 +210,7 @@ class DockerDaemon(AgentCheck):
             self.collect_events = _is_affirmative(instance.get('collect_events', True))
             self.collect_image_size = _is_affirmative(instance.get('collect_image_size', False))
             self.collect_disk_stats = _is_affirmative(instance.get('collect_disk_stats', False))
+            self.collect_exit_codes = _is_affirmative(instance.get('collect_exit_codes', False))
             self.collect_ecs_tags = _is_affirmative(instance.get('ecs_tags', True)) and Platform.is_ecs_instance()
 
             self.ecs_tags = {}
@@ -728,6 +729,14 @@ class DockerDaemon(AgentCheck):
                     low_prio_events.append((event, container_name))
                 else:
                     normal_prio_events.append((event, container_name))
+
+                # Report the exit code in case of a DIE event
+                if event['status'] == 'die' and self.collect_exit_codes:
+                    try:
+                        exit_code = int(event['Actor']['Attributes']['exitCode'])
+                        self.gauge('docker.containers.exit_codes', exit_code, container_tags)
+                    except KeyError:
+                        self.log.warning('Unable to collect the exit code for container %s' % container_name)
 
             exec_event = self._create_dd_event(low_prio_events, image_name, container_tags, priority='Low')
             if exec_event:
