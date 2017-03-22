@@ -7,7 +7,7 @@ The Datadog agent's MySQL check sends many database metrics to Datadog, includin
 * Connections (currently open connections, aborted connections, errors, etc)
 * InnoDB (buffer pool metrics, etc)
 
-And [many more](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv). You can also invent your own metrics using custom queries.
+And [many more](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv). You can also invent your own metrics using custom SQL queries.
 
 The MySQL check sends one service check: whether or not the Datadog agent can connect to MySQL.
 
@@ -15,7 +15,7 @@ It does not send anything to your events stream.
 
 # Installation
 
-The MySQL check is included in the Datadog agent package, so simply install `datadog-agent` on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The MySQL check is included in the Datadog agent package, so simply [install the Datadog agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 # Configuration
 
