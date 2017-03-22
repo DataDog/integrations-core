@@ -529,7 +529,8 @@ class MySql(AgentCheck):
         if _is_affirmative(options.get('replication', False)):
             # Get replica stats
             results.update(self._get_replica_stats(db))
-            results.update(self._get_slave_status(db, above_560))
+            nonblocking = _is_affirmative(options.get('replication_non_blocking_status', True))
+            results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
 
             # get slave running form global status page
@@ -863,7 +864,7 @@ class MySql(AgentCheck):
             self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
             return {}
 
-    def _get_slave_status(self, db, above_560):
+    def _get_slave_status(self, db, above_560, nonblocking):
         """
         Retrieve the slaves' statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
@@ -871,7 +872,7 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor()) as cursor:
-                if above_560:
+                if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
                     cursor.execute("SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'")
