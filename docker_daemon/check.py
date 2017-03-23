@@ -757,11 +757,8 @@ class DockerDaemon(AgentCheck):
                 container_tags.add('container_name:%s' % container_name)
                 try:
                     exit_code = int(event['Actor']['Attributes']['exitCode'])
-                    if(exit_code == 0):
-                        self.increment('docker.containers.exit_success', tags=container_tags)
-                    else:
-                        container_tags.add('exit_code:%d' % exit_code)
-                        self.increment('docker.containers.exit_failure', tags=container_tags)
+                    container_tags.add('exit_code:%d' % exit_code)
+                    self.increment('docker.containers.exit', tags=container_tags)
                 except KeyError:
                     self.log.warning('Unable to collect the exit code for container %s' % container_name)
 

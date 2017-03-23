@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] adds the ability to collect docker exit codes as counts, adds metrics `docker.containers.exit_failure` with the `exit_code` as tag and `docker.containers.exit_success`
+* [FEATURE] adds the ability to collect docker exit codes as counts, adds metrics `docker.containers.exit` with the `exit_code` as tag
 
  1.0.003-22-2017
  ==================
