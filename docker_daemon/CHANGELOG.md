@@ -1,6 +1,11 @@
 # CHANGELOG - docker_daemon
+<<<<<<< HEAD
  
 1.1.0/ Unreleased
+=======
+
+1.0.003-22-2017
+>>>>>>> af3cfce41d14a70f10403f844e362885f9f0cda5
 ==================
 
 ### Changes
