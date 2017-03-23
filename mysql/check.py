@@ -265,7 +265,7 @@ SCHEMA_VARS = {
 
 REPLICA_VARS = {
     'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', COUNT),
+    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
 }
 
 SYNTHETIC_VARS = {
