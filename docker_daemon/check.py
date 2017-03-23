@@ -658,6 +658,7 @@ class DockerDaemon(AgentCheck):
             # Revert to previous behaviour if the method is missing or failing
             self.warning("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
             networks = {'eth0': 'bridge'}
+            self.network_mappings[container['Id']] = networks
 
         try:
             with open(proc_net_file, 'r') as fp:
@@ -684,16 +685,16 @@ class DockerDaemon(AgentCheck):
         for ev in api_events:
             try:
                 if ev.get('Type') == 'network' and ev.get('Action').endswith('connect'):
-                    id = ev.get('Actor').get('Attributes').get('container')
-                    if id in self.network_mappings:
-                        self.log.debug("Removing network mapping cache for container %s" % id)
-                        del self.network_mappings[id]
+                    container_id = ev.get('Actor').get('Attributes').get('container')
+                    if container_id in self.network_mappings:
+                        self.log.debug("Removing network mapping cache for container %s" % container_id)
+                        del self.network_mappings[container_id]
             except Exception:
                 self.log.warning('Malformed network event: %s' % str(ev))
 
     def _process_events(self, containers_by_id):
         if self.collect_events is False:
-            # Crawl events for service discovery only
+            # Crawl events for service discovery and network mapping cache invalidation
             self._get_events()
             return
         try:
