@@ -673,7 +673,6 @@ class DockerDaemon(AgentCheck):
 
         if self.collect_events:
             try:
-                api_events = self._get_events()
                 aggregated_events = self._pre_aggregate_events(api_events, containers_by_id)
                 events = self._format_events(aggregated_events, containers_by_id)
             except (socket.timeout, urllib2.URLError):
@@ -743,7 +742,9 @@ class DockerDaemon(AgentCheck):
         return events
 
     def _report_exit_codes(self, events, containers_by_id):
+        self.log.debug("reporting exit codes")
         for event in events:
+            self.log.debug('docker event found: ' + str(event))
             container_tags = set()
             container = containers_by_id.get(event.get('id'))
             # Skip events related to filtered containers
