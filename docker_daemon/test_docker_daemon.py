@@ -652,3 +652,35 @@ class TestCheckDockerDaemon(AgentCheckTest):
         ]
         for co in containers:
             self.assertEqual(DockerUtil.container_name_extractor(co[0]), co[1])
+
+    def test_collect_exit_code(self):
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+                "collect_exit_codes": True
+            }]
+        }
+        DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
+
+        expected_metrics = [
+            ("docker.containers.exit", ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-code', 'exit_code:1'])
+        ]
+
+        from time import time
+        now = int(time())
+        container = self.docker_client.create_container(
+            "nginx:latest", detach=True, name='test-exit-code', entrypoint='/bin/false')
+        log.debug('start nginx:latest with entrypoint /bin/false')
+        self.docker_client.start(container)
+
+        # Wait until the DIE event is created
+        for event in self.docker_client.events(since=now, until=now + 2, decode=True):
+            if event.get('id') == container.get('Id') and event.get('status') == 'die':
+                break
+
+        self.run_check(config)
+        self.docker_client.remove_container(container)
+
+        for mname, tags in expected_metrics:
+            self.assertMetric(mname, tags=tags, count=1, at_least=1)
