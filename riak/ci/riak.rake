@@ -17,11 +17,8 @@ namespace :ci do
       sh %(docker rm -f #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('riak/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('riak')
       sh %(docker run -d --name #{container_name} -p 18098:8098 -v #{resources_path}:/etc/riak/ tutum/riak)
     end
 

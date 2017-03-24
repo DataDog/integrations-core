@@ -12,11 +12,8 @@ namespace :ci do
   namespace :haproxy do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('haproxy/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('haproxy')
 
       sh %(mkdir -p $VOLATILE_DIR/haproxy)
       sh %(docker create -v $VOLATILE_DIR/haproxy:/tmp -p 3835:3835 --name dd-haproxy haproxy:#{haproxy_version})

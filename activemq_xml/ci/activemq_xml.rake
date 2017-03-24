@@ -36,11 +36,8 @@ namespace :ci do
       sh %(chmod -R a+rwxX #{activemq_xml_rootdir})
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('activemq_xml/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('activemq_xml')
 
       sh %(docker run -d \
        -p #{admin_port}:#{admin_port} \

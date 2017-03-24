@@ -9,11 +9,8 @@ namespace :ci do
       sh %(docker rm -f #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('snmp/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('snmp')
       sh %(docker run -d -v #{resources_path}:/etc/snmp/ --name #{container_name} -p 11111:161/udp polinux/snmpd -c /etc/snmp/snmpd.conf)
       sleep_for 5
     end

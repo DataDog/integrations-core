@@ -18,11 +18,8 @@ namespace :ci do
       `docker rm $(docker ps -aq --filter name=dd-test-mysql) || true`
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('mysql/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('mysql')
       sh %(docker run -p #{container_port}:3306 --name #{container_name} -e MYSQL_ROOT_PASSWORD=datadog -d mysql:5.7)
     end
 

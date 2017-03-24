@@ -19,11 +19,8 @@ namespace :ci do
       sh %(docker rm  dd-test-consul-1 dd-test-consul-2 dd-test-consul-3 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('consul/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('consul')
       # sample docker usage
       sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} \
             consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )

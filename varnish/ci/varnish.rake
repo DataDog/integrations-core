@@ -8,7 +8,7 @@ namespace :ci do
   namespace :varnish do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
+    task :install do
       target = varnish_version.split('.')[0]
       sh %(docker-compose -f varnish/ci/docker-compose.yml up -d varnish#{target})
     end
