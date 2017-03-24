@@ -12,11 +12,8 @@ namespace :ci do
   namespace :docker do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('docker/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('docker')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name docker source/docker:docker_version)
       # sh %(docker start docker)

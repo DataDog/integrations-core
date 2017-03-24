@@ -25,11 +25,8 @@ namespace :ci do
       sh %(rm -f #{__dir__}/jmxremote.password.tmp)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('cassandra/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('cassandra')
       sh %(docker create --expose #{container_port} --expose 9042 --expose 7000 --expose 7001 --expose 9160 \
            -p #{container_port}:#{container_port} -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=#{container_port} \
            -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})

@@ -12,11 +12,8 @@ namespace :ci do
   namespace :kubernetes_state do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('kubernetes_state/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('kubernetes_state')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name kubernetes_state source/kubernetes_state:kubernetes_state_version)
       # sh %(docker start kubernetes_state)
