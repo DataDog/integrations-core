@@ -262,8 +262,17 @@ class Network(AgentCheck):
                 for ip_version in ['4', '6']:
                     # Call `ss` for each IP version because there's no built-in way of distinguishing
                     # between the IP versions in the output
-                    output, _, _ = get_subprocess_output(["ss", "-n", "-u", "-t", "-a", "-{0}".format(ip_version)], self.log)
-                    lines = output.splitlines()
+                    output_tcp, _, _ = get_subprocess_output(["ss", "-n", "-t", "-a", "-{0}".format(ip_version)], self.log)
+                    output_udp, _, _ = get_subprocess_output(["ss", "-n", "-u", "-a", "-{0}".format(ip_version)], self.log)
+
+                    lines_tcp = output_tcp.splitlines()
+                    for line in lines_tcp:
+                        line = 'tcp ' + line
+                    lines_udp = output_udp.splitlines()
+                    for line in lines_udp:
+                        line = 'udp ' + line
+                    lines = lines_tcp + lines_udp[1:]
+
                     # Netid  State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
                     # udp    UNCONN     0      0              127.0.0.1:8125                  *:*
                     # udp    ESTAB      0      0              127.0.0.1:37036         127.0.0.1:8125
