@@ -667,17 +667,15 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ("docker.containers.exit", ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-code', 'exit_code:1'])
         ]
 
-        from time import time
-        now = int(time())
         container = self.docker_client.create_container(
             "nginx:latest", detach=True, name='test-exit-code', entrypoint='/bin/false')
         log.debug('start nginx:latest with entrypoint /bin/false')
         self.docker_client.start(container)
-
-        # Wait until the DIE event is created
-        for event in self.docker_client.events(since=now, until=now + 2, decode=True):
-            if event.get('id') == container.get('Id') and event.get('status') == 'die':
-                break
+        log.debug('container exited with %s' % self.docker_client.wait(container, 1))
+        # After the container exits, we need to wait a second so the event isn't too recent
+        # when the check runs, otherwise the event is not picked up
+        from time import sleep
+        sleep(1)
 
         self.run_check(config)
         self.docker_client.remove_container(container)
