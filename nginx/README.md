@@ -2,12 +2,12 @@
 
 # Overview
 
-The Datadog Agent's NGINX check sends many metrics to Datadog, including basic metrics for:
+The Datadog Agent's NGINX check sends many metrics to Datadog, including metrics for:
 
 * Total requests
 * Connections (accepted, handled, active)
 
-If you use NGINX Plus, the commercial version of NGINX, the Agent can collect significantly more metrics, like those for:
+If you use NGINX Plus, the commercial version of NGINX, the Agent collects significantly more metrics, like those for:
 
 * Errors (4xx codes, 5xx codes)
 * SSL (handshakes, failed handshakes, etc)
@@ -86,7 +86,7 @@ Restart the Agent to start sending NGINX metrics to Datadog.
 
 # Validation
 
-Run the Agent's info subcommand and look for mysql under the Checks section:
+Run the Agent's info subcommand and look for `nginx` under the Checks section:
 
 ```
   Checks
