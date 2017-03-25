@@ -7,7 +7,7 @@ The Datadog Agent's NGINX check sends many metrics to Datadog, including metrics
 * Total requests
 * Connections (accepted, handled, active)
 
-If you use NGINX Plus, the commercial version of NGINX, the Agent collects significantly more metrics, like those for:
+NGINX Plus, the commercial version of NGINX, provides significantly more metrics, like those for:
 
 * Errors (4xx codes, 5xx codes)
 * SSL (handshakes, failed handshakes, etc)
