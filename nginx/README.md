@@ -149,4 +149,4 @@ The NGINX check is compatible with all major platforms.
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv) for a full list of provided metrics.
 
-Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html)(open source NGINX) and [http status](http://nginx.org/en/docs/http/ngx_http_status_module.html)(NGINX Plus) to understand which metrics are provided by each module.
+Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](http://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
