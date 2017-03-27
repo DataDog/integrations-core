@@ -1,6 +1,6 @@
 # CHANGELOG - powerdns_recursor
 
-1.0.0/ Unreleased
+1.0.003-22-2017
 ==================
 
 ### Changes
