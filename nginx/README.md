@@ -26,7 +26,7 @@ The NGINX integration - also known as the NGINX check - is included in the Datad
 
 ### NGINX status module
 
-The NGINX check works by pulling metrics from a local NGINX status endpoint. For this to work, your NGINX instances need to have been compiled with one of two NGINX status modules:
+The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
 * [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - for open source NGINX
 * [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - only for NGINX Plus
