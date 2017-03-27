@@ -1,21 +1,21 @@
 # Overview
 
-The Datadog Agent's MySQL check sends many database metrics to Datadog, including metrics for:
+The Datadog Agent can collect many metrics from MySQL databases, including those for:
 
 * Query throughput
 * Query performance (average query run time, slow queries, etc)
 * Connections (currently open connections, aborted connections, errors, etc)
 * InnoDB (buffer pool metrics, etc)
 
-And [many more](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv). You can also invent your own metrics using custom SQL queries.
+And many more. You can also invent your own metrics using custom SQL queries.
 
-The MySQL check sends one service check: whether or not the Agent is successfully connecting to MySQL.
+The Agent sends one MySQL-related service check: whether or not the Agent is successfully collecting metrics from MySQL.
 
-The check does not send anything to your events stream.
+The Agent does not send anything MySQL-related to your events stream.
 
 # Installation
 
-The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The MySQL integration - also known as the MySQL check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 # Configuration
 
@@ -38,7 +38,7 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-If the MySQL server has the `performance_schema` database enabled and you want to collect metrics from it, the Agent needs one more `GRANT`. Check that `performance_schema` exists and run the `GRANT` if so:
+If the MySQL server has the `performance_schema` database enabled and you want to collect metrics from it, the Agent's user needs one more `GRANT`. Check that `performance_schema` exists and run the `GRANT` if so:
 
 ```
 mysql> show databases like 'performance_schema';
