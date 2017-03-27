@@ -26,16 +26,21 @@ The NGINX integration - also known as the NGINX check - is included in the Datad
 
 ### NGINX status module
 
-The NGINX check requires NGINX instances to have been compiled with the [NGINX stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html). Verify that this module is included in your `nginx` binary:
+The NGINX check works by pulling metrics from a local NGINX status endpoint. For this to work, your NGINX instances need to have been compiled with one of two NGINX status modules:
+
+* [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - freely available with open source NGINX
+* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - only available with NGINX Plus
+
+NGINX Plus always includes the http status module, so if you're a Plus user, skip to the Configuration section now.
+
+If you use open source NGINX, your instances may lack the stub status module. Verify that your NGINX binary has the module before proceeding to Configuration:
 
 ```
-$ nginx -V 2>&1| grep -o http_stub_status_module
+web01$ nginx -V 2>&1| grep -o http_stub_status_module
 http_stub_status_module
 ```
 
-If the command's output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own preferred version of NGINX (enabling the module as you compile it), but most modern Linux distributions provide alternative NGINX packages with a variety of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
-
-NGINX Plus always includes the [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html), which provides far more metrics than the stub status module. If you use NGINX Plus, you don't need to install anything additional.
+If the command's output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX (enabling the module as you compile it), but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 # Configuration
 
@@ -55,11 +60,11 @@ server {
   location /nginx_status {
     # Choose your status module
 
-    # available only with NGINX Plus
-    # status;
-
     # freely available with open source NGINX
     stub_status;
+
+    # available only with NGINX Plus
+    # status;
   }
 }
 ```
@@ -70,7 +75,7 @@ Reload NGINX to enable the local status endpoint. There's no need for a full res
 
 ### Connect the Agent
 
-Create a basic `nginx.yaml` in the Agent's `conf.d` directory to connect it to the NGINX status endpoint:
+Create an `nginx.yaml` in the Agent's `conf.d` directory to connect the Agent to the NGINX status endpoint:
 
 ```
 init_config:
@@ -128,7 +133,7 @@ http{
 	...
 
 	include <directory_that_contains_status.conf>/*.conf;
-	# e.g. include /etc/nginx/conf.d/*.conf;
+	# e.g.: include /etc/nginx/conf.d/*.conf;
 }
 ```
 
