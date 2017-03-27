@@ -2,12 +2,12 @@
 
 # Overview
 
-The Datadog Agent's NGINX check sends many metrics to Datadog, including metrics for:
+The Datadog Agent can collect many metrics from NGINX instances, including those for:
 
 * Total requests
 * Connections (accepted, handled, active)
 
-NGINX Plus, the commercial version of NGINX, provides significantly more metrics, like those for:
+For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics NGINX Plus provides, like those for:
 
 * Errors (4xx codes, 5xx codes)
 * SSL (handshakes, failed handshakes, etc)
@@ -16,17 +16,17 @@ NGINX Plus, the commercial version of NGINX, provides significantly more metrics
 
 And many more.
 
-The NGINX check sends one service check: whether or not the Agent is successfully collecting NGINX metrics.
+The Agent sends one NGINX-related service check: whether or not the Agent is successfully collecting NGINX metrics.
 
-The check does not send anything to your events stream.
+The Agent does not send anything NGINX-related to your events stream.
 
 # Installation
 
-The NGINX check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the NGINX check, install the `dd-check-nginx` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The NGINX integration - also known as the NGINX check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the NGINX check, install the `dd-check-nginx` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### NGINX status module
 
-The NGINX check requires your NGINX instances to have been compiled with the [NGINX stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html). Verify that this module is included in your `nginx` binary:
+The NGINX check requires NGINX instances to have been compiled with the [NGINX stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html). Verify that this module is included in your `nginx` binary:
 
 ```
 $ nginx -V 2>&1| grep -o http_stub_status_module
