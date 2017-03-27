@@ -69,7 +69,7 @@ server {
 }
 ```
 
-NGINX Plus can also use `stub_status`, but since that module collects fewer metrics, Plus users should use `status`.
+NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, Plus users should use `status`.
 
 You may optionally configure HTTP basic authentication in the server block, but since the service is only listening locally, it's not necessary.
 
