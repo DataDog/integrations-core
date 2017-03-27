@@ -7,12 +7,12 @@ The Datadog Agent can collect many metrics from NGINX instances, including those
 * Total requests
 * Connections (accepted, handled, active)
 
-For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics NGINX Plus provides, like those for:
+For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like those for:
 
 * Errors (4xx codes, 5xx codes)
-* SSL (handshakes, failed handshakes, etc)
 * Upstream servers (active connections, 5xx codes, health checks, etc)
 * Caches (size, hits, misses, etc)
+* SSL (handshakes, failed handshakes, etc)
 
 And many more.
 
@@ -28,19 +28,19 @@ The NGINX integration - also known as the NGINX check - is included in the Datad
 
 The NGINX check works by pulling metrics from a local NGINX status endpoint. For this to work, your NGINX instances need to have been compiled with one of two NGINX status modules:
 
-* [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - freely available with open source NGINX
-* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - only available with NGINX Plus
+* [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - for open source NGINX
+* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - for NGINX Plus ONLY
 
-NGINX Plus always includes the http status module, so if you're a Plus user, skip to the Configuration section now.
+NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to the Configuration section now.
 
-If you use open source NGINX, your instances may lack the stub status module. Verify that your NGINX binary has the module before proceeding to Configuration:
+If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to Configuration:
 
 ```
-web01$ nginx -V 2>&1| grep -o http_stub_status_module
+$ nginx -V 2>&1| grep -o http_stub_status_module
 http_stub_status_module
 ```
 
-If the command's output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX (enabling the module as you compile it), but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
+If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX (enabling the module as you compile it), but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 # Configuration
 
@@ -69,9 +69,11 @@ server {
 }
 ```
 
+NGINX Plus can also use `stub_status`, but since that module collects far fewer metrics, Plus users should use `status`.
+
 You may optionally configure HTTP basic authentication in the server block, but since the service is only listening locally, it's not necessary.
 
-Reload NGINX to enable the local status endpoint. There's no need for a full restart.
+Reload NGINX to enable the status endpoint. There's no need for a full restart.
 
 ### Connect the Agent
 
@@ -82,9 +84,9 @@ init_config:
 
 instances:
   - nginx_status_url: http://localhost:81/nginx_status/
-  #   If you configured the endpoint with HTTP basic authentication
-  #   user: <USER>
-  #   password: <PASSWORD>
+  # If you configured the endpoint with HTTP basic authentication
+  # user: <USER>
+  # password: <PASSWORD>
 ```
 
 Restart the Agent to start sending NGINX metrics to Datadog.
