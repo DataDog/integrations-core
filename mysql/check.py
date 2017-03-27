@@ -561,12 +561,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
-                if self._is_master(slaves, binlog_running):  # master
-                    if slaves > 0 and binlog_running:
-                        slave_running_status = AgentCheck.OK
-                    else:
-                        slave_running_status = AgentCheck.WARNING
-                elif slave_running:  # slave (or standalone)
+                if slave_running:
                     if slave_running.lower().strip() == 'on':
                         slave_running_status = AgentCheck.OK
                     else:
