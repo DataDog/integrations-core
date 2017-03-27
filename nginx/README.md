@@ -29,7 +29,7 @@ The NGINX integration - also known as the NGINX check - is included in the Datad
 The NGINX check works by pulling metrics from a local NGINX status endpoint. For this to work, your NGINX instances need to have been compiled with one of two NGINX status modules:
 
 * [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - for open source NGINX
-* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - for NGINX Plus ONLY
+* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - only for NGINX Plus
 
 NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to the Configuration section now.
 
@@ -46,7 +46,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains other NGINX configuration files (e.g. `/etc/nginx/conf.d/` in many packages):
+On each NGINX server, create a `status.conf` in the directory that contains other NGINX configuration files (e.g. `/etc/nginx/conf.d/`):
 
 ```
 server {
@@ -69,7 +69,7 @@ server {
 }
 ```
 
-NGINX Plus can also use `stub_status`, but since that module collects far fewer metrics, Plus users should use `status`.
+NGINX Plus can also use `stub_status`, but since that module collects fewer metrics, Plus users should use `status`.
 
 You may optionally configure HTTP basic authentication in the server block, but since the service is only listening locally, it's not necessary.
 
@@ -93,7 +93,7 @@ Restart the Agent to start sending NGINX metrics to Datadog.
 
 # Validation
 
-Run the Agent's info subcommand and look for `nginx` under the Checks section:
+Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
 
 ```
   Checks
