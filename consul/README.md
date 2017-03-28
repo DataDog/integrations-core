@@ -68,6 +68,25 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 # Validation
 
+### Datadog Agent to Consul Agent
+
+Run the Agent's `info` subcommand and look for `consul` under the Checks section:
+
+```
+  Checks
+  ======
+	[...]
+
+    consul (5.12.1)
+    ---------------
+      - instance #0 [OK]
+      - Collected 9 metrics, 0 events & 2 service checks
+
+    [...]
+```
+
+Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular requests in the Consul log:
+
 ```
     2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/leader (59.344µs) from=127.0.0.1:53768
     2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/peers (62.678µs) from=127.0.0.1:53770
@@ -78,29 +97,36 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
     2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/coordinate/nodes (84.95µs) from=127.0.0.1:53780
 ```
 
-# Troubleshooting
+### Consul Agent to DogStatsD
+
+Use `netstat` to verify that Consul is sending its metrics via UDP:
+
+```
+$ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
+udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 23176/consul
+```
 
 # Compatibility
 
-The Consul check is compatible with all major platforms
+The Consul check is compatible with all major platforms.
 
 # Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
 
-See the [Consul docs](https://www.consul.io/docs/agent/telemetry.html) for a list of metrics the Consul Agent sents to DogStatsD.
+See the [Consul docs](https://www.consul.io/docs/agent/telemetry.html) for a list of metrics the Consul Agent sends to DogStatsD.
 
 # Service Checks
 
 `consul.check`:
 
-The Agent creates a service check for each Health Check in your Consul cluster, tagging each with:
+The Agent creates a service check for each Consul Health Check in your cluster, tagging each with:
 
-* `service` if Consul reports a `ServiceName`
-* `consul_service_id` if Consul reports a `ServiceID`
+* `service:<name>` if Consul reports a `ServiceName`
+* `consul_service_id:<id>` if Consul reports a `ServiceID`
 
 # Events
 
 `consul.new_leader`:
 
-The Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
+The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
