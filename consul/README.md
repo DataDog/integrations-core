@@ -5,11 +5,11 @@
 The Datadog Agent collects many metrics from Consul nodes, including those for:
 
 * Total Consul peers
-* Node health - given a service, how many of its nodes are up, passing, warning, critical?
-* Service health - given a node, how many of its services are up, passing, warning, critical?
-* Network coordinates - inter-datacenter and intra-datacenter latencies
+* Service health - for a given service, how many of its nodes are up, passing, warning, critical?
+* Node health - for a given node, how many of its services are up, passing, warning, critical?
+* Network coordinates - inter- and intra-datacenter latencies
 
-The Agent also sends service checks and emits events for Consul Health Checks and leader elections, respectively.
+The Agent also sends Consul Health Checks as service checks, and emits an event for new leader elections.
 
 The _Consul_ Agent can provide its internal health metrics via DogStatsD, including those related to:
 
@@ -33,9 +33,11 @@ Create a `consul.yaml` in the Datadog Agent's `conf.d` directory:
 init_config:
 
 instances:
-    # Where your Consul HTTP Server Lives
-    # Use 'https' if your Consul setup is configured for SSL
+    # where the Consul HTTP Server Lives
+    # use 'https' if Consul is configured for SSL
     - url: http://localhost:8500
+      # again, if Consul is talking SSL
+      # client_cert_file: '/path/to/client.concatenated.pem'
 
       # submit per-service node status and per-node service status?
       catalog_checks: yes
@@ -46,20 +48,20 @@ instances:
       network_latency_checks: yes
 ```
 
-See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options. If your Consul HTTP server uses SSL, see the file for options to provide SSL keys and certificates.
+See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options.
 
 Restart the Agent to start sending Consul metrics to Datadog.
 
 ### Connect Consul Agent to DogStatsD
 
-In your main Consul configuration file, add `dogstatsd_addr` under the top-level `telemetry` option:
+In the main Consul configuration file, add your `dogstatsd_addr` nested under the top-level `telemetry` key:
 
 ```
 {
   ...
   "telemetry": {
     "dogstatsd_addr": "127.0.0.1:8125"
-  }
+  },
   ...
 }
 ```
@@ -85,7 +87,7 @@ Run the Agent's `info` subcommand and look for `consul` under the Checks section
     [...]
 ```
 
-Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular requests in the Consul log:
+Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular polling in the Consul log:
 
 ```
     2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/leader (59.344µs) from=127.0.0.1:53768
