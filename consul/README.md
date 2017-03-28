@@ -124,7 +124,7 @@ See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coor
 
 `consul.check`:
 
-The Datadog Agent submits a service check for each Consul Health Check in your cluster, tagging each with:
+The Datadog Agent submits a service check for each of the cluster's Health Checks, tagging each with:
 
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
