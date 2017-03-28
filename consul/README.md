@@ -25,8 +25,46 @@ The Datadog Agent's Consul Check is included in the Agent package, so simply [in
 
 # Configuration
 
+### Connect Datadog Agent to Consul Agent
 
+Create a `consul.yaml` in the Datadog Agent's `conf.d` directory:
 
+```
+init_config:
+
+instances:
+    # Where your Consul HTTP Server Lives
+    # Use 'https' if your Consul setup is configured for SSL
+    - url: http://localhost:8500
+
+      # submit per-service node status and per-node service status?
+      catalog_checks: yes
+
+      # emit leader election events
+      self_leader_check: yes
+
+      network_latency_checks: yes
+```
+
+See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options. If your Consul HTTP server uses SSL, see the file for options to provide SSL keys and certificates.
+
+Restart the Agent to start sending Consul metrics to Datadog.
+
+### Connect Consul Agent to DogStatsD
+
+In your main Consul configuration file, add `dogstatsd_addr` under the top-level `telemetry` option:
+
+```
+{
+  ...
+  "telemetry": {
+    "dogstatsd_addr": "127.0.0.1:8125"
+  }
+  ...
+}
+```
+
+Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 # Validation
 
@@ -50,4 +88,19 @@ The Consul check is compatible with all major platforms
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
 
-See the [Consul Agent docs](https://www.consul.io/docs/agent/telemetry.html) for a list of metrics the Consul Agent sents to DogStatsD.
+See the [Consul docs](https://www.consul.io/docs/agent/telemetry.html) for a list of metrics the Consul Agent sents to DogStatsD.
+
+# Service Checks
+
+`consul.check`:
+
+The Agent creates a service check for each Health Check in your Consul cluster, tagging each with:
+
+* `service` if Consul reports a `ServiceName`
+* `consul_service_id` if Consul reports a `ServiceID`
+
+# Events
+
+`consul.new_leader`:
+
+The Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
