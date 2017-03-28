@@ -11,7 +11,7 @@ The Datadog Agent collects many metrics from Consul nodes, including those for:
 
 The Agent also sends Consul Health Checks as service checks, and emits events for new leader elections.
 
-The _Consul_ Agent can provide its internal health metrics via DogStatsD, including those related to:
+The _Consul_ Agent can provide further metrics via DogStatsD. These metrics are more related to the internal health of Consul itself, not to services which depend on Consul. There are metrics for:
 
 * Serf events and member flaps
 * The Raft protocol
