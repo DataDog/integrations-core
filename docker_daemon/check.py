@@ -192,6 +192,8 @@ class DockerDaemon(AgentCheck):
             if self.docker_util.filtering_enabled:
                 self.tag_names[FILTERED] = self.docker_util.filtered_tag_names
 
+            # Container network mapping cache
+            self.network_mappings = {}
 
             # get the health check whitelist
             self.whitelist_patterns = None
@@ -253,7 +255,7 @@ class DockerDaemon(AgentCheck):
         containers_by_id = self._crawl_container_pids(containers_by_id, custom_cgroups)
 
         # Send events from Docker API
-        if self.collect_events or self._service_discovery:
+        if self.collect_events or self._service_discovery or not self._disable_net_metrics:
             self._process_events(containers_by_id)
 
         # Report performance container metrics (cpu, mem, net, io)
@@ -644,6 +646,20 @@ class DockerDaemon(AgentCheck):
             return
 
         proc_net_file = os.path.join(container['_proc_root'], 'net/dev')
+
+        try:
+            if container['Id'] in self.network_mappings:
+                networks = self.network_mappings[container['Id']]
+            else:
+                self.log.debug("Fetching network mapping for container %s" % container['Id'])
+                networks = self.docker_util.get_container_network_mapping(container)
+                self.network_mappings[container['Id']] = networks
+        except Exception as e:
+            # Revert to previous behaviour if the method is missing or failing
+            self.warning("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
+            networks = {'eth0': 'bridge'}
+            self.network_mappings[container['Id']] = networks
+
         try:
             with open(proc_net_file, 'r') as fp:
                 lines = fp.readlines()
@@ -654,19 +670,31 @@ class DockerDaemon(AgentCheck):
                 for l in lines[2:]:
                     cols = l.split(':', 1)
                     interface_name = str(cols[0]).strip()
-                    if interface_name == 'eth0':
+                    if interface_name in networks:
+                        net_tags = tags + ['docker_network:'+networks[interface_name]]
                         x = cols[1].split()
                         m_func = FUNC_MAP[RATE][self.use_histogram]
-                        m_func(self, "docker.net.bytes_rcvd", long(x[0]), tags)
-                        m_func(self, "docker.net.bytes_sent", long(x[8]), tags)
-                        break
+                        m_func(self, "docker.net.bytes_rcvd", long(x[0]), net_tags)
+                        m_func(self, "docker.net.bytes_sent", long(x[8]), net_tags)
+
         except Exception as e:
             # It is possible that the container got stopped between the API call and now
             self.warning("Failed to report IO metrics from file {0}. Exception: {1}".format(proc_net_file, e))
 
+    def _invalidate_network_mapping_cache(self, api_events):
+        for ev in api_events:
+            try:
+                if ev.get('Type') == 'network' and ev.get('Action').endswith('connect'):
+                    container_id = ev.get('Actor').get('Attributes').get('container')
+                    if container_id in self.network_mappings:
+                        self.log.debug("Removing network mapping cache for container %s" % container_id)
+                        del self.network_mappings[container_id]
+            except Exception:
+                self.log.warning('Malformed network event: %s' % str(ev))
+
     def _process_events(self, containers_by_id):
         if self.collect_events is False:
-            # Crawl events for service discovery only
+            # Crawl events for service discovery and network mapping cache invalidation
             self._get_events()
             return
         try:
@@ -688,6 +716,8 @@ class DockerDaemon(AgentCheck):
     def _get_events(self):
         """Get the list of events."""
         events, changed_container_ids = self.docker_util.get_events()
+        if not self._disable_net_metrics:
+            self._invalidate_network_mapping_cache(events)
         if changed_container_ids and self._service_discovery:
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
         return events
