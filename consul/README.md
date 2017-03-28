@@ -19,8 +19,8 @@ And many more.
 
 Finally, in addition to metrics, the Datadog Agent also sends:
 
-* a service checks for each Consul Health Check 
-* an event upon each new leader election
+* a service check for each Consul Health Check 
+* an event after each new leader election
 
 # Installation
 
