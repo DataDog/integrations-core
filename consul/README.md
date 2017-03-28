@@ -9,8 +9,6 @@ The Datadog Agent collects many metrics from Consul nodes, including those for:
 * Node health - for a given node, how many of its services are up, passing, warning, critical?
 * Network coordinates - inter- and intra-datacenter latencies
 
-The Agent also sends Consul Health Checks as service checks, and emits events for new leader elections.
-
 The _Consul_ Agent can provide further metrics via DogStatsD. These metrics are more related to the internal health of Consul itself, not to services which depend on Consul. There are metrics for:
 
 * Serf events and member flaps
@@ -18,6 +16,11 @@ The _Consul_ Agent can provide further metrics via DogStatsD. These metrics are 
 * DNS performance
 
 And many more.
+
+Finally, in addition to metrics, the Datadog Agent also sends:
+
+* a service checks for each Consul Health Check 
+* an event upon each new leader election
 
 # Installation
 
