@@ -118,16 +118,16 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cons
 
 See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) for a description of metrics the Consul Agent sends to DogStatsD.
 
-See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coordinates.html) if you're curious how these metrics are calculated.
+See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coordinates.html) if you're curious about how the network latency metrics are calculated.
 
 # Service Checks
 
 `consul.check`:
 
-The Agent creates a service check for each Consul Health Check in your cluster, tagging each with:
+The Datadog Agent submits a service check for each Consul Health Check in your cluster, tagging each with:
 
-* `service:<name>` if Consul reports a `ServiceName`
-* `consul_service_id:<id>` if Consul reports a `ServiceID`
+* `service:<name>`, if Consul reports a `ServiceName`
+* `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
 # Events
 
