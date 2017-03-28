@@ -17,10 +17,7 @@ The _Consul_ Agent can provide further metrics via DogStatsD. These metrics are 
 
 And many more.
 
-Finally, in addition to metrics, the Datadog Agent also sends:
-
-* a service check for each Consul Health Check 
-* an event after each new leader election
+Finally, in addition to metrics, the Datadog Agent also sends a service check for each of Consul's health checks, and an event after each new leader election.
 
 # Installation
 
@@ -137,3 +134,10 @@ The Datadog Agent submits a service check for each of the cluster's Health Check
 `consul.new_leader`:
 
 The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
+
+# Further Reading
+
+To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
+
+* [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog) - a more in-depth explanation of Datadog-Consul integration
+* [Consul at Datadog](https://engineering.datadoghq.com/consul-at-datadog/) - how Datadog Engineering uses Consul
