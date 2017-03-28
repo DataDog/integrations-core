@@ -642,7 +642,9 @@ class MongoDb(AgentCheck):
 
         if ssl_params:
             username_uri = u"{}@".format(urllib.quote(username))
-            clean_server_name = clean_server_name.replace(username_uri, "")
+
+            if username_uri:
+                clean_server_name = clean_server_name.replace(username_uri, "")
 
         # Get the list of metrics to collect
         collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
