@@ -9,7 +9,7 @@ The Datadog Agent collects many metrics from Consul nodes, including those for:
 * Node health - for a given node, how many of its services are up, passing, warning, critical?
 * Network coordinates - inter- and intra-datacenter latencies
 
-The Agent also sends Consul Health Checks as service checks, and emits an event for new leader elections.
+The Agent also sends Consul Health Checks as service checks, and emits events for new leader elections.
 
 The _Consul_ Agent can provide its internal health metrics via DogStatsD, including those related to:
 
@@ -101,7 +101,7 @@ Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Ag
 
 ### Consul Agent to DogStatsD
 
-Use `netstat` to verify that Consul is sending its metrics via UDP:
+Use `netstat` to verify that Consul is sending _its_ metrics via UDP:
 
 ```
 $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
@@ -116,7 +116,9 @@ The Consul check is compatible with all major platforms.
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
 
-See the [Consul docs](https://www.consul.io/docs/agent/telemetry.html) for a list of metrics the Consul Agent sends to DogStatsD.
+See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) for a description of metrics the Consul Agent sends to DogStatsD.
+
+See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coordinates.html) if you're curious how these metrics are calculated.
 
 # Service Checks
 
