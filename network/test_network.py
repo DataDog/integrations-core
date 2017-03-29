@@ -17,10 +17,14 @@ from tests.checks.common import AgentCheckTest, Fixtures
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def ss_subprocess_mock(*args, **kwargs):
-    if args[0][-1] == '-4':
-        return (Fixtures.read_file('ss_ipv4', sdk_dir=FIXTURE_DIR), "", 0)
-    elif args[0][-1] == '-6':
-        return (Fixtures.read_file('ss_ipv6', sdk_dir=FIXTURE_DIR), "", 0)
+    if args[0][-1] == '-4' and args[0][-3] == '-u':
+        return (Fixtures.read_file('ss_ipv4_udp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-4' and args[0][-3] == '-t':
+        return (Fixtures.read_file('ss_ipv4_tcp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-6' and args[0][-3] == '-u':
+        return (Fixtures.read_file('ss_ipv6_udp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-6' and args[0][-3] == '-t':
+        return (Fixtures.read_file('ss_ipv6_tcp', sdk_dir=FIXTURE_DIR), "", 0)
 
 
 def netstat_subprocess_mock(*args, **kwargs):
