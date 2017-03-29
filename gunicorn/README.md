@@ -4,7 +4,7 @@
 
 The Datadog Agent collects one main metric about Gunicorn: the number of worker processes running. It also sends one service check: whether or not Gunicorn is running at all.
 
-Gunicorn itself can provide further metrics via DogStatsD, including those for:
+Gunicorn can provide further metrics via DogStatsD, including those for:
 
 * Total request rate
 * Request rate by status code (2xx, 3xx, 4xx, 5xx)
