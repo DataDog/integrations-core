@@ -101,7 +101,7 @@ Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Ag
 
 ### Consul Agent to DogStatsD
 
-Use `netstat` to verify that Consul is sending _its_ metrics via UDP:
+Use `netstat` to verify that Consul is sending its metrics, too:
 
 ```
 $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
@@ -124,7 +124,7 @@ See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coor
 
 `consul.check`:
 
-The Datadog Agent submits a service check for each of the cluster's Health Checks, tagging each with:
+The Datadog Agent submits a service check for each of Consul's health checks, tagging each with:
 
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
