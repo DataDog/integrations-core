@@ -397,13 +397,13 @@ class Network(AgentCheck):
         for l in lines:
             cols = l.split()
             if cols[0].startswith('tcp') or protocol == 'tcp':
-                protocol = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
+                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
                 if cols[state_col] in tcp_states:
-                    metric = self.cx_state_gauge[protocol, tcp_states[cols[state_col]]]
+                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
                     metrics[metric] += 1
             elif cols[0].startswith('udp') or protocol == 'udp':
-                protocol = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
-                metric = self.cx_state_gauge[protocol, 'connections']
+                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
+                metric = self.cx_state_gauge[proto, 'connections']
                 metrics[metric] += 1
 
         return metrics
