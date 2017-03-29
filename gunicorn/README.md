@@ -81,7 +81,7 @@ udp        0      0 127.0.0.1:38374         127.0.0.1:8125          ESTABLISHED 
 
 Either Gunicorn really isn't running, or your app's Python environment doesn't have the `setproctitle` package installed.
 
-If `setproctitle` is not installed, Gunicorn will appear in the process table like so:
+If `setproctitle` is not installed, Gunicorn appears in the process table like so:
 
 ```
 $ ps -ef | grep gunicorn
