@@ -24,6 +24,7 @@ from utils.dockerutil import (DockerUtil,
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
+from utils.orchestrator import NomadUtil
 
 
 EVENT_TYPE = 'docker'
@@ -153,6 +154,9 @@ class DockerDaemon(AgentCheck):
             raise Exception("Docker check only supports one configured instance.")
         AgentCheck.__init__(self, name, init_config,
                             agentConfig, instances=instances)
+
+        self.nomadutil = NomadUtil()
+        self.nomadutil.init_platform(agentConfig)
 
         self.init_success = False
         self.docker_client = None
@@ -474,6 +478,12 @@ class DockerDaemon(AgentCheck):
                 if kube_tags:
                     tags.extend(list(kube_tags))
 
+            # Add nomad tags
+            if Platform.is_nomad():
+                nomad_tags = self.nomadutil.extract_container_tags(entity)
+                if nomad_tags:
+                    tags.extend(list(nomad_tags))
+
         return tags
 
     def _extract_tag_value(self, entity, tag_name):
@@ -787,6 +797,8 @@ class DockerDaemon(AgentCheck):
             self._invalidate_network_mapping_cache(events)
         if changed_container_ids and self._service_discovery:
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
+        if changed_container_ids and Platform.is_nomad():
+            self.nomadutil.invalidate_cache(events)
         return events
 
     def _pre_aggregate_events(self, api_events, containers_by_id):
