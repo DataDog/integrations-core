@@ -263,6 +263,8 @@ class Network(AgentCheck):
                     for protocol in ['tcp', 'udp']:
                         # Call `ss` for each IP version because there's no built-in way of distinguishing
                         # between the IP versions in the output
+                        # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
+                        # bug that print `tcp` even if it's `udp`
                         output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log)
                         lines = output.splitlines()
 
