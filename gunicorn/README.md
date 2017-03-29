@@ -115,4 +115,4 @@ This check's status is CRITICAL if the Agent cannot find a Gunicorn master proce
 
 # Further Reading
 
-To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).
+To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).
