@@ -277,7 +277,9 @@ class Network(AgentCheck):
                         metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version)
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in self.cx_state_gauge.iteritems():
-                            if stat[0].endswith(ip_version):
+                            if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
+
+                                self.log.debug('%s : %s' % (metric, metrics.get(metric)))
                                 self.gauge(metric, metrics.get(metric))
 
             except OSError:
