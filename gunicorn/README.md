@@ -55,7 +55,7 @@ Run the Agent's `info` subcommand and look for `gunicorn` under the Checks secti
     [...]
 ```
 
-### Gunicorn app to DogStatsD
+If the status is not OK, see the Troubleshooting section.
 
 Use `netstat` to verify that Gunicorn is sending _its_ metrics, too:
 
