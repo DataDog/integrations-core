@@ -104,9 +104,6 @@ env:
     - TRAVIS_FLAVOR=win32_event_log
     # END OF TRAVIS MATRIX
 
-before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools libpq-dev
-
 install:
   - bundle install
   - bundle package
