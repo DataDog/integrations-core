@@ -979,7 +979,6 @@ class DockerDaemon(AgentCheck):
         self._disable_net_metrics = False
 
         for folder in pid_dirs:
-
             try:
                 path = os.path.join(proc_path, folder, 'cgroup')
                 with open(path, 'r') as f:
@@ -992,9 +991,7 @@ class DockerDaemon(AgentCheck):
                         selinux_policy = f.readlines()[0]
             except IOError, e:
                 #  Issue #2074
-                self.log.debug("Cannot read %s, "
-                               "process likely raced to finish : %s" %
-                               (path, str(e)))
+                self.log.debug("Cannot read %s, process likely raced to finish : %s", path, e)
             except Exception as e:
                 self.warning("Cannot read %s : %s" % (path, str(e)))
                 continue
@@ -1011,11 +1008,13 @@ class DockerDaemon(AgentCheck):
                 if matches:
                     container_id = matches[-1]
                     if container_id not in container_dict:
-                        self.log.debug("Container %s not in container_dict, it's likely excluded", container_id)
+                        self.log.debug(
+                            "Container %s not in container_dict, it's likely excluded", container_id
+                        )
                         continue
                     container_dict[container_id]['_pid'] = folder
                     container_dict[container_id]['_proc_root'] = os.path.join(proc_path, folder)
-                elif custom_cgroups: # if we match by pid that should be enough (?) - O(n) ugh!
+                elif custom_cgroups:  # if we match by pid that should be enough (?) - O(n) ugh!
                     for _, container in container_dict.iteritems():
                         if container.get('_pid') == int(folder):
                             container['_proc_root'] = os.path.join(proc_path, folder)
