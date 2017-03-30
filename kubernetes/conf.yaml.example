@@ -12,7 +12,7 @@ instances:
   # KUBERNETES_KUBELET_HOST is found (if your node names can be resolved by pods, we recommend you set this variable to spec.nodeName through the downward API).
   #
   # To enable Kube State metrics, please refer to kubernetes_states integration. For more information,
-  # please consult https://github.com/DataDog/integrations-core/tree/master/kubernetes_state
+  # please consult http://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
   #
   # If the read-only endpoint is disabled, the check will query kubelet over HTTPS
   #
