@@ -150,12 +150,14 @@ class KafkaCheck(AgentCheck):
         # Fetch consumer group offsets from Zookeeper
         zk_hosts_ports = self.read_config(instance, 'zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
-        # Only validate consumer_groups if specified; otherwise will be fetched from zk
-        if 'consumer_groups' in instance:
+
+        # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
+        if instance.get('monitor_unlisted_consumer_groups', False):
+            consumer_groups = None
+        else:
             consumer_groups = self.read_config(instance, 'consumer_groups',
                                                cast=self._validate_consumer_groups)
-        else:
-            consumer_groups = None
+
         consumer_offsets = self._get_zk_consumer_offsets(
             zk_hosts_ports, consumer_groups, zk_prefix)
 
@@ -226,5 +228,6 @@ consumer_groups:
 
 Note that each level of values is optional. Any omitted values will be fetched from Zookeeper.
 You can omit partitions (example: myconsumer2), topics (example: myconsumer3), and even consumer_groups.
+If you omit consumer_groups, you must set the flag 'monitor_unlisted_consumer_groups': True.
 If a value is omitted, the parent value must still be it's expected type (typically a dict).
 """)
