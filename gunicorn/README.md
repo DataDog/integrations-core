@@ -2,9 +2,9 @@
 
 # Overview
 
-The Datadog Agent collects one main metric about Gunicorn: the number of worker processes running. It also sends one service check: whether or not Gunicorn is running at all.
+The Datadog Agent collects one main metric about Gunicorn: the number of worker processes running. It also sends one service check: whether or not Gunicorn is running.
 
-Gunicorn can provide further metrics via DogStatsD, including those for:
+Gunicorn itself can provide further metrics via DogStatsD, including those for:
 
 * Total request rate
 * Request rate by status code (2xx, 3xx, 4xx, 5xx)
@@ -27,8 +27,9 @@ Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
 init_config:
 
 instances:
-  # as set in your app's config.py (proc_name = <YOUR_APP_NAME>),
-  # or via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
+  # as set 
+  # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
+  # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
   - proc_name: <YOUR_APP_NAME>
 ```
 
@@ -36,7 +37,7 @@ Restart the Agent to begin sending Gunicorn metrics to Datadog.
 
 ### Connect Gunicorn to DogStatsD
 
-Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a StatsD daemon. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI or set it in your app's config file (if it uses one). Configure your app to send metrics to DogStatsD at `localhost:8125`, and restart the app.
+Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a StatsD daemon. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
 
 # Validation
 
