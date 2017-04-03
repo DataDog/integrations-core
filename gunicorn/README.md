@@ -112,7 +112,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/guni
 
 `gunicorn.is_running`:
 
-This check's status is CRITICAL if the Agent cannot find a Gunicorn master process, or if cannot find any working or idle worker processes.
+Returns CRITICAL if the Agent cannot find a Gunicorn master process, or if cannot find any working or idle worker processes.
 
 # Further Reading
 
