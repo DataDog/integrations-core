@@ -47,6 +47,6 @@ class KubernetesState(AgentCheck):
             'accept': 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
             'accept-encoding': 'gzip',
         }
-        r = requests.get(endpoint, headers=headers)
-        r.raise_for_status()
-        return r.content
+        req = requests.get(endpoint, headers=headers)
+        req.raise_for_status()
+        return req.content
