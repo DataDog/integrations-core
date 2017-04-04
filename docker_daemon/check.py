@@ -436,11 +436,14 @@ class DockerDaemon(AgentCheck):
             if self.collect_mesos_tags and (tag_type is CONTAINER or tag_type is PERFORMANCE):
                 cont_id = entity.get("Id")
                 if cont_id is not None:
-                    cont_inspected = self.docker_client.inspect_container(cont_id)
-                    for env_var in cont_inspected['Config']['Env']:
-                        arr = env_var.split("=")
-                        if arr[0].upper() in MESOS_TAG_ENVS:
-                            tags.append("{}:{}".format(arr[0].lower(), arr[1]))
+                    try:
+                        cont_inspected = self.docker_client.inspect_container(cont_id)
+                        for env_var in cont_inspected['Config']['Env']:
+                            arr = env_var.split("=")
+                            if arr[0].upper() in MESOS_TAG_ENVS:
+                                tags.append("{}:{}".format(arr[0].lower(), arr[1]))
+                    except Exception as e:
+                        self.log.debug("Unable to inspect Docker container: %s", e)
 
             # Add kube labels
             if Platform.is_k8s():
