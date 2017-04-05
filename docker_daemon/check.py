@@ -811,7 +811,8 @@ class DockerDaemon(AgentCheck):
                     exit_code = int(event['Actor']['Attributes']['exitCode'])
                     message = 'Container %s exited with %s' % (container_name, exit_code)
                     status = AgentCheck.OK if exit_code == 0 else AgentCheck.CRITICAL
-                    self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=container_tags, message=message)
+                    self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=list(container_tags), message=message)
+                    self.log.debug('Send service_check %s with status %s, message: %s' % (EXIT_SERVICE_CHECK_NAME, status, message))
                 except KeyError:
                     self.log.warning('Unable to collect the exit code for container %s' % container_name)
 
