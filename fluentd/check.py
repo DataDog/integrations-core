@@ -40,6 +40,7 @@ class Fluentd(AgentCheck):
         try:
             url = instance.get('monitor_agent_url')
             plugin_ids = instance.get('plugin_ids', [])
+            custom_tags = instance.get('tags', [])
 
             # Fallback  with `tag_by: plugin_id`
             tag_by = instance.get('tag_by')
@@ -49,7 +50,7 @@ class Fluentd(AgentCheck):
             monitor_agent_host = parsed_url.hostname
             monitor_agent_port = parsed_url.port or 24220
             service_check_tags = ['fluentd_host:%s' % monitor_agent_host, 'fluentd_port:%s'
-                                  % monitor_agent_port]
+                                  % monitor_agent_port] + custom_tags
 
             timeout = float(instance.get('timeout', self.default_timeout))
 
@@ -64,7 +65,7 @@ class Fluentd(AgentCheck):
                         continue
                     # Filter unspecified plugins to keep backward compatibility.
                     if len(plugin_ids) == 0 or p.get('plugin_id') in plugin_ids:
-                        self.gauge('fluentd.%s' % (m), p.get(m), [tag])
+                        self.gauge('fluentd.%s' % (m), p.get(m), [tag] + custom_tags)
         except Exception as e:
             msg = "No stats could be retrieved from %s : %s" % (url, str(e))
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

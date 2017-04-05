@@ -1,15 +1,14 @@
 # CHANGELOG - docker_daemon
- 
-1.1.0/ Unreleased
-==================
 
+1.x.x/ Unreleased
+==================
 ### Changes
 
+* [FEATURE] adds docker_network tagging to `docker.net.bytes_*` metrics, needs dd-agent >= 5.13.0
 * [FEATURE] adds the ability to collect docker exit codes as counts, adds metrics `docker.containers.exit` with the `exit_code` as tag
 
- 1.0.003-22-2017
- ==================
- 
+1.0.003-22-2017
+==================
 ### Changes
 
 * [FEATURE] adds docker_daemon integration.

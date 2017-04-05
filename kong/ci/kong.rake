@@ -22,11 +22,8 @@ namespace :ci do
       sh %(docker rm #{container_name} #{container_name_db} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('kong/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('kong')
       sh %(docker run -d --name #{container_name_db} -p 9042:9042 cassandra:2.2)
 
       wait_on_docker_logs(container_name_db, 40, 'Listening for thrift clients', "Created default superuser role 'cassandra'")

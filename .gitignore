@@ -30,7 +30,6 @@ var/
 .installed.cfg
 *.egg
 *.zip
-Gemfile.lock
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -70,9 +69,9 @@ target/
 
 #sdk collateral
 venv/
+vendor/
 embedded/
 .bundle/
-Gemfile.lock
 .ropeproject/
 setuptools-*.zip
 

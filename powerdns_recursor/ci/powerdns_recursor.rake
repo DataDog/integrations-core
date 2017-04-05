@@ -19,11 +19,8 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('powerdns_recursor/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('powerdns_recursor')
       pdns_tag = 'powerdns_recursor_' + powerdns_recursor_version.tr('.', '_')
       sh %(docker run -d --expose #{container_port2} --expose #{container_port1}/udp \
            -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2}/udp \

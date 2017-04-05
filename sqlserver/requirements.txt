@@ -2,7 +2,5 @@
 adodbapi==2.6.0.7
 pyro4==4.36
 
-
-# optional - SDK question here
-# Requires unixodbc on Linux
-# pyodbc==4.0.13 is satisfied in 'integration-deps'
+# Requires unixodbc on Linux, so only build on windows for now
+pyodbc==4.0.13; sys_platform == 'win32'

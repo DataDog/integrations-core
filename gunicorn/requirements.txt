@@ -1,1 +1,2 @@
 # integration pip requirements
+psutil==4.4.1

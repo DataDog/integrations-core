@@ -12,11 +12,8 @@ namespace :ci do
   namespace :agent_metrics do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('agent_metrics/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('agent_metrics')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name agent_metrics source/agent_metrics:agent_metrics_version)
       # sh %(docker start agent_metrics)
