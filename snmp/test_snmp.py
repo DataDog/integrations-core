@@ -106,6 +106,23 @@ class SNMPTestCase(AgentCheckTest):
         }
     ]
 
+    SCALAR_OBJECTS_WITH_TAGS = [
+      {
+            'OID': "1.3.6.1.2.1.7.1.0",
+            'name': "udpDatagrams",
+            'metric_tags': ['udpdgrams', 'UDP']
+        }, {
+            'OID': "1.3.6.1.2.1.6.10.0",
+            'name': "tcpInSegs",
+            'metric_tags': ['tcpinsegs', 'TCP']
+        }, {
+            'MIB': "TCP-MIB",
+            'symbol': "tcpCurrEstab",
+            'metric_tags': ['MIB', 'TCP', 'estab']
+        }
+
+    ]
+
     TABULAR_OBJECTS = [{
         'MIB': "IF-MIB",
         'table': "ifTable",
@@ -360,6 +377,27 @@ class SNMPTestCase(AgentCheckTest):
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.CRITICAL,
                                 tags=self.CHECK_TAGS, count=1)
+        self.coverage_report()
+
+    def test_scalar_with_tags(self):
+        """
+        Support SNMP scalar objects with tags
+        """
+        config = {
+            'instances': [self.generate_instance_config(self.SCALAR_OBJECTS_WITH_TAGS)]
+        }
+        self.run_check_n(config, repeat=3)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+
+        # Test metrics
+        for metric in self.SCALAR_OBJECTS_WITH_TAGS:
+            metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
+            tags = self.CHECK_TAGS + metric.get('metric_tags')
+            self.assertMetric(metric_name, tags=tags, count=1)
+        # Test service check
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
+                                tags=self.CHECK_TAGS, count=1)
+
         self.coverage_report()
 
     def test_network_failure(self):
