@@ -29,6 +29,7 @@ from utils.service_discovery.sd_backend import get_sd_backend
 EVENT_TYPE = 'docker'
 SERVICE_CHECK_NAME = 'docker.service_up'
 HEALTHCHECK_SERVICE_CHECK_NAME = 'docker.container_health'
+EXIT_SERVICE_CHECK_NAME = 'docker.exit'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
@@ -808,8 +809,9 @@ class DockerDaemon(AgentCheck):
                 container_tags.add('container_name:%s' % container_name)
                 try:
                     exit_code = int(event['Actor']['Attributes']['exitCode'])
-                    container_tags.add('exit_code:%d' % exit_code)
-                    self.increment('docker.containers.exit', tags=container_tags)
+                    message = 'Container %s exited with %s' % (container_name, exit_code)
+                    status = AgentCheck.OK if exit_code == 0 else AgentCheck.CRITICAL
+                    self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=container_tags, message=message)
                 except KeyError:
                     self.log.warning('Unable to collect the exit code for container %s' % container_name)
 

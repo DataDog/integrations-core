@@ -10,6 +10,7 @@ import mock
 from nose.plugins.attrib import attr
 
 # project
+from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 from utils.dockerutil import DockerUtil
 
@@ -670,25 +671,32 @@ class TestCheckDockerDaemon(AgentCheckTest):
         }
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
 
-        expected_metrics = [
-            ("docker.containers.exit", ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-code', 'exit_code:1'])
+        expected_service_checks = [
+            (AgentCheck.OK, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-ok']),
+            (AgentCheck.CRITICAL, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-fail']),
         ]
 
-        container = self.docker_client.create_container(
-            "nginx:latest", detach=True, name='test-exit-code', entrypoint='/bin/false')
+        container_ok = self.docker_client.create_container(
+            "nginx:latest", detach=True, name='test-exit-ok', entrypoint='/bin/true')
+        log.debug('start nginx:latest with entrypoint /bin/true')
+        container_fail = self.docker_client.create_container(
+            "nginx:latest", detach=True, name='test-exit-fail', entrypoint='/bin/false')
         log.debug('start nginx:latest with entrypoint /bin/false')
-        self.docker_client.start(container)
-        log.debug('container exited with %s' % self.docker_client.wait(container, 1))
+        self.docker_client.start(container_ok)
+        self.docker_client.start(container_fail)
+        log.debug('container exited with %s' % self.docker_client.wait(container_ok, 1))
+        log.debug('container exited with %s' % self.docker_client.wait(container_fail, 1))
         # After the container exits, we need to wait a second so the event isn't too recent
         # when the check runs, otherwise the event is not picked up
         from time import sleep
         sleep(1)
 
         self.run_check(config)
-        self.docker_client.remove_container(container)
+        self.docker_client.remove_container(container_ok)
+        self.docker_client.remove_container(container_fail)
 
-        for mname, tags in expected_metrics:
-            self.assertMetric(mname, tags=tags, count=1, at_least=1)
+        for status, tags in expected_service_checks:
+            self.assertServiceCheck('docker.exit', status=status, tags=tags, count=1)
 
     def test_network_tagging(self):
         expected_metrics = [
