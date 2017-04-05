@@ -367,8 +367,8 @@ class Network(AgentCheck):
             },
             'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
-                'InErrors': 'system.net.udp.in_errors',
                 'NoPorts': 'system.net.udp.no_ports',
+                'InErrors': 'system.net.udp.in_errors',
                 'OutDatagrams': 'system.net.udp.out_datagrams',
                 'RcvbufErrors': 'system.net.udp.rcv_buf_errors',
                 'SndbufErrors': 'system.net.udp.snd_buf_errors',
