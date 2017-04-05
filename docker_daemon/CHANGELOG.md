@@ -5,7 +5,7 @@
 ### Changes
 
 * [FEATURE] adds docker_network tagging to `docker.net.bytes_*` metrics, needs dd-agent >= 5.13.0
-* [FEATURE] adds the ability to collect docker exit codes as counts, adds metrics `docker.containers.exit` with the `exit_code` as tag
+* [FEATURE] adds the ability to monitor for docker exits failure with service check `docker.exit`
 
 1.0.003-22-2017
 ==================
