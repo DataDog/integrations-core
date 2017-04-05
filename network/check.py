@@ -330,8 +330,8 @@ class Network(AgentCheck):
         netstat_data = {}
         for f in ['netstat', 'snmp']:
             proc_data_path = "{}/net/{}".format(proc_location, f)
-            netstat = open(proc_data_path, 'r')
             try:
+                netstat = open(proc_data_path, 'r')
 
                 while True:
                     n_header = netstat.readline()
@@ -371,7 +371,8 @@ class Network(AgentCheck):
                 'NoPorts': 'system.net.udp.no_ports',
                 'OutDatagrams': 'system.net.udp.out_datagrams',
                 'RcvbufErrors': 'system.net.udp.rcv_buf_errors',
-                'SndbufErrors': 'system.net.udp.snd_buf_errors'
+                'SndbufErrors': 'system.net.udp.snd_buf_errors',
+                'InCsumErrors': 'system.net.udp.in_csum_errors'
             }
         }
 
