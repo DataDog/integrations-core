@@ -419,14 +419,26 @@ class Kubernetes(AgentCheck):
                 kind = created_by['reference']['kind']
                 if kind in supported_kinds:
                     namespace = created_by['reference']['namespace']
-                    controllers_map[(created_by['reference']['name'], namespace)] += 1
+                    controllers_map[(created_by['reference']['name'], kind, namespace)] += 1
             except (KeyError, ValueError) as e:
                 self.log.debug("Unable to retrieve pod kind for pod %s: %s", pod, e)
                 continue
 
         tags = instance.get('tags', [])
-        for (ctrl, namespace), pod_count in controllers_map.iteritems():
+        for (ctrl, kind, namespace), pod_count in controllers_map.iteritems():
             _tags = tags[:]  # copy base tags
+            if kind == 'DaemonSet':
+                _tags.append('kube_daemon_set:%s' % ctrl)
+            elif kind == 'ReplicaSet':
+                _tags.append('kube_replica_set:%s' % ctrl)
+                deployment = self.kubeutil.get_deployment_for_replicaset(ctrl)
+                if deployment:
+                    _tags.append('kube_deployment:%s' % deployment)
+            elif kind == 'Deployment':
+                _tags.append('kube_deployment:%s' % ctrl)
+            elif kind == 'Job':
+                _tags.append('kube_job:%s' % ctrl)
+            # Keeping kube_replication_controller for all types for retro-compatibility
             _tags.append('kube_replication_controller:{0}'.format(ctrl))
             _tags.append('kube_namespace:{0}'.format(namespace))
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
