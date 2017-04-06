@@ -424,7 +424,7 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         if not filter(re.compile('^url:').match, tags):
             tags.append('url:{0}'.format(url))
-        
+
         tags.append("instance:{0}".format(instance_name))
 
         if sc_name == self.SC_STATUS:
