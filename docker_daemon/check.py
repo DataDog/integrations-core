@@ -472,6 +472,14 @@ class DockerDaemon(AgentCheck):
 
         return entity["_tag_values"][tag_name]
 
+    def _localhost_ecs_agent(self):
+        result = ""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        result = sock.connect_ex(('localhost', ECS_INTROSPECT_DEFAULT_PORT))
+        sock.close()
+        return True if result == 0 else False
+
     def refresh_ecs_tags(self):
         ecs_config = self.docker_client.inspect_container('ecs-agent')
         ip = ecs_config.get('NetworkSettings', {}).get('IPAddress')
@@ -479,10 +487,13 @@ class DockerDaemon(AgentCheck):
         port = ports.keys()[0].split('/')[0] if ports else None
         if not ip:
             port = ECS_INTROSPECT_DEFAULT_PORT
-            if Platform.is_containerized() and self.docker_gateway:
+            if self._localhost_ecs_agent():
+                ip = "localhost"
+            elif Platform.is_containerized() and self.docker_gateway:
                 ip = self.docker_gateway
             else:
-                ip = "localhost"
+                self.log.warning("Unable to determine ecs-agent IP address, skipping task tagging")
+                return
 
         ecs_tags = {}
         try:
