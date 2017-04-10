@@ -13,7 +13,22 @@ Install the `dd-check-postfix` package manually or with your favorite configurat
 
 ## Configuration
 
-Edit the `postfix.yaml` file to point to your server and port, set the masters to monitor
+* Edit the `postfix.yaml` file to point to your postfix spool/queues directory (e.g. `/var/spool/postfix)..
+* Add a few mail queues to monitor (e.g. `incoming`, `active`, and `deferred`).
+* Update `/etc/sudoers` to allow `dd-agent` to run `find /path/to/postfix/spool/* -type f`.
+
+Example:
+
+```yaml
+init_config:
+
+instances:
+  - directory: /var/spool/postfix
+    queues:
+      - incoming
+      - active
+      - deferred
+```
 
 ## Validation
 
