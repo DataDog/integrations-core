@@ -17,7 +17,7 @@ class PostfixCheck(AgentCheck):
              sudo access is not required when running dd-agent as root (not recommended)
 
     example /etc/sudoers entry:
-             dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find
+             dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix* -type f
 
     YAML config options:
         "directory" - the value of 'postconf -h queue_directory'
