@@ -305,8 +305,8 @@ init_config:
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
         attribute:
           Count:
-            metric_type: rate
-            alias: kafka.request.handler.avg.idle.pct.rate
+            metric_type: gauge
+            alias: kafka.request.handler.avg.idle.pct
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ProducerRequestPurgatory,name=PurgatorySize'
