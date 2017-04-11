@@ -390,6 +390,7 @@ class TestMySql(AgentCheckTest):
                                      self.OPTIONAL_STATUS_VARS +
                                      self.OPTIONAL_STATUS_VARS_5_6_6), 1)
 
+        raise Exception
         # Raises when coverage < 100%
         self.coverage_report()
 

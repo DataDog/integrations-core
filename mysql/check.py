@@ -561,6 +561,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
+                self.log.warning("SLAVE STATUS: %s" % slave_running)
                 if self._is_master(slaves, binlog_running):  # master
                     if slaves > 0 and binlog_running:
                         slave_running_status = AgentCheck.OK
@@ -649,7 +650,7 @@ class MySql(AgentCheck):
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
-        return version > compat_version
+        return version >= compat_version
 
     def _get_version(self, db, host):
         hostkey = self._get_host_key()
