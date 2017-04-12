@@ -636,7 +636,7 @@ class MongoDb(AgentCheck):
         # Therefore, the string replace (below) won't work, because it won't have an
         # exact match.  Convert the password *back* to URL encoded, so the string
         # replace works properly.
-        encoded_password = urllib.quote_plus(password, safe='%') if password else None
+        encoded_password = urllib.quote_plus(password, safe='%/:=&?~#+!$,;'@()*[]') if password else None
 
         clean_server_name = server.replace(encoded_password, "*" * 5) if encoded_password else server
 
