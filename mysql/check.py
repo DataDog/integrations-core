@@ -561,7 +561,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
-                if self._is_master(slaves, binlog_running):  # master
+                if self._is_master(slaves, results):  # master
                     if slaves > 0 and binlog_running:
                         slave_running_status = AgentCheck.OK
                     else:
@@ -606,8 +606,10 @@ class MySql(AgentCheck):
                              % self.MAX_CUSTOM_QUERIES)
 
 
-    def _is_master(self, slaves, binlog):
-        if slaves > 0 or binlog:
+    def _is_master(self, slaves, results):
+        # master uuid only collected in slaves
+        master_uuid = self._collect_string('Master_UUID', results)
+        if slaves > 0 or not master_uuid:
             return True
 
         return False
