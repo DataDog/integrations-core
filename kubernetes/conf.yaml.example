@@ -11,8 +11,10 @@ instances:
   # reach the kubelet and cadvisor APIs unless the environment variable
   # KUBERNETES_KUBELET_HOST is found (if your node names can be resolved by pods, we recommend you set this variable to spec.nodeName through the downward API).
   #
-  # To enable Kube State metrics, please refer to kubernetes_states integration. For more information,
+  # To enable Kubernetes State Metrics, please refer to kubernetes_states integration.
+  # For more information,
   # please consult http://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
+  # and https://github.com/DataDog/integrations-core/ on the kubernetes_state directory.
   #
   # If the read-only endpoint is disabled, the check will query kubelet over HTTPS
   #
