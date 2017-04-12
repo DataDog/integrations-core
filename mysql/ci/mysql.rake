@@ -22,7 +22,8 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('mysql')
-      sh %(docker run -p #{container_port}:3306 --name #{container_name}_master -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d bergerx/mysql-replication:#{mysql_version})
+      sh %(docker run -p #{container_port}:3306 --name #{container_name}_master \
+           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d bergerx/mysql-replication:#{mysql_version})
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -39,7 +40,9 @@ namespace :ci do
         puts 'MySQL is up!'
       end
 
-      sh %(docker run -p #{container_port+1}:3306 --name #{container_name}_slave -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master -d bergerx/mysql-replication:#{mysql_version})
+      sh %(docker run -p #{container_port + 1}:3306 --name #{container_name}_slave \
+           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
+           -d bergerx/mysql-replication:#{mysql_version})
       Wait.for 13_307
       count = 0
       logs = `docker logs #{container_name}_slave 2>&1`

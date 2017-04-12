@@ -397,7 +397,7 @@ class TestMySql(AgentCheckTest):
 
     def test_complex_config_replica(self):
         config = {'instances': self.MYSQL_COMPLEX_CONFIG}
-        config['instances'][0]['port'] = 13307 
+        config['instances'][0]['port'] = 13307
         self.run_check_twice(config)
 
         # Test service check
