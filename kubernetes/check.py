@@ -482,33 +482,13 @@ class Kubernetes(AgentCheck):
 
         k8s_namespaces = set(k8s_namespaces)
 
-        events_endpoint = '{}/events'.format(self.kubeutil.kubernetes_api_url)
-        self.log.debug('Kubernetes API endpoint to query events: %s' % events_endpoint)
-
-        events = self.kubeutil.retrieve_json_auth(events_endpoint)
-        event_items = events.get('items') or []
-        last_read = self.kubeutil.last_event_collection_ts
-        most_recent_read = 0
-
-        self.log.debug('Found {} events, filtering out using timestamp: {} and namespaces: {}'.format(len(event_items), last_read, k8s_namespaces))
+        event_items, changed_cids = self.kubeutil.get_events(k8s_namespaces)
 
         for event in event_items:
-            # skip if the event is too old
-            event_ts = calendar.timegm(time.strptime(event.get('lastTimestamp'), '%Y-%m-%dT%H:%M:%SZ'))
-            if event_ts <= last_read:
-                continue
-
-            involved_obj = event.get('involvedObject', {})
-
-            # filter events by white listed namespaces (empty namespace belong to the 'default' one)
-            if involved_obj.get('namespace', 'default') not in k8s_namespaces:
-                continue
-
             tags = self.kubeutil.extract_event_tags(event)
 
-            # compute the most recently seen event, without relying on items order
-            if event_ts > most_recent_read:
-                most_recent_read = event_ts
+            event_ts = calendar.timegm(time.strptime(event.get('lastTimestamp'), '%Y-%m-%dT%H:%M:%SZ'))
+            involved_obj = event.get('involvedObject', {})
 
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
@@ -527,7 +507,3 @@ class Kubernetes(AgentCheck):
                 'tags': tags,
             }
             self.event(dd_event)
-
-        if most_recent_read > 0:
-            self.kubeutil.last_event_collection_ts = most_recent_read
-            self.log.debug('last_event_collection_ts is now {}'.format(most_recent_read))
