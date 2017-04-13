@@ -479,20 +479,20 @@ class DockerDaemon(AgentCheck):
         """
         if self.ecs_agent_local is not None:
             return self.ecs_agent_local
-        result = ""
+
+        self.ecs_agent_local = False
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
         try:
             result = sock.connect_ex(('localhost', ECS_INTROSPECT_DEFAULT_PORT))
         except Exception as e:
             self.log.debug("Unable to connect to ecs-agent. Exception: {0}".format(e))
-        sock.close()
-        if result == 0:
-            self.ecs_agent_local = True
         else:
-            self.ecs_agent_local = False
-            self.log.debug("ecs-agent is not avaiable locally, encountered error: {0}".format(result))
-
+            if result == 0:
+                self.ecs_agent_local = True
+            else:
+                self.log.debug("ecs-agent is not available locally, encountered error code: {0}".format(result))
+        sock.close()
         return self.ecs_agent_local
 
     def refresh_ecs_tags(self):
