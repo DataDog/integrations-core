@@ -1,0 +1,13 @@
+init_config:
+
+instances:
+#  - tags:
+#    - name:mypacemaker_cluster
+#
+#    crm_mon_cmd: /usr/sbin/crm_mon
+#
+# If your environment requires sudo, please add a line like:
+#          dd-agent ALL=(ALL) NOPASSWD:/usr/sbin/crm_mon
+# to your sudoers file, and uncomment the below option.
+#
+#    use_sudo: True
