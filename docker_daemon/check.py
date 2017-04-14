@@ -959,6 +959,8 @@ class DockerDaemon(AgentCheck):
             return True
         if line[2].startswith('/') and re.match(CONTAINER_ID_RE, line[2][1:]): # kubernetes
             return True
+        if line[2].startswith('/') and re.match(CONTAINER_ID_RE, line[2].split('/')[-1]): # kube 1.6+ qos hierarchy
+            return True
         return False
 
     # proc files
