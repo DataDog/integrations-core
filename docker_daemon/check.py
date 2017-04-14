@@ -793,9 +793,7 @@ class DockerDaemon(AgentCheck):
         return events
 
     def _report_exit_codes(self, events, containers_by_id):
-        self.log.debug("reporting exit codes")
         for event in events:
-            self.log.debug('docker event found: ' + str(event))
             container_tags = set()
             container = containers_by_id.get(event.get('id'))
             # Skip events related to filtered containers
@@ -812,7 +810,6 @@ class DockerDaemon(AgentCheck):
                     message = 'Container %s exited with %s' % (container_name, exit_code)
                     status = AgentCheck.OK if exit_code == 0 else AgentCheck.CRITICAL
                     self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=list(container_tags), message=message)
-                    self.log.debug('Send service_check %s with status %s, message: %s' % (EXIT_SERVICE_CHECK_NAME, status, message))
                 except KeyError:
                     self.log.warning('Unable to collect the exit code for container %s' % container_name)
 
