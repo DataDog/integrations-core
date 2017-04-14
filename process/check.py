@@ -308,7 +308,7 @@ class ProcessCheck(AgentCheck):
         ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
-        add_children = instance.get('add_children', False)
+        add_children = _is_affirmative(instance.get('add_children', False))
         user = instance.get('user', False)
 
         if self._conflicting_procfs:
