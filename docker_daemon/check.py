@@ -29,6 +29,7 @@ from utils.service_discovery.sd_backend import get_sd_backend
 EVENT_TYPE = 'docker'
 SERVICE_CHECK_NAME = 'docker.service_up'
 HEALTHCHECK_SERVICE_CHECK_NAME = 'docker.container_health'
+EXIT_SERVICE_CHECK_NAME = 'docker.exit'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
@@ -215,6 +216,7 @@ class DockerDaemon(AgentCheck):
             self.collect_events = _is_affirmative(instance.get('collect_events', True))
             self.collect_image_size = _is_affirmative(instance.get('collect_image_size', False))
             self.collect_disk_stats = _is_affirmative(instance.get('collect_disk_stats', False))
+            self.collect_exit_codes = _is_affirmative(instance.get('collect_exit_codes', False))
             self.collect_ecs_tags = _is_affirmative(instance.get('ecs_tags', True)) and Platform.is_ecs_instance()
 
             self.ecs_tags = {}
@@ -259,7 +261,7 @@ class DockerDaemon(AgentCheck):
         containers_by_id = self._crawl_container_pids(containers_by_id, custom_cgroups)
 
         # Send events from Docker API
-        if self.collect_events or self._service_discovery or not self._disable_net_metrics:
+        if self.collect_events or self._service_discovery or not self._disable_net_metrics or self.collect_exit_codes:
             self._process_events(containers_by_id)
 
         # Report performance container metrics (cpu, mem, net, io)
@@ -739,25 +741,26 @@ class DockerDaemon(AgentCheck):
                 self.log.warning('Malformed network event: %s' % str(ev))
 
     def _process_events(self, containers_by_id):
-        if self.collect_events is False:
-            # Crawl events for service discovery and network mapping cache invalidation
-            self._get_events()
-            return
-        try:
-            api_events = self._get_events()
-            aggregated_events = self._pre_aggregate_events(api_events, containers_by_id)
-            events = self._format_events(aggregated_events, containers_by_id)
-        except (socket.timeout, urllib2.URLError):
-            self.warning('Timeout when collecting events. Events will be missing.')
-            return
-        except Exception as e:
-            self.warning("Unexpected exception when collecting events: {0}. "
-                         "Events will be missing".format(e))
-            return
+        api_events = self._get_events()
 
-        for ev in events:
-            self.log.debug("Creating event: %s" % ev['msg_title'])
-            self.event(ev)
+        if self.collect_exit_codes:
+            self._report_exit_codes(api_events, containers_by_id)
+
+        if self.collect_events:
+            try:
+                aggregated_events = self._pre_aggregate_events(api_events, containers_by_id)
+                events = self._format_events(aggregated_events, containers_by_id)
+            except (socket.timeout, urllib2.URLError):
+                self.warning('Timeout when collecting events. Events will be missing.')
+                return
+            except Exception as e:
+                self.warning("Unexpected exception when collecting events: {0}. "
+                             "Events will be missing".format(e))
+                return
+
+            for ev in events:
+                self.log.debug("Creating event: %s" % ev['msg_title'])
+                self.event(ev)
 
     def _get_events(self):
         """Get the list of events."""
@@ -814,6 +817,27 @@ class DockerDaemon(AgentCheck):
                 events.append(normal_event)
 
         return events
+
+    def _report_exit_codes(self, events, containers_by_id):
+        for event in events:
+            container_tags = set()
+            container = containers_by_id.get(event.get('id'))
+            # Skip events related to filtered containers
+            if container is not None and self._is_container_excluded(container):
+                continue
+
+            # Report the exit code in case of a DIE event
+            if container is not None and event['status'] == 'die':
+                container_name = DockerUtil.container_name_extractor(container)[0]
+                container_tags.update(self._get_tags(container, CONTAINER))
+                container_tags.add('container_name:%s' % container_name)
+                try:
+                    exit_code = int(event['Actor']['Attributes']['exitCode'])
+                    message = 'Container %s exited with %s' % (container_name, exit_code)
+                    status = AgentCheck.OK if exit_code == 0 else AgentCheck.CRITICAL
+                    self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=list(container_tags), message=message)
+                except KeyError:
+                    self.log.warning('Unable to collect the exit code for container %s' % container_name)
 
     def _create_dd_event(self, events, image, c_tags, priority='Normal'):
         """Create the actual event to submit from a list of similar docker events"""
