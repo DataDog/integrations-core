@@ -7,3 +7,33 @@ consul.catalog.services_critical,gauge,,service,,Total critical services on node
 consul.catalog.services_passing,gauge,,service,,Total passing services on nodes,1,consul,svc pass
 consul.catalog.services_up,gauge,,service,,Total services registered on nodes,0,consul,svc up
 consul.catalog.services_warning,gauge,,service,,Total warning services on nodes,-1,consul,svc warn
+consul.net.node.latency.min,gauge,,millisecond,,minimum latency from this node to all others,-1,consul,min latency
+consul.net.node.latency.p25,gauge,,millisecond,,p25 latency from this node to all others,-1,consul,p25 latency
+consul.net.node.latency.median,gauge,,millisecond,,median latency from this node to all others,-1,consul,median latency
+consul.net.node.latency.p75,gauge,,millisecond,,p75 latency from this node to all others,-1,consul,p75 latency
+consul.net.node.latency.p90,gauge,,millisecond,,p90 latency from this node to all others,-1,consul,p90 latency
+consul.net.node.latency.p95,gauge,,millisecond,,p95 latency from this node to all others,-1,consul,p95 latency
+consul.net.node.latency.p99,gauge,,millisecond,,p99 latency from this node to all others,-1,consul,p99 latency
+consul.net.node.latency.max,gauge,,millisecond,,maximum latency from this node to all others,-1,consul,max latency
+consul.runtime.num_goroutines,gauge,10,,,Number of running goroutines,0,consul,num goroutines
+consul.runtime.alloc_bytes,gauge,10,byte,,Current bytes allocated by the Consul process,0,consul,bytes alloc
+consul.runtime.heap_objects,gauge,10,object,,Number of objects allocated on the heap,0,consul,heap objs
+consul.runtime.sys_bytes,gauge,10,byte,,Total size of the virtual address space reserved by the Go runtime,0,consul,
+consul.runtime.malloc_count,gauge,10,object,,Cumulative count of heap objects allocated,0,consul,
+consul.runtime.free_count,gauge,10,object,,Cumulative count of heap objects freed,0,consul,
+consul.runtime.heap_objects,gauge,10,byte,,Bytes of allocated heap objects,0,consul,heap alloc
+consul.runtime.total_gc_pause_ns,gauge,10,nanosecond,,Cumulative nanoseconds in GC stop-the-world pauses since Consul started,0,consul,
+consul.runtime.total_gc_runs,gauge,10,,,Number of completed GC cycles,0,consul,
+consul.raft.state.leader,rate,10,event,,Number of completed leader elections,-1,consul,leader elecs
+consul.raft.state.candidate,rate,10,event,,Number of initiated leader elections,-1,consul,leader elecs init
+consul.raft.apply,rate,10,transaction,,Number of raft transactions occurring,0,consul,raft trans
+consul.raft.commitTime,gauge,10,millisecond,,The time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt time
+consul.raft.leader.dispatchLog,gauge,10,millisecond,,The time it takes for the leader to write log entries to disk,-1,consul,dispatch log time
+consul.raft.replication.appendEntries,gauge,10,millisecond,,The time it takes to replicate log entries to followers,-1,consul,log repl time
+consul.raft.leader.lastContact,gauge,10,millisecond,,Time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact
+consul.memberlist.msg.suspect,rate,10,,,Number of times an agent suspects another as failed while probing during gossip protocol,-1,consul,
+consul.serf.member.flap,rate,10,,,Number of times an agent is marked dead and then quickly recovers,-1,consul,
+consul.serf.events,rate,10,event,,Incremented when an agent processes a serf event,0,consul,num events
+consul.serf.member.join,rate,10,event,,Incremented when an agent processes a join event,0,consul,num joins
+consul.autopilot.healthy,gauge,10,,,The health of the local server cluster. 1 if all nodes are healthy; 0 otherwise,0,consul,
+consul.autopilot.failure_tolerance,gauge,10,node,,The number of voting servers that the cluster can lose while continuing to function,1,consul,
