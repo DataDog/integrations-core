@@ -15,9 +15,15 @@ Install the `dd-check-postfix` package manually or with your favorite configurat
 
 * Edit the `postfix.yaml` file to point to your postfix spool/queues directory (e.g. `/var/spool/postfix`).
 * Add a few mail queues to monitor (e.g. `incoming`, `active`, and `deferred`).
-* Update `/etc/sudoers` to allow the user `dd-agent` to run `find /path/to/postfix/spool/* -type f` (e.g. `dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix* -type f`).  
-Example:
+* Update `/etc/sudoers` to allow the user `dd-agent` to run the `find` command exclusively on the queues
+of your choice, for example:
+```bash
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
+```
 
+ * Configure the check:
 ```yaml
 init_config:
 
