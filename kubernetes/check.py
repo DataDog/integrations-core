@@ -20,6 +20,7 @@ import simplejson as json
 from checks import AgentCheck
 from config import _is_affirmative
 from utils.kubernetes import KubeUtil
+from utils.service_discovery.sd_backend import get_sd_backend
 
 
 NAMESPACE = "kubernetes"
@@ -90,14 +91,15 @@ class Kubernetes(AgentCheck):
         if not self.kubeutil.kubelet_api_url:
             raise Exception('Unable to reach kubelet. Try setting the host parameter.')
 
-        self.k8s_namespace_regexp = None
-        if inst:
-            regexp = inst.get('namespace_name_regexp', None)
-            if regexp:
-                try:
-                    self.k8s_namespace_regexp = re.compile(regexp)
-                except re.error as e:
-                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
+        if agentConfig.get('service_discovery') and \
+           agentConfig.get('service_discovery_backend') == 'docker':
+            self._sd_backend = get_sd_backend(agentConfig)
+        else:
+            self._sd_backend = None
+
+        # Delay init to first check (need the instance options)
+        self._collect_events = None
+        self.event_retriever = None
 
     def _perform_kubelet_checks(self, url):
         service_check_base = NAMESPACE + '.kubelet.check'
@@ -152,6 +154,14 @@ class Kubernetes(AgentCheck):
         except:
             pods_list = None
 
+        if self._collect_events is None:
+            self._collect_events = _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+            if self._collect_events:
+                self.event_retriever = self.kubeutil.get_event_retriever()
+            else:
+                # Only fetch service and pod events for service mapping and SD
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'])
+
         # kubelet health checks
         self._perform_kubelet_checks(self.kubeutil.kube_health_url)
 
@@ -159,12 +169,18 @@ class Kubernetes(AgentCheck):
             # kubelet metrics
             self._update_metrics(instance, pods_list)
 
-            # kubelet events
-            if _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS)):
-                try:
-                    self._process_events(instance, pods_list)
-                except Exception as ex:
-                    self.log.error("Event collection failed: %s" % str(ex))
+        # kubelet events
+        if self.event_retriever is not None:
+            try:
+                events = self.event_retriever.get_event_array()
+                if events and self._collect_events:
+                    self._process_events(instance, pods_list, events)
+                changed_pods = self.kubeutil.process_events(events)
+                changed_cids = self.kubeutil.match_containers_for_pods(changed_pods, pods_list)
+                if (changed_cids and self.sd_backend):
+                    self.sd_backend.update_checks(changed_cids)
+            except Exception as ex:
+                self.log.error("Event collection failed: %s" % str(ex))
 
     def _publish_raw_metrics(self, metric, dat, tags, depth=0):
         if depth >= self.max_depth:
@@ -443,18 +459,11 @@ class Kubernetes(AgentCheck):
             _tags.append('kube_namespace:{0}'.format(namespace))
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
 
-    def _process_events(self, instance, pods_list):
+    def _process_events(self, instance, pods_list, event_items):
         """
-        Retrieve a list of events from the kubernetes API.
-
-        At the moment (k8s v1.3) there is no support to select events based on a timestamp query, so we
-        go through the whole list every time. This should be fine for now as events
-        have a TTL of one hour[1] but logic needs to improve as soon as they provide
-        query capabilities or at least pagination, see [2][3].
-
-        [1] https://github.com/kubernetes/kubernetes/blob/release-1.3.0/cmd/kube-apiserver/app/options/options.go#L51
-        [2] https://github.com/kubernetes/kubernetes/issues/4432
-        [3] https://github.com/kubernetes/kubernetes/issues/1362
+        Process kube events and send ddog events
+        The namespace filtering is done here instead of KubeEventRetriever
+        to avoid interfering with service discovery
         """
         node_ip, node_name = self.kubeutil.get_node_info()
         self.log.debug('Processing events on {} [{}]'.format(node_name, node_ip))
@@ -470,6 +479,15 @@ class Kubernetes(AgentCheck):
                              '''from 5.13. Please use 'namespaces' and/or 'namespace_name_regexp' instead.''')
             k8s_namespaces.append(instance.get('namespace'))
 
+        self.k8s_namespace_regexp = None
+        if instance:
+            regexp = inst.get('namespace_name_regexp', None)
+            if regexp:
+                try:
+                    self.k8s_namespace_regexp = re.compile(regexp)
+                except re.error as e:
+                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
+
         if self.k8s_namespace_regexp:
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
             self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
@@ -482,13 +500,15 @@ class Kubernetes(AgentCheck):
 
         k8s_namespaces = set(k8s_namespaces)
 
-        event_items, changed_cids = self.kubeutil.get_events(k8s_namespaces)
-
         for event in event_items:
-            tags = self.kubeutil.extract_event_tags(event)
-
             event_ts = calendar.timegm(time.strptime(event.get('lastTimestamp'), '%Y-%m-%dT%H:%M:%SZ'))
             involved_obj = event.get('involvedObject', {})
+
+            # filter events by white listed namespaces (empty namespace belong to the 'default' one)
+            if involved_obj.get('namespace', 'default') not in k8s_namespaces:
+                continue
+
+            tags = self.kubeutil.extract_event_tags(event)
 
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
