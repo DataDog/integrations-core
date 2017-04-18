@@ -10,6 +10,7 @@ end
 
 container_name = 'dd-test-mysql'
 container_port = 13_306
+slave_container_port = 13_307
 
 namespace :ci do
   namespace :mysql do |flavor|
@@ -27,7 +28,7 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for 13_306
+      Wait.for container_port
       count = 0
       logs = `docker logs #{container_name}_master 2>&1`
       puts 'Waiting for MySQL to come up'
@@ -40,10 +41,10 @@ namespace :ci do
         puts 'MySQL is up!'
       end
 
-      sh %(docker run -p #{container_port + 1}:3306 --name #{container_name}_slave \
+      sh %(docker run -p #{slave_container_port}:3306 --name #{container_name}_slave \
            -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
            -d bergerx/mysql-replication:#{mysql_version})
-      Wait.for 13_307
+      Wait.for slave_container_port
       count = 0
       logs = `docker logs #{container_name}_slave 2>&1`
       puts 'Waiting for MySQL to come up'
@@ -52,9 +53,8 @@ namespace :ci do
         logs = `docker logs #{container_name}_slave 2>&1`
         count += 1
       end
-      if logs.include? 'MySQL init process done. Ready for start up'
-        puts 'MySQL is up!'
-      end
+      raise 'Slave not up in time. Failing...' unless logs.include? 'MySQL init process done. Ready for start up'
+      puts 'MySQL is up!'
 
       sh %(docker run -it --link #{container_name}_master:mysql --rm mysql:#{mysql_version} \
            sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot \
