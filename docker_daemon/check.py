@@ -169,7 +169,12 @@ class DockerDaemon(AgentCheck):
             self.docker_gateway = DockerUtil.get_gateway()
 
             if Platform.is_k8s():
-                self.kubeutil = KubeUtil()
+                try:
+                    self.kubeutil = KubeUtil()
+                except Exception as ex:
+                    self.kubeutil = None
+                    self.log.error("Couldn't instantiate the kubernetes client, "
+                        "subsequent kubernetes calls will fail as well. Error: %s" % str(ex))
 
             # We configure the check with the right cgroup settings for this host
             # Just needs to be done once
@@ -246,11 +251,12 @@ class DockerDaemon(AgentCheck):
             self.refresh_ecs_tags()
 
         if Platform.is_k8s():
-            try:
-                self.kube_labels = self.kubeutil.get_kube_labels()
-            except Exception as e:
-                self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
-                self.kube_labels = {}
+            self.kube_labels = {}
+            if self.kubeutil:
+                try:
+                    self.kube_labels = self.kubeutil.get_kube_labels()
+                except Exception as e:
+                    self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
 
         # containers running with custom cgroups?
         custom_cgroups = _is_affirmative(instance.get('custom_cgroups', False))
