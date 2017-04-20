@@ -342,9 +342,13 @@ class ProcessCheck(AgentCheck):
             # psutil.NoSuchProcess is raised.
             pids = self._get_pid_set(pid)
         elif pid_file is not None:
-            with open(pid_file, 'r') as file_pid:
-                pid_line = file_pid.readline().strip()
-                pids = self._get_pid_set(int(pid_line))
+            try:
+                with open(pid_file, 'r') as file_pid:
+                    pid_line = file_pid.readline().strip()
+                    pids = self._get_pid_set(int(pid_line))
+            except IOError:
+                # pid file doesn't exist, assuming the process is not running
+                pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
 
