@@ -382,6 +382,23 @@ class TestKubernetes(AgentCheckTest):
         self.assertEvent('dd-agent-a769 SuccessfulDelete on Bar', count=1, exact_match=False)
         self.assertEvent('hello-node-47289321-91tfd Scheduled on Bar', count=0, exact_match=False)
 
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
+    def test_kubelet_fail(self, *args):
+        # To avoid the disparition of some gauges during the second check
+        config = {
+            "instances": [{"host": "foo"}]
+        }
+
+        # Can't use run_check_twice due to specific metrics
+        self.run_check(config, force_reload=True)
+        self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=None, count=1)
+
 class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
