@@ -699,12 +699,12 @@ class DockerDaemon(AgentCheck):
             if container['Id'] in self.network_mappings:
                 networks = self.network_mappings[container['Id']]
             else:
-                self.log.debug("Fetching network mapping for container %s" % container['Id'])
                 networks = self.docker_util.get_container_network_mapping(container)
                 self.network_mappings[container['Id']] = networks
         except Exception as e:
             # Revert to previous behaviour if the method is missing or failing
-            self.warning("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
+            # Debug message will only appear once per container, then the cache is used
+            self.log.debug("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
             networks = {'eth0': 'bridge'}
             self.network_mappings[container['Id']] = networks
 
