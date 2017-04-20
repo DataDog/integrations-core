@@ -23,7 +23,6 @@ MAX_WAIT = 150
 GAUGE = AgentCheck.gauge
 RATE = AgentCheck.rate
 
-@attr(requires='mongo')
 class TestMongoUnit(AgentCheckTest):
     """
     Unit tests for MongoDB AgentCheck.
@@ -156,6 +155,43 @@ class TestMongoUnit(AgentCheckTest):
         self.assertEquals('UNKNOWN', self.check.get_state_name(500))
         unknown_desc = self.check.get_state_description(500)
         self.assertTrue(unknown_desc.find('500') != -1)
+
+    def test_server_uri_sanitization(self):
+        # Initialize check
+        config = {
+            'instances': [self.MONGODB_CONFIG]
+        }
+        self.load_check(config)
+
+        _parse_uri = self.check._parse_uri
+
+        # Batch with `sanitize_username` set to False
+        server_names = (
+            ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
+            ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
+            ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"), # pymongo parses the password as `pass_%2`
+            ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"), # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
+            ("mongodb://user%2@localhost:27017/admin", "mongodb://user%2@localhost:27017/admin"), # same thing here, parsed username: `user%2`
+            ("mongodb://user%25@localhost:27017/admin", "mongodb://user%@localhost:27017/admin"), # with the current sanitization approach, we expect the username to be decoded in the clean name
+        )
+
+        for server, expected_clean_name in server_names:
+            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=False)
+            self.assertEquals(expected_clean_name, clean_name)
+
+        # Batch with `sanitize_username` set to True
+        server_names = (
+            ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
+            ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
+            ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
+            ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
+            ("mongodb://user%2@localhost:27017/admin", "mongodb://localhost:27017/admin"),
+            ("mongodb://user%25@localhost:27017/admin", "mongodb://localhost:27017/admin"),
+        )
+
+        for server, expected_clean_name in server_names:
+            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=True)
+            self.assertEquals(expected_clean_name, clean_name)
 
 @attr(requires='mongo')
 class TestMongo(unittest.TestCase):
