@@ -171,17 +171,20 @@ class TestMongoUnit(AgentCheckTest):
             ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
             ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"), # pymongo parses the password as `pass_%2`
             ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"), # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
+            ("mongodb://user%2@localhost:27017/admin", "mongodb://user%2@localhost:27017/admin"), # same thing here, parsed username: `user%2`
+            ("mongodb://user%25@localhost:27017/admin", "mongodb://user%@localhost:27017/admin"), # with the current sanitization approach, we expect the username to be decoded in the clean name
         )
 
         for server, expected_clean_name in server_names:
             _, _, _, _, clean_name = _parse_uri(server, sanitize_username=False)
             self.assertEquals(expected_clean_name, clean_name)
 
-
-        # Batch with `sanitize_username` set to True, with this option no password is expected in the mongo URI
+        # Batch with `sanitize_username` set to True
         server_names = (
             ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
-            ("mongodb://user@localhost:27017/admin", "mongodb://localhost:27017/admin"),
+            ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
+            ("mongodb://user:pass_%2@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
+            ("mongodb://user:pass_%25@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
             ("mongodb://user%2@localhost:27017/admin", "mongodb://localhost:27017/admin"),
             ("mongodb://user%25@localhost:27017/admin", "mongodb://localhost:27017/admin"),
         )

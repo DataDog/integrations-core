@@ -606,9 +606,9 @@ class MongoDb(AgentCheck):
         decoded_server = urllib.unquote_plus(server)
         clean_server_name = decoded_server.replace(password, "*" * 5) if password else decoded_server
 
-        if sanitize_username:
-            username_uri = u"{}@".format(username)
-            clean_server_name = clean_server_name.replace(username_uri, "")
+        if sanitize_username and username:
+            username_pattern = u"{}[@:]".format(re.escape(username))
+            clean_server_name = re.sub(username_pattern, "", clean_server_name)
 
         return username, password, db_name, nodelist, clean_server_name
 
