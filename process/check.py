@@ -346,8 +346,9 @@ class ProcessCheck(AgentCheck):
                 with open(pid_file, 'r') as file_pid:
                     pid_line = file_pid.readline().strip()
                     pids = self._get_pid_set(int(pid_line))
-            except IOError:
+            except IOError as e:
                 # pid file doesn't exist, assuming the process is not running
+                self.log.debug('Unable to find pid file: %s', e)
                 pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
