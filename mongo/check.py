@@ -640,7 +640,7 @@ class MongoDb(AgentCheck):
 
         clean_server_name = server.replace(encoded_password, "*" * 5) if encoded_password else server
 
-        if ssl_params:
+        if username:
             username_uri = u"{}@".format(urllib.quote(username))
             clean_server_name = clean_server_name.replace(username_uri, "")
 
