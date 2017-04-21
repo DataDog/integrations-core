@@ -2,15 +2,15 @@
 
 # Overview
 
-
+Stay up-to-date on the health of your Elasticsearch cluster, from its overall status down to JVM heap usage and everything in between. The Datadog Agent's Elasticsearch check collects metrics for search and indexing performance, memory usage and garbage collection, node availability, shard statistics, disk space and performance, and many more. The Agent also sends events and service checks for the overall status of your cluster. 
 
 # Installation
 
-The Agent's Elasticsearch check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes. If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes or on some other server if you use hosted Elasticsearch. If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 # Configuration
 
-Create an `elastic.yaml` in the Datadog Agent's `conf.d` directory:
+Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory:
 
 ```
 init_config:
@@ -77,7 +77,7 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 
 `elasticsearch.cluster_health`:
 
-Return `Ok` if the cluster status is green, `Warn` if yellow, and `Critical` otherwise.
+Return `OK` if the cluster status is green, `Warn` if yellow, and `Critical` otherwise.
 
 # Further Reading
 
