@@ -177,8 +177,8 @@ class Kubernetes(AgentCheck):
                     self._process_events(instance, pods_list, events)
                 changed_pods = self.kubeutil.process_events(events)
                 changed_cids = self.kubeutil.match_containers_for_pods(changed_pods, pods_list)
-                if (changed_cids and self.sd_backend):
-                    self.sd_backend.update_checks(changed_cids)
+                if (changed_cids and self._sd_backend):
+                    self._sd_backend.update_checks(changed_cids)
             except Exception as ex:
                 self.log.error("Event collection failed: %s" % str(ex))
 
@@ -430,6 +430,7 @@ class Kubernetes(AgentCheck):
         # (create-by, namespace): count
         controllers_map = defaultdict(int)
         for pod in pods['items']:
+            # Get pod creator reference
             try:
                 created_by = json.loads(pod['metadata']['annotations']['kubernetes.io/created-by'])
                 kind = created_by['reference']['kind']
@@ -439,6 +440,16 @@ class Kubernetes(AgentCheck):
             except (KeyError, ValueError) as e:
                 self.log.debug("Unable to retrieve pod kind for pod %s: %s", pod, e)
                 continue
+
+            # Get pod services
+            try:
+                services = self.kubeutil.match_services_for_pod(pod.get('metadata', {}))
+                for service in services:
+                    controllers_map[(service, 'Service', namespace)] += 1
+            except (KeyError, ValueError) as e:
+                self.log.debug("Unable to retrieve services for pod %s: %s", pod, e)
+                continue
+
 
         tags = instance.get('tags', [])
         for (ctrl, kind, namespace), pod_count in controllers_map.iteritems():
@@ -454,8 +465,13 @@ class Kubernetes(AgentCheck):
                 _tags.append('kube_deployment:%s' % ctrl)
             elif kind == 'Job':
                 _tags.append('kube_job:%s' % ctrl)
-            # Keeping kube_replication_controller for all types for retro-compatibility
-            _tags.append('kube_replication_controller:{0}'.format(ctrl))
+
+            if kind == 'Service':
+                _tags.append('kube_service:%s' % ctrl)
+            else:
+                # Keeping kube_replication_controller for all types for retro-compatibility
+                _tags.append('kube_replication_controller:{0}'.format(ctrl))
+
             _tags.append('kube_namespace:{0}'.format(namespace))
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
 
