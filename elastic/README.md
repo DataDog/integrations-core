@@ -2,11 +2,13 @@
 
 # Overview
 
-Stay up-to-date on the health of your Elasticsearch cluster, from its overall status down to JVM heap usage and everything in between. The Datadog Agent's Elasticsearch check collects metrics for search and indexing performance, memory usage and garbage collection, node availability, shard statistics, disk space and performance, and many more. The Agent also sends events and service checks for the overall status of your cluster. 
+Stay up-to-date on the health of your Elasticsearch cluster, from its overall status down to JVM heap usage and everything in between. Know when you need to revive a replica, add capacity to the cluster, or otherwise tweak its configuration. Watch your cluster metrics respond when you do so.
+
+The Datadog Agent's Elasticsearch check collects metrics for search and indexing performance, memory usage and garbage collection, node availability, shard statistics, disk space and performance, pending tasks, and many more. The Agent also sends events and service checks for the overall status of your cluster.
 
 # Installation
 
-The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes or on some other server if you use hosted Elasticsearch. If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes or on some other server if you use hosted Elasticsearch (e.g. Elastic Cloud). If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 # Configuration
 
@@ -71,13 +73,13 @@ The Elasticsearch check emits an event to Datadog each time the overall status o
 
 # Service checks
 
-`elasticsearch.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metrics.
-
 `elasticsearch.cluster_health`:
 
 Return `OK` if the cluster status is green, `Warn` if yellow, and `Critical` otherwise.
+
+`elasticsearch.can_connect`:
+
+Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metrics.
 
 # Further Reading
 
