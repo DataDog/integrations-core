@@ -13,7 +13,7 @@ redis.cpu.user_children,gauge,,second,,User CPU consumed by the background proce
 redis.expires,gauge,,key,,The number of keys that have expired.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys that have been expired.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis info command.,0,redis,info latency
-redis.key.length,gauge,,,,The number of elements in a given key, tagged by key, e.g. 'key:mykeyname'. Enable in Agent config via the keys option.,0,redis,key length
+redis.key.length,gauge,,,,The number of elements in a given key tagged by key e.g. 'key:mykeyname'. Enable in Agent config via the keys option.,0,redis,key length
 redis.keys,gauge,,key,,The total number of keys.,0,redis,keys
 redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired
@@ -49,5 +49,5 @@ redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries rep
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median
 redis.stats.keyspace_hits,gauge,,key,,The total number of successful lookups in the db.,0,redis,keyspace hits
 redis.stats.keyspace_misses,gauge,,key,,The total number of missed lookups in the db.,0,redis,keyspace misses
-redis.command.calls,gauge,,,,The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent config via the command_stats option.,0,redis,cmd calls
-redis.command.usec_per_call,gauge,,,,The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent config via the command_stats option.,0,redis,usec per cmd
+redis.command.calls,gauge,,,,The number of times a redis command has been called tagged by 'command' e.g. 'command:append'. Enable in Agent config via the command_stats option.,0,redis,cmd calls
+redis.command.usec_per_call,gauge,,,,The CPU time consumed per redis command call tagged by 'command' e.g. 'command:append'. Enable in Agent config via the command_stats option.,0,redis,usec per cmd
