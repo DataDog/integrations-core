@@ -32,14 +32,15 @@ instances:
     #   - optional_tag2
     #
 
-    # Check the length of these keys
+    # Collect the lengths of the following keys.
+    # Length is zero for keys that have a type other than list, set, hash, or sorted set.
     #
     # keys:
     #   - key1
     #   - key2
 
-    # Display a warning in the info page if the keys we're tracking are missing
-    # Default: True
+    # If you provide a list of 'keys', have the Agent log a warning when keys are missing.
+    # (default: True)
     #
     # warn_on_missing_keys: True
 
