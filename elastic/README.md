@@ -19,7 +19,7 @@ init_config:
 
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
-  - cluster_stats: false # set to true ONLY if you're not running the Elasticsearch check on individual nodes
+  - cluster_stats: false # set true ONLY if you're not running the check on individual nodes
   - pshard_stats: true   # clusterwise metrics
   - pending_task_stats: true
 ```
@@ -61,7 +61,7 @@ Check that the `url` in `elastic.yaml` is correct.
 
 # Compatibility
 
-The Elasticsearch check is compatible with all major platforms
+The Elasticsearch check is compatible with all major platforms.
 
 # Metrics
 
