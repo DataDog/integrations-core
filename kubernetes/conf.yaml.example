@@ -48,6 +48,7 @@ instances:
   # collect_events controls whether the agent should fetch events from the kubernetes API and
   # ingest them in Datadog. To avoid duplicates, only one agent at a time across the entire
   # cluster should have this feature enabled. To enable the feature, set the parameter to `true`.
+  # Setting this to true disables all other checks.
   #
   # collect_events: false
   #
