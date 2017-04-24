@@ -31,10 +31,12 @@ instances:
     # * `metrics.commands` - Use of database commands
     # * `tcmalloc` -  TCMalloc memory allocator
     # * `top` - Usage statistics for each collection
+    # * `collection` - Metrics of the specified collections
     # additional_metrics:
     #   - metrics.commands
     #   - tcmalloc
     #   - top
+    #   - collection
     #
     # Collect metrics on specific collections from the database specified
     # Each collection generates many metrics,
