@@ -24,7 +24,7 @@ instances:
   - pending_task_stats: true
 ```
 
-If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you don't run your own cluster — set `cluster_stats` to true.
+If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
 
 See [the sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication and SSL verification.
 
