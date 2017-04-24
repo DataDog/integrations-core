@@ -19,20 +19,20 @@ init_config:
 
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
-  - cluster_stats: false # set true ONLY if you're not running the check on individual nodes
-  - pshard_stats: true   # clusterwise metrics
+  - cluster_stats: false # set true ONLY if you're not running the check on each cluster node
+  - pshard_stats: true
   - pending_task_stats: true
 ```
 
 If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use Elastic Cloud — set `cluster_stats` to true.
 
-See [the sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of the cluster URL.
+See [the sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication and SSL verification.
 
 Restart the Agent to begin sending Elasticsearch metrics to Datadog.
 
 # Validation
 
-Run the Agent's info subcommand and look for elastic under the Checks section:
+Run the Agent's info subcommand and look for `elastic` under the Checks section:
 
 ```
   Checks
