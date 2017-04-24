@@ -74,7 +74,7 @@ FACTORS = {
 
 QUANTITY_EXP = re.compile(r'[-+]?\d+[\.]?\d*[numkMGTPE]?i?')
 
-SERVICE_NAMES_SEPARATOR = ":"
+TAG_SEPARATOR = "|"
 
 class Kubernetes(AgentCheck):
     """ Collect metrics and events from kubelet """
@@ -429,58 +429,31 @@ class Kubernetes(AgentCheck):
         # reserved for system/Kubernetes.
 
     def _update_pods_metrics(self, instance, pods):
-        supported_kinds = [
-            "DaemonSet",
-            "Deployment",
-            "Job",
-            "ReplicationController",
-            "ReplicaSet",
-        ]
+        """
+        Reports the number of running pods, tagged by service and creator
 
-        # (creator-name, creator-kind, namespace, services): count
-        controllers_map = defaultdict(int)
+        We go though all the pods, extract tags then count them by tag list, sorted and
+        serialized in a pipe-separated string (it is an illegar character for tags)
+        """
+        tags_map = defaultdict(int)
         for pod in pods['items']:
-            # Get pod creator reference
-            try:
-                created_by = json.loads(pod['metadata']['annotations']['kubernetes.io/created-by'])
-                kind = created_by['reference']['kind']
-                if kind in supported_kinds:
-                    namespace = created_by['reference']['namespace']
-                    services = self.kubeutil.match_services_for_pod(pod.get('metadata', {}))
-                    if isinstance(services, list):
-                        services.sort()
-                        # Service names can't contain colon, using to build an immutable string
-                        services_str = SERVICE_NAMES_SEPARATOR.join(services)
-                    else:
-                        services_str = ""
-                    controllers_map[(created_by['reference']['name'], kind, namespace, services_str)] += 1
-            except (KeyError, ValueError) as e:
-                self.log.debug("Unable to retrieve pod kind for pod %s: %s", pod, e)
-                continue
+            pod_meta = pod.get('metadata', {})
+            pod_tags = self.kubeutil.get_pod_creator_tags(pod_meta, legacy_rep_controller_tag=True)
+            services = self.kubeutil.match_services_for_pod(pod_meta)
+            if isinstance(services, list):
+                for service in services:
+                    pod_tags.append('kube_service:%s' % service)
+            if 'namespace' in pod_meta:
+                pod_tags.append('kube_namespace:%s' % pod_meta['namespace'])
 
-        tags = instance.get('tags', [])
-        for (ctrl, kind, namespace, services_str), pod_count in controllers_map.iteritems():
-            _tags = tags[:]  # copy base tags
-            if kind == 'DaemonSet':
-                _tags.append('kube_daemon_set:%s' % ctrl)
-            elif kind == 'ReplicaSet':
-                _tags.append('kube_replica_set:%s' % ctrl)
-                deployment = self.kubeutil.get_deployment_for_replicaset(ctrl)
-                if deployment:
-                    _tags.append('kube_deployment:%s' % deployment)
-            elif kind == 'Deployment':
-                _tags.append('kube_deployment:%s' % ctrl)
-            elif kind == 'Job':
-                _tags.append('kube_job:%s' % ctrl)
+            pod_tags.sort()
+            tags_map[TAG_SEPARATOR.join(pod_tags)] += 1
 
-            # Keeping kube_replication_controller for all types for retro-compatibility
-            _tags.append('kube_replication_controller:{0}'.format(ctrl))
-
-            for service in services_str.split(SERVICE_NAMES_SEPARATOR):
-                _tags.append('kube_service:%s' % service)
-
-            _tags.append('kube_namespace:{0}'.format(namespace))
-            self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
+        commmon_tags = instance.get('tags', [])
+        for pod_tags, pod_count in tags_map.iteritems():
+            tags = pod_tags.split(TAG_SEPARATOR)
+            tags.extend(commmon_tags)
+            self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, tags)
 
     def _process_events(self, instance, pods_list, event_items):
         """
