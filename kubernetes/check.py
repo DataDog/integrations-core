@@ -502,15 +502,6 @@ class Kubernetes(AgentCheck):
                              '''from 5.13. Please use 'namespaces' and/or 'namespace_name_regexp' instead.''')
             k8s_namespaces.append(instance.get('namespace'))
 
-        self.k8s_namespace_regexp = None
-        if instance:
-            regexp = inst.get('namespace_name_regexp', None)
-            if regexp:
-                try:
-                    self.k8s_namespace_regexp = re.compile(regexp)
-                except re.error as e:
-                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
-
         if self.k8s_namespace_regexp:
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
             self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
