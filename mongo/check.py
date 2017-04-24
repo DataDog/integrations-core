@@ -689,6 +689,8 @@ class MongoDb(AgentCheck):
             cli = pymongo.mongo_client.MongoClient(
                 server,
                 socketTimeoutMS=timeout,
+                connectTimeoutMS=timeout,
+                serverSelectionTimeoutMS=timeout,
                 read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
                 **ssl_params)
             # some commands can only go against the admin DB
@@ -761,6 +763,8 @@ class MongoDb(AgentCheck):
                 cli = pymongo.mongo_client.MongoClient(
                     server,
                     socketTimeoutMS=timeout,
+                    connectTimeoutMS=timeout,
+                    serverSelectionTimeoutMS=timeout,
                     replicaset=setname,
                     read_preference=pymongo.ReadPreference.NEAREST,
                     **ssl_params)
