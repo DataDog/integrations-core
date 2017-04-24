@@ -8,7 +8,7 @@ The Datadog Agent's Elasticsearch check collects metrics for search and indexing
 
 # Installation
 
-The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes or on some other server if you use hosted Elasticsearch (e.g. Elastic Cloud). If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud). If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 # Configuration
 
@@ -24,7 +24,7 @@ instances:
   - pending_task_stats: true
 ```
 
-If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use Elastic Cloud — set `cluster_stats` to true.
+If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you don't run your own cluster — set `cluster_stats` to true.
 
 See [the sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication and SSL verification.
 
