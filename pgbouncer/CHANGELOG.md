@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-1.0.1\Unreleased
+1.0.1/2017-04-24
 ==================
 
 ### Changes
