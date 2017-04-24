@@ -97,6 +97,15 @@ class Kubernetes(AgentCheck):
         else:
             self._sd_backend = None
 
+        self.k8s_namespace_regexp = None
+        if inst:
+            regexp = inst.get('namespace_name_regexp', None)
+            if regexp:
+                try:
+                    self.k8s_namespace_regexp = re.compile(regexp)
+                except re.error as e:
+                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
+
         # Delay init to first check (need the instance options)
         self._collect_events = None
         self.event_retriever = None
