@@ -74,6 +74,7 @@ FACTORS = {
 
 QUANTITY_EXP = re.compile(r'[-+]?\d+[\.]?\d*[numkMGTPE]?i?')
 
+SERVICE_NAMES_SEPARATOR = ":"
 
 class Kubernetes(AgentCheck):
     """ Collect metrics and events from kubelet """
@@ -436,7 +437,7 @@ class Kubernetes(AgentCheck):
             "ReplicaSet",
         ]
 
-        # (create-by, namespace): count
+        # (creator-name, creator-kind, namespace, services): count
         controllers_map = defaultdict(int)
         for pod in pods['items']:
             # Get pod creator reference
@@ -445,23 +446,20 @@ class Kubernetes(AgentCheck):
                 kind = created_by['reference']['kind']
                 if kind in supported_kinds:
                     namespace = created_by['reference']['namespace']
-                    controllers_map[(created_by['reference']['name'], kind, namespace)] += 1
+                    services = self.kubeutil.match_services_for_pod(pod.get('metadata', {}))
+                    if isinstance(services, list):
+                        services.sort()
+                        # Service names can't contain colon, using to build an immutable string
+                        services_str = SERVICE_NAMES_SEPARATOR.join(services)
+                    else:
+                        services_str = ""
+                    controllers_map[(created_by['reference']['name'], kind, namespace, services_str)] += 1
             except (KeyError, ValueError) as e:
                 self.log.debug("Unable to retrieve pod kind for pod %s: %s", pod, e)
                 continue
 
-            # Get pod services
-            try:
-                services = self.kubeutil.match_services_for_pod(pod.get('metadata', {}))
-                for service in services:
-                    controllers_map[(service, 'Service', namespace)] += 1
-            except (KeyError, ValueError) as e:
-                self.log.debug("Unable to retrieve services for pod %s: %s", pod, e)
-                continue
-
-
         tags = instance.get('tags', [])
-        for (ctrl, kind, namespace), pod_count in controllers_map.iteritems():
+        for (ctrl, kind, namespace, services_str), pod_count in controllers_map.iteritems():
             _tags = tags[:]  # copy base tags
             if kind == 'DaemonSet':
                 _tags.append('kube_daemon_set:%s' % ctrl)
@@ -475,11 +473,11 @@ class Kubernetes(AgentCheck):
             elif kind == 'Job':
                 _tags.append('kube_job:%s' % ctrl)
 
-            if kind == 'Service':
-                _tags.append('kube_service:%s' % ctrl)
-            else:
-                # Keeping kube_replication_controller for all types for retro-compatibility
-                _tags.append('kube_replication_controller:{0}'.format(ctrl))
+            # Keeping kube_replication_controller for all types for retro-compatibility
+            _tags.append('kube_replication_controller:{0}'.format(ctrl))
+
+            for service in services_str.split(SERVICE_NAMES_SEPARATOR):
+                _tags.append('kube_service:%s' % service)
 
             _tags.append('kube_namespace:{0}'.format(namespace))
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
