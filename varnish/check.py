@@ -4,6 +4,7 @@
 
 # stdlib
 from collections import defaultdict
+from os import geteuid
 import re
 import xml.parsers.expat # python 2.4 compatible
 
@@ -100,8 +101,24 @@ class Varnish(AgentCheck):
         varnishadm_path = instance.get('varnishadm')
         if varnishadm_path:
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
-            cmd = ['sudo', varnishadm_path, '-S', secretfile_path, 'debug.health']
-            output, _, _ = get_subprocess_output(cmd, self.log)
+
+            cmd = []
+            if geteuid() != 0:
+                cmd.append('sudo')
+
+            if version < [4, 1, 0]:
+                cmd.extend([varnishadm_path, '-S', secretfile_path, 'debug.health'])
+            else:
+                cmd.extend([varnishadm_path, '-S', secretfile_path, 'backend.list', '-p'])
+
+            try:
+                output, err, _ = get_subprocess_output(cmd, self.log)
+            except OSError as e:
+                self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+                output = None
+            if err:
+                self.log.error('Error getting service check from varnishadm: %s', err)
+
             if output:
                 self._parse_varnishadm(output)
 
@@ -112,25 +129,25 @@ class Varnish(AgentCheck):
 
         # Assumptions regarding varnish's version
         use_xml = True
-        version = 3
+        version = [3, 0, 0]
 
-        m1 = re.search(r"varnish-(\d+)", output, re.MULTILINE)
+        m1 = re.search(r"varnish-(\d+\.\d+\.\d+)", output, re.MULTILINE)
         # v2 prints the version on stderr, v3 on stdout
-        m2 = re.search(r"varnish-(\d+)", error, re.MULTILINE)
+        m2 = re.search(r"varnish-(\d+\.\d+\.\d+)", error, re.MULTILINE)
 
         if m1 is None and m2 is None:
             self.log.warn("Cannot determine the version of varnishstat, assuming 3 or greater")
             self.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
         else:
             if m1 is not None:
-                version = int(m1.group(1))
+                version = map(int, m1.group(1).split('.'))
             elif m2 is not None:
-                version = int(m2.group(1))
+                version = map(int, m2.group(1).split('.'))
 
-        self.log.debug("Varnish version: %d" % version)
+        self.log.debug("Varnish version: %s", '.'.join(map(str, version)))
 
         # Location of varnishstat
-        if version <= 2:
+        if version[0] <= 2:
             use_xml = False
 
         return version, use_xml
