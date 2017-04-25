@@ -172,7 +172,7 @@ class TestPostgres(AgentCheckTest):
                 self.assertMetric(mname, count=1)
 
         # Testing ARCHIVER_METRICS scope
-        for mname in self.ARCHIVER_METRICS:
+        for mname in self.COMMON_ARCHIVER_METRICS:
             self.assertMetric(mname, count=1)
 
         # FIXME: Test postgresql.locks
@@ -313,7 +313,7 @@ class TestPostgres(AgentCheckTest):
                 self.assertMetric(mname, count=1)
 
         # Testing ARCHIVER_METRICS scope
-        for mname in self.ARCHIVER_METRICS:
+        for mname in self.COMMON_ARCHIVER_METRICS:
             self.assertMetric(mname, count=1)
 
         # FIXME: Test postgresql.locks
@@ -445,7 +445,7 @@ class TestPostgres(AgentCheckTest):
                 self.assertMetric(mname, count=1)
 
         # Testing ARCHIVER_METRICS scope
-        for mname in self.ARCHIVER_METRICS:
+        for mname in self.COMMON_ARCHIVER_METRICS:
             self.assertMetric(mname, count=1)
 
         # FIXME: Test postgresql.locks
