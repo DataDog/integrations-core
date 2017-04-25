@@ -421,16 +421,19 @@ class SparkCheck(AgentCheck):
         '''
         spark_apps = {}
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
-            response = self._rest_request_to_json(tracking_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK)
+            try:
+                response = self._rest_request_to_json(tracking_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK)
 
-            for app in response:
-                app_id = app.get('id')
-                app_name = app.get('name')
+                for app in response:
+                    app_id = app.get('id')
+                    app_name = app.get('name')
 
-                if app_id and app_name:
-                    spark_apps[app_id] = (app_name, tracking_url)
+                    if app_id and app_name:
+                        spark_apps[app_id] = (app_name, tracking_url)
+            except HTTPError as e:
+                self.log.warn('Unable to query tracking_url for app ids: %s (%s)', tracking_url, e)
 
         return spark_apps
 
@@ -439,83 +442,92 @@ class SparkCheck(AgentCheck):
         Get metrics for each Spark job.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                response = self._rest_request_to_json(tracking_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK, app_id, 'jobs')
 
-            response = self._rest_request_to_json(tracking_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'jobs')
+                for job in response:
 
-            for job in response:
+                    status = job.get('status')
 
-                status = job.get('status')
+                    tags = ['app_name:%s' % str(app_name)]
+                    tags.extend(addl_tags)
+                    tags.append('status:%s' % str(status).lower())
 
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
+                    self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
+                    self._set_metric('spark.job.count', INCREMENT, 1, tags)
+            except HTTPError as e:
+                self.log.warn('Unable to query tracking_url for job metrics: %s (%s)', tracking_url, e)
 
-                self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
-                self._set_metric('spark.job.count', INCREMENT, 1, tags)
 
     def _spark_stage_metrics(self, running_apps, addl_tags):
         '''
         Get metrics for each Spark stage.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                response = self._rest_request_to_json(tracking_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK, app_id, 'stages')
 
-            response = self._rest_request_to_json(tracking_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'stages')
+                for stage in response:
 
-            for stage in response:
+                    status = stage.get('status')
 
-                status = stage.get('status')
+                    tags = ['app_name:%s' % str(app_name)]
+                    tags.extend(addl_tags)
+                    tags.append('status:%s' % str(status).lower())
 
-                tags = ['app_name:%s' % str(app_name)]
-                tags.extend(addl_tags)
-                tags.append('status:%s' % str(status).lower())
-
-                self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
-                self._set_metric('spark.stage.count', INCREMENT, 1, tags)
+                    self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
+                    self._set_metric('spark.stage.count', INCREMENT, 1, tags)
+            except HTTPError as e:
+                self.log.warn('Unable to query tracking_url for stage metrics: %s (%s)', tracking_url, e)
 
     def _spark_executor_metrics(self, running_apps, addl_tags):
         '''
         Get metrics for each Spark executor.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                response = self._rest_request_to_json(tracking_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK, app_id, 'executors')
 
-            response = self._rest_request_to_json(tracking_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'executors')
+                tags = ['app_name:%s' % str(app_name)]
+                tags.extend(addl_tags)
 
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
+                for executor in response:
+                    if executor.get('id') == 'driver':
+                        self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
+                    else:
+                        self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
 
-            for executor in response:
-                if executor.get('id') == 'driver':
-                    self._set_metrics_from_json(tags, executor, SPARK_DRIVER_METRICS)
-                else:
-                    self._set_metrics_from_json(tags, executor, SPARK_EXECUTOR_METRICS)
-
-            if len(response):
-                self._set_metric('spark.executor.count', INCREMENT, len(response), tags)
+                if len(response):
+                    self._set_metric('spark.executor.count', INCREMENT, len(response), tags)
+            except HTTPError as e:
+                self.log.warn('Unable to query tracking_url for executor metrics: %s (%s)', tracking_url, e)
 
     def _spark_rdd_metrics(self, running_apps, addl_tags):
         '''
         Get metrics for each Spark RDD.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
+            try:
+                response = self._rest_request_to_json(tracking_url,
+                    SPARK_APPS_PATH,
+                    SPARK_SERVICE_CHECK, app_id, 'storage/rdd')
 
-            response = self._rest_request_to_json(tracking_url,
-                SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'storage/rdd')
+                tags = ['app_name:%s' % str(app_name)]
+                tags.extend(addl_tags)
 
-            tags = ['app_name:%s' % str(app_name)]
-            tags.extend(addl_tags)
+                for rdd in response:
+                    self._set_metrics_from_json(tags, rdd, SPARK_RDD_METRICS)
 
-            for rdd in response:
-                self._set_metrics_from_json(tags, rdd, SPARK_RDD_METRICS)
-
-            if len(response):
-                self._set_metric('spark.rdd.count', INCREMENT, len(response), tags)
+                if len(response):
+                    self._set_metric('spark.rdd.count', INCREMENT, len(response), tags)
+            except HTTPError as e:
+                self.log.warn('Unable to query tracking_url for rdd metrics: %s (%s)', tracking_url, e)
 
     def _set_metrics_from_json(self, tags, metrics_json, metrics):
         '''
