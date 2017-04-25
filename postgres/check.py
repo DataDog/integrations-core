@@ -451,6 +451,7 @@ SELECT s.schemaname,
             self.db_archiver_metrics.append(sub_key)
 
             self.archiver_metrics[key] = dict(self.COMMON_ARCHIVER_METRICS)
+            metrics = self.archiver_metrics.get(key)
         return metrics
 
     def _get_replication_metrics(self, key, db):
