@@ -1,32 +1,76 @@
 # Fluentd Integration
 
-## Overview
+# Overview
 
-Get metrics from fluentd service in real time to:
+Get metrics from Fluentd to:
 
 * Visualize Fluentd performance.
 * Correlate the performance of Fluentd with the rest of your applications.
 
-## Installation
+# Installation
 
-Install the `dd-check-fluentd` package manually or with your favorite configuration manager
+The Fluentd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Fluentd servers.
 
-## Configuration
+# Configuration
 
-Edit the `fluentd.yaml` file to point to your server and port, set the masters to monitor
+## Prepare Fluentd
 
-## Validation
+In your fluentd configuration, add a `monitor_agent` source:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+<source>
+  @type monitor_agent
+  bind 0.0.0.0
+  port 24220
+</source>
+```
 
-    Checks
-    ======
+## Connect the Datadog Agent
 
-        fluentd
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Create a file `fluentd.yaml` in the Agent's `conf.d` directory:
 
-## Compatibility
+```
+init_config:
 
-The fluentd check is compatible with all major platforms
+instances:
+  - monitor_agent_url: http://localhost:24220/api/plugins.json
+    #tag_by: "type" # defaults to 'plugin_id'
+    #plugin_ids:    # collect metrics only on your chosen plugin_ids (optional)
+    #  - plg1
+    #  - plg2
+```
+
+Restart the Agent to begin sending Fluentd metrics to Datadog.
+
+# Validation
+
+Run the Agent's `info` subcommand and look for `fluentd` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    fluentd
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks
+
+`fluentd.is_ok`:
+
+Returns 'Critical' if the Agent cannot connect to Fluentd to collect metrics. This is the check which most other integrations would call `can_connect`.
+
+# Further Reading
+
+To get a better idea of how (or why) to integrate your Redis servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-fluentd-datadog/) about it.
