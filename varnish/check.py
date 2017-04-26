@@ -78,7 +78,7 @@ class Varnish(AgentCheck):
             tags = list(set(tags))
         varnishstat_path = instance.get("varnishstat")
         name = instance.get('name')
-        metrics_filter = instance.get("metrics_filter")
+        metrics_filter = instance.get("metrics_filter", [])
         if not isinstance(metrics_filter, list):
             raise Exception("The parameter 'metrics_filter' must be a list")
 
