@@ -235,6 +235,8 @@ class DockerDaemon(AgentCheck):
             self.ecs_tags = {}
             self.ecs_agent_local = None
 
+            self.capped_metrics = instance.get('capped_metrics')
+
         except Exception as e:
             self.log.critical(e)
             self.warning("Initialization failed. Will retry at next iteration")
@@ -307,6 +309,9 @@ class DockerDaemon(AgentCheck):
         except:
             self.log.exception("Docker_daemon check failed")
             self.warning("Check failed. Will retry at next iteration")
+
+        if self.capped_metrics:
+            self.filter_capped_metrics()
 
     def _count_and_weigh_images(self):
         try:
@@ -1105,3 +1110,14 @@ class DockerDaemon(AgentCheck):
                 self.warning("Cannot parse %s content: %s" % (path, str(e)))
                 continue
         return container_dict
+
+    def filter_capped_metrics(self):
+        metrics = self.aggregator.metrics.values()
+        for metric in metrics:
+            if metric.name in self.capped_metrics:
+                cap = self.capped_metrics[metric.name]
+                val = metric._rate(metric.samples[-2], metric.samples[-1])
+                if val > cap:
+                    sample = metric.samples.pop()
+                    self.log.debug("Dropped latest value %s (raw sample: %s) of "
+                        "metric %s as it was above the cap for this metric." % (val, sample, metric.name))
