@@ -1,32 +1,64 @@
-# Couch Integration
+# CouchDB Integration
 
-## Overview
+# Overview
 
-Get metrics from couch service in real time to:
+Capture CouchDB data in Datadog to:
 
-* Visualize and monitor couch states
-* Be notified about couch failovers and events.
+* Visualize key CouchDB metrics.
+* Correlate CouchDB performance with the rest of your applications.
 
-## Installation
+# Installation
 
-Install the `dd-check-couch` package manually or with your favorite configuration manager
+The CouchDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your CouchDB servers.
 
-## Configuration
+# Configuration
 
-Edit the `couch.yaml` file to point to your server and port, set the masters to monitor
+Create a file `couch.yaml` in the Agent's `conf.d` directory:
 
-## Validation
+```
+init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+instances:
+  - server: http://localhost:5984 # or wherever your CouchDB is listening
+  #user: <your_username>
+  #password: <your_password>
+```
 
-    Checks
-    ======
+Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
-        couch
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Restart the Agent to begin sending CouchDB metrics to Datadog.
 
-## Compatibility
+# Validation
 
-The couch check is compatible with all major platforms
+Run the Agent's `info` subcommand and look for `couch` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    couch
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Troubleshooting
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks
+
+`couchdb.can_connect`:
+
+Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
+
+# Further Reading
+
+To get a better idea of how (or why) to integrate your CouchDB cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/) about it.
