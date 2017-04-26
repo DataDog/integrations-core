@@ -1,32 +1,64 @@
 # Couchbase Integration
 
-## Overview
+# Overview
 
 Get metrics from couchbase service in real time to:
 
 * Visualize and monitor couchbase states
 * Be notified about couchbase failovers and events.
 
-## Installation
+# Installation
 
-Install the `dd-check-couchbase` package manually or with your favorite configuration manager
+The Couchbase check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Couchbase nodes.
 
-## Configuration
+# Configuration
 
-Edit the `couchbase.yaml` file to point to your server and port, set the masters to monitor
+Create a file `couchbase.yaml` in the Agent's `conf.d` directory:
 
-## Validation
+```
+init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+instances:
+  - server: http://localhost:8091 # or wherever your Couchbase is listening
+    #user: <your_username>
+    #password: <your_password>
+```
 
-    Checks
-    ======
+Restart the Agent to begin sending Couchbase metrics to Datadog.
 
-        couchbase
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+# Validation
 
-## Compatibility
+Run the Agent's `info` subcommand and look for `couchbase` under the Checks section:
 
-The couchbase check is compatible with all major platforms
+```
+  Checks
+  ======
+    [...]
+
+    couchbase
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Compatibility
+
+The couchbase check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks
+
+`couchbase.can_connect`:
+
+Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
+
+# Further Reading
+
+To get a better idea of how (or why) to integrate your Redis servers with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/) about it.
