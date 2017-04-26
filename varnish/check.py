@@ -78,6 +78,9 @@ class Varnish(AgentCheck):
             tags = list(set(tags))
         varnishstat_path = instance.get("varnishstat")
         name = instance.get('name')
+        metrics_filter = instance.get("metrics_filter")
+        if not isinstance(metrics_filter, list):
+            raise Exception("The parameter 'metrics_filter' must be a list")
 
         # Get version and version-specific args from varnishstat -V.
         version, use_xml = self._get_version_info(varnishstat_path)
@@ -85,6 +88,8 @@ class Varnish(AgentCheck):
         # Parse metrics from varnishstat.
         arg = '-x' if use_xml else '-1'
         cmd = [varnishstat_path, arg]
+        for metric in metrics_filter:
+            cmd.extend(["-f", metric])
 
         if name is not None:
             cmd.extend(['-n', name])

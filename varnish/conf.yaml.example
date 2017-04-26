@@ -6,6 +6,11 @@ init_config:
 instances:
   # The full path to the varnishstat binary
   - varnishstat: /usr/bin/varnishstat
+    # List of field inclusion blobs that will be passed to varnishstat with the
+    # -f options to filter which metrics to collect. 
+    # See https://www.varnish-cache.org/docs/4.1/reference/varnishstat.html#options.
+    metrics_filter:
+      - ^VBE.*
 
     # The (optional) name will be used in the varnishstat command for the
     # -n argument and will add a name:$instancename tag to all metrics.
