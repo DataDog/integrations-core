@@ -1,10 +1,10 @@
-# Go Expvar Integration
+# Go expvar Integration
 
 # Overview
 
-Track the memory usage of your Go services and collect custom metrics you've instrumented with Go's expvar package.
+Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
 
-If you already instrument your Go code with [dogstats-go](https://github.com/DataDog/datadog-go), you can still use this check to collect memory-related metrics.
+If you prefer to instrument your Go code with [dogstats-go](https://github.com/DataDog/datadog-go) instead, you can still use this integration to collect memory-related metrics.
 
 # Installation
 
