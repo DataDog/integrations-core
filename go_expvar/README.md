@@ -1,4 +1,4 @@
-# Go expvar Integration
+# Go Expvar Integration
 
 # Overview
 
@@ -26,7 +26,6 @@ Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
 init_config:
 
 instances:
-  # where <your_apps_port> is the HTTP port of your Go service
   - expvar_url: http://localhost:<your_apps_port>/debug/vars
     # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
     namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
