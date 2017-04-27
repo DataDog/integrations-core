@@ -207,6 +207,9 @@ class HAProxy(AgentCheck):
 
         back_or_front = None
 
+        # Sanitize CSV, handle line breaks
+        data = self._sanitize_lines(data)
+
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
             if not line.strip():
@@ -267,6 +270,27 @@ class HAProxy(AgentCheck):
             )
 
         return data
+
+
+    def _sanitize_lines(self, data):
+        sanitized = []
+
+        clean = ''
+        single_quotes = 0
+        double_quotes = 0
+        for line in data:
+            single_quotes += line.count('\'')
+            double_quotes += line.count('"')
+            clean += line
+
+            if single_quotes % 2 == 0 and double_quotes % 2 == 0:
+                sanitized.append(clean.replace('\n', '').replace('\r', ''))
+                single_quotes = 0
+                double_quotes = 0
+                clean = ''
+
+        return sanitized
+
 
     def _line_to_dict(self, fields, line):
         data_dict = {}
@@ -515,11 +539,12 @@ class HAProxy(AgentCheck):
                                           services_excl_filter):
             return
 
+        data_status = data['status']
         if status is None:
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
             return
 
-        if status != data['status'] and data['status'] in ('up', 'down'):
+        if status != data_status and data_status in ('up', 'down'):
             # If the status of a host has changed, we trigger an event
             try:
                 lastchg = int(data['lastchg'])
@@ -528,13 +553,13 @@ class HAProxy(AgentCheck):
 
             # Create the event object
             ev = self._create_event(
-                data['status'], hostname, lastchg, service_name,
+                data_status, hostname, lastchg, service_name,
                 data['back_or_front'], custom_tags=custom_tags
             )
             self.event(ev)
 
             # Store this host status so we can check against it later
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front,
                       custom_tags=[]):
