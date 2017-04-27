@@ -275,12 +275,22 @@ class HAProxy(AgentCheck):
     def _sanitize_lines(self, data):
         sanitized = []
 
+        def char_count(line, char):
+            count = 0
+
+            for idx, c in enumerate(line):
+                prev = None if idx is 0 else line[idx-1]
+                if c is char:
+                    count = count + 1 if prev and prev is not '\\' else count
+
+            return count
+
         clean = ''
         single_quotes = 0
         double_quotes = 0
         for line in data:
-            single_quotes += line.count('\'')
-            double_quotes += line.count('"')
+            single_quotes += char_count(line, '\'')
+            double_quotes += char_count(line, '"')
             clean += line
 
             if single_quotes % 2 == 0 and double_quotes % 2 == 0:
