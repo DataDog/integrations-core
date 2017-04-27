@@ -30,7 +30,7 @@ instances:
   - expvar_url: http://localhost:<your_apps_port>/debug/vars
     # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
     namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
-    # define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
+    # optionally define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
     metrics:
       - path: my_func_counter
         # if you don't want it named my_go_app.my_func_counter
@@ -40,9 +40,9 @@ instances:
         #  - "tag_name1:tag_value1"
 ```
 
-If you don't configure a `metrics` list, the Agent will still collect most memstat metrics. Use `metrics` to tell the Agent which extra memstat metrics and which expvar vars to collect.
+If you don't configure a `metrics` list, the Agent will still collect memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
 
-Restart the Agent to begin sending expvar metrics to Datadog.
+Restart the Agent to begin sending memstat and expvar metrics to Datadog.
 
 # Validation
 
