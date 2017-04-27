@@ -71,13 +71,6 @@ COMMON_METRICS = [
     'varnish.LCK.vcl.locks',
 ]
 
-COMMON_SMA_METRICS = [
-    'varnish.SMA.s0.c_req',
-    'varnish.SMA.s0.c_fail',
-    'varnish.SMA.Transient.c_req',
-    'varnish.SMA.Transient.c_fail',
-]
-
 VARNISH_DEFAULT_VERSION = "4.1.4"
 
 
@@ -116,6 +109,14 @@ class VarnishCheckTest(AgentCheckTest):
                 self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
             else:
                 self.assertMetric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+
+        config['instances'][0]['metrics_filter'] = ['^SMA.Transient.c_req']
+        self.run_check_twice(config)
+        for mname in COMMON_METRICS:
+            if 'SMA.Transient.c_req' in mname:
+                self.assertMetric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            elif 'varnish.uptime' not in mname:
+                self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
     # This the docker image is in a different repository, we check that the
     # verison requested in the FLAVOR_VERSION is the on running inside the
