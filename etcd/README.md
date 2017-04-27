@@ -2,11 +2,11 @@
 
 # Overview
 
-Collect etc metrics to:
+Collect etcd metrics to:
 
-- Monitor the health of your etcd cluster.
-- Know when host configurations may be out of sync.
-- Correlate the performance of etcd with the rest of your applications.
+* Monitor the health of your etcd cluster.
+* Know when host configurations may be out of sync.
+* Correlate the performance of etcd with the rest of your applications.
 
 # Installation
 
