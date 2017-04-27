@@ -40,7 +40,7 @@ instances:
         #  - "tag_name1:tag_value1"
 ```
 
-If you don't configure a `metrics` list, the Agent will still collect most memstat metrics. Use `metrics` to tell the Agent which extra memstat metrics to collect, and which expvar vars you want to collect.
+If you don't configure a `metrics` list, the Agent will still collect most memstat metrics. Use `metrics` to tell the Agent which extra memstat metrics and which expvar vars to collect.
 
 Restart the Agent to begin sending expvar metrics to Datadog.
 
