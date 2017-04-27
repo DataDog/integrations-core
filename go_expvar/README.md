@@ -1,87 +1,76 @@
-# Go_expvar Integration
+# Go Expvar Integration
 
-## Overview
+# Overview
 
-Get metrics from go_expvar service in real time to:
+Track the memory usage of your Go services and collect custom metrics you've instrumented with Go's expvar package.
 
-* Visualize and monitor go_expvar states
-* Be notified about go_expvar failovers and events.
+If you already instrument your Go code with [dogstats-go](https://github.com/DataDog/datadog-go), you can still use this check to collect memory-related metrics.
 
-## Installation
+# Installation
 
-Install the `dd-check-go_expvar` package manually or with your favorite configuration manager
+The Go Expvar check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you run Go services whose metrics you want to collect.
 
-## Configuration
+# Configuration
 
-Edit the `go_expvar.yaml` file to point to your server and port, set the masters to monitor
+## Prepare your Go service
 
-Use Go's expvar package to expose your memory information
-package ...
+If your Go service doesn't use the [expvar package](https://golang.org/pkg/expvar/) already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar — i.e. you only want to collect your service's memory metrics — import the package using the blank identifier (`import _ "expvar"`).
 
-```
-import (
-    ...
-    "net/http"
-    "expvar"
-    ...
-)
+If your service doesn't already listen for HTTP requests (via the http package), [make it listen](https://golang.org/pkg/net/http/#ListenAndServe) locally, just for the Datadog Agent.
 
-// If your application has no http server running for the DefaultServeMux,
-// you'll have to have a http server running for expvar to use, for example
-// by adding the following to your init function
-func init() {
-    go http.ServeAndListen(":8080", nil)
-}
+## Connect the Agent
 
-...
-
-// You can also expose variables that are specific to your application
-// See http://golang.org/pkg/expvar/ for more information
-
-var (
-    exp_points_processed = expvar.NewInt("points_processed")
-)
-
-func processPoints(p RawPoints) {
-    points_processed, err := parsePoints(p)
-    exp_points_processed.Add(points_processed)
-    ...
-}
-
-...
-```
-
-Configure the Agent to connect to your application's expvar and specify the metrics you want to collect
-Edit conf.d/go_expvar.yaml
+Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
+
 instances:
-   -   expvar_url: http://localhost:8080/debug/vars
-       tags:
-           - optionaltag1
-           - optionaltag2
-       metrics:
-           - path: memstats/PauseTotalNs
-             alias: go_expvar.gc.pause_time_in_ns
-             type: rate                  # default is a gauge
-           - path: memstats/Alloc        # will be reported as go_expvar.memstats.alloc
-           - path: points_processed
-             type: rate
+  # where <your_apps_port> is the HTTP port of your Go service
+  - expvar_url: http://localhost:<your_apps_port>/debug/vars
+    # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
+    namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
+    # define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
+    metrics:
+      - path: my_func_counter
+        # if you don't want it named my_go_app.my_func_counter
+        #alias: my_go_app.preferred_counter_name
+        type: counter # other valid options: rate, gauge
+        #tags:
+        #  - "tag_name1:tag_value1"
 ```
 
-## Validation
+If you don't configure a `metrics` list, the Agent will still collect most memstat metrics. Use `metrics` to tell the Agent which extra memstat metrics to collect, and which expvar vars you want to collect.
 
-When you run `datadog-agent info` you should see something like the following:
+Restart the Agent to begin sending expvar metrics to Datadog.
 
-    Checks
-    ======
+# Validation
 
-        go_expvar
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Run the Agent's `info` subcommand and look for `go_expvar` under the Checks section:
 
-## Compatibility
+```
+  Checks
+  ======
+    [...]
 
-The go_expvar check is compatible with all major platforms
+    go_expvar
+    -------
+      - instance #0 [OK]
+      - Collected 13 metrics, 0 events & 0 service checks
+
+    [...]
+```
+
+# Compatibility
+
+The go_expvar check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv) for a list of metrics provided by this integration.
+
+# Service Checks
+
+# Events
+
+# Further Reading
