@@ -281,7 +281,7 @@ class HAProxy(AgentCheck):
             for idx, c in enumerate(line):
                 prev = None if idx is 0 else line[idx-1]
                 if c is char:
-                    count = count + 1 if prev and prev is not '\\' else count
+                    count = count + 1 if not prev or prev is not '\\' else count
 
             return count
 
