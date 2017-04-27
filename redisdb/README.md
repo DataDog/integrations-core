@@ -67,7 +67,7 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 Configure a `password` in `redisdb.yaml`.
 
-## Compatibility
+# Compatibility
 
 The redis check is compatible with all major platforms.
 
