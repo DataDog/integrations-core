@@ -43,9 +43,9 @@ instances:
   #   - dev.example.com
 ```
 
-If you want to collect metrics on a per-site basis, you must use the `sites` option, even if you want to monitor all of your sites. When you provide `sites`, the Agent collects metrics per site and tags them with the site name — e.g. `iis.net.num_connections` tagged with `site:example.com`, and another `iis.net.num_connections` tagged with `site:dev.example.com`.
+If you want to collect metrics on a per-site basis, you *must* use the `sites` option. When you do so, the Agent collects metrics per site and tags them with the site name — `iis.net.num_connections` tagged with `site:example.com`, and `iis.net.num_connections` tagged with `site:dev.example.com`.
 
-If you don't configure `sites`, the Agent collects all the same IIS metrics, but their values will reflect totals across all sites — `iis.net.num_connections` means the total number of connections on the IIS server; you will not have visibility into per-site metrics.
+If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites — `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
 You can also monitor sites on remote IIS servers. See the [sample iis.conf](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for relevant configuration options.
 
