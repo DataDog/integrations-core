@@ -23,4 +23,3 @@ system.net.udp.no_ports,gauge,,datagram,second,"The rate of received UDP datagra
 system.net.udp.out_datagrams,gauge,,datagram,second,"The rate of UDP datagrams sent from this entity.",0,system,udp out datagrams
 system.net.udp.rcv_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the receive buffer.,-1,system,udp rcv buf errs
 system.net.udp.snd_buf_errors,gauge,,error,second,The rate of UDP datagrams lost because there was no room in the send buffer.,-1,system,udp snd buf errs
-
