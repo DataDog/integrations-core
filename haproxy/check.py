@@ -275,13 +275,29 @@ class HAProxy(AgentCheck):
     def _sanitize_lines(self, data):
         sanitized = []
 
-        def char_count(line, char):
+        def char_count(line, char, compute_escaped=False):
             count = 0
 
+            def is_escaped(line, idx, compute_escaped=False):
+                if idx is 0:
+                    return False
+
+                backslash = 0
+                pos = idx - 1
+                while line[pos] is '\\' and pos >= 0:
+                    backslash += 1
+                    pos -= 1
+
+                return bool(backslash % 2)
+
+
             for idx, c in enumerate(line):
-                prev = None if idx is 0 else line[idx-1]
                 if c is char:
-                    count = count + 1 if not prev or prev is not '\\' else count
+                    if compute_escaped:
+                        count += 1
+                    else:
+                        escaped = is_escaped(line, idx)
+                        count = count if escaped else count + 1
 
             return count
 
