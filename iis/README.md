@@ -2,26 +2,28 @@
 
 # Overview
 
-Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site: is the site up, or down?
+Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.
 
 # Installation
 
 The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
-Also, your IIS servers need to have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
+Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
 
 # Configuration
 
 ## Prepare IIS
 
-Resync the WMI counters. On Windows <= 2003 (or equivalent) run the following in cmd.exe:
+On your IIS servers, first resync the WMI counters.
+
+On Windows <= 2003 (or equivalent), run the following in cmd.exe:
 
 ```
 C:/> winmgmt /clearadap
 C:/> winmgmt /resyncperf
 ```
 
-On Windows >= 2008 (or equivalent) instead run:
+On Windows >= 2008 (or equivalent), instead run:
 
 ```
 C:/> winmgmt /resyncperf
@@ -38,11 +40,12 @@ instances:
   - host: . # "." means the current host
   # sites:  # to monitor specific sites, or to collect metrics on a per-site basis
   #   - example.com
+  #   - dev.example.com
 ```
 
-If you want to collect metrics on a per-site basis, you must use the `sites` option, *even if you want to monitor all of your sites*. When you provide `sites`, the Agent tags each site's metrics by the site name. Otherwise, the Agent collects the same metrics, but their values will reflect totals across all sites. 
+If you want to collect metrics on a per-site basis, you must use the `sites` option, even if you want to monitor all of your sites. When you provide `sites`, the Agent collects metrics per site and tags them with the site name — e.g. `iis.net.num_connections` tagged with `site:example.com`, and another `iis.net.num_connections` tagged with `site:dev.example.com`.
 
-In other words: If you don't configure `sites`, you will not have visibility into per-site metrics.
+If you don't configure `sites`, the Agent collects all the same IIS metrics, but their values will reflect totals across all sites — `iis.net.num_connections` means the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
 You can also monitor sites on remote IIS servers. See the [sample iis.conf](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for relevant configuration options.
 
