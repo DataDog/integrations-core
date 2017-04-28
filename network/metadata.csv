@@ -11,9 +11,9 @@ system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received
 system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted.,0,system,pkts retrans
 system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted.,0,system,segs retrans
 system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted.,0,system,pkts sent
-system.net.tcp.rtt,gauge,10,millisecond,,The TCP round trip time.,-1,system,tcp rtt
-system.net.tcp.rtt.avg,gauge,10,millisecond,,The average TCP round trip time as typically computed by the TCP stack.,-1,system,tcp rtt avg
-system.net.tcp.rtt.jitter,gauge,10,millisecond,,The TCP round trip time jitter.,-1,system,tcp rtt jitter
+system.net.tcp.rtt,gauge,10,millisecond,,The TCP round trip time. Available since Agent v5.7.0. Collected by go-metro., not the ,-1,system,tcp rtt
+system.net.tcp.rtt.avg,gauge,10,millisecond,,The average TCP round trip time as typically computed by the TCP stack. Available since Agent v5.7.0. Collected by go-metro.,-1,system,tcp rtt avg
+system.net.tcp.rtt.jitter,gauge,10,millisecond,,The TCP round trip time jitter. Available since Agent v5.7.0. Collected by go-metro.,-1,system,tcp rtt jitter
 system.net.tcp.listen_overflows,gauge,,,,The number of times connections have overflowed the accept buffer. Available since Agent v5.14.0.,-1,system,tcp listen overflows
 system.net.tcp.listen_drops,gauge,,,,The number of times connections have dropped out of listen. Available since Agent v5.14.0.,-1,system,tcp listen drops
 system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog. Available since Agent v5.14.0.,-1,system,tcp backlog drops
