@@ -2,7 +2,7 @@
 
 # Overview
 
-Whether you're a website administrator or a DNS service operator, use this Agent check to make sure DNS records are resolving properly and in a timely manner.
+Monitor the resolvability of and lookup times for any DNS records using nameservers of your choosing.
 
 # Installation
 
