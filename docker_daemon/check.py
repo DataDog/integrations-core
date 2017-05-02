@@ -116,9 +116,9 @@ DEFAULT_LABELS_AS_TAGS = [
 
 
 TAG_EXTRACTORS = {
-    "docker_image": lambda c: [c["Image"]],
-    "image_name": lambda c: DockerUtil.image_tag_extractor(c, 0),
-    "image_tag": lambda c: DockerUtil.image_tag_extractor(c, 1),
+    "docker_image": lambda c: [DockerUtil().image_name_extractor(c)],
+    "image_name": lambda c: DockerUtil().image_tag_extractor(c, 0),
+    "image_tag": lambda c: DockerUtil().image_tag_extractor(c, 1),
     "container_command": lambda c: [c["Command"]],
     "container_name": DockerUtil.container_name_extractor,
     "container_id": lambda c: [c["Id"]],
