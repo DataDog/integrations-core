@@ -69,7 +69,9 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/http
 
 # Events
 
-Older versions of the HTTP check only emitted events to reflect site status, but now the check supports service checks, too. However, events are still the default behavior. Set `skip_event` to true for all configured instances to submit service checks instead of events. The Agent will soon deprecate `skip_event`, i.e. the HTTP check's default be will only support service checks.
+Older versions of the HTTP check only emitted events to reflect site status, but now the check supports service checks, too. However, emitting events is still the default behavior. Set `skip_event` to true for all configured instances to submit service checks instead of events.
+
+The Agent will soon deprecate `skip_event`, i.e. the HTTP check will only support service checks.
 
 # Service Checks
 
@@ -91,9 +93,9 @@ Otherwise, returns `UP`.
 
 The check returns:
 
-* `DOWN` if the `uri`'s' certificate has already expired
-* `CRITICAL` if the `uri`'s' certificate expires in less than `days_critical` days
-* `WARNING` if the `uri`'s' certificate expires in less than `days_warning` days
+* `DOWN` if the `uri`'s certificate has already expired
+* `CRITICAL` if the `uri`'s certificate expires in less than `days_critical` days
+* `WARNING` if the `uri`'s certificate expires in less than `days_warning` days
 
 Otherwise, returns `UP`.
 
