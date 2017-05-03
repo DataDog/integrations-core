@@ -53,5 +53,5 @@ kubernetes_state.resourcequota.limits.memory.limit,gauge,,byte,,Hard limit on th
 kubernetes_state.pod.phase.running,gauge,,,Number of pods running with these tags,0,kubernetes,k8s_state.pod.phase.running
 kubernetes_state.pod.phase.pending,gauge,,,Number of pods pending scheduling with these tags,0,kubernetes,k8s_state.pod.phase.pending
 kubernetes_state.pod.phase.succeeded,gauge,,,Number of pods terminated with success with these tags,0,kubernetes,k8s_state.pod.phase.succeeded
-kubernetes_state.pod.phase.failed,gauge,,,Number of pods terminated with failure with these tags,0,kubernetes,k8s_state.pod.phase.failed
-kubernetes_state.pod.phase.unknown,gauge,,,Number of pods in unknown state with these tags,0,kubernetes,k8s_state.pod.phase.unknown
+kubernetes_state.pod.phase.failed,gauge,,,Number of pods terminated with failure with these tags,-1,kubernetes,k8s_state.pod.phase.failed
+kubernetes_state.pod.phase.unknown,gauge,,,Number of pods in unknown state with these tags,-1,kubernetes,k8s_state.pod.phase.unknown
