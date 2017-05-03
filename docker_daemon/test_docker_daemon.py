@@ -654,8 +654,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 [['datadog/docker-dd-agent'], None]),
         ]
         for entity in entities:
-            self.assertEqual(sorted(DockerUtil.image_tag_extractor(entity[0], 0)), sorted(entity[1][0]))
-            tags = DockerUtil.image_tag_extractor(entity[0], 1)
+            self.assertEqual(sorted(DockerUtil().image_tag_extractor(entity[0], 0)), sorted(entity[1][0]))
+            tags = DockerUtil().image_tag_extractor(entity[0], 1)
             if isinstance(entity[1][1], list):
                 self.assertEqual(sorted(tags), sorted(entity[1][1]))
             else:
