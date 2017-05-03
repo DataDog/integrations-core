@@ -608,8 +608,8 @@ class MySql(AgentCheck):
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
-        master_uuid = self._collect_string('Master_UUID', results)
-        if slaves > 0 or not master_uuid:
+        master_host = self._collect_string('Master_Host', results)
+        if slaves > 0 or not master_host:
             return True
 
         return False
