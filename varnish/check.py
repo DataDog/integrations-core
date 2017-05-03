@@ -5,7 +5,7 @@
 # stdlib
 from collections import defaultdict
 from os import geteuid
-from distutils.version import LooseVersion
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 import re
 import xml.parsers.expat # python 2.4 compatible
 
@@ -29,6 +29,8 @@ class BackendStatus(object):
 
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
+
+    # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
     # XML parsing bits, a.k.a. Kafka in Code
