@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "riak",
-  "short_description": "Get metrics from riak service in real time.",
+  "short_description": "Track node, vnode and ring performance metrics. Supports RiakKV and RiakTS.",
   "support": "core",
   "supported_os": [
     "linux",
