@@ -73,4 +73,4 @@ Returns 'Critical' if the Agent cannot connect to Fluentd to collect metrics. Th
 
 # Further Reading
 
-To get a better idea of how (or why) to integrate your Redis servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-fluentd-datadog/) about it.
+To get a better idea of how (or why) to integrate your Fluentd servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-fluentd-datadog/) about it.
