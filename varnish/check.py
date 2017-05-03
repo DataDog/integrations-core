@@ -5,6 +5,7 @@
 # stdlib
 from collections import defaultdict
 from os import geteuid
+from distutils.version import LooseVersion
 import re
 import xml.parsers.expat # python 2.4 compatible
 
@@ -28,6 +29,7 @@ class BackendStatus(object):
 
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
+    version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
     # XML parsing bits, a.k.a. Kafka in Code
     def _reset(self):
@@ -106,7 +108,7 @@ class Varnish(AgentCheck):
             if geteuid() != 0:
                 cmd.append('sudo')
 
-            if version < [4, 1, 0]:
+            if version < LooseVersion('4.1.0'):
                 cmd.extend([varnishadm_path, '-S', secretfile_path, 'debug.health'])
             else:
                 cmd.extend([varnishadm_path, '-S', secretfile_path, 'backend.list', '-p'])
@@ -129,25 +131,25 @@ class Varnish(AgentCheck):
 
         # Assumptions regarding varnish's version
         use_xml = True
-        version = [3, 0, 0]
+        version = LooseVersion('3.0.0')
 
-        m1 = re.search(r"varnish-(\d+\.\d+\.\d+)", output, re.MULTILINE)
+        m1 = self.version_pattern.search(output, re.MULTILINE)
         # v2 prints the version on stderr, v3 on stdout
-        m2 = re.search(r"varnish-(\d+\.\d+\.\d+)", error, re.MULTILINE)
+        m2 = self.version_pattern.search(error, re.MULTILINE)
 
         if m1 is None and m2 is None:
             self.log.warn("Cannot determine the version of varnishstat, assuming 3 or greater")
             self.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
         else:
             if m1 is not None:
-                version = map(int, m1.group(1).split('.'))
+                version = LooseVersion(m1.group())
             elif m2 is not None:
-                version = map(int, m2.group(1).split('.'))
+                version = LooseVersion(m2.group())
 
-        self.log.debug("Varnish version: %s", '.'.join(map(str, version)))
+        self.log.debug("Varnish version: %s", version)
 
         # Location of varnishstat
-        if version[0] <= 2:
+        if version < LooseVersion('3.0.0'):
             use_xml = False
 
         return version, use_xml
