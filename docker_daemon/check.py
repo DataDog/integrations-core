@@ -155,6 +155,7 @@ class DockerDaemon(AgentCheck):
                             agentConfig, instances=instances)
 
         self.init_success = False
+        self.docker_client = None
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
         self.init()
@@ -236,58 +237,69 @@ class DockerDaemon(AgentCheck):
     def check(self, instance):
         """Run the Docker check for one instance."""
         if not self.init_success:
-            # Initialization can fail if cgroups are not ready. So we retry if needed
+            # Initialization can fail if cgroups are not ready or docker daemon is down. So we retry if needed
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
+
+            if self.docker_client is None:
+                message = "Unable to connect to Docker daemon"
+                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                                   message=message)
+                return
+
             if not self.init_success:
                 # Initialization failed, will try later
                 return
 
-        # Report image metrics
-        if self.collect_image_stats:
-            self._count_and_weigh_images()
+        try:
+            # Report image metrics
+            if self.collect_image_stats:
+                self._count_and_weigh_images()
 
-        if self.collect_ecs_tags:
-            self.refresh_ecs_tags()
+            if self.collect_ecs_tags:
+                self.refresh_ecs_tags()
 
-        if Platform.is_k8s():
-            self.kube_labels = {}
-            if self.kubeutil:
-                try:
-                    self.kube_labels = self.kubeutil.get_kube_labels()
-                except Exception as e:
-                    self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
+            if Platform.is_k8s():
+                self.kube_labels = {}
+                if self.kubeutil:
+                    try:
+                        self.kube_labels = self.kubeutil.get_kube_labels()
+                    except Exception as e:
+                        self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
 
-        # containers running with custom cgroups?
-        custom_cgroups = _is_affirmative(instance.get('custom_cgroups', False))
+            # containers running with custom cgroups?
+            custom_cgroups = _is_affirmative(instance.get('custom_cgroups', False))
 
-        # Get the list of containers and the index of their names
-        health_service_checks = True if self.whitelist_patterns else False
-        containers_by_id = self._get_and_count_containers(custom_cgroups, health_service_checks)
-        containers_by_id = self._crawl_container_pids(containers_by_id, custom_cgroups)
+            # Get the list of containers and the index of their names
+            health_service_checks = True if self.whitelist_patterns else False
+            containers_by_id = self._get_and_count_containers(custom_cgroups, health_service_checks)
+            containers_by_id = self._crawl_container_pids(containers_by_id, custom_cgroups)
 
-        # Send events from Docker API
-        if self.collect_events or self._service_discovery or not self._disable_net_metrics or self.collect_exit_codes:
-            self._process_events(containers_by_id)
+            # Send events from Docker API
+            if self.collect_events or self._service_discovery or not self._disable_net_metrics or self.collect_exit_codes:
+                self._process_events(containers_by_id)
 
-        # Report performance container metrics (cpu, mem, net, io)
-        self._report_performance_metrics(containers_by_id)
+            # Report performance container metrics (cpu, mem, net, io)
+            self._report_performance_metrics(containers_by_id)
 
-        if self.collect_container_size:
-            self._report_container_size(containers_by_id)
+            if self.collect_container_size:
+                self._report_container_size(containers_by_id)
 
-        if self.collect_container_count:
-            self._report_container_count(containers_by_id)
+            if self.collect_container_count:
+                self._report_container_count(containers_by_id)
 
-        if self.collect_volume_count:
-            self._report_volume_count()
+            if self.collect_volume_count:
+                self._report_volume_count()
 
-        # Collect disk stats from Docker info command
-        if self.collect_disk_stats:
-            self._report_disk_stats()
+            # Collect disk stats from Docker info command
+            if self.collect_disk_stats:
+                self._report_disk_stats()
 
-        if health_service_checks:
-            self._send_container_healthcheck_sc(containers_by_id)
+            if health_service_checks:
+                self._send_container_healthcheck_sc(containers_by_id)
+        except:
+            self.log.exception("Docker_daemon check failed")
+            self.warning("Check failed. Will retry at next iteration")
 
     def _count_and_weigh_images(self):
         try:

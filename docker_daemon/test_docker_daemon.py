@@ -37,6 +37,16 @@ def reset_docker_settings():
     """Populate docker settings with default, dummy settings"""
     DockerUtil().set_docker_settings({}, {})
 
+@attr(requires='docker_daemon')
+class TestCheckDockerDaemonDown(AgentCheckTest):
+    """Tests for docker_daemon integration when docker is down."""
+    CHECK_NAME = 'docker_daemon'
+
+    @mock.patch('docker.client.Client._retrieve_server_version',
+                side_effect=Exception("Connection timeout"))
+    def test_docker_down(self, *args):
+        self.run_check(MOCK_CONFIG, force_reload=True)
+        self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=None, count=1)
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemon(AgentCheckTest):
