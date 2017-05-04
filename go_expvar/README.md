@@ -4,7 +4,7 @@
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
 
-If you prefer to instrument your Go code with [dogstats-go](https://github.com/DataDog/datadog-go) instead, you can still use this integration to collect memory-related metrics.
+If you prefer to instrument your Go code using only [dogstats-go](https://github.com/DataDog/datadog-go), you can still use this integration to collect memory-related metrics.
 
 # Installation
 
