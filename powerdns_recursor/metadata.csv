@@ -1,6 +1,10 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 powerdns.recursor.cache_entries,gauge,,unit,,The number of entries in the cache,0,powerdns_recursor,cache entries
+powerdns.recursor.negcache_entries,gauge,,unit,,The number of entries in the negative answer cache,0,powerdns_recursor,negcache entries
+powerdns.recursor.packetcache_entries,gauge,,unit,,The number of entries in the packet cache,0,powerdns_recursor,pkt cache entries
+powerdns.recursor.failed_host_entries,gauge,,unit,,The number of servers that failed to resolve,0,powerdns_recursor,failed host entries
 powerdns.recursor.concurrent_queries,gauge,,unit,,The number of MThreads currently running,0,powerdns_recursor,concurrent queries
+powerdns.recursor.throttle_entries,gauge,,unit,,The number of entries in the throttle map,0,powerdns_recursor,throttle entries
 powerdns.recursor.all_outqueries,gauge,,operation,second,The number of outgoing udp queries per second,0,powerdns_recursor,all outqueries
 powerdns.recursor.answers_slow,gauge,,unit,second,Number of queries answered after 1 second,-1,powerdns_recursor, slow answers
 powerdns.recursor.answers0_1,gauge,,unit,second,Number of queries answered after 1 second,1,powerdns_recursor, answers in 1ms
@@ -9,9 +13,16 @@ powerdns.recursor.answers10_100,gauge,,unit,second,Number of queries answered wi
 powerdns.recursor.answers100_1000,gauge,,unit,second,Number of queries answered within 1 second,0,powerdns_recursor,answers in 1000ms
 powerdns.recursor.cache_hits,gauge,,operation,second,The number of cache hits per second,0,powerdns_recursor,cache hits
 powerdns.recursor.cache_misses,gauge,,operation,second,The number of cache misses per second,0,powerdns_recursor,cache misses
+
+powerdns.recursor.chain_resends,gauge,,operation,second,The number of queries chained to existing outstanding query per second,0,powerdns_recursor,chain resends
+powerdns.recursor.case_mismatches,gauge,,operation,second,The number of mismatches in character case per second,0,powerdns_recursor,case mismatches
+powerdns.recursor.client_parse_errors,gauge,,operation,second,The number of unparseable packets per second,0,powerdns_recursor,unparseable pkts
+powerdns.recursor.dont_outqueries,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,dont outqueries
+
+
 powerdns.recursor.noerror_answers,gauge,,operation,second,The number of times it answered NOERROR per second,0,powerdns_recursor,noerrors
 powerdns.recursor.outgoing_timeouts,gauge,,operation,second,The number of timeouts per second,0,powerdns_recursor,timeouts
 powerdns.recursor.questions,gauge,,operation,second,The number of user initiated udp queries per second,0,powerdns_recursor,questions
-powerdns.recursor.servfail_answers,gauge,,operation,second,The number of times it answered SERVFAIL per second,0,powerdns_recursor,fervfails
+powerdns.recursor.servfail_answers,gauge,,operation,second,The number of SERVFAIL answers per second,0,powerdns_recursor,fervfails
 powerdns.recursor.tcp_outqueries,gauge,,operation,second,The number of outgoing tcp queries per second,0,powerdns_recursor,tcp outqueries
 powerdns.recursor.tcp_questions,gauge,,operation,second,The number of incoming tcp queries per second,0,powerdns_recursor,tcp questions
