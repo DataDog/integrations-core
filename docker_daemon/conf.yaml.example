@@ -168,4 +168,4 @@ instances:
     # List of docker event attributes to add as tags of the datadog events
     # Defaults to None.
     # 
-    # event_attributes_as_tag: ["signal"]
+    # event_attributes_as_tags: ["signal"]
