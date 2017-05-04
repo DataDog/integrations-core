@@ -15,7 +15,7 @@ Install the `dd-check-varnish` package manually or with your favorite configurat
 
 Configure the Agent to connect to Varnish
 
-Edit conf.d/varnish.yaml
+ - Edit conf.d/varnish.yaml
 ```
 init_config:
 
@@ -25,10 +25,17 @@ instances:
           - instance:production
 ```
 
-Note: If you're running Varnish 4.1+, you must also add the dd-agent user to the varnish group.
+ - If you're running Varnish 4.1+, you must add the dd-agent user to the varnish group.
 ```
 sudo usermod -a -G varnish dd-agent
 ```
+
+ - If you want the check to use `varnishadm` and send a service check, the agent must be able to access `varnishadm` with root privileges. For this, you can update your `/etc/sudoers` file with for example:
+ ```
+ dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
+ ```
+
+
 
 ## Validation
 
