@@ -356,6 +356,17 @@ class ProcessCheckTest(AgentCheckTest):
 
             self.assertMetric('system.processes.cpu.pct', count=1, tags=expected_tags)
 
+    def test_check_missing_pid(self):
+        config = {
+            'instances': [{
+                'name': 'foo',
+                'pid_file': '/foo/bar/baz',
+            }]
+        }
+
+        self.run_check(config, mocks={'get_pagefault_stats': noop_get_pagefault_stats})
+        self.assertServiceCheckCritical('process.up', count=1)
+
     def test_check_real_process(self):
         "Check that we detect python running (at least this process)"
         from utils.platform import Platform
