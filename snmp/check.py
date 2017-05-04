@@ -492,6 +492,7 @@ class SnmpCheck(NetworkCheck):
             return
 
         metric_name = self.normalize(name, prefix="snmp")
+        self.log.debug("Submitting %s", metric_name)
 
         if forced_type:
             if forced_type.lower() == "gauge":
@@ -520,4 +521,4 @@ class SnmpCheck(NetworkCheck):
             self.gauge(metric_name, value, tags)
             return
 
-        self.log.warning("Unsupported metric type %s", snmp_class)
+        self.log.warning("Unsupported metric type %s for %s", snmp_class, metric_name)

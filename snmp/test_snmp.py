@@ -27,8 +27,8 @@ class SNMPTestCase(AgentCheckTest):
     CHECK_NAME = 'snmp'
     CHECK_TAGS = ['snmp_device:localhost']
 
-    AUTH_PROTOCOLS = ['MD5', 'SHA']
-    PRIV_PROTOCOLS = ['DES', 'AES']
+    AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
+    PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
     AUTH_KEY='doggiepass'
     PRIV_KEY='doggiePRIVkey'
 
@@ -353,9 +353,9 @@ class SNMPTestCase(AgentCheckTest):
         self.coverage_report()
 
 
-    def test_table_v3_priv(self):
+    def test_table_v3_MD5_DES(self):
         """
-        Support SNMP V3 priv modes: MD5/SHA + DES/AES
+        Support SNMP V3 priv modes: MD5 + DES
         """
         config = {
             'instances': []
@@ -363,31 +363,31 @@ class SNMPTestCase(AgentCheckTest):
 
         # build multiple confgs
         tags = []
-        for auth in self.AUTH_PROTOCOLS:
-            for priv in self.PRIV_PROTOCOLS:
-                name = 'instance_{}_{}'.format(auth, priv)
-                tags.append('snmp_device:{}'.format(name))
-                config['instances'].append(
-                    self.generate_v3_instance_config(
-                        self.TABULAR_OBJECTS,
-                        name=name,
-                        user='datadog{}{}'.format(auth.upper(), priv.upper()),
-                        auth=auth,
-                        auth_key=self.AUTH_KEY,
-                        priv=priv,
-                        priv_key=self.PRIV_KEY
-                    )
-                )
+        auth = 'MD5'
+        priv = 'DES'
+        name = 'instance_{}_{}'.format(auth, priv)
+        tags.append('snmp_device:{}'.format(name))
+        config['instances'].append(
+            self.generate_v3_instance_config(
+                self.TABULAR_OBJECTS,
+                name=name,
+                user='datadog{}{}'.format(auth.upper(), priv.upper()),
+                auth=self.AUTH_PROTOCOLS[auth],
+                auth_key=self.AUTH_KEY,
+                priv=self.PRIV_PROTOCOLS[priv],
+                priv_key=self.PRIV_KEY
+            )
+        )
 
 
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 4)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
 
         # Test metrics
         for device_tag in tags:
             for symbol in self.TABULAR_OBJECTS[0]['symbols']:
                 metric_name = "snmp." + symbol
-                self.assertMetric(metric_name, at_least=4)
+                self.assertMetric(metric_name, at_least=1)
                 self.assertMetricTag(metric_name, device_tag, at_least=1)
 
                 for mtag in self.TABULAR_OBJECTS[0]['metric_tags']:
@@ -396,7 +396,151 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=4)
+                                tags=self.CHECK_TAGS, count=1)
+
+        self.coverage_report()
+
+
+    def test_table_v3_MD5_AES(self):
+        """
+        Support SNMP V3 priv modes: MD5 + AES
+        """
+        config = {
+            'instances': []
+        }
+
+        # build multiple confgs
+        tags = []
+        auth = 'MD5'
+        priv = 'AES'
+        name = 'instance_{}_{}'.format(auth, priv)
+        tags.append('snmp_device:{}'.format(name))
+        config['instances'].append(
+            self.generate_v3_instance_config(
+                self.TABULAR_OBJECTS,
+                name=name,
+                user='datadog{}{}'.format(auth.upper(), priv.upper()),
+                auth=self.AUTH_PROTOCOLS[auth],
+                auth_key=self.AUTH_KEY,
+                priv=self.PRIV_PROTOCOLS[priv],
+                priv_key=self.PRIV_KEY
+            )
+        )
+
+
+        self.run_check_n(config, repeat=3, sleep=2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+
+        # Test metrics
+        for device_tag in tags:
+            for symbol in self.TABULAR_OBJECTS[0]['symbols']:
+                metric_name = "snmp." + symbol
+                self.assertMetric(metric_name, at_least=1)
+                self.assertMetricTag(metric_name, device_tag, at_least=1)
+
+                for mtag in self.TABULAR_OBJECTS[0]['metric_tags']:
+                    tag = mtag['tag']
+                    self.assertMetricTagPrefix(metric_name, tag, at_least=1)
+
+        # Test service check
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
+                                tags=self.CHECK_TAGS, count=1)
+
+        self.coverage_report()
+
+
+    def test_table_v3_SHA_DES(self):
+        """
+        Support SNMP V3 priv modes: SHA + DES
+        """
+        config = {
+            'instances': []
+        }
+
+        # build multiple confgs
+        tags = []
+        auth = 'SHA'
+        priv = 'DES'
+        name = 'instance_{}_{}'.format(auth, priv)
+        tags.append('snmp_device:{}'.format(name))
+        config['instances'].append(
+            self.generate_v3_instance_config(
+                self.TABULAR_OBJECTS,
+                name=name,
+                user='datadog{}{}'.format(auth.upper(), priv.upper()),
+                auth=self.AUTH_PROTOCOLS[auth],
+                auth_key=self.AUTH_KEY,
+                priv=self.PRIV_PROTOCOLS[priv],
+                priv_key=self.PRIV_KEY
+            )
+        )
+
+
+        self.run_check_n(config, repeat=3, sleep=2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+
+        # Test metrics
+        for device_tag in tags:
+            for symbol in self.TABULAR_OBJECTS[0]['symbols']:
+                metric_name = "snmp." + symbol
+                self.assertMetric(metric_name, at_least=1)
+                self.assertMetricTag(metric_name, device_tag, at_least=1)
+
+                for mtag in self.TABULAR_OBJECTS[0]['metric_tags']:
+                    tag = mtag['tag']
+                    self.assertMetricTagPrefix(metric_name, tag, at_least=1)
+
+        # Test service check
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
+                                tags=self.CHECK_TAGS, count=1)
+
+        self.coverage_report()
+
+
+    def test_table_v3_SHA_AES(self):
+        """
+        Support SNMP V3 priv modes: SHA + AES
+        """
+        config = {
+            'instances': []
+        }
+
+        # build multiple confgs
+        tags = []
+        auth = 'SHA'
+        priv = 'AES'
+        name = 'instance_{}_{}'.format(auth, priv)
+        tags.append('snmp_device:{}'.format(name))
+        config['instances'].append(
+            self.generate_v3_instance_config(
+                self.TABULAR_OBJECTS,
+                name=name,
+                user='datadog{}{}'.format(auth.upper(), priv.upper()),
+                auth=self.AUTH_PROTOCOLS[auth],
+                auth_key=self.AUTH_KEY,
+                priv=self.PRIV_PROTOCOLS[priv],
+                priv_key=self.PRIV_KEY
+            )
+        )
+
+
+        self.run_check_n(config, repeat=3, sleep=2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+
+        # Test metrics
+        for device_tag in tags:
+            for symbol in self.TABULAR_OBJECTS[0]['symbols']:
+                metric_name = "snmp." + symbol
+                self.assertMetric(metric_name, at_least=1)
+                self.assertMetricTag(metric_name, device_tag, at_least=1)
+
+                for mtag in self.TABULAR_OBJECTS[0]['metric_tags']:
+                    tag = mtag['tag']
+                    self.assertMetricTagPrefix(metric_name, tag, at_least=1)
+
+        # Test service check
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
+                                tags=self.CHECK_TAGS, count=1)
 
         self.coverage_report()
 
