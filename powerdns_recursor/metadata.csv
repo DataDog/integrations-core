@@ -13,14 +13,36 @@ powerdns.recursor.answers10_100,gauge,,unit,second,Number of queries answered wi
 powerdns.recursor.answers100_1000,gauge,,unit,second,Number of queries answered within 1 second,0,powerdns_recursor,answers in 1000ms
 powerdns.recursor.cache_hits,gauge,,operation,second,The number of cache hits per second,0,powerdns_recursor,cache hits
 powerdns.recursor.cache_misses,gauge,,operation,second,The number of cache misses per second,0,powerdns_recursor,cache misses
-
 powerdns.recursor.chain_resends,gauge,,operation,second,The number of queries chained to existing outstanding query per second,0,powerdns_recursor,chain resends
 powerdns.recursor.case_mismatches,gauge,,operation,second,The number of mismatches in character case per second,0,powerdns_recursor,case mismatches
 powerdns.recursor.client_parse_errors,gauge,,operation,second,The number of unparseable packets per second,0,powerdns_recursor,unparseable pkts
 powerdns.recursor.dont_outqueries,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,dont outqueries
+powerdns.recursor.ipv6_outqueries,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,ipv6 outqueries
+powerdns.recursor.ipv6_questions,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,ipv6 questions
+powerdns.recursor.nxdomain_answers,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,nxdomain answers
+powerdns.recursor.max_mthread_stack,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,max mthread stack
+powerdns.recursor.outgoing_timesouts,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,outgoing timeouts
+powerdns.recursor.over_capacity_drops,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,over capacity drops
+powerdns.recursor.packetcache_hits,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,packetcache hits
+powerdns.recursor.packetcache_misses,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,packetcache misses
+powerdns.recursor.policy_drops,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,policy drops
+powerdns.recursor.qa_latency,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,qa latency
+powerdns.recursor.server_parse_errors,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,server parse errors
+powerdns.recursor.servfail_answers,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,servfail answers
+powerdns.recursor.spoof_prevents,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,prevented spoofs
+powerdns.recursor.sys_msec,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,sys msec
+powerdns.recursor.tcp_client_overflow,gauge,,operation,second,The number of outgoing queries dropped per second because of 'dont query' setting,0,powerdns_recursor,tcp client overflow
+powerdns.recursor.tcp_clients,gauge,,operation,second,The number of active TCP/IP clients per second,0,powerdns_recursor,tcp clients
+powerdns.recursor.tcp_outqueries,gauge,,operation,second,The number of outgoing TCP queries per second,0,powerdns_recursor,tcp outqueries
+powerdns.recursor.throttled_out,gauge,,operation,second,The number of throttled outgoing UDP queries per second,0,powerdns_recursor,throttled out
+powerdns.recursor.unauthorized_tcp,gauge,,operation,second,The number of TCP questions denied per second because of allow-from restrictions,0,powerdns_recursor,unauth tcp
+powerdns.recursor.unauthorized_udp,gauge,,operation,second,The number of UDP questions denied per second because of allow-from restrictions,0,powerdns_recursor,unauth udp
+powerdns.recursor.unexpected_packets,gauge,,operation,second,The number of unexpected answers per second from remote servers,0,powerdns_recursor,unexpected pkts
+powerdns.recursor.unreachables,gauge,,operation,second,The number times nameservers were unreachable per second,0,powerdns_recursor,unreachables
 
 
-powerdns.recursor.noerror_answers,gauge,,operation,second,The number of times it answered NOERROR per second,0,powerdns_recursor,noerrors
+
+powerdns.recursor.noerror_answers,gauge,,operation,second,The number of NOERROR answers per second,0,powerdns_recursor,noerrors
 powerdns.recursor.outgoing_timeouts,gauge,,operation,second,The number of timeouts per second,0,powerdns_recursor,timeouts
 powerdns.recursor.questions,gauge,,operation,second,The number of user initiated udp queries per second,0,powerdns_recursor,questions
 powerdns.recursor.servfail_answers,gauge,,operation,second,The number of SERVFAIL answers per second,0,powerdns_recursor,fervfails
