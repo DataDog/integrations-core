@@ -4,6 +4,7 @@ instances:
   - server: http://localhost:8091
     user: Administrator
     password: password
+    # query_monitoring: http://localhost:8093 # Url to get query monitoring stats, available since couchbase 4.5. See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
     # timeout: 10 # Optional timeout to http connections to the API
     # tags:
     #   - optional_tag1

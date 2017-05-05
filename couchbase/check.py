@@ -15,6 +15,7 @@ from util import headers
 
 # Constants
 COUCHBASE_STATS_PATH = '/pools/default'
+COUCHBASE_VITALS_PATH = '/admin/vitals'
 DEFAULT_TIMEOUT = 10
 
 
@@ -103,6 +104,30 @@ class Couchbase(AgentCheck):
         'vb_replica_queue_size',
         'xdc_ops',
     ])
+    # Selected metrics of the query monitoring API
+    # See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
+    QUERY_STATS = set([
+        'cpu.sys.percent',
+        'cpu.user.percent',
+        'gc.num',
+        'gc.pause.percent',
+        'gc.pause.time',
+        'memory.system',
+        'memory.total',
+        'memory.usage',
+        'request.active.count',
+        'request.completed.count',
+        'request.per.sec.15min',
+        'request.per.sec.1min',
+        'request.per.sec.5min',
+        'request.prepared.percent',
+        'request_time.80percentile',
+        'request_time.95percentile',
+        'request_time.99percentile',
+        'request_time.mean',
+        'request_time.median',
+        'total.threads',
+    ])
 
     def _create_metrics(self, data, tags=None):
         storage_totals = data['stats']['storageTotals']
@@ -129,6 +154,13 @@ class Couchbase(AgentCheck):
                     metric_tags = list(tags)
                     metric_tags.append('node:%s' % node_name)
                     self.gauge(metric_name, val, tags=metric_tags, device_name=node_name)
+
+        for metric_name, val in data['query']:
+            if val is not None:
+                norm_metric_name = self.camel_case_to_joined_lower(metric_name)
+                if norm_metric_name in self.QUERY_STATS:
+                    full_metric_name = '.'.join(['couchbase', 'query', self.camel_case_to_joined_lower(norm_metric_name)])
+                    self.gauge(full_metric_name, val, tags=tags)
 
     def _get_stats(self, url, instance):
         """ Hit a given URL and return the parsed json. """
@@ -165,7 +197,8 @@ class Couchbase(AgentCheck):
         couchbase = {
             'stats': None,
             'buckets': {},
-            'nodes': {}
+            'nodes': {},
+            'query': {},
         }
 
         # build couchbase stats entry point
@@ -227,6 +260,18 @@ class Couchbase(AgentCheck):
                 bucket_samples = bucket_stats['op']['samples']
                 if bucket_samples is not None:
                     couchbase['buckets'][bucket['name']] = bucket_samples
+
+        # Next, get the query monitoring data
+        query_monitoring = instance.get('query_monitoring', None)
+        if query_monitoring is not None:
+            try:
+                url = '%s%s' % (query_monitoring, COUCHBASE_VITALS_PATH)
+                query = self._get_stats(url, instance)
+                if query is not None:
+                    couchbase['query'] = query
+            except requests.exceptions.HTTPError:
+                self.log.error("Error accessing the endpoint %s, make sure you're running at least "
+                    "couchbase 4.5 to use this feature", url)
 
         return couchbase
 
