@@ -944,15 +944,17 @@ class MongoDb(AgentCheck):
 
             oplog_data = {}
 
+            local_collections = localdb.collection_names()
+
             for ol_collection_name in ("oplog.rs", "oplog.$main"):
-                ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
-                if ol_metadata:
+                if ol_collection_name in local_collections:
+                    ol_metadata = ol_collection_name
                     break
 
             if ol_metadata:
                 try:
                     oplog_data['logSizeMB'] = round(
-                        ol_metadata['options']['size'] / 2.0 ** 20, 2
+                        localdb.command("collstats", ol_collection_name)['maxSize'] / 2.0 ** 20, 2
                     )
 
                     oplog = localdb[ol_collection_name]
@@ -961,8 +963,8 @@ class MongoDb(AgentCheck):
                         localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
                     )
 
-                    op_asc_cursor = oplog.find().sort("$natural", pymongo.ASCENDING).limit(1)
-                    op_dsc_cursor = oplog.find().sort("$natural", pymongo.DESCENDING).limit(1)
+                    op_asc_cursor = oplog.find({"ts": { "$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
+                    op_dsc_cursor = oplog.find({"ts": { "$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
 
                     try:
                         first_timestamp = op_asc_cursor[0]['ts'].as_datetime()
