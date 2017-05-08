@@ -239,7 +239,7 @@ class Couchbase(AgentCheck):
                     metric_tags.append('node:%s' % node_name)
                     self.gauge(metric_name, val, tags=metric_tags, device_name=node_name)
 
-        for metric_name, val in data['query']:
+        for metric_name, val in data['query'].items():
             if val is not None:
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
