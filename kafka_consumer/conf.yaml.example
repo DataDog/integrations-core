@@ -13,6 +13,7 @@ init_config:
 
 instances:
   # - kafka_connect_str: localhost:9092
+  #   zk_offsets: true
   #   zk_connect_str: localhost:2181
   #   zk_prefix: /0.8
   #   consumer_groups:
