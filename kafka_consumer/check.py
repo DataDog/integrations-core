@@ -13,6 +13,7 @@ from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 
 # project
+from config import _is_affirmative
 from checks import AgentCheck
 
 DEFAULT_KAFKA_TIMEOUT = 5
@@ -26,8 +27,6 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
-        self.zk_offset = bool(
-            init_config.get('zk_offsets', DEFAULT_ZK_OFFSETS))
         self.zk_timeout = int(
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
@@ -36,6 +35,7 @@ class KafkaCheck(AgentCheck):
     def check(self, instance):
         consumer_groups = self.read_config(instance, 'consumer_groups',
                                            cast=self._validate_consumer_groups)
+        zk_offsets = _is_affirmative(instance.get('zk_offsets', True))
         zk_connect_str = self.read_config(instance, 'zk_connect_str')
         kafka_host_ports = self.read_config(instance, 'kafka_connect_str')
 
@@ -50,7 +50,7 @@ class KafkaCheck(AgentCheck):
         consumer_offsets = {}
         topics = defaultdict(set)
         try:
-            if self.zk_offset:
+            if zk_offsets:
                 topics, consumer_offsets = self.get_offsets_zk(zk_connect_str, consumer_groups, zk_prefix='')
             else:
                 topics, consumer_offsets = self.get_offsets_kafka(kafka_host_ports, consumer_groups)
