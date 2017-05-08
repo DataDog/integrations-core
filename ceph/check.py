@@ -36,7 +36,7 @@ class Ceph(AgentCheck):
         else:
             ceph_args = [ceph_cmd]
 
-        args = ceph_args + ['version']
+        args = ceph_args + ['--version']
         try:
             output,_,_ = get_subprocess_output(args, self.log)
         except Exception as e:
