@@ -8,6 +8,7 @@ from collections import defaultdict
 # 3p
 from kafka import KafkaClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
+from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 
@@ -16,6 +17,7 @@ from checks import AgentCheck
 
 DEFAULT_KAFKA_TIMEOUT = 5
 DEFAULT_ZK_TIMEOUT = 5
+DEFAULT_ZK_OFFSETS = True
 
 
 class KafkaCheck(AgentCheck):
@@ -24,6 +26,8 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
+        self.zk_offset = bool(
+            init_config.get('zk_offsets', DEFAULT_ZK_OFFSETS))
         self.zk_timeout = int(
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
@@ -43,31 +47,15 @@ class KafkaCheck(AgentCheck):
         zk_conn = KazooClient(zk_connect_str, timeout=self.zk_timeout)
         zk_conn.start()
 
+        consumer_offsets = {}
+        topics = defaultdict(set)
         try:
-            # Query Zookeeper for consumer offsets
-            consumer_offsets = {}
-            topics = defaultdict(set)
-            for consumer_group, topic_partitions in consumer_groups.iteritems():
-                for topic, partitions in topic_partitions.iteritems():
-                    # Remember the topic partitions that we've see so that we can
-                    # look up their broker offsets later
-                    topics[topic].update(set(partitions))
-                    for partition in partitions:
-                        zk_path = zk_path_tmpl % (consumer_group, topic, partition)
-                        try:
-                            consumer_offset = int(zk_conn.get(zk_path)[0])
-                            key = (consumer_group, topic, partition)
-                            consumer_offsets[key] = consumer_offset
-                        except NoNodeError:
-                            self.log.warn('No zookeeper node at %s' % zk_path)
-                        except Exception:
-                            self.log.exception('Could not read consumer offset from %s' % zk_path)
-        finally:
-            try:
-                zk_conn.stop()
-                zk_conn.close()
-            except Exception:
-                self.log.exception('Error cleaning up Zookeeper connection')
+            if self.zk_offset:
+                topics, consumer_offsets = self.get_offsets_zk(zk_connect_str, consumer_groups, zk_prefix='')
+            else:
+                topics, consumer_offsets = self.get_offsets_kafka(kafka_host_ports, consumer_groups)
+        except Exception:
+            self.log.warn('There was an issue collecting the consumer offsets, metrics may be missing.')
 
         # Connect to Kafka
         kafka_conn = KafkaClient(kafka_host_ports, timeout=self.kafka_timeout)
@@ -126,3 +114,77 @@ consumer_groups:
     mytopic0: [0, 1, 2]
     mytopic1: [10, 12]
 ''')
+
+    def get_offsets_zk(self, zk_connect_str, consumer_groups, zk_prefix=''):
+        # Construct the Zookeeper path pattern
+        zk_path_tmpl = zk_prefix + '/consumers/%s/offsets/%s/%s'
+
+        # Connect to Zookeeper
+        zk_conn = KazooClient(zk_connect_str, timeout=self.zk_timeout)
+        zk_conn.start()
+
+        try:
+            # Query Zookeeper for consumer offsets
+            consumer_offsets = {}
+            topics = defaultdict(set)
+            for consumer_group, topic_partitions in consumer_groups.iteritems():
+                for topic, partitions in topic_partitions.iteritems():
+                    # Remember the topic partitions that we've see so that we can
+                    # look up their broker offsets later
+                    topics[topic].update(set(partitions))
+                    for partition in partitions:
+                        zk_path = zk_path_tmpl % (consumer_group, topic, partition)
+                        try:
+                            consumer_offset = int(zk_conn.get(zk_path)[0])
+                            key = (consumer_group, topic, partition)
+                            consumer_offsets[key] = consumer_offset
+                        except NoNodeError:
+                            self.log.warn('No zookeeper node at %s' % zk_path)
+                        except Exception:
+                            self.log.exception('Could not read consumer offset from %s' % zk_path)
+        finally:
+            try:
+                zk_conn.stop()
+                zk_conn.close()
+            except Exception:
+                self.log.exception('Error cleaning up Zookeeper connection')
+
+        return topics, consumer_offsets
+
+    def get_offsets_kafka(self, kafka_connect_str, consumer_groups):
+        consumer_offsets = {}
+        topics = defaultdict(set)
+        for consumer_group, topic_partitions in consumer_groups.iteritems():
+            try:
+                coordinator = self.get_group_coordinator(kafka_connect_str, consumer_group)
+                offsets = self.get_consumer_offsets(coordinator, consumer_group, topic_partitions)
+                for topic_partition, offset in offsets.iteritems():
+                    topic, partition = topic_partition
+                    topics[topic].updata([partition])
+                    key = (consumer_group, topic, partition)
+                    consumer_offsets[key] = offset
+            except Exception:
+                self.log.expcetion('Could not read consumer offsets from kafka.')
+
+        return topics, consumer_offsets
+
+    def get_group_coordinator(self, kafka_connect_str, group):
+        kafka_cli = KafkaClient(kafka_connect_str, timeout=self.kafka_timeout)
+
+        return kafka_cli._get_coordinator_for_group(group)
+
+    def get_consumer_offsets(self, coordinator, group, topic_partitions):
+        conn_str = "{}:{}".format(coordinator.host, coordinator.port)
+        kafka_cli = KafkaClient(conn_str, timeout=self.kafka_timeout)
+
+        requests = []
+        for topic, partitions in topic_partitions.iteritems():
+            requests.extend([OffsetFetchRequestPayload(topic=topic, partition=p) for p in partitions])
+
+        responses = kafka_cli.send_offset_fetch_request_kafka(group, payloads=requests)
+
+        consumer_offsets = {}
+        for resp in responses:
+            consumer_offsets[(resp.topic, resp.partition)] = resp.offset
+
+        return consumer_offsets
