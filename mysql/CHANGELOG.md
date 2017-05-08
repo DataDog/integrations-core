@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+1.0.3/Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] MySQL: Fix replication service check for <5.6. See [#394][]
+
+
 1.0.2/2017-04-24
 ==================
 
@@ -28,3 +36,4 @@
 [#288]: https://github.com/DataDog/integrations-core/issues/288
 [#291]: https://github.com/DataDog/integrations-core/issues/291
 [#329]: https://github.com/DataDog/integrations-core/issues/329
+[#394]: https://github.com/DataDog/integrations-core/issues/394
