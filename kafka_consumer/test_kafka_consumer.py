@@ -37,9 +37,22 @@ class TestKafka(AgentCheckTest):
 
     def test_check(self):
         """
-        Testing Kafka_consumer check.
+        Testing Kafka_consumer check w/ zookeeper.
         """
         self.run_check({'instances': instance})
+
+        for mname in METRICS:
+            self.assertMetric(mname, at_least=1)
+
+        self.coverage_report()
+
+    def test_kafka_nozk(self):
+        """
+        Testing Kafka_consumer check without zookeeper
+        """
+        config = {'instances': instance}
+        config['instances'][0]['zk_offsets'] = False
+        self.run_check(config)
 
         for mname in METRICS:
             self.assertMetric(mname, at_least=1)
