@@ -17,7 +17,7 @@ from requests.exceptions import RequestException
 # project
 from checks import AgentCheck
 from config import _is_affirmative
-from utils.proxy import get_no_proxy_from_env
+from utils.proxy import get_no_proxy_from_env, config_proxy_skip
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 QUEUE_TYPE = 'queues'
