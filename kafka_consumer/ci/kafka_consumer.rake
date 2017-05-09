@@ -4,6 +4,12 @@ def kafka_consumer_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
+def kafka_consumer_options
+  ENV['FLAVOR_OPTIONS'] || 'zookeeper'
+end
+
+ENV['KAFKA_OFFSETS_STORAGE'] = kafka_consumer_options
+
 namespace :ci do
   namespace :kafka_consumer do |flavor|
     task before_install: ['ci:common:before_install']
