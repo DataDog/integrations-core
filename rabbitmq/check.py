@@ -17,7 +17,6 @@ from requests.exceptions import RequestException
 # project
 from checks import AgentCheck
 from config import _is_affirmative
-from utils.proxy import get_no_proxy_from_env, config_proxy_skip
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 QUEUE_TYPE = 'queues'
@@ -105,7 +104,6 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
-`       self.proxies['no'] = get_no_proxy_from_env()
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -162,7 +160,7 @@ class RabbitMQ(AgentCheck):
             # Generate a service check from the aliveness API. In the case of an invalid response
             # code or unparseable JSON this check will send no data.
             vhosts = instance.get('vhosts')
-            self._check_aliveness(base_url, vhosts, auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self._check_aliveness(instance, base_url, vhosts, auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK)
@@ -190,7 +188,7 @@ class RabbitMQ(AgentCheck):
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
-        instance_proxy = config_proxy_skip(self.proxies.copy(), base_url, skip_proxy=skip_proxy)
+        instance_proxy = self.get_instance_proxy(instance, base_url)
         data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
@@ -323,26 +321,26 @@ class RabbitMQ(AgentCheck):
 
         self.event(event)
 
-    def _check_aliveness(self, base_url, vhosts=None, auth=None, ssl_verify=True, skip_proxy=False):
+    def _check_aliveness(self, instance, base_url, vhosts=None, auth=None, ssl_verify=True, skip_proxy=False):
         """
         Check the aliveness API against all or a subset of vhosts. The API
         will return {"status": "ok"} and a 200 response code in the case
         that the check passes.
         """
 
-        vhost_proxy = config_proxy_skip(self.proxies.copy(), vhosts_url, skip_proxy=skip_proxy)
         if not vhosts:
             # Fetch a list of _all_ vhosts from the API.
             vhosts_url = urlparse.urljoin(base_url, 'vhosts')
+            vhost_proxy = self.get_instance_proxy(instance, vhosts_url)
             vhosts_response = self._get_data(vhosts_url, auth=auth, ssl_verify=ssl_verify, proxies=vhost_proxy)
             vhosts = [v['name'] for v in vhosts_response]
 
-        aliveness_proxy = config_proxy_skip(self.proxies.copy(), aliveness_url, skip_proxy=skip_proxy)
         for vhost in vhosts:
             tags = ['vhost:%s' % vhost]
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/%s' % (urllib.quote_plus(vhost))
             aliveness_url = urlparse.urljoin(base_url, path)
+            aliveness_proxy = self.get_instance_proxy(instance, aliveness_url)
             aliveness_response = self._get_data(aliveness_url, auth=auth, ssl_verify=ssl_verify, proxies=aliveness_proxy)
             message = u"Response from aliveness API: %s" % aliveness_response
 
