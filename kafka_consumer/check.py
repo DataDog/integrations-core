@@ -36,24 +36,20 @@ class KafkaCheck(AgentCheck):
         consumer_groups = self.read_config(instance, 'consumer_groups',
                                            cast=self._validate_consumer_groups)
         zk_offsets = _is_affirmative(instance.get('zk_offsets', True))
-        zk_connect_str = self.read_config(instance, 'zk_connect_str')
-        kafka_host_ports = self.read_config(instance, 'kafka_connect_str')
-
-        # Construct the Zookeeper path pattern
+        zk_connect_str = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
-        zk_path_tmpl = zk_prefix + '/consumers/%s/offsets/%s/%s'
-
-        # Connect to Zookeeper
-        zk_conn = KazooClient(zk_connect_str, timeout=self.zk_timeout)
-        zk_conn.start()
+        kafka_host_ports = self.read_config(instance, 'kafka_connect_str')
 
         consumer_offsets = {}
         topics = defaultdict(set)
         try:
-            if zk_offsets:
-                topics, consumer_offsets = self.get_offsets_zk(zk_connect_str, consumer_groups, zk_prefix='')
-            else:
+            if not zk_offsets:
                 topics, consumer_offsets = self.get_offsets_kafka(kafka_host_ports, consumer_groups)
+            elif zk_connect_str:
+                topics, consumer_offsets = self.get_offsets_zk(zk_connect_str, consumer_groups, zk_prefix)
+            else:
+                self.log.warn('No ZK connection string provided, but config specifies collecting from ZK.')
+                return
         except Exception:
             self.log.warn('There was an issue collecting the consumer offsets, metrics may be missing.')
 
@@ -76,13 +72,13 @@ class KafkaCheck(AgentCheck):
                 self.log.exception('Error cleaning up Kafka connection')
 
         # Report the broker data
-        for (topic, partition), broker_offset in broker_offsets.items():
+        for (topic, partition), broker_offset in broker_offsets.iteritems():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_offset = broker_offsets.get((topic, partition))
             self.gauge('kafka.broker_offset', broker_offset, tags=broker_tags)
 
         # Report the consumer
-        for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
+        for (consumer_group, topic, partition), consumer_offset in consumer_offsets.iteritems():
 
             # Get the broker offset
             broker_offset = broker_offsets.get((topic, partition))
@@ -158,9 +154,8 @@ consumer_groups:
             try:
                 coordinator = self.get_group_coordinator(kafka_connect_str, consumer_group)
                 offsets = self.get_consumer_offsets(coordinator, consumer_group, topic_partitions)
-                for topic_partition, offset in offsets.iteritems():
-                    topic, partition = topic_partition
-                    topics[topic].updata([partition])
+                for (topic, partition), offset in offsets.iteritems():
+                    topics[topic].update([partition])
                     key = (consumer_group, topic, partition)
                     consumer_offsets[key] = offset
             except Exception:
@@ -173,7 +168,7 @@ consumer_groups:
 
         return kafka_cli._get_coordinator_for_group(group)
 
-    def get_consumer_offsets(self, coordinator, group, topic_partitions):
+    def get_consumer_offsets(self, coordinator, consumer_group, topic_partitions):
         conn_str = "{}:{}".format(coordinator.host, coordinator.port)
         kafka_cli = KafkaClient(conn_str, timeout=self.kafka_timeout)
 
@@ -181,7 +176,7 @@ consumer_groups:
         for topic, partitions in topic_partitions.iteritems():
             requests.extend([OffsetFetchRequestPayload(topic=topic, partition=p) for p in partitions])
 
-        responses = kafka_cli.send_offset_fetch_request_kafka(group, payloads=requests)
+        responses = kafka_cli.send_offset_fetch_request_kafka(consumer_group, payloads=requests)
 
         consumer_offsets = {}
         for resp in responses:
