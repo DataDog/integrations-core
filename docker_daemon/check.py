@@ -76,6 +76,13 @@ CGROUP_METRICS = [
         },
     },
     {
+        "cgroup": "cpuacct",
+        "file": "cpuacct.usage",
+        "metrics": {
+            "usage": ("docker.cpu.usage", RATE),
+        }
+    },
+    {
         "cgroup": "cpu",
         "file": "cpu.stat",
         "metrics": {
@@ -998,6 +1005,8 @@ class DockerDaemon(AgentCheck):
             with open(stat_file, 'r') as fp:
                 if 'blkio' in stat_file:
                     return self._parse_blkio_metrics(fp.read().splitlines())
+                elif 'cpuacct.usage' in stat_file:
+                    return dict({'usage': str(int(fp.read())/10000000)})
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:
