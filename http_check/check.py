@@ -32,7 +32,6 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
 from checks.network_checks import EventType, NetworkCheck, Status
 from config import _is_affirmative
 from util import headers as agent_headers
-from utils.proxy import get_no_proxy_from_env, config_proxy_skip
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
 CONTENT_LENGTH = 200
@@ -155,7 +154,6 @@ class HTTPCheck(NetworkCheck):
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 
         self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
-        self.proxies['no'] = get_no_proxy_from_env()
 
 
     def _load_conf(self, instance):
@@ -223,8 +221,7 @@ class HTTPCheck(NetworkCheck):
                 self.warning("Skipping SSL certificate validation for %s based on configuration"
                              % addr)
 
-            instance_proxy = config_proxy_skip(self.proxies.copy(), addr, skip_proxy=skip_proxy)
-
+            instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
 
             auth = None
