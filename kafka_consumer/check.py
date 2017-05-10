@@ -8,9 +8,9 @@ from collections import defaultdict
 
 # 3p
 from kafka.client import KafkaClient
-from kafka import KafkaClient as KafkaLegacyClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
 from kafka.protocol.commit import GroupCoordinatorRequest
+from kafka.protocol.offset import OffsetRequest
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
@@ -38,7 +38,18 @@ class KafkaCheck(AgentCheck):
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
+        self.kafka_clients = {}
 
+    def _get_kafka_client(instance):
+        kafka_conn_str = self.read_config(instance, 'kafka_connect_str')
+        if not kafka_conn_str:
+            raise Exception('Bad instance')
+
+        if kafka_conn_str not in self.kafka_clients:
+            cli = KafkaClient(bootstrap_servers=kafka_connect_str, client_id='dd-agent')
+            self.kafka_clients[kafka_conn_str] = cli
+
+        return self.kafka_clients[kafka_conn_str]
 
     def check(self, instance):
         consumer_groups = self.read_config(instance, 'consumer_groups',
@@ -46,13 +57,12 @@ class KafkaCheck(AgentCheck):
         zk_offsets = _is_affirmative(instance.get('zk_offsets', True))
         zk_connect_str = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
-        kafka_host_ports = self.read_config(instance, 'kafka_connect_str')
 
         consumer_offsets = {}
         topics = defaultdict(set)
         try:
             if not zk_offsets:
-                topics, consumer_offsets = self.get_offsets_kafka(kafka_host_ports, consumer_groups)
+                topics, consumer_offsets = self.get_offsets_kafka(instance, consumer_groups)
             elif zk_connect_str:
                 topics, consumer_offsets = self.get_offsets_zk(zk_connect_str, consumer_groups, zk_prefix)
             else:
@@ -62,20 +72,24 @@ class KafkaCheck(AgentCheck):
             self.log.warn('There was an issue collecting the consumer offsets, metrics may be missing.')
 
         # Connect to Kafka
-        kafka_conn = KafkaLegacyClient(kafka_host_ports, timeout=self.kafka_timeout)
+        cli = self._get_kafka_client(instance)
 
         try:
             # Query Kafka for the broker offsets
             broker_offsets = {}
             for topic, partitions in topics.items():
-                offset_responses = kafka_conn.send_offset_request([
-                    OffsetRequest(topic, p, -1, 1) for p in partitions])
+                request = OffsetRequest[0](-1, [(topic, partition_requests)])
+                response = self._make_blocking_req(cli, request)
 
-                for resp in offset_responses:
-                    broker_offsets[(resp.topic, resp.partition)] = resp.offsets[0]
+                for resp in response:
+                    # handle responses
+                    for topic, partitions in response.topics:
+                        for partition, error, offsets in partitions:
+                            broker_offsets[(topic, partition)] = offsets[0]
         finally:
             try:
-                kafka_conn.close()
+                # we might not need this.
+                cli.close()
             except Exception:
                 self.log.exception('Error cleaning up Kafka connection')
 
@@ -155,11 +169,11 @@ consumer_groups:
 
         return topics, consumer_offsets
 
-    def get_offsets_kafka(self, kafka_connect_str, consumer_groups):
+    def get_offsets_kafka(self, instance, consumer_groups):
         consumer_offsets = {}
         topics = defaultdict(set)
 
-        cli = KafkaClient(bootstrap_servers=kafka_connect_str, client_id='dd-agent')
+        cli = self._get_kafka_client(instance)
         cli.poll()
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
@@ -184,7 +198,7 @@ consumer_groups:
 
     def _make_blocking_req(self, client, request, nodeid=None):
 
-	if not nodeid:
+        if not nodeid:
             brokers = client.cluster.brokers()
             if not brokers:
                 raise Exception('No known available brokers... make this a specific exception')
