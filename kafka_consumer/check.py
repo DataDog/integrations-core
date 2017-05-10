@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import random
 from collections import defaultdict
 
 # 3p
@@ -181,16 +182,23 @@ consumer_groups:
 
         return 0
 
-    def _make_blocking_req(self, client, request):
-        future = client.send(coord_id, request)
-        cli.poll(future=future)  # block until we get response.
+    def _make_blocking_req(self, client, request, nodeid=None):
+
+	if not nodeid:
+            brokers = client.cluster.brokers()
+            if not brokers:
+                raise Exception('No known available brokers... make this a specific exception')
+	    nodeid = random.sample(brokers, 1)[0].nodeId
+
+        future = client.send(nodeid, request)
+        client.poll(future=future)  # block until we get response.
         assert future.succeeded()
         response = future.value
 
         return response
 
     def get_group_coordinator(self, client, group):
-        request = GroupCoordinatorRequest[0](consumer_group)
+        request = GroupCoordinatorRequest[0](group)
         response = self._make_blocking_req(client, request)
         client.cluster.add_group_coordinator(group, response)
 
@@ -204,7 +212,7 @@ consumer_groups:
             tps[topic].add(set(partitions))
         request = OffsetFetchRequest[self.get_api_for_version(version)](consumer_group, list(tps.iteritems()))
 
-        response = self._make_blocking_req(client, request)
+        response = self._make_blocking_req(client, request, nodeid=coord_id)
 
         # consumer_offsets = {}
         # for resp in response.topics:
