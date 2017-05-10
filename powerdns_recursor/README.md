@@ -2,11 +2,19 @@
 
 # Overview
 
+Track the performance of your PowerDNS recursors, and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
 
+* Query answer times — see how many responses take less than 1ms, 10ms, 100ms, 1s, and greater than 1s
+* Query timeouts
+* Cache hits and misses
+* Answer rates by type — SRVFAIL, NXDOMAIN, NOERROR
+* Ignored and dropped packets
+
+And many more.
 
 # Installation
 
-The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your recursors. If you need the newest version of the check, install the `dd-check-powerdns-recursor` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your recursors.
 
 # Configuration
 
@@ -17,14 +25,14 @@ This check collects performance statistics via pdns_recursor's statistics API. V
 ```
 webserver=yes
 api-key=changeme            # only available since ver 4.0
-webserver-readonly=yes    # default no
+webserver-readonly=yes      # default no
 # webserver-port=8081       # default 8082
 # webserver-address=0.0.0.0 # default 127.0.0.1
 ```
 
 If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, e.g. `experimental-webserver=yes`.
 
-If you're running pdns_recursor >= 4.1, simply set an `api-key` in the recursor config.
+If you're running pdns_recursor >= 4.1, only set `api-key` in the recursor config.
 
 Restart the recursor to enable the statistics API.
 
@@ -39,7 +47,7 @@ instances:
   - host: 127.0.0.1
     port: 8082
     api_key: changeme
-    version: 4 # omit this option if you're running pdns_recursor 3.x
+    version: 4 # omit this line if you're running pdns_recursor version 3.x
 ```
 
 Restart the Agent to begin sending PowerDNS metrics to Datadog.
