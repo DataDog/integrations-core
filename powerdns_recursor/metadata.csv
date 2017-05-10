@@ -79,7 +79,7 @@ powerdns.recursor.policy_result_drop,gauge,,packet,second,The number of packets 
 powerdns.recursor.policy_result_nxdomain,gauge,,packet,second,The number of packets per second that were replied to with NXDOMAIN by the RPZ/filter engine; Available since pdns_recursor v4.x,0,powerdns_recursor,policy result nxdomain
 powerdns.recursor.policy_result_nodata,gauge,,packet,second,The number of packets per second that were replied to with NODATA by the RPZ/filter engine; Available since pdns_recursor v4.x,0,powerdns_recursor,policy result nodata
 powerdns.recursor.policy_result_truncate,gauge,,packet,second,The number of packets per second that were forced to TCP by the RPZ/filter engine; Available since pdns_recursor v4.x,0,powerdns_recursor,policy result truncate
-powerdns.recursor.real_memory_usage,gauge,,byte,,The amount of memory consumed by PowerDNS, in bytes; Available since pdns_recursor v4.x,0,powerdns_recursor,real memory usage
+powerdns.recursor.real_memory_usage,gauge,,byte,,The amount of memory consumed by PowerDNS in bytes; Available since pdns_recursor v4.x,0,powerdns_recursor,real memory usage
 powerdns.recursor.resource_limits,gauge,,query,second,The number of queries per second that could not be performed due to resource limits; Available since pdns_recursor v4.x,0,powerdns_recursor,resource limits
 powerdns.recursor.too_old_drops,gauge,,query,second,The number of questions per second that were dropped because they were too old; Available since pdns_recursor v4.x,0,powerdns_recursor,too old drops
 powerdns.recursor.udp_in_errors,gauge,,packet,second,The number of packets per second that were received faster than the OS could process them; Available since pdns_recursor v4.x,0,powerdns_recursor,udp in errors
