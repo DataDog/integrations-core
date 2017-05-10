@@ -674,6 +674,8 @@ class DockerDaemon(AgentCheck):
                 cgroup_stat_file_failures += 1
                 if cgroup_stat_file_failures >= len(CGROUP_METRICS):
                     self.warning("Couldn't find the cgroup files. Skipping the CGROUP_METRICS for now.")
+            except IOError as e:
+                self.log.debug("Cannot read cgroup file, container likely raced to finish : %s", e)
             else:
                 stats = self._parse_cgroup_file(stat_file)
                 if stats:
