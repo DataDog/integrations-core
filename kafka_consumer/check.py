@@ -157,17 +157,12 @@ consumer_groups:
         consumer_offsets = {}
         topics = defaultdict(set)
 
-        kafka_cfg = {
-            'bootstrap_servers': kafka_connect_str,
-            'client_id': 'dd-agent'
-        }
         cli = KafkaClient(bootstrap_servers=kafka_connect_str, client_id='dd-agent')
         cli.poll()
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
-
-                coordinator_id = self.get_group_coordinator(client, group)
+                coordinator_id = self.get_group_coordinator(cli, consumer_group)
                 offsets = self.get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
                 for (topic, partition), offset in offsets.iteritems():
                     topics[topic].update([partition])
