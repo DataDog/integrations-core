@@ -4,6 +4,7 @@
 ==================
 ### Changes
 
+* [BUGFIX] catch IOError exception when container exits in the middle of a check run. See [#408][]
 * [BUGFIX] fix image name when using sha256 for specs. See [#393][]
 
 
@@ -34,3 +35,4 @@
 [#345]: https://github.com/DataDog/integrations-core/issues/345
 [#348]: https://github.com/DataDog/integrations-core/issues/348
 [#393]: https://github.com/DataDog/integrations-core/issues/393
+[#408]: https://github.com/DataDog/integrations-core/issues/408
