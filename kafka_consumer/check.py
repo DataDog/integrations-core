@@ -9,7 +9,6 @@ from collections import defaultdict
 from kafka import KafkaClient as KafkaLegacyClient
 from kafka.client import KafkaClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
-from kafka.protocol import KafkaProtocol
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
@@ -23,20 +22,13 @@ DEFAULT_ZK_TIMEOUT = 5
 DEFAULT_ZK_OFFSETS = True
 
 
-def encode_consumer_metadata_request_wrapper(wrapped_func):
-    wrapped_func = wrapped_func.__func__
-    def _w(*args, **kwargs):
-        print '<foo_wrap>'
-        kwargs['client_id'] = 1
-        kwargs['correlation_id'] = 1
-        wrapped_func(*args, **kwargs)
-        print '</foo_wrap>'
-    return classmethod(_w)
-
-
 class KafkaCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'kafka'
+    API_VERSION_MAP = [
+        ((0, 9), 2),
+        ((0, 8, 2), 1)
+    ]
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
@@ -44,10 +36,6 @@ class KafkaCheck(AgentCheck):
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
-
-        # Monkeypatch kafka client encoder function.
-        KafkaProtocol.encode_consumer_metadata_request = encode_consumer_metadata_wrapper(
-            KafkaProtocol.encode_consumer_metadata_request)
 
 
     def check(self, instance):
@@ -168,10 +156,18 @@ consumer_groups:
     def get_offsets_kafka(self, kafka_connect_str, consumer_groups):
         consumer_offsets = {}
         topics = defaultdict(set)
+        kafka_cfg = {
+            'bootstrap_servers': kafka_connect_str,
+            'client_id': 'dd-agent'
+        }
+        cli = KafkaClient(kafka_cfg)
+
+        cli.poll()
+
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
-                coordinator = self.get_group_coordinator(kafka_connect_str, consumer_group)
-                offsets = self.get_consumer_offsets(coordinator, consumer_group, topic_partitions)
+                coordinator_id = cli.cluster.coordinator_for_group(consumer_group)
+                offsets = self.get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
                 for (topic, partition), offset in offsets.iteritems():
                     topics[topic].update([partition])
                     key = (consumer_group, topic, partition)
@@ -181,23 +177,34 @@ consumer_groups:
 
         return topics, consumer_offsets
 
+    def get_api_for_version(self, version):
+        for kafka_ver, api_version in self.API_VERSION_MAP:
+            if version >= kafka_ver:
+                return api_version
+
+        return 0
+
     def get_group_coordinator(self, kafka_connect_str, group):
         kafka_cli = KafkaLegacyClient(kafka_connect_str, timeout=self.kafka_timeout)
 
         return kafka_cli._get_coordinator_for_group(group)
 
-    def get_consumer_offsets(self, coordinator, consumer_group, topic_partitions):
-        conn_str = "{}:{}".format(coordinator.host, coordinator.port)
-        kafka_cli = KafkaLegacyClient(conn_str, timeout=self.kafka_timeout)
+    def get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
 
-        requests = []
+        version = client.check_version(coord_id)
+
+        tps = defaultdict(set)
         for topic, partitions in topic_partitions.iteritems():
-            requests.extend([OffsetFetchRequestPayload(topic=topic, partition=p) for p in partitions])
+            tps[topic].add(set(partitions))
+        request = OffsetFetchRequest[self.get_api_for_version(version)](consumer_group, list(tps.iteritems()))
 
-        responses = kafka_cli.send_offset_fetch_request_kafka(consumer_group, payloads=requests)
+        future = client.send(coord_id, request)
+        cli.poll(future=future)  # block until we get response.
+        assert future.succeeded()
+        response = future.value
 
-        consumer_offsets = {}
-        for resp in responses:
-            consumer_offsets[(resp.topic, resp.partition)] = resp.offset
+        # consumer_offsets = {}
+        # for resp in response.topics:
+        #     consumer_offsets[(resp.topic, resp.partition)] = resp.offset
 
-        return consumer_offsets
+        # return consumer_offsets
