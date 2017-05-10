@@ -191,27 +191,37 @@ class Couchbase(AgentCheck):
     # Selected metrics of the query monitoring API
     # See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
     QUERY_STATS = set([
-        'cpu.sys.percent',
-        'cpu.user.percent',
-        'gc.num',
-        'gc.pause.percent',
-        'gc.pause.time',
-        'memory.system',
-        'memory.total',
-        'memory.usage',
-        'request.active.count',
-        'request.completed.count',
-        'request.per.sec.15min',
-        'request.per.sec.1min',
-        'request.per.sec.5min',
-        'request.prepared.percent',
-        'request_time.80percentile',
-        'request_time.95percentile',
-        'request_time.99percentile',
-        'request_time.mean',
-        'request_time.median',
-        'total.threads',
+        'cores',
+        'cpu_sys_percent',
+        'cpu_user_percent',
+        'gc_num',
+        'gc_pause_percent',
+        'gc_pause_time',
+        'memory_system',
+        'memory_total',
+        'memory_usage',
+        'request_active_count',
+        'request_completed_count',
+        'request_per_sec_15min',
+        'request_per_sec_1min',
+        'request_per_sec_5min',
+        'request_prepared_percent',
+        'request_time_80percentile',
+        'request_time_95percentile',
+        'request_time_99percentile',
+        'request_time_mean',
+        'request_time_median',
+        'total_threads',
     ])
+
+    TO_SECONDS = {
+        'ns': 1e9,
+        'ms': 1e3,
+        'us': 1e6,
+        's': 1,
+    }
+
+    seconds_value_pattern = re.compile('(\d+(\.\d+)?)(\D+)')
 
     def _create_metrics(self, data, tags=None):
         storage_totals = data['stats']['storageTotals']
@@ -241,6 +251,9 @@ class Couchbase(AgentCheck):
 
         for metric_name, val in data['query'].items():
             if val is not None:
+                # for query times, the unit is part of the value, we need to extract it
+                if val[-1] == 's':
+                    val = self.extract_seconds_value(val)
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
                     full_metric_name = '.'.join(['couchbase', 'query', self.camel_case_to_joined_lower(norm_metric_name)])
@@ -375,3 +388,15 @@ class Couchbase(AgentCheck):
         converted_variable = re.sub('^_|_$', '', converted_variable)
 
         return converted_variable
+
+    # Takes a string with a time and a unit (e.g '3.45ms') and returns the value in seconds
+    def extract_seconds_value(self, value):
+        match = self.seconds_value_pattern.search(value)
+
+        val, unit = match.group(1, 3)
+        # They use the 'micro' symbol for microseconds so there is an encoding problem
+        # so let's assume it's microseconds if we don't find the key in unit
+        if unit not in self.TO_SECONDS:
+            unit = 'us'
+
+        return float(val)/self.TO_SECONDS[unit]
