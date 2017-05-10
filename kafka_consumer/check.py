@@ -6,8 +6,8 @@
 from collections import defaultdict
 
 # 3p
-from kafka import KafkaClient as KafkaLegacyClient
 from kafka.client import KafkaClient
+from kafka import KafkaClient as KafkaLegacyClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
@@ -156,12 +156,12 @@ consumer_groups:
     def get_offsets_kafka(self, kafka_connect_str, consumer_groups):
         consumer_offsets = {}
         topics = defaultdict(set)
+
         kafka_cfg = {
             'bootstrap_servers': kafka_connect_str,
             'client_id': 'dd-agent'
         }
-        cli = KafkaClient(kafka_cfg)
-
+        cli = KafkaClient(bootstrap_servers=kafka_connect_str, client_id='dd-agent')
         cli.poll()
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
@@ -184,13 +184,24 @@ consumer_groups:
 
         return 0
 
-    def get_group_coordinator(self, kafka_connect_str, group):
-        kafka_cli = KafkaLegacyClient(kafka_connect_str, timeout=self.kafka_timeout)
+    def _make_blocking_req(self, client, request):
+        future = client.send(coord_id, request)
+        cli.poll(future=future)  # block until we get response.
+        assert future.succeeded()
+        response = future.value
 
-        return kafka_cli._get_coordinator_for_group(group)
+        return response
+
+    def get_group_coordinator(self, client, group):
+        request = GroupCoordinatorRequest[0](consumer_group)
+        response = self._make_blocking_req(client, request)
+        client.cluster.add_group_coordinator(group, response)
+
+        return client.cluster.coordinator_for_group(group)
 
     def get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
 
+        coord_id = self.get_group_coordinator(client, group)
         version = client.check_version(coord_id)
 
         tps = defaultdict(set)
@@ -198,10 +209,7 @@ consumer_groups:
             tps[topic].add(set(partitions))
         request = OffsetFetchRequest[self.get_api_for_version(version)](consumer_group, list(tps.iteritems()))
 
-        future = client.send(coord_id, request)
-        cli.poll(future=future)  # block until we get response.
-        assert future.succeeded()
-        response = future.value
+        response = self._make_blocking_req(client, request)
 
         # consumer_offsets = {}
         # for resp in response.topics:
