@@ -2,10 +2,15 @@
 
 # Overview
 
-Get metrics from couchbase service in real time to:
+Identify busy buckets, track cache miss ratios, and more. This Agent check collects metrics like:
 
-* Visualize and monitor couchbase states
-* Be notified about couchbase failovers and events.
+* Hard disk and memory used by data
+* Current connections
+* Total objects
+* Operations per second
+* Disk write queue size
+
+And many more.
 
 # Installation
 
@@ -61,4 +66,4 @@ Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
 # Further Reading
 
-To get a better idea of how (or why) to integrate your Redis servers with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/) about it.
+To get a better idea of how (or why) to integrate your Couchbase cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/) about it.
