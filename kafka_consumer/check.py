@@ -6,8 +6,10 @@
 from collections import defaultdict
 
 # 3p
-from kafka import KafkaClient
+from kafka import KafkaClient as KafkaLegacyClient
+from kafka.client import KafkaClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
+from kafka.protocol import KafkaProtocol
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
@@ -21,6 +23,17 @@ DEFAULT_ZK_TIMEOUT = 5
 DEFAULT_ZK_OFFSETS = True
 
 
+def encode_consumer_metadata_request_wrapper(wrapped_func):
+    wrapped_func = wrapped_func.__func__
+    def _w(*args, **kwargs):
+        print '<foo_wrap>'
+        kwargs['client_id'] = 1
+        kwargs['correlation_id'] = 1
+        wrapped_func(*args, **kwargs)
+        print '</foo_wrap>'
+    return classmethod(_w)
+
+
 class KafkaCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'kafka'
@@ -31,6 +44,11 @@ class KafkaCheck(AgentCheck):
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
+
+        # Monkeypatch kafka client encoder function.
+        KafkaProtocol.encode_consumer_metadata_request = encode_consumer_metadata_wrapper(
+            KafkaProtocol.encode_consumer_metadata_request)
+
 
     def check(self, instance):
         consumer_groups = self.read_config(instance, 'consumer_groups',
@@ -54,7 +72,7 @@ class KafkaCheck(AgentCheck):
             self.log.warn('There was an issue collecting the consumer offsets, metrics may be missing.')
 
         # Connect to Kafka
-        kafka_conn = KafkaClient(kafka_host_ports, timeout=self.kafka_timeout)
+        kafka_conn = KafkaLegacyClient(kafka_host_ports, timeout=self.kafka_timeout)
 
         try:
             # Query Kafka for the broker offsets
@@ -164,13 +182,13 @@ consumer_groups:
         return topics, consumer_offsets
 
     def get_group_coordinator(self, kafka_connect_str, group):
-        kafka_cli = KafkaClient(kafka_connect_str, timeout=self.kafka_timeout)
+        kafka_cli = KafkaLegacyClient(kafka_connect_str, timeout=self.kafka_timeout)
 
         return kafka_cli._get_coordinator_for_group(group)
 
     def get_consumer_offsets(self, coordinator, consumer_group, topic_partitions):
         conn_str = "{}:{}".format(coordinator.host, coordinator.port)
-        kafka_cli = KafkaClient(conn_str, timeout=self.kafka_timeout)
+        kafka_cli = KafkaLegacyClient(conn_str, timeout=self.kafka_timeout)
 
         requests = []
         for topic, partitions in topic_partitions.iteritems():
