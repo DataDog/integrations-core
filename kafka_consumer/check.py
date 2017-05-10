@@ -166,7 +166,8 @@ consumer_groups:
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
-                coordinator_id = cli.cluster.coordinator_for_group(consumer_group)
+
+                coordinator_id = self.get_group_coordinator(client, group)
                 offsets = self.get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
                 for (topic, partition), offset in offsets.iteritems():
                     topics[topic].update([partition])
@@ -200,8 +201,6 @@ consumer_groups:
         return client.cluster.coordinator_for_group(group)
 
     def get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
-
-        coord_id = self.get_group_coordinator(client, group)
         version = client.check_version(coord_id)
 
         tps = defaultdict(set)
