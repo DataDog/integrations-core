@@ -8,7 +8,7 @@ def kafka_consumer_options
   ENV['FLAVOR_OPTIONS'] || 'zookeeper'
 end
 
-ENV['KAFKA_OFFSETS_STORAGE'] = kafka_consumer_options
+ENV['CONSUMER_OFFSET_STORAGE'] = kafka_consumer_options
 
 namespace :ci do
   namespace :kafka_consumer do |flavor|
