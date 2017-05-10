@@ -104,6 +104,18 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ]
         }
 
+    def mock_get_info_no_spaces(self):
+        return {
+            'DriverStatus': [
+                ['Data Space Used', '1GB'],
+                ['Data Space Available', '9GB'],
+                ['Data Space Total', '10GB'],
+                ['Metadata Space Used', '1MB'],
+                ['Metadata Space Available', '9MB'],
+                ['Metadata Space Total', '10MB'],
+            ]
+        }
+
     @mock.patch('docker.Client.info')
     def test_devicemapper_disk_metrics(self, mock_info):
         mock_info.return_value = self.mock_normal_get_info()
@@ -163,6 +175,20 @@ class TestCheckDockerDaemon(AgentCheckTest):
         self.assertMetric('docker.data.used', value=0)
         self.assertMetric('docker.data.total', value=0)
         self.assertNotIn('docker.data.percent', metric_names)
+
+    @mock.patch('docker.Client.info')
+    def test_devicemapper_no_spaces(self, mock_info):
+        mock_info.return_value = self.mock_get_info_no_spaces()
+
+        self.run_check(MOCK_CONFIG, force_reload=True)
+        self.assertMetric('docker.data.free', value=9e9)
+        self.assertMetric('docker.data.used', value=1e9)
+        self.assertMetric('docker.data.total', value=10e9)
+        self.assertMetric('docker.data.percent', value=10.0)
+        self.assertMetric('docker.metadata.free', value=9e6)
+        self.assertMetric('docker.metadata.used', value=1e6)
+        self.assertMetric('docker.metadata.total', value=10e6)
+        self.assertMetric('docker.metadata.percent', value=10.0)
 
     # integration tests #
 
