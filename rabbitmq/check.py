@@ -8,7 +8,6 @@ import re
 import time
 import urllib
 import urlparse
-from os import environ
 
 # 3p
 import requests
