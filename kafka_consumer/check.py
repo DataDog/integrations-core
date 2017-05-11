@@ -8,9 +8,9 @@ from collections import defaultdict
 
 # 3p
 from kafka.client import KafkaClient
-from kafka.common import OffsetRequestPayload as OffsetRequest
+from kafka.common import OffsetRequestPayload as LegacyOffsetRequest
 from kafka.protocol.commit import OffsetFetchRequest, GroupCoordinatorRequest
-from kafka.protocol.offset import OffsetRequest
+from kafka.protocol.offset import OffsetRequest, OffsetResponse_v0
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
