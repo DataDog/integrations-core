@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-1.0.3/Unreleased
+1.0.3 / 2017-05-11
 ==================
 
 ### Changes
@@ -8,7 +8,7 @@
 * [BUGFIX] MySQL: Fix replication service check for <5.6. See [#394][]
 
 
-1.0.2/2017-04-24
+1.0.2 / 2017-04-24
 ==================
 
 ### Changes
@@ -16,7 +16,7 @@
 * [BUGFIX] MySQL: Fix for replication service check. See [#329][]
 
 
-1.0.1 03-23-2017
+1.0.1 / 2017-03-23
 ==================
 
 ### Changes
@@ -25,7 +25,7 @@
 * [BUGFIX] MySQL: Slaves_connected should be a gauge. See [#291][]
 
 
-1.0.003-22-2017
+1.0.0 / 2017-03-23
 ==================
 
 ### Changes

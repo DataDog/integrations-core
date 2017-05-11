@@ -1,6 +1,6 @@
 # CHANGELOG - docker_daemon
 
-1.1.1/Unreleased
+1.1.1 / 2017-05-11
 ==================
 ### Changes
 
@@ -8,7 +8,7 @@
 * [BUGFIX] fix image name when using sha256 for specs. See [#393][]
 
 
-1.1.0/2017-04-24
+1.1.0 / 2017-04-24
 ==================
 ### Changes
 
@@ -20,7 +20,7 @@
 * [FEATURE] adds the ability to monitor for docker exits failure with service check `docker.exit`. See [#290][]
 * [FEATURE] collect rancher label container name as tag. See [#282][]
 
-1.0.0/2017-03-22
+1.0.0 / 2017-03-22
 ==================
 ### Changes
 

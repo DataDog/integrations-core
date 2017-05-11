@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-1.0.1/Unreleased
+1.0.1 / 2017-05-11
 ==================
 
 ### Changes
@@ -8,7 +8,7 @@
 * [BUGFIX] Handle the case where the pidfile doesn't exist. See [#349][]
 
 
-1.0.0/2017-05-08
+1.0.0 / 2017-05-08
 ==================
 
 ### Changes

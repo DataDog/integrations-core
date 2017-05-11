@@ -1,20 +1,20 @@
 # CHANGELOG - haproxy
 
-1.0.2/Unreleased
+1.0.2 / 2017-05-11
 ==================
 
 ### Changes
 
 * [BUGFIX] Sanitize bogus evil CSV with with linebreak in field. See [#379][]
 
-1.0.1/2017-04-24
+1.0.1 / 2017-04-24
 ==================
 
 ### Changes
 
 * [BUGFIX] handle comma in fields. See [#281][]
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
