@@ -170,12 +170,13 @@ class TestRabbitMQ(AgentCheckTest):
         self.assertEqual(sc['status'], AgentCheck.OK)
 
     def test__check_aliveness(self):
-        self.load_check({"instances": [{"rabbitmq_api_url": "http://example.com"}]})
+        instances = {"instances": [{"rabbitmq_api_url": "http://example.com"}]}
+        self.load_check(instances)
         self.check._get_data = mock.MagicMock()
 
         # only one vhost should be OK
         self.check._get_data.side_effect = [{"status": "ok"}, {}]
-        self.check._check_aliveness('', vhosts=['foo', 'bar'])
+        self.check._check_aliveness(instances['instances'][0], '', vhosts=['foo', 'bar'])
         sc = self.check.get_service_checks()
 
         self.assertEqual(len(sc), 2)
@@ -187,4 +188,4 @@ class TestRabbitMQ(AgentCheckTest):
         # in case of connection errors, this check should stay silent
         from check import RabbitMQException  # pylint: disable=import-error,no-name-in-module
         self.check._get_data.side_effect = RabbitMQException
-        self.assertRaises(RabbitMQException, self.check._check_aliveness, '')
+        self.assertRaises(RabbitMQException, self.check._check_aliveness, instances['instances'][0], '')
