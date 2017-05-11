@@ -82,11 +82,20 @@ class KafkaCheck(AgentCheck):
                 request = OffsetRequest[0](-1, [(topic, partition_requests)])
                 response = self._make_blocking_req(cli, request)
 
-                for resp in response:
+                is_v0 = True
+                if not isinstance(response, OffsetResponse_v0):
+                    is_v0 = False
+
+
+                for resp in response.topics:
                     # handle responses
-                    for topic, partitions in response.topics:
-                        for partition, error, offsets in partitions:
-                            broker_offsets[(topic, partition)] = offsets[0]
+                    for topic_partition in resp:
+                        _topic = topic_partition.topic
+                        for partition_offsets in topic_partition.partitions:
+                            if is_v0:
+                                broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offsets[0]
+                            else:
+                                broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offset
         finally:
             try:
                 # we might not need this.
