@@ -87,15 +87,14 @@ class KafkaCheck(AgentCheck):
                     is_v0 = False
 
 
-                for resp in response.topics:
+                for topic_partition in response.topics:
                     # handle responses
-                    for topic_partition in resp:
-                        _topic = topic_partition.topic
-                        for partition_offsets in topic_partition.partitions:
-                            if is_v0:
-                                broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offsets[0]
-                            else:
-                                broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offset
+                    _topic = topic_partition.topic
+                    for partition_offsets in topic_partition.partitions:
+                        if is_v0:
+                            broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offsets[0]
+                        else:
+                            broker_offsets[(_topic, partition_offsets.partition)] = partition_offsets.offset
         finally:
             try:
                 # we might not need this.
