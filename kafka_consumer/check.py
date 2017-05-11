@@ -9,7 +9,7 @@ from collections import defaultdict
 # 3p
 from kafka.client import KafkaClient
 from kafka.common import OffsetRequestPayload as OffsetRequest
-from kafka.protocol.commit import GroupCoordinatorRequest
+from kafka.protocol.commit import OffsetFetchRequest, GroupCoordinatorRequest
 from kafka.protocol.offset import OffsetRequest
 from kafka.structs import OffsetFetchRequestPayload
 from kazoo.client import KazooClient
@@ -40,13 +40,13 @@ class KafkaCheck(AgentCheck):
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self.kafka_clients = {}
 
-    def _get_kafka_client(instance):
+    def _get_kafka_client(self, instance):
         kafka_conn_str = self.read_config(instance, 'kafka_connect_str')
         if not kafka_conn_str:
             raise Exception('Bad instance')
 
         if kafka_conn_str not in self.kafka_clients:
-            cli = KafkaClient(bootstrap_servers=kafka_connect_str, client_id='dd-agent')
+            cli = KafkaClient(bootstrap_servers=kafka_conn_str, client_id='dd-agent')
             self.kafka_clients[kafka_conn_str] = cli
 
         return self.kafka_clients[kafka_conn_str]
@@ -78,6 +78,7 @@ class KafkaCheck(AgentCheck):
             # Query Kafka for the broker offsets
             broker_offsets = {}
             for topic, partitions in topics.items():
+                partition_requests = [(p, -1, 1) for p in partitions]
                 request = OffsetRequest[0](-1, [(topic, partition_requests)])
                 response = self._make_blocking_req(cli, request)
 
