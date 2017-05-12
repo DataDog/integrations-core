@@ -1114,7 +1114,7 @@ class DockerDaemon(AgentCheck):
     def filter_capped_metrics(self):
         metrics = self.aggregator.metrics.values()
         for metric in metrics:
-            if metric.name in self.capped_metrics:
+            if metric.name in self.capped_metrics and len(metric.samples) >= 2:
                 cap = self.capped_metrics[metric.name]
                 val = metric._rate(metric.samples[-2], metric.samples[-1])
                 if val > cap:
