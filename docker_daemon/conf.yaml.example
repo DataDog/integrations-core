@@ -140,6 +140,12 @@ instances:
     #
     # ecs_tags: false
 
+    # Collect the  mesos tags from containers.
+    # By default collects mesos_task_id and marathon_app_id or chronos_job_name
+    # Default: false
+    #
+    # mesos_tags: true
+
     # Custom metrics tagging
     # Define which Docker tags to apply on metrics.
     # Since it impacts the aggregation, modify it carefully (only if you really need it).
