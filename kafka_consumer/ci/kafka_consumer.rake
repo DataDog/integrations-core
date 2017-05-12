@@ -23,16 +23,6 @@ namespace :ci do
       sh %(EXTERNAL_PORT=9091 EXTERNAL_JMX_PORT=9998 CONSUMER_OFFSET_STORAGE=#{kafka_consumer_options} docker-compose -f \
            #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml scale kafka=2)
       wait_on_docker_logs('resources_kafka_2', 5, '[Kafka Server 1002], started')
-      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -e JMX_PORT=9999 -p 7777:9999 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c \
-           '$KAFKA_HOME/bin/kafka-console-consumer.sh --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer')
-      wait_on_docker_logs('resources_kafka_1', 30, 'Created topic "test"')
-      # wait_on_docker_logs('resources_kafka_1', 30, 'Created log for partition [test,0]')
-      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -e JMX_PORT=9999 -p 7778:9999 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c \
-           '$KAFKA_HOME/bin/kafka-topics.sh --create --topic test --partitions 4 --zookeeper $ZK --replication-factor 2 ; \
-           while true; do $KAFKA_HOME/bin/kafka-console-producer.sh --topic=test --broker-list=`broker-list.sh` <<< "boomshakalaka" ; \
-           sleep 1 ; done')
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -51,8 +41,6 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker rm -f kafka_consumer)
-      sh %(docker rm -f kafka_producer)
       sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml stop)
       sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml rm -f)
     end
