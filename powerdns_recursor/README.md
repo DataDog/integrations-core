@@ -2,7 +2,7 @@
 
 # Overview
 
-Track the performance of your PowerDNS recursors, and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
+Track the performance of your PowerDNS recursors and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
 
 * Query answer times — see how many responses take less than 1ms, 10ms, 100ms, 1s, and greater than 1s
 * Query timeouts
@@ -32,7 +32,7 @@ webserver-readonly=yes      # default no
 
 If you're running pdns_recursor 3.x, prepend `experimental-` to these option names, e.g. `experimental-webserver=yes`.
 
-If you're running pdns_recursor >= 4.1, only set `api-key` in the recursor config.
+If you're running pdns_recursor >= 4.1, just set `api-key`.
 
 Restart the recursor to enable the statistics API.
 
@@ -50,7 +50,7 @@ instances:
     version: 4 # omit this line if you're running pdns_recursor version 3.x
 ```
 
-Restart the Agent to begin sending PowerDNS metrics to Datadog.
+Restart the Agent to begin sending PowerDNS Recursor metrics to Datadog.
 
 # Validation
 
