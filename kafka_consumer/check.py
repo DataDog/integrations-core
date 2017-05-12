@@ -90,7 +90,7 @@ class KafkaCheck(AgentCheck):
                     # handle responses - helper named tuple might make sense
                     _topic = topic_partition[0]
                     for partition_offsets in topic_partition[1]:
-                        if is_v0:
+                        if is_v0 and partition_offsets[2]:
                             broker_offsets[(_topic, partition_offsets[0])] = partition_offsets[2][0]
                         else:
                             broker_offsets[(_topic, partition_offsets[0])] = partition_offsets[2]
