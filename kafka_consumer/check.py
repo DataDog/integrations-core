@@ -182,7 +182,6 @@ consumer_groups:
         topics = defaultdict(set)
 
         cli = self._get_kafka_client(instance)
-        cli.poll()
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
@@ -210,7 +209,7 @@ consumer_groups:
             brokers = client.cluster.brokers()
             if not brokers:
                 raise Exception('No known available brokers... make this a specific exception')
-	    nodeid = random.sample(brokers, 1)[0].nodeId
+            nodeid = random.sample(brokers, 1)[0].nodeId
 
         future = client.send(nodeid, request)
         client.poll(future=future)  # block until we get response.
@@ -221,10 +220,19 @@ consumer_groups:
 
     def get_group_coordinator(self, client, group):
         request = GroupCoordinatorRequest[0](group)
-        response = self._make_blocking_req(client, request)
-        client.cluster.add_group_coordinator(group, response)
 
-        return client.cluster.coordinator_for_group(group)
+        # not all brokers might return a good response... Try all of them
+        for broker in client.cluster.brokers():
+            try:
+                coord_resp = self._make_blocking_req(client, request, nodeid=broker.nodeId)
+                if coord_resp:
+                    client.cluster.add_group_coordinator(group, coord_resp)
+                    return client.cluster.coordinator_for_group(group)
+            except AssertionError:
+                continue
+
+        return None
+
 
     def get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
         version = client.check_version(coord_id)
