@@ -1,17 +1,17 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-docker.cpu.system,gauge,,fraction,,The fraction of time the CPU is executing system calls on behalf of processes of this container,0,docker,cpu system
-docker.cpu.system.95percentile,gauge,,fraction,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
-docker.cpu.system.avg,gauge,,fraction,,Average value of docker.cpu.system,0,docker,cpu system avg
+docker.cpu.system,gauge,,percent,,The percent of time the CPU is executing system calls on behalf of processes of this container,0,docker,cpu system
+docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
+docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg
 docker.cpu.system.count,rate,,sample,second,The rate that the value of docker.cpu.system was sampled,0,docker,cpu system count
-docker.cpu.system.max,gauge,,fraction,,Max value of docker.cpu.system,0,docker,cpu system max
-docker.cpu.system.median,gauge,,fraction,,Median value of docker.cpu.system,0,docker,cpu system median
-docker.cpu.user,gauge,,fraction,,The fraction of time the CPU is under direct control of processes of this container,0,docker,cpu user
-docker.cpu.user.95percentile,gauge,,fraction,,95th percentile of docker.cpu.user,0,docker,cpu user 95%
-docker.cpu.user.avg,gauge,,fraction,,Average value of docker.cpu.user,0,docker,cpu user avg
+docker.cpu.system.max,gauge,,percent,,Max value of docker.cpu.system,0,docker,cpu system max
+docker.cpu.system.median,gauge,,percent,,Median value of docker.cpu.system,0,docker,cpu system median
+docker.cpu.user,gauge,,percent,,The percent of time the CPU is under direct control of processes of this container,0,docker,cpu user
+docker.cpu.user.95percentile,gauge,,percent,,95th percentile of docker.cpu.user,0,docker,cpu user 95%
+docker.cpu.user.avg,gauge,,percent,,Average value of docker.cpu.user,0,docker,cpu user avg
 docker.cpu.user.count,rate,,sample,second,The rate that the value of docker.cpu.user was sampled,0,docker,cpu user count
-docker.cpu.user.max,gauge,,fraction,,Max value of docker.cpu.user,0,docker,cpu user max
-docker.cpu.user.median,gauge,,fraction,,Median value of docker.cpu.user,0,docker,cpu user median
-docker.cpu.usage,gauge,,fraction,,the fraction of CPU time obtained by this container,0,docker,docker.cpu.usage
+docker.cpu.user.max,gauge,,percent,,Max value of docker.cpu.user,0,docker,cpu user max
+docker.cpu.user.median,gauge,,percent,,Median value of docker.cpu.user,0,docker,cpu user median
+docker.cpu.usage,gauge,,percent,,The percent of CPU time obtained by this container,0,docker,docker.cpu.usage
 docker.cpu.throttled,gauge,,,,Number of times the cgroup has been throttled,-1,docker,cpu throttled
 docker.mem.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),0,docker,mem cache
 docker.mem.cache.95percentile,gauge,,byte,,95th percentile value of docker.mem.cache,0,docker,mem cache 95%
