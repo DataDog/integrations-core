@@ -29,8 +29,8 @@ class SNMPTestCase(AgentCheckTest):
 
     AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
     PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
-    AUTH_KEY='doggiepass'
-    PRIV_KEY='doggiePRIVkey'
+    AUTH_KEY = 'doggiepass'
+    PRIV_KEY = 'doggiePRIVkey'
 
     SNMP_CONF = {
         'ip_address': "localhost",
