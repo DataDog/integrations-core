@@ -52,9 +52,6 @@ class Consumer(threading.Thread):
                                  auto_offset_reset='earliest')
         consumer.subscribe(['my_topic'])
 
-        for message in consumer:
-            print (message)
-
 
 @attr(requires='kafka_consumer')
 class TestKafka(AgentCheckTest):

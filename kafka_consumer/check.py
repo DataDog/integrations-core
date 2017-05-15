@@ -60,6 +60,7 @@ class KafkaCheck(AgentCheck):
 
         consumer_offsets = {}
         topics = defaultdict(set)
+        import pdb ; pdb.set_trace()
         try:
             if not zk_offsets:
                 topics, consumer_offsets = self.get_offsets_kafka(instance, consumer_groups)
@@ -97,7 +98,8 @@ class KafkaCheck(AgentCheck):
         finally:
             try:
                 # we might not need this.
-                cli.close()
+                # cli.close()
+                pass
             except Exception:
                 self.log.exception('Error cleaning up Kafka connection')
 

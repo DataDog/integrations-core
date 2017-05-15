@@ -26,9 +26,8 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      wait_on_docker_logs('kafka_consumer', 25, 'boomshakalaka')
       # wait_on_docker_logs('resources_kafka_1', 15, 'Partition [test,0] on broker 1001')
-      wait_on_docker_logs('resources_zookeeper_1', 90, 'Error Path:/consumers/my_consumer/offsets')
+      # wait_on_docker_logs('resources_zookeeper_1', 90, 'Error Path:/consumers/my_consumer/offsets')
     end
 
     task script: ['ci:common:script'] do
