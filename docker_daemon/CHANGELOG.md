@@ -1,6 +1,14 @@
 # CHANGELOG - docker_daemon
 
-1.1.0/2017-04-24
+1.1.1 / 2017-05-11
+==================
+### Changes
+
+* [BUGFIX] catch IOError exception when container exits in the middle of a check run. See [#408][]
+* [BUGFIX] fix image name when using sha256 for specs. See [#393][]
+
+
+1.1.0 / 2017-04-24
 ==================
 ### Changes
 
@@ -12,7 +20,7 @@
 * [FEATURE] adds the ability to monitor for docker exits failure with service check `docker.exit`. See [#290][]
 * [FEATURE] collect rancher label container name as tag. See [#282][]
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 ### Changes
 
@@ -26,3 +34,5 @@
 [#333]: https://github.com/DataDog/integrations-core/issues/333
 [#345]: https://github.com/DataDog/integrations-core/issues/345
 [#348]: https://github.com/DataDog/integrations-core/issues/348
+[#393]: https://github.com/DataDog/integrations-core/issues/393
+[#408]: https://github.com/DataDog/integrations-core/issues/408

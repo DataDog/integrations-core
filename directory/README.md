@@ -1,30 +1,66 @@
-# Directory Integration
+# Directory Check
 
-## Overview
+# Overview
 
-This check monitor and report metrics on files for a set of directories.
+Capture metrics from directories and files of your choosing. The Agent will collect:
 
-## Installation
+  * number of files
+  * file size
+  * age of the last modification
+  * age of the creation
 
-Ensure that the user account running the Agent (typically dd-agent) has read
-access to the monitored directories and files.
+# Installation
 
-## Configuration
+The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
 
-Edit the `conf.d/directory.yaml` file.
+# Configuration
 
-## Validation
+Create a file `directory.yaml` in the Agent's `conf.d` directory:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+init_config:
 
-    Checks
-    ======
+instances:
+  - directory: "/path/to/directory" # the only required option
+    name: "my_monitored_dir"        # What the Agent will tag this directory's metrics with. Defaults to "directory"
+    pattern: "*.log"                # defaults to "*" (all files)
+    recursive: True                 # default False
+    countonly: False                # set to True to only collect the number of files matching 'pattern'. Useful for very large directories.
+```
 
-        directory
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics & 0 events
+Ensure that the user running the Agent process (usually `dd-agent`) has read access to the directories, subdirectories, and files you configure.
 
-## Compatibility
+Restart the Agent to begin sending metrics on your chosen directories to Datadog.
 
-The Directory check is compatible with all major platforms
+# Validation
+
+Run the Agent's `info` subcommand and look for `directory` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    directory
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Troubleshooting
+
+# Compatibility
+
+The directory check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks
+
+# Further Reading

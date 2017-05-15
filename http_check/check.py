@@ -6,7 +6,6 @@
 from datetime import datetime
 import _strptime # noqa
 import os.path
-from os import environ
 import re
 import socket
 import ssl
@@ -155,9 +154,6 @@ class HTTPCheck(NetworkCheck):
 
         self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
 
-        self.proxies['no'] = environ.get('no_proxy',
-                                         environ.get('NO_PROXY', None)
-                                         )
 
     def _load_conf(self, instance):
         # Fetches the conf
@@ -224,18 +220,7 @@ class HTTPCheck(NetworkCheck):
                 self.warning("Skipping SSL certificate validation for %s based on configuration"
                              % addr)
 
-            instance_proxy = self.proxies.copy()
-
-            # disable proxy if necessary
-            if skip_proxy:
-                instance_proxy.pop('http')
-                instance_proxy.pop('https')
-            elif self.proxies['no']:
-                for url in self.proxies['no'].replace(';', ',').split(","):
-                    if url in parsed_uri.netloc:
-                        instance_proxy.pop('http')
-                        instance_proxy.pop('https')
-
+            instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
 
             auth = None

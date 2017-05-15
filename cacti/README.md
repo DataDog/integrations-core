@@ -1,17 +1,17 @@
 # Cacti Integration
 
-## Overview
+# Overview
 
 Get metrics from cacti service in real time to:
 
 * Visualize and monitor cacti states
 * Be notified about cacti failovers and events.
 
-## Installation
+# Installation
 
-Install the `dd-check-cacti` package manually or with your favorite configuration manager
+The Cacti check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Cacti servers.
 
-## Configuration
+# Configuration
 
 Create a datadog user with read-only rights to the Cacti database
 
@@ -61,18 +61,31 @@ else echo -e "\033[0;31mdd-agent can not read the RRD files\033[0m";
 fi'
 ```
 
-## Validation
+# Validation
 
-When you run `datadog-agent info` you should see something like the following:
+Run the Agent's `info` subcommand and look for `cacti` under the Checks section:
 
-    Checks
-    ======
+```
+  Checks
+  ======
+    [...]
 
-        cacti
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    cacti
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
 
-## Compatibility
+    [...]
+```
+
+# Troubleshooting
+
+# Compatibility
 
 The cacti check is compatible with all major platforms
+
+# Metrics
+
+# Events
+
+# Service Checks

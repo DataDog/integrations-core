@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "gearmand",
-  "short_description": "Visualize Gearman performance, know how many tasks are queued or running, correlate the performance of Gearman with the rest of your applications.",
+  "short_description": "Track the number of jobs queued and running — in total or by task.",
   "support": "core",
   "supported_os": [
     "linux",
