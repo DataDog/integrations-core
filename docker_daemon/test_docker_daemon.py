@@ -67,7 +67,7 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
 
         container_fail = self.docker_client.create_container(
-            "nginx:latest", detach=True, name='test-exit-fail', entrypoint='/bin/false')
+            "nginx:latest", detach=True, name='event-tags-test', entrypoint='/bin/false')
         log.debug('start nginx:latest with entrypoint /bin/false')
         self.docker_client.start(container_fail)
         log.debug('container exited with %s' % self.docker_client.wait(container_fail, 1))
@@ -77,9 +77,15 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
         self.run_check(config, force_reload=True)
         self.docker_client.remove_container(container_fail)
 
-        self.assertEqual(len(self.events), 1)
-        self.assertIn("exitCode:1", self.events[0]["tags"])
-        self.assertNotIn("name:test-exit-fail", self.events[0]["tags"])
+        # Previous tests might have left unprocessed events, to be ignored
+        filtered_events = []
+        for event in self.events:
+            if 'container_name:event-tags-test' in event.get('tags', []):
+                filtered_events.append(event)
+
+        self.assertEqual(len(filtered_events), 1)
+        self.assertIn("exitCode:1", filtered_events[0]["tags"])
+        self.assertNotIn("name:test-exit-fail", filtered_events[0]["tags"])
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemon(AgentCheckTest):
@@ -687,8 +693,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 [['datadog/docker-dd-agent'], None]),
         ]
         for entity in entities:
-            self.assertEqual(sorted(DockerUtil.image_tag_extractor(entity[0], 0)), sorted(entity[1][0]))
-            tags = DockerUtil.image_tag_extractor(entity[0], 1)
+            self.assertEqual(sorted(DockerUtil().image_tag_extractor(entity[0], 0)), sorted(entity[1][0]))
+            tags = DockerUtil().image_tag_extractor(entity[0], 1)
             if isinstance(entity[1][1], list):
                 self.assertEqual(sorted(tags), sorted(entity[1][1]))
             else:
