@@ -164,7 +164,11 @@ instances:
     # Default to None
     # Example:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
-
+    # List of docker event attributes to add as tags of the datadog events
+    # Defaults to None.
+    # 
+    # event_attributes_as_tags: ["signal"]
+    
     ## Rate Filtering
     ##
 

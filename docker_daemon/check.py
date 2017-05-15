@@ -132,6 +132,13 @@ TAG_EXTRACTORS = {
     "container_id": lambda c: [c["Id"]],
 }
 
+# Event attributes not to include as tags since they are collected with e.g. performance tags
+EXCLUDED_ATTRIBUTES = [
+    'image',
+    'name',
+    'container',
+]
+
 CONTAINER = "container"
 PERFORMANCE = "performance"
 FILTERED = "filtered"
@@ -231,6 +238,7 @@ class DockerDaemon(AgentCheck):
             self.collect_container_count = _is_affirmative(instance.get('collect_container_count', False))
             self.collect_volume_count = _is_affirmative(instance.get('collect_volume_count', False))
             self.collect_events = _is_affirmative(instance.get('collect_events', True))
+            self.event_attributes_as_tags = instance.get('event_attributes_as_tags', [])
             self.collect_image_size = _is_affirmative(instance.get('collect_image_size', False))
             self.collect_disk_stats = _is_affirmative(instance.get('collect_disk_stats', False))
             self.collect_exit_codes = _is_affirmative(instance.get('collect_exit_codes', False))
@@ -845,6 +853,10 @@ class DockerDaemon(AgentCheck):
                     container_name = DockerUtil.container_name_extractor(cont)[0]
                     container_tags.update(self._get_tags(cont, PERFORMANCE))
                     container_tags.add('container_name:%s' % container_name)
+                    # Add additionnal docker event attributes as tag
+                    for attr in self.event_attributes_as_tags:
+                        if attr in event['Actor']['Attributes'] and attr not in EXCLUDED_ATTRIBUTES:
+                            container_tags.add('%s:%s' % (attr, event['Actor']['Attributes'][attr]))
 
                 # health checks generate tons of these so we treat them separately and lower their priority
                 if event['status'].startswith('exec_create:') or event['status'].startswith('exec_start:'):
