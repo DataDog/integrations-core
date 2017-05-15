@@ -24,6 +24,7 @@ from utils.dockerutil import (DockerUtil,
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
+from utils.orchestrator import NomadUtil
 
 
 EVENT_TYPE = 'docker'
@@ -183,6 +184,9 @@ class DockerDaemon(AgentCheck):
                     self.kubeutil = None
                     self.log.error("Couldn't instantiate the kubernetes client, "
                         "subsequent kubernetes calls will fail as well. Error: %s" % str(ex))
+
+            if Platform.is_nomad():
+                self.nomadutil = NomadUtil()
 
             # We configure the check with the right cgroup settings for this host
             # Just needs to be done once
@@ -480,6 +484,12 @@ class DockerDaemon(AgentCheck):
                 kube_tags = self.kube_labels.get(pod_name)
                 if kube_tags:
                     tags.extend(list(kube_tags))
+
+            # Add nomad tags
+            if Platform.is_nomad():
+                nomad_tags = self.nomadutil.extract_container_tags(entity)
+                if nomad_tags:
+                    tags.extend(nomad_tags)
 
         return tags
 
@@ -796,6 +806,8 @@ class DockerDaemon(AgentCheck):
             self._invalidate_network_mapping_cache(events)
         if changed_container_ids and self._service_discovery:
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
+        if changed_container_ids and Platform.is_nomad():
+            self.nomadutil.invalidate_cache(events)
         return events
 
     def _pre_aggregate_events(self, api_events, containers_by_id):
