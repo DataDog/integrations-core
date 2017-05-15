@@ -743,3 +743,33 @@ class TestCheckDockerDaemon(AgentCheckTest):
             if tags is not None:
                 expected_tags += tags
             self.assertMetric(mname, tags=expected_tags, count=1, at_least=1)
+
+    def mock_parse_cgroup_file(self, stat_file):
+        with open(stat_file, 'r') as fp:
+            if 'blkio' in stat_file:
+                return {}
+            elif 'cpuacct.usage' in stat_file:
+                return dict({'usage': str(int(fp.read())/10000000)})
+            # mocked part
+            elif 'cpu' in stat_file:
+                return {'user': 1000 * self.run, 'system': 1000 * self.run}
+                self.run += 1
+            else:
+                return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
+
+    def test_filter_capped_metrics(self):
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+                "capped_metrics": {
+                    "docker.cpu.user": 100,
+                    "docker.cpu.system": 100,
+                }
+            }]
+        }
+        self.run = 1
+        self.run_check_twice(config, mocks={'_parse_cgroup_file': self.mock_parse_cgroup_file})
+        # last 2 points should be dropped so the rate should be 0
+        self.assertMetric('docker.cpu.user', value=0.0)
+        self.assertMetric('docker.cpu.system', value=0.0)
