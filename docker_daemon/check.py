@@ -34,6 +34,8 @@ EXIT_SERVICE_CHECK_NAME = 'docker.exit'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
+DISK_STATS_RE = re.compile('([0-9.]+)\s?([a-zA-Z]+)')
+
 GAUGE = AgentCheck.gauge
 RATE = AgentCheck.rate
 HISTORATE = AgentCheck.generate_historate_func(["container_name"])
@@ -987,7 +989,11 @@ class DockerDaemon(AgentCheck):
         """Cast the disk stats to float and convert them to bytes"""
         for name, raw_val in metrics.iteritems():
             if raw_val:
-                val, unit = raw_val.split(' ')
+                match = DISK_STATS_RE.search(raw_val)
+                if match is None or len(match.groups()) != 2:
+                    self.log.warning('Can\'t parse value %s for disk metric %s. Dropping it.' % (raw_val, name))
+                    metrics[name] = None
+                val, unit = match.groups()
                 # by default some are uppercased others lowercased. That's error prone.
                 unit = unit.lower()
                 try:
