@@ -41,7 +41,7 @@ class CheckSSH(AgentCheck):
         params = []
         for option, required, default, expected_type in self.OPTIONS:
             value = instance.get(option)
-            if required and (not value or type(value)) != expected_type:
+            if required and (not value or type(value) != expected_type):
                 raise Exception("Please specify a valid {0}".format(option))
 
             if value is None or type(value) != expected_type:
