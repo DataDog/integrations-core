@@ -53,7 +53,7 @@ class Consumer(threading.Thread):
         consumer.subscribe(['my_topic'])
 
         for message in consumer:
-            print (message)
+            pass
 
 
 @attr(requires='kafka_consumer')
