@@ -752,6 +752,8 @@ class DockerDaemon(AgentCheck):
                 networks = self.network_mappings[container['Id']]
             else:
                 networks = self.docker_util.get_container_network_mapping(container)
+                if not networks:
+                    networks = {'eth0': 'bridge'}
                 self.network_mappings[container['Id']] = networks
         except Exception as e:
             # Revert to previous behaviour if the method is missing or failing
