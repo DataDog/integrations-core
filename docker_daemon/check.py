@@ -837,7 +837,10 @@ class DockerDaemon(AgentCheck):
                 continue
             # from may be missing (for network events for example)
             if 'from' in event:
-                events[event['from']].appendleft(event)
+                image_name = event['from']
+                if image_name.startswith('sha256:'):
+                    image_name = self.docker_util.image_name_extractor({'Image': image_name})
+                events[image_name].appendleft(event)
         return events
 
     def _format_events(self, aggregated_events, containers_by_id):
