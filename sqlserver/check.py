@@ -118,7 +118,7 @@ class SQLServer(AgentCheck):
                 # check to see if the database exists before we try any connections to it
                 with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE):
                     db_exists, context = self._check_db_exists(instance)
-                
+
                 if db_exists:
                     self.do_check[instance_key] = True
                     if instance.get('stored_procedure') is None:
@@ -145,12 +145,12 @@ class SQLServer(AgentCheck):
         If not then we won't do any checks
         This allows the same config to be installed on many servers but fail gracefully
         """
-        
+
         dsn, host, username, password, database, driver = self._get_access_info(instance, self.DEFAULT_DB_KEY)
         context = "%s - %s" % (host, database)
         if self.existing_databases is None:
             cursor = self.get_cursor(instance, None, self.DEFAULT_DATABASE)
-        
+
             try:
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
@@ -161,7 +161,7 @@ class SQLServer(AgentCheck):
             except Exception, e:
                 self.log.error("Failed to check if database %s exists: %s" % (database, e))
                 return False, context
-        
+
         return database in self.existing_databases, context
 
     def _make_metric_list_to_collect(self, instance, custom_metrics):
@@ -378,7 +378,7 @@ class SQLServer(AgentCheck):
                 self.do_stored_procedure_check(instance, proc)
         else:
             self.log.debug("Skipping check")
-            
+
     def do_perf_counter_check(self, instance):
         """
         Fetch the metrics from the sys.dm_os_performance_counters table
@@ -421,10 +421,10 @@ class SQLServer(AgentCheck):
                     else:
                         self.log.warning('%s is not a recognised type from procedure %s, metric %s'
                                          % (row.type, proc, row.metric))
-                        
+
             except Exception, e:
                 self.log.warning("Could not call procedure %s: %s" % (proc, e))
-                
+
             self.close_cursor(cursor)
             self.close_db_connections(instance, self.DEFAULT_DB_KEY)
         else:
@@ -445,7 +445,7 @@ class SQLServer(AgentCheck):
             should_run = result[0] == 1
         except Exception, e:
             self.log.error("Failed to run proc_only_if sql %s : %s" % (sql, e))
-        
+
         self.close_cursor(cursor)
         self.close_db_connections(instance, self.PROC_GUARD_DB_KEY)
         return should_run

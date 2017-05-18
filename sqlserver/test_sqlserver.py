@@ -7,7 +7,6 @@ import copy
 from nose.plugins.attrib import attr
 
 # 3p
-import logging
 from testfixtures import LogCapture
 
 # project
