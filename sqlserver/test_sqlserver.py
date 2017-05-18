@@ -148,10 +148,10 @@ class TestSqlserver(AgentCheckTest):
 
         with LogCapture() as l:
             self.run_check(config, force_reload=True)
-            l.check(
-                ('checks.sqlserver', 'ERROR', 'Skipping SQL Server instance'),
-                ('checks.sqlserver', 'DEBUG', 'Skipping check'),
-            )
+            assert l.records[0].message == 'Skipping SQL Server instance'
+            assert l.records[0].levelname == 'ERROR'
+            assert l.records[1].message == 'Skipping check'
+            assert l.records[1].levelname == 'DEBUG'
 
         self.assertServiceCheckCritical('sqlserver.can_connect',
                                         tags=['host:(local)\SQL2012SP1', 'db:master'])
