@@ -74,7 +74,6 @@ FACTORS = {
 
 QUANTITY_EXP = re.compile(r'[-+]?\d+[\.]?\d*[numkMGTPE]?i?')
 
-TAG_SEPARATOR = "|"
 
 class Kubernetes(AgentCheck):
     """ Collect metrics and events from kubelet """
@@ -445,12 +444,11 @@ class Kubernetes(AgentCheck):
             if 'namespace' in pod_meta:
                 pod_tags.append('kube_namespace:%s' % pod_meta['namespace'])
 
-            pod_tags.sort()
-            tags_map[TAG_SEPARATOR.join(pod_tags)] += 1
+            tags_map[frozenset(pod_tags)] += 1
 
         commmon_tags = instance.get('tags', [])
         for pod_tags, pod_count in tags_map.iteritems():
-            tags = pod_tags.split(TAG_SEPARATOR)
+            tags = list(pod_tags)
             tags.extend(commmon_tags)
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, tags)
 
