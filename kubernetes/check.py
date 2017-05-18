@@ -107,9 +107,17 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-        # Delay init to first check (need the instance options)
-        self._collect_events = None
-        self.event_retriever = None
+        if inst:
+            self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
+            if self._collect_events:
+                self.event_retriever = self.kubeutil.get_event_retriever()
+            else:
+                # Only fetch service and pod events for service mapping and SD
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'])
+        else:
+            self._collect_events = None
+            self.event_retriever = None
+
 
     def _perform_kubelet_checks(self, url):
         service_check_base = NAMESPACE + '.kubelet.check'
@@ -164,14 +172,6 @@ class Kubernetes(AgentCheck):
         except:
             pods_list = None
 
-        if self._collect_events is None:
-            self._collect_events = _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
-            if self._collect_events:
-                self.event_retriever = self.kubeutil.get_event_retriever()
-            else:
-                # Only fetch service and pod events for service mapping and SD
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'])
-
         # kubelet health checks
         self._perform_kubelet_checks(self.kubeutil.kube_health_url)
 
@@ -183,12 +183,11 @@ class Kubernetes(AgentCheck):
         if self.event_retriever is not None:
             try:
                 events = self.event_retriever.get_event_array()
-                if events and self._collect_events:
-                    self._process_events(instance, pods_list, events)
-                changed_pods = self.kubeutil.process_events(events)
-                changed_cids = self.kubeutil.match_containers_for_pods(changed_pods, pods_list)
+                changed_cids = self.kubeutil.process_events(events, podlist=pods_list)
                 if (changed_cids and self._sd_backend):
                     self._sd_backend.update_checks(changed_cids)
+                if events and self._collect_events:
+                    self._update_kube_events(instance, pods_list, events)
             except Exception as ex:
                 self.log.error("Event collection failed: %s" % str(ex))
 
@@ -455,7 +454,7 @@ class Kubernetes(AgentCheck):
             tags.extend(commmon_tags)
             self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, tags)
 
-    def _process_events(self, instance, pods_list, event_items):
+    def _update_kube_events(self, instance, pods_list, event_items):
         """
         Process kube events and send ddog events
         The namespace filtering is done here instead of KubeEventRetriever
