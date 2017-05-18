@@ -474,6 +474,7 @@ class MongoDb(AgentCheck):
                 'member_status:' + short_status,
                 'previous_member_status:' + last_short_status,
                 'replset:' + replset_name,
+                'replset_state:' + state
             ]
         })
 
@@ -779,15 +780,6 @@ class MongoDb(AgentCheck):
                         message=message)
                     raise Exception(message)
 
-                # Replication set information
-                replset_name = replSet['set']
-                replset_state = self.get_state_name(replSet['myState']).lower()
-
-                tags.extend([
-                    u"replset_name:{0}".format(replset_name),
-                    u"replset_state:{0}".format(replset_state),
-                ])
-
                 # Find nodes: master and current node (ourself)
                 for member in replSet.get('members'):
                     if member.get('self'):
@@ -819,7 +811,7 @@ class MongoDb(AgentCheck):
 
                 # Submit events
                 self._report_replica_set_state(
-                    data['state'], clean_server_name, replset_name, self.agentConfig
+                    data['state'], clean_server_name, replSet['set'], self.agentConfig
                 )
 
         except Exception as e:
