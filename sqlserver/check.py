@@ -126,7 +126,7 @@ class SQLServer(AgentCheck):
                             self._make_metric_list_to_collect(instance, self.custom_metrics)
                 else:
                     # How much do we care that the DB doesn't exist?
-                    ignore = instance.get('ignore_missing_database')
+                    ignore = _is_affirmative(instance.get("ignore_missing_database", False))
                     if ignore is not None and ignore:
                         # not much : we expect it. leave checks disabled
                         self.log.info("Database %s does not exist. Disabling checks for this instance." % (context))
