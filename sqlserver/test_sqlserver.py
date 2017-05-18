@@ -148,9 +148,9 @@ class TestSqlserver(AgentCheckTest):
 
         with LogCapture() as l:
             self.run_check(config, force_reload=True)
-            assert l.records[0].message == 'Skipping SQL Server instance'
+            assert l.records[0].msg == 'Skipping SQL Server instance'
             assert l.records[0].levelname == 'ERROR'
-            assert l.records[1].message == 'Skipping check'
+            assert l.records[1].msg == 'Skipping check'
             assert l.records[1].levelname == 'DEBUG'
 
         self.assertServiceCheckCritical('sqlserver.can_connect',
