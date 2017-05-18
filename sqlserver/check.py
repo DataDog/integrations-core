@@ -112,10 +112,12 @@ class SQLServer(AgentCheck):
         self.custom_metrics = init_config.get('custom_metrics', [])
         for instance in instances:
             try:
+                instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
+                self.do_check[instance_key] = False
+
                 # check to see if the database exists before we try any connections to it
                 with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE):
                     db_exists, context = self._check_db_exists(instance)
-                instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
                 
                 if db_exists:
                     self.do_check[instance_key] = True
@@ -126,8 +128,7 @@ class SQLServer(AgentCheck):
                     # How much do we care that the DB doesn't exist?
                     ignore = instance.get('ignore_missing_database')
                     if ignore is not None and ignore:
-                        # not much : we expect it. Disable checks
-                        self.do_check[instance_key] = False
+                        # not much : we expect it. leave checks disabled
                         self.log.info("Database %s does not exist. Disabling checks for this instance." % (context))
                     else:
                         # yes we do. Keep trying
@@ -526,7 +527,6 @@ class SQLServer(AgentCheck):
         except Exception as e:
             cx = "%s - %s" % (host, database)
             message = "Unable to connect to SQL Server for instance %s." % cx
-            self.log.warning("%s Exception: %s", message, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=message)
 
