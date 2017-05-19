@@ -13,9 +13,6 @@ import re
 import time
 import calendar
 
-# 3rd party
-import simplejson as json
-
 # project
 from checks import AgentCheck
 from config import _is_affirmative

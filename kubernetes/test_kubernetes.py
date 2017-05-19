@@ -1,4 +1,4 @@
-    # (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -613,7 +613,7 @@ class TestKubeutil(unittest.TestCase):
             (
                 {},
                 {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': None}
-            ), (   
+            ), (
                 {'bearer_token': 'foo_tok'},
                 {'verify': False, 'timeout': 10, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok'}, 'cert': None}
             ), (
