@@ -20,11 +20,11 @@ class Gearman(AgentCheck):
         return {"gearman": gearman.__version__}
 
     def _get_client(self,host,port):
-        if not gearman_client:
+        if not self.gearman_client:
             self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
-            gearman_client = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
+            self.gearman_client = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
 
-        return gearman_client
+        return self.gearman_client
 
     def _get_aggregate_metrics(self, tasks, tags):
         running = 0
