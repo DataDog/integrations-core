@@ -14,14 +14,17 @@ MAX_NUM_TASKS = 200
 
 class Gearman(AgentCheck):
     SERVICE_CHECK_NAME = 'gearman.can_connect'
+    gearman_client = None
 
     def get_library_versions(self):
         return {"gearman": gearman.__version__}
 
     def _get_client(self,host,port):
-        self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
-        return gearman.GearmanAdminClient(["%s:%s" %
-            (host, port)])
+        if not gearman_client:
+            self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
+            gearman_client = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
+
+        return gearman_client
 
     def _get_aggregate_metrics(self, tasks, tags):
         running = 0
