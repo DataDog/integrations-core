@@ -1,0 +1,30 @@
+init_config:
+
+# TODO add notes about both broker version 0.10.2 and new-style consumer groups
+# required for monitor_unlisted_consumer_groups feature to work. Otherwise,
+# must list not only consumer groups, but also their topics.
+
+instances:
+  # - kafka_connect_str: localhost:9092
+  #   consumer_groups:
+  #     my_consumer_group_1:
+  #       - topic_1
+  #       - topic_2
+  #     my_consumer_group_2:
+  #       - topic_1
+  #       - topic_2
+  #   # Setting monitor_unlisted_consumer_groups to True will tell the check to
+  #   # discover and fetch all offsets for all consumer groups stored in Kafka.
+  #   # While this is often convenient, it can also spam a tremendous number of
+  #   # metrics, so use judiciously.
+  #   monitor_unlisted_consumer_groups: False
+  #
+  # Production example with redundant hosts:
+  # In a production environment, it's often useful to specify multiple Kafka
+  # brokers for a single check instance. This way you only generate a single
+  # check process, but if one host goes down, KafkaClient will try contacting
+  # the next host. Details: https://github.com/DataDog/dd-agent/issues/2943
+  #
+  # - kafka_connect_str:
+  #   - <kafka_host1:port>
+  #   - <kafka_host2:port>
