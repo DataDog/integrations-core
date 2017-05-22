@@ -31,16 +31,6 @@ docker.mem.swap.avg,gauge,,byte,,Average value of docker.mem.swap,0,docker,mem s
 docker.mem.swap.count,rate,,sample,second,The rate that the value of docker.mem.swap was sampled,0,docker,mem swap count
 docker.mem.swap.max,gauge,,byte,,Max value of docker.mem.swap,0,docker,mem swap max
 docker.mem.swap.median,gauge,,byte,,Median value of docker.mem.swap,0,docker,mem swap median
-docker.mem.active_anon,gauge,,byte,,"The amount of ""active"" RSS memory. Active memory is not swapped to disk",0,docker,mem active rss
-docker.mem.inactive_anon,gauge,,byte,,"The amount of ""inactive"" RSS memory. Inactive memory is swapped to disk when necessary",0,docker,mem inactive rss
-docker.mem.active_file,gauge,,byte,,"The amount of ""active"" cache memory. Active memory is reclaimed by the system only after ""inactive"" has been reclaimed",0,docker,mem active cache
-docker.mem.inactive_file,gauge,,byte,,"The amount of ""inactive"" cache memory. Inactive memory may be reclaimed first when the system needs memory",0,docker,mem inactive cache
-docker.mem.mapped_file,gauge,,byte,,The amount of memory mapped by the processes in the control group,0,docker,mem mapped
-docker.mem.pgfault,gauge,,,,The rate that processes in the container trigger page faults by accessing a nonexistent or protected part of its virtual address space. Usually a page fault of this type results in a segmentation fault,-1,docker,pgfault
-docker.mem.pgmajfault,gauge,,,,The rate that processes in the container trigger page faults by accessing a part virtual address space that was swapped out or corresponded to a mapped file. Usually a page fault of type results in fetching data from disk instead of from memory,-1,docker,maj pgfault
-docker.mem.pgpgin,gauge,,page,second,"The rate at which pages are ""charged"" (added to the accounting) of a cgroup",0,docker,mem pgpgin
-docker.mem.pgpgout,gauge,,page,second,"The rate at which pages are ""uncharged"" (removed from the accounting) of a cgroup",0,docker,mem pgpgout
-docker.mem.unevictable,gauge,,byte,,The amount of memory that cannot be reclaimed. Usually this memory contains sensitive data and has been locked to ensure that it never swaps to disk,0,docker,mem unevictable
 docker.container.size_rw,gauge,,byte,,Total size of all the files in the container which have been created or changed by processes running in the container,0,docker,changed files size
 docker.container.size_rw.95percentile,gauge,,byte,,95th percentile of docker.container.size_rw,0,docker,changed files size 95%
 docker.container.size_rw.avg,gauge,,byte,,Average value of docker.container.size_rw,0,docker,changed files size avg
@@ -107,6 +97,11 @@ docker.net.bytes_sent_bytes.avg,gauge,,byte,second,Average value of docker.net.b
 docker.net.bytes_sent_bytes.count,rate,,sample,second,The rate that the value of docker.net.bytes_sent_bytes was sampled,0,docker,net sent count
 docker.net.bytes_sent_bytes.max,gauge,,byte,second,Max value of docker.container.net.bytes_sent_bytes,0,docker,net sent max
 docker.net.bytes_sent_bytes.median,gauge,,byte,second,Median value of docker.container.net.bytes_sent_bytes,0,docker,net sent median
-docker.disk.used,gauge,,byte,,Average number of bytes the container's disk uses,0,docker,used disk space
-docker.disk.free,gauge,,byte,,Average number of bytes the container's disk has free,0,docker,free disk space
-docker.disk.total,gauge,,byte,,Average number of total bytes in the container's disk,0,docker,total disk space
+docker.data.used,gauge,,byte,,Average number of bytes the container's disk uses,0,docker,used disk space
+docker.data.free,gauge,,byte,,Average number of bytes the container's disk has free,0,docker,free disk space
+docker.data.total,gauge,,byte,,Average number of total bytes in the container's disk,0,docker,total disk space
+docker.data.percent,gauge,,percent,,Average percentage of bytes the container's disk uses,0,docker,percent of used disk space
+docker.metadata.used,gauge,,byte,,Metadata space used,0,docker,metadata space used
+docker.metadata.free,gauge,,byte,,Metadata space free,0,docker,metadata space free
+docker.metadata.total,gauge,,byte,,Metadata space total,0,docker,metadata space total
+docker.metadata.percent,gauge,,percent,,The percent of total metadata space,0,docker,percent of metadata space total
