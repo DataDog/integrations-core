@@ -103,7 +103,6 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-        if inst:
             self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
             if self._collect_events:
                 self.event_retriever = self.kubeutil.get_event_retriever()
