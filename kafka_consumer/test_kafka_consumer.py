@@ -3,10 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import os
 import threading, time
 
 # 3p
 from nose.plugins.attrib import attr
+from nose import SkipTest
 from kafka import KafkaConsumer, KafkaProducer
 
 # project
@@ -77,6 +79,9 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check w/ zookeeper.
         """
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "zookeeper":
+            raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
+
         self.run_check({'instances': instance})
 
         for mname in METRICS:
@@ -88,6 +93,9 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check without zookeeper
         """
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
+            raise SkipTest("Skipping test - environment not configured for Kafka consumer offsets")
+
         config = {'instances': instance}
         config['instances'][0]['zk_offsets'] = False
         self.run_check(config)
