@@ -362,7 +362,6 @@ class ProcessCheckTest(AgentCheckTest):
     def mock_get_child_processes(self, pids):
         return [2, 3, 4]
 
-    @attr(requires='process')
     @patch('psutil.Process', return_value=MockProcess())
     def test_check_collect_children(self, mock_process):
 
