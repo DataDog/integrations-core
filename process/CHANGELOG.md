@@ -1,5 +1,12 @@
 # CHANGELOG - process
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Add option to collect metrics for children of matched processes
+
 1.0.1 / 2017-05-11
 ==================
 
