@@ -194,7 +194,7 @@ consumer_groups:
                     key = (consumer_group, topic, partition)
                     consumer_offsets[key] = offset
             except Exception:
-                self.log.expcetion('Could not read consumer offsets from kafka.')
+                self.log.exception('Could not read consumer offsets from kafka.')
 
         return topics, consumer_offsets
 
