@@ -241,14 +241,15 @@ consumer_groups:
         tps = defaultdict(set)
         for topic, partitions in topic_partitions.iteritems():
             tps[topic] = tps[unicode(topic)].union(set(partitions))
-        request = OffsetFetchRequest[self.get_api_for_version(version)](consumer_group, list(tps.iteritems()))
 
+        # TODO: find reliable way to decide what API version to use for
+        # OffsetFetchRequest.
+        request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
         response = self._make_blocking_req(client, request, nodeid=coord_id)
 
         consumer_offsets = {}
-        for resp in response.topics:
-            for topic, partition_offsets in resp:
-                for partition, offset, _, _ in partition_offsets:
-                    consumer_offsets[(topic, partition)] = offset
+        for (topic, partition_offsets) in response.topics:
+            for partition, offset, _, _ in partition_offsets:
+                consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
