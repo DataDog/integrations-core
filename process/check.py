@@ -308,6 +308,8 @@ class ProcessCheck(AgentCheck):
         ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
+        add_children = _is_affirmative(instance.get('add_children', False))
+        user = instance.get('user', False)
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -352,6 +354,12 @@ class ProcessCheck(AgentCheck):
                 pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
+
+        if add_children:
+            pids = self.add_children(pids)
+
+        if user:
+            pids = self.filter_by_user(user, pids)
 
         proc_state = self.get_process_state(name, pids)
 
@@ -424,3 +432,42 @@ class ProcessCheck(AgentCheck):
             tags=service_check_tags,
             message=message_str % (status_str[status], nb_procs, name)
         )
+
+    @staticmethod
+    def add_children(parent_pids):
+        """
+        Searches children pids for each of parent
+        pids recursively.
+        :param parent_pids: set of parent pids
+        :return: set parent and children pids
+        """
+        pids = set()
+        for ppid in parent_pids:
+            try:
+                parent = psutil.Process(ppid)
+                children = parent.children(recursive=True)
+                for child in children:
+                    pids.add(child.pid)
+            except psutil.NoSuchProcess:
+                pass
+
+        return parent_pids.union(pids)
+
+    @staticmethod
+    def filter_by_user(user, pids):
+        """
+        Filter pids by it's username.
+        :param user: string with name of system user
+        :param pids: set of pids to filter
+        :return: set of filtered pids
+        """
+        filtered_pids = set()
+        for pid in pids:
+            try:
+                proc = psutil.Process(pid)
+                if proc.username() == user:
+                    filtered_pids.add(pid)
+            except psutil.NoSuchProcess:
+                pass
+
+        return filtered_pids
