@@ -247,7 +247,8 @@ consumer_groups:
 
         consumer_offsets = {}
         for resp in response.topics:
-            for topic, (parition, offset, _, _) in resp.partitions:
-                consumer_offsets[(topic, partition)] = offset
+            for topic, partition_offsets in resp:
+                for partition, offset, _, _ in partition_offsets:
+                    consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
