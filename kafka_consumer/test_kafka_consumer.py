@@ -79,7 +79,7 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check w/ zookeeper.
         """
-        if os.environ.get('FLAVOR_OPTIONS','').lower() == "zookeeper":
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
             raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
 
         self.run_check({'instances': instance})
@@ -93,7 +93,7 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check without zookeeper
         """
-        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "zookeeper":
             raise SkipTest("Skipping test - environment not configured for Kafka consumer offsets")
 
         config = {'instances': instance}
