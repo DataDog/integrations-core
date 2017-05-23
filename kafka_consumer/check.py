@@ -246,8 +246,9 @@ consumer_groups:
 
         response = self._make_blocking_req(client, request, nodeid=coord_id)
 
-        # consumer_offsets = {}
-        # for resp in response.topics:
-        #     consumer_offsets[(resp.topic, resp.partition)] = resp.offset
+        consumer_offsets = {}
+        for resp in response.topics:
+            for partition in resp.partitions:
+                consumer_offsets[(resp.topic, partition.partition)] = partition.offset
 
-        # return consumer_offsets
+        return consumer_offsets
