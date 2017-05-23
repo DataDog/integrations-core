@@ -60,7 +60,6 @@ class KafkaCheck(AgentCheck):
 
         consumer_offsets = {}
         topics = defaultdict(set)
-        import pdb ; pdb.set_trace()
         try:
             if not zk_offsets:
                 topics, consumer_offsets = self.get_offsets_kafka(instance, consumer_groups)
