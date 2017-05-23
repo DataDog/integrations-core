@@ -97,11 +97,11 @@ docker.net.bytes_sent_bytes.avg,gauge,,byte,second,Average value of docker.net.b
 docker.net.bytes_sent_bytes.count,rate,,sample,second,The rate that the value of docker.net.bytes_sent_bytes was sampled,0,docker,net sent count
 docker.net.bytes_sent_bytes.max,gauge,,byte,second,Max value of docker.container.net.bytes_sent_bytes,0,docker,net sent max
 docker.net.bytes_sent_bytes.median,gauge,,byte,second,Median value of docker.container.net.bytes_sent_bytes,0,docker,net sent median
-docker.data.used,gauge,,byte,,Average number of bytes the container's disk uses,0,docker,used disk space
-docker.data.free,gauge,,byte,,Average number of bytes the container's disk has free,0,docker,free disk space
-docker.data.total,gauge,,byte,,Average number of total bytes in the container's disk,0,docker,total disk space
-docker.data.percent,gauge,,percent,,Average percentage of bytes the container's disk uses,0,docker,percent of used disk space
-docker.metadata.used,gauge,,byte,,Metadata space used,0,docker,metadata space used
-docker.metadata.free,gauge,,byte,,Metadata space free,0,docker,metadata space free
-docker.metadata.total,gauge,,byte,,Metadata space total,0,docker,metadata space total
-docker.metadata.percent,gauge,,percent,,The percent of total metadata space,0,docker,percent of metadata space total
+docker.data.used,gauge,,byte,,Storage pool disk space used,0,docker,used disk space
+docker.data.free,gauge,,byte,,Storage pool disk space free,0,docker,free disk space
+docker.data.total,gauge,,byte,,Storage pool disk space total,0,docker,total disk space
+docker.data.percent,gauge,,percent,,The percent of storage pool used,0,docker,percent of used disk space
+docker.metadata.used,gauge,,byte,,Storage pool metadata space used,0,docker,metadata space used
+docker.metadata.free,gauge,,byte,,Storage pool metadata space free,0,docker,metadata space free
+docker.metadata.total,gauge,,byte,,Storage pool metadata space total,0,docker,metadata space total
+docker.metadata.percent,gauge,,percent,,The percent of storage pool metadata used,0,docker,percent of metadata space total
