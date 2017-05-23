@@ -235,7 +235,6 @@ consumer_groups:
 
         return None
 
-
     def get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
         version = client.check_version(coord_id)
 
@@ -248,7 +247,7 @@ consumer_groups:
 
         consumer_offsets = {}
         for resp in response.topics:
-            for partition in resp.partitions:
-                consumer_offsets[(resp.topic, partition.partition)] = partition.offset
+            for topic, (parition, offset, _, _) in resp.partitions:
+                consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
