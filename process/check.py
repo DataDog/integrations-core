@@ -305,6 +305,7 @@ class ProcessCheck(AgentCheck):
         for pid in pids:
             try:
                 children = psutil.Process(pid).children(recursive=True)
+                self.log.debug('%s children were collected for process %s', len(children), pid)
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
