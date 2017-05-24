@@ -63,10 +63,38 @@ class GoExpvar(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._last_gc_count = defaultdict(int)
 
-    def _get_data(self, url):
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        return r.json()
+    def _get_data(self, url, instance):
+        ssl_params = {
+            'ssl': instance.get('ssl', None),
+            'ssl_keyfile': instance.get('ssl_keyfile', None),
+            'ssl_certfile': instance.get('ssl_certfile', None),
+            'ssl_verify': instance.get('ssl_verify', None),
+        }
+        for key, param in ssl_params.items():
+            if param is None:
+                del ssl_params[key]
+
+        # Load SSL configuration, if available.
+        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), str):
+            verify = ssl_params.get('ssl_verify')
+        else:
+            verify = None
+        if ssl_params.get('ssl_certfile') and ssl_params.get('ssl_keyfile'):
+            cert = (ssl_params.get('ssl_certfile'), ssl_params.get('ssl_keyfile'))
+        elif ssl_params.get('ssl_certfile'):
+            cert = ssl_params.get('ssl_certfile')
+        else:
+            cert = None
+
+        resp = requests.get(
+                url,
+                timeout=10,
+                verify=verify,
+                cert=cert
+        )
+        resp.raise_for_status()
+        return resp.json()
 
     def _load(self, instance):
         url = instance.get('expvar_url')
@@ -75,7 +103,7 @@ class GoExpvar(AgentCheck):
 
         tags = instance.get('tags', [])
         tags.append("expvar_url:%s" % url)
-        data = self._get_data(url)
+        data = self._get_data(url, instance)
         metrics = DEFAULT_METRICS + instance.get("metrics", [])
         max_metrics = instance.get("max_returned_metrics", DEFAULT_MAX_METRICS)
         namespace = instance.get('namespace', DEFAULT_METRIC_NAMESPACE)
