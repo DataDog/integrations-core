@@ -5,7 +5,6 @@
 # stdlib
 import os
 import re
-import requests
 import socket
 import urllib2
 from collections import defaultdict, Counter, deque
@@ -24,7 +23,7 @@ from utils.dockerutil import (DockerUtil,
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
-from utils.orchestrator import NomadUtil
+from utils.orchestrator import NomadUtil, ECSUtil
 
 
 EVENT_TYPE = 'docker'
@@ -147,8 +146,6 @@ FILTERED = "filtered"
 HEALTHCHECK = "healthcheck"
 IMAGE = "image"
 
-ECS_INTROSPECT_DEFAULT_PORT = 51678
-
 ERROR_ALERT_TYPE = ['oom', 'kill']
 
 def compile_filter_rules(rules):
@@ -196,6 +193,8 @@ class DockerDaemon(AgentCheck):
 
             if Platform.is_nomad():
                 self.nomadutil = NomadUtil()
+            elif Platform.is_ecs_instance():
+                self.ecsutil = ECSUtil()
 
             # We configure the check with the right cgroup settings for this host
             # Just needs to be done once
@@ -246,9 +245,6 @@ class DockerDaemon(AgentCheck):
             self.collect_exit_codes = _is_affirmative(instance.get('collect_exit_codes', False))
             self.collect_ecs_tags = _is_affirmative(instance.get('ecs_tags', True)) and Platform.is_ecs_instance()
 
-            self.ecs_tags = {}
-            self.ecs_agent_local = None
-
             self.capped_metrics = instance.get('capped_metrics')
 
         except Exception as e:
@@ -278,9 +274,6 @@ class DockerDaemon(AgentCheck):
             # Report image metrics
             if self.collect_image_stats:
                 self._count_and_weigh_images()
-
-            if self.collect_ecs_tags:
-                self.refresh_ecs_tags()
 
             if Platform.is_k8s():
                 self.kube_labels = {}
@@ -489,10 +482,8 @@ class DockerDaemon(AgentCheck):
 
             # Add ECS tags
             if self.collect_ecs_tags:
-                entity_id = entity.get("Id")
-                if entity_id in self.ecs_tags:
-                    ecs_tags = self.ecs_tags[entity_id]
-                    tags.extend(ecs_tags)
+                ecs_tags = self.ecsutil.extract_container_tags(entity)
+                tags.extend(ecs_tags)
 
             # Add kube labels
             if Platform.is_k8s():
@@ -524,56 +515,6 @@ class DockerDaemon(AgentCheck):
             entity["_tag_values"][tag_name] = TAG_EXTRACTORS[tag_name](entity)
 
         return entity["_tag_values"][tag_name]
-
-    def _is_ecs_agent_local(self):
-        """Return True if we can reach the ecs-agent over localhost, False otherwise.
-        This is needed because if the ecs-agent is started with --net=host it won't have an IP address attached.
-        """
-        if self.ecs_agent_local is not None:
-            return self.ecs_agent_local
-
-        self.ecs_agent_local = False
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(5)
-        try:
-            result = sock.connect_ex(('localhost', ECS_INTROSPECT_DEFAULT_PORT))
-        except Exception as e:
-            self.log.debug("Unable to connect to ecs-agent. Exception: {0}".format(e))
-        else:
-            if result == 0:
-                self.ecs_agent_local = True
-            else:
-                self.log.debug("ecs-agent is not available locally, encountered error code: {0}".format(result))
-        sock.close()
-        return self.ecs_agent_local
-
-    def refresh_ecs_tags(self):
-        ecs_config = self.docker_client.inspect_container('ecs-agent')
-        ip = ecs_config.get('NetworkSettings', {}).get('IPAddress')
-        ports = ecs_config.get('NetworkSettings', {}).get('Ports')
-        port = ports.keys()[0].split('/')[0] if ports else None
-        if not ip:
-            port = ECS_INTROSPECT_DEFAULT_PORT
-            if self._is_ecs_agent_local():
-                ip = "localhost"
-            elif Platform.is_containerized() and self.docker_gateway:
-                ip = self.docker_gateway
-            else:
-                self.log.warning("Unable to determine ecs-agent IP address, skipping task tagging")
-                return
-
-        ecs_tags = {}
-        try:
-            if ip and port:
-                tasks = requests.get('http://%s:%s/v1/tasks' % (ip, port)).json()
-                for task in tasks.get('Tasks', []):
-                    for container in task.get('Containers', []):
-                        tags = ['task_name:%s' % task['Family'], 'task_version:%s' % task['Version']]
-                        ecs_tags[container['DockerId']] = tags
-        except (requests.exceptions.HTTPError, requests.exceptions.HTTPError) as e:
-            self.log.warning("Unable to collect ECS task names: %s" % e)
-
-        self.ecs_tags = ecs_tags
 
     def _filter_containers(self, containers):
         if not self.docker_util.filtering_enabled:
@@ -823,8 +764,11 @@ class DockerDaemon(AgentCheck):
             self._invalidate_network_mapping_cache(events)
         if changed_container_ids and self._service_discovery:
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
-        if changed_container_ids and Platform.is_nomad():
-            self.nomadutil.invalidate_cache(events)
+        if changed_container_ids:
+            if Platform.is_nomad():
+                self.nomadutil.invalidate_cache(events)
+            elif Platform.is_ecs_instance():
+                self.ecsutil.invalidate_cache(events)
         return events
 
     def _pre_aggregate_events(self, api_events, containers_by_id):
