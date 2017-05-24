@@ -51,12 +51,13 @@ METRICS = [
 ]
 
 
-def KubeUtil_fake_retrieve_json_auth(url, timeout=10):
+def KubeUtil_fake_retrieve_json_auth(url, timeout=10, params=None):
     if url.endswith("/namespaces"):
         return json.loads(Fixtures.read_file("namespaces.json", sdk_dir=FIXTURE_DIR, string_escape=False))
     if url.endswith("/events"):
         return json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))
     return {}
+
 
 class TestKubernetes(AgentCheckTest):
 
@@ -128,6 +129,7 @@ class TestKubernetes(AgentCheckTest):
             (['kube_replication_controller:l7-lb-controller', 'kube_namespace:kube-system'], [PODS]),
             (['kube_replication_controller:redis-slave', 'kube_namespace:default'], [PODS]),
             (['kube_replication_controller:frontend', 'kube_namespace:default'], [PODS]),
+            (['kube_namespace:kube-system'], [PODS]),
             (['kube_replication_controller:heapster-v11', 'kube_namespace:kube-system'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
@@ -178,6 +180,7 @@ class TestKubernetes(AgentCheckTest):
             (['kube_replication_controller:redis-slave', 'kube_namespace:default'], [PODS]),
             (['kube_replication_controller:frontend', 'kube_namespace:default'], [PODS]),
             (['kube_replication_controller:heapster-v11', 'kube_namespace:kube-system'], [PODS]),
+            (['kube_namespace:kube-system'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
 
@@ -244,7 +247,7 @@ class TestKubernetes(AgentCheckTest):
               'image_tag:massi_ingest_k8s_events','pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar',
               'kube_bar:baz', 'kube_replication_controller:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
-            (['kube_replication_controller:dd-agent', 'kube_namespace:default'], [PODS]),
+            (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
 
@@ -297,7 +300,7 @@ class TestKubernetes(AgentCheckTest):
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
               'kube_replication_controller:dd-agent'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
             (['pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
-            (['kube_replication_controller:dd-agent', 'kube_namespace:default'], [PODS]),
+            (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
 
@@ -398,6 +401,7 @@ class TestKubernetes(AgentCheckTest):
         # Can't use run_check_twice due to specific metrics
         self.run_check(config, force_reload=True)
         self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=None, count=1)
+
 
 class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
@@ -606,11 +610,15 @@ class TestKubeutil(unittest.TestCase):
     def test_retrieve_json_auth(self, r):
         instances = [
             # tls_settings, expected_params
-            ({}, {'verify': False, 'timeout': 10, 'headers': None, 'cert': None}),
-            ({'bearer_token': 'foo_tok'}, {'verify': False, 'timeout': 10, 'headers': {'Authorization': 'Bearer foo_tok'}, 'cert': None}),
             (
-                {'bearer_token': 'foo_tok', 'apiserver_client_cert': ('foo.crt', 'foo.key')},
-                {'verify': False, 'timeout': 10, 'headers': None, 'cert': ('foo.crt', 'foo.key')}
+                {},
+                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': None}
+            ), (
+                {'bearer_token': 'foo_tok'},
+                {'verify': False, 'timeout': 10, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok'}, 'cert': None}
+            ), (
+                {'bearer_token': 'foo_tok','apiserver_client_cert': ('foo.crt', 'foo.key')},
+                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': ('foo.crt', 'foo.key')}
             ),
         ]
 
@@ -624,7 +632,7 @@ class TestKubeutil(unittest.TestCase):
         self.kubeutil.tls_settings = {'bearer_token': 'foo_tok'}
         self.kubeutil.CA_CRT_PATH = __file__
         self.kubeutil.retrieve_json_auth('url')
-        r.get.assert_called_with('url', verify=__file__, timeout=10, headers={'Authorization': 'Bearer foo_tok'}, cert=None)
+        r.get.assert_called_with('url', verify=__file__, timeout=10, params=None, headers={'Authorization': 'Bearer foo_tok'}, cert=None)
 
     def test_get_node_info(self):
         with mock.patch('utils.kubernetes.KubeUtil._fetch_host_data') as f:
