@@ -88,10 +88,10 @@ class GoExpvar(AgentCheck):
             cert = None
 
         resp = requests.get(
-                url,
-                timeout=10,
-                verify=verify,
-                cert=cert
+            url,
+            timeout=10,
+            verify=verify,
+            cert=cert
         )
         resp.raise_for_status()
         return resp.json()
