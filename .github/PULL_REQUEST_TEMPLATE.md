@@ -1,5 +1,5 @@
-*Note: Please remember to review the Datadog [Contribution Guidelines](https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md)
-if you have not yet done so.*
+<!-- *Note: Please remember to review the Datadog [Contribution Guidelines](https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md)
+if you have not yet done so.* -->
 
 ### What does this PR do?
 
