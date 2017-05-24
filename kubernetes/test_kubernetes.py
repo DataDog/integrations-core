@@ -9,6 +9,7 @@ import os
 
 # 3p
 import simplejson as json
+#from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
@@ -59,6 +60,7 @@ def KubeUtil_fake_retrieve_json_auth(url, timeout=10, params=None):
     return {}
 
 
+#@attr(requires='kubernetes')
 class TestKubernetes(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes'
@@ -238,7 +240,7 @@ class TestKubernetes(AgentCheckTest):
             (['container_name:k8s_POD.35220667_dd-agent-1rxlh_default_12c7be82-33ca-11e6-ac8f-42010af00003_f5cf585f',
               'container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh', 'kube_namespace:default', 'kube_app:dd-agent',
-              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent'],
+              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'],
             [MEM, CPU, FS, NET, NET_ERRORS]),
             (['container_name:/', 'pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['container_name:/system', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
@@ -246,7 +248,7 @@ class TestKubernetes(AgentCheckTest):
               'container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events','pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar',
-              'kube_bar:baz', 'kube_replication_controller:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
+              'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
@@ -294,11 +296,11 @@ class TestKubernetes(AgentCheckTest):
             (['container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
             (['container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
             (['pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
@@ -403,17 +405,18 @@ class TestKubernetes(AgentCheckTest):
         self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=None, count=1)
 
 
+#@attr(requires='kubernetes')
 class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
         self.kubeutil = KubeUtil()
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list', side_effect=['foo'])
-    @mock.patch('utils.kubernetes.KubeUtil.extract_kube_labels')
-    def test_get_kube_labels(self, extract_kube_labels, retrieve_pods_list):
-        self.kubeutil.get_kube_labels(excluded_keys='bar')
+    @mock.patch('utils.kubernetes.KubeUtil.extract_kube_pod_tags')
+    def test_get_kube_pod_tags(self, extract_kube_pod_tags, retrieve_pods_list):
+        self.kubeutil.get_kube_pod_tags(excluded_keys='bar')
         retrieve_pods_list.assert_called_once()
-        extract_kube_labels.assert_called_once_with('foo', excluded_keys='bar')
+        extract_kube_pod_tags.assert_called_once_with('foo', excluded_keys='bar')
 
     @mock.patch('os.path.exists', return_value=True)
     @mock.patch('utils.kubernetes.kubeutil.KubeUtil.get_auth_token', return_value='tkn')
@@ -543,28 +546,28 @@ class TestKubeutil(unittest.TestCase):
             with mock.patch('utils.kubernetes.kubeutil.KubeUtil.retrieve_json_auth', return_value=node_list):
                 self.assertEqual(self.kubeutil.get_node_hostname('ip-10-0-0-179'), expected_result)
 
-    def test_extract_kube_labels(self):
+    def test_extract_kube_pod_tags(self):
         """
-        Test with both 1.1 and 1.2 version payloads
+        Test kube_pod_tags with both 1.1 and 1.2 version payloads
         """
-        res = self.kubeutil.extract_kube_labels({}, ['foo'])
+        res = self.kubeutil.extract_kube_pod_tags({}, ['foo'])
         self.assertEqual(len(res), 0)
 
         pods = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
-        res = self.kubeutil.extract_kube_labels(pods, ['foo'])
+        res = self.kubeutil.extract_kube_pod_tags(pods, ['foo'])
         labels = set(inn for out in res.values() for inn in out)
-        self.assertEqual(len(labels), 8)
-        res = self.kubeutil.extract_kube_labels(pods, ['k8s-app'])
+        self.assertEqual(len(labels), 8 + 4)
+        res = self.kubeutil.extract_kube_pod_tags(pods, ['k8s-app'])
         labels = set(inn for out in res.values() for inn in out)
-        self.assertEqual(len(labels), 6)
+        self.assertEqual(len(labels), 6 + 4)
 
         pods = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
-        res = self.kubeutil.extract_kube_labels(pods, ['foo'])
+        res = self.kubeutil.extract_kube_pod_tags(pods, ['foo'])
         labels = set(inn for out in res.values() for inn in out)
-        self.assertEqual(len(labels), 3)
-        res = self.kubeutil.extract_kube_labels(pods, ['k8s-app'])
+        self.assertEqual(len(labels), 3 + 1)
+        res = self.kubeutil.extract_kube_pod_tags(pods, ['k8s-app'])
         labels = set(inn for out in res.values() for inn in out)
-        self.assertEqual(len(labels), 3)
+        self.assertEqual(len(labels), 3 + 1)
 
     @mock.patch('utils.kubernetes.kubeutil.KubeUtil.perform_kubelet_query')
     def test_retrieve_pods_list(self, retrieve_pods):
