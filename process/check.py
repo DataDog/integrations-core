@@ -336,6 +336,7 @@ class ProcessCheck(AgentCheck):
 
         # FIXME 6.x remove me
         if search_string is not None:
+	    assert isinstance(search_string, list)
             if "All" in search_string:
                 self.warning('Deprecated: Having "All" in your search_string will'
                          'greatly reduce the performance of the check and '
