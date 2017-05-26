@@ -31,6 +31,7 @@ dependencies:
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt ]; then pip install -r ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt; fi
         - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/Gemfile ]; then cd ~/$CIRCLE_PROJECT_REPONAME ; bundle install; cd - ; fi
+        - if [ -e ~/$CIRCLE_PROJECT_REPONAME/Gemfile ]; then cd ~/$CIRCLE_PROJECT_REPONAME ; bundle exec rake setup_agent_libs; cd - ; fi
 
 test:
     override:
