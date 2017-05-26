@@ -7,6 +7,7 @@ import copy
 from nose.plugins.attrib import attr
 
 # 3p
+from testfixtures import LogCapture
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -144,8 +145,12 @@ class TestSqlserver(AgentCheckTest):
             'timeout': 1,
         }]
 
-        with self.assertRaisesRegexp(Exception, 'Unable to connect to SQL Server'):
+        with LogCapture() as l:
             self.run_check(config, force_reload=True)
+            assert l.records[0].msg == 'Skipping SQL Server instance'
+            assert l.records[0].levelname == 'ERROR'
+            assert l.records[1].msg == 'Skipping check'
+            assert l.records[1].levelname == 'DEBUG'
 
         self.assertServiceCheckCritical('sqlserver.can_connect',
                                         tags=['host:(local)\SQL2012SP1', 'db:master'])
