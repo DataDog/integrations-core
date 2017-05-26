@@ -39,7 +39,9 @@ init_config:
 
   # Metrics collected by this check. You should not have to modify this.
   conf:
-    # v0.8.2.x Producers
+    #
+    # Producers (only v0.8.2.x)
+    #
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=ProducerRequestMetrics,name=ProducerRequestRateAndTimeMs,clientId=.*'
@@ -69,8 +71,9 @@ init_config:
             metric_type: rate
             alias: kafka.producer.message_rate
 
-
-    # v0.9.0.x Producers
+    #
+    # Producers (v0.9.0.x to v0.10.2.x)
+    #
     - include:
         domain: 'kafka.producer'
         bean_regex: 'kafka\.producer:type=producer-metrics,client-id=.*'
@@ -107,8 +110,9 @@ init_config:
             metric_type: gauge
             alias: kafka.producer.io_wait
 
-
-    # v0.8.2.x Consumers
+    #
+    # Consumers (only v0.8.2.x)
+    #
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=ConsumerFetcherManager,name=MaxLag,clientId=.*'
@@ -137,17 +141,16 @@ init_config:
           Count:
             metric_type: rate
             alias: kafka.consumer.messages_in
-
-    # Offsets committed to ZooKeeper
     - include:
+        # Offsets committed to ZooKeeper
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=ZookeeperConsumerConnector,name=ZooKeeperCommitsPerSec,clientId=.*'
         attribute:
           Count:
             metric_type: rate
             alias: kafka.consumer.zookeeper_commits
-    # Offsets committed to Kafka
     - include:
+        # Offsets committed to Kafka
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=ZookeeperConsumerConnector,name=KafkaCommitsPerSec,clientId=.*'
         attribute:
@@ -155,7 +158,9 @@ init_config:
             metric_type: rate
             alias: kafka.consumer.kafka_commits
 
-    # v0.9.0.x Consumers
+    #
+    # Consumers (v0.9.0.x to v0.10.2.x)
+    #
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=.*'
