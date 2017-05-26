@@ -206,7 +206,7 @@ class DockerDaemon(AgentCheck):
             # Set tagging options
             self.custom_tags = instance.get("tags", [])
             self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
-            self.kube_labels = {}
+            self.kube_pod_tags = {}
 
             self.use_histogram = _is_affirmative(instance.get('use_histogram', False))
             performance_tags = instance.get("performance_tags", DEFAULT_PERFORMANCE_TAGS)
@@ -276,10 +276,10 @@ class DockerDaemon(AgentCheck):
                 self._count_and_weigh_images()
 
             if Platform.is_k8s():
-                self.kube_labels = {}
+                self.kube_pod_tags = {}
                 if self.kubeutil:
                     try:
-                        self.kube_labels = self.kubeutil.get_kube_labels()
+                        self.kube_pod_tags = self.kubeutil.get_kube_pod_tags()
                     except Exception as e:
                         self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
 
@@ -485,9 +485,9 @@ class DockerDaemon(AgentCheck):
                 ecs_tags = self.ecsutil.extract_container_tags(entity)
                 tags.extend(ecs_tags)
 
-            # Add kube labels
+            # Add kube labels and creator/service tags
             if Platform.is_k8s():
-                kube_tags = self.kube_labels.get(pod_name)
+                kube_tags = self.kube_pod_tags.get(pod_name)
                 if kube_tags:
                     tags.extend(list(kube_tags))
 
