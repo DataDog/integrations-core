@@ -17,7 +17,7 @@ is available in our contribution guidelines.
 ### Versioning
 
 - [ ] Bumped the version check in `manifest.json`
-- [ ] Updated the `CHANGELOG`
+- [ ] Updated `CHANGELOG.md`
 
 ### Additional Notes
 
