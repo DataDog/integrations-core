@@ -65,10 +65,10 @@ class GoExpvar(AgentCheck):
 
     def _get_data(self, url, instance):
         ssl_params = {
-            'ssl': instance.get('ssl', None),
-            'ssl_keyfile': instance.get('ssl_keyfile', None),
-            'ssl_certfile': instance.get('ssl_certfile', None),
-            'ssl_verify': instance.get('ssl_verify', None),
+            'ssl': instance.get('ssl'),
+            'ssl_keyfile': instance.get('ssl_keyfile'),
+            'ssl_certfile': instance.get('ssl_certfile'),
+            'ssl_verify': instance.get('ssl_verify'),
         }
         for key, param in ssl_params.items():
             if param is None:
@@ -76,7 +76,7 @@ class GoExpvar(AgentCheck):
 
         # Load SSL configuration, if available.
         # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
-        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), str):
+        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), basestring):
             verify = ssl_params.get('ssl_verify')
         else:
             verify = None
