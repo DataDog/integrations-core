@@ -17,7 +17,7 @@ from tests.checks.common import AgentCheckTest, Fixtures
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
-def _get_data_mock(url):
+def _get_data_mock(url, instance):
     with open(url, 'r') as go_output:
         return json.loads(go_output.read())
 
