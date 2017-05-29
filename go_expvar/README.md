@@ -26,7 +26,7 @@ Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
 init_config:
 
 instances:
-  - expvar_url: http://localhost:<your_apps_port>/debug/vars
+  - expvar_url: http://localhost:<your_apps_port>
     # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
     namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
     # optionally define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")

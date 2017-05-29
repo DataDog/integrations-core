@@ -5,6 +5,7 @@
 
 # stdlib
 from collections import defaultdict
+from urlparse import urlparse
 import re
 
 # 3rd party
@@ -56,6 +57,7 @@ DEFAULT_RATE_MEMSTAT_METRICS = [
 DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] +\
     [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
 
+GO_EXPVAR_URL_PATH = "/debug/vars"
 
 class GoExpvar(AgentCheck):
 
@@ -100,6 +102,11 @@ class GoExpvar(AgentCheck):
         url = instance.get('expvar_url')
         if not url:
             raise Exception('GoExpvar instance missing "expvar_url" value.')
+
+        parsed_url = urlparse(url)
+        # if no path is specified we use the default one
+        if not parsed_url.path:
+            url = parsed_url._replace(path=GO_EXPVAR_URL_PATH).geturl()
 
         tags = instance.get('tags', [])
         tags.append("expvar_url:%s" % url)

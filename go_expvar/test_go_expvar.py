@@ -16,6 +16,7 @@ import simplejson as json
 from tests.checks.common import AgentCheckTest, Fixtures
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+GO_EXPVAR_URL_PATH = "/debug/vars"
 
 def _get_data_mock(url, instance):
     with open(url, 'r') as go_output:
@@ -286,7 +287,7 @@ class TestGoExpVar(AgentCheckTest):
         AgentCheckTest.__init__(self, *args, **kwargs)
         self.config = {
             "instances": [{
-                "expvar_url": 'http://localhost:8079/debug/vars',
+                "expvar_url": 'http://localhost:8079',
                 'tags': ['my_tag'],
                 'metrics': [
                     {
@@ -301,7 +302,7 @@ class TestGoExpVar(AgentCheckTest):
         # To avoid the disparition of some gauges during the second check
         mocks = {}
         config = self.config
-        expvar_url = self.config['instances'][0]['expvar_url']
+        expvar_url = self.config['instances'][0]['expvar_url'] + GO_EXPVAR_URL_PATH
 
         fake_last_gc_count = defaultdict(int)
         mocks['_last_gc_count'] = fake_last_gc_count
@@ -320,7 +321,7 @@ class TestGoExpVar(AgentCheckTest):
 
         shared_tags = [
             'my_tag',
-            'expvar_url:{0}'.format(self.config['instances'][0]['expvar_url'])
+            'expvar_url:{0}{1}'.format(self.config['instances'][0]['expvar_url'], GO_EXPVAR_URL_PATH)
         ]
 
         for gauge in self.CHECK_GAUGES + self.CHECK_GAUGES_DEFAULT:
