@@ -9,7 +9,7 @@ import os
 
 # 3p
 import simplejson as json
-#from nose.plugins.attrib import attr
+from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
@@ -60,7 +60,7 @@ def KubeUtil_fake_retrieve_json_auth(url, timeout=10, params=None):
     return {}
 
 
-#@attr(requires='kubernetes')
+@attr(requires='kubernetes')
 class TestKubernetes(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes'
@@ -405,7 +405,7 @@ class TestKubernetes(AgentCheckTest):
         self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=None, count=1)
 
 
-#@attr(requires='kubernetes')
+@attr(requires='kubernetes')
 class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
