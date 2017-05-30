@@ -150,12 +150,8 @@ class Twemproxy(AgentCheck):
             except socket.error as e:
                 self.log.warning("unable to connect to %s - %s", addr[-1], e)
 
-        if response:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags)
-        else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags)
+        status = AgentCheck.OK if response else AgentCheck.CRITICAL
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags)
 
         return response
 
