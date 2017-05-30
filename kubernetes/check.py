@@ -489,6 +489,7 @@ class Kubernetes(AgentCheck):
                 continue
 
             tags = self.kubeutil.extract_event_tags(event)
+            tags.extend(instance.get('tags', []))
 
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
