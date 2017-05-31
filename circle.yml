@@ -14,6 +14,7 @@ machine:
         SDK_TESTING: "true"
         DD_AGENT_BRANCH: "master"
         EXTRAS_BRANCH: "master"
+        JMXFETCH_URL: "https://dd-jmxfetch.s3.amazonaws.com"
         REQ_LOCALS: "$CI_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
 
 dependencies:
