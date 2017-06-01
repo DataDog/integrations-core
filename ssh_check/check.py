@@ -74,41 +74,45 @@ class CheckSSH(AgentCheck):
         client.load_system_host_keys()
 
         exception_message = None
-        # Service Availability to check status of SSH
         try:
-            client.connect(conf.host, port=conf.port, username=conf.username,
-                password=conf.password, pkey=private_key)
-            self.service_check('ssh.can_connect', AgentCheck.OK, tags=tags,
-                message=exception_message)
-
-        except Exception as e:
-            exception_message = str(e)
-            status = AgentCheck.CRITICAL
-            self.service_check('ssh.can_connect', status, tags=tags,
-                message=exception_message)
-            if conf.sftp_check:
-                self.service_check('sftp.can_connect', status, tags=tags,
-                    message=exception_message)
-            raise
-
-        # Service Availability to check status of SFTP
-        if conf.sftp_check:
+            # Try to connect to check status of SSH
             try:
-                sftp = client.open_sftp()
-                # Check response time of SFTP
-                start_time = time.time()
-                sftp.listdir('.')
-                status = AgentCheck.OK
-                end_time = time.time()
-                time_taken = end_time - start_time
-                self.gauge('sftp.response_time', time_taken, tags=tags)
+                client.connect(conf.host, port=conf.port, username=conf.username,
+                    password=conf.password, pkey=private_key)
+                self.service_check('ssh.can_connect', AgentCheck.OK, tags=tags,
+                    message=exception_message)
 
             except Exception as e:
                 exception_message = str(e)
                 status = AgentCheck.CRITICAL
+                self.service_check('ssh.can_connect', status, tags=tags,
+                    message=exception_message)
+                if conf.sftp_check:
+                    self.service_check('sftp.can_connect', status, tags=tags,
+                        message=exception_message)
+                raise
 
-            if exception_message is None:
-                exception_message = "No errors occured"
+            # Open sftp session on the existing connection to check status of SFTP
+            if conf.sftp_check:
+                try:
+                    sftp = client.open_sftp()
+                    # Check response time of SFTP
+                    start_time = time.time()
+                    sftp.listdir('.')
+                    status = AgentCheck.OK
+                    end_time = time.time()
+                    time_taken = end_time - start_time
+                    self.gauge('sftp.response_time', time_taken, tags=tags)
 
-            self.service_check('sftp.can_connect', status, tags=tags,
-                message=exception_message)
+                except Exception as e:
+                    exception_message = str(e)
+                    status = AgentCheck.CRITICAL
+
+                if exception_message is None:
+                    exception_message = "No errors occured"
+
+                self.service_check('sftp.can_connect', status, tags=tags,
+                    message=exception_message)
+        finally:
+            # Always close the client, failure to do so leaks one thread per connection left open
+            client.close()
