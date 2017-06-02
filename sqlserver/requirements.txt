@@ -1,5 +1,6 @@
 # integration pip requirements
 adodbapi==2.6.0.7
+pyodbc==4.0.13
 pyro4==4.36
 testfixtures==4.14.3
 
