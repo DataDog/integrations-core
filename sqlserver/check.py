@@ -131,7 +131,7 @@ class SQLServer(AgentCheck):
                     if ignore is not None and ignore:
                         # not much : we expect it. leave checks disabled
                         self.do_check[instance_key] = False
-                        self.warning("Database %s does not exist. Disabling checks for this instance." % (context))
+                        self.log.warning("Database %s does not exist. Disabling checks for this instance." % (context))
                     else:
                         # yes we do. Keep trying
                         self.log.error("Database %s does not exist. Fix issue and restart agent" % (context))
