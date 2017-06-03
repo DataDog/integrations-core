@@ -115,14 +115,13 @@ class SQLServer(AgentCheck):
         for instance in instances:
             try:
                 instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
-                self.do_check[instance_key] = False
+                self.do_check[instance_key] = True
 
                 # check to see if the database exists before we try any connections to it
                 with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE):
                     db_exists, context = self._check_db_exists(instance)
 
                 if db_exists:
-                    self.do_check[instance_key] = True
                     if instance.get('stored_procedure') is None:
                         with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
                             self._make_metric_list_to_collect(instance, self.custom_metrics)
@@ -131,11 +130,11 @@ class SQLServer(AgentCheck):
                     ignore = _is_affirmative(instance.get("ignore_missing_database", False))
                     if ignore is not None and ignore:
                         # not much : we expect it. leave checks disabled
-                        self.log.info("Database %s does not exist. Disabling checks for this instance." % (context))
+                        self.do_check[instance_key] = False
+                        self.log.warning("Database %s does not exist. Disabling checks for this instance." % (context))
                     else:
                         # yes we do. Keep trying
-                        self.do_check[instance_key] = True
-                        self.log.exception("Database %s does not exist. Fix issue and restart agent" % (context))
+                        self.log.error("Database %s does not exist. Fix issue and restart agent" % (context))
 
             except SQLConnectionError:
                 self.log.exception("Skipping SQL Server instance")
@@ -159,10 +158,11 @@ class SQLServer(AgentCheck):
                 for row in cursor:
                     self.existing_databases[row.name] = True
 
-                self.close_cursor(cursor)
             except Exception, e:
                 self.log.error("Failed to check if database %s exists: %s" % (database, e))
                 return False, context
+            finally:
+                self.close_cursor(cursor)
 
         return database in self.existing_databases, context
 

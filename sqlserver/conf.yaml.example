@@ -35,6 +35,8 @@ init_config:
 
     # As well as capturing from the DMV you can also capture from a custom proc
     # Please note this feature will produce a number of custom metrics that might affect your billing
+    # To use this feature, specify in your instance the procedure to execute : 
+    # stored_procedure: ProcedureToExecute
     #
     # The proc should return this table
     # CREATE TABLE #Datadog
@@ -78,9 +80,11 @@ instances:
       - optional_tag
 
   # get metrics from custom proc in MyDB but only if the database is writeable (i.e. it's the master in an availability group)
-  - host: HOST,PORT
-    database: MyDB
-    stored_procedure: GetDatadogMetrics
-    proc_only_if: SELECT CASE CONVERT(sysname,DatabasePropertyEx('MyDB','Updateability')) WHEN 'READ_WRITE' THEN 1 ELSE 0 END
-    proc_only_if_database: master
-    ignore_missing_database: True 
+  # - host: HOST,PORT
+  #   database: MyDB
+  #   username: my_username
+  #   password: my_password
+  #   stored_procedure: GetDatadogMetrics
+  #   proc_only_if: SELECT CASE CONVERT(sysname,DatabasePropertyEx('MyDB','Updateability')) WHEN 'READ_WRITE' THEN 1 ELSE 0 END
+  #   proc_only_if_database: master
+  #   ignore_missing_database: True 
