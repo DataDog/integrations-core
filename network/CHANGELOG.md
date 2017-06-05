@@ -1,16 +1,15 @@
 # CHANGELOG - network
 
-## 1.1.1 Unreleased
+## 1.2.0 Unreleased
 
 ### Changes
 
-* [BUGFIX] Fix regression that would throw an error if the snmp or netstat file can't be opened. See [#452][]
+* [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299][] and [#452][], thanks [@cory-stripe][]
 
 ## 1.1.0 05-03-2017
 
 ### Changes
 
-* [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299][]
 * [BUGFIX] Work around `ss -atun` bug not differentiating tcp and udp. See [#296][]
 
 ## 1.0.0 03-22-2017
@@ -23,3 +22,4 @@
 [#296]: https://github.com/DataDog/integrations-core/issues/296
 [#299]: https://github.com/DataDog/integrations-core/issues/299
 [#452]: https://github.com/DataDog/integrations-core/issues/452
+[@cory-stripe]: https://github.com/cory-stripe
