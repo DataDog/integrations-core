@@ -20,7 +20,7 @@ instances:
       port: 2222 # change if your twemproxy doesn't use the default stats monitoring port
 ```
 
-Change the host and port
+Restart the Agent to begin sending twemproxy metrics to Datadog.
 
 # Validation
 
