@@ -8,5 +8,5 @@
   "guid": "3c05ed97-bf34-4061-83c4-e742d7daa5f8",
   "support": "contrib",
   "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "version": "1.0.0"
 }

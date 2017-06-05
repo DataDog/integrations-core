@@ -1,5 +1,17 @@
 # CHANGELOG - docker_daemon
 
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Add option to extract docker event attibutes as tags. See [#404][]
+* [FEATURE] Add option to cap rate values to filter out cgroup CPU spikes. See [#412][]
+* [IMPROVEMENT] Tag metrics with Nomad task/group/job names when available. See [#305][]
+* [IMPROVEMENT] Support the new diskmapper statsd format for docker.disk.* metrics. See [#409][]
+* [IMPROVEMENT] Report a service check when the Docker daemon is unreachable. See [#354][]
+* [IMPROVEMENT] Add docker.cpu.usage metric for global container CPU usage. See [#385][]
+* [BUGFIX] Docker events are tagged with the image name when docker reports its checksum. See [#415][]
+
 1.1.1 / 2017-05-11
 ==================
 ### Changes
@@ -30,9 +42,16 @@
 [#277]: https://github.com/DataDog/integrations-core/issues/277
 [#282]: https://github.com/DataDog/integrations-core/issues/282
 [#290]: https://github.com/DataDog/integrations-core/issues/290
+[#305]: https://github.com/DataDog/integrations-core/issues/305
 [#320]: https://github.com/DataDog/integrations-core/issues/320
 [#333]: https://github.com/DataDog/integrations-core/issues/333
 [#345]: https://github.com/DataDog/integrations-core/issues/345
 [#348]: https://github.com/DataDog/integrations-core/issues/348
+[#354]: https://github.com/DataDog/integrations-core/issues/354
+[#385]: https://github.com/DataDog/integrations-core/issues/385
 [#393]: https://github.com/DataDog/integrations-core/issues/393
+[#404]: https://github.com/DataDog/integrations-core/issues/404
 [#408]: https://github.com/DataDog/integrations-core/issues/408
+[#409]: https://github.com/DataDog/integrations-core/issues/409
+[#412]: https://github.com/DataDog/integrations-core/issues/412
+[#415]: https://github.com/DataDog/integrations-core/issues/415

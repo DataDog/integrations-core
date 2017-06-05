@@ -12,7 +12,7 @@
 
 * [FEATURE] ssl support for go_expvar check
 
-1.0.003-22-2017
+1.0.0 / 03-22-2017
 ==================
 
 ### Changes
