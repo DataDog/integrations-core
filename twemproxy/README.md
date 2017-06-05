@@ -46,3 +46,9 @@ The twemproxy check is compatible with all major platforms.
 # Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/twemproxy/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+`twemproxy.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise OK.
