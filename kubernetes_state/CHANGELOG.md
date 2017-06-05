@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] Support more metrics from kube-state-metrics. See [dd-agent-3309](https://github.com/DataDog/dd-agent/pull/3309) and [#343][]
+* [FEATURE] Support more metrics from kube-state-metrics. See [dd-agent-3309](https://github.com/DataDog/dd-agent/pull/3309), [dd-agent-3352](https://github.com/DataDog/dd-agent/pull/3352) and [#343][]
 
 1.0.0 02-23-2017
 ==================
