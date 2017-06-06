@@ -79,6 +79,20 @@ class TestCouchbase(AgentCheckTest):
         self.assertTrue(len([k for k in metrics if -1 != k[0].find('by_node')]) > 1, 'Unable to fund any per node metrics')
         self.assertTrue(len([k for k in metrics if -1 != k[0].find('by_bucket')]) > 1, 'Unable to fund any per node metrics')
 
+    def test_query_monitoring_metrics(self):
+        raise SkipTest("Skipped for now as it's hard to configure couchbase on travis")
+        # Add query monitoring endpoint and reload check
+        self.config['instances'][0]['query_monitoring_url'] = 'http://localhost:8093'
+        self.check = load_check('couchbase', self.config, self.agentConfig)
+        self.check.check(self.config['instances'][0])
+
+        metrics = self.check.get_metrics()
+
+        self.assertTrue(isinstance(metrics, ListType))
+        self.assertTrue(len(metrics) > 3)
+
+        self.assertTrue(len([k for k in metrics if 'query' in k[0]]) > 1, 'Unable to fund any query metrics')
+
     def test_service_check(self):
         try:
             self.check.check(self.config['instances'][0])

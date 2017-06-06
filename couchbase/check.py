@@ -225,8 +225,8 @@ class Couchbase(AgentCheck):
 
     TO_SECONDS = {
         'ns': 1e9,
-        'ms': 1e3,
         'us': 1e6,
+        'ms': 1e3,
         's': 1,
     }
 
@@ -261,7 +261,7 @@ class Couchbase(AgentCheck):
         for metric_name, val in data['query'].items():
             if val is not None:
                 # for query times, the unit is part of the value, we need to extract it
-                if val[-1] == 's':
+                if type(val) == basestring:
                     val = self.extract_seconds_value(val)
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
@@ -368,10 +368,10 @@ class Couchbase(AgentCheck):
                     couchbase['buckets'][bucket['name']] = bucket_samples
 
         # Next, get the query monitoring data
-        query_monitoring = instance.get('query_monitoring', None)
-        if query_monitoring is not None:
+        query_monitoring_url = instance.get('query_monitoring_url', None)
+        if query_monitoring_url is not None:
             try:
-                url = '%s%s' % (query_monitoring, COUCHBASE_VITALS_PATH)
+                url = '%s%s' % (query_monitoring_url, COUCHBASE_VITALS_PATH)
                 query = self._get_stats(url, instance)
                 if query is not None:
                     couchbase['query'] = query
