@@ -5,6 +5,7 @@
 
 # stdlib
 from collections import defaultdict
+from urlparse import urlparse
 import re
 
 # 3rd party
@@ -56,6 +57,7 @@ DEFAULT_RATE_MEMSTAT_METRICS = [
 DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] +\
     [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
 
+GO_EXPVAR_URL_PATH = "/debug/vars"
 
 class GoExpvar(AgentCheck):
 
@@ -63,19 +65,52 @@ class GoExpvar(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._last_gc_count = defaultdict(int)
 
-    def _get_data(self, url):
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        return r.json()
+    def _get_data(self, url, instance):
+        ssl_params = {
+            'ssl': instance.get('ssl'),
+            'ssl_keyfile': instance.get('ssl_keyfile'),
+            'ssl_certfile': instance.get('ssl_certfile'),
+            'ssl_verify': instance.get('ssl_verify'),
+        }
+        for key, param in ssl_params.items():
+            if param is None:
+                del ssl_params[key]
+
+        # Load SSL configuration, if available.
+        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), basestring):
+            verify = ssl_params.get('ssl_verify')
+        else:
+            verify = None
+        if ssl_params.get('ssl_certfile') and ssl_params.get('ssl_keyfile'):
+            cert = (ssl_params.get('ssl_certfile'), ssl_params.get('ssl_keyfile'))
+        elif ssl_params.get('ssl_certfile'):
+            cert = ssl_params.get('ssl_certfile')
+        else:
+            cert = None
+
+        resp = requests.get(
+            url,
+            timeout=10,
+            verify=verify,
+            cert=cert
+        )
+        resp.raise_for_status()
+        return resp.json()
 
     def _load(self, instance):
         url = instance.get('expvar_url')
         if not url:
             raise Exception('GoExpvar instance missing "expvar_url" value.')
 
+        parsed_url = urlparse(url)
+        # if no path is specified we use the default one
+        if not parsed_url.path:
+            url = parsed_url._replace(path=GO_EXPVAR_URL_PATH).geturl()
+
         tags = instance.get('tags', [])
         tags.append("expvar_url:%s" % url)
-        data = self._get_data(url)
+        data = self._get_data(url, instance)
         metrics = DEFAULT_METRICS + instance.get("metrics", [])
         max_metrics = instance.get("max_returned_metrics", DEFAULT_MAX_METRICS)
         namespace = instance.get('namespace', DEFAULT_METRIC_NAMESPACE)

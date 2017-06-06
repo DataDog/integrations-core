@@ -6,8 +6,6 @@
 import copy
 from nose.plugins.attrib import attr
 
-# 3p
-
 # project
 from tests.checks.common import AgentCheckTest
 

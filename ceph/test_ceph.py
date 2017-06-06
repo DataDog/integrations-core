@@ -19,7 +19,7 @@ class TestCeph(AgentCheckTest):
 
     def test_simple_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
+            '_collect_raw': lambda x,y,z: json.loads(Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
             'instances': [{'host': 'foo'}]
@@ -37,7 +37,7 @@ class TestCeph(AgentCheckTest):
 
     def test_warn_health(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('warn.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -56,7 +56,7 @@ class TestCeph(AgentCheckTest):
 
     def test_tagged_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -81,7 +81,7 @@ class TestCeph(AgentCheckTest):
 
     def test_osd_status_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('ceph_10.2.2.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -115,7 +115,7 @@ class TestCeph(AgentCheckTest):
         shouldn't make the check fail
         """
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('ceph_10.2.2_mon_health.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
