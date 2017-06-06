@@ -1,14 +1,20 @@
 # CHANGELOG - snmp
 
-1.1.0/2017-04-24
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Drop dependency on pycrypto. See #426
+
+1.1.0 / 2017-04-24
 ==================
 
 ### Changes
 
 * [FEATURE] Add individual metric tagging to OID and MIB Non-tabular data. See [#248][]
 
-
-1.0.003-22-2017
+1.0.0 / 03-22-2017
 ==================
 
 ### Changes

@@ -6,6 +6,7 @@ Get metrics from marathon service in real time to:
 
 * Visualize and monitor marathon states
 * Be notified about marathon failovers and events.
+* Determine if your marathon tasks are not being scheduled as expected
 
 ## Installation
 

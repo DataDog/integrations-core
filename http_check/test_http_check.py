@@ -197,6 +197,16 @@ CONFIG_POST_METHOD = {
     }]
 }
 
+CONFIG_POST_SOAP = {
+    'instances': [{
+        'name': 'post_soap',
+        'url': 'http://httpbin.org/post',
+        'timeout': 1,
+        'method': 'post',
+        'data': '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice><m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>'
+    }]
+}
+
 @attr(requires='skip')
 class HTTPCheckTest(AgentCheckTest):
     CHECK_NAME = 'http_check'
@@ -361,3 +371,4 @@ class HTTPCheckTest(AgentCheckTest):
     def test_post_method(self):
         # Run the check
         self.run_check(CONFIG_POST_METHOD)
+        self.run_check(CONFIG_POST_SOAP)
