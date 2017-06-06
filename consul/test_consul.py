@@ -10,6 +10,9 @@ from nose.plugins.attrib import attr
 from tests.checks.common import AgentCheckTest, load_check
 from utils.containers import hash_mutable
 
+# project
+from checks import AgentCheck
+
 MOCK_CONFIG = {
     'init_config': {},
     'instances' : [{
@@ -366,6 +369,80 @@ class TestCheckConsul(AgentCheckTest):
             }
         }]
 
+    def mock_get_health_check(self, instance, endpoint):
+        return [{
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-loadbalancer",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "critical",
+            "Notes": "",
+            "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-2",
+            "CheckID": "server-loadbalancer",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-status-empty",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-empty",
+            "ServiceName": "server-empty",
+        }]
+
     def mock_get_cluster_leader_A(self, instance):
         return '10.0.2.15:8300'
 
@@ -421,6 +498,18 @@ class TestCheckConsul(AgentCheckTest):
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_critical', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+
+    def test_service_checks(self):
+        my_mocks = self._get_consul_mocks()
+        my_mocks['consul_request'] = self.mock_get_health_check
+
+        self.run_check(MOCK_CONFIG, mocks=my_mocks)
+        self.assertServiceCheckCritical('consul.check', tags=["consul_datacenter:dc1", "check:server-loadbalancer", "consul_service_id:server-loadbalancer","service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer","service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"], count=1)
+        self.assertServiceCheck('consul.check', status=AgentCheck.UNKNOWN, tags=["consul_datacenter:dc1", "check:server-status-empty", "consul_service_id:server-empty", "service:server-empty"], count=1)
+        self.assertServiceCheck('consul.check', count=5)
 
     def test_get_peers_in_cluster(self):
         mocks = self._get_consul_mocks()
