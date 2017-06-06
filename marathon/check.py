@@ -35,49 +35,27 @@ class Marathon(AgentCheck):
         'tasksUnhealthy'
     ]
 
+    QUEUE_METRICS = {
+        'count': (None, 'count'),
+        'delay': ('timeLeftSeconds', 'delay'),
+        'processedOffersSummary': [
+            ('processedOffersCount', 'offers.processed'),
+            ('unusedOffersCount', 'offers.unused'),
+            ('rejectSummaryLastOffers', 'offers.reject.last'),
+            ('rejectSummaryLaunchAttempt', 'offers.reject.launch'),
+        ]
+    }
+
     def check(self, instance):
-        if 'url' not in instance:
-            raise Exception('Marathon instance missing "url" value.')
+        try:
+            url, auth, acs_url, ssl_verify, group, instance_tags, timeout = self.get_instance_config(instance)
+        except Exception as e:
+            self.log.error("Invalid instance configuration.")
+            raise e
 
-        # Load values from the instance config
-        url = instance['url']
-        user = instance.get('user')
-        password = instance.get('password')
-        acs_url = instance.get('acs_url')
-        if user is not None and password is not None:
-            auth = (user,password)
-        else:
-            auth = None
-        ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
-        group = instance.get('group', None)
-
-        instance_tags = instance.get('tags', [])
-        default_timeout = self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
-        timeout = float(instance.get('timeout', default_timeout))
-
-        # Marathon apps
-        if group is None:
-            marathon_path = urljoin(url, "v2/apps")
-        else:
-            marathon_path = urljoin(url, "v2/groups/{}".format(group))
-        response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify)
-        if response is not None:
-            self.gauge('marathon.apps', len(response['apps']), tags=instance_tags)
-            for app in response['apps']:
-                tags = ['app_id:' + app['id'], 'version:' + app['version']] + instance_tags
-                for attr in self.APP_METRICS:
-                    if attr in app:
-                        self.gauge('marathon.' + attr, app[attr], tags=tags)
-
-        # Number of running/pending deployments
-        response = self.get_json(urljoin(url, "v2/deployments"), timeout, auth, acs_url, ssl_verify)
-        if response is not None:
-            self.gauge('marathon.deployments', len(response), tags=instance_tags)
-
-        # Number of queued applications
-        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify)
-        if response is not None:
-            self.gauge('marathon.queue.size', len(response['queue']), tags=instance_tags)
+        self.process_apps(url, timeout, auth, acs_url, ssl_verify, instance_tags, group)
+        self.process_deployments(url, timeout, auth, acs_url, ssl_verify, instance_tags)
+        self.process_queues(url, timeout, auth, acs_url, ssl_verify, instance_tags)
 
     def refresh_acs_token(self, auth, acs_url):
         try:
@@ -141,3 +119,87 @@ class Marathon(AgentCheck):
                                tags = ["url:{0}".format(url)])
 
         return r.json()
+
+    def get_instance_config(self, instance):
+        if 'url' not in instance:
+            raise Exception('Marathon instance missing "url" value.')
+
+        # Load values from the instance config
+        url = instance['url']
+        user = instance.get('user')
+        password = instance.get('password')
+        acs_url = instance.get('acs_url')
+        if user is not None and password is not None:
+            auth = (user,password)
+        else:
+            auth = None
+        ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
+        group = instance.get('group', None)
+
+        tags = instance.get('tags', [])
+        default_timeout = self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
+        timeout = float(instance.get('timeout', default_timeout))
+
+        return url, auth, acs_url, ssl_verify, group, tags, timeout
+
+    def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
+        # Marathon apps
+        if group is None:
+            marathon_path = urljoin(url, "v2/apps")
+        else:
+            marathon_path = urljoin(url, "v2/groups/{}".format(group))
+        response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify)
+        if response is not None:
+            self.gauge('marathon.apps', len(response['apps']), tags=tags)
+            for app in response['apps']:
+                tags = ['app_id:' + app['id'], 'version:' + app['version']] + tags
+                for attr in self.APP_METRICS:
+                    if attr in app:
+                        self.gauge('marathon.' + attr, app[attr], tags=tags)
+
+    def process_deployments(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
+        # Number of running/pending deployments
+        response = self.get_json(urljoin(url, "v2/deployments"), timeout, auth, acs_url, ssl_verify)
+        if response is not None:
+            self.gauge('marathon.deployments', len(response), tags=tags)
+
+    def process_queues(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
+        # Number of queued applications
+        QUEUE_PREFIX = 'marathon.queue'
+        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify)
+        if response is None:
+            return
+
+        self.gauge('{}.size'.format(QUEUE_PREFIX), len(response['queue']), tags=tags)
+        for queue in response['queue']:
+            tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
+
+            for m_type, sub_metric in self.QUEUE_METRICS.iteritems():
+                if isinstance(sub_metric, list):
+                    for attr, name in sub_metric:
+                        try:
+                            metric_name = '{}.{}'.format(QUEUE_PREFIX, name)
+                            _attr = queue[m_type][attr]
+                            if 'Summary' in attr:
+                                for reject in _attr:
+                                    reason = reject['reason']
+                                    declined = reject['declined']
+                                    processed = reject['processed']
+                                    summary_tags = tags + ['reason:{}'.format(reason)]
+                                    self.gauge(metric_name, declined, tags=summary_tags + ['status:declined'])
+                                    self.gauge(metric_name, processed, tags=summary_tags + ['status:processed'])
+                            else:
+                                val = float(_attr)
+                                self.gauge(metric_name, val, tags=tags)
+                        except KeyError, TypeError:
+                            self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+
+                else:
+                    try:
+                        attr, name = sub_metric
+                        metric_name = '{}.{}'.format(QUEUE_PREFIX, name)
+                        _attr = queue[m_type][attr] if attr else queue[m_type]
+                        val = float(_attr)
+                        self.gauge(metric_name, val, tags=tags)
+                    except KeyError, TypeError:
+                        self.log.warn("Metric unavailable skipping: {}".format(metric_name))

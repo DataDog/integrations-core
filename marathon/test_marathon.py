@@ -53,6 +53,7 @@ class MarathonCheckTest(AgentCheckTest):
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=1)
         self.assertMetric('marathon.deployments', value=1)
+        self.assertMetric('marathon.queue.count', value=1)
 
 
     def test_empty_responses(self):
