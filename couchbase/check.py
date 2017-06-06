@@ -377,7 +377,7 @@ class Couchbase(AgentCheck):
                     couchbase['query'] = query
             except requests.exceptions.HTTPError:
                 self.log.error("Error accessing the endpoint %s, make sure you're running at least "
-                    "couchbase 4.5 to use this feature", url)
+                    "couchbase 4.5 to collect the query monitoring metrics", url)
 
         return couchbase
 
