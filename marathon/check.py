@@ -191,7 +191,7 @@ class Marathon(AgentCheck):
                             else:
                                 val = float(_attr)
                                 self.gauge(metric_name, val, tags=tags)
-                        except KeyError, TypeError:
+                        except (KeyError, TypeError):
                             self.log.warn("Metric unavailable skipping: {}".format(metric_name))
 
                 else:
@@ -201,5 +201,5 @@ class Marathon(AgentCheck):
                         _attr = queue[m_type][attr] if attr else queue[m_type]
                         val = float(_attr)
                         self.gauge(metric_name, val, tags=tags)
-                    except KeyError, TypeError:
+                    except (KeyError, TypeError):
                         self.log.warn("Metric unavailable skipping: {}".format(metric_name))
