@@ -50,6 +50,19 @@ class TestCouchbase(AgentCheckTest):
             self.assertEqual(test_output, expected_output,
                 'Input was %s, expected output was %s, actual output was %s' % (test_input, expected_output, test_output))
 
+    def test_extract_seconds_value(self):
+        test_pairs = {
+            '3.45s': 3.45,
+            '12ms': .012,
+            '700.5us': .0007005,
+            u'733.364\u00c2s': .000733364,
+        }
+
+        for test_input, expected_output in test_pairs.items():
+            test_output = self.check.extract_seconds_value(test_input)
+            self.assertEqual(test_output, expected_output,
+                'Input was %s, expected output was %s, actual output was %s' % (test_input, expected_output, test_output))
+
     def test_metrics_casing(self):
         raise SkipTest("Skipped for now as it's hard to configure couchbase on travis")
         self.check.check(self.config['instances'][0])
