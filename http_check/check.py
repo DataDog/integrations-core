@@ -453,7 +453,7 @@ class HTTPCheck(NetworkCheck):
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
-            return Status.DOWN, "%s" % (str(e))
+            return Status.DOWN, 0, "%s" % (str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()
