@@ -54,6 +54,7 @@ class MarathonCheckTest(AgentCheckTest):
         self.assertMetric('marathon.apps', value=1)
         self.assertMetric('marathon.deployments', value=1)
         self.assertMetric('marathon.queue.count', value=1)
+        self.assertMetric('marathon.queue.delay', value=1)
 
 
     def test_empty_responses(self):

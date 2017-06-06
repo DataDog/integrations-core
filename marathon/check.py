@@ -172,7 +172,7 @@ class Marathon(AgentCheck):
 
         self.gauge('{}.size'.format(QUEUE_PREFIX), len(response['queue']), tags=tags)
         for queue in response['queue']:
-            tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
+            q_tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
 
             for m_type, sub_metric in self.QUEUE_METRICS.iteritems():
                 if isinstance(sub_metric, list):
@@ -185,12 +185,12 @@ class Marathon(AgentCheck):
                                     reason = reject['reason']
                                     declined = reject['declined']
                                     processed = reject['processed']
-                                    summary_tags = tags + ['reason:{}'.format(reason)]
+                                    summary_tags = q_tags + ['reason:{}'.format(reason)]
                                     self.gauge(metric_name, declined, tags=summary_tags + ['status:declined'])
                                     self.gauge(metric_name, processed, tags=summary_tags + ['status:processed'])
                             else:
                                 val = float(_attr)
-                                self.gauge(metric_name, val, tags=tags)
+                                self.gauge(metric_name, val, tags=q_tags)
                         except (KeyError, TypeError):
                             self.log.warn("Metric unavailable skipping: {}".format(metric_name))
 
@@ -200,6 +200,6 @@ class Marathon(AgentCheck):
                         metric_name = '{}.{}'.format(QUEUE_PREFIX, name)
                         _attr = queue[m_type][attr] if attr else queue[m_type]
                         val = float(_attr)
-                        self.gauge(metric_name, val, tags=tags)
+                        self.gauge(metric_name, val, tags=q_tags)
                     except (KeyError, TypeError):
                         self.log.warn("Metric unavailable skipping: {}".format(metric_name))
