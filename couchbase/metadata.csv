@@ -94,8 +94,10 @@ couchbase.by_bucket.ep_mem_low_wat,gauge,,byte,,Mem usage low water mark for aut
 couchbase.by_bucket.ep_meta_data_memory,gauge,,byte,,Total amount of item metadata consuming RAM in this bucket,0,couchbase,metadata mem
 couchbase.by_bucket.ep_num_non_resident,gauge,,item,,Number of non-resident items,0,couchbase,non-resident items
 couchbase.by_bucket.ep_num_ops_del_meta,gauge,,operation,second,Number of delete operations per second for this bucket as the target for XDCR,0,couchbase,ops del meta
+couchbase.by_bucket.ep_num_ops_del_ret_meta,gauge,,operation,second,Number of delRetMeta operations per second for this bucket as the target for XDCR,0,couchbase,ops del meta
 couchbase.by_bucket.ep_num_ops_get_meta,gauge,,operation,second,Number of read operations per second for this bucket as the target for XDCR,0,couchbase,ops get meta
 couchbase.by_bucket.ep_num_ops_set_meta,gauge,,operation,second,Number of set operations per second for this bucket as the target for XDCR,0,couchbase,ops set meta
+couchbase.by_bucket.ep_num_ops_set_ret_meta,gauge,,operation,second,Number of setRetMeta operations per second for this bucket as the target for XDCR,0,couchbase,ops set rep meta
 couchbase.by_bucket.ep_num_value_ejects,gauge,,item,,Number of times item values got ejected from memory to disk,0,couchbase,ejects
 couchbase.by_bucket.ep_oom_errors,gauge,,error,,Number of times unrecoverable OOMs happened while processing operations,-1,couchbase,ooms
 couchbase.by_bucket.ep_ops_create,gauge,,operation,,Create operations,0,couchbase,create ops
@@ -117,9 +119,12 @@ couchbase.by_bucket.hibernated_waked,gauge,,request,,Rate of streaming request w
 couchbase.by_bucket.hit_ratio,gauge,,percent,,Hit ratio,1,couchbase,hit ratio
 couchbase.by_bucket.incr_hits,gauge,,hit,,Number of increment hits,1,couchbase,increment hits
 couchbase.by_bucket.incr_misses,gauge,,miss,,Number of increment misses,-1,couchbase,increment misses
+couchbase.by_bucket.mem_actual_free,gauge,,byte,,Free memory,0,couchbase,actual free
+couchbase.by_bucket.mem_actual_used,gauge,,byte,,Used memory,0,couchbase,actual used
 couchbase.by_bucket.mem_free,gauge,,byte,,Free memory,0,couchbase,free
 couchbase.by_bucket.mem_total,gauge,,byte,,Total available memory,0,couchbase,total
-couchbase.by_bucket.mem_used,gauge,,byte,,Engines total memory usage (deprecated),0,couchbase,used
+couchbase.by_bucket.mem_used,gauge,,byte,,Engine's total memory usage (deprecated),0,couchbase,used
+couchbase.by_bucket.mem_used_sys,gauge,,byte,,System memory usage,0,couchbase,used sys
 couchbase.by_bucket.misses,gauge,,miss,,Total number of misses,-1,couchbase,misses
 couchbase.by_bucket.ops,gauge,,operation,,Total number of operations,0,couchbase,ops
 couchbase.by_bucket.page_faults,gauge,,page,,Number of page faults,-1,couchbase,faults
@@ -170,7 +175,7 @@ couchbase.by_bucket.vb_replica_queue_drain,gauge,,item,,Total drained replica it
 couchbase.by_bucket.vb_replica_queue_fill,gauge,,item,,Total enqueued replica items on disk queue,0,couchbase,vb replica queue fill
 couchbase.by_bucket.vb_replica_queue_size,gauge,,item,,Replica items in disk queue,0,couchbase,vb replica queue size
 couchbase.by_bucket.vb_replica_resident_items_ratio,gauge,,item,,Number of resident replica items,0,couchbase,vb replica resident items ratio
-couchbase.by_bucket.vb_total_queue_age,gauge,,second,,Number of resident replica items,0,couchbase,vb replica resident items ratio
+couchbase.by_bucket.vb_total_queue_age,gauge,,second,,Sum of disk queue item age in milliseconds,0,couchbase,vb total queue age
 couchbase.by_bucket.xdc_ops,gauge,,operation,,Number of cross-datacenter replication operations,0,couchbase,xdc ops
 couchbase.by_node.curr_items,gauge,,item,,Number of active items in memory,0,couchbase,mem items
 couchbase.by_node.curr_items_tot,gauge,,item,,Total number of items,0,couchbase,total items
