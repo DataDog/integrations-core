@@ -45,10 +45,10 @@ def find_changelogs
   changelogs
 end
 
-def set_release_date(rel_date)
+def release_date(rel_date)
   changelogs = find_changelogs
   changelogs.each do |f|
-    changelog_out = File.read(f).gsub(/unreleased|Unreleased/, "#{rel_date}")
+    changelog_out = File.read(f).gsub(/unreleased|Unreleased/, rel_date.to_s)
     File.open(f, 'w') do |out|
       out << changelog_out
     end
@@ -113,8 +113,8 @@ end
 
 desc 'Set (today\'s) release date for Unreleased checks'
 task :release_date do
-  set_release_date(
-    Time.now.strftime("%Y-%m-%d")
+  release_date(
+    Time.now.strftime('%Y-%m-%d')
   )
 end
 
