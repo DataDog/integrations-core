@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [FEATURE] adds `pshard_graceful_timeout` that will skip pshard_stats if TO. See #463
 * [IMPROVEMENT] get rid of pretty json. See [#893][].
 
 1.2.0 / 2017-11-21
