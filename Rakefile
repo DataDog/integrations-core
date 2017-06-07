@@ -38,6 +38,23 @@ def find_yaml_confs
   yaml_confs
 end
 
+def find_changelogs
+  changelogs = Dir.glob("#{ENV['SDK_HOME']}/*/CHANGELOG.md").collect do |file_path|
+    file_path
+  end.entries
+  changelogs
+end
+
+def set_release_date(rel_date)
+  changelogs = find_changelogs
+  changelogs.each do |f|
+    changelog_out = File.read(f).gsub(/unreleased|Unreleased/, "#{rel_date}")
+    File.open(f, 'w') do |out|
+      out << changelog_out
+    end
+  end
+end
+
 def find_inconsistencies(files, dd_agent_base_dir)
   inconsistencies = []
   files.each do |file_basename, file_path|
@@ -91,6 +108,13 @@ task dd_agent_consistency: [:pull_latest_agent] do
   print_inconsistencies(
     'yaml example file',
     find_inconsistencies(find_yaml_confs, 'conf.d')
+  )
+end
+
+desc 'Set (today\'s) release date for Unreleased checks'
+task :release_date do
+  set_release_date(
+    Time.now.strftime("%Y-%m-%d")
   )
 end
 
