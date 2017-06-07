@@ -1,6 +1,12 @@
 # CHANGELOG - http_check
 
-## 1.1.0 / Unreleased
+## 1.1.1 / Unreleased
+
+### Changes
+
+* [BUGFIX] Fix response tuple arity in SSL certificate check
+
+## 1.1.0 / 06-05-2017
 
 ### Changes
 
