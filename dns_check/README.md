@@ -62,7 +62,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_
 
 # Service Checks
 
-`dns.can_connect`:
+`dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.
 
