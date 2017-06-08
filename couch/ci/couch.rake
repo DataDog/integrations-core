@@ -1,7 +1,11 @@
 require 'ci/common'
 
 def couch_version
-  ENV['FLAVOR_VERSION'] || '1.6.1'
+  ENV['FLAVOR_VERSION'] || 'couchdb:1.6.1'
+end
+
+def couch_2?
+  couch_version.include? '2.0'
 end
 
 def couch_rootdir
@@ -20,28 +24,53 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('couch')
-      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d couchdb:#{couch_version})
+      docker_args = if couch_2?
+                      %(--with-admin-party-please --with-haproxy -n 1)
+                    else
+                      %()
+                    end
+      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d #{couch_version} ) + docker_args
     end
 
     task before_script: ['ci:common:before_script'] do
+      if couch_2?
+        ENV['NOSE_FILTER'] = if ENV['NOSE_FILTER']
+                               ENV['NOSE_FILTER'] + ' and not couch1_only'
+                             else
+                               'not couch1_only'
+                             end
+      end
+
       Wait.for container_port
       count = 0
       logs = `docker logs dd-test-couch 2>&1`
       puts 'Waiting for couchdb to come up'
-      until count == 20 || logs.include?('CouchDB has started')
+      couch_up_msg = couch_2? ? 'cluster is set up' : 'CouchDB has started'
+      until count == 20 || logs.include?(couch_up_msg)
         sleep_for 2
         logs = `docker logs dd-test-couch 2>&1`
         count += 1
       end
-      puts 'couchdb is up!' if logs.include? 'CouchDB has started'
-      # Create a test database
-      sh %(curl -X PUT http://localhost:5984/kennel)
+      puts 'couchdb is up!' if logs.include? couch_up_msg
+
+      if couch_2?
+        # couch 2 takes a little longer to be available, but doesn't have more
+        # logs we can look for
+        sleep_for 10
+      end
 
       # Create a user
-      sh %(curl -X PUT http://localhost:5984/_config/admins/dduser -d '"pawprint"')
+      if couch_2?
+        sh %(curl -X PUT http://localhost:5984/_node/node1@127.0.0.1/_config/admins/dduser -d '"pawprint"')
+      else
+        sh %(curl -X PUT http://localhost:5984/_config/admins/dduser -d '"pawprint"')
+      end
 
-      # Restrict test databse to authenticated user
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/kennel/_security \
+      # Create a test database
+      sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
+
+      # Restrict test databse to other authenticated user
+      sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel/_security \
            -d '{"admins":{"names":[],"roles":[]},"members":{"names":["dduser"],"roles":[]}}')
     end
 

@@ -28,13 +28,27 @@ class CouchDb(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.db_blacklist = {}
 
-    def _create_metric(self, data, tags=None):
-        overall_stats = data.get('stats', {})
+    def _create_metric_helper(self, overall_stats, tags):
         for key, stats in overall_stats.items():
             for metric, val in stats.items():
-                if val['current'] is not None:
+                if 'current' in val:
+                    if val['current'] is None:
+                        continue
                     metric_name = '.'.join(['couchdb', key, metric])
                     self.gauge(metric_name, val['current'], tags=tags)
+                elif 'value' in val:
+                    if val['value'] is None:
+                        continue
+                    metric_name = '.'.join(['couchdb', key, metric])
+                    self.gauge(metric_name, val['value'], tags=tags)
+
+    def _create_metric(self, data, tags=None):
+        if data.get('stats'):
+            self._create_metric_helper(data['stats'], tags)
+        elif data.get('cluster_stats'):
+            for member, member_stats in data['cluster_stats'].items():
+                member_tags = (tags or []) + ['node:%s' % member]
+                self._create_metric_helper(data['cluster_stats'], member_tags)
 
         for db_name, db_stats in data.get('databases', {}).items():
             for name, val in db_stats.items():
@@ -66,12 +80,9 @@ class CouchDb(AgentCheck):
         data = self.get_data(server, instance)
         self._create_metric(data, tags=['instance:%s' % server])
 
-    def get_data(self, server, instance):
-        # The dictionary to be returned.
-        couchdb = {'stats': None, 'databases': {}}
-
+    def _get_node_stats(self, server, instance):
         # First, get overall statistics.
-        endpoint = '/_stats/'
+        endpoint = '_stats/'
 
         url = urljoin(server, endpoint)
 
@@ -100,7 +111,24 @@ class CouchDb(AgentCheck):
         if overall_stats is None:
             raise Exception("No stats could be retrieved from %s" % url)
 
-        couchdb['stats'] = overall_stats
+        return overall_stats
+
+    def get_data(self, server, instance):
+        # The dictionary to be returned.
+        couchdb = {'stats': None, 'cluster_stats': {}, 'databases': {}}
+
+        couch_2 = instance.get('couch_2')
+        if couch_2:
+            endpoint = '_membership'
+            url = urljoin(server, endpoint)
+            members = self._get_stats(url, instance)["cluster_nodes"]
+            member_endpoints = [urljoin(server, '_node/%s/') % member for member in members]
+            couchdb['cluster_stats'] = {
+                endpoint: self._get_node_stats(endpoint, instance)
+                for endpoint in member_endpoints
+            }
+        else:
+            couchdb['stats'] = self._get_node_stats(server, instance)
 
         # Next, get all database names.
         endpoint = '/_all_dbs/'
