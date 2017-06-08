@@ -23,7 +23,7 @@ from utils.dockerutil import (DockerUtil,
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
-from utils.orchestrator import NomadUtil, ECSUtil, Tagger
+from utils.orchestrator import NomadUtil, ECSUtil, MetadataCollector
 
 
 EVENT_TYPE = 'docker'
@@ -183,7 +183,7 @@ class DockerDaemon(AgentCheck):
             self.docker_client = self.docker_util.client
             self.docker_gateway = DockerUtil.get_gateway()
 
-            self.orchestrator_tagger = Tagger()
+            self.metadata_collector = MetadataCollector()
 
             if Platform.is_k8s():
                 try:
@@ -499,8 +499,8 @@ class DockerDaemon(AgentCheck):
                 if nomad_tags:
                     tags.extend(nomad_tags)
 
-            if self.orchestrator_tagger.has_detected():
-                orch_tags = self.orchestrator_tagger.get_container_tags(co=entity)
+            if self.metadata_collector.has_detected():
+                orch_tags = self.metadata_collector.get_container_tags(co=entity)
                 tags.extend(orch_tags)
 
         return tags
@@ -771,6 +771,7 @@ class DockerDaemon(AgentCheck):
         if changed_container_ids and self._service_discovery:
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
         if changed_container_ids:
+            self.metadata_collector.invalidate_cache(events)
             if Platform.is_nomad():
                 self.nomadutil.invalidate_cache(events)
             elif Platform.is_ecs_instance():
