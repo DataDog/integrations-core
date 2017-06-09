@@ -27,6 +27,8 @@ instances:
 
 Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
+If using couch 2.0, add `couch_2` to get stats from each node.
+
 Restart the Agent to begin sending CouchDB metrics to Datadog.
 
 ### Validation
