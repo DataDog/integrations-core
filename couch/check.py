@@ -14,6 +14,10 @@ from checks import AgentCheck
 from util import headers
 
 
+# In couch 2.0 these metrics moved from the top level to under couchdb
+COUCHDB2_MOVED_METRICS = ('httpd', 'httpd_request_methods', 'httpd_status_codes')
+
+
 class CouchDb(AgentCheck):
     """Extracts stats from CouchDB via its REST API
     http://wiki.apache.org/couchdb/Runtime_Statistics
@@ -41,6 +45,14 @@ class CouchDb(AgentCheck):
                         continue
                     metric_name = '.'.join(['couchdb', key, metric])
                     self.gauge(metric_name, val['value'], tags=tags)
+                elif isinstance(val, dict):
+                    for sub_metric, sub_val in val.items():
+                        if sub_val.get('value') is not None:
+                            if metric in COUCHDB2_MOVED_METRICS:
+                                metric_name = '.'.join(['couchdb', metric, sub_metric])
+                            else:
+                                metric_name = '.'.join(['couchdb', key, metric, sub_metric])
+                            self.gauge(metric_name, sub_val['value'], tags=tags)
 
     def _create_metric(self, data, tags=None):
         if data.get('stats'):
