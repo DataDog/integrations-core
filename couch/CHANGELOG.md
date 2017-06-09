@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+1.0.2/2017-06-09
+=================
+
+### Changes
+
+* [FEATURE] Adds support for Couch 2.0
+
 1.0.1/2017-04-24
 ==================
 
