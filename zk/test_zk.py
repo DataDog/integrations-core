@@ -92,7 +92,7 @@ class ZooKeeperTestCase(AgentCheckTest):
         for mname in self.STAT_METRICS:
             self.assertMetric(mname, tags=["mode:standalone", "mytag"], count=1)
 
-        zk_version = os.environ.get("FLAVOR_VERSION") or "3.4.9"
+        zk_version = os.environ.get("FLAVOR_VERSION") or "3.4.10"
 
         if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
             for mname in self.MNTR_METRICS:

@@ -5,9 +5,6 @@
 # stdlib
 from mock import patch
 
-# 3p
-from nose.plugins.attrib import attr
-
 # project
 from tests.core.test_wmi import TestCommonWMI
 from tests.checks.common import AgentCheckTest
@@ -17,12 +14,13 @@ def to_time(wmi_ts):
     "Just return any time struct"
     return (2100, 12, 24, 11, 30, 47, 0, 0)
 
+
 def from_time(year=0, month=0, day=0, hours=0, minutes=0,
             seconds=0, microseconds=0, timezone=0):
     "Just return any WMI date"
     return "20151224113047.000000-480"
 
-@attr(requires='win32_event_log')
+
 class TestWin32_event_log(AgentCheckTest, TestCommonWMI):
     """Basic Test for win32_event_log integration."""
     CHECK_NAME = 'win32_event_log'

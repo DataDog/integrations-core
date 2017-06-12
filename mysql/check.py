@@ -561,7 +561,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
-                if self._is_master(slaves, binlog_running):  # master
+                if self._is_master(slaves, results):  # master
                     if slaves > 0 and binlog_running:
                         slave_running_status = AgentCheck.OK
                     else:
@@ -606,8 +606,10 @@ class MySql(AgentCheck):
                              % self.MAX_CUSTOM_QUERIES)
 
 
-    def _is_master(self, slaves, binlog):
-        if slaves > 0 or binlog:
+    def _is_master(self, slaves, results):
+        # master uuid only collected in slaves
+        master_host = self._collect_string('Master_Host', results)
+        if slaves > 0 or not master_host:
             return True
 
         return False
@@ -649,7 +651,7 @@ class MySql(AgentCheck):
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
-        return version > compat_version
+        return version >= compat_version
 
     def _get_version(self, db, host):
         hostkey = self._get_host_key()

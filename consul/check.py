@@ -65,6 +65,13 @@ class ConsulCheck(AgentCheck):
         'critical': AgentCheck.CRITICAL,
     }
 
+    STATUS_SEVERITY = {
+        AgentCheck.UNKNOWN: 0,
+        AgentCheck.OK: 1,
+        AgentCheck.WARNING: 2,
+        AgentCheck.CRITICAL: 3,
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -246,18 +253,27 @@ class ConsulCheck(AgentCheck):
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
 
+            sc = {}
+            # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
+                sc_id = '{0}/{1}/{2}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = self.STATUS_SC.get(check['Status'])
                 if status is None:
-                    continue
+                    status = AgentCheck.UNKNOWN
 
-                tags = ["check:{0}".format(check["CheckID"])]
-                if check["ServiceName"]:
-                    tags.append("service:{0}".format(check["ServiceName"]))
-                if check["ServiceID"]:
-                    tags.append("consul_service_id:{0}".format(check["ServiceID"]))
+                if sc_id not in sc:
+                    tags = ["check:{0}".format(check["CheckID"])]
+                    if check["ServiceName"]:
+                        tags.append("service:{0}".format(check["ServiceName"]))
+                    if check["ServiceID"]:
+                        tags.append("consul_service_id:{0}".format(check["ServiceID"]))
+                    sc[sc_id] = {'status': status, 'tags': tags}
 
-                self.service_check(self.HEALTH_CHECK, status, tags=main_tags+tags)
+                elif self.STATUS_SEVERITY[status] > self.STATUS_SEVERITY[sc[sc_id]['status']]:
+                    sc[sc_id]['status'] = status
+
+            for s in sc.values():
+                self.service_check(self.HEALTH_CHECK, s['status'], tags=main_tags+s['tags'])
 
         except Exception as e:
             self.log.error(e)

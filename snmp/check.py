@@ -395,7 +395,10 @@ class SnmpCheck(NetworkCheck):
                                          queried_oid)
                         continue
                 name = metric.get('name', 'unnamed_metric')
-                self.submit_metric(name, value, forced_type, tags)
+                metric_tags = tags
+                if metric.get('metric_tags'):
+                    metric_tags = metric_tags + metric.get('metric_tags')
+                self.submit_metric(name, value, forced_type, metric_tags)
 
     def report_table_metrics(self, metrics, results, tags):
         '''
@@ -433,7 +436,10 @@ class SnmpCheck(NetworkCheck):
                     self.log.warning("Several rows corresponding while the metric is supposed to be a scalar")
                     continue
                 val = result[0][1]
-                self.submit_metric(name, val, forced_type, tags)
+                metric_tags = tags
+                if metric.get('metric_tags'):
+                    metric_tags = metric_tags + metric.get('metric_tags')
+                self.submit_metric(name, val, forced_type, metric_tags)
             elif 'OID' in metric:
                 pass # This one is already handled by the other batch of requests
             else:

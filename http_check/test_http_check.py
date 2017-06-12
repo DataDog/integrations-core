@@ -197,6 +197,16 @@ CONFIG_POST_METHOD = {
     }]
 }
 
+CONFIG_POST_SOAP = {
+    'instances': [{
+        'name': 'post_soap',
+        'url': 'http://httpbin.org/post',
+        'timeout': 1,
+        'method': 'post',
+        'data': '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:m="http://www.example.org/stocks"><soap:Header></soap:Header><soap:Body><m:GetStockPrice><m:StockName>EXAMPLE</m:StockName></m:GetStockPrice></soap:Body></soap:Envelope>'
+    }]
+}
+
 @attr(requires='skip')
 class HTTPCheckTest(AgentCheckTest):
     CHECK_NAME = 'http_check'
@@ -303,6 +313,17 @@ class HTTPCheckTest(AgentCheckTest):
 
         self.coverage_report()
 
+    @mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
+    def test_check_ssl_expire_error(self, getpeercert_func):
+        self.run_check(CONFIG_EXPIRED_SSL)
+
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        tags = ['url:https://github.com', 'instance:expired_cert']
+        self.assertServiceCheckOK("http.can_connect", tags=tags)
+        self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
+
+        self.coverage_report()
+
     def test_check_allow_redirects(self):
         self.run_check(CONFIG_HTTP_REDIRECTS)
         # Overrides self.service_checks attribute when values are available\
@@ -361,3 +382,4 @@ class HTTPCheckTest(AgentCheckTest):
     def test_post_method(self):
         # Run the check
         self.run_check(CONFIG_POST_METHOD)
+        self.run_check(CONFIG_POST_SOAP)

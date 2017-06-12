@@ -1,32 +1,36 @@
-# Disk Integration
+# Disk Check
 
-## Overview
+# Overview
 
-Get metrics from disk service in real time to:
+Collect metrics related to disk usage and IO.
 
-* Visualize and monitor disk states
-* Be notified about disk failovers and events.
+# Installation
 
-## Installation
+The disk check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
 
-Install the `dd-check-disk` package manually or with your favorite configuration manager
+# Configuration
 
-## Configuration
+The disk check is enabled by default, and the Agent will collect metrics on all local partitions. If you want to configure the check with custom options, create a file `disk.yaml` in the Agent's `conf.d` directory. See the [sample disk.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.default) for all available configuration options.
 
-Edit the `disk.yaml` file to point to your server and port, set the masters to monitor
+# Validation
 
-## Validation
+Run the Agent's `info` subcommand and look for `disk` under the Checks section:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+  Checks
+  ======
+    [...]
 
-    Checks
-    ======
+    disk
+    -------
+      - instance #0 [OK]
+      - Collected 40 metrics, 0 events & 0 service checks
 
-        disk
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    [...]
+```
 
-## Compatibility
+# Troubleshooting
 
-The disk check is compatible with all major platforms
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this check.

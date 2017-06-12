@@ -4,7 +4,8 @@ instances:
   # Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
   # E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/my-db
   - server: mongodb://user:pass@host:port/db-name
-    # Time to wait on creating a MongoDB connection
+    # Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS (see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html)
+    # Defaults to 30 seconds
     # timeout: 30
 
     # tags:
@@ -31,10 +32,12 @@ instances:
     # * `metrics.commands` - Use of database commands
     # * `tcmalloc` -  TCMalloc memory allocator
     # * `top` - Usage statistics for each collection
+    # * `collection` - Metrics of the specified collections
     # additional_metrics:
     #   - metrics.commands
     #   - tcmalloc
     #   - top
+    #   - collection
     #
     # Collect metrics on specific collections from the database specified
     # Each collection generates many metrics,
