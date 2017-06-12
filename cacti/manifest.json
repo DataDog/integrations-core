@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "cacti",
-  "short_description": "Visualize Cacti metrics and correlate with the rest of your applications in Datadog.",
+  "short_description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
   "support": "core",
   "supported_os": [
     "linux"

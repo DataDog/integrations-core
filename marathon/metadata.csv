@@ -8,3 +8,4 @@ marathon.instances,gauge,,,,Number of instances of this application to start,0,m
 marathon.mem,gauge,,mebibyte,,Memory that is needed for the application per instance,0,marathon,mem
 marathon.tasksRunning,gauge,,task,,Number of tasks running,0,marathon,tasks running
 marathon.tasksStaged,gauge,,task,,Number of tasks staged to run,0,marathon,tasks staged
+marathon.queue.size,gauge,,,,Number of apps waiting for deployment,0,marathon,apps

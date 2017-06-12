@@ -4,13 +4,13 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "postgres",
-  "short_description": "PostgreSQL is an open-source, free object-relational database management system available on many platforms.",
+  "short_description": "Collect a wealth of database performance and health metrics.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.2",
   "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9"
 }
