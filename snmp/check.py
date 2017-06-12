@@ -492,7 +492,6 @@ class SnmpCheck(NetworkCheck):
             return
 
         metric_name = self.normalize(name, prefix="snmp")
-        self.log.debug("Submitting %s", metric_name)
 
         if forced_type:
             if forced_type.lower() == "gauge":
