@@ -300,6 +300,19 @@ class ProcessCheck(AgentCheck):
 
         return map(lambda i: int(i), data.split()[9:13])
 
+    def _get_child_processes(self, pids):
+        children_pids = set()
+        for pid in pids:
+            try:
+                children = psutil.Process(pid).children(recursive=True)
+                self.log.debug('%s children were collected for process %s', len(children), pid)
+                for child in children:
+                    children_pids.add(child.pid)
+            except psutil.NoSuchProcess:
+                pass
+
+        return children_pids
+
     def check(self, instance):
         name = instance.get('name', None)
         tags = instance.get('tags', [])
@@ -308,6 +321,7 @@ class ProcessCheck(AgentCheck):
         ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
+        collect_children = _is_affirmative(instance.get('collect_children', False))
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -342,11 +356,19 @@ class ProcessCheck(AgentCheck):
             # psutil.NoSuchProcess is raised.
             pids = self._get_pid_set(pid)
         elif pid_file is not None:
-            with open(pid_file, 'r') as file_pid:
-                pid_line = file_pid.readline().strip()
-                pids = self._get_pid_set(int(pid_line))
+            try:
+                with open(pid_file, 'r') as file_pid:
+                    pid_line = file_pid.readline().strip()
+                    pids = self._get_pid_set(int(pid_line))
+            except IOError as e:
+                # pid file doesn't exist, assuming the process is not running
+                self.log.debug('Unable to find pid file: %s', e)
+                pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
+
+        if collect_children:
+            pids.update(self._get_child_processes(pids))
 
         proc_state = self.get_process_state(name, pids)
 

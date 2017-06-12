@@ -74,6 +74,11 @@ class Marathon(AgentCheck):
         if response is not None:
             self.gauge('marathon.deployments', len(response), tags=instance_tags)
 
+        # Number of queued applications
+        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify)
+        if response is not None:
+            self.gauge('marathon.queue.size', len(response['queue']), tags=instance_tags)
+
     def refresh_acs_token(self, auth, acs_url):
         try:
             auth_body = {

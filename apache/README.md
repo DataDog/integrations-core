@@ -1,32 +1,61 @@
-# Apache Integration
+# Overview
 
-## Overview
+Get metrics from Apache in real time; graph them and correlate them with other relevant system metrics and events.
 
-Get metrics from apache service in real time to:
+  * Visualize your web server performance
+  * Correlate the performance of Apache with the rest of your applications
 
-* Visualize and monitor apache states
-* Be notified about apache failovers and events.
+# Installation
 
-## Installation
+The Apache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
 
-Install the `dd-check-apache` package manually or with your favorite configuration manager
+Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
-## Configuration
+# Configuration
 
-Edit the `apache.yaml` file to point to your server and port, set the masters to monitor
+Create a file `apache.yaml` in the Agent's `conf.d` directory:
 
-## Validation
+```
+        init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+        instances:
+          - apache_status_url: http://example.com/server-status?auto
+            # apache_user: example_user
+            # apache_password: example_password
+            tags:
+              - instance:foo
+            disable_ssl_validation: true # if you want to disable SSL cert validation
+```
 
-    Checks
-    ======
+Restart the Agent to begin sending Apache metrics to Datadog.
 
-        apache
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+# Validation
 
-## Compatibility
+Run the Agent's `info` subcommand and look for `apache` under the Checks section:
 
-The apache check is compatible with all major platforms
+```
+  Checks
+  ======
+    [...]
+
+    apache
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Troubleshooting
+
+# Compatibility
+
+The Apache check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks

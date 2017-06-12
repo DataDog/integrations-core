@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "nginx",
-  "short_description": "Nginx is a free, open-source, high-performance HTTP server and reverse proxy, as well as an IMAP/POP3 proxy server.",
+  "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
   "supported_os": [
     "linux",

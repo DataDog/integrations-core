@@ -6,7 +6,6 @@
 from datetime import datetime
 import _strptime # noqa
 import os.path
-from os import environ
 import re
 import socket
 import ssl
@@ -155,9 +154,6 @@ class HTTPCheck(NetworkCheck):
 
         self.ca_certs = init_config.get('ca_certs', get_ca_certs_path())
 
-        self.proxies['no'] = environ.get('no_proxy',
-                                         environ.get('NO_PROXY', None)
-                                         )
 
     def _load_conf(self, instance):
         # Fetches the conf
@@ -224,18 +220,7 @@ class HTTPCheck(NetworkCheck):
                 self.warning("Skipping SSL certificate validation for %s based on configuration"
                              % addr)
 
-            instance_proxy = self.proxies.copy()
-
-            # disable proxy if necessary
-            if skip_proxy:
-                instance_proxy.pop('http')
-                instance_proxy.pop('https')
-            elif self.proxies['no']:
-                for url in self.proxies['no'].replace(';', ',').split(","):
-                    if url in parsed_uri.netloc:
-                        instance_proxy.pop('http')
-                        instance_proxy.pop('https')
-
+            instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
 
             auth = None
@@ -253,7 +238,8 @@ class HTTPCheck(NetworkCheck):
             r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
                              proxies = instance_proxy, allow_redirects=allow_redirects,
                              verify=False if disable_ssl_validation else instance_ca_certs,
-                             json = data if method == 'post' else None)
+                             json = data if method == 'post' and isinstance(data, dict) else None,
+                             data = data if method == 'post' and isinstance(data, basestring) else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
@@ -334,7 +320,12 @@ class HTTPCheck(NetworkCheck):
                 send_status_up("%s is UP" % addr)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+
+            tags_list = list(tags)
+            tags_list.append('url:%s' % addr)
+            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+
             service_checks.append((
                 self.SC_SSL_CERT, status, msg
             ))
@@ -462,21 +453,21 @@ class HTTPCheck(NetworkCheck):
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
-            return Status.DOWN, "%s" % (str(e))
+            return Status.DOWN, 0, "%s" % (str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()
 
         if days_left.days < 0:
-            return Status.DOWN, "Expired by {0} days".format(days_left.days)
+            return Status.DOWN, days_left.days,"Expired by {0} days".format(days_left.days)
 
         elif days_left.days < critical_days:
-            return Status.CRITICAL, "This cert TTL is critical: only {0} days before it expires"\
+            return Status.CRITICAL, days_left.days,"This cert TTL is critical: only {0} days before it expires"\
                 .format(days_left.days)
 
         elif days_left.days < warning_days:
-            return Status.WARNING, "This cert is almost expired, only {0} days left"\
+            return Status.WARNING,days_left.days, "This cert is almost expired, only {0} days left"\
                 .format(days_left.days)
 
         else:
-            return Status.UP, "Days left: {0}".format(days_left.days)
+            return Status.UP, days_left.days,"Days left: {0}".format(days_left.days)
