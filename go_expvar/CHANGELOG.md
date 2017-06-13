@@ -1,9 +1,13 @@
 # CHANGELOG - go_expvar
 
-1.0.2 / Unreleased
+1.0.3 / Unreleased
 ==================
 
 * [BUGFIX] Fix path tag appended to all metrics matching path regex
+
+1.0.2 / Unreleased
+==================
+
 * [FEATURE] Make the hardcoded expvar URL path optional in the configuration
 
 1.0.1 / 5-22-2017
