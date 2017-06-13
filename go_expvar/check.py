@@ -175,8 +175,7 @@ class GoExpvar(AgentCheck):
 
             for traversed_path, value in values:
                 actual_path = ".".join(traversed_path)
-                if tag_by_path:
-                    metric_tags.append("path:%s" % actual_path)
+                path_tag = ["path:%s" % actual_path] if tag_by_path else []
 
                 metric_name = alias or self.normalize(actual_path, namespace, fix_case=True)
 
@@ -191,7 +190,7 @@ class GoExpvar(AgentCheck):
                                  "Please contact support@datadoghq.com for more information.")
                     return
 
-                SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags)
+                SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):
