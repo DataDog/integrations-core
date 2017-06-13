@@ -32,7 +32,7 @@ instances:
     # to fetch metrics for these ESXi hosts and the VMs
     # running on it
     # optional
-    # host_include_only_regex: ".*\.prod.datadoghq.com"
+    # host_include_only_regex: .*\.prod.datadoghq.com
 
     # Use a regex to include only the VMs that are
     # matching this pattern.
