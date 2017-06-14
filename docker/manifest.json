@@ -1,7 +1,7 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
-  "max_agent_version": "6.0.0",
+  "max_agent_version": "5.14",
   "min_agent_version": "5.6.3",
   "name": "docker",
   "short_description": "docker description.",
@@ -11,5 +11,5 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
