@@ -19,7 +19,7 @@ init_config:
 
 instances:
   - name: Example (com)
-    # nameserver: 8.8.8.8   # The nameserver to query
+    # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
     hostname: example.com # the record to fetch
     # record_type: AAAA   # default is A
   - name: Example (org)
