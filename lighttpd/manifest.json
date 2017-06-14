@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "lighttpd",
-  "short_description": "Lighttpd is a secure, fast, compliant, and very flexible web-server that has been optimized for high-performance environments.",
+  "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
   "support": "core",
   "supported_os": [
     "linux",

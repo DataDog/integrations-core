@@ -867,6 +867,9 @@ class VSphereCheck(AgentCheck):
                 if result.id.counterId not in self.metrics_metadata[i_key]:
                     self.log.debug("Skipping this metric value, because there is no metadata about it")
                     continue
+                if not result.value:
+                    self.log.debug("Skipping this metric value, because there are no samples available")
+                    continue
                 instance_name = result.id.instance or "none"
                 value = self._transform_value(instance, result.id.counterId, result.value[0])
 

@@ -34,6 +34,26 @@ c,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0
 c,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
 """
 
+MOCK_DATA_EVIL = """# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
+a,FRONTEND,,,1,2,12,1,11,11,0,0,0,,,,,OPEN,,,,,,,,,1,1,0,,,,0,1,0,2,,,,0,1,0,0,0,0,,1,1,1,,,
+a,BACKEND,0,0,0,0,12,0,11,11,0,0,,0,0,0,0,UP,0,0,0,,0,1221810,0,,1,1,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
+b,FRONTEND,,,1,2,12,11,11,0,0,0,0,,,,,OPEN,,,,,,,,,1,2,0,,,,0,0,0,1,,,,,,,,,,,0,0,0,,,
+b,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+b,i-2,0,0,1,1,,1,1,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,1,0,,1,3,2,,71,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+b,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+b,i-4,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+b,i-5,0,0,0,1,,1,1,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+b,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,"Now, this is just plain
+EVIL",,,,,,,,,0,0,
+c,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,"And this is 'end of days' stuff,
+am I right? ""Pure EVIL
+DOIN'""
+",,,,,0,,,,0,0,
+c,i-2,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN (agent),1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+c,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+c,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
+"""
+
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
     (['status:available', 'service:b'], 4),
@@ -121,6 +141,25 @@ class TestCheckHAProxy(AgentCheckTest):
 
     @mock.patch('requests.get', return_value=mock.Mock(content=MOCK_DATA))
     def test_count_per_status_by_service_and_collate_per_host(self, mock_requests):
+        config = copy.deepcopy(self.BASE_CONFIG)
+        config['instances'][0]['collect_status_metrics_by_host'] = True
+        config['instances'][0]['collate_status_tags_per_host'] = True
+        self.run_check(config)
+
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:FRONTEND', 'status:available', 'service:a'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:FRONTEND', 'status:available', 'service:b'])
+        for backend in ['i-1', 'i-2', 'i-3']:
+            self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:%s' % backend, 'status:available', 'service:b'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-4', 'status:unavailable', 'service:b'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-5', 'status:unavailable', 'service:b'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:available', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:unavailable', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:unavailable', 'service:c'])
+
+        self._assert_agg_statuses(collate_status_tags_per_host=True)
+
+    @mock.patch('requests.get', return_value=mock.Mock(content=MOCK_DATA_EVIL))
+    def test_count_per_status_by_service_and_collate_per_host_evil(self, mock_requests):
         config = copy.deepcopy(self.BASE_CONFIG)
         config['instances'][0]['collect_status_metrics_by_host'] = True
         config['instances'][0]['collate_status_tags_per_host'] = True

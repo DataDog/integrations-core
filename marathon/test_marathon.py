@@ -45,6 +45,8 @@ class MarathonCheckTest(AgentCheckTest):
                 return Fixtures.read_json_file("apps.json", sdk_dir=ci_dir)
             elif "v2/deployments" in url:
                 return Fixtures.read_json_file("deployments.json", sdk_dir=ci_dir)
+            elif "v2/queue" in url:
+                return Fixtures.read_json_file("queue.json", sdk_dir=ci_dir)
             else:
                 raise Exception("unknown url:" + url)
 
@@ -59,6 +61,8 @@ class MarathonCheckTest(AgentCheckTest):
                 return {"apps": []}
             elif "v2/deployments" in url:
                 return {"deployments": []}
+            elif "v2/queue" in url:
+                return {"queue": []}
             else:
                 raise Exception("unknown url:" + url)
 
