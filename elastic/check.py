@@ -23,7 +23,7 @@ class NodeNotFound(Exception):
 ESInstanceConfig = namedtuple(
     'ESInstanceConfig', [
         'pshard_stats',
-        'pshard_skip_to',
+        'pshard_graceful_to',
         'cluster_stats',
         'password',
         'service_check_tags',
@@ -355,7 +355,7 @@ class ESCheck(AgentCheck):
             raise Exception("A URL must be specified in the instance")
 
         pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
-        pshard_skip_to = _is_affirmative(instance.get('pshard_skip_to', False))
+        pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
 
         cluster_stats = _is_affirmative(instance.get('cluster_stats', False))
         if 'is_external' in instance:
@@ -386,7 +386,7 @@ class ESCheck(AgentCheck):
 
         config = ESInstanceConfig(
             pshard_stats=pshard_stats,
-            pshard_skip_to=pshard_skip_to,
+            pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
             password=instance.get('password'),
             service_check_tags=service_check_tags,
@@ -426,7 +426,7 @@ class ESCheck(AgentCheck):
         # Load clusterwise data
         # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
-            send_sc = bubble_ex = not config.pshard_to_skip
+            send_sc = bubble_ex = not config.pshard_graceful_to
             pshard_stats_url = urlparse.urljoin(config.url, pshard_stats_url)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
@@ -604,7 +604,6 @@ class ESCheck(AgentCheck):
                     message="Error {0} when hitting {1}".format(e, url),
                     tags=config.service_check_tags
                 )
-
             raise
 
         return resp.json()
