@@ -32,6 +32,8 @@ DEFAULT_ENABLED_RATES = [
 DEFAULT_COLLECT_EVENTS = False
 DEFAULT_NAMESPACES = ['default']
 
+DEFAULT_SERVICE_EVENT_FREQ = 5 * 60  # seconds
+
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
 DEFAULT_ENABLED_GAUGES = [
@@ -106,13 +108,16 @@ class Kubernetes(AgentCheck):
             self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
             if self._collect_events:
                 self.event_retriever = self.kubeutil.get_event_retriever()
+            elif self.kubeutil.collect_service_tag:
+                # Only fetch service and pod events for service mapping
+                event_delay = inst.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
+                                                                         delay=event_delay)
             else:
-                # Only fetch service and pod events for service mapping and SD
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'])
+                self.event_retriever = None
         else:
             self._collect_events = None
             self.event_retriever = None
-
 
     def _perform_kubelet_checks(self, url):
         service_check_base = NAMESPACE + '.kubelet.check'
