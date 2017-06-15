@@ -1,6 +1,12 @@
 # CHANGELOG - kubernetes
 
-1.1.0 UNRELEASED
+1.1.1 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] query kubernetes service mapping every 5 minutes to reduce apiserver traffic (see service_tag_update_freq option) and add collect_service_tags option to disable it completely. See [#476][]
+
+1.1.0 / Unreleased
 ==================
 ### Changes
 
@@ -10,7 +16,7 @@
 * [IMPROVEMENT] Add custom tags to events. See [#449][]
 * [BUGFIX] Fix missing docker.net metrics in Kubernetes. See [#418][]
 
-1.0.0 02-23-2017
+1.0.0 / 02-23-2017
 ==================
 
 ### Changes
@@ -23,3 +29,4 @@
 [#418]: https://github.com/DataDog/integrations-core/issues/418
 [#434]: https://github.com/DataDog/integrations-core/issues/434
 [#449]: https://github.com/DataDog/integrations-core/issues/449
+[#476]: https://github.com/DataDog/integrations-core/issues/476
