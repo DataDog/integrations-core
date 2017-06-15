@@ -249,6 +249,26 @@ class TestMockGoExpVar(AgentCheckTest):
         results = self.check.deep_get(content, ['list', '.*', 'value'], [])
         self.assertEqual(sorted(results), sorted(expected))
 
+    # Test that the path tags get correctly added when metric has alias
+    def test_alias_tag_path(self):
+        mock_config = {
+            "instances": [{
+                "expvar_url": self._expvar_url,
+                "metrics": [
+                    {
+                        "path": "array/\d+/key",
+                        "alias": "array.dict.key",
+                        "type": "gauge",
+                    }
+                ]
+            }]
+        }
+        self.run_check(mock_config, mocks=self.mocks)
+
+        shared_tags = ['expvar_url:{0}'.format(self._expvar_url)]
+        self.assertMetric("array.dict.key", count=1, tags=shared_tags + ["path:array.0.key"])
+        self.assertMetric("array.dict.key", count=1, tags=shared_tags + ["path:array.1.key"])
+
 @attr(requires='go_expvar')
 class TestGoExpVar(AgentCheckTest):
 
