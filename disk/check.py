@@ -15,7 +15,7 @@ except ImportError:
 # datadog
 from checks import AgentCheck
 from config import _is_affirmative
-from util import Platform
+from utils.platform import Platform
 from utils.subprocess_output import get_subprocess_output
 from utils.timeout import (
     timeout,
