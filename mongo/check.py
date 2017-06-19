@@ -945,8 +945,8 @@ class MongoDb(AgentCheck):
 
             oplog_data = {}
 
-            db_version =  cli.server_info()['version']
-            oplog_names =  ("oplog.rs", "oplog.$main")
+            db_version = cli.server_info()['version']
+            oplog_names = ("oplog.rs", "oplog.$main")
             if LooseVersion(db_version) < LooseVersion("3.0.0"):
                 for ol_collection_name in oplog_names:
                     ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
