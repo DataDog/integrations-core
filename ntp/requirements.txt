@@ -1,2 +1,0 @@
-# integration pip requirements
-ntplib==0.3.3

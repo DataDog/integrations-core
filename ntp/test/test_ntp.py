@@ -23,7 +23,8 @@ class TestNtp(AgentCheckTest):
 
         agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'api_key': 'toto',
+            'additional_checksd': '.',
         }
 
         # load this config in the ntp singleton
