@@ -11,7 +11,35 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 ## Setup
 ### Installation
 
-The NTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) wherever you'd like to run the check. If you need the newest version of the check, install the `dd-check-ntp` package.
+To install the check on the agent:
+```
+/opt/datadog-agent/embedded/bin/pip install .
+```
+
+## Development
+
+Create a dedicated virtualenv and follow the instructions in this paragraph
+to work with the check.
+
+To install the check in dev mode:
+```
+pip install -e .[dev]
+```
+
+To run the tests:
+```
+python setup.py test
+```
+
+Once installed, the check is available as:
+```
+import check.ntp
+```
+
+To build the wheel package:
+```
+python setup.py bdist_wheel
+```
 
 ### Configuration
 
