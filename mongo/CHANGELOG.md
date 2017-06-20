@@ -29,3 +29,4 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#491]: https://github.com/DataDog/integrations-core/issues/491
