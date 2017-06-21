@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "nagios",
-  "short_description": "nagios description.",
+  "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
   "support": "core",
   "supported_os": [
     "linux",

@@ -18,11 +18,8 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('mcache/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('mcache')
       sh %(docker run -d --name #{container_name} -p #{container_port}:11211 memcached:#{mcache_version})
 
       mcache_response = `#{__dir__}/mc_conn_tester.pl -s localhost -p #{container_port} -c 1 --timeout 1`

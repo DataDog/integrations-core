@@ -101,7 +101,9 @@ class ZookeeperCheck(AgentCheck):
 
     Parse content from `stat` and `mntr`(if available) commmands to retrieve health cluster metrics.
     """
-    version_pattern = re.compile(r'Zookeeper version: ([^.]+)\.([^.]+)\.([^-]+)', flags=re.I)
+    # example match:
+    # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
+    version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
 
@@ -231,7 +233,7 @@ class ZookeeperCheck(AgentCheck):
             mode = "unknown"
 
         tags = tags + ['mode:%s' % mode]
-        self.set('zookeeper.instances', hostname, tags=tags)
+        self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
 
         for k, v in gauges.iteritems():
@@ -280,14 +282,13 @@ class ZookeeperCheck(AgentCheck):
         # body correctly. Particularly, the Connections val was added in
         # >= 3.4.4.
         start_line = buf.readline()
-        match = self.version_pattern.match(start_line)
+        match = self.version_pattern.search(start_line)
         if match is None:
             return (None, None, "inactive", None)
             raise Exception("Could not parse version from stat command output: %s" % start_line)
         else:
-            version_tuple = match.groups()
-        has_connections_val = version_tuple >= ('3', '4', '4')
-        version = "%s.%s.%s" % version_tuple
+            version = match.group()
+        has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
 
         # Clients:
         buf.readline()  # skip the Clients: header

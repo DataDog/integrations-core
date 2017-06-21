@@ -2,6 +2,7 @@
 import re
 import time
 import urllib
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 # 3p
 import pymongo
@@ -588,6 +589,30 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
+    def _parse_uri(self, server, sanitize_username=False):
+        """
+        Parses a MongoDB-formatted URI (e.g. mongodb://user:pass@server/db) and returns parsed elements
+        and a sanitized URI.
+        """
+        parsed = pymongo.uri_parser.parse_uri(server)
+
+        username = parsed.get('username')
+        password = parsed.get('password')
+        db_name = parsed.get('database')
+        nodelist = parsed.get('nodelist')
+
+        # Remove password (and optionally username) from sanitized server URI.
+        # To ensure that the `replace` works well, we first need to url-decode the raw server string
+        # since the password parsed by pymongo is url-decoded
+        decoded_server = urllib.unquote_plus(server)
+        clean_server_name = decoded_server.replace(password, "*" * 5) if password else decoded_server
+
+        if sanitize_username and username:
+            username_pattern = u"{}[@:]".format(re.escape(username))
+            clean_server_name = re.sub(username_pattern, "", clean_server_name)
+
+        return username, password, db_name, nodelist, clean_server_name
+
     def check(self, instance):
         """
         Returns a dictionary that looks a lot like what's sent back by
@@ -623,26 +648,9 @@ class MongoDb(AgentCheck):
             if param is None:
                 del ssl_params[key]
 
-        # Configuration a URL, mongodb://user:pass@server/db
         server = instance['server']
-        parsed = pymongo.uri_parser.parse_uri(server)
-        username = parsed.get('username')
-        password = parsed.get('password')
-        db_name = parsed.get('database')
+        username, password, db_name, nodelist, clean_server_name = self._parse_uri(server, sanitize_username=bool(ssl_params))
         additional_metrics = instance.get('additional_metrics', [])
-
-        # IF the password contains a URL encoded character (for example '/'), then the
-        # raw server string will have %2F, but the password string will have the '/'.
-        # Therefore, the string replace (below) won't work, because it won't have an
-        # exact match.  Convert the password *back* to URL encoded, so the string
-        # replace works properly.
-        encoded_password = urllib.quote_plus(password) if password else None
-
-        clean_server_name = server.replace(encoded_password, "*" * 5) if encoded_password else server
-
-        if ssl_params:
-            username_uri = u"{}@".format(urllib.quote(username))
-            clean_server_name = clean_server_name.replace(username_uri, "")
 
         # Get the list of metrics to collect
         collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
@@ -669,7 +677,6 @@ class MongoDb(AgentCheck):
         # (it's added in the backend for service checks)
         tags.append('server:%s' % clean_server_name)
 
-        nodelist = parsed.get('nodelist')
         if nodelist:
             host = nodelist[0][0]
             port = nodelist[0][1]
@@ -683,6 +690,8 @@ class MongoDb(AgentCheck):
             cli = pymongo.mongo_client.MongoClient(
                 server,
                 socketTimeoutMS=timeout,
+                connectTimeoutMS=timeout,
+                serverSelectionTimeoutMS=timeout,
                 read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
                 **ssl_params)
             # some commands can only go against the admin DB
@@ -755,6 +764,8 @@ class MongoDb(AgentCheck):
                 cli = pymongo.mongo_client.MongoClient(
                     server,
                     socketTimeoutMS=timeout,
+                    connectTimeoutMS=timeout,
+                    serverSelectionTimeoutMS=timeout,
                     replicaset=setname,
                     read_preference=pymongo.ReadPreference.NEAREST,
                     **ssl_params)
@@ -934,10 +945,20 @@ class MongoDb(AgentCheck):
 
             oplog_data = {}
 
-            for ol_collection_name in ("oplog.rs", "oplog.$main"):
-                ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
-                if ol_metadata:
-                    break
+            db_version = cli.server_info()['version']
+            oplog_names = ("oplog.rs", "oplog.$main")
+            if LooseVersion(db_version) < LooseVersion("3.0.0"):
+                for ol_collection_name in oplog_names:
+                    ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
+                    if ol_metadata:
+                        break
+            else:
+                res = localdb.command("listCollections", filter={"name": {"$in": oplog_names}})
+                if res['cursor']['firstBatch']:
+                    ol_metadata = res['cursor']['firstBatch'][0]
+                    ol_collection_name = ol_metadata['name']
+                else:
+                    ol_metadata = None
 
             if ol_metadata:
                 try:

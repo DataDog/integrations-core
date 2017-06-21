@@ -16,11 +16,8 @@ namespace :ci do
       rm_rf gunicorn_rootdir
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('gunicorn/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('gunicorn')
       section('GUNICORN_INSTALL')
       `mkdir -p #{gunicorn_rootdir}/venv`
       `mkdir -p #{gunicorn_rootdir}/app`

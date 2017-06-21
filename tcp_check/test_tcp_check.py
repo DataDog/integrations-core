@@ -8,7 +8,7 @@ import time
 # project
 from tests.checks.common import AgentCheckTest
 
-RESULTS_TIMEOUT = 5
+RESULTS_TIMEOUT = 20
 
 CONFIG = {
     'init_config': {},
@@ -56,7 +56,7 @@ class TCPCheckTest(AgentCheckTest):
             self.check._process_results()
             if len(getattr(self.check, attribute)) >= count:
                 return getattr(self.check, method)()
-            time.sleep(1)
+            time.sleep(1.1)
             i += 1
         raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
                         .format(len(getattr(self.check, attribute)), count, i,

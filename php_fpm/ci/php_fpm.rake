@@ -6,11 +6,8 @@ namespace :ci do
   namespace :php_fpm do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('php_fpm/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('php_fpm')
       sh %(docker create -p 181:80 --name #{container_name} -e NGINX_GENERATE_DEFAULT_VHOST=true million12/nginx-php:php55)
       sh %(docker cp #{__dir__}/fpm-status.conf #{container_name}:/etc/nginx/conf.d/fpm-status.conf)
       sh %(docker start #{container_name})

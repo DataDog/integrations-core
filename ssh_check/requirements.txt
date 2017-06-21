@@ -1,2 +1,4 @@
 # integration pip requirements
-paramiko==1.15.2
+paramiko==2.1.2
+cryptography==1.7.1
+winrandom-ctypes==1.0; sys_platform == 'win32'

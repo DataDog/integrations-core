@@ -265,7 +265,7 @@ SCHEMA_VARS = {
 
 REPLICA_VARS = {
     'Seconds_Behind_Master': ('mysql.replication.seconds_behind_master', GAUGE),
-    'Slaves_connected': ('mysql.replication.slaves_connected', COUNT),
+    'Slaves_connected': ('mysql.replication.slaves_connected', GAUGE),
 }
 
 SYNTHETIC_VARS = {
@@ -529,7 +529,8 @@ class MySql(AgentCheck):
         if _is_affirmative(options.get('replication', False)):
             # Get replica stats
             results.update(self._get_replica_stats(db))
-            results.update(self._get_slave_status(db, above_560))
+            nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
+            results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
 
             # get slave running form global status page
@@ -560,7 +561,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
-                if self._is_master(slaves, binlog_running):  # master
+                if self._is_master(slaves, results):  # master
                     if slaves > 0 and binlog_running:
                         slave_running_status = AgentCheck.OK
                     else:
@@ -605,8 +606,10 @@ class MySql(AgentCheck):
                              % self.MAX_CUSTOM_QUERIES)
 
 
-    def _is_master(self, slaves, binlog):
-        if slaves > 0 or binlog:
+    def _is_master(self, slaves, results):
+        # master uuid only collected in slaves
+        master_host = self._collect_string('Master_Host', results)
+        if slaves > 0 or not master_host:
             return True
 
         return False
@@ -648,7 +651,7 @@ class MySql(AgentCheck):
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
-        return version > compat_version
+        return version >= compat_version
 
     def _get_version(self, db, host):
         hostkey = self._get_host_key()
@@ -863,7 +866,7 @@ class MySql(AgentCheck):
             self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
             return {}
 
-    def _get_slave_status(self, db, above_560):
+    def _get_slave_status(self, db, above_560, nonblocking):
         """
         Retrieve the slaves' statuses using:
         1. The `performance_schema.threads` table. Non-blocking, requires version > 5.6.0
@@ -871,7 +874,7 @@ class MySql(AgentCheck):
         """
         try:
             with closing(db.cursor()) as cursor:
-                if above_560:
+                if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
                     cursor.execute("SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'")

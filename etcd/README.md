@@ -1,32 +1,65 @@
 # Etcd Integration
 
-## Overview
+# Overview
 
-Get metrics from etcd service in real time to:
+Collect etcd metrics to:
 
-* Visualize and monitor etcd states
-* Be notified about etcd failovers and events.
+* Monitor the health of your etcd cluster.
+* Know when host configurations may be out of sync.
+* Correlate the performance of etcd with the rest of your applications.
 
-## Installation
+# Installation
 
-Install the `dd-check-etcd` package manually or with your favorite configuration manager
+The etcd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your etcd instance(s).
 
-## Configuration
+# Configuration
 
-Edit the `etcd.yaml` file to point to your server and port, set the masters to monitor
+Create a file `etcd.yaml` in the Agent's `conf.d` directory:
 
-## Validation
+```
+init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+instances:
+  - url: "https://server:port" # API endpoint of your etcd instance
+```
 
-    Checks
-    ======
+Restart the Agent to begin sending etcd metrics to Datadog.
 
-        etcd
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+# Validation
 
-## Compatibility
+Run the Agent's `info` subcommand and look for `etcd` under the Checks section:
 
-The etcd check is compatible with all major platforms
+```
+  Checks
+  ======
+    [...]
+
+    etcd
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 0 service checks
+
+    [...]
+```
+
+# Troubleshooting
+
+# Compatibility
+
+The etcd check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv) for a list of metrics provided by this integration.
+
+# Events
+
+# Service Checks
+
+`etcd.can_connect`:
+
+Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoint.
+
+# Further Reading
+
+To get a better idea of how (or why) to integrate etcd with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-etcd-performance/) about it.

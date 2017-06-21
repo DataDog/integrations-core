@@ -1,34 +1,66 @@
-# Tcp_check Integration
+# TCP Integration
 
-## Overview
+# Overview
 
-Get metrics from tcp_check service in real time to:
+Monitor TCP connectivity and response time for any host and port.
 
-* Visualize and monitor tcp_check states
-* Be notified about tcp_check failovers and events.
+# Installation
 
-The TCP check is a service check, it only checks to see if the system is up or down, it does not monitor any other metrics.
+The TCP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
 
-## Installation
+If you need the newest version of the TCP check, install the `dd-check-tcp` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
-Install the `dd-check-tcp_check` package manually or with your favorite configuration manager
+# Configuration
 
-## Configuration
+Create a file `tcp_check.yaml` in the Agent's `conf.d` directory:
 
-Edit the `tcp_check.yaml` file to point to your server and port, set the masters to monitor
+```
+init_config:
 
-## Validation
+instances:
+  - name: SSH check
+    host: jumphost.example.com # or IPv4/IPv6 address
+    port: 22           
+    skip_event: true # Default is false, i.e. emit events instead of service checks. Recommend to set to true.
+    collect_response_time: true # to collect network.tcp.response_time. Default is false.
+```
 
-When you run `datadog-agent info` you should see something like the following:
+Restart the Agent to start sending TCP service checks and response times to Datadog.
 
-    Checks
-    ======
+# Validation
 
-        tcp_check
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Run the Agent's `info` subcommand and look for `tcp_check` under the Checks section:
 
-## Compatibility
+```
+  Checks
+  ======
+    [...]
 
-The tcp_check check is compatible with all major platforms
+    tcp_check
+    ----------
+      - instance #0 [OK]
+      - Collected 1 metric, 0 events & 1 service check
+
+    [...]
+```
+
+# Troubleshooting
+
+# Compatibility
+
+The TCP check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv) for a list of metrics provided by this integration.
+
+
+# Service Checks
+
+Older versions of the TCP check only emitted events to reflect site status. This has now been deprecated in favor of Service Checks. The Agent will submit these by default.  To create alert conditions on this service checks in Datadog, select 'Network' on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not 'Integration'.
+
+**`tcp.can_connect`**:
+
+Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
+
+# Further Reading

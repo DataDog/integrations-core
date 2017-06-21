@@ -9,9 +9,8 @@ import time
 import dns.resolver
 
 # project
-from util import Platform
+from utils.platform import Platform
 from checks.network_checks import NetworkCheck, Status
-
 
 # These imports are necessary because otherwise dynamic type
 # resolution will fail on windows without it.
@@ -19,9 +18,17 @@ from checks.network_checks import NetworkCheck, Status
 if Platform.is_win32():
     from dns.rdtypes.ANY import *  # noqa
     from dns.rdtypes.IN import *  # noqa
+    # for tiny time deltas, time.time on Windows reports the same value
+    # of the clock more than once, causing the computation of response_time
+    # to be often 0; let's use time.clock that is more precise.
+    time_func = time.clock
+else:
+    time_func = time.time
+
 
 class BadConfException(Exception):
     pass
+
 
 class DNSCheck(NetworkCheck):
     SERVICE_CHECK_NAME = 'dns.can_resolve'
@@ -63,7 +70,8 @@ class DNSCheck(NetworkCheck):
         hostname, timeout, nameserver, record_type, resolver = self._load_conf(instance)
 
         # Perform the DNS query, and report its duration as a gauge
-        start_time = time.time()
+        response_time = 0
+        t0 = time_func()
 
         try:
             self.log.debug('Querying "{0}" record for hostname "{1}"...'.format(record_type, hostname))
@@ -78,7 +86,7 @@ class DNSCheck(NetworkCheck):
                 answer = resolver.query(hostname, rdtype=record_type)
                 assert(answer.rrset.items[0].to_text())
 
-            end_time = time.time()
+            response_time = time_func() - t0
 
         except dns.exception.Timeout:
             self.log.error('DNS resolution of {0} timed out'.format(hostname))
@@ -90,8 +98,8 @@ class DNSCheck(NetworkCheck):
 
         else:
             tags = self._get_tags(instance)
-            if end_time - start_time > 0:
-                self.gauge('dns.response_time', end_time - start_time, tags=tags)
+            if response_time > 0:
+                self.gauge('dns.response_time', response_time, tags=tags)
             self.log.debug('Resolved hostname: {0}'.format(hostname))
             return Status.UP, 'UP'
 

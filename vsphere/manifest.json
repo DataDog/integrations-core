@@ -2,15 +2,15 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.15.0",
   "name": "vsphere",
-  "short_description": "VMware vSphere is VMware's cloud computing virtualization operating system.",
+  "short_description": "Understand how vSphere resource usage affects your application.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.2",
   "guid": "930b1839-cc1f-4e7a-b706-0e8cf3218464"
 }

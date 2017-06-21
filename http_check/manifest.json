@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.14.0",
   "name": "http_check",
   "short_description": "http_check description.",
   "support": "core",
@@ -11,6 +11,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.1",
   "guid": "eb133a1f-697c-4143-bad3-10e72541fa9c"
 }

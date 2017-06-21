@@ -15,6 +15,54 @@ class TestKubernetesState(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes_state'
 
+    METRICS = [
+        # nodes
+        NAMESPACE + '.node.cpu_capacity',
+        NAMESPACE + '.node.memory_capacity',
+        NAMESPACE + '.node.pods_capacity',
+        NAMESPACE + '.node.cpu_allocatable',
+        NAMESPACE + '.node.memory_allocatable',
+        NAMESPACE + '.node.pods_allocatable',
+        # deployments
+        NAMESPACE + '.deployment.replicas',
+        NAMESPACE + '.deployment.replicas_available',
+        NAMESPACE + '.deployment.replicas_unavailable',
+        NAMESPACE + '.deployment.replicas_updated',
+        NAMESPACE + '.deployment.replicas_desired',
+        NAMESPACE + '.deployment.paused',
+        NAMESPACE + '.deployment.rollingupdate.max_unavailable',
+        # daemonsets
+        NAMESPACE + '.daemonset.scheduled',
+        NAMESPACE + '.daemonset.misscheduled',
+        NAMESPACE + '.daemonset.desired',
+        # pods
+        NAMESPACE + '.pod.ready',
+        NAMESPACE + '.pod.scheduled',
+        # containers
+        NAMESPACE + '.container.ready',
+        NAMESPACE + '.container.running',
+        NAMESPACE + '.container.terminated',
+        NAMESPACE + '.container.waiting',
+        NAMESPACE + '.container.restarts',
+        NAMESPACE + '.container.cpu_requested',
+        NAMESPACE + '.container.memory_requested',
+        NAMESPACE + '.container.cpu_limit',
+        NAMESPACE + '.container.memory_limit',
+        # replicasets
+        NAMESPACE + '.replicaset.replicas',
+        NAMESPACE + '.replicaset.fully_labeled_replicas',
+        NAMESPACE + '.replicaset.replicas_ready',
+        NAMESPACE + '.replicaset.replicas_desired',
+    ]
+
+    ZERO_METRICS = [
+        NAMESPACE + '.deployment.replicas_unavailable',
+        NAMESPACE + '.deployment.paused',
+        NAMESPACE + '.daemonset.misscheduled',
+        NAMESPACE + '.container.terminated',
+        NAMESPACE + '.container.waiting',
+    ]
+
     def test__get_kube_state(self):
         headers = {
             'accept': 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
@@ -37,6 +85,13 @@ class TestKubernetesState(AgentCheckTest):
         config = {'instances': [{'host': 'foo', 'kube_state_url': 'https://example.com:12345'}]}
         self.run_check(config, force_reload=True, mocks=mocks)
         mocked.assert_called_once()
+
+    def assertMetricNotAllZeros(self, metric_name):
+        for mname, ts, val, mdata in self.metrics:
+            if mname == metric_name:
+                if val != 0:
+                    return True
+        raise AssertionError("All metrics named %s have 0 value." % metric_name)
 
     def test__update_kube_state_metrics(self):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
@@ -63,26 +118,22 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
         # TODO: uncomment when any of these are in the test protobuf.bin
-        # self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
         # self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
         # self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
         # self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
 
-        self.assertMetric(NAMESPACE + '.node.cpu_capacity')
-        self.assertMetric(NAMESPACE + '.node.memory_capacity')
-        self.assertMetric(NAMESPACE + '.node.pods_capacity')
-        self.assertMetric(NAMESPACE + '.node.cpu_allocatable')
-        self.assertMetric(NAMESPACE + '.node.memory_allocatable')
-        self.assertMetric(NAMESPACE + '.node.pods_allocatable')
-        self.assertMetric(NAMESPACE + '.node.status')
-        self.assertMetric(NAMESPACE + '.container.cpu_requested')
-        self.assertMetric(NAMESPACE + '.container.memory_requested')
-        # TODO: uncomment when kube-state-metrics 0.4 is released
-        # self.assertMetric(NAMESPACE + '.container.cpu_limit')
-        # self.assertMetric(NAMESPACE + '.container.memory_limit')
-        self.assertMetric(NAMESPACE + '.container.restarts')
-        self.assertMetric(NAMESPACE + '.deployment.replicas_available')
-        self.assertMetric(NAMESPACE + '.deployment.replicas_unavailable')
-        self.assertMetric(NAMESPACE + '.deployment.replicas_desired')
-        self.assertMetric(NAMESPACE + '.deployment.replicas_updated')
+        for metric in self.METRICS:
+            self.assertMetric(metric)
+            if metric not in self.ZERO_METRICS:
+                self.assertMetricNotAllZeros(metric)
+
+        self.assert_resourcequota()
+
+    def assert_resourcequota(self):
+        """ The metric name is created dynamically so we just check some exist. """
+        for m in self.metrics:
+            if 'kubernetes_state.resourcequota.' in m[0]:
+                return True
+        return False

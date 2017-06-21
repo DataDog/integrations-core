@@ -12,11 +12,8 @@ namespace :ci do
   namespace :nagios do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('nagios/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('nagios')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name nagios source/nagios:nagios_version)
       # sh %(docker start nagios)

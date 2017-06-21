@@ -12,11 +12,8 @@ namespace :ci do
   namespace :go_expvar do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('go_expvar/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('go_expvar')
       sh %(docker build -t datadog-test-expvar #{ENV['TRAVIS_BUILD_DIR']}/go_expvar/ci/)
       sh %(docker run -dt --name datadog-test-expvar -p 8079:8079 datadog-test-expvar)
       sleep_for 5

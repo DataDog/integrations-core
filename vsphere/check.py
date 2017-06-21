@@ -21,7 +21,7 @@ from checks import AgentCheck
 from checks.libs.thread_pool import Pool
 from checks.libs.vmware.basic_metrics import BASIC_METRICS
 from checks.libs.vmware.all_metrics import ALL_METRICS
-from util import Timer
+from utils.timer import Timer
 
 SOURCE_TYPE = 'vsphere'
 REAL_TIME_INTERVAL = 20  # Default vCenter sampling interval
@@ -866,6 +866,9 @@ class VSphereCheck(AgentCheck):
             for result in results[0].value:
                 if result.id.counterId not in self.metrics_metadata[i_key]:
                     self.log.debug("Skipping this metric value, because there is no metadata about it")
+                    continue
+                if not result.value:
+                    self.log.debug("Skipping this metric value, because there are no samples available")
                     continue
                 instance_name = result.id.instance or "none"
                 value = self._transform_value(instance, result.id.counterId, result.value[0])
