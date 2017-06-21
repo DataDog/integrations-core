@@ -30,6 +30,12 @@ instances:
   # cAdvisor host
   # host: localhost
 
+  # API server host and port
+  # Autodetected via the KUBERNETES_SERVICE_HOST variable if present
+  #
+  # api_server_host: localhost
+  # api_server_port: 443
+
   # Authentication against the apiserver
   #
   # By default the agent authenticates against the apiserver with its service account bearer token.
@@ -101,7 +107,8 @@ instances:
   # Providing a server cert enables TLS validation.
   #
   # It is possible to providing a client cert/key pair for client auth.
-  # If no such cert is passed, the agent authenticates using its pod bearer token (if available) when querying kubelet and the apiserver.
+  # If no such cert is passed, the agent authenticates using its pod bearer token (if available)
+  # when querying kubelet and the apiserver. Its path can also be set with bearer_token_path.
   #
   # The recommended way to pass certificates and keys to the agent is by using
   # "Secret" Kubernetes object (and to mount them as volumes).
@@ -110,7 +117,7 @@ instances:
   # kubelet_cert: /path/to/ca.pem
   # kubelet_client_crt: /path/to/client.crt
   # kubelet_client_key: /path/to/client.key
-  #
+  # bearer_token_path: /var/run/secrets/kubernetes.io/serviceaccount/token
   #
   # We can define a whitelist of patterns that permit publishing raw metrics.
   # enabled_rates:
