@@ -321,7 +321,7 @@ class Kubernetes(AgentCheck):
         stats = subcontainer['stats'][-1]  # take the latest
         self._publish_raw_metrics(NAMESPACE, stats, tags)
 
-        if subcontainer.get("spec", {}).get("has_filesystem"):
+        if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
             fs_utilization = float(fs['usage'])/float(fs['capacity'])
             self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
