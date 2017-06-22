@@ -5,6 +5,7 @@
 ### Changes
 
 * [IMPROVEMENT] query kubernetes service mapping every 5 minutes to reduce apiserver traffic (see service_tag_update_freq option) and add collect_service_tags option to disable it completely. See [#476][]
+* [IMPROVEMENT] Fix typo in exception reporting when unable to collect metrics for a container. See [#493][]
 
 1.1.0 / Unreleased
 ==================
