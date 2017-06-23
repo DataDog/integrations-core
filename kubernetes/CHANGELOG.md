@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes
 
+1.1.2 / Unreleased
+==================
+### Changes
+[BUGFIX] Use correct Node hostname in event collection
+
 1.1.1 / Unreleased
 ==================
 ### Changes
