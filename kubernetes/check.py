@@ -502,7 +502,6 @@ class Kubernetes(AgentCheck):
             if source:
                 title += ' on {}'.format(source.get('host', ''))
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
-                
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
             dd_event = {
                 'timestamp': event_ts,
