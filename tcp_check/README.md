@@ -54,13 +54,10 @@ The TCP check is compatible with all major platforms.
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
-
-Older versions of the TCP check only emitted events to reflect site status, but now the check supports service checks, too. However, events are still the default behavior. Set `skip_event` to true for all configured instances to submit service checks instead of events. The Agent will soon deprecate `skip_event`, i.e. the TCP check's default be will only support service checks.
 
 # Service Checks
 
-To create alert conditions on this service checks in Datadog, select 'Network' on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not 'Integration'.
+Older versions of the TCP check only emitted events to reflect site status. This has now been deprecated in favor of Service Checks. The Agent will submit these by default.  To create alert conditions on this service checks in Datadog, select 'Network' on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not 'Integration'.
 
 **`tcp.can_connect`**:
 
