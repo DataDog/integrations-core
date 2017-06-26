@@ -1,5 +1,13 @@
 # CHANGELOG - varnish
 
+1.0.2 06-26-2017
+==================
+
+### Changes
+
+* [IMPROVEMENT] Support for passing additional parameters to varnishstat and varnishadm
+in order to better support service discovery.
+
 1.0.1 Unreleased
 ==================
 

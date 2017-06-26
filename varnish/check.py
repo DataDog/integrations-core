@@ -81,7 +81,7 @@ class Varnish(AgentCheck):
             tags = []
         else:
             tags = list(set(tags))
-        varnishstat_path = instance.get("varnishstat")
+        varnishstat_path = instance.get("varnishstat").split(' ')
         name = instance.get('name')
 
         # Get version and version-specific args from varnishstat -V.
@@ -89,7 +89,7 @@ class Varnish(AgentCheck):
 
         # Parse metrics from varnishstat.
         arg = '-x' if use_xml else '-1'
-        cmd = [varnishstat_path, arg]
+        cmd = varnishstat_path + [arg]
 
         if name is not None:
             cmd.extend(['-n', name])
@@ -102,7 +102,7 @@ class Varnish(AgentCheck):
         self._parse_varnishstat(output, use_xml, tags)
 
         # Parse service checks from varnishadm.
-        varnishadm_path = instance.get('varnishadm')
+        varnishadm_path = instance.get('varnishadm').split(' ')
         if varnishadm_path:
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
@@ -111,9 +111,9 @@ class Varnish(AgentCheck):
                 cmd.append('sudo')
 
             if version < LooseVersion('4.1.0'):
-                cmd.extend([varnishadm_path, '-S', secretfile_path, 'debug.health'])
+                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend([varnishadm_path, '-S', secretfile_path, 'backend.list', '-p'])
+                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'backend.list', '-p'])
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
@@ -128,7 +128,7 @@ class Varnish(AgentCheck):
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output([varnishstat_path, "-V"], self.log,
+        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log,
             raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
