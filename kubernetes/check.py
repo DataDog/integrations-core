@@ -364,8 +364,8 @@ class Kubernetes(AgentCheck):
                 # also store tags for aliases
                 for alias in subcontainer.get('aliases', []):
                     container_tags[alias] = tags
-            except Exception, e:
-                self.log.error("Unable to collect metrics for container: {0} ({1}".format(c_id, e))
+            except Exception as e:
+                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
 
         # container metrics from kubernetes API: limits and requests
         for pod in pods_list['items']:
