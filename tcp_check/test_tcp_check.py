@@ -15,18 +15,18 @@ CONFIG = {
     'instances': [{
         'host': '127.0.0.1',
         'port': 65530,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'DownService'
     }, {
         'host': '126.0.0.1',
         'port': 65530,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'DownService2',
         'tags': ['test1']
     }, {
         'host': 'datadoghq.com',
         'port': 80,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'UpService',
         'tags': ['test2']
     }, {

@@ -321,7 +321,7 @@ class Kubernetes(AgentCheck):
         stats = subcontainer['stats'][-1]  # take the latest
         self._publish_raw_metrics(NAMESPACE, stats, tags)
 
-        if subcontainer.get("spec", {}).get("has_filesystem"):
+        if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
             fs_utilization = float(fs['usage'])/float(fs['capacity'])
             self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
@@ -364,8 +364,8 @@ class Kubernetes(AgentCheck):
                 # also store tags for aliases
                 for alias in subcontainer.get('aliases', []):
                     container_tags[alias] = tags
-            except Exception, e:
-                self.log.error("Unable to collect metrics for container: {0} ({1}".format(c_id, e))
+            except Exception as e:
+                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
 
         # container metrics from kubernetes API: limits and requests
         for pod in pods_list['items']:
