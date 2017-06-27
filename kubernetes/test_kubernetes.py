@@ -240,7 +240,7 @@ class TestKubernetes(AgentCheckTest):
             (['container_name:k8s_POD.35220667_dd-agent-1rxlh_default_12c7be82-33ca-11e6-ac8f-42010af00003_f5cf585f',
               'container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh', 'kube_namespace:default', 'kube_app:dd-agent',
-              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'],
+              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'],
             [MEM, CPU, FS, NET, NET_ERRORS]),
             (['container_name:/', 'pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['container_name:/system', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
@@ -248,7 +248,7 @@ class TestKubernetes(AgentCheckTest):
               'container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events','pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar',
-              'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
+              'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
@@ -296,11 +296,11 @@ class TestKubernetes(AgentCheckTest):
             (['container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
             (['container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
             (['pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
