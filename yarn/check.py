@@ -220,6 +220,7 @@ class YarnCheck(AgentCheck):
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})
+        collect_app_metrics = instance.get('collect_app_metrics', {})
         filter_queues = instance.get('filter_queues', [])
 
         if type(app_tags) is not dict:
@@ -253,7 +254,8 @@ class YarnCheck(AgentCheck):
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
-        self._yarn_app_metrics(rm_address, app_tags, tags)
+        if instance.get('collect_app_metrics', True):
+            self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, filter_queues)
 
