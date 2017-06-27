@@ -856,7 +856,11 @@ class MySql(AgentCheck):
                 slave_results = cursor.fetchall()
                 if len(slave_results) > 0:
                     for slave_result in slave_results:
-                        channel = slave_result['Channel_Name'] or 'default'
+                        # MySQL <5.7 does not have Channel_Name
+                        if 'Channel_Name' in slave_result:
+                            channel = slave_result['Channel_Name'] or 'default'
+                        else:
+                            channel = 'default'
                         for key in slave_result:
                             if key not in replica_results:
                                 replica_results[key] = {}
