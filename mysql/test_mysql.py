@@ -400,6 +400,8 @@ class TestMySql(AgentCheckTest):
         config['instances'][0]['port'] = 13307
         self.run_check_twice(config)
 
+        self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
+
         # Test service check
         self.assertServiceCheck('mysql.can_connect', status=AgentCheck.OK,
                                 tags=self.SC_TAGS_REPLICA, count=1)
