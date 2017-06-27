@@ -55,10 +55,11 @@ instances:
     #   - another_\d+queue
     #   - (lepidorae)-\d+   # to tag queues in the lepidorae queue_family
 
-    # Service checks:
+    # Service checks and `rabbitmq.connections` metric:
     # By default a list of all vhosts is fetched and each one will be checked
-    # using the aliveness API. If you prefer only certain vhosts to be monitored
-    # with service checks then you can list the vhosts you care about.
+    # using the aliveness API and the metric `rabbitmq.connections` will be collected.
+    # If you prefer only certain vhosts to be monitored with service checks
+    # and the number of `connections` then you can list the vhosts you care about.
     #
     # vhosts:
     #   - vhost1
