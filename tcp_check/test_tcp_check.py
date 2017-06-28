@@ -51,13 +51,16 @@ class TCPCheckTest(AgentCheckTest):
 
         Raise after
         """
-        service_checks = getattr(self, attribute)
+
+        # Check the initial values to see if we already have a results before waiting for the async
+        # instances to finish
+        initial_values = getattr(self, attribute)
 
         i = 0
         while i < RESULTS_TIMEOUT:
             self.check._process_results()
-            if len(getattr(self.check, attribute)) + len(service_checks) >= count:
-                return getattr(self.check, method)() + service_checks
+            if len(getattr(self.check, attribute)) + len(initial_values) >= count:
+                return getattr(self.check, method)() + initial_values
             time.sleep(1.1)
             i += 1
         raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
