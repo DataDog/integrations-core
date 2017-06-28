@@ -51,12 +51,13 @@ class TCPCheckTest(AgentCheckTest):
 
         Raise after
         """
-        num_service_checks = len(self.getattr(self.check, attribute))
+        service_checks = getattr(self, attribute)
+
         i = 0
         while i < RESULTS_TIMEOUT:
             self.check._process_results()
-            if len(getattr(self.check, attribute)) + num_service_checks >= count:
-                return getattr(self.check, method)()
+            if len(getattr(self.check, attribute)) + len(service_checks) >= count:
+                return getattr(self.check, method)() + service_checks
             time.sleep(1.1)
             i += 1
         raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
