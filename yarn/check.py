@@ -93,6 +93,7 @@ from checks import AgentCheck
 DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
 DEFAULT_CUSTER_NAME = 'default_cluster'
+DEFAULT_COLLECT_APP_METRICS = True;
 
 # Path to retrieve cluster metrics
 YARN_CLUSTER_METRICS_PATH = '/ws/v1/cluster/metrics'
@@ -220,6 +221,7 @@ class YarnCheck(AgentCheck):
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})
+        collect_app_metrics = instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)
         filter_queues = instance.get('filter_queues', [])
 
         if type(app_tags) is not dict:
@@ -253,7 +255,8 @@ class YarnCheck(AgentCheck):
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
-        self._yarn_app_metrics(rm_address, app_tags, tags)
+        if collect_app_metrics:
+            self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, filter_queues)
 
