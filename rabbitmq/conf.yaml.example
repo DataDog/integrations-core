@@ -64,3 +64,8 @@ instances:
     # vhosts:
     #   - vhost1
     #   - vhost2
+
+    # Optional tags to be applied to every emitted metric, service checks and events.
+    # tags:
+    #   - "key:value"
+    #   - "instance:production"
