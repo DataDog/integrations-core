@@ -118,7 +118,6 @@ class RabbitMQ(AgentCheck):
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse.urlparse(base_url)
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
-        skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
@@ -148,7 +147,7 @@ class RabbitMQ(AgentCheck):
 
         auth = (username, password)
 
-        return base_url, max_detailed, specified, auth, ssl_verify, skip_proxy, custom_tags
+        return base_url, max_detailed, specified, auth, ssl_verify, custom_tags
 
     def _get_vhosts(self, instance, base_url, auth=None, ssl_verify=True):
         vhosts = instance.get('vhosts')
@@ -163,21 +162,21 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, auth, ssl_verify, skip_proxy, custom_tags = self._get_config(instance)
+        base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
             # Generate metrics from the status API.
             self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], custom_tags,
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+                           auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], custom_tags,
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+                           auth=auth, ssl_verify=ssl_verify)
 
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+                           auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check from the aliveness API. In the case of an invalid response
             # code or unparseable JSON this check will send no data.
-            self._check_aliveness(instance, base_url, vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self._check_aliveness(instance, base_url, vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
@@ -197,7 +196,7 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True, skip_proxy=False):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -312,7 +311,7 @@ class RabbitMQ(AgentCheck):
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
 
-    def get_connections_stat(self, instance, base_url, object_type, vhosts, custom_tags, auth=None, ssl_verify=True, skip_proxy=False):
+    def get_connections_stat(self, instance, base_url, object_type, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         Collect metrics on currently open connection per vhost.
         """
@@ -355,7 +354,7 @@ class RabbitMQ(AgentCheck):
 
         self.event(event)
 
-    def _check_aliveness(self, instance, base_url, vhosts, custom_tags, auth=None, ssl_verify=True, skip_proxy=False):
+    def _check_aliveness(self, instance, base_url, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         Check the aliveness API against all or a subset of vhosts. The API
         will return {"status": "ok"} and a 200 response code in the case
