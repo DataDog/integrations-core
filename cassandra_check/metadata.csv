@@ -1,0 +1,2 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+cassandra.replication_failures,gauge,,,,Number of replica nodes down per keyspace,-1,cassandra_check,replication failures

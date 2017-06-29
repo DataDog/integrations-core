@@ -1,0 +1,12 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.6.3",
+  "name": "cassandra_check",
+  "short_description": "cassandra_check description.",
+  "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
+  "support": "contrib",
+  "supported_os": ["linux","mac_os","windows"],
+  "version": "0.1.0"
+}
