@@ -49,7 +49,8 @@ def requests_get_mock(*args, **kwargs):
     elif args[0] == YARN_APPS_URL:
         with open(Fixtures.file('apps_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
-            self.collected_from_app_url = True
+            global collected_from_app_url
+            collected_from_app_url = True
             return MockResponse(body, 200)
 
     elif args[0] == YARN_NODES_URL:
@@ -212,7 +213,8 @@ class YARNCheck(AgentCheckTest):
     ]
 
     def setup():
-        self.collected_from_app_url = False
+        global collected_from_app_url
+        collected_from_app_url = False
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
     def test_check_excludes_app_metrics(self, mock_requests):
@@ -223,7 +225,7 @@ class YARNCheck(AgentCheckTest):
         self.run_check(config)
 
         # Check that the YARN App metrics is empty
-        self.assertFalse(self.collected_from_app_url)
+        self.assertFalse(collected_from_app_url)
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
     def test_check(self, mock_requests):
