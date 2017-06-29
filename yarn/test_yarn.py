@@ -65,6 +65,7 @@ def requests_get_mock(*args, **kwargs):
 
 
 class YARNCheck(AgentCheckTest):
+
     CHECK_NAME = 'yarn'
 
     YARN_CONFIG = {
@@ -212,7 +213,7 @@ class YARNCheck(AgentCheckTest):
         'opt_key:opt_value'
     ]
 
-    def setup(self):
+    def setUp(self):
         global collected_from_app_url
         collected_from_app_url = False
 
