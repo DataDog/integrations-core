@@ -1,0 +1,15 @@
+{
+  "numFilesToCheck": 10,
+  "findPotentialReviewers": true,
+  "fileBlacklist": ["*.md"],
+  "userBlacklist": [],
+  "userBlacklistForPR": [],
+  "requiredOrgs": ["DataDog"],
+  "branches": ["master"],
+  "skipAlreadyAssignedPR": true,
+  "skipAlreadyMentionedPR": true,
+  "assignToReviewer": false,
+  "createReviewRequest": false,
+  "createComment": true,
+  "skipCollaboratorPR": false
+}
