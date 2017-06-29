@@ -52,7 +52,7 @@ class TCPCheckTest(AgentCheckTest):
         Raise after
         """
 
-        # Check the initial values to see if we already have a results before waiting for the async
+        # Check the initial values to see if we already have results before waiting for the async
         # instances to finish
         initial_values = getattr(self, attribute)
 
