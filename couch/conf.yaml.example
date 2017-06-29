@@ -16,7 +16,6 @@ instances:
     # user: username                # optional
     # password: password            # optional
     # timeout: 5                    # in seconds
-    # couch_2: False
     # db_whitelist:
     #  - db1
     #  - db2
