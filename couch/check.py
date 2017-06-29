@@ -125,12 +125,23 @@ class CouchDb(AgentCheck):
 
         return overall_stats
 
+    def _get_couch_version(self, server):
+        try:
+            couch_version = requests.get(server).json().get('version', '1.6')
+        except Exception as e:
+            service_check_tags = ['instance:%s' % server]
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                tags=service_check_tags, message=str(e))
+            raise
+        else:
+            return couch_version
+
     def get_data(self, server, instance):
         # The dictionary to be returned.
         couchdb = {'stats': None, 'cluster_stats': {}, 'databases': {}}
 
-        couch_2 = instance.get('couch_2')
-        if couch_2:
+        couch_version = self._get_couch_version(server)
+        if couch_version.startswith('2.'):
             endpoint = '_membership'
             url = urljoin(server, endpoint)
             members = self._get_stats(url, instance)["cluster_nodes"]
@@ -149,8 +160,8 @@ class CouchDb(AgentCheck):
 
         # Get the list of whitelisted databases.
         db_whitelist = instance.get('db_whitelist')
-        self.db_blacklist.setdefault(server,[])
-        self.db_blacklist[server].extend(instance.get('db_blacklist',[]))
+        self.db_blacklist.setdefault(server, [])
+        self.db_blacklist[server].extend(instance.get('db_blacklist', []))
         whitelist = set(db_whitelist) if db_whitelist else None
         databases = set(self._get_stats(url, instance)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
@@ -160,7 +171,7 @@ class CouchDb(AgentCheck):
             databases = list(databases)[:self.MAX_DB]
 
         for dbName in databases:
-            url = urljoin(server, quote(dbName, safe = ''))
+            url = urljoin(server, quote(dbName, safe=''))
             try:
                 db_stats = self._get_stats(url, instance)
             except requests.exceptions.HTTPError as e:

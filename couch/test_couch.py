@@ -53,7 +53,6 @@ class CouchTestCase(AgentCheckTest):
                     "server": "http://localhost:5984",
                     "user": "dduser",
                     "password": "pawprint",
-                    "couch_2": self.is_couch_2
                 }
             ]
         }
@@ -136,7 +135,3 @@ class CouchTestCase(AgentCheckTest):
                     self.assertMetric(gauge, tags=tags, count=0)
                 else:
                     self.assertMetric(gauge, tags=tags, count=1)
-
-    @property
-    def is_couch_2(self):
-        return '2.0' in os.environ.get('FLAVOR_VERSION', '')
