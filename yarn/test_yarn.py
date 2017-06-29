@@ -26,7 +26,7 @@ YARN_SCHEDULER_URL = urljoin(RM_ADDRESS, '/ws/v1/cluster/scheduler')
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
-COLLECTED_FROM_APP_URL = False
+collected_from_app_url = False
 
 def requests_get_mock(*args, **kwargs):
 
@@ -49,7 +49,7 @@ def requests_get_mock(*args, **kwargs):
     elif args[0] == YARN_APPS_URL:
         with open(Fixtures.file('apps_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
-            COLLECTED_FROM_APP_URL = True
+            self.collected_from_app_url = True
             return MockResponse(body, 200)
 
     elif args[0] == YARN_NODES_URL:
@@ -140,10 +140,6 @@ class YARNCheck(AgentCheckTest):
         'yarn.apps.vcore_seconds': 103,
     }
 
-    YARN_APP_METRIC_EXCLUDED_VALUES = {
-
-    }
-
     YARN_APP_METRICS_TAGS = [
         'cluster_name:%s' % CLUSTER_NAME,
         'app_name:word count',
@@ -215,9 +211,11 @@ class YARNCheck(AgentCheckTest):
         'opt_key:opt_value'
     ]
 
+    def setup():
+        self.collected_from_app_url = False
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
-    def test_check_excludes_app_metrics(self, mock, requests):
+    def test_check_excludes_app_metrics(self, mock_requests):
         config = {
             'instances': [self.YARN_CONFIG_EXCLUDING_APP]
         }
@@ -225,7 +223,7 @@ class YARNCheck(AgentCheckTest):
         self.run_check(config)
 
         # Check that the YARN App metrics is empty
-        assertFalse(COLLECTED_FROM_APP_URL)
+        self.assertFalse(self.collected_from_app_url)
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
     def test_check(self, mock_requests):
