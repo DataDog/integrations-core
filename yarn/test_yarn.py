@@ -212,7 +212,7 @@ class YARNCheck(AgentCheckTest):
         'opt_key:opt_value'
     ]
 
-    def setup():
+    def setup(self):
         global collected_from_app_url
         collected_from_app_url = False
 
