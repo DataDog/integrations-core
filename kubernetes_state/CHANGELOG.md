@@ -1,6 +1,13 @@
 # CHANGELOG - kubernetes_state
 
-1.1.0 Unreleased
+1.2.0 Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Port to PrometheusCheck class and support for new 0.5.0 metrics
+
+1.1.0 06-05-2017
 ==================
 
 ### Changes
