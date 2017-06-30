@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def varnish_version
-  ENV['FLAVOR_VERSION'] || '4.1.4'
+  ENV['FLAVOR_VERSION'] || '4.1.7'
 end
 
 namespace :ci do
