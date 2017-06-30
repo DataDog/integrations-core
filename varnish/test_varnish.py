@@ -72,7 +72,7 @@ COMMON_METRICS = [
     'varnish.LCK.vcl.locks',
 ]
 
-VARNISH_DEFAULT_VERSION = "4.1.4"
+VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
