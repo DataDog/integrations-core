@@ -34,6 +34,7 @@ env:
     - BUNDLE_PATH=$TRAVIS_BUILD_DIR/vendor/cache
     - DD_AGENT_BRANCH=master
     - EXTRAS_BRANCH=master
+    - JMXFETCH_URL="https://dd-jmxfetch.s3.amazonaws.com"
     - REQ_LOCALS="$TRAVIS_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
   matrix:
     - TRAVIS_FLAVOR=default
@@ -67,12 +68,15 @@ env:
     - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.1.0-1
     - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=0.10.1.0-1
     - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.9.0
+    - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
+    - TRAVIS_FLAVOR=kubernetes
     - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
     - TRAVIS_FLAVOR=lighttpd
     - TRAVIS_FLAVOR=mcache FLAVOR_VERSION=1.4.22
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=2.6.9
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.0.1
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
+    - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.4
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.5
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.6
     - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.7
@@ -88,6 +92,7 @@ env:
     - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=3.7.3
     - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=4.0.3
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.5.0
+    - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.6.0
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.4.18
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.6.17
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.8.19
@@ -103,7 +108,6 @@ env:
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.4
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
-    - TRAVIS_FLAVOR=win32_event_log
     # END OF TRAVIS MATRIX
 
 install:
@@ -113,6 +117,7 @@ install:
   - git -C $HOME/integrations-extras pull || git clone -b $EXTRAS_BRANCH --depth 1 https://github.com/DataDog/integrations-extras.git $HOME/integrations-extras
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
+  - bundle exec rake setup_agent_libs
 
 script:
   - bundle exec rake prep_travis_ci

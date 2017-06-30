@@ -139,7 +139,7 @@ class Docker(AgentCheck):
     def check(self, instance):
         # Report image metrics
         self.warning('Using the "docker" check is deprecated and will be removed'
-        ' in a future version of the agent. Please use the "docker_daemon" one instead')
+        ' in the next version of the agent, 5.15. Please use the "docker_daemon" one instead')
         if _is_affirmative(instance.get('collect_images_stats', True)):
             self._count_images(instance)
 

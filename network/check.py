@@ -156,18 +156,18 @@ class Network(AgentCheck):
                 ('tcp4', 'listen') : 'system.net.tcp4.listen',
                 ('tcp4', 'last_ack') : 'system.net.tcp4.time_wait',
 
-                ('tcp6', 'estab') : 'system.net.tcp4.estab',
-                ('tcp6', 'syn_sent') : 'system.net.tcp4.syn_sent',
-                ('tcp6', 'syn_recv') : 'system.net.tcp4.syn_recv',
-                ('tcp6', 'fin_wait_1') : 'system.net.tcp4.fin_wait_1',
-                ('tcp6', 'fin_wait_2') : 'system.net.tcp4.fin_wait_2',
-                ('tcp6', 'time_wait') : 'system.net.tcp4.time_wait',
-                ('tcp6', 'unconn') : 'system.net.tcp4.unconn',
-                ('tcp6', 'close') : 'system.net.tcp4.close',
-                ('tcp6', 'close_wait') : 'system.net.tcp4.close_wait',
-                ('tcp6', 'closing') : 'system.net.tcp4.closing',
-                ('tcp6', 'listen') : 'system.net.tcp4.listen',
-                ('tcp6', 'last_ack') : 'system.net.tcp4.time_wait',
+                ('tcp6', 'estab') : 'system.net.tcp6.estab',
+                ('tcp6', 'syn_sent') : 'system.net.tcp6.syn_sent',
+                ('tcp6', 'syn_recv') : 'system.net.tcp6.syn_recv',
+                ('tcp6', 'fin_wait_1') : 'system.net.tcp6.fin_wait_1',
+                ('tcp6', 'fin_wait_2') : 'system.net.tcp6.fin_wait_2',
+                ('tcp6', 'time_wait') : 'system.net.tcp6.time_wait',
+                ('tcp6', 'unconn') : 'system.net.tcp6.unconn',
+                ('tcp6', 'close') : 'system.net.tcp6.close',
+                ('tcp6', 'close_wait') : 'system.net.tcp6.close_wait',
+                ('tcp6', 'closing') : 'system.net.tcp6.closing',
+                ('tcp6', 'listen') : 'system.net.tcp6.listen',
+                ('tcp6', 'last_ack') : 'system.net.tcp6.time_wait',
             }
 
             self.tcp_states = {
@@ -335,28 +335,23 @@ class Network(AgentCheck):
         for f in ['netstat', 'snmp']:
             proc_data_path = "{}/net/{}".format(proc_location, f)
             try:
-                netstat = open(proc_data_path, 'r')
+                with open(proc_data_path, 'r') as netstat:
+                    while True:
+                        n_header = netstat.readline()
+                        if not n_header:
+                            break # No more? Abort!
+                        n_data = netstat.readline()
 
-                while True:
-                    n_header = netstat.readline()
-                    if not n_header:
-                        break # No more? Abort!
-                    n_data = netstat.readline()
-
-                    h_parts = n_header.strip().split(' ')
-                    h_values = n_data.strip().split(' ')
-                    ns_category = h_parts[0][:-1]
-                    netstat_data[ns_category] = {}
-                    # Turn the data into a dictionary
-                    for idx, hpart in enumerate(h_parts[1:]):
-                        netstat_data[ns_category][hpart] = h_values[idx + 1]
-
+                        h_parts = n_header.strip().split(' ')
+                        h_values = n_data.strip().split(' ')
+                        ns_category = h_parts[0][:-1]
+                        netstat_data[ns_category] = {}
+                        # Turn the data into a dictionary
+                        for idx, hpart in enumerate(h_parts[1:]):
+                            netstat_data[ns_category][hpart] = h_values[idx + 1]
             except IOError:
                 # On Openshift, /proc/net/snmp is only readable by root
                 self.log.debug("Unable to read %s.", proc_data_path)
-
-            finally:
-                netstat.close()
 
         nstat_metrics_names = {
             'Tcp': {

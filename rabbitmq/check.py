@@ -20,6 +20,7 @@ from config import _is_affirmative
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 QUEUE_TYPE = 'queues'
 NODE_TYPE = 'nodes'
+CONNECTION_TYPE = 'connections'
 MAX_DETAILED_QUEUES = 200
 MAX_DETAILED_NODES = 100
 # Post an event in the stream when the number of queues or nodes to
@@ -71,6 +72,7 @@ ATTRIBUTES = {
     NODE_TYPE: NODE_ATTRIBUTES,
 }
 
+TAG_PREFIX = 'rabbitmq'
 TAGS_MAP = {
     QUEUE_TYPE: {
         'node': 'node',
@@ -115,6 +117,7 @@ class RabbitMQ(AgentCheck):
         password = instance.get('rabbitmq_pass', 'guest')
         parsed_url = urlparse.urlparse(base_url)
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
+        skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
@@ -144,19 +147,36 @@ class RabbitMQ(AgentCheck):
 
         auth = (username, password)
 
-        return base_url, max_detailed, specified, auth, ssl_verify
+        return base_url, max_detailed, specified, auth, ssl_verify, skip_proxy
+
+    def _get_vhosts(self, instance, base_url, auth=None, ssl_verify=True):
+        vhosts = instance.get('vhosts')
+
+        if not vhosts:
+            # Fetch a list of _all_ vhosts from the API.
+            vhosts_url = urlparse.urljoin(base_url, 'vhosts')
+            vhost_proxy = self.get_instance_proxy(instance, vhosts_url)
+            vhosts_response = self._get_data(vhosts_url, auth=auth, ssl_verify=ssl_verify, proxies=vhost_proxy)
+            vhosts = [v['name'] for v in vhosts_response]
+
+        return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, auth, ssl_verify = self._get_config(instance)
+        base_url, max_detailed, specified, auth, ssl_verify, skip_proxy = self._get_config(instance)
         try:
             # Generate metrics from the status API.
-            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], auth=auth, ssl_verify=ssl_verify)
-            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], auth=auth, ssl_verify=ssl_verify)
+            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE],
+                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE],
+                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+
+            vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts,
+                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
 
             # Generate a service check from the aliveness API. In the case of an invalid response
             # code or unparseable JSON this check will send no data.
-            vhosts = instance.get('vhosts')
-            self._check_aliveness(base_url, vhosts, auth=auth, ssl_verify=ssl_verify)
+            self._check_aliveness(instance, base_url, vhosts, auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK)
@@ -166,9 +186,9 @@ class RabbitMQ(AgentCheck):
             self.service_check('rabbitmq.status', AgentCheck.CRITICAL, message=msg)
             self.log.error(msg)
 
-    def _get_data(self, url, auth=None, ssl_verify=True):
+    def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
         try:
-            r = requests.get(url, auth=auth, timeout=self.default_integration_http_timeout, verify=ssl_verify)
+            r = requests.get(url, auth=auth, proxies=proxies, timeout=self.default_integration_http_timeout, verify=ssl_verify)
             r.raise_for_status()
             return r.json()
         except RequestException as e:
@@ -176,7 +196,7 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, auth=None, ssl_verify=True):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, auth=None, ssl_verify=True, skip_proxy=False):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -184,7 +204,9 @@ class RabbitMQ(AgentCheck):
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
-        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth, ssl_verify=ssl_verify)
+        instance_proxy = self.get_instance_proxy(instance, base_url)
+        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+                              ssl_verify=ssl_verify, proxies=instance_proxy)
 
         # Make a copy of this list as we will remove items from it at each
         # iteration
@@ -270,7 +292,7 @@ class RabbitMQ(AgentCheck):
             tag = data.get(t)
             if tag:
                 # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
-                tags.append('rabbitmq_%s:%s' % (tag_list[t], tag))
+                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
 
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
@@ -287,6 +309,22 @@ class RabbitMQ(AgentCheck):
                 except ValueError:
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
+
+    def get_connections_stat(self, instance, base_url, object_type, vhosts, auth=None, ssl_verify=True, skip_proxy=False):
+        """
+        Collect metrics on currently open connection per vhost.
+        """
+        instance_proxy = self.get_instance_proxy(instance, base_url)
+        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+                              ssl_verify=ssl_verify, proxies=instance_proxy)
+
+        stats = {vhost: 0 for vhost in vhosts}
+        for conn in data:
+            if conn['vhost'] in vhosts:
+                stats[conn['vhost']] += 1
+
+        for vhost, nb_conn in stats.iteritems():
+            self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)])
 
     def alert(self, base_url, max_detailed, size, object_type):
         key = "%s%s" % (base_url, object_type)
@@ -315,24 +353,20 @@ class RabbitMQ(AgentCheck):
 
         self.event(event)
 
-    def _check_aliveness(self, base_url, vhosts=None, auth=None, ssl_verify=True):
+    def _check_aliveness(self, instance, base_url, vhosts, auth=None, ssl_verify=True, skip_proxy=False):
         """
         Check the aliveness API against all or a subset of vhosts. The API
         will return {"status": "ok"} and a 200 response code in the case
         that the check passes.
         """
-        if not vhosts:
-            # Fetch a list of _all_ vhosts from the API.
-            vhosts_url = urlparse.urljoin(base_url, 'vhosts')
-            vhosts_response = self._get_data(vhosts_url, auth=auth, ssl_verify=ssl_verify)
-            vhosts = [v['name'] for v in vhosts_response]
 
         for vhost in vhosts:
             tags = ['vhost:%s' % vhost]
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/%s' % (urllib.quote_plus(vhost))
             aliveness_url = urlparse.urljoin(base_url, path)
-            aliveness_response = self._get_data(aliveness_url, auth=auth, ssl_verify=ssl_verify)
+            aliveness_proxy = self.get_instance_proxy(instance, aliveness_url)
+            aliveness_response = self._get_data(aliveness_url, auth=auth, ssl_verify=ssl_verify, proxies=aliveness_proxy)
             message = u"Response from aliveness API: %s" % aliveness_response
 
             if aliveness_response.get('status') == 'ok':
