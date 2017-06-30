@@ -4,7 +4,6 @@
 
 # stdlib
 import copy
-import time
 
 # 3rd party
 from nose.plugins.attrib import attr
@@ -267,14 +266,14 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [self.generate_instance_config(self.PLAY_WITH_GET_NEXT_METRICS)]
         }
         self.run_check_twice(config)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
                                 tags=self.CHECK_TAGS, count=1)
 
         self.run_check(config)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for metric in self.PLAY_WITH_GET_NEXT_METRICS:
@@ -295,7 +294,7 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [self.generate_instance_config(self.SCALAR_OBJECTS)]
         }
         self.run_check_n(config, repeat=3)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for metric in self.SCALAR_OBJECTS:
@@ -316,7 +315,7 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [self.generate_instance_config(self.TABULAR_OBJECTS)]
         }
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for symbol in self.TABULAR_OBJECTS[0]['symbols']:
@@ -361,7 +360,7 @@ class SNMPTestCase(AgentCheckTest):
 
 
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for symbol in self.TABULAR_OBJECTS[0]['symbols']:
@@ -406,7 +405,7 @@ class SNMPTestCase(AgentCheckTest):
 
 
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for symbol in self.TABULAR_OBJECTS[0]['symbols']:
@@ -451,7 +450,7 @@ class SNMPTestCase(AgentCheckTest):
 
 
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for symbol in self.TABULAR_OBJECTS[0]['symbols']:
@@ -496,7 +495,7 @@ class SNMPTestCase(AgentCheckTest):
 
 
         self.run_check_n(config, repeat=3, sleep=2)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for symbol in self.TABULAR_OBJECTS[0]['symbols']:
@@ -524,12 +523,12 @@ class SNMPTestCase(AgentCheckTest):
         }
         self.run_check(config)
 
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1)
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1, RESULTS_TIMEOUT)
         self.assertWarning("Fail to collect some metrics: No symbol IF-MIB::noIdeaWhatIAmDoingHere",
                            count=1, exact_match=False)
 
         # # Test service check
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.CRITICAL,
                                 tags=self.CHECK_TAGS, count=1)
         self.coverage_report()
@@ -542,7 +541,7 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [self.generate_instance_config(self.FORCED_METRICS)]
         }
         self.run_check_twice(config)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         for metric in self.FORCED_METRICS:
             metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
@@ -570,11 +569,11 @@ class SNMPTestCase(AgentCheckTest):
 
         self.run_check(config)
 
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1)
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1, RESULTS_TIMEOUT)
         self.assertWarning("Invalid forced-type specified:", count=1, exact_match=False)
 
         # # Test service check
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.CRITICAL,
                                 tags=self.CHECK_TAGS, count=1)
         self.coverage_report()
@@ -587,7 +586,7 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [self.generate_instance_config(self.SCALAR_OBJECTS_WITH_TAGS)]
         }
         self.run_check_n(config, repeat=3)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for metric in self.SCALAR_OBJECTS_WITH_TAGS:
@@ -613,12 +612,12 @@ class SNMPTestCase(AgentCheckTest):
             'instances': [instance]
         }
         self.run_check(config)
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1)
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1, RESULTS_TIMEOUT)
 
         self.assertWarning("No SNMP response received before timeout for instance localhost", count=1)
 
         # Test service check
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.CRITICAL,
                                 tags=self.CHECK_TAGS, count=1)
 

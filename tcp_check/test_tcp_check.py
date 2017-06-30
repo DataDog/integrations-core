@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlibb
-import time
-
 # 3p
 from nose.plugins.attrib import attr
 
@@ -91,7 +88,7 @@ class TCPCheckTest(AgentCheckTest):
         self.run_check(CONFIG)
 
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']))
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']), RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530"]

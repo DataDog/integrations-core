@@ -4,9 +4,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlibb
-import time
-
 # 3p
 import mock
 from nose.plugins.attrib import attr
@@ -277,7 +274,7 @@ class HTTPCheckTest(AgentCheckTest):
     def test_check_ssl(self):
         self.run_check(CONFIG_SSL_ONLY)
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 6)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 6, RESULTS_TIMEOUT)
         tags = ['url:https://github.com:443', 'instance:good_cert']
         self.assertServiceCheckOK("http.can_connect", tags=tags)
         self.assertServiceCheckOK("http.ssl_cert", tags=tags)
@@ -300,7 +297,7 @@ class HTTPCheckTest(AgentCheckTest):
     def test_check_ssl_expire_error(self, getpeercert_func):
         self.run_check(CONFIG_EXPIRED_SSL)
 
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2, RESULTS_TIMEOUT)
         tags = ['url:https://github.com', 'instance:expired_cert']
         self.assertServiceCheckOK("http.can_connect", tags=tags)
         self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
@@ -310,7 +307,7 @@ class HTTPCheckTest(AgentCheckTest):
     def test_check_allow_redirects(self):
         self.run_check(CONFIG_HTTP_REDIRECTS)
         # Overrides self.service_checks attribute when values are available\
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         tags = ['url:http://github.com', 'instance:redirect_service']
         self.assertServiceCheckOK("http.can_connect", tags=tags)
@@ -322,7 +319,7 @@ class HTTPCheckTest(AgentCheckTest):
         self.run_check(CONFIG_EXPIRED_SSL)
         # Overrides self.service_checks attribute when values are av
         # Needed for the HTTP headers
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2, RESULTS_TIMEOUT)
         tags = ['url:https://github.com', 'instance:expired_cert']
         self.assertServiceCheckOK("http.can_connect", tags=tags)
         self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
@@ -338,7 +335,7 @@ class HTTPCheckTest(AgentCheckTest):
         self.run_check(CONFIG_UNORMALIZED_INSTANCE_NAME)
 
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2, RESULTS_TIMEOUT)
 
         # Assess instance name normalization
         tags = ['url:https://github.com', 'instance:need_to_be_normalized']
@@ -352,7 +349,7 @@ class HTTPCheckTest(AgentCheckTest):
         self.run_check(SIMPLE_CONFIG)
 
         # Overrides self.service_checks attribute when values are available\
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1)
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', 1, RESULTS_TIMEOUT)
 
         # Assess warnings
         self.assertWarning(
