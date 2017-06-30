@@ -215,23 +215,6 @@ class HTTPCheckTest(AgentCheckTest):
         if self.check:
             self.check.stop()
 
-    def wait_for_async(self, method, attribute, count):
-        """
-        Loop on `self.check.method` until `self.check.attribute >= count`.
-
-        Raise after
-        """
-        i = 0
-        while i < RESULTS_TIMEOUT:
-            self.check._process_results()
-            if len(getattr(self.check, attribute)) >= count:
-                return getattr(self.check, method)()
-            time.sleep(1)
-            i += 1
-        raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
-                        .format(len(getattr(self.check, attribute)), count, i,
-                                getattr(self.check, attribute)))
-
     def test_http_headers(self):
         """
         Headers format.
@@ -251,7 +234,7 @@ class HTTPCheckTest(AgentCheckTest):
         self.run_check(CONFIG)
         # Overrides self.service_checks attribute when values are available\
         self.service_checks = self.wait_for_async(
-            'get_service_checks', 'service_checks', len(CONFIG['instances']))
+            'get_service_checks', 'service_checks', len(CONFIG['instances']), RESULTS_TIMEOUT)
 
         # HTTP connection error
         tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']

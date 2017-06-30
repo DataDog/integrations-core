@@ -209,24 +209,6 @@ class SNMPTestCase(AgentCheckTest):
 
         return instance_config
 
-    def wait_for_async(self, method, attribute, count):
-        """
-        Loop on `self.check.method` until `self.check.attribute >= count`.
-
-        Raise after
-        """
-        i = 0
-        while i < RESULTS_TIMEOUT:
-            self.check._process_results()
-            if len(getattr(self.check, attribute)) >= count:
-                return getattr(self.check, method)()
-            time.sleep(1)
-            i += 1
-        raise Exception("Didn't get the right count for {attribute} in time, {total}/{expected} in {seconds}s: {attr}"
-                        .format(attribute=attribute, total=len(getattr(self.check, attribute)), expected=count, seconds=i,
-                                attr=getattr(self.check, attribute)))
-
-
     def test_command_generator(self):
         """
         Command generator's parameters should match init_config
@@ -256,7 +238,7 @@ class SNMPTestCase(AgentCheckTest):
                 self.SUPPORTED_METRIC_TYPES + self.UNSUPPORTED_METRICS)]
         }
         self.run_check_n(config, repeat=3)
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test metrics
         for metric in self.SUPPORTED_METRIC_TYPES:
