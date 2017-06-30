@@ -49,6 +49,45 @@ class TestCheckDockerDaemonDown(AgentCheckTest):
         self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=None, count=1)
 
 @attr(requires='docker_daemon')
+class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
+    """Tests for docker_daemon integration that don't need the setUp."""
+    CHECK_NAME = 'docker_daemon'
+
+    def test_event_attributes_tag(self):
+        self.docker_client = DockerUtil().client
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+                "event_attributes_as_tags": ["exitCode", "name"],
+            },
+            ],
+        }
+
+        DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
+
+        container_fail = self.docker_client.create_container(
+            "nginx:latest", detach=True, name='event-tags-test', entrypoint='/bin/false')
+        log.debug('start nginx:latest with entrypoint /bin/false')
+        self.docker_client.start(container_fail)
+        log.debug('container exited with %s' % self.docker_client.wait(container_fail, 1))
+        # Wait 1 second after exit so the event will be picked up
+        from time import sleep
+        sleep(1)
+        self.run_check(config, force_reload=True)
+        self.docker_client.remove_container(container_fail)
+
+        # Previous tests might have left unprocessed events, to be ignored
+        filtered_events = []
+        for event in self.events:
+            if 'container_name:event-tags-test' in event.get('tags', []):
+                filtered_events.append(event)
+
+        self.assertEqual(len(filtered_events), 1)
+        self.assertIn("exitCode:1", filtered_events[0]["tags"])
+        self.assertNotIn("name:test-exit-fail", filtered_events[0]["tags"])
+
+@attr(requires='docker_daemon')
 class TestCheckDockerDaemon(AgentCheckTest):
     """Basic Test for docker_daemon integration."""
     CHECK_NAME = 'docker_daemon'
@@ -101,6 +140,18 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 ['Data Space Available', '0 MB'],
                 ['Data Space Total', '0 GB'],
                 ['Data Space Used', '0 KB'],
+            ]
+        }
+
+    def mock_get_info_no_spaces(self):
+        return {
+            'DriverStatus': [
+                ['Data Space Used', '1GB'],
+                ['Data Space Available', '9GB'],
+                ['Data Space Total', '10GB'],
+                ['Metadata Space Used', '1MB'],
+                ['Metadata Space Available', '9MB'],
+                ['Metadata Space Total', '10MB'],
             ]
         }
 
@@ -163,6 +214,20 @@ class TestCheckDockerDaemon(AgentCheckTest):
         self.assertMetric('docker.data.used', value=0)
         self.assertMetric('docker.data.total', value=0)
         self.assertNotIn('docker.data.percent', metric_names)
+
+    @mock.patch('docker.Client.info')
+    def test_devicemapper_no_spaces(self, mock_info):
+        mock_info.return_value = self.mock_get_info_no_spaces()
+
+        self.run_check(MOCK_CONFIG, force_reload=True)
+        self.assertMetric('docker.data.free', value=9e9)
+        self.assertMetric('docker.data.used', value=1e9)
+        self.assertMetric('docker.data.total', value=10e9)
+        self.assertMetric('docker.data.percent', value=10.0)
+        self.assertMetric('docker.metadata.free', value=9e6)
+        self.assertMetric('docker.metadata.used', value=1e6)
+        self.assertMetric('docker.metadata.total', value=10e6)
+        self.assertMetric('docker.metadata.percent', value=10.0)
 
     # integration tests #
 
@@ -743,3 +808,33 @@ class TestCheckDockerDaemon(AgentCheckTest):
             if tags is not None:
                 expected_tags += tags
             self.assertMetric(mname, tags=expected_tags, count=1, at_least=1)
+
+    def mock_parse_cgroup_file(self, stat_file):
+        with open(stat_file, 'r') as fp:
+            if 'blkio' in stat_file:
+                return {}
+            elif 'cpuacct.usage' in stat_file:
+                return dict({'usage': str(int(fp.read())/10000000)})
+            # mocked part
+            elif 'cpu' in stat_file:
+                return {'user': 1000 * self.run, 'system': 1000 * self.run}
+                self.run += 1
+            else:
+                return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
+
+    def test_filter_capped_metrics(self):
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+                "capped_metrics": {
+                    "docker.cpu.user": 100,
+                    "docker.cpu.system": 100,
+                }
+            }]
+        }
+        self.run = 1
+        self.run_check_twice(config, mocks={'_parse_cgroup_file': self.mock_parse_cgroup_file})
+        # last 2 points should be dropped so the rate should be 0
+        self.assertMetric('docker.cpu.user', value=0.0)
+        self.assertMetric('docker.cpu.system', value=0.0)

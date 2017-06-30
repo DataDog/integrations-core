@@ -4,6 +4,7 @@ init_config:
 instances:
     - name: example
       hostname: www.example.org
+      # please notice: nameserver must be a valid IP address
       nameserver: 127.0.0.1
       timeout: 8
 

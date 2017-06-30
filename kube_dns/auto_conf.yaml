@@ -1,0 +1,10 @@
+docker_images:
+  - kubedns-amd64
+  - k8s-dns-kube-dns-amd64
+
+init_config:
+
+instances:
+  - prometheus_endpoint: "http://%%host%%:10055/metrics"
+    tags:
+      - "dns-pod:%%host%%"
