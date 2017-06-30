@@ -2,7 +2,7 @@ version: '2'
 services:
 
   varnish4:
-    image: datadog/docker-library:varnish_4_1_4
+    image: datadog/docker-library:varnish_4_1_7
     container_name: ci_varnish4
     ports:
     - "80"
