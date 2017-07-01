@@ -1,5 +1,11 @@
 # CHANGELOG - network
 
+## 1.2.1 Unreleased
+
+### Changes
+
+* [BUGFIX] Fix TCP6 metrics overriding TCP4 metrics when monitoring non combines socket states. See [#501][]
+
 ## 1.2.0 Unreleased
 
 ### Changes
@@ -22,4 +28,5 @@
 [#296]: https://github.com/DataDog/integrations-core/issues/296
 [#299]: https://github.com/DataDog/integrations-core/issues/299
 [#452]: https://github.com/DataDog/integrations-core/issues/452
+[#501]: https://github.com/DataDog/integrations-core/issues/501
 [@cory-stripe]: https://github.com/cory-stripe

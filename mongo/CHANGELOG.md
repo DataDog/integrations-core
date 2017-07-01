@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][]
+
 1.1.0 / Unreleased
 ==================
 ### Changes
@@ -12,7 +18,7 @@
 
 * [BUGFIX] Redact username/password in logs, etc. See [#326][] and [#347][]
 
-1.0.003-22-2017
+1.0.0 / 03-22-2017
 ==================
 
 ### Changes
@@ -23,3 +29,4 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#491]: https://github.com/DataDog/integrations-core/issues/491

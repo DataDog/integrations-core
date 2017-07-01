@@ -10,6 +10,7 @@ import os
 import mock
 import requests
 from nose.plugins.attrib import attr
+import pika
 
 # project
 from checks import AgentCheck
@@ -52,6 +53,30 @@ CONFIG_WITH_FAMILY = {
     ]
 }
 
+CONFIG_DEFAULT_VHOSTS = {
+    'init_config': {},
+    'instances': [
+        {
+            'rabbitmq_api_url': 'http://localhost:15672/api/',
+            'rabbitmq_user': 'guest',
+            'rabbitmq_pass': 'guest',
+            'vhosts': ['/', 'test'],
+        }
+    ]
+}
+
+CONFIG_TEST_VHOSTS = {
+    'init_config': {},
+    'instances': [
+        {
+            'rabbitmq_api_url': 'http://localhost:15672/api/',
+            'rabbitmq_user': 'guest',
+            'rabbitmq_pass': 'guest',
+            'vhosts': ['test', 'test2'],
+        }
+    ]
+}
+
 COMMON_METRICS = [
     'rabbitmq.node.fd_used',
     'rabbitmq.node.mem_used',
@@ -85,6 +110,7 @@ class RabbitMQCheckTest(AgentCheckTest):
             self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
 
         self.assertMetric('rabbitmq.node.partitions', value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
 
         # Queue attributes, should be only one queue fetched
         # TODO: create a 'fake consumer' and get missing metrics
@@ -104,6 +130,8 @@ class RabbitMQCheckTest(AgentCheckTest):
         # Node attributes
         for mname in COMMON_METRICS:
             self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
+
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
 
         for mname in Q_METRICS:
             self.assertMetricTag('rabbitmq.queue.%s' %
@@ -125,6 +153,8 @@ class RabbitMQCheckTest(AgentCheckTest):
         for mname in COMMON_METRICS:
             self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
 
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+
         for mname in Q_METRICS:
             self.assertMetricTag('rabbitmq.queue.%s' %
                                  mname, 'rabbitmq_queue_family:test', count=2)
@@ -133,6 +163,38 @@ class RabbitMQCheckTest(AgentCheckTest):
         self.assertServiceCheckOK('rabbitmq.status')
 
         self.coverage_report()
+
+    def test_connections(self):
+        # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
+        self.run_check(CONFIG)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+
+        # no connections with a 'vhosts' list in the conf produce one metrics per vhost
+        self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', count=2)
+
+        # create connections
+        connection1 = pika.BlockingConnection()
+        connection2 = pika.BlockingConnection()
+
+        self.run_check(CONFIG, force_reload=True)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
+        self.assertMetric('rabbitmq.connections', count=1)
+
+        self.run_check(CONFIG_DEFAULT_VHOSTS, force_reload=True)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', count=2)
+
+        self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', count=2)
+
+        connection1.close()
+        connection2.close()
 
 @attr(requires='rabbitmq')
 class TestRabbitMQ(AgentCheckTest):
@@ -188,4 +250,4 @@ class TestRabbitMQ(AgentCheckTest):
         # in case of connection errors, this check should stay silent
         from check import RabbitMQException  # pylint: disable=import-error,no-name-in-module
         self.check._get_data.side_effect = RabbitMQException
-        self.assertRaises(RabbitMQException, self.check._check_aliveness, instances['instances'][0], '')
+        self.assertRaises(RabbitMQException, self.check._get_vhosts, instances['instances'][0], '')
