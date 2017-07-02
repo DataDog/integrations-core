@@ -319,12 +319,22 @@ class RabbitMQ(AgentCheck):
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
+        connection_states = {}
         for conn in data:
+            if conn['state'] not in connection_states:
+                connection_states[conn['state']] = 0
+
+            connection_states[conn['state']] += 1
+
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)])
+
+        for conn_state, nb_conn in connection_states.iteritems():
+            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)])
+
 
     def alert(self, base_url, max_detailed, size, object_type):
         key = "%s%s" % (base_url, object_type)

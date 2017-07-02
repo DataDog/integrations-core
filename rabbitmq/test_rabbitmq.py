@@ -182,6 +182,8 @@ class RabbitMQCheckTest(AgentCheckTest):
         self.run_check(CONFIG, force_reload=True)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
         self.assertMetric('rabbitmq.connections', count=1)
+        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=2, count=1)
+        self.assertMetric('rabbitmq.connections.state', count=1)
 
         self.run_check(CONFIG_DEFAULT_VHOSTS, force_reload=True)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
