@@ -107,7 +107,7 @@ class KafkaCheck(AgentCheck):
             for consumer_group, topics in consumer_groups.iteritems():
                 if topics is None:
                     # If topics are't specified, fetch them from ZK
-                    zk_path_topics = zk_path_topic_tmpl.format(consumer_group)
+                    zk_path_topics = zk_path_topic_tmpl.format(consumer_group=consumer_group)
                     topics = {topic: None for topic in
                         self._get_zk_path_children(zk_conn, zk_path_topics, 'topics')}
 
