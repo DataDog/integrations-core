@@ -93,7 +93,7 @@ class KafkaCheck(AgentCheck):
         # Construct the Zookeeper path pattern
         # /consumers/[groupId]/offsets/[topic]/[partitionId]
         zk_path_consumer = zk_prefix + '/consumers/'
-        zk_path_topic_tmpl = zk_path_consumer + '{consumer_group}/offsets/'
+        zk_path_topic_tmpl = zk_path_consumer + '{group}/offsets/'
         zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/'
 
         zk_conn = KazooClient(zk_hosts_ports, timeout=self.zk_timeout)
@@ -107,7 +107,7 @@ class KafkaCheck(AgentCheck):
             for consumer_group, topics in consumer_groups.iteritems():
                 if topics is None:
                     # If topics are't specified, fetch them from ZK
-                    zk_path_topics = zk_path_topic_tmpl.format(consumer_group=consumer_group)
+                    zk_path_topics = zk_path_topic_tmpl.format(group=consumer_group)
                     topics = {topic: None for topic in
                         self._get_zk_path_children(zk_conn, zk_path_topics, 'topics')}
 
@@ -116,7 +116,8 @@ class KafkaCheck(AgentCheck):
                         partitions = set(partitions)  # defend against bad user input
                     else:
                         # If partitions aren't specified, fetch them from ZK
-                        zk_path_partitions = zk_path_partition_tmpl.fromat(consumer_group, topic)
+                        zk_path_partitions = zk_path_partition_tmpl.format(
+                            group=consumer_group, topic=topic)
                         # Zookeeper returns the partition IDs as strings because
                         # they are extracted from the node path
                         partitions = [int(x) for x in self._get_zk_path_children(
@@ -124,7 +125,8 @@ class KafkaCheck(AgentCheck):
 
                     # Fetch consumer offsets for each partition from ZK
                     for partition in partitions:
-                        zk_path = (zk_path_partition_tmpl + '{partition}/').format(consumer_group, topic, partition)
+                        zk_path = (zk_path_partition_tmpl + '{partition}/').format(
+                            group=consumer_group, topic=topic, partition=partition)
                         try:
                             consumer_offset = int(zk_conn.get(zk_path)[0])
                             key = (consumer_group, topic, partition)
