@@ -54,6 +54,7 @@ class TestKafka(AgentCheckTest):
         """
         nogroup_instance = copy.copy(instance)
         nogroup_instance[0].pop('consumer_groups')
+        nogroup_instance[0]['monitor_unlisted_consumer_groups'] = True
 
         self.run_check({'instances': instance})
 
