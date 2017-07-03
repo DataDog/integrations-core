@@ -802,6 +802,8 @@ class OpenStackCheck(AgentCheck):
                 server_tags = ["nova_managed_server"]
                 if instance_scope.tenant_id:
                     server_tags.append("tenant_id:%s" % instance_scope.tenant_id)
+                if project and 'name' in project:
+                    server_tags.append('project_name:{0}'.format(project['name']))
 
                 self.external_host_tags[sid] = host_tags
                 self.get_stats_for_single_server(sid, tags=server_tags)
@@ -850,7 +852,21 @@ class OpenStackCheck(AgentCheck):
         """
         project_auth_scope = self.get_scope_for_instance(instance)
         if project_auth_scope.tenant_id:
-            return {"id": project_auth_scope.tenant_id}
+            scope = {"id": project_auth_scope.tenant_id}
+            if project_auth_scope.project_name:
+                scope["name"] = project_auth_scope.project_name
+            else:
+                # Try to get the project name from the keystone API so that it may be added as a tag
+                url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", project_auth_scope.tenant_id)
+                headers = {'X-Auth-Token': self.get_auth_token(instance)}
+                try:
+                    project_details = self._make_request_with_auth_fallback(url, headers)
+                    # Set the project name so we won't have to fetch it next time
+                    project_auth_scope.project_name = project_details["project"]["name"]
+                    scope["name"] = project_auth_scope.project_name
+                except Exception as e:
+                    self.warning('Unable to get project name for project id {0}: {1}'.format(project_auth_scope.tenant_id, str(e)))
+            return scope
 
         filter_params = {
             "name": project_auth_scope.project_name,
