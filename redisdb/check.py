@@ -175,6 +175,7 @@ class Redis(AgentCheck):
         info = None
         try:
             info = conn.info()
+            tags = sorted(tags + ["redis_role:%s" % info["role"]])
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)

@@ -21,7 +21,7 @@ from checks import AgentCheck
 from checks.libs.thread_pool import Pool
 from checks.libs.vmware.basic_metrics import BASIC_METRICS
 from checks.libs.vmware.all_metrics import ALL_METRICS
-from util import Timer
+from utils.timer import Timer
 
 SOURCE_TYPE = 'vsphere'
 REAL_TIME_INTERVAL = 20  # Default vCenter sampling interval
