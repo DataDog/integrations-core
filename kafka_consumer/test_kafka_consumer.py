@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-from nose.plugins.attrib import attr
+import copy
 
 # 3p
+from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -39,6 +40,21 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check.
         """
+        self.run_check({'instances': instance})
+
+        for mname in METRICS:
+            self.assertMetric(mname, at_least=1)
+
+        self.coverage_report()
+
+
+    def test_check_nogroups(self):
+        """
+        Testing Kafka_consumer check grabbing groups from ZK
+        """
+        nogroup_instance = copy.copy(instance)
+        nogroup_instance[0].pop('consumer_groups')
+
         self.run_check({'instances': instance})
 
         for mname in METRICS:
