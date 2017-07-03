@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# stdlib
+import time
+
 # 3p
 from kafka import SimpleClient
 from kafka.structs import OffsetRequestPayload
@@ -244,12 +247,11 @@ If a value is omitted, the parent value must still be it's expected type (typica
         event_dict = {
             'timestamp': int(time.time()),
             'source_type_name': self.SOURCE_TYPE_NAME,
-            'tags': [],
+            'msg_title': title,
+            'event_type': type,
+            'msg_text': text,
+            'tags': tags,
+            'aggregation_key': aggregation_key,
         }
-        event_dict['msg_title'] = title
-        event_dict['event_type'] = type
-        event_dict['msg_text'] = text
-        event_dict['tags'] = tags
-        event_dict['aggregation_key'] = aggregation_key
 
         self.event(event_dict)
