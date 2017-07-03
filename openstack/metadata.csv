@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-openstack.nova.current_workload,gauge,,,,Current workload on the Nova hypervisor,-1,openstack,nova workload,
+openstack.nova.current_workload,gauge,,,,Current workload on the Nova hypervisor,-1,openstack,nova workload
 openstack.nova.disk_available_least,gauge,,gibibyte,,Disk available for the Nova hypervisor,1,openstack,nova disk available
 openstack.nova.free_disk_gb,gauge,,gibibyte,,Free disk on the Nova hypervisor,1,openstack,nova free disk
 openstack.nova.free_ram_mb,gauge,,mebibyte,,Free RAM on the Nova hypervisor,1,openstack,nova free ram
