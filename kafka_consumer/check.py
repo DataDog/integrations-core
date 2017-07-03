@@ -186,9 +186,17 @@ class KafkaCheck(AgentCheck):
                 # the topic are never consumed by that particular consumer
                 # group. So still report the negative lag as a way of increasing
                 # visibility of the error.
-                self.log.error("Consumer lag for consumer group: %s, topic: %s, "
-                    "partition: %s  is negative. This should never happen.",
-                    consumer_group, topic, partition)
+                title = "Consumer lag for consumer negative."
+                message = "Consumer lag for consumer group: {group}, topic: {topic}, " \
+                    "partition: {partition} is negative. This should never happen.".format(
+                        group=consumer_group,
+                        topic=topic,
+                        partition=partition
+                    )
+                key = (consumer_group, topic, partition)
+                self._send_event(title, message, consumer_group_tags, 'consumer_lag', key)
+                self.log.debug(message)
+
             self.gauge('kafka.consumer_lag', consumer_lag,
                tags=consumer_group_tags)
 
@@ -231,3 +239,17 @@ You can omit partitions (example: myconsumer2), topics (example: myconsumer3), a
 If you omit consumer_groups, you must set the flag 'monitor_unlisted_consumer_groups': True.
 If a value is omitted, the parent value must still be it's expected type (typically a dict).
 """)
+
+    def _send_event(self, title, text, tags, type, aggregation_key):
+        event_dict = {
+            'timestamp': int(time.time()),
+            'source_type_name': self.SOURCE_TYPE_NAME,
+            'tags': [],
+        }
+        event_dict['msg_title'] = title
+        event_dict['event_type'] = type
+        event_dict['msg_text'] = text
+        event_dict['tags'] = tags
+        event_dict['aggregation_key'] = aggregation_key
+
+        self.event(event_dict)
