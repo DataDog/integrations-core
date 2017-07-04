@@ -115,9 +115,9 @@ class RabbitMQ(AgentCheck):
             base_url += '/'
         username = instance.get('rabbitmq_user', 'guest')
         password = instance.get('rabbitmq_pass', 'guest')
+        custom_tags = instance.get('tags', [])
         parsed_url = urlparse.urlparse(base_url)
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
-        skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
@@ -147,7 +147,7 @@ class RabbitMQ(AgentCheck):
 
         auth = (username, password)
 
-        return base_url, max_detailed, specified, auth, ssl_verify, skip_proxy
+        return base_url, max_detailed, specified, auth, ssl_verify, custom_tags
 
     def _get_vhosts(self, instance, base_url, auth=None, ssl_verify=True):
         vhosts = instance.get('vhosts')
@@ -162,28 +162,28 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, auth, ssl_verify, skip_proxy = self._get_config(instance)
+        base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
             # Generate metrics from the status API.
-            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE],
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
-            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE],
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], custom_tags,
+                           auth=auth, ssl_verify=ssl_verify)
+            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], custom_tags,
+                           auth=auth, ssl_verify=ssl_verify)
 
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
-            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts,
-                           auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
+                           auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check from the aliveness API. In the case of an invalid response
             # code or unparseable JSON this check will send no data.
-            self._check_aliveness(instance, base_url, vhosts, auth=auth, ssl_verify=ssl_verify, skip_proxy=skip_proxy)
+            self._check_aliveness(instance, base_url, vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check for the service status.
-            self.service_check('rabbitmq.status', AgentCheck.OK)
+            self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
 
         except RabbitMQException as e:
             msg = "Error executing check: {}".format(e)
-            self.service_check('rabbitmq.status', AgentCheck.CRITICAL, message=msg)
+            self.service_check('rabbitmq.status', AgentCheck.CRITICAL, custom_tags, message=msg)
             self.log.error(msg)
 
     def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
@@ -196,7 +196,7 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, auth=None, ssl_verify=True, skip_proxy=False):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -274,7 +274,7 @@ class RabbitMQ(AgentCheck):
         # if no filters are specified, check everything according to the limits
         if len(data) > ALERT_THRESHOLD * max_detailed:
             # Post a message on the dogweb stream to warn
-            self.alert(base_url, max_detailed, len(data), object_type)
+            self.alert(base_url, max_detailed, len(data), object_type, custom_tags)
 
         if len(data) > max_detailed:
             # Display a warning in the info page
@@ -283,9 +283,9 @@ class RabbitMQ(AgentCheck):
 
         for data_line in data[:max_detailed]:
             # We truncate the list of nodes/queues if it's above the limit
-            self._get_metrics(data_line, object_type)
+            self._get_metrics(data_line, object_type, custom_tags)
 
-    def _get_metrics(self, data, object_type):
+    def _get_metrics(self, data, object_type, custom_tags):
         tags = []
         tag_list = TAGS_MAP[object_type]
         for t in tag_list:
@@ -293,6 +293,7 @@ class RabbitMQ(AgentCheck):
             if tag:
                 # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
+        tags.extend(custom_tags)
 
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
@@ -310,7 +311,7 @@ class RabbitMQ(AgentCheck):
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
 
-    def get_connections_stat(self, instance, base_url, object_type, vhosts, auth=None, ssl_verify=True, skip_proxy=False):
+    def get_connections_stat(self, instance, base_url, object_type, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         Collect metrics on currently open connection per vhost.
         """
@@ -330,13 +331,12 @@ class RabbitMQ(AgentCheck):
                 stats[conn['vhost']] += 1
 
         for vhost, nb_conn in stats.iteritems():
-            self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)])
+            self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
 
         for conn_state, nb_conn in connection_states.iteritems():
-            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)])
+            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
 
-
-    def alert(self, base_url, max_detailed, size, object_type):
+    def alert(self, base_url, max_detailed, size, object_type, custom_tags):
         key = "%s%s" % (base_url, object_type)
         if key in self.already_alerted:
             # We have already posted an event
@@ -357,13 +357,13 @@ class RabbitMQ(AgentCheck):
             "alert_type": 'warning',
             "source_type_name": SOURCE_TYPE_NAME,
             "host": self.hostname,
-            "tags": ["base_url:%s" % base_url, "host:%s" % self.hostname],
+            "tags": ["base_url:%s" % base_url, "host:%s" % self.hostname] + custom_tags,
             "event_object": "rabbitmq.limit.%s" % object_type,
         }
 
         self.event(event)
 
-    def _check_aliveness(self, instance, base_url, vhosts, auth=None, ssl_verify=True, skip_proxy=False):
+    def _check_aliveness(self, instance, base_url, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         Check the aliveness API against all or a subset of vhosts. The API
         will return {"status": "ok"} and a 200 response code in the case
@@ -371,7 +371,7 @@ class RabbitMQ(AgentCheck):
         """
 
         for vhost in vhosts:
-            tags = ['vhost:%s' % vhost]
+            tags = ['vhost:%s' % vhost] + custom_tags
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/%s' % (urllib.quote_plus(vhost))
             aliveness_url = urlparse.urljoin(base_url, path)
