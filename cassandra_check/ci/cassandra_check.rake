@@ -36,15 +36,15 @@ namespace :ci do
       logs = `docker logs #{container_name} 2>&1`
       logs2 = `docker logs #{container_name2} 2>&1`
       puts 'Waiting for Cassandra to come up'
-      until count == 20 || ((logs.include?('Listening for thrift clients') || logs.include?('Starting listening for CQL clients')) && \
-             (logs2.include?('Listening for thrift clients') || logs2.include?('Starting listening for CQL clients')))
+      until count == 20 || ((logs.include?('Listening for thrift clients') || logs.include?("Created default superuser role 'cassandra'")) && \
+             (logs2.include?('Listening for thrift clients') || logs2.include?('Not starting RPC server as requested')))
         sleep_for 4
         logs = `docker logs #{container_name} 2>&1`
         logs2 = `docker logs #{container_name2} 2>&1`
         count += 1
       end
-      if (logs.include?('Listening for thrift clients') || logs.include?('Starting listening for CQL clients')) && \
-         (logs2.include?('Listening for thrift clients') || logs2.include?('Starting listening for CQL clients'))
+      if (logs.include?('Listening for thrift clients') || logs.include?("Created default superuser role 'cassandra'")) && \
+         (logs2.include?('Listening for thrift clients') || logs2.include?('Not starting RPC server as requested'))
         puts 'Cassandra is up!'
       else
         puts 'Logs of container 1'
