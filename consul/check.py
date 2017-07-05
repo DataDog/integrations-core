@@ -84,14 +84,19 @@ class ConsulCheck(AgentCheck):
             clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
             privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
             cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
+            acl_token = instance.get('acl_token', None)
+
+            headers = {}
+            if acl_token is not None:
+                headers['X-Consul-Token'] = acl_token
 
             if clientcertfile:
                 if privatekeyfile:
-                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile)
+                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile, headers=headers)
                 else:
-                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile)
+                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
             else:
-                resp = requests.get(url, verify=cabundlefile)
+                resp = requests.get(url, verify=cabundlefile, headers=headers)
 
         except requests.exceptions.Timeout:
             self.log.exception('Consul request to {0} timed out'.format(url))

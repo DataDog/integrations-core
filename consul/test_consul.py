@@ -6,6 +6,7 @@ import random
 
 # 3p
 from nose.plugins.attrib import attr
+from requests import HTTPError
 
 from tests.checks.common import AgentCheckTest, load_check
 from utils.containers import hash_mutable
@@ -703,7 +704,8 @@ class TestIntegrationConsul(AgentCheckTest):
                 'network_latency_checks': True,
                 'new_leader_checks': True,
                 'catalog_checks': True,
-                'self_leader_check': True
+                'self_leader_check': True,
+                'acl_token': 'token'
             }]
         }
 
@@ -720,3 +722,25 @@ class TestIntegrationConsul(AgentCheckTest):
         self.assertServiceCheck('consul.up')
 
         self.coverage_report()
+
+    def test_acl_forbidden(self):
+        """
+        Testing Consul Integration
+        """
+
+        config = {
+            "instances": [{
+                'url': 'http://localhost:8500',
+                'catalog_checks': True,
+                'network_latency_checks': True,
+                'new_leader_checks': True,
+                'catalog_checks': True,
+                'self_leader_check': True,
+                'acl_token': 'wrong_token'
+            }]
+        }
+        try:
+            self.run_check(config)
+        except HTTPError as e:
+            if e.errno == 403:
+                pass
