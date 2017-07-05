@@ -4,13 +4,13 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "mongo",
-  "short_description": "MongoDB is an open-source, high-performance, schema-free, document-oriented database.",
+  "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.2.0",
   "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c"
 }

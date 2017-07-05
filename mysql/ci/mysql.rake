@@ -4,6 +4,14 @@ def mysql_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
+def mysql_repo
+  if mysql_version == '5.5'
+    'jfullaondo/mysql-replication'
+  else
+    'bergerx/mysql-replication'
+  end
+end
+
 def mysql_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/mysql_#{mysql_version}"
 end
@@ -24,7 +32,7 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('mysql')
       sh %(docker run -p #{container_port}:3306 --name #{container_name}_master \
-           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d bergerx/mysql-replication:#{mysql_version})
+           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d #{mysql_repo}:#{mysql_version})
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -43,7 +51,7 @@ namespace :ci do
 
       sh %(docker run -p #{slave_container_port}:3306 --name #{container_name}_slave \
            -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
-           -d bergerx/mysql-replication:#{mysql_version})
+           -d #{mysql_repo}:#{mysql_version})
       Wait.for slave_container_port
       count = 0
       logs = `docker logs #{container_name}_slave 2>&1`

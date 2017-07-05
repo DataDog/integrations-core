@@ -4,6 +4,8 @@
 
 # stdlib
 from collections import defaultdict
+from os import geteuid
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 import re
 import xml.parsers.expat # python 2.4 compatible
 
@@ -27,6 +29,9 @@ class BackendStatus(object):
 
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
+
+    # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
+    version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
 
     # XML parsing bits, a.k.a. Kafka in Code
     def _reset(self):
@@ -78,6 +83,9 @@ class Varnish(AgentCheck):
             tags = list(set(tags))
         varnishstat_path = instance.get("varnishstat")
         name = instance.get('name')
+        metrics_filter = instance.get("metrics_filter", [])
+        if not isinstance(metrics_filter, list):
+            raise Exception("The parameter 'metrics_filter' must be a list")
 
         # Get version and version-specific args from varnishstat -V.
         version, use_xml = self._get_version_info(varnishstat_path)
@@ -85,6 +93,8 @@ class Varnish(AgentCheck):
         # Parse metrics from varnishstat.
         arg = '-x' if use_xml else '-1'
         cmd = [varnishstat_path, arg]
+        for metric in metrics_filter:
+            cmd.extend(["-f", metric])
 
         if name is not None:
             cmd.extend(['-n', name])
@@ -100,8 +110,24 @@ class Varnish(AgentCheck):
         varnishadm_path = instance.get('varnishadm')
         if varnishadm_path:
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
-            cmd = ['sudo', varnishadm_path, '-S', secretfile_path, 'debug.health']
-            output, _, _ = get_subprocess_output(cmd, self.log)
+
+            cmd = []
+            if geteuid() != 0:
+                cmd.append('sudo')
+
+            if version < LooseVersion('4.1.0'):
+                cmd.extend([varnishadm_path, '-S', secretfile_path, 'debug.health'])
+            else:
+                cmd.extend([varnishadm_path, '-S', secretfile_path, 'backend.list', '-p'])
+
+            try:
+                output, err, _ = get_subprocess_output(cmd, self.log)
+            except OSError as e:
+                self.log.error("There was an error running varnishadm. Make sure 'sudo' is available. %s", e)
+                output = None
+            if err:
+                self.log.error('Error getting service check from varnishadm: %s', err)
+
             if output:
                 self._parse_varnishadm(output)
 
@@ -112,25 +138,25 @@ class Varnish(AgentCheck):
 
         # Assumptions regarding varnish's version
         use_xml = True
-        version = 3
+        version = LooseVersion('3.0.0')
 
-        m1 = re.search(r"varnish-(\d+)", output, re.MULTILINE)
+        m1 = self.version_pattern.search(output, re.MULTILINE)
         # v2 prints the version on stderr, v3 on stdout
-        m2 = re.search(r"varnish-(\d+)", error, re.MULTILINE)
+        m2 = self.version_pattern.search(error, re.MULTILINE)
 
         if m1 is None and m2 is None:
             self.log.warn("Cannot determine the version of varnishstat, assuming 3 or greater")
             self.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
         else:
             if m1 is not None:
-                version = int(m1.group(1))
+                version = LooseVersion(m1.group())
             elif m2 is not None:
-                version = int(m2.group(1))
+                version = LooseVersion(m2.group())
 
-        self.log.debug("Varnish version: %d" % version)
+        self.log.debug("Varnish version: %s", version)
 
         # Location of varnishstat
-        if version <= 2:
+        if version < LooseVersion('3.0.0'):
             use_xml = False
 
         return version, use_xml

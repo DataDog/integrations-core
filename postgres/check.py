@@ -698,14 +698,17 @@ SELECT s.schemaname,
 
             self.log.debug("Metric: {0}".format(m))
 
-            for ref, (_, mtype) in m['metrics'].iteritems():
-                cap_mtype = mtype.upper()
-                if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                    raise CheckException("Collector method {0} is not known."
-                        " Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
+            try:
+                for ref, (_, mtype) in m['metrics'].iteritems():
+                    cap_mtype = mtype.upper()
+                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
+                        raise CheckException("Collector method {0} is not known."
+                            " Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
 
-                m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
-                self.log.debug("Method: %s" % (str(mtype)))
+                    m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
+                    self.log.debug("Method: %s" % (str(mtype)))
+            except Exception as e:
+                raise CheckException("Error processing custom metric '{}': {}".format(m, e))
 
         self.custom_metrics[key] = custom_metrics
         return custom_metrics
