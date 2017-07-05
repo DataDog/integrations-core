@@ -214,13 +214,13 @@ class ConsulCheck(AgentCheck):
             if len(service_whitelist) > max_services:
                 self.warning('More than %d services in whitelist. Service list will be truncated.' % max_services)
 
-            services = [s for s in services if s in service_whitelist][:max_services]
+            services = dict([(k, v) for (k, v) in services.items() if k in service_whitelist][:max_services])
         else:
             if len(services) <= max_services:
                 self.log.debug('Consul service whitelist not defined. Agent will poll for all %d services found', len(services))
             else:
                 self.warning('Consul service whitelist not defined. Agent will poll for at most %d services' % max_services)
-                services = list(islice(services.iterkeys(), 0, max_services))
+                services = dict(islice(services.iteritems(), max_services))
 
         return services
 
@@ -268,6 +268,8 @@ class ConsulCheck(AgentCheck):
 
                 if sc_id not in sc:
                     tags = ["check:{0}".format(check["CheckID"])]
+                    if check["ServiceTags"]:
+                        tags.extend(list(check["ServiceTags"]))
                     if check["ServiceName"]:
                         tags.append("service:{0}".format(check["ServiceName"]))
                     if check["ServiceID"]:
@@ -301,8 +303,7 @@ class ConsulCheck(AgentCheck):
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))
-
-            for service in services:
+            for service, stags in services.items():
                 # For every service in the cluster,
                 # Gauge the following:
                 # `consul.catalog.nodes_up` : # of Nodes registered with that service
@@ -311,7 +312,7 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
                 service_tags = ['consul_service_id:{0}'.format(service)]
-
+                service_tags.extend(stags)
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 
                 # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
