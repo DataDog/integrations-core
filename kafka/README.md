@@ -409,6 +409,8 @@ init_config:
             alias: kafka.log.flush_rate.rate
 ```
 
+Restart the Agent to begin sending Kafka metrics to Datadog.
+
 # Validation
 
 Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
@@ -432,4 +434,4 @@ The kafka check is compatible with all major platforms
 
 # Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv) for a list of metrics provided by this check.
