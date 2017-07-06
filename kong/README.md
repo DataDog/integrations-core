@@ -51,3 +51,9 @@ The kong check is compatible with all major platforms.
 # Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+`kong.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
