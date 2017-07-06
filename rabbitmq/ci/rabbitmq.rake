@@ -49,6 +49,9 @@ namespace :ci do
         sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=amq.default routing_key=#{q} payload="hello, world")
       end
       sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
+
+      # leave time for rabbitmq to update the management information
+      sleep_for 2
     end
 
     task script: ['ci:common:script'] do
