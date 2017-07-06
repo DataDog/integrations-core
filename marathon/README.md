@@ -59,4 +59,4 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mara
 
 `marathon.can_connect`:
 
-Returns CRITICAL if the Agent cannot connect to Marathon to collect metrics, otherwise OK.
+Returns CRITICAL if the Agent cannot connect to the Marathon API to collect metrics, otherwise OK.
