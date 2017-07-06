@@ -112,6 +112,18 @@ SELECT datname,
         'checkpoint_sync_time' : ('postgresql.bgwriter.sync_time', MONOTONIC),
     }
 
+    ARCHIVER_METRICS = {
+        'descriptors': [],
+        'metrics': {},
+        'query': "select %s FROM pg_stat_archiver",
+        'relation': False,
+    }
+
+    COMMON_ARCHIVER_METRICS = {
+        'archived_count'        : ('postgresql.archiver.archived_count', MONOTONIC),
+        'failed_count'          : ('postgresql.archiver.failed_count', MONOTONIC),
+    }
+
     LOCK_METRICS = {
         'descriptors': [
             ('mode', 'lock_mode'),
@@ -310,8 +322,10 @@ SELECT s.schemaname,
         self.versions = {}
         self.instance_metrics = {}
         self.bgw_metrics = {}
+        self.archiver_metrics = {}
         self.db_instance_metrics = []
         self.db_bgw_metrics = []
+        self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
 
@@ -351,6 +365,9 @@ SELECT s.schemaname,
 
     def _is_9_2_or_above(self, key, db):
         return self._is_above(key, db, [9,2,0])
+
+    def _is_9_4_or_above(self, key, db):
+        return self._is_above(key, db, [9,4,0])
 
     def _get_instance_metrics(self, key, db, database_size_metrics):
         """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
@@ -413,6 +430,30 @@ SELECT s.schemaname,
             metrics = self.bgw_metrics.get(key)
         return metrics
 
+    def _get_archiver_metrics(self, key, db):
+        """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
+        defined in 9.4 (first version to have this table).
+        Uses a dictionary to save the result for each instance
+        """
+        # While there's only one set for now, prepare for future additions to
+        # the table, mirroring _get_bgw_metrics()
+        metrics = self.archiver_metrics.get(key)
+
+        if self._is_9_4_or_above(key, db) and metrics is None:
+            # Collect from only one instance. See _get_bgw_metrics() for details on why.
+            sub_key = key[:2]
+            if sub_key in self.db_archiver_metrics:
+                self.archiver_metrics[key] = None
+                self.log.debug("Not collecting archiver metrics for key: {0} as"
+                    " they are already collected by another instance".format(key))
+                return None
+
+            self.db_archiver_metrics.append(sub_key)
+
+            self.archiver_metrics[key] = dict(self.COMMON_ARCHIVER_METRICS)
+            metrics = self.archiver_metrics.get(key)
+        return metrics
+
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_9_1 or REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2
         depending on the postgres version.
@@ -466,6 +507,7 @@ SELECT s.schemaname,
         # These are added only once per PG server, thus the test
         db_instance_metrics = self._get_instance_metrics(key, db, database_size_metrics)
         bgw_instance_metrics = self._get_bgw_metrics(key, db)
+        archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
         if db_instance_metrics is not None:
             # FIXME: constants shouldn't be modified
@@ -476,6 +518,11 @@ SELECT s.schemaname,
             # FIXME: constants shouldn't be modified
             self.BGW_METRICS['metrics'] = bgw_instance_metrics
             metric_scope.append(self.BGW_METRICS)
+
+        if archiver_instance_metrics is not None:
+            # FIXME: constants shouldn't be modified
+            self.ARCHIVER_METRICS['metrics'] = archiver_instance_metrics
+            metric_scope.append(self.ARCHIVER_METRICS)
 
         # Do we need relation-specific metrics?
         if relations:

@@ -1,6 +1,14 @@
 # CHANGELOG - rabbitmq
 
-1.1.0 / Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add a metric about the number of connections to rabbitmq.
+* [FEATURE] Add custom tags to metrics, event and service checks.
+
+1.1.0 / 06-05-2017
 ==================
 
 ### Changes

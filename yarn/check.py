@@ -88,11 +88,13 @@ import requests
 
 # Project
 from checks import AgentCheck
+from config import _is_affirmative
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
 DEFAULT_CUSTER_NAME = 'default_cluster'
+DEFAULT_COLLECT_APP_METRICS = True
 
 # Path to retrieve cluster metrics
 YARN_CLUSTER_METRICS_PATH = '/ws/v1/cluster/metrics'
@@ -253,7 +255,8 @@ class YarnCheck(AgentCheck):
 
         # Get metrics from the Resource Manager
         self._yarn_cluster_metrics(rm_address, tags)
-        self._yarn_app_metrics(rm_address, app_tags, tags)
+        if _is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
+            self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, filter_queues)
 

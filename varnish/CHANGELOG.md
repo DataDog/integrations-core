@@ -1,5 +1,12 @@
 # CHANGELOG - varnish
 
+1.0.2 Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] adds ability to filter metrics using the -f option of varnishstat
+
 1.0.1 Unreleased
 ==================
 
