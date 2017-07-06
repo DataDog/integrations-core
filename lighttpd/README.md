@@ -49,9 +49,9 @@ The lighttpd check is compatible with all major platforms.
 
 # Metrics
 
-The metrics this check collects depends on the major version of lighttpd you're using.
+The check collects different metrics depending on the major version of lighttpd.
 
-It collects the these metrics for lighttpd 1:
+It collects these metrics for lighttpd 1:
 
 - lighttpd.net.bytes
 - lighttpd.net.bytes_per_s
@@ -61,7 +61,7 @@ It collects the these metrics for lighttpd 1:
 - lighttpd.performance.idle_server
 - lighttpd.performance.uptime
 
-It collects the these metrics for lighttpd 2:
+It collects these metrics for lighttpd 2:
 
 - lighttpd.connections.state_handle_request
 - lighttpd.connections.state_keep_alive
