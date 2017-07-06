@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def cassandra_version
-  ENV['FLAVOR_VERSION'] || '2.1.14' # '2.0.17'
+  ENV['FLAVOR_VERSION'] || '2.2.10' # '2.1.14' # '2.0.17'
 end
 
 def cassandra_rootdir
