@@ -7,8 +7,8 @@ from nose.plugins.attrib import attr
 from mock import patch
 
 # 3p
-from cassandra.cluster import Cluster
-from cassandra.metadata import TokenMap
+from cassandra.cluster import Cluster # pylint: disable=E0611
+from cassandra.metadata import TokenMap # pylint: disable=E0611
 
 # project
 from tests.checks.common import AgentCheckTest

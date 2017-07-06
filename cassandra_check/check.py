@@ -3,8 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # 3rd party
-from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.auth import PlainTextAuthProvider
+from cassandra.cluster import Cluster, NoHostAvailable # pylint: disable=E0611
+from cassandra.auth import PlainTextAuthProvider # pylint: disable=E0611
 
 # project
 from checks import AgentCheck
