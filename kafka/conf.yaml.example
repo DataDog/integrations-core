@@ -310,7 +310,7 @@ init_config:
         domain: 'kafka.server'
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
         attribute:
-          MeanRate:
+          OneMinuteRate:
             metric_type: gauge
             alias: kafka.request.handler.avg.idle.pct.rate
     - include:
