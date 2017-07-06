@@ -8,6 +8,7 @@ import re
 import time
 import urllib
 import urlparse
+from collections import defaultdict
 
 # 3p
 import requests
@@ -320,15 +321,11 @@ class RabbitMQ(AgentCheck):
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
-        connection_states = {}
+        connection_states = defaultdict(int)
         for conn in data:
-            if conn['state'] not in connection_states:
-                connection_states[conn['state']] = 0
-
-            connection_states[conn['state']] += 1
-
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
+                connection_states[conn['state']] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)

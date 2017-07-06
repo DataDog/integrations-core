@@ -184,17 +184,21 @@ class RabbitMQCheckTest(AgentCheckTest):
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=2, count=1)
         self.assertMetric('rabbitmq.connections', count=1)
         self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=2, count=1)
-        self.assertMetric('rabbitmq.connections.state', count=1)
+        self.assertMetric('rabbitmq.connections.state', tags=["tag1:1", "tag2"], count=1)
 
         self.run_check(CONFIG_DEFAULT_VHOSTS, force_reload=True)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
         self.assertMetric('rabbitmq.connections', count=2)
+        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
+        self.assertMetric('rabbitmq.connections.state', tags=["tag1:1", "tag2"], count=0)
 
         self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
         self.assertMetric('rabbitmq.connections', count=2)
+        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
+        self.assertMetric('rabbitmq.connections.state', tags=["tag1:1", "tag2"], count=0)
 
         connection1.close()
         connection2.close()
