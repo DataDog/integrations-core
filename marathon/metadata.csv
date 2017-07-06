@@ -2,14 +2,14 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 marathon.apps,gauge,,,,Number of applications,0,marathon,apps
 marathon.deployments,gauge,,,,Number of running or pending deployments,0,marathon,deployments
 marathon.queue.size,gauge,,,,Number of apps waiting to be deployed,0,marathon,apps
-marathon.backoffFactor,gauge,,,,Backoff time multiplication factor for each consecutive failed task launch,0,marathon,backoff factor
-marathon.backoffSeconds,gauge,,second,,Task backoff period,0,marathon,backoff
-marathon.cpus,gauge,,,,Number of CPU's this application needs per instance,0,marathon,cpus
-marathon.disk,gauge,,mebibyte,,Disk that is needed for the application,0,marathon,disk
-marathon.instances,gauge,,,,Number of instances of a given application; tagged with app_id and version,0,marathon,instances
-marathon.mem,gauge,,mebibyte,,Memory that is needed for the application per instance; tagged with app_id and version,0,marathon,mem
-marathon.taskRateLimit,gauge,,,,The task rate limit for a given application; tagged with app_id and version,0,marathon,task rate limit
-marathon.tasksRunning,gauge,,task,,Number of tasks running for a given application; tagged with app_id and version,0,marathon,tasks running
-marathon.tasksStaged,gauge,,task,,Number of tasks staged for a given application; tagged with app_id and version,0,marathon,tasks staged
-marathon.tasksHealthy,gauge,,task,,Number of healthy tasks for a given application; tagged with app_id and version,0,marathon,healthy tasks
-marathon.tasksUnhealthy,gauge,,task,,Number of unhealthy tasks for a given application; tagged with app_id and version,-1,marathon,unhealthy tasks
+marathon.backoffFactor,gauge,,,,Backoff time multiplication factor for each consecutive failed task launch; tagged by app_id and version,0,marathon,backoff factor
+marathon.backoffSeconds,gauge,,second,,Task backoff period; tagged by app_id and version,0,marathon,backoff
+marathon.cpus,gauge,,,,Configured CPUs for each instance of a given application,0,marathon,cpus
+marathon.disk,gauge,,mebibyte,,Configured CPU for each instance of a given application,0,marathon,disk
+marathon.instances,gauge,,,,Number of instances of a given application; tagged by app_id and version,0,marathon,instances
+marathon.mem,gauge,,mebibyte,,Configured memory for each instance of a given application; tagged by app_id and version,0,marathon,mem
+marathon.taskRateLimit,gauge,,,,The task rate limit for a given application; tagged by app_id and version,0,marathon,task rate limit
+marathon.tasksRunning,gauge,,task,,Number of tasks running for a given application; tagged by app_id and version,0,marathon,tasks running
+marathon.tasksStaged,gauge,,task,,Number of tasks staged for a given application; tagged by app_id and version,0,marathon,tasks staged
+marathon.tasksHealthy,gauge,,task,,Number of healthy tasks for a given application; tagged by app_id and version,0,marathon,healthy tasks
+marathon.tasksUnhealthy,gauge,,task,,Number of unhealthy tasks for a given application; tagged by app_id and version,-1,marathon,unhealthy tasks
