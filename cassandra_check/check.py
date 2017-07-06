@@ -44,8 +44,7 @@ class CassandraCheck(AgentCheck):
                         down_replicas = max(down_replicas, len([r for r in replicas if not r.is_up]))
 
                     self.gauge("cassandra.replication_failures", down_replicas,
-                        tags=["keyspace:%s" % keyspace, "cluster:%s" % cluster.metadata.cluster_name] + tags)
-
+                               tags=["keyspace:%s" % keyspace, "cluster:%s" % cluster.metadata.cluster_name] + tags)
 
         except NoHostAvailable as e:
             self.log.error('Could not connect to node %s:%s : %s' % (node_ip, node_port, e))
