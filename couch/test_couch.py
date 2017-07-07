@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import os
 
 # 3rd party
 from nose.plugins.attrib import attr
@@ -46,9 +47,24 @@ class CouchTestCase(AgentCheckTest):
 
     def __init__(self, *args, **kwargs):
         AgentCheckTest.__init__(self, *args, **kwargs)
-        self.config = {"instances": [{"server": "http://localhost:5984"}]}
+        self.config = {
+            "instances": [
+                {
+                    "server": "http://localhost:5984",
+                    "user": "dduser",
+                    "password": "pawprint",
+                }
+            ]
+        }
 
+    @attr('couch1_only')
     def test_couch(self):
+        """
+        Couch 2.0 needs access to _membership to have node level statistics,
+        so unauthorized access you can't test unauthorized access
+        """
+        del self.config['instances'][0]['user']
+        del self.config['instances'][0]['password']
         self.run_check(self.config)
 
         # Metrics should have been emitted for any publicly readable databases.
@@ -77,8 +93,6 @@ class CouchTestCase(AgentCheckTest):
         self.coverage_report()
 
     def test_couch_authorized_user(self):
-        self.config['instances'][0]['user'] = 'dduser'
-        self.config['instances'][0]['password'] = 'pawprint'
         self.run_check(self.config)
 
         # As an authorized user we should be able to read restricted databases
