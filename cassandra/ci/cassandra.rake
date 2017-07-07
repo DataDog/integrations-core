@@ -20,22 +20,22 @@ cassandra_jmx_options = "-Dcom.sun.management.jmxremote.port=#{container_port}
 namespace :ci do
   namespace :cassandra do |flavor|
     task before_install: ['ci:common:before_install'] do
-      sh %(docker kill #{container_name} 2>/dev/null || true)
-      sh %(docker rm #{container_name} 2>/dev/null || true)
-      sh %(rm -f #{__dir__}/jmxremote.password.tmp)
+      # sh %(docker kill #{container_name} 2>/dev/null || true)
+      # sh %(docker rm #{container_name} 2>/dev/null || true)
+      # sh %(rm -f #{__dir__}/jmxremote.password.tmp)
     end
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('cassandra')
-      sh %(docker create --expose #{container_port} --expose 9042 --expose 7000 --expose 7001 --expose 9160 \
-           -p #{container_port}:#{container_port} -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=#{container_port} \
-           -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})
-
-      sh %(cp #{__dir__}/jmxremote.password #{__dir__}/jmxremote.password.tmp)
-      sh %(chmod 400 #{__dir__}/jmxremote.password.tmp)
-      sh %(docker cp #{__dir__}/jmxremote.password.tmp #{container_name}:/etc/cassandra/jmxremote.password)
-      sh %(rm -f #{__dir__}/jmxremote.password.tmp)
-      sh %(docker start #{container_name})
+      # Rake::Task['ci:common:install'].invoke('cassandra')
+      # sh %(docker create --expose #{container_port} \
+      #      -p #{container_port}:#{container_port} -e JMX_PORT=#{container_port} \
+      #      -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})
+      #
+      # sh %(cp #{__dir__}/jmxremote.password #{__dir__}/jmxremote.password.tmp)
+      # sh %(chmod 400 #{__dir__}/jmxremote.password.tmp)
+      # sh %(docker cp #{__dir__}/jmxremote.password.tmp #{container_name}:/etc/cassandra/jmxremote.password)
+      # sh %(rm -f #{__dir__}/jmxremote.password.tmp)
+      # sh %(docker start #{container_name})
       # sh %(bash #{__dir__}/start-docker.sh)
     end
 
