@@ -19,9 +19,9 @@ init_config:
 
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
-  - cluster_stats: false # set true ONLY if you're not running the check on each cluster node
-  - pshard_stats: true
-  - pending_task_stats: true
+    cluster_stats: false # set true ONLY if you're not running the check on each cluster node
+    pshard_stats: true
+    pending_task_stats: true
 ```
 
 If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
