@@ -7,6 +7,7 @@
 
 * [FEATURE] Add a metric about the number of connections to rabbitmq.
 * [FEATURE] Add custom tags to metrics, event and service checks.
+* [FEATURE] Add a metric about the number of each connection states.
 
 1.1.0 / 06-05-2017
 ==================
