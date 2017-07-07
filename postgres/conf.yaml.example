@@ -38,12 +38,51 @@ instances:
 
 
 # Custom metrics
-# Below are some examples of commonly used metrics, which are implemented as custom metrics.
-# Uncomment them if you want to use them as is, or use as an example for creating your own custom metrics.
-# The format for describing custome metrics is identical with the one used for common metrics in postgres.py
+# Custom metrics allow you to build custom queries to extract more information from PostgreSQL.
+# The format for describing custom metric is identical with the one used for common metrics in postgres.py
 # Be extra careful with ensuring proper custom metrics description format. If your custom metric does not work
 # after an agent restart, look for errors in the output of "/etc/init.d/datadog-agent info" command, as well as
 # /var/log/datadog/collector.log file.
+#
+# Format:
+#   descriptors: is used to add tags to you metrics. It's a list of lists each containing 2 strings. The second
+#                one will be the tag name. The first is only here for documentation purposes (usually used to
+#                make clear what we are getting from the query). Note that instance tags will be added
+#                to that list.
+#   metrics: A dict, the key is the query, the value a list containing the name of the metric and its type
+#            (RATE, GAUGE or MONOTONIC).
+#   query: the base PostgreSQL query. Queries from 'metrics' dict will be inserted here, so you will need
+#          to specify where to insert them using '%s' formating operator.
+#   relation: if set to 'true', the 'relations' list (see section above) will be available as a second
+#             parameter in the query (ie: second '%s'). You can look at 'IDX_METRICS' in the postgres check
+#             for an example.
+#
+# A very simple example
+#
+#    custom_metrics:
+#    - descriptors:
+#        - [tag1, node]
+#        - [tag2, hostname]
+#      metrics:
+#         0.5 as idl_time: [postgresql.idl_time, GAUGE]
+#         10 as nb_client: [postgresql.nb_client, GAUGE]
+#      query: SELECT 'node21', 'someHost', %s;
+#      relation: false
+#
+# The above custom metric will produce the following query in PostgreSQL:
+# "SELECT 'node21', 'someHost', 0.5 as idl_time, 10 as nb_client;"
+#
+# The first two columns in the results will be used for tags ('node:node21', 'hostname:someHost') and the other columns as metrics values.
+# At the end the following metrics will be produced:
+# {"postgresql.idl_time": 0.5, "type": "GAUGE", "tags": ['node:node21', 'hostname:someHost']}
+# {"postgresql.nb_client": 10, "type": "GAUGE", "tags": ['node:node21', 'hostname:someHost']}
+#
+# Finally, it's important to note that the check will produce as many metrics
+# as the number of columns and rows returned by the query. It's up to the user
+# to make sure each association of the metric name and tags is unique. If not
+# the metrics will overwrite each other.
+#
+# Below a more complex example.
 #
 #    custom_metrics:
 #    - # Londiste 3 replication lag
