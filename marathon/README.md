@@ -22,11 +22,11 @@ init_config:
 instances:
   - url: https://<server>:<port> # the API endpoint of your Marathon master; required
     #acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
-	user: <username> # the user for marathon API or ACS token authentication
-	password: <password> # the password for marathon API or ACS token authentication
+	  user: <username> # the user for marathon API or ACS token authentication
+	  password: <password> # the password for marathon API or ACS token authentication
 ```
 
-The function of `user` and `password` depends on whether or not you configure `acs_url`. If you do, set `user` and `password` to whatever credentials will let the Agent request an authentication token from ACS. Otherwise, set them to whatever credentials will let the Agent authenticate (HTTP basic auth) to the Marathon API.
+The function of `user` and `password` depends on whether or not you configure `acs_url`. If you do, set `user` and `password` to whatever credentials will let the Agent request an authentication token from ACS (the Agent will then use the token to authenticate to the Marathon API). Otherwise, set them to whatever credentials will let the Agent authenticate (HTTP basic auth) to the Marathon API.
 
 Restart the Agent to begin sending Marathon metrics to Datadog.
 
