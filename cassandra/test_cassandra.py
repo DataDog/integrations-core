@@ -97,10 +97,10 @@ class JMXTestCase(unittest.TestCase):
 
         self.assertTrue(isinstance(metrics, ListType))
         self.assertTrue(len(metrics) > 0)
-        log.info([t for t in metrics if "cassandra.db." in t['metric'] and "instance:cassandra_instance" in t['tags']])
+        log.info([t for t in metrics if "cassandra." in t['metric'] and "instance:cassandra_instance" in t['tags']])
         log.info(metrics)
-        log.info(len([t for t in metrics if "cassandra.db." in t['metric'] and "instance:cassandra_instance" in t['tags']]))
+        log.info(len([t for t in metrics if "cassandra." in t['metric'] and "instance:cassandra_instance" in t['tags']]))
         log.info(len([t for t in metrics if "instance:cassandra_instance" in t['tags']]))
-        log.info(len([t for t in metrics if "cassandra.db." in t['metric']]))
+        log.info(len([t for t in metrics if "cassandra." in t['metric']]))
         log.info(len(metrics))
         self.assertTrue(len([t for t in metrics if "cassandra." in t['metric'] and "instance:cassandra_instance" in t['tags']]) > 40, metrics)
