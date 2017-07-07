@@ -103,6 +103,7 @@ env:
     - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=statsd
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
+    - TRAVIS_FLAVOR=tcp_check    
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
