@@ -13,6 +13,9 @@ import re
 import time
 import calendar
 
+# 3p
+from requests.exceptions import ConnectionError
+
 # project
 from checks import AgentCheck
 from config import _is_affirmative
@@ -176,8 +179,17 @@ class Kubernetes(AgentCheck):
         self._perform_kubelet_checks(self.kubeutil.kube_health_url)
 
         if pods_list is not None:
-            # kubelet metrics
-            self._update_metrics(instance, pods_list)
+            # Will not fail if cAdvisor is not available
+            self._update_pods_metrics(instance, pods_list)
+            # cAdvisor & kubelet metrics, will fail if port 4194 is not open
+            try:
+                self._update_metrics(instance, pods_list)
+            except ConnectionError:
+                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
+                             ''' limits/requests will not be collected. Please setup'''
+                             ''' your kubelet with the --cadvisor-port=4194 option''')
+            except Exception as err:
+                self.log.warning("Error while getting performance metrics: %s" % str(err))
 
         # kubelet events
         if self.event_retriever is not None:
@@ -417,7 +429,6 @@ class Kubernetes(AgentCheck):
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
-        self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
 
     def _update_node(self, instance):
