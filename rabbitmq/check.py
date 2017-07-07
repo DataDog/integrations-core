@@ -8,6 +8,7 @@ import re
 import time
 import urllib
 import urlparse
+from collections import defaultdict
 
 # 3p
 import requests
@@ -320,12 +321,17 @@ class RabbitMQ(AgentCheck):
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
+        connection_states = defaultdict(int)
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
+                connection_states[conn['state']] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
+
+        for conn_state, nb_conn in connection_states.iteritems():
+            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
 
     def alert(self, base_url, max_detailed, size, object_type, custom_tags):
         key = "%s%s" % (base_url, object_type)
