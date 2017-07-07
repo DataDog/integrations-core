@@ -11,7 +11,7 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest
 
-RESULTS_TIMEOUT = 20
+RESULTS_TIMEOUT = 40
 
 CONFIG = {
     'init_config': {},
