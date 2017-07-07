@@ -13,6 +13,9 @@ import re
 import time
 import calendar
 
+# 3p
+from requests.exceptions import ConnectionError
+
 # project
 from checks import AgentCheck
 from config import _is_affirmative
@@ -176,8 +179,17 @@ class Kubernetes(AgentCheck):
         self._perform_kubelet_checks(self.kubeutil.kube_health_url)
 
         if pods_list is not None:
-            # kubelet metrics
-            self._update_metrics(instance, pods_list)
+            # Will not fail if cAdvisor is not available
+            self._update_pods_metrics(instance, pods_list)
+            # cAdvisor & kubelet metrics, will fail if port 4194 is not open
+            try:
+                self._update_metrics(instance, pods_list)
+            except ConnectionError:
+                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
+                             ''' limits/requests will not be collected. Please setup'''
+                             ''' your kubelet with the --cadvisor-port=4194 option''')
+            except Exception as err:
+                self.log.warning("Error while getting performance metrics: %s" % str(err))
 
         # kubelet events
         if self.event_retriever is not None:
@@ -219,8 +231,12 @@ class Kubernetes(AgentCheck):
 
         pod_name = cont_labels[KubeUtil.POD_NAME_LABEL]
         pod_namespace = cont_labels[KubeUtil.NAMESPACE_LABEL]
+        # kube_container_name is the name of the Kubernetes container resource,
+        # not the name of the docker container (that's tagged as container_name)
+        kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
         tags.append(u"pod_name:{0}/{1}".format(pod_namespace, pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
+        tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
         kube_labels_key = "{0}/{1}".format(pod_namespace, pod_name)
 
@@ -413,7 +429,6 @@ class Kubernetes(AgentCheck):
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
-        self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
 
     def _update_node(self, instance):
