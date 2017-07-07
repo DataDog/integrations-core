@@ -5,6 +5,9 @@
 # stdlibb
 import time
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
@@ -39,6 +42,8 @@ CONFIG = {
     }]
 }
 
+
+@attr(requires='tcp_check')
 class TCPCheckTest(AgentCheckTest):
     CHECK_NAME = 'tcp_check'
 
