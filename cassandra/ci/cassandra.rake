@@ -36,7 +36,6 @@ namespace :ci do
       sh %(docker cp #{__dir__}/jmxremote.password.tmp #{container_name}:/etc/cassandra/jmxremote.password)
       sh %(rm -f #{__dir__}/jmxremote.password.tmp)
       sh %(docker start #{container_name})
-      sh %(bash #{__dir__}/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script'] do
