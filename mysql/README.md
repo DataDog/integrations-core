@@ -9,10 +9,6 @@ The Datadog Agent can collect many metrics from MySQL databases, including those
 
 And many more. You can also invent your own metrics using custom SQL queries.
 
-The Agent sends one MySQL-related service check: whether or not the Agent is successfully collecting metrics from MySQL.
-
-The Agent does not send anything MySQL-related to your events stream.
-
 # Installation
 
 The MySQL integration - also known as the MySQL check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
@@ -141,3 +137,19 @@ Review the Configuration section and grant the datadog user all necessary privil
 # Compatibility
 
 The MySQL integration is supported on versions x.x+
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+`mysql.replication.slave_running`:
+
+Returns CRITICAL for a slave that's not running, otherwise OK.
+
+`mysql.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
+
+# Further Reading
