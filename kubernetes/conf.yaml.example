@@ -119,3 +119,8 @@ instances:
   # tags:
   #   - optional_tag1
   #   - optional_tag2
+  #
+  # Some metrics that are collected from the kubelet end up in units of nanocores
+  # Specify patterns to match those metrics to have them scaled back to cores
+  # nanocore_metrics:
+  #   - cpu.*.total
