@@ -1,32 +1,78 @@
-# Nagios Integration
+# Nagios Check
 
-## Overview
+# Overview
 
-Get metrics from nagios service in real time to:
+The Nagios check watches your Nagios server's logs and sends events to your Datadog event stream. This lets you visualize and track problems with your Nagios-monitored infrastructure with a much nicer UI—the Datadog application—than Nagios provides.
 
-* Visualize and monitor nagios states
-* Be notified about nagios failovers and events.
+The check emits events for service flaps, host state changes, passive service checks, host and service downtimes, and more.
 
-## Installation
+The check can also collect Nagios Perfdata and send them as metrics to Datadog.
 
-Install the `dd-check-nagios` package manually or with your favorite configuration manager
+# Installation
 
-## Configuration
+The Nagios check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Nagios servers. If you need the newest version of the check, install the `dd-check-nagios` package.
 
-Edit the `nagios.yaml` file to point to your server and port, set the masters to monitor
+# Configuration
 
-## Validation
+Create a file `nagios.yaml` in the Agent's `conf.d` directory:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+init_config:
+  check_freq: 15 # default is 15
 
-    Checks
-    ======
+instances:
+  - nagios_conf: /etc/nagios3/nagios.cfg   # or wherever your main nagios conf is
+    collect_events: True                   # default is True
+    passive_checks_events: True            # default is False
+    collect_host_performance_data: True    # default is False
+    collect_service_performance_data: True # default is False
+```
 
-        nagios
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+The Agent reads the main nagios configuration file to get the locations of the nagios log files it should watch.
 
-## Compatibility
+This check also works with Icinga, the popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
 
-The nagios check is compatible with all major platforms
+Restart the Agent to start sending Nagios events and (optionally) perfdata metrics to Datadog.
+
+# Validation
+
+Run the Agent's `info` subcommand and look for `nagios` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    nagios
+    -------
+      - instance #0 [OK]
+      - Collected 10 metrics, 15 events & 0 service checks
+
+    [...]
+```
+
+# Compatibility
+
+The nagios check is compatible with all major platforms.
+
+# Metrics
+
+With a default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for perfdata and sumbits it as gauge metrics to Datadog.
+
+# Events
+
+The check watches the Nagios events log for log lines containing these string, emitting an event for each such line:
+
+- SERVICE FLAPPING ALERT
+- ACKNOWLEDGE_SVC_PROBLEM
+- SERVICE ALERT
+- HOST ALERT
+- PASSIVE SERVICE CHECK
+- CURRENT SERVICE STATE
+- ACKNOWLEDGE_HOST_PROBLEM
+- CURRENT HOST STATE
+- SERVICE NOTIFICATION
+- HOST DOWNTIME ALERT
+- PROCESS_SERVICE_CHECK_RESULT
+- SERVICE DOWNTIME ALERT
+
