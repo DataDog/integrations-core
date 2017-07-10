@@ -153,3 +153,5 @@ Returns CRITICAL for a slave that's not running, otherwise OK.
 Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
 
 # Further Reading
+
+Check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.
