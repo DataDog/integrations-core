@@ -87,7 +87,7 @@ class ConsulCheck(AgentCheck):
             acl_token = instance.get('acl_token', None)
 
             headers = {}
-            if acl_token is not None:
+            if acl_token:
                 headers['X-Consul-Token'] = acl_token
 
             if clientcertfile:

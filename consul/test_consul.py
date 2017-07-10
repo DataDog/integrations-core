@@ -739,8 +739,11 @@ class TestIntegrationConsul(AgentCheckTest):
                 'acl_token': 'wrong_token'
             }]
         }
+        got_error_403 = False
         try:
             self.run_check(config)
         except HTTPError as e:
-            if e.errno == 403:
-                pass
+            if e.response.status_code == 403:
+                got_error_403 = True
+
+        self.assertTrue(got_error_403)
