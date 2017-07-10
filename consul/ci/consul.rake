@@ -22,8 +22,10 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('consul')
       # sample docker usage
-      sh %( docker run -d --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} \
+      sh %( docker create --expose 8301 --expose 8500 -p 8500:8500 --name #{container_name_1} \
             consul:#{consul_version} agent -dev -bind=0.0.0.0 -client=0.0.0.0 )
+      sh %( docker cp #{__dir__}/server.json #{container_name_1}:/consul/config/server.json )
+      sh %( docker start #{container_name_1} )
       Wait.for 8500
       wait_on_docker_logs(container_name_1, 30, 'agent: Node info in sync', "agent: Synced service 'consul'")
 
