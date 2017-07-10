@@ -25,3 +25,4 @@ rabbitmq.queue.messages.publish.rate,gauge,,message,second,Rate per second of me
 rabbitmq.queue.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv
 rabbitmq.queue.messages.redeliver.rate,gauge,,message,second,Rate per second of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv rate
 rabbitmq.connections,gauge,,connection,,Number of current connections to rabbitmq by vhost,0,rabbitmq,connections
+rabbitmq.connections.state,gauge,,connection_state,,Number of connections in the specified connection state,0,rabbitmq,connection_state
