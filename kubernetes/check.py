@@ -34,6 +34,8 @@ DEFAULT_ENABLED_RATES = [
     'cpu.*.total']
 DEFAULT_COLLECT_EVENTS = False
 DEFAULT_NAMESPACES = ['default']
+DEFAULT_SEND_CPU_AS_CORES = False
+DEFAULT_NANOCORE_METRICS = ['cpu.*.total']
 
 DEFAULT_SERVICE_EVENT_FREQ = 5 * 60  # seconds
 
@@ -170,6 +172,8 @@ class Kubernetes(AgentCheck):
         # initialized by _filter_containers
         self._filtered_containers = set()
 
+        nanocore_metrics = instance.get('nanocore_metrics', DEFAULT_NANOCORE_METRICS)
+        self.nanocore_metrics = ["{0}.{1}".format(NAMESPACE, x) for x in nanocore_metrics]
         try:
             pods_list = self.kubeutil.retrieve_pods_list()
         except:
@@ -209,10 +213,16 @@ class Kubernetes(AgentCheck):
             return
 
         if isinstance(dat, numbers.Number):
+            # CAdvisor sends some metrics in "nanocpus" - optionally normalize to whole cores
+            if any([fnmatch(metric, pat) for pat in self.nanocore_metrics]):
+                float_dat = float(dat) / 1000000000.0
+            else:
+                float_dat = float(dat)
+
             if self.enabled_rates and any([fnmatch(metric, pat) for pat in self.enabled_rates]):
-                self.publish_rate(self, metric, float(dat), tags)
+                self.publish_rate(self, metric, float_dat, tags)
             elif self.enabled_gauges and any([fnmatch(metric, pat) for pat in self.enabled_gauges]):
-                self.publish_gauge(self, metric, float(dat), tags)
+                self.publish_gauge(self, metric, float_dat,  tags)
 
         elif isinstance(dat, dict):
             for k, v in dat.iteritems():

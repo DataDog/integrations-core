@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import copy
 import mock
 import unittest
 import os
@@ -262,6 +263,33 @@ class TestKubernetes(AgentCheckTest):
         self.assertMetric('kubernetes.memory.capacity', value=8391204864)
 
         self.coverage_report()
+
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info',
+                side_effect=lambda: json.loads(Fixtures.read_file("machine_info_1.2.json", sdk_dir=FIXTURE_DIR)))
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
+                side_effect=[
+                    json.loads(Fixtures.read_file("metrics_1.2_cpu_1.json", sdk_dir=FIXTURE_DIR, string_escape=False)),
+                    json.loads(Fixtures.read_file("metrics_1.2_cpu_2.json", sdk_dir=FIXTURE_DIR, string_escape=False))])
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
+                side_effect=lambda: json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False)))
+    @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
+    def test_cpu_cores_reporting(self, *args):
+        mocks = {
+            '_perform_kubelet_checks': lambda x: None,
+        }
+        config = {
+            "instances": [
+                {
+                    "host": "foo",
+                    "enable_kubelet_checks": False,
+                }
+            ]
+        }
+        expected_value = 4.908024242991814
+
+        self.run_check_twice(config, mocks=mocks, force_reload=True)
+        self.assertMetric('kubernetes.cpu.usage.total', value=expected_value)
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info',
