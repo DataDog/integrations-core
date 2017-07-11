@@ -37,6 +37,9 @@ instances:
     # By default, the application name is collected with the prefix app_name.
 
     # Do not emit metrics for certain yarn capacityScheduler queues.
-    # filter_queues:
+    # The check can send queue metrics on up to 100 queues.
+    # If you have less than 100 queues, you don't have to set this parameter.
+    # If you have more than 100 queues, please exclude queues with this parameter.
+    # queue_blacklist:
     #   - foo_queue
     #   - bar_queue
