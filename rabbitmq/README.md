@@ -36,7 +36,7 @@ instances:
 #     - <THE_ONE_VHOST_YOU_CARE_ABOUT>
 ```
 
-If you don't set `vhosts`, the Agent sends the following for ALL vhosts:
+If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 1. the `rabbitmq.aliveness` service check
 1. the `rabbitmq.connections` metric
