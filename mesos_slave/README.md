@@ -14,7 +14,7 @@ This check also creates a service check for every executor task.
 
 # Installation
 
-Follow the instructions in our [blog post] to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
+Follow the instructions in our [blog post](https://www.datadoghq.com/blog/deploy-datadog-dcos/) to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
 
 # Configuration
 
