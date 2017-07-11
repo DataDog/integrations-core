@@ -1,5 +1,12 @@
 # CHANGELOG - pgbouncer
 
+1.0.2/2017-07-05
+==================
+
+### Changes
+
+* [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
+
 1.0.1/2017-04-24
 ==================
 
