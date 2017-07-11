@@ -106,6 +106,7 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
+        self.connection_states = {}
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -321,7 +322,14 @@ class RabbitMQ(AgentCheck):
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
-        connection_states = defaultdict(int)
+        if base_url not in self.connection_states:
+            self.connection_states[base_url] = defaultdict(int)
+
+        # let's keep the dict around to "discover" states.
+        connection_states = self.connection_states[base_url]
+        for conn_state in connection_states.iterkeys():
+            connection_states[conn_state] = 0
+
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
