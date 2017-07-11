@@ -44,14 +44,13 @@ class Nginx(AgentCheck):
         else:
             metrics = self.parse_text(response, tags)
 
-        UPSTREAM_RESPONSE_CODES = {
-            nginx.upstream.peers.responses.1xx
-            nginx.upstream.peers.responses.2xx
-            nginx.upstream.peers.responses.3xx
-            nginx.upstream.peers.responses.4xx
-            nginx.upstream.peers.responses.5xx
-        }
-        
+        UPSTREAM_RESPONSE_CODES = [
+            'nginx.upstream.peers.responses.1xx',
+            'nginx.upstream.peers.responses.2xx',
+            'nginx.upstream.peers.responses.3xx',
+            'nginx.upstream.peers.responses.4xx',
+            'nginx.upstream.peers.responses.5xx'
+        ]
 
         funcs = {
             'gauge': self.gauge,
@@ -60,9 +59,10 @@ class Nginx(AgentCheck):
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
-                if name in UPSTREAM_RESPONSE_CODES:
-                    func_rate = funcs(rate)
-                    func(name+"_rate", value, tags)
+                for metric_name in UPSTREAM_RESPONSE_CODES:
+                    if name in metric_name:
+                        func_rate = funcs['rate']
+                        func_rate(name+"_rate", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
             except Exception as e:
