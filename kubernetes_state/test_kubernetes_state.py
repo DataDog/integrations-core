@@ -55,7 +55,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.replicaset.replicas_desired',
         # statefulsets
         NAMESPACE + '.statefulset.replicas_desired',
-        NAMESPACE + '.statefulset.replicas',        
+        NAMESPACE + '.statefulset.replicas',
     ]
 
     ZERO_METRICS = [
