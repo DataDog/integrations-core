@@ -19,7 +19,7 @@ instances:
   - host: localhost
     port: 6379 # or wherever your redis listens
 #   unix_socket_path: /var/run/redis/redis.sock # if your redis uses a socket instead of TCP
-#.  password: myredispassword                   # if your redis requires auth
+#   password: myredispassword                   # if your redis requires auth
 ```
 
 See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
