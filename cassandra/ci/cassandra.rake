@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def cassandra_version
-  ENV['FLAVOR_VERSION'] || '2.1.14' # '2.0.17'
+  ENV['FLAVOR_VERSION'] || '2.2.10' # '2.1.14' # '2.0.17'
 end
 
 def cassandra_rootdir
@@ -27,8 +27,8 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('cassandra')
-      sh %(docker create --expose #{container_port} --expose 9042 --expose 7000 --expose 7001 --expose 9160 \
-           -p #{container_port}:#{container_port} -p 9042:9042 -p 7000:7000 -p 7001:7001 -p 9160:9160 -e JMX_PORT=#{container_port} \
+      sh %(docker create --expose #{container_port} \
+           -p #{container_port}:#{container_port} -e JMX_PORT=#{container_port} \
            -e LOCAL_JMX='no' -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_version})
 
       sh %(cp #{__dir__}/jmxremote.password #{__dir__}/jmxremote.password.tmp)
@@ -36,7 +36,6 @@ namespace :ci do
       sh %(docker cp #{__dir__}/jmxremote.password.tmp #{container_name}:/etc/cassandra/jmxremote.password)
       sh %(rm -f #{__dir__}/jmxremote.password.tmp)
       sh %(docker start #{container_name})
-      # sh %(bash #{__dir__}/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script'] do

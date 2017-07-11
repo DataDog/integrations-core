@@ -5,10 +5,13 @@
 # stdlibb
 import time
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
-RESULTS_TIMEOUT = 20
+RESULTS_TIMEOUT = 40
 
 CONFIG = {
     'init_config': {},
@@ -16,29 +19,46 @@ CONFIG = {
         'host': '127.0.0.1',
         'port': 65530,
         'timeout': 1.5,
-        'name': 'DownService'
+        'name': 'DownService',
+        'skip_event': True
     }, {
         'host': '126.0.0.1',
         'port': 65530,
         'timeout': 1.5,
         'name': 'DownService2',
-        'tags': ['test1']
+        'tags': ['test1'],
+        'skip_event': True
     }, {
         'host': 'datadoghq.com',
         'port': 80,
         'timeout': 1.5,
         'name': 'UpService',
-        'tags': ['test2']
+        'tags': ['test2'],
+        'skip_event': True
     }, {
         'host': 'datadoghq.com',
         'port': 80,
         'timeout': 1,
         'name': 'response_time',
         'tags': ['test3'],
-        'collect_response_time': True
+        'collect_response_time': True,
+        'skip_event': True
     }]
 }
 
+CONFIG_EVENTS = {
+    'init_config': {},
+    'instances': [{
+        'host': '127.0.0.1',
+        'port': 65530,
+        'timeout': 1.5,
+        'name': 'DownService',
+        'skip_event': False
+    }]
+}
+
+
+@attr(requires='tcp_check')
 class TCPCheckTest(AgentCheckTest):
     CHECK_NAME = 'tcp_check'
 
@@ -72,17 +92,17 @@ class TCPCheckTest(AgentCheckTest):
         Deprecate events usage for service checks.
         """
         # Run the check
-        self.run_check(CONFIG)
+        self.run_check(CONFIG_EVENTS)
 
         # Overrides self.service_checks attribute when values are available
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', len(CONFIG['instances']))
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', len(CONFIG_EVENTS['instances']))
 
         # Assess warnings
         self.assertWarning(
             "Using events for service checks is deprecated in "
             "favor of monitors and will be removed in future versions of the "
             "Datadog Agent.",
-            count=len(CONFIG['instances'])
+            count=len(CONFIG_EVENTS['instances'])
         )
 
     def test_check(self):
