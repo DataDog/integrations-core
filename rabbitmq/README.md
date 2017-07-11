@@ -41,7 +41,7 @@ If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 1. the `rabbitmq.aliveness` service check
 1. the `rabbitmq.connections` metric
 
-If you do set `vhosts`, the Agent submits this check and metric only for the vhosts you list.
+If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
 There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for details on these configuration options (and all others).
 
