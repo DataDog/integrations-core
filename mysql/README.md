@@ -1,6 +1,6 @@
 # Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including those for:
+The Datadog Agent can collect many metrics from MySQL databases, including:
 
 * Query throughput
 * Query performance (average query run time, slow queries, etc)
@@ -11,7 +11,7 @@ And many more. You can also invent your own metrics using custom SQL queries.
 
 # Installation
 
-The MySQL integration - also known as the MySQL check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the check, install the `dd-check-mysql` package.
 
 # Configuration
 
@@ -289,4 +289,4 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 
 # Further Reading
 
-Check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.
+Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.
