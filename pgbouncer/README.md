@@ -1,4 +1,4 @@
-# Pgbouncer Integration
+# Pgbouncer Check
 
 ## Overview
 

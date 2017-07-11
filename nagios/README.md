@@ -1,4 +1,4 @@
-# Nagios Check
+## Nagios Integration
 
 # Overview
 
@@ -7,15 +7,15 @@ Get metrics from nagios service in real time to:
 * Visualize and monitor nagios states
 * Be notified about nagios failovers and events.
 
-# Installation
+## Installation
 
 Install the `dd-check-nagios` package manually or with your favorite configuration manager
 
-# Configuration
+## Configuration
 
 Edit the `nagios.yaml` file to point to your server and port, set the masters to monitor
 
-# Validation
+## Validation
 
 When you run `datadog-agent info` you should see something like the following:
 
@@ -27,6 +27,6 @@ When you run `datadog-agent info` you should see something like the following:
           - instance #0 [OK]
           - Collected 39 metrics, 0 events & 7 service checks
 
-# Compatibility
+## Compatibility
 
 The nagios check is compatible with all major platforms
