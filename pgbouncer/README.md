@@ -1,21 +1,18 @@
-# Pgbouncer Check
+# Pgbouncer Integrations
 
-## Overview
+# Overview
 
-Get metrics from pgbouncer service in real time to:
 
-* Visualize and monitor pgbouncer states
-* Be notified about pgbouncer failovers and events.
 
-## Installation
+# Installation
 
-Install the `dd-check-pgbouncer` package manually or with your favorite configuration manager
 
-## Configuration
+
+# Configuration
 
 Edit the `pgbouncer.yaml` file to point to your server and port, set the masters to monitor
 
-## Validation
+# Validation
 
 When you run `datadog-agent info` you should see something like the following:
 
@@ -27,6 +24,12 @@ When you run `datadog-agent info` you should see something like the following:
           - instance #0 [OK]
           - Collected 39 metrics, 0 events & 7 service checks
 
-## Compatibility
+# Compatibility
 
-The pgbouncer check is compatible with all major platforms
+The pgbouncer check is compatible with all major platforms.
+
+# Metrics
+
+# Service Checks
+
+

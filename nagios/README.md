@@ -1,6 +1,6 @@
-## Nagios Integration
+# Nagios Integration
 
-# Overview
+## Overview
 
 Get metrics from nagios service in real time to:
 
