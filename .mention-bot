@@ -1,7 +1,7 @@
 {
   "numFilesToCheck": 10,
   "findPotentialReviewers": true,
-  "fileBlacklist": ["*.md"],
+  "fileBlacklist": ["*.md",".travis.yml","circle.yml","appveyor.yml","requirement*.txt","Gemfile*",".gitignore",".pylintrc","Rakefile",".github/*"],
   "userBlacklist": [],
   "userBlacklistForPR": [],
   "requiredOrgs": ["DataDog"],
