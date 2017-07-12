@@ -15,6 +15,14 @@ from checks import AgentCheck
 from util import headers
 
 
+UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
+    'nginx.upstream.peers.responses.1xx',
+    'nginx.upstream.peers.responses.2xx',
+    'nginx.upstream.peers.responses.3xx',
+    'nginx.upstream.peers.responses.4xx',
+    'nginx.upstream.peers.responses.5xx'
+]
+
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
     * number of connections
@@ -44,26 +52,17 @@ class Nginx(AgentCheck):
         else:
             metrics = self.parse_text(response, tags)
 
-        UPSTREAM_RESPONSE_CODES = [
-            'nginx.upstream.peers.responses.1xx',
-            'nginx.upstream.peers.responses.2xx',
-            'nginx.upstream.peers.responses.3xx',
-            'nginx.upstream.peers.responses.4xx',
-            'nginx.upstream.peers.responses.5xx'
-        ]
-
         funcs = {
             'gauge': self.gauge,
-            'rate': self.rate
+            'rate': self.rate,
             'count': self.count
         }
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
-                for metric_name in UPSTREAM_RESPONSE_CODES:
-                    if name in metric_name:
-                        func_rate = funcs['count']
-                        func_rate(name+"_count", value, tags)
+                if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
+                    func_count = funcs['count']
+                    func_count(name+"_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
             except Exception as e:
