@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.2.0
+* [FEATURE] Implement the check to do a single bulk query of all of the metrics, and then filter
+  locally, rather than one query per metric
+  
 ## 1.1.0 / Unreleased
 
 ### Changes

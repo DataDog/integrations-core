@@ -10,7 +10,7 @@ for information on how to report the metrics available in the sys.dm_os_performa
 # stdlib
 import traceback
 from contextlib import contextmanager
-
+from collections import defaultdict
 # 3rd party
 import adodbapi
 try:
@@ -48,10 +48,9 @@ INSTANCES_QUERY = '''select instance_name
                      from sys.dm_os_performance_counters
                      where counter_name=? and instance_name!='_Total';'''
 
-VALUE_AND_BASE_QUERY = '''select cntr_value
+VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name
                           from sys.dm_os_performance_counters
-                          where (counter_name=? or counter_name=?)
-                          and instance_name=?
+                          where counter_name in (%s)
                           order by cntr_type;'''
 
 DATABASE_EXISTS_QUERY = 'select name from sys.databases;'
@@ -96,6 +95,8 @@ class SQLServer(AgentCheck):
         self.connections = {}
         self.failed_connections = {}
         self.instances_metrics = {}
+        self.instances_simple_checks = {}
+        self.instances_fraction_checks = {}
         self.existing_databases = None
         self.do_check = {}
         self.proc_type_mapping = {
@@ -113,6 +114,7 @@ class SQLServer(AgentCheck):
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
         for instance in instances:
+            self.log.debug("initializing %s", str(instance))
             try:
                 instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
                 self.do_check[instance_key] = True
@@ -213,6 +215,20 @@ class SQLServer(AgentCheck):
 
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
         self.instances_metrics[instance_key] = metrics_to_collect
+        simple_metrics = []
+        fraction_metrics = []
+        self.log.debug("metrics to collect %s", str(metrics_to_collect))
+        for m in metrics_to_collect:
+            if type(m) is SqlSimpleMetric:
+                self.log.debug("Adding simple metric %s", m.sql_name)
+                simple_metrics.append(m.sql_name)
+            elif type(m) is SqlFractionMetric or type(m) is SqlIncrFractionMetric:
+                self.log.debug("Adding fraction metric %s", m.sql_name)
+                fraction_metrics.append(m.sql_name)
+                fraction_metrics.append(m.base_name)
+
+        self.instances_simple_checks[instance_key] = simple_metrics
+        self.instances_fraction_checks[instance_key] = fraction_metrics
 
     def typed_metric(self, instance, dd_name, sql_name, base_name, user_type, sql_type, instance_name, tag_by):
         '''
@@ -395,9 +411,15 @@ class SQLServer(AgentCheck):
             metrics_to_collect = self.instances_metrics[instance_key]
 
             with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
+                simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_simple_checks[instance_key], self.log)
+                fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_fraction_checks[instance_key], self.log)
                 for metric in metrics_to_collect:
                     try:
-                        metric.fetch_metric(cursor, custom_tags)
+                        if type(metric) is SqlSimpleMetric:
+                            metric.fetch_metric(cursor, simple_rows, custom_tags)
+                        elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
+                            metric.fetch_metric(cursor, fraction_results, custom_tags)
+
                     except Exception as e:
                         self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
 
@@ -564,30 +586,57 @@ class SqlServerMetric(object):
 
 class SqlSimpleMetric(SqlServerMetric):
 
-    def fetch_metric(self, cursor, tags):
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        placeholder = '?'
+        placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
-                    select instance_name, cntr_value
-                    from sys.dm_os_performance_counters
-                    where counter_name = ?
-                    '''
-        if self.instance == ALL_INSTANCES:
-            query = query_base + "and instance_name!= '_Total'"
-            query_content = (self.sql_name,)
-        else:
-            query = query_base + "and instance_name=?"
-            query_content = (self.sql_name, self.instance)
+            select counter_name, instance_name, cntr_value
+            from sys.dm_os_performance_counters where counter_name in (%s)
+            ''' % placeholders
 
-        cursor.execute(query, query_content)
+        logger.debug("query base: %s", query_base)
+        cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
-        for instance_name, cntr_value in rows:
-            metric_tags = tags
-            if self.instance == ALL_INSTANCES:
-                metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
-            self.report_function(self.datadog_name, cntr_value,
-                                 tags=metric_tags)
+        return rows
+
+    def fetch_metric(self, cursor, rows, tags):
+        for counter_name_long, instance_name_long, cntr_value in rows:
+            counter_name = counter_name_long.strip()
+            instance_name = instance_name_long.strip()
+            if counter_name.strip() == self.sql_name:
+                matched = False
+                if self.instance == ALL_INSTANCES and instance_name != "_Total":
+                    matched = True
+                else:
+                    if instance_name == self.instance:
+                        matched = True
+                if matched:
+                    metric_tags = tags
+                    if self.instance == ALL_INSTANCES:
+                        metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
+                    self.report_function(self.datadog_name, cntr_value,
+                                        tags=metric_tags)
+                    break
 
 
 class SqlFractionMetric(SqlServerMetric):
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        placeholder = '?'
+        placeholders = ', '.join(placeholder for unused in counters_list)
+        query_base = VALUE_AND_BASE_QUERY % placeholders
+
+        logger.debug("query base: %s, %s", query_base, str(counters_list))
+        cursor.execute(query_base, counters_list)
+        rows = cursor.fetchall()
+        results = defaultdict(list)
+        for counter_name, cntr_type, cntr_value, instance_name in rows:
+            rowlist = [cntr_type, cntr_value, instance_name.strip()]
+            logger.debug("Adding new rowlist %s", str(rowlist))
+            results[counter_name.strip()].append(rowlist)
+        return results
 
     def set_instances(self, cursor):
         if self.instance == ALL_INSTANCES:
@@ -596,32 +645,53 @@ class SqlFractionMetric(SqlServerMetric):
         else:
             self.instances = [self.instance]
 
-    def fetch_metric(self, cursor, tags):
+    def fetch_metric(self, cursor, results, tags):
         '''
         Because we need to query the metrics by matching pairs, we can't query
         all of them together without having to perform some matching based on
         the name afterwards so instead we query instance by instance.
         We cache the list of instance so that we don't have to look it up every time
         '''
-        if self.instances is None:
-            self.set_instances(cursor)
-        for instance in self.instances:
-            cursor.execute(VALUE_AND_BASE_QUERY, (self.sql_name, self.base_name, instance))
-            rows = cursor.fetchall()
-            if len(rows) != 2:
-                self.log.warning("Missing counter to compute fraction for "
-                                 "metric %s instance %s, skipping", self.sql_name, instance)
+        if self.sql_name not in results:
+            self.log.warning("Couldn't find %s in results", self.sql_name)
+            return
+
+        results_list = results[self.sql_name]
+        done_instances = []
+        for ndx, row in enumerate(results_list):
+            ctype = row[0]
+            cval = row[1]
+            inst = row[2]
+
+            if inst in done_instances:
                 continue
-            if self.connector == 'odbc':
-                value = rows[0].cntr_value
-                base = rows[1].cntr_value
+
+            if self.instance != ALL_INSTANCES and inst != self.instance:
+                done_instances.append(inst)
+                continue
+
+            #find the next row which has the same instance
+            cval2 = None
+            ctype2 = None
+            for second_row in results_list[:ndx+1]:
+                if inst == second_row[2]:
+                    cval2 = second_row[1]
+                    ctype2 = second_row[0]
+
+            if cval2 is None:
+                self.log.warning("Couldn't find second value for %s", self.sql_name)
+                continue
+            done_instances.append(inst)
+            if ctype < ctype2:
+                value = cval
+                base = cval2
             else:
-                value = rows[0, "cntr_value"]
-                base = rows[1, "cntr_value"]
+                value = cval2
+                base = cval
 
             metric_tags = tags
             if self.instance == ALL_INSTANCES:
-                metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance.strip())]
+                metric_tags = metric_tags + ['%s:%s' % (self.tag_by, inst.strip())]
             self.report_fraction(value, base, metric_tags)
 
     def report_fraction(self, value, base, metric_tags):
