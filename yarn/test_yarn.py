@@ -78,7 +78,7 @@ class YARNCheck(AgentCheckTest):
             'app_id': 'id',
             'app_queue': 'queue'
         },
-        'filter_queues': [
+        'queue_blacklist': [
             'nofollowqueue'
         ]
     }
@@ -93,9 +93,6 @@ class YARNCheck(AgentCheckTest):
             'app_id': 'id',
             'app_queue': 'queue'
         },
-        'filter_queues': [
-            'nofollowqueue'
-        ],
         'collect_app_metrics': 'false'
     }
 
@@ -266,6 +263,5 @@ class YARNCheck(AgentCheckTest):
                 value=value,
                 tags=self.YARN_QUEUE_METRICS_TAGS)
 
-        # Check the YARN Filter Queue Metrics
-        with self.assertRaises(Exception):
-            self.assertMetric('yarn.queue.absolute_capacity', value=23, tags=self.YARN_QUEUE_NOFOLLOW_METRICS_TAGS)
+        # Check the YARN Queue Metrics from excluded queues are absent
+        self.assertMetric('yarn.queue.absolute_capacity', count=0, tags=self.YARN_QUEUE_NOFOLLOW_METRICS_TAGS)
