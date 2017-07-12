@@ -864,7 +864,9 @@ class MySql(AgentCheck):
                         for key in slave_result:
                             if key not in replica_results:
                                 replica_results[key] = {}
-                            replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
+
+                            if slave_result[key]:
+                                replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
 
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
