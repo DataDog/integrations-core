@@ -1,6 +1,15 @@
 # CHANGELOG - docker_daemon
 
-1.2.0 / Unreleased
+1.3.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] collect kube_container_name by default in docker_daemon check, like kubernetes does. See [#553][]
+* [FEATURE] add kube_container_name tag to kubernetes and docker integrations. See [#509][], thanks [@sophaskins][]
+* [IMPROVEMENT] remove NomadUtil & ECSUtil from docker_daemon, MetadataCollector proxies them. See [#486][]
+* [IMPROVEMENT] use the new orchestrator.Tagger class to retrieve the Mesos tags for docker metrics. See [#466][]
+
+1.2.0 / 2017-06-05
 ==================
 ### Changes
 
@@ -55,3 +64,8 @@
 [#409]: https://github.com/DataDog/integrations-core/issues/409
 [#412]: https://github.com/DataDog/integrations-core/issues/412
 [#415]: https://github.com/DataDog/integrations-core/issues/415
+[#466]: https://github.com/DataDog/integrations-core/issues/466
+[#486]: https://github.com/DataDog/integrations-core/issues/486
+[#509]: https://github.com/DataDog/integrations-core/issues/509
+[#553]: https://github.com/DataDog/integrations-core/issues/553
+[@sophaskins]: https://github.com/sophaskins
