@@ -1,52 +1,63 @@
-# Postfix Integration
+# Postfix Check
 
-## Overview
+# Overview
 
-Get metrics from postfix service in real time to:
+This check monitors the size of all your Postfix queues.
 
-* Visualize and monitor postfix states
-* Be notified about postfix failovers and events.
+# Installation
 
-## Installation
+The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers. If you need the newest version of the check, install the `dd-check-postfix` package.
 
-Install the `dd-check-postfix` package manually or with your favorite configuration manager
+# Configuration
 
-## Configuration
+Create a file `postfix.yaml` in the Agent's `conf.d` directory:
 
-* Edit the `postfix.yaml` file to point to your postfix spool/queues directory (e.g. `/var/spool/postfix`).
-* Add a few mail queues to monitor (e.g. `incoming`, `active`, and `deferred`).
-* Update `/etc/sudoers` to allow the user `dd-agent` to run the `find` command exclusively on the queues
-of your choice, for example:
-```bash
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
-
- * Configure the check:
-```yaml
 init_config:
 
 instances:
+  # add one instance for each postfix service you want to track
   - directory: /var/spool/postfix
     queues:
       - incoming
       - active
       - deferred
+#   tags:
+#     - optional_tag1
+#     - optional_tag2
 ```
 
-## Validation
+For each mail queue in `queues`, the Agent forks a `find` on its directory. It uses `sudo`to do this, so you must add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
+```
 
-    Checks
-    ======
+Restart the Agent to start sending Postfix metrics to Datadog.
 
-        postfix
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+# Validation
 
-## Compatibility
+Run the Agent's `info` subcommand and look for postfix` under the Checks section:
 
-The postfix check is compatible with all major platforms
+```
+  Checks
+  ======
+    [...]
+
+    postfix
+    -------
+      - instance #0 [OK]
+      - Collected 3 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Compatibility
+
+The postfix check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv) for a list of metrics provided by this check.

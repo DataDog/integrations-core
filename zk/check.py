@@ -233,7 +233,7 @@ class ZookeeperCheck(AgentCheck):
             mode = "unknown"
 
         tags = tags + ['mode:%s' % mode]
-        self.set('zookeeper.instances', hostname, tags=tags)
+        self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
 
         for k, v in gauges.iteritems():
