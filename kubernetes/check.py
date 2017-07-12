@@ -511,10 +511,11 @@ class Kubernetes(AgentCheck):
             tags = self.kubeutil.extract_event_tags(event)
             tags.extend(instance.get('tags', []))
 
-            title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
+            title = '{} {}'.format(involved_obj.get('name'), event.get('reason'))
             message = event.get('message')
             source = event.get('source')
             if source:
+                title += ' on {}'.format(source.get('host', ''))
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
             dd_event = {
