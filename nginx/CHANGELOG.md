@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [BUGFIX] adds duplicate nginx.upstream.peers.response.*xx_rate metrics with type rate. [#559][]
+* [BUGFIX] adds duplicate nginx.upstream.peers.response.*xx_count metrics with type count. [#559][]
 
 1.0.003-22-2017
 ==================

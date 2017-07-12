@@ -55,14 +55,15 @@ class Nginx(AgentCheck):
         funcs = {
             'gauge': self.gauge,
             'rate': self.rate
+            'count': self.count
         }
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
                 for metric_name in UPSTREAM_RESPONSE_CODES:
                     if name in metric_name:
-                        func_rate = funcs['rate']
-                        func_rate(name+"_rate", value, tags)
+                        func_rate = funcs['count']
+                        func_rate(name+"_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
             except Exception as e:
