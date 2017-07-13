@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 varnish.accept_fail,gauge,,connection,second,Accept failures.,0,varnish,accept fail
-varnish.backend_busy,gauge,,connection,second,Maximum number of connections to a backend was reached.,0,varnish,backend busy
-varnish.backend_conn,gauge,,connection,second,Successful connections to a backen.,0,varnish,backend conn
-varnish.backend_fail,gauge,,connection,second,Backend connection failures.,0,varnish,backend fail
+varnish.backend_busy,gauge,,connection,second,Maximum number of connections to a given backend.,0,varnish,backend busy
+varnish.backend_conn,gauge,,connection,second,Successful connections to a given backend.,0,varnish,backend conn
+varnish.backend_fail,gauge,,connection,second,Failed connections for a given backend.,0,varnish,backend fail
 varnish.backend_recycle,gauge,,connection,second,Backend connections with keep-alive that are returned to the pool of connections.,0,varnish,backend recycle
 varnish.backend_req,gauge,,request,second,Backend requests.,0,varnish,backend req
 varnish.backend_retry,gauge,,connection,second,Backend connection retries.,0,varnish,backend retry
