@@ -75,7 +75,7 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',
             'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
-            'kube_statefulset_spec_replicas': 'statefulset.replicas_desired',
+            'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
         }
 
