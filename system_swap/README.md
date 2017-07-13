@@ -2,7 +2,7 @@
 
 # Overview
 
-This check monitors the number of bytes any host as swapped in and swapped out.
+This check monitors the number of bytes a host has swapped in and swapped out.
 
 # Installation
 
