@@ -25,7 +25,7 @@ Then, create a file `varnish.yaml` in the Agent's `conf.d` directory:
 init_config:
 
 instances:
-  - varnishstat: /usr/bin/varnishstat
+  - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
     varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
 #   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
 #   tags:
