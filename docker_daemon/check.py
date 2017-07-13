@@ -412,6 +412,7 @@ class DockerDaemon(AgentCheck):
         # Collect pod names as tags on kubernetes
         if Platform.is_k8s() and KubeUtil.POD_NAME_LABEL not in self.collect_labels_as_tags:
             self.collect_labels_as_tags.append(KubeUtil.POD_NAME_LABEL)
+            self.collect_labels_as_tags.append(KubeUtil.CONTAINER_NAME_LABEL)
 
         # Collect container names as tags on rancher
         if Platform.is_rancher():
@@ -446,6 +447,9 @@ class DockerDaemon(AgentCheck):
                                 tags.append("kube_replication_controller:%s" % replication_controller)
                                 tags.append("pod_name:%s" % pod_name)
 
+                        elif k == KubeUtil.CONTAINER_NAME_LABEL and Platform.is_k8s():
+                            if v:
+                                tags.append("kube_container_name:%s" % v)
                         elif k == SWARM_SVC_LABEL and Platform.is_swarm():
                             if v:
                                 tags.append("swarm_service:%s" % v)
