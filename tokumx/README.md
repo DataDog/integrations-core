@@ -1,32 +1,83 @@
-# Tokumx Integration
+# Agent Check: TokuMX
 
-## Overview
+# Overview
 
-Get metrics from tokumx service in real time to:
+This check collects TokuMX metrics like:
 
-* Visualize and monitor tokumx states
-* Be notified about tokumx failovers and events.
+* Opcounters
+* Replication lag
+* Cache table utilization and storage size
 
-## Installation
+And more.
 
-Install the `dd-check-tokumx` package manually or with your favorite configuration manager
+# Installation
 
-## Configuration
+The TokuMX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your TokuMX servers. If you need the newest version of the check, install the `dd-check-tokumx` package.
 
-Edit the `tokumx.yaml` file to point to your server and port, set the masters to monitor
+# Configuration
 
-## Validation
+## Prepare TokuMX
 
-When you run `datadog-agent info` you should see something like the following:
+In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
-    Checks
-    ======
+```
+# Authenticate as the admin user.
+use admin
+db.auth("admin", "<YOUR_TOKUX_ADMIN_PASSWORD>")
+# Add a user for Datadog Agent
+db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+```
 
-        tokumx
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+## Connect the Agent
 
-## Compatibility
+Create a file `tokumx.yaml` in the Agent's `conf.d` directory:
 
-The tokumx check is compatible with all major platforms
+```
+init_config:
+
+instances:
+  - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
+```
+
+Restart the Agent to start sending TokuMX metrics to Datadog.
+
+# Validation
+
+Run the Agent's `info` subcommand and look for `tokuxmx` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    tokumx
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
+
+# Compatibility
+
+The tokumx check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv) for a list of metrics provided by this check.
+
+# Events
+
+**Replication state changes**:
+
+This check emits an event each time a TokuMX node has a change in its replication state.
+
+# Service Checks
+
+`tokumx.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
+
+# Further Reading
+
+See our [blog post](https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/) on monitoring TokuMX databases with Datadog.
