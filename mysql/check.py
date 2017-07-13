@@ -1193,19 +1193,12 @@ class MySql(AgentCheck):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
 
-        sql_95th_percentile = """SELECT s2.avg_us avg_us,
-                IFNULL(SUM(s1.cnt)/NULLIF((SELECT COUNT(*) FROM performance_schema.events_statements_summary_by_digest), 0), 0) percentile
-            FROM (SELECT COUNT(*) cnt, ROUND(avg_timer_wait/1000000) AS avg_us
-                    FROM performance_schema.events_statements_summary_by_digest
-                    GROUP BY avg_us) AS s1
-            JOIN (SELECT COUNT(*) cnt, ROUND(avg_timer_wait/1000000) AS avg_us
-                    FROM performance_schema.events_statements_summary_by_digest
-                    GROUP BY avg_us) AS s2
-            ON s1.avg_us <= s2.avg_us
-            GROUP BY s2.avg_us
-            HAVING percentile > 0.95
-            ORDER BY percentile
-            LIMIT 1"""
+        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM 
+            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM 
+                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us` 
+                FROM performance_schema.events_statements_summary_by_digest ORDER BY `avg_us` ASC) p, (SELECT @rownum := 0) r) q
+             WHERE q.`ro` > ROUND(.95*@rownum)
+             ORDER BY `percentile` ASC LIMIT 1"""
 
         try:
             with closing(db.cursor()) as cursor:
