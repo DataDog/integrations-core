@@ -154,6 +154,7 @@ class VarnishCheckTest(AgentCheckTest):
         self.run_check(config)
         args, _ = mock_subprocess.call_args
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
+        self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:default'], count=1)
 
         mock_version.return_value = LooseVersion('4.1.0'), True
         mock_geteuid.return_value = 1
