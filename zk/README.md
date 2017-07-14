@@ -6,7 +6,7 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 
 # Installation
 
-The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers. If you need the newest version of the check, install the `dd-check-zookeeper` package.
+The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers. If you need the newest version of the check, install the `dd-check-zk` package.
 
 # Configuration
 
@@ -25,14 +25,14 @@ Restart the Agent to start sending Zookeeper metrics to Datadog.
 
 # Validation
 
-Run the Agent's `info` subcommand and look for `zookeeper` under the Checks section:
+Run the Agent's `info` subcommand and look for `zk` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    zookeeper
+    zk
     -------
       - instance #0 [OK]
       - Collected 14 metrics, 0 events & 1 service check
@@ -56,4 +56,4 @@ Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, ot
 
 **zookeeper.mode**:
 
-The Agent only submits this service check if `expected_mode` is configured in `zk.yaml`. If it is, the service check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise it returns CRITICAL.
+The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise CRITICAL.
