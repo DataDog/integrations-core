@@ -56,16 +56,16 @@ The Windows Services check is compatible with all Windows platforms.
 
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
 
-|Windows status|windows_service.state status
-|---
-|Stopped|CRITICAL
-|Start Pending|WARNING
-|Stop Pending|WARNING
-|Running|OK
-|Continue Pending|WARNING
-|Pause Pending|WARNING
-|Paused|WARNING
-|Unknown|UNKNOWN
+|Windows status|windows_service.state status|
+|---|---|
+|Stopped|CRITICAL|
+|Start Pending|WARNING|
+|Stop Pending|WARNING|
+|Running|OK|
+|Continue Pending|WARNING|
+|Pause Pending|WARNING|
+|Paused|WARNING|
+|Unknown|UNKNOWN|
 
 # Further Reading
 
