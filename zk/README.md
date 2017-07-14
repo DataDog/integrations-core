@@ -1,19 +1,17 @@
-# Zk Integration
+# Agent Check: Zookeeper
 
-## Overview
+# Overview
 
-Connect ZooKeeper to Datadog in order to:
+The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
 
-* Visualize ZooKeeper performance and utilization.
-* Correlate the performance of ZooKeeper with the rest of your applications.
+# Installation
 
-## Installation
+The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers. If you need the newest version of the check, install the `dd-check-zookeeper` package.
 
-Install the `dd-check-zk` package manually or with your favorite configuration manager
+# Configuration
 
-## Configuration
+Create a file `zk.yaml` in the Agent's `conf.d` directory:
 
-1. Configure the Agent to connect to ZooKeeper. Edit conf.d/zk.yaml
 ```
 init_config:
 
@@ -22,20 +20,40 @@ instances:
     port: 2181
     timeout: 3
 ```
-2. Restart the Agent
 
-## Validation
+Restart the Agent to start sending Zookeeper metrics to Datadog.
 
-When you run `datadog-agent info` you should see something like the following:
+# Validation
 
-    Checks
-    ======
+Run the Agent's `info` subcommand and look for `zookeeper` under the Checks section:
 
-        zk
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+```
+  Checks
+  ======
+    [...]
 
-## Compatibility
+    zookeeper
+    -------
+      - instance #0 [OK]
+      - Collected 14 metrics, 0 events & 1 service check
 
-The zk check is compatible with all major platforms
+    [...]
+```
+
+# Compatibility
+
+The Zookeeper check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zookeeper/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+**zookeeper.ruok**:
+
+Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, otherwise OK.
+
+**zookeeper.mode**:
+
+The Agent only submits this service check if `expected_mode` is configured in `zk.yaml`. If it is, the service check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise it returns CRITICAL.
