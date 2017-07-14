@@ -13,6 +13,9 @@ import re
 import time
 import calendar
 
+# 3p
+from requests.exceptions import ConnectionError
+
 # project
 from checks import AgentCheck
 from config import _is_affirmative
@@ -31,6 +34,8 @@ DEFAULT_ENABLED_RATES = [
     'cpu.*.total']
 DEFAULT_COLLECT_EVENTS = False
 DEFAULT_NAMESPACES = ['default']
+
+DEFAULT_SERVICE_EVENT_FREQ = 5 * 60  # seconds
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
@@ -106,13 +111,16 @@ class Kubernetes(AgentCheck):
             self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
             if self._collect_events:
                 self.event_retriever = self.kubeutil.get_event_retriever()
+            elif self.kubeutil.collect_service_tag:
+                # Only fetch service and pod events for service mapping
+                event_delay = inst.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
+                                                                         delay=event_delay)
             else:
-                # Only fetch service and pod events for service mapping and SD
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'])
+                self.event_retriever = None
         else:
             self._collect_events = None
             self.event_retriever = None
-
 
     def _perform_kubelet_checks(self, url):
         service_check_base = NAMESPACE + '.kubelet.check'
@@ -171,8 +179,17 @@ class Kubernetes(AgentCheck):
         self._perform_kubelet_checks(self.kubeutil.kube_health_url)
 
         if pods_list is not None:
-            # kubelet metrics
-            self._update_metrics(instance, pods_list)
+            # Will not fail if cAdvisor is not available
+            self._update_pods_metrics(instance, pods_list)
+            # cAdvisor & kubelet metrics, will fail if port 4194 is not open
+            try:
+                self._update_metrics(instance, pods_list)
+            except ConnectionError:
+                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
+                             ''' limits/requests will not be collected. Please setup'''
+                             ''' your kubelet with the --cadvisor-port=4194 option''')
+            except Exception as err:
+                self.log.warning("Error while getting performance metrics: %s" % str(err))
 
         # kubelet events
         if self.event_retriever is not None:
@@ -214,8 +231,12 @@ class Kubernetes(AgentCheck):
 
         pod_name = cont_labels[KubeUtil.POD_NAME_LABEL]
         pod_namespace = cont_labels[KubeUtil.NAMESPACE_LABEL]
+        # kube_container_name is the name of the Kubernetes container resource,
+        # not the name of the docker container (that's tagged as container_name)
+        kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
         tags.append(u"pod_name:{0}/{1}".format(pod_namespace, pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
+        tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
         kube_labels_key = "{0}/{1}".format(pod_namespace, pod_name)
 
@@ -316,7 +337,7 @@ class Kubernetes(AgentCheck):
         stats = subcontainer['stats'][-1]  # take the latest
         self._publish_raw_metrics(NAMESPACE, stats, tags)
 
-        if subcontainer.get("spec", {}).get("has_filesystem"):
+        if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
             fs_utilization = float(fs['usage'])/float(fs['capacity'])
             self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
@@ -359,8 +380,8 @@ class Kubernetes(AgentCheck):
                 # also store tags for aliases
                 for alias in subcontainer.get('aliases', []):
                     container_tags[alias] = tags
-            except Exception, e:
-                self.log.error("Unable to collect metrics for container: {0} ({1}".format(c_id, e))
+            except Exception as e:
+                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
 
         # container metrics from kubernetes API: limits and requests
         for pod in pods_list['items']:
@@ -408,7 +429,6 @@ class Kubernetes(AgentCheck):
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
-        self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
 
     def _update_node(self, instance):

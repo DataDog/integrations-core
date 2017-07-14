@@ -19,9 +19,9 @@ init_config:
 
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
-  - cluster_stats: false # set true ONLY if you're not running the check on each cluster node
-  - pshard_stats: true
-  - pending_task_stats: true
+    cluster_stats: false # set true ONLY if you're not running the check on each cluster node
+    pshard_stats: true
+    pending_task_stats: true
 ```
 
 If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
@@ -65,7 +65,7 @@ The Elasticsearch check is compatible with all major platforms.
 
 # Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv) for a list of metrics provided by this integration.
 
 # Events
 

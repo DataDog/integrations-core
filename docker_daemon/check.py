@@ -23,7 +23,7 @@ from utils.dockerutil import (DockerUtil,
 from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
-from utils.orchestrator import NomadUtil, ECSUtil, MetadataCollector
+from utils.orchestrator import MetadataCollector
 
 
 EVENT_TYPE = 'docker'
@@ -192,11 +192,6 @@ class DockerDaemon(AgentCheck):
                     self.kubeutil = None
                     self.log.error("Couldn't instantiate the kubernetes client, "
                         "subsequent kubernetes calls will fail as well. Error: %s" % str(ex))
-
-            if Platform.is_nomad():
-                self.nomadutil = NomadUtil()
-            elif Platform.is_ecs_instance():
-                self.ecsutil = ECSUtil()
 
             # We configure the check with the right cgroup settings for this host
             # Just needs to be done once
@@ -417,6 +412,7 @@ class DockerDaemon(AgentCheck):
         # Collect pod names as tags on kubernetes
         if Platform.is_k8s() and KubeUtil.POD_NAME_LABEL not in self.collect_labels_as_tags:
             self.collect_labels_as_tags.append(KubeUtil.POD_NAME_LABEL)
+            self.collect_labels_as_tags.append(KubeUtil.CONTAINER_NAME_LABEL)
 
         # Collect container names as tags on rancher
         if Platform.is_rancher():
@@ -451,6 +447,9 @@ class DockerDaemon(AgentCheck):
                                 tags.append("kube_replication_controller:%s" % replication_controller)
                                 tags.append("pod_name:%s" % pod_name)
 
+                        elif k == KubeUtil.CONTAINER_NAME_LABEL and Platform.is_k8s():
+                            if v:
+                                tags.append("kube_container_name:%s" % v)
                         elif k == SWARM_SVC_LABEL and Platform.is_swarm():
                             if v:
                                 tags.append("swarm_service:%s" % v)
@@ -482,22 +481,11 @@ class DockerDaemon(AgentCheck):
                         for t in tag_value:
                             tags.append('%s:%s' % (tag_name, str(t).strip()))
 
-            # Add ECS tags
-            if self.collect_ecs_tags:
-                ecs_tags = self.ecsutil.extract_container_tags(entity)
-                tags.extend(ecs_tags)
-
             # Add kube labels and creator/service tags
             if Platform.is_k8s():
                 kube_tags = self.kube_pod_tags.get(pod_name)
                 if kube_tags:
                     tags.extend(list(kube_tags))
-
-            # Add nomad tags
-            if Platform.is_nomad():
-                nomad_tags = self.nomadutil.extract_container_tags(entity)
-                if nomad_tags:
-                    tags.extend(nomad_tags)
 
             if self.metadata_collector.has_detected():
                 orch_tags = self.metadata_collector.get_container_tags(co=entity)

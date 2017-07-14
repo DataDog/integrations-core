@@ -2,6 +2,7 @@
 import re
 import time
 import urllib
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 # 3p
 import pymongo
@@ -944,10 +945,20 @@ class MongoDb(AgentCheck):
 
             oplog_data = {}
 
-            for ol_collection_name in ("oplog.rs", "oplog.$main"):
-                ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
-                if ol_metadata:
-                    break
+            db_version = cli.server_info()['version']
+            oplog_names = ("oplog.rs", "oplog.$main")
+            if LooseVersion(db_version) < LooseVersion("3.0.0"):
+                for ol_collection_name in oplog_names:
+                    ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
+                    if ol_metadata:
+                        break
+            else:
+                res = localdb.command("listCollections", filter={"name": {"$in": oplog_names}})
+                if res['cursor']['firstBatch']:
+                    ol_metadata = res['cursor']['firstBatch'][0]
+                    ol_collection_name = ol_metadata['name']
+                else:
+                    ol_metadata = None
 
             if ol_metadata:
                 try:
