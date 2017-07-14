@@ -1192,13 +1192,14 @@ class MySql(AgentCheck):
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
-
-        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM 
-            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM 
-                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us` 
-                FROM performance_schema.events_statements_summary_by_digest ORDER BY `avg_us` ASC) p, (SELECT @rownum := 0) r) q
-             WHERE q.`ro` > ROUND(.95*@rownum)
-             ORDER BY `percentile` ASC LIMIT 1"""
+        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM
+            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
+                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us` FROM performance_schema.events_statements_summary_by_digest
+                    ORDER BY `avg_us` ASC) p,
+                (SELECT @rownum := 0) r) q
+            WHERE q.`ro` > ROUND(.95*@rownum)
+            ORDER BY `percentile` ASC
+            LIMIT 1"""
 
         try:
             with closing(db.cursor()) as cursor:
