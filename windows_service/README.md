@@ -31,7 +31,7 @@ Restart the Agent to start monitoring the services and sending service checks to
 
 # Validation
 
-See at the info page in the Agent Manager and look for `windows_service` under the Checks section:
+See the info page in the Agent Manager and look for `windows_service` under the Checks section:
 
 ```
   Checks
