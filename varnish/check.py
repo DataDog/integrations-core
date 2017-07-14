@@ -256,7 +256,7 @@ class Varnish(AgentCheck):
             if len(tokens) > 0:
                 if tokens[0] == 'Backend':
                     backend = tokens[1]
-                    status = tokens[1].lower()
+                    status = tokens[-1].lower()
                 elif tokens[0] == 'Current' and backend is not None:
                     try:
                         message = ' '.join(tokens[2:]).strip()
