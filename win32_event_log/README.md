@@ -6,7 +6,7 @@ This check watches for events in the Windows Event Log and forwards them to Data
 
 # Installation
 
-The Windows Event Log check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts. If you need the newest version of the check, install the `dd-check-win32-event-log` package.
+The Windows Event Log check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
 # Configuration
 
@@ -19,13 +19,13 @@ instances:
   - host: localhost
 ```
 
-This minimal file will capture all events from localhost, but you can configure the check to only collect certain kinds of events. See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/conf.yaml.example) for a comprehensive list and description of options that allow you to do this.
+This minimal file will capture all events from localhost, but you can configure the check to only collect certain kinds of events. See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/conf.yaml.example) for a comprehensive list and description of options that allow you to do that.
 
 Restart the Agent to start sending Windows events to Datadog.
 
 # Validation
 
-Run the Agent's `info` subcommand and look for `win32_event_log` under the Checks section:
+See the info page in the Agent Manager and look for `win32_event_log` under the Checks section:
 
 ```
   Checks
@@ -42,7 +42,7 @@ Run the Agent's `info` subcommand and look for `win32_event_log` under the Check
 
 # Compatibility
 
-The win32_event_log check is compatible with Windows.
+The win32_event_log check is compatible with all Windows platforms.
 
 # Further Reading
 
