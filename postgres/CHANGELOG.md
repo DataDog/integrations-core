@@ -1,6 +1,12 @@
 # CHANGELOG - postgres
 
-## 1.0.2 / Unreleased
+## 1.0.3 / Unrelease
+
+### Changes
+
+* [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
+
+## 1.0.2 / 2017-06-05
 
 ### Changes
 
