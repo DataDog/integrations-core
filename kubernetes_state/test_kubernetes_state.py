@@ -8,7 +8,8 @@ import os
 
 # project
 from tests.checks.common import AgentCheckTest
-from utils.kubernetes import NAMESPACE
+
+NAMESPACE = 'kubernetes_state'
 
 
 class TestKubernetesState(AgentCheckTest):
