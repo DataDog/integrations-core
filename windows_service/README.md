@@ -1,12 +1,12 @@
-# Agent Check: Windows Services
+# Agent Check: Windows Service
 
 # Overview
 
-This check monitors the state of Windows Services and submits a service check to Datadog for each one.
+This check monitors the state of any Windows Service and submits a service check to Datadog.
 
 # Installation
 
-The Windows Services check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
+The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
 # Configuration
 
@@ -48,7 +48,7 @@ See the info page in the Agent Manager and look for `windows_service` under the 
 
 # Compatibility
 
-The Windows Services check is compatible with all Windows platforms.
+The Windows Service check is compatible with all Windows platforms.
 
 # Service Checks
 
