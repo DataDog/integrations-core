@@ -28,7 +28,7 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 
 ## Configuration Options
 
-* `ssl_verify` (Optional) - Set to false to disable SSL verification, when connecting to vCenter optional
+* `ssl_verify` (Optional) - Set to false to disable SSL verification, when connecting to vCenter
 * `ssl_capath` (Optional) - Set to the absolute file path of a directory containing CA certificates in PEM format
 * `host_include_only_regex` (Optional) - Use a regex like this if you want only the check to fetch metrics for these ESXi hosts and the VMs running on it
 * `vm_include_only_regex` (Optional) - Use a regex to include only the VMs that are matching this pattern.
