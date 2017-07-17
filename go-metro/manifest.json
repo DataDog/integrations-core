@@ -7,7 +7,7 @@
   "short_description": "Passively calculate TCP RTT between hosts",
   "support": "core",
   "supported_os": [
-    "linux",
+    "linux"
   ],
-  "version": "1.0.0",
+  "version": "1.0.0"
 }
