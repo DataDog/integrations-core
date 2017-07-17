@@ -826,7 +826,7 @@ class SqlOsVirtualFileStat(SqlServerMetric):
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
         if not counters_list:
-            return
+            return None, None
 
         query_base = "select * from sys.dm_io_virtual_file_stats(null, null)"
         cursor.execute(query_base)
@@ -873,6 +873,9 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
+        if not counters_list:
+            return None, None
+
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
