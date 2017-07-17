@@ -33,14 +33,14 @@ Restart the Agent to start sending YARN metrics to Datadog.
 
 # Validation
 
-Run the Agent's `info` subcommand and look for `mcache` under the Checks section:
+Run the Agent's `info` subcommand and look for `yarn` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    mcache
+    yarn
     -------
       - instance #0 [OK]
       - Collected 26 metrics, 0 events & 1 service check
