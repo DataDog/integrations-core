@@ -65,7 +65,7 @@ The Elasticsearch check is compatible with all major platforms.
 
 # Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv) for a list of metrics provided by this integration.
 
 # Events
 

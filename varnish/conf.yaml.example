@@ -10,9 +10,10 @@ instances:
     # -f options to filter which metrics to collect. 
     # See https://www.varnish-cache.org/docs/4.1/reference/varnishstat.html#options.
     # The exclusion filter with '^' is broken with 'varnishstat' version 4.0 to 4.1.6 and 5.0 to 5.1.2. See https://github.com/varnishcache/varnish-cache/issues/2320
-    # You can still use the inclusion blob with those versions.
-    metrics_filter:
-      - ^VBE.*
+    # Version 4.1.7 has been released and includes a fix for this. Using the exclusion blob with a broken version will silence the integration (no metric will be sent)
+    # However, you can still use the inclusion blob with those versions.
+    # metrics_filter:
+    #  - ^VBE.*
 
     # The (optional) name will be used in the varnishstat command for the
     # -n argument and will add a name:$instancename tag to all metrics.
