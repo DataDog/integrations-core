@@ -1,6 +1,13 @@
 # CHANGELOG - kubernetes_state
 
-1.2.0 / Unreleased
+1.3.0 Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Support for StatefulSet metrics
+
+1.2.0 07-11-2017
 ==================
 
 ### Changes
