@@ -5,6 +5,9 @@
 # stdlibb
 import time
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
@@ -15,18 +18,18 @@ CONFIG = {
     'instances': [{
         'host': '127.0.0.1',
         'port': 65530,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'DownService'
     }, {
         'host': '126.0.0.1',
         'port': 65530,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'DownService2',
         'tags': ['test1']
     }, {
         'host': 'datadoghq.com',
         'port': 80,
-        'timeout': 1,
+        'timeout': 1.5,
         'name': 'UpService',
         'tags': ['test2']
     }, {
@@ -39,6 +42,8 @@ CONFIG = {
     }]
 }
 
+
+@attr(requires='tcp_check')
 class TCPCheckTest(AgentCheckTest):
     CHECK_NAME = 'tcp_check'
 
@@ -51,11 +56,16 @@ class TCPCheckTest(AgentCheckTest):
 
         Raise after
         """
+
+        # Check the initial values to see if we already have results before waiting for the async
+        # instances to finish
+        initial_values = getattr(self, attribute)
+
         i = 0
         while i < RESULTS_TIMEOUT:
             self.check._process_results()
-            if len(getattr(self.check, attribute)) >= count:
-                return getattr(self.check, method)()
+            if len(getattr(self.check, attribute)) + len(initial_values) >= count:
+                return getattr(self.check, method)() + initial_values
             time.sleep(1.1)
             i += 1
         raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"

@@ -9,7 +9,7 @@ import time
 import dns.resolver
 
 # project
-from util import Platform
+from utils.platform import Platform
 from checks.network_checks import NetworkCheck, Status
 
 # These imports are necessary because otherwise dynamic type
