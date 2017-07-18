@@ -7,14 +7,14 @@
 
 * [SANITY] Import `Timer` helper from `utils.timer` instead of deprecated `util`. See [#484][]
 
-1.0.1 Unreleased
+1.0.1 / 2017-06-05
 ==================
 
 ### Changes
 
 * [BUGFIX] Fix case where returned data series are empty. See [#346][]
 
-1.0.0 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

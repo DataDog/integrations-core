@@ -3,7 +3,7 @@ GEM
   specs:
     ast (2.3.0)
     colorize (0.8.1)
-    datadog-sdk-testing (0.7.3)
+    datadog-sdk-testing (0.7.4)
       colorize (~> 0.8)
       httparty (~> 0.14)
       rake (~> 11.0)
@@ -24,13 +24,13 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
-    unicode-display_width (1.2.1)
+    unicode-display_width (1.3.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  datadog-sdk-testing
+  datadog-sdk-testing (~> 0.7.4)
   rake (~> 11.3.0)
   rubocop (~> 0.38.0)
 
