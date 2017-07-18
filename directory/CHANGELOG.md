@@ -7,7 +7,7 @@
 
 * [FEATURE] adds pattern matching against files' relative paths. See [#429][] (Thanks [@cmatteri][])
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

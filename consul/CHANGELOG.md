@@ -6,7 +6,7 @@
 * [Fix] Fix duplicate service check with same tags but different status being sent (one per Node). See [#460][]
 * [FEATURE] Support ACL token for authentication. See [#521][]
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
