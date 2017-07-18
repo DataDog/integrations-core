@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-1.1.0 / Unreleased
+1.1.0 / 2017-07-18
 ==================
 
 * [Fix] Fix duplicate service check with same tags but different status being sent (one per Node). See [#460][]

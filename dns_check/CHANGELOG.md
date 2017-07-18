@@ -1,7 +1,7 @@
 # CHANGELOG - dns_check
 
 
-1.0.2 / Unreleased
+1.0.2 / 2017-07-18
 ==================
 
 ### Changes

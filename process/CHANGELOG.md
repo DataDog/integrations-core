@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-1.1.1 / Unreleased
+1.1.1 / 2017-07-18
 ==================
 
 ### Changes

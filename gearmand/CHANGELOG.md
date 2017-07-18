@@ -1,7 +1,7 @@
 # CHANGELOG - gearmand
 
 
-1.0.1 / Unreleased
+1.0.1 / 2017-07-18
 ==================
 
 ### Changes
