@@ -3,13 +3,12 @@ init_config:
 instances:
   # Configuration options:
   # keyspaces: a list of keyspaces to monitor
-  # node_ip: the IP of the cassandra node to connect to. The rest of the nodes in the cluster will be auto discovered by the cassandra driver 
-  #   For more information, see https://datastax.github.io/python-driver/api/index.html
+  # host: host that nodetool will connect to.
   #   Default to localhost.
-  # node_port: the port cassandra is listening for connections.
-  #   Default to 9042
-  # username/password: a set of credentials to connect to the cassandra cluster.
-  # tags: optional, a list of tags to be sent with the metrics
-  # connect_timeout: timeout, in seconds, for creating new connections. Default to 5. 
+  # port: the port JMX is listening for connections.
+  #   Default to 7199
+  # username/password: a set of credentials to connect to the host. These are the credentials for the JMX server.
+  #   For the check to work, this user must have a read/write access so that nodetool can execute the `status` command
+  # tags: optional, a list of additionnal tags to be sent with the metrics
 
   - keyspaces: ["foo"]

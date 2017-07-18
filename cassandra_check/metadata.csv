@@ -1,2 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-cassandra.replication_failures,gauge,,,,Number of replica nodes down per keyspace,-1,cassandra_check,replication failures
+cassandra.replication_availability,gauge,,,,Percentage of data available per keyspace times replication factor,+1,cassandra_check,available data
+cassandra.replication_factor,gauge,,,,Replication factor per keyspace,0,cassandra_check,replication factor

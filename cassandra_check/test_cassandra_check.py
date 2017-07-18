@@ -5,20 +5,12 @@
 # stdlib
 from nose.plugins.attrib import attr
 from mock import patch
-
-# 3p
-from cassandra.cluster import Cluster # pylint: disable=E0611
-from cassandra.metadata import TokenMap # pylint: disable=E0611
+from os.path import join, dirname
 
 # project
-from tests.checks.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest, Fixtures
 
-class MockHost:
-    def __init__(self, up):
-        self.is_up = up
-
-def mock_get_replicas(self, keyspace, token):
-    return [MockHost(True), MockHost(False)]
+FIXTURE_DIR = join(dirname(__file__), 'ci')
 
 @attr(requires='cassandra_check')
 class TestCassandraCheck(AgentCheckTest):
@@ -28,39 +20,27 @@ class TestCassandraCheck(AgentCheckTest):
     config = {
         'instances': [
             {
-                'host': '127.0.0.1',
-                'port': 9042,
+                'host': 'localhost',
                 'keyspaces': ['test'],
-                'tags': ['foo', 'bar'],
-                'connect_timeout': 1
+                'tags': ['foo', 'bar']
             }
         ]
     }
 
-    def test_check(self):
-        # Create a keyspace with replication factor 2
-        cluster = Cluster(connect_timeout=1)
-        session = cluster.connect()
-        session.execute("CREATE KEYSPACE IF NOT EXISTS test WITH "
-                        "REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 2}")
-        cluster.shutdown()
-        # Run check with both, we should get the value 0 (on mac this will fail since
-        # there is no docker0 bridge so the connection to the second container cannot be made)
-        self.run_check(self.config)
-        self.assertMetric('cassandra.replication_failures',
-                          value=0,
-                          tags=['keyspace:test', 'cluster:Test Cluster', 'foo', 'bar'])
-        self.assertServiceCheckOK('cassandra.can_connect', tags=['foo', 'bar'])
+    @patch('_cassandra_check.get_subprocess_output',
+           return_value=Fixtures.read_file('nodetool_output', sdk_dir=FIXTURE_DIR))
+    def test_check(self, mock_output):
 
-        self.coverage_report()
-
-    @patch.object(TokenMap, 'get_replicas', mock_get_replicas)
-    def test_1_replica_down(self):
-        # We should have the value 1 since the driver won't be able to connect to the second container
         self.run_check(self.config)
-        self.assertMetric('cassandra.replication_failures',
-                          value=1,
-                          tags=['keyspace:test', 'cluster:Test Cluster', 'foo', 'bar'])
-        self.assertServiceCheckOK('cassandra.can_connect', tags=['foo', 'bar'])
+
+        mock_output.assertCalledWith(['/usr/bin/nodetool', '-h', 'localhost', '-p', '7199', '--', 'test'])
+        self.assertMetric('cassandra.replication_availability', value=64.5,
+                          tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
+        self.assertMetric('cassandra.replication_availability', value=100,
+                          tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
+        self.assertMetric('cassandra.replication_factor', value=1,
+                          tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
+        self.assertMetric('cassandra.replication_factor', value=2,
+                          tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
 
         self.coverage_report()

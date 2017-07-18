@@ -2,56 +2,75 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# 3rd party
-from cassandra.cluster import Cluster, NoHostAvailable # pylint: disable=E0611
-from cassandra.auth import PlainTextAuthProvider # pylint: disable=E0611
+# stdlib
+import re
 
 # project
 from checks import AgentCheck
+from utils.subprocess_output import get_subprocess_output
+from collections import defaultdict
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_check'
-DEFAULT_NODE_IP = 'localhost'
-DEFAULT_NODE_PORT = 9042
-
+DEFAULT_HOST = 'localhost'
+DEFAULT_PORT = '7199'
 
 class CassandraCheck(AgentCheck):
+
+    datacenter_name_re = re.compile('^Datacenter: (.*)')
+    host_status_re = re.compile('^(?P<status>[UD])[NLJM].* (?P<owns>(\d+\.\d+%)|\?).*')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
     def check(self, instance):
-        # Get the node IP address to connect Cassandra
-        node_ip = instance.get("node_ip", DEFAULT_NODE_IP)
-        node_port = instance.get("node_port", DEFAULT_NODE_PORT)
+        nodetool_path = instance.get("nodetool", "/usr/bin/nodetool")
+        host = instance.get("host", DEFAULT_HOST)
+        port = instance.get("port", DEFAULT_PORT)
         keyspaces = instance.get("keyspaces", [])
-        tags = instance.get("tags", [])
-        connect_timeout = instance.get("connect_timeout", 5)
-
         username = instance.get("username", "")
         password = instance.get("password", "")
-        auth_provider = PlainTextAuthProvider(username, password)
+        tags = instance.get("tags", [])
 
-        # Try to connect to the node
-        cluster = Cluster([node_ip], port=node_port, auth_provider=auth_provider, connect_timeout=connect_timeout)
-        try:
-            cluster.connect(wait_for_all_pools=True)
-            if keyspaces:
-                for keyspace in keyspaces:
-                    token_map = cluster.metadata.token_map
-                    down_replicas = 0
-                    for token in token_map.ring:
-                        replicas = token_map.get_replicas(keyspace, token)
-                        down_replicas = max(down_replicas, len([r for r in replicas if not r.is_up]))
+        for keyspace in keyspaces:
+            # Build the nodetool command
+            cmd = [nodetool_path, '-h', host, '-p', port]
+            if username and password:
+                cmd += ['-u', username, '-pw', password]
+            cmd += ['status', '--', keyspace]
 
-                    self.gauge("cassandra.replication_failures", down_replicas,
-                               tags=["keyspace:%s" % keyspace, "cluster:%s" % cluster.metadata.cluster_name] + tags)
+            # Execute the command
+            out, err, _ = get_subprocess_output(cmd, self.log, False)
+            if err or 'Error:' in out:
+                self.log.error('Error executing nodetool status: %s', err or out)
+            percent_up_by_dc, percent_total_by_dc = self._process_nodetool_output(out)
+            for datacenter, percent_up in percent_up_by_dc.items():
+                self.gauge('cassandra.replication_availability', percent_up,
+                           tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter])
+            for datacenter, percent_total in percent_total_by_dc.items():
+                self.gauge('cassandra.replication_factor', int(round(percent_total / 100)),
+                           tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter])
 
-        except NoHostAvailable as e:
-            self.log.error('Could not connect to node %s:%s : %s' % (node_ip, node_port, e))
-            node_status = AgentCheck.CRITICAL
-        else:
-            node_status = AgentCheck.OK
-        finally:
-            cluster.shutdown()
+    def _process_nodetool_output(self, output):
+        percent_up_by_datacenter = defaultdict(float)
+        percent_total_by_datacenter = defaultdict(float)
+        for line in output.splitlines():
+            # Ouput of nodetool
+            # Datacenter: dc1
+            # ===============
+            # Status=Up/Down
+            # |/ State=Normal/Leaving/Joining/Moving
+            # --  Address     Load       Tokens  Owns (effective)  Host ID                               Rack
+            # UN  172.21.0.3  184.8 KB   256     38.4%             7501ef03-eb63-4db0-95e6-20bfeb7cdd87  RAC1
+            # UN  172.21.0.4  223.34 KB  256     39.5%             e521a2a4-39d3-4311-a195-667bf56450f4  RAC1
+            match = self.datacenter_name_re.search(line)
+            if match:
+                datacenter_name = match.group(1)
+            match = self.host_status_re.search(line)
+            if match:
+                host_status = match.group('status')
+                host_owns = match.group('owns')
+                if host_status == 'U' and host_owns != '?':
+                    percent_up_by_datacenter[datacenter_name] += float(host_owns[:-1])
+                percent_total_by_datacenter[datacenter_name] += float(host_owns[:-1])
 
-        self.service_check('cassandra.can_connect', node_status, tags=tags)
+        return percent_up_by_datacenter, percent_total_by_datacenter

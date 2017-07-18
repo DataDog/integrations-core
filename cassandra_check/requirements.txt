@@ -1,2 +1,1 @@
 # integration pip requirements
-cassandra-driver==3.10.0
