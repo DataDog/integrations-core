@@ -1,19 +1,22 @@
 # CHANGELOG - http_check
 
-## 1.1.1 / Unreleased
+1.1.1 / Unreleased
+==================
 
 ### Changes
 
 * [BUGFIX] Fix response tuple arity in SSL certificate check. See[#461][].
 
-## 1.1.0 / 06-05-2017
+1.1.0 / 2017-06-05
+==================
 
 ### Changes
 
 * [FEATURE] Add support for SOAP requests. See [#328][].
 * [FEATURE] Add gauge metric for ssl days left. See [#249][].
 
-## 1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 

@@ -1,13 +1,15 @@
 # CHANGELOG - sqlserver
 
-## 1.1.0 / Unreleased
+1.1.0 / Unreleased
+==================
 
 ### Changes
 
 * [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357][] and [#456][], thanks [@rlaveycal][]
 * [SANITY] Fix yaml example file spacing. See [#342][], thanks [@themsquared][]
 
-## 1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 

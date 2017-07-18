@@ -7,7 +7,7 @@
 
 * [BUGFIX] Fixes an issue with retrieving the backend service checks. [#582][]
 
-1.0.2 Unreleased
+1.0.2 / 2017-06-15
 ==================
 
 ### Changes

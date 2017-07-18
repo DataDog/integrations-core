@@ -7,7 +7,7 @@
 
 * [BUGFIX] Make process validation case-insensitve on Windows See [#479][]
 
-1.1.0 / Unreleased
+1.1.0 / 2017-06-05
 ==================
 
 ### Changes

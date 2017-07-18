@@ -1,24 +1,28 @@
 # CHANGELOG - network
 
-## 1.2.1 Unreleased
+1.2.1 / Unreleased
+==================
 
 ### Changes
 
 * [BUGFIX] Fix TCP6 metrics overriding TCP4 metrics when monitoring non combines socket states. See [#501][]
 
-## 1.2.0 Unreleased
+1.2.0 / 2017-06-05
+==================
 
 ### Changes
 
 * [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299][] and [#452][], thanks [@cory-stripe][]
 
-## 1.1.0 05-03-2017
+1.1.0 / 2017-05-03
+==================
 
 ### Changes
 
 * [BUGFIX] Work around `ss -atun` bug not differentiating tcp and udp. See [#296][]
 
-## 1.0.0 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 
