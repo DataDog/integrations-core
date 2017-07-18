@@ -7,7 +7,7 @@
 
 * [FEATURE] Support for StatefulSet metrics
 
-1.2.0 07-11-2017
+1.2.0 / Unreleased
 ==================
 
 ### Changes
