@@ -7,7 +7,7 @@
 
 * [FEATURE] Add `can_connect` service check. See [#420][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
