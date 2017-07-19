@@ -8,6 +8,7 @@ from os import geteuid
 from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 import re
 import xml.parsers.expat # python 2.4 compatible
+import shlex
 
 # project
 from checks import AgentCheck
@@ -81,8 +82,19 @@ class Varnish(AgentCheck):
             tags = []
         else:
             tags = list(set(tags))
-        varnishstat_path = instance.get("varnishstat").split(' ')
+        # Split the varnishstat command so that additional arguments can be passed in
+        # In order to support monitoring a Varnish instance which is running as a Docker
+        # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+        # perform a docker exec on the running container. This works fine when running a
+        # single container on the host but breaks down when attempting to use the auto
+        # discovery feature. This change allows for passing in additional parameters to
+        # the script (i.e. %%host%%) so that the command is properly formatted and the
+        # desired container is queried.
+        varnishstat_path = shlex.split(instance.get("varnishstat"))
         name = instance.get('name')
+        metrics_filter = instance.get("metrics_filter", [])
+        if not isinstance(metrics_filter, list):
+            raise Exception("The parameter 'metrics_filter' must be a list")
 
         # Get version and version-specific args from varnishstat -V.
         version, use_xml = self._get_version_info(varnishstat_path)
@@ -90,6 +102,8 @@ class Varnish(AgentCheck):
         # Parse metrics from varnishstat.
         arg = '-x' if use_xml else '-1'
         cmd = varnishstat_path + [arg]
+        for metric in metrics_filter:
+            cmd.extend(["-f", metric])
 
         if name is not None:
             cmd.extend(['-n', name])
@@ -102,8 +116,16 @@ class Varnish(AgentCheck):
         self._parse_varnishstat(output, use_xml, tags)
 
         # Parse service checks from varnishadm.
-        varnishadm_path = instance.get('varnishadm').split(' ')
-        if varnishadm_path:
+        if instance.get("varnishadm", None):
+            # Split the varnishadm command so that additional arguments can be passed in
+            # In order to support monitoring a Varnish instance which is running as a Docker
+            # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+            # perform a docker exec on the running container. This works fine when running a
+            # single container on the host but breaks down when attempting to use the auto
+            # discovery feature. This change allows for passing in additional parameters to
+            # the script (i.e. %%host%%) so that the command is properly formatted and the
+            # desired container is queried.
+            varnishadm_path = shlex.split(instance.get('varnishadm'))
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
             cmd = []
@@ -251,7 +273,7 @@ class Varnish(AgentCheck):
             if len(tokens) > 0:
                 if tokens[0] == 'Backend':
                     backend = tokens[1]
-                    status = tokens[1].lower()
+                    status = tokens[-1].lower()
                 elif tokens[0] == 'Current' and backend is not None:
                     try:
                         message = ' '.join(tokens[2:]).strip()

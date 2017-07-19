@@ -26,6 +26,8 @@ YARN_SCHEDULER_URL = urljoin(RM_ADDRESS, '/ws/v1/cluster/scheduler')
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
+collected_from_app_url = False
+
 def requests_get_mock(*args, **kwargs):
 
     class MockResponse:
@@ -47,6 +49,8 @@ def requests_get_mock(*args, **kwargs):
     elif args[0] == YARN_APPS_URL:
         with open(Fixtures.file('apps_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
             body = f.read()
+            global collected_from_app_url
+            collected_from_app_url = True
             return MockResponse(body, 200)
 
     elif args[0] == YARN_NODES_URL:
@@ -61,6 +65,7 @@ def requests_get_mock(*args, **kwargs):
 
 
 class YARNCheck(AgentCheckTest):
+
     CHECK_NAME = 'yarn'
 
     YARN_CONFIG = {
@@ -73,9 +78,22 @@ class YARNCheck(AgentCheckTest):
             'app_id': 'id',
             'app_queue': 'queue'
         },
-        'filter_queues': [
+        'queue_blacklist': [
             'nofollowqueue'
         ]
+    }
+
+    YARN_CONFIG_EXCLUDING_APP = {
+        'resourcemanager_uri': 'http://localhost:8088',
+        'cluster_name': CLUSTER_NAME,
+        'tags': [
+            'opt_key:opt_value'
+        ],
+        'application_tags': {
+            'app_id': 'id',
+            'app_queue': 'queue'
+        },
+        'collect_app_metrics': 'false'
     }
 
     YARN_CLUSTER_METRICS_VALUES = {
@@ -192,6 +210,20 @@ class YARNCheck(AgentCheckTest):
         'opt_key:opt_value'
     ]
 
+    def setUp(self):
+        global collected_from_app_url
+        collected_from_app_url = False
+
+    @mock.patch('requests.get', side_effect=requests_get_mock)
+    def test_check_excludes_app_metrics(self, mock_requests):
+        config = {
+            'instances': [self.YARN_CONFIG_EXCLUDING_APP]
+        }
+
+        self.run_check(config)
+
+        # Check that the YARN App metrics is empty
+        self.assertFalse(collected_from_app_url)
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
     def test_check(self, mock_requests):
@@ -231,6 +263,5 @@ class YARNCheck(AgentCheckTest):
                 value=value,
                 tags=self.YARN_QUEUE_METRICS_TAGS)
 
-        # Check the YARN Filter Queue Metrics
-        with self.assertRaises(Exception):
-            self.assertMetric('yarn.queue.absolute_capacity', value=23, tags=self.YARN_QUEUE_NOFOLLOW_METRICS_TAGS)
+        # Check the YARN Queue Metrics from excluded queues are absent
+        self.assertMetric('yarn.queue.absolute_capacity', count=0, tags=self.YARN_QUEUE_NOFOLLOW_METRICS_TAGS)

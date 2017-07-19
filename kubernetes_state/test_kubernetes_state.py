@@ -8,7 +8,8 @@ import os
 
 # project
 from tests.checks.common import AgentCheckTest
-from utils.kubernetes import NAMESPACE
+
+NAMESPACE = 'kubernetes_state'
 
 
 class TestKubernetesState(AgentCheckTest):
@@ -63,29 +64,6 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.waiting',
     ]
 
-    def test__get_kube_state(self):
-        headers = {
-            'accept': 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited',
-            'accept-encoding': 'gzip',
-        }
-        url = 'https://example.com'
-
-        self.load_check({'instances': [{'host': 'foo'}]})
-        with mock.patch('{}.requests'.format(self.check.__module__)) as r:
-            self.check._get_kube_state(url)
-            r.get.assert_called_once_with(url, headers=headers)
-
-    def test_kube_state(self):
-        mocked = mock.MagicMock()
-        mocks = {
-            '_perform_kubelet_checks': mock.MagicMock(),
-            '_update_metrics': mock.MagicMock(),
-            '_update_kube_state_metrics': mocked,
-        }
-        config = {'instances': [{'host': 'foo', 'kube_state_url': 'https://example.com:12345'}]}
-        self.run_check(config, force_reload=True, mocks=mocks)
-        mocked.assert_called_once()
-
     def assertMetricNotAllZeros(self, metric_name):
         for mname, ts, val, mdata in self.metrics:
             if mname == metric_name:
@@ -93,18 +71,11 @@ class TestKubernetesState(AgentCheckTest):
                     return True
         raise AssertionError("All metrics named %s have 0 value." % metric_name)
 
-    def test__update_kube_state_metrics(self):
+    @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
+    def test__update_kube_state_metrics(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
-        mocked = mock.MagicMock()
         with open(f_name, 'rb') as f:
-            mocked.return_value = f.read()
-
-        mocks = {
-            '_perform_kubelet_checks': mock.MagicMock(),
-            '_update_metrics': mock.MagicMock(),
-            'kubeutil': mock.MagicMock(),
-            '_get_kube_state': mocked,
-        }
+            mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
 
         config = {
             'instances': [{
@@ -113,7 +84,7 @@ class TestKubernetesState(AgentCheckTest):
             }]
         }
 
-        self.run_check(config, mocks=mocks)
+        self.run_check(config)
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
