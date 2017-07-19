@@ -4,6 +4,7 @@
 
 ### Changes
 
+* [MINOR] Allow specifying postgres port as string.
 * [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
 
 ## 1.0.2 / 2017-06-05
