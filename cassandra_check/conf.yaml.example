@@ -2,6 +2,8 @@ init_config:
 
 instances:
   # Configuration options:
+  # nodetool: a command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
+  #   Default to /usr/bin/nodetool
   # keyspaces: a list of keyspaces to monitor
   # host: host that nodetool will connect to.
   #   Default to localhost.

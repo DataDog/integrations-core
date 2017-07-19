@@ -4,6 +4,7 @@
 
 # stdlib
 import re
+import shlex
 
 # project
 from checks import AgentCheck
@@ -23,7 +24,8 @@ class CassandraCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
     def check(self, instance):
-        nodetool_path = instance.get("nodetool", "/usr/bin/nodetool")
+        # Allow to specify a complete command for nodetool such as `docker exec container nodetool`
+        nodetool_cmd = shlex.split(instance.get("nodetool", "/usr/bin/nodetool"))
         host = instance.get("host", DEFAULT_HOST)
         port = instance.get("port", DEFAULT_PORT)
         keyspaces = instance.get("keyspaces", [])
@@ -33,7 +35,7 @@ class CassandraCheck(AgentCheck):
 
         for keyspace in keyspaces:
             # Build the nodetool command
-            cmd = [nodetool_path, '-h', host, '-p', port]
+            cmd = nodetool_cmd + ['-h', host, '-p', port]
             if username and password:
                 cmd += ['-u', username, '-pw', password]
             cmd += ['status', '--', keyspace]

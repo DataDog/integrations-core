@@ -11,6 +11,7 @@ from os.path import join, dirname
 from tests.checks.common import AgentCheckTest, Fixtures
 
 FIXTURE_DIR = join(dirname(__file__), 'ci')
+CASSANDRA_CONTAINER_NAME = 'dd-test-cassandra'
 
 def mock_output(*args):
     return Fixtures.read_file('nodetool_output', sdk_dir=FIXTURE_DIR), "", 0
@@ -22,7 +23,7 @@ class TestCassandraCheck(AgentCheckTest):
     config = {
         'instances': [
             {
-                'host': 'localhost',
+                'nodetool': 'docker exec %s nodetool' % CASSANDRA_CONTAINER_NAME,
                 'keyspaces': ['test'],
                 'username': 'controlRole',
                 'password': 'QED',
