@@ -1,12 +1,12 @@
 # CHANGELOG - mongo
 
-1.2.0 / Unreleased
+1.2.0 / 2017-07-18
 ==================
 ### Changes
 
 * [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][]
 
-1.1.0 / Unreleased
+1.1.0 / 2017-06-05
 ==================
 ### Changes
 

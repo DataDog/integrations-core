@@ -1,13 +1,13 @@
 # CHANGELOG - nginx
 
-1.1.007-12-2017 Unreleased
+1.1.0 / 2017-07-18
 ==================
 
 ### Changes
 
 * [BUGFIX] adds duplicate nginx.upstream.peers.response.*xx_count metrics with type count. [#559][]
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

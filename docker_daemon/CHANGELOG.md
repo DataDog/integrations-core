@@ -6,7 +6,7 @@
 
 * [BUGFIX] safely check volume list before accessing. See [#544][]
 
-1.3.0 / Unreleased
+1.3.0 / 2017-07-18
 ==================
 ### Changes
 
