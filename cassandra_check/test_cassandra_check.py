@@ -38,8 +38,8 @@ class TestCassandraCheck(AgentCheckTest):
         self.run_check(self.config)
 
         self.assertEquals(mock_output.call_args[0][0],
-                          ['/usr/bin/nodetool', '-h', 'localhost', '-p', '7199', '-u',
-                          'controlRole', '-pw', 'QED', 'status', '--', 'test'])
+                          ['docker', 'exec', CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p',
+                          '7199', '-u', 'controlRole', '-pw', 'QED', 'status', '--', 'test'])
         self.assertMetric('cassandra.replication_availability', value=64.5,
                           tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
         self.assertMetric('cassandra.replication_availability', value=200,
