@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes
 
-1.2.0 / Unreleased
+1.2.0 / 2017-07-18
 ==================
 ### Changes
 
@@ -20,7 +20,7 @@
 * [IMPROVEMENT] Add custom tags to events. See [#449][]
 * [BUGFIX] Fix missing docker.net metrics in Kubernetes. See [#418][]
 
-1.0.0 / 02-23-2017
+1.0.0 / 2017-02-23
 ==================
 
 ### Changes

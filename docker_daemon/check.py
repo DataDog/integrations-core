@@ -597,8 +597,8 @@ class DockerDaemon(AgentCheck):
 
         attached_volumes = self.docker_client.volumes(filters={'dangling': False})
         dangling_volumes = self.docker_client.volumes(filters={'dangling': True})
-        attached_count = len(attached_volumes['Volumes'])
-        dangling_count = len(dangling_volumes['Volumes'])
+        attached_count = len(attached_volumes.get('Volumes', []))
+        dangling_count = len(dangling_volumes.get('Volumes', []))
         m_func(self, 'docker.volume.count', attached_count, tags=['volume_state:attached'])
         m_func(self, 'docker.volume.count', dangling_count, tags=['volume_state:dangling'])
 

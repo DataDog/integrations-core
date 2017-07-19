@@ -1,10 +1,13 @@
 # CHANGELOG - ssh_check
 
-1.1.1 
-=================
+1.1.1 / Unreleased
+==================
+
+### Changes
+
 * [IMPROVEMENT] drop dependency on winrandom_ctypes for windows
 
-1.1.0 / Unreleased
+1.1.0 / 2017-07-18
 ==================
 
 ### Changes
@@ -12,7 +15,7 @@
 * [IMPROVEMENT] Drop dependency on pycrypto. See [#426][] and [#454][]
 * [BUGFIX] Fix misplaced parentheses in config validation. See [#416][], thanks [@ilkka][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

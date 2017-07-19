@@ -1,20 +1,13 @@
 # CHANGELOG - pgbouncer
 
-1.0.2/2017-07-05
-==================
-
-### Changes
-
-* [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
-
-1.0.1/2017-04-24
+1.0.1 / 2017-04-24
 ==================
 
 ### Changes
 
 * [DEPENDENCY] bump psycopg2 to 2.7.1. See [#295][]
 
-1.0.0 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
