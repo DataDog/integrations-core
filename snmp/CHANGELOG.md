@@ -14,7 +14,7 @@
 
 * [FEATURE] Add individual metric tagging to OID and MIB Non-tabular data. See [#248][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
