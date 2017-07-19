@@ -1,6 +1,6 @@
 # CHANGELOG - agent_metrics
 
-1.0.1 / Unreleased
+1.0.1 / 2017-07-18
 ==================
 
 ### Changes
@@ -8,7 +8,7 @@
 * [IMPROVEMENT] Remove usage of `metric_types.MetricTypes`. See [#474][]
 
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

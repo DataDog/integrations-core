@@ -1,9 +1,8 @@
+# Agent Check: Apache Web Server
+
 # Overview
 
-Get metrics from Apache in real time; graph them and correlate them with other relevant system metrics and events.
-
-  * Visualize your web server performance
-  * Correlate the performance of Apache with the rest of your applications
+The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
 
 # Installation
 
@@ -16,18 +15,16 @@ Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 Create a file `apache.yaml` in the Agent's `conf.d` directory:
 
 ```
-        init_config:
+init_config:
 
-        instances:
-          - apache_status_url: http://example.com/server-status?auto
-            # apache_user: example_user
-            # apache_password: example_password
-            tags:
-              - instance:foo
-            disable_ssl_validation: true # if you want to disable SSL cert validation
+instances:
+  - apache_status_url: http://example.com/server-status?auto
+#   apache_user: example_user # if apache_status_url needs HTTP basic auth
+#   apache_password: example_password
+#   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
 ```
 
-Restart the Agent to begin sending Apache metrics to Datadog.
+Restart the Agent to start sending Apache metrics to Datadog.
 
 # Validation
 
@@ -46,16 +43,16 @@ Run the Agent's `info` subcommand and look for `apache` under the Checks section
     [...]
 ```
 
-# Troubleshooting
-
 # Compatibility
 
 The Apache check is compatible with all major platforms.
 
 # Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this integration.
-
-# Events
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this check.
 
 # Service Checks
+
+**apache.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
