@@ -15,7 +15,7 @@
 
 * [BUGFIX] use time.clock under windows. See [#330][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
