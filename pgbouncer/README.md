@@ -48,7 +48,7 @@ Run the Agent's `info` subcommand and look for `pgbouncer` under the Checks sect
 
 # Compatibility
 
-The pgbouncer check is compatible with all major platforms.
+The PgBouncer check is compatible with all major platforms.
 
 # Metrics
 
