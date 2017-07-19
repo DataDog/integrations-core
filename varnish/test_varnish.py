@@ -91,7 +91,7 @@ class VarnishCheckTest(AgentCheckTest):
 
     def _get_varnish_stat_path(self):
         varnish_version = os.environ.get('FLAVOR_VERSION', VARNISH_DEFAULT_VERSION).split('.', 1)[0]
-        return "%s/ci/varnishstat%s" % (os.path.dirname(os.path.abspath(__file__)), varnish_version)
+        return ["%s/ci/varnishstat%s" % (os.path.dirname(os.path.abspath(__file__)), varnish_version)]
 
     def _get_config_by_version(self, name=None):
         config = {
