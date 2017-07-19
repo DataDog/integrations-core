@@ -1,5 +1,11 @@
 # CHANGELOG - docker_daemon
 
+1.3.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] safely check volume list before accessing. See [#544][]
+
 1.3.0 / 2017-07-18
 ==================
 ### Changes
@@ -67,5 +73,6 @@
 [#466]: https://github.com/DataDog/integrations-core/issues/466
 [#486]: https://github.com/DataDog/integrations-core/issues/486
 [#509]: https://github.com/DataDog/integrations-core/issues/509
+[#544]: https://github.com/DataDog/integrations-core/issues/544
 [#553]: https://github.com/DataDog/integrations-core/issues/553
 [@sophaskins]: https://github.com/sophaskins
