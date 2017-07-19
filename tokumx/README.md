@@ -23,7 +23,7 @@ In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` d
 ```
 # Authenticate as the admin user.
 use admin
-db.auth("admin", "<YOUR_TOKUX_ADMIN_PASSWORD>")
+db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
 # Add a user for Datadog Agent
 db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 ```
