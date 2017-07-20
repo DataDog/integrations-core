@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.15.0",
   "name": "varnish",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
   "support": "core",
@@ -11,6 +11,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.1",
+  "version": "1.0.3",
   "guid": "d2052eae-89b8-4cb1-b631-f373010da4b8"
 }

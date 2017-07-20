@@ -14,8 +14,7 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 from checks import AgentCheck
-from utils.kubernetes.kubeutil import KubeUtil
-from utils.platform import Platform
+from utils.kubernetes.kubeutil import KubeUtil, detect_is_k8s
 
 CPU = "CPU"
 MEM = "MEM"
@@ -240,7 +239,7 @@ class TestKubernetes(AgentCheckTest):
             (['container_name:k8s_POD.35220667_dd-agent-1rxlh_default_12c7be82-33ca-11e6-ac8f-42010af00003_f5cf585f',
               'container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh', 'kube_namespace:default', 'kube_app:dd-agent',
-              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'],
+              'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'],
             [MEM, CPU, FS, NET, NET_ERRORS]),
             (['container_name:/', 'pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['container_name:/system', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
@@ -248,7 +247,7 @@ class TestKubernetes(AgentCheckTest):
               'container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events','pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar',
-              'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
+              'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
@@ -296,11 +295,11 @@ class TestKubernetes(AgentCheckTest):
             (['container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
               'image_tag:massi_ingest_k8s_events', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
             (['container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
               'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
+              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
             (['pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
@@ -498,16 +497,22 @@ class TestKubeutil(unittest.TestCase):
         """
         no_auth_instances = [
             # instance, tls_settings, expected_result
-            ({}, {'kubelet_verify': True}, 'https://test_k8s_host:10250'),
-            ({'kubelet_port': '1337'}, {'kubelet_verify': 'test.pem'}, 'https://test_k8s_host:1337'),
+            (
+                {},
+                {'bearer_token': 'foo', 'kubelet_verify': True},
+                'https://test_k8s_host:10250'),
+            (
+                {'kubelet_port': '1337'},
+                {'bearer_token': 'foo', 'kubelet_verify': 'test.pem'},
+                'https://test_k8s_host:1337'),
             (
                 {'host': 'test_explicit_host'},
-                {'kubelet_verify': True, 'kubelet_client_cert': ('client.crt', 'client.key')},
+                {'bearer_token': 'foo', 'kubelet_verify': True, 'kubelet_client_cert': ('client.crt', 'client.key')},
                 'https://test_explicit_host:10250'
             ),
             (
                 {'host': 'test_explicit_host', 'kubelet_port': '1337'},
-                {'kubelet_verify': True},
+                {'bearer_token': 'foo', 'kubelet_verify': True},
                 'https://test_explicit_host:1337'
             ),
         ]
@@ -584,23 +589,22 @@ class TestKubeutil(unittest.TestCase):
         self.kubeutil.retrieve_metrics()
         retrieve_json.assert_called_once_with(self.kubeutil.metrics_url)
 
-    @mock.patch('utils.kubernetes.kubeutil.KubeUtil.get_auth_token', return_value='foo')
     @mock.patch('utils.kubernetes.kubeutil.requests')
-    def test_perform_kubelet_query(self, req, _get_auth_tkn):
+    def test_perform_kubelet_query(self, req):
         base_params = {'timeout': 10, 'verify': False,
             'params': {'verbose': True}, 'cert': None, 'headers': None}
 
-        auth_token_header = {'headers': {'Authorization': 'Bearer %s' % self.kubeutil.get_auth_token()}}
+        auth_token_header = {'headers': {'Authorization': 'Bearer foo'}}
         verify_true = {'verify': True}
         verify_cert = {'verify': 'kubelet.pem'}
         client_cert = {'cert': ('client.crt', 'client.key')}
 
         instances = [
-            ('http://test.com', {}, dict(base_params.items() + verify_true.items())),
-            ('https://test.com', {}, dict(base_params.items() + verify_true.items() + auth_token_header.items())),
-            ('https://test.com', {'kubelet_verify': True}, dict(base_params.items() + verify_true.items() + auth_token_header.items())),
-            ('https://test.com', {'kubelet_verify': 'kubelet.pem'}, dict(base_params.items() + verify_cert.items() + auth_token_header.items())),
-            ('https://test.com', {'kubelet_client_cert': ('client.crt', 'client.key')},
+            ('http://test.com', {'bearer_token': 'foo'}, dict(base_params.items() + verify_true.items())),
+            ('https://test.com', {'bearer_token': 'foo'}, dict(base_params.items() + verify_true.items() + auth_token_header.items())),
+            ('https://test.com', {'bearer_token': 'foo', 'kubelet_verify': True}, dict(base_params.items() + verify_true.items() + auth_token_header.items())),
+            ('https://test.com', {'bearer_token': 'foo', 'kubelet_verify': 'kubelet.pem'}, dict(base_params.items() + verify_cert.items() + auth_token_header.items())),
+            ('https://test.com', {'bearer_token': 'foo', 'kubelet_client_cert': ('client.crt', 'client.key')},
                 dict(base_params.items() + verify_true.items() + client_cert.items())),
         ]
         for url, ssl_context, expected_params in instances:
@@ -672,15 +676,15 @@ class TestKubeutil(unittest.TestCase):
 
     def test_get_auth_token(self):
         KubeUtil.AUTH_TOKEN_PATH = '/foo/bar'
-        self.assertIsNone(KubeUtil.get_auth_token())
+        self.assertIsNone(KubeUtil.get_auth_token({}))
         KubeUtil.AUTH_TOKEN_PATH = Fixtures.file('events.json', sdk_dir=FIXTURE_DIR,)  # any file could do the trick
-        self.assertIsNotNone(KubeUtil.get_auth_token())
+        self.assertIsNotNone(KubeUtil.get_auth_token({}))
 
     def test_is_k8s(self):
         os.unsetenv('KUBERNETES_PORT')
-        self.assertFalse(Platform.is_k8s())
+        self.assertFalse(detect_is_k8s())
         os.environ['KUBERNETES_PORT'] = '999'
-        self.assertTrue(Platform.is_k8s())
+        self.assertTrue(detect_is_k8s())
 
     def test_extract_event_tags(self):
         events = json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))['items']

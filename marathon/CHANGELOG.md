@@ -1,13 +1,13 @@
 # CHANGELOG - marathon
 
-1.1.0 / Unreleased
+1.1.0 / 2017-07-18
 ==================
 
 ### Changes
 
 * [FEATURE] Add gauge for queue size. See [#321][], thanks [@jangie][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
