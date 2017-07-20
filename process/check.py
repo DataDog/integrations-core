@@ -6,7 +6,7 @@
 # stdlib
 from collections import defaultdict
 import time
-
+import os
 # 3p
 import psutil
 
@@ -113,7 +113,6 @@ class ProcessCheck(AgentCheck):
         refresh_ad_cache = self.should_refresh_ad_cache(name)
 
         matching_pids = set()
-
         for proc in psutil.process_iter():
             # Skip access denied processes
             if not refresh_ad_cache and proc.pid in self.ad_cache:
@@ -126,12 +125,22 @@ class ProcessCheck(AgentCheck):
                     if string == 'All':
                         found = True
                     if exact_match:
-                        if proc.name() == string:
-                            found = True
+                        if os.name == 'nt':
+                            if proc.name().lower() == string.lower():
+                                found = True
+                        else:
+                            if proc.name() == string:
+                                found = True
+
                     else:
                         cmdline = proc.cmdline()
-                        if string in ' '.join(cmdline):
-                            found = True
+                        if os.name == 'nt':
+                            lstring = string.lower()
+                            if lstring in ' '.join(cmdline).lower():
+                                found = True
+                        else:
+                            if string in ' '.join(cmdline):
+                                found = True
                 except psutil.NoSuchProcess:
                     self.log.warning('Process disappeared while scanning')
                 except psutil.AccessDenied as e:
@@ -369,7 +378,6 @@ class ProcessCheck(AgentCheck):
 
         if collect_children:
             pids.update(self._get_child_processes(pids))
-
         proc_state = self.get_process_state(name, pids)
 
         # FIXME 6.x remove the `name` tag
@@ -379,7 +387,7 @@ class ProcessCheck(AgentCheck):
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("No matching process was found")
+            self.warning("No matching process '%s' was found" % name)
 
         for attr, mname in ATTR_TO_METRIC.iteritems():
             vals = [x for x in proc_state[attr] if x is not None]

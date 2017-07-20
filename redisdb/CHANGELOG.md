@@ -1,6 +1,14 @@
 # CHANGELOG - redisdb
 
-1.0.003-22-2017
+1.1.0 / 2017-07-18
+==================
+
+### Changes
+
+* [IMPROVEMENT] add "redis_role:{master,slave}" tag.
+
+
+1.0.0 / 2017-02-22
 ==================
 
 ### Changes

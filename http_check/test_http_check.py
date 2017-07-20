@@ -313,6 +313,17 @@ class HTTPCheckTest(AgentCheckTest):
 
         self.coverage_report()
 
+    @mock.patch('ssl.SSLSocket.getpeercert', **{'return_value.raiseError.side_effect': Exception()})
+    def test_check_ssl_expire_error(self, getpeercert_func):
+        self.run_check(CONFIG_EXPIRED_SSL)
+
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        tags = ['url:https://github.com', 'instance:expired_cert']
+        self.assertServiceCheckOK("http.can_connect", tags=tags)
+        self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
+
+        self.coverage_report()
+
     def test_check_allow_redirects(self):
         self.run_check(CONFIG_HTTP_REDIRECTS)
         # Overrides self.service_checks attribute when values are available\

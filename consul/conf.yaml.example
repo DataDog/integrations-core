@@ -20,6 +20,9 @@ instances:
       # Possible values: True, False or '/path/to/your/trusted_ca_bundle_file'
       # ca_bundle_file: '/path/to/trusted_ca_bundle_file'
 
+      # ACL token to use for authentication
+      # acl_token: 'token'
+
       # Whether to perform checks against the Consul service Catalog
       catalog_checks: yes
 

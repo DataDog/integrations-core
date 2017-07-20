@@ -7,6 +7,7 @@ from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 # 3p
 from nose.plugins.attrib import attr
+from nose.plugins.skip import SkipTest
 
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
@@ -72,7 +73,7 @@ COMMON_METRICS = [
     'varnish.LCK.vcl.locks',
 ]
 
-VARNISH_DEFAULT_VERSION = "4.1.4"
+VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
@@ -111,6 +112,34 @@ class VarnishCheckTest(AgentCheckTest):
         for mname in COMMON_METRICS:
             self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
+    def test_inclusion_filter(self):
+        config = self._get_config_by_version()
+        config['instances'][0]['metrics_filter'] = ['SMA.*']
+
+        self.run_check_twice(config)
+        for mname in COMMON_METRICS:
+            if 'SMA.' in mname:
+                self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+            else:
+                self.assertMetric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+
+    def test_exclusion_filter(self):
+        # FIXME: Bugfix not released yet for version 5 so skip this test for this version:
+        # See  https://github.com/varnishcache/varnish-cache/issues/2320
+        config = self._get_config_by_version()
+        config['instances'][0]['metrics_filter'] = ['^SMA.Transient.c_req']
+        self.load_check(config)
+        version, _ = self.check._get_version_info(self._get_varnish_stat_path())
+        if str(version) == '5.0.0':
+            raise SkipTest('varnish bugfix for exclusion blob not released yet for version 5 so skip this test')
+
+        self.run_check_twice(config)
+        for mname in COMMON_METRICS:
+            if 'SMA.Transient.c_req' in mname:
+                self.assertMetric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            elif 'varnish.uptime' not in mname:
+                self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+
     @mock.patch('_varnish.geteuid')
     @mock.patch('_varnish.Varnish._get_version_info')
     @mock.patch('_varnish.get_subprocess_output', side_effect=debug_health_mock)
@@ -125,6 +154,7 @@ class VarnishCheckTest(AgentCheckTest):
         self.run_check(config)
         args, _ = mock_subprocess.call_args
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
+        self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:default'], count=1)
 
         mock_version.return_value = LooseVersion('4.1.0'), True
         mock_geteuid.return_value = 1

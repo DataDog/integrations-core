@@ -19,7 +19,7 @@ init_config:
 
 instances:
   - name: Example (com)
-    # nameserver: 8.8.8.8   # The nameserver to query
+    # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
     hostname: example.com # the record to fetch
     # record_type: AAAA   # default is A
   - name: Example (org)
@@ -62,7 +62,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_
 
 # Service Checks
 
-`dns.can_connect`:
+`dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.
 
