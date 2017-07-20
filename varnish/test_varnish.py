@@ -91,7 +91,7 @@ class VarnishCheckTest(AgentCheckTest):
 
     def _get_varnish_stat_path(self):
         varnish_version = os.environ.get('FLAVOR_VERSION', VARNISH_DEFAULT_VERSION).split('.', 1)[0]
-        return ["%s/ci/varnishstat%s" % (os.path.dirname(os.path.abspath(__file__)), varnish_version)]
+        return "%s/ci/varnishstat%s" % (os.path.dirname(os.path.abspath(__file__)), varnish_version)
 
     def _get_config_by_version(self, name=None):
         config = {
@@ -129,7 +129,7 @@ class VarnishCheckTest(AgentCheckTest):
         config = self._get_config_by_version()
         config['instances'][0]['metrics_filter'] = ['^SMA.Transient.c_req']
         self.load_check(config)
-        version, _ = self.check._get_version_info(self._get_varnish_stat_path())
+        version, _ = self.check._get_version_info([self._get_varnish_stat_path()])
         if str(version) == '5.0.0':
             raise SkipTest('varnish bugfix for exclusion blob not released yet for version 5 so skip this test')
 
