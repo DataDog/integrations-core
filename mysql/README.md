@@ -1,6 +1,6 @@
 # Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including those for:
+The Datadog Agent can collect many metrics from MySQL databases, including:
 
 * Query throughput
 * Query performance (average query run time, slow queries, etc)
@@ -9,13 +9,9 @@ The Datadog Agent can collect many metrics from MySQL databases, including those
 
 And many more. You can also invent your own metrics using custom SQL queries.
 
-The Agent sends one MySQL-related service check: whether or not the Agent is successfully collecting metrics from MySQL.
-
-The Agent does not send anything MySQL-related to your events stream.
-
 # Installation
 
-The MySQL integration - also known as the MySQL check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the check, install the `dd-check-mysql` package.
 
 # Configuration
 
@@ -141,3 +137,156 @@ Review the Configuration section and grant the datadog user all necessary privil
 # Compatibility
 
 The MySQL integration is supported on versions x.x+
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this check.
+
+The check does not collect all metrics by default. Set the following boolean configuration options to `true` to enable its metrics:
+
+|`extra_status_metrics`|
+|----------|--------|
+| mysql.binlog.cache_disk_use | GAUGE |
+| mysql.binlog.cache_use | GAUGE |
+| mysql.performance.handler_commit | RATE |
+| mysql.performance.handler_delete | RATE |
+| mysql.performance.handler_prepare | RATE |
+| mysql.performance.handler_read_first | RATE |
+| mysql.performance.handler_read_key | RATE |
+| mysql.performance.handler_read_next | RATE |
+| mysql.performance.handler_read_prev | RATE |
+| mysql.performance.handler_read_rnd | RATE |
+| mysql.performance.handler_read_rnd_next | RATE |
+| mysql.performance.handler_rollback | RATE |
+| mysql.performance.handler_update | RATE |
+| mysql.performance.handler_write | RATE |
+| mysql.performance.opened_tables | RATE |
+| mysql.performance.qcache_total_blocks | GAUGE |
+| mysql.performance.qcache_free_blocks | GAUGE |
+| mysql.performance.qcache_free_memory | GAUGE |
+| mysql.performance.qcache_not_cached | RATE |
+| mysql.performance.qcache_queries_in_cache | GAUGE |
+| mysql.performance.select_full_join | RATE |
+| mysql.performance.select_full_range_join | RATE |
+| mysql.performance.select_range | RATE |
+| mysql.performance.select_range_check | RATE |
+| mysql.performance.select_scan | RATE |
+| mysql.performance.sort_merge_passes | RATE |
+| mysql.performance.sort_range | RATE |
+| mysql.performance.sort_rows | RATE |
+| mysql.performance.sort_scan | RATE |
+| mysql.performance.table_locks_immediate | GAUGE |
+| mysql.performance.table_locks_immediate.rate | RATE |
+| mysql.performance.threads_cached | GAUGE |
+| mysql.performance.threads_created | MONOTONIC |
+
+|`extra_innodb_metrics`|
+|----------|--------|
+| mysql.innodb.active_transactions | GAUGE |
+| mysql.innodb.buffer_pool_data | GAUGE |
+| mysql.innodb.buffer_pool_pages_data | GAUGE |
+| mysql.innodb.buffer_pool_pages_dirty | GAUGE |
+| mysql.innodb.buffer_pool_pages_flushed | RATE |
+| mysql.innodb.buffer_pool_pages_free | GAUGE |
+| mysql.innodb.buffer_pool_pages_total | GAUGE |
+| mysql.innodb.buffer_pool_read_ahead | RATE |
+| mysql.innodb.buffer_pool_read_ahead_evicted | RATE |
+| mysql.innodb.buffer_pool_read_ahead_rnd | GAUGE |
+| mysql.innodb.buffer_pool_wait_free | MONOTONIC |
+| mysql.innodb.buffer_pool_write_requests | RATE |
+| mysql.innodb.checkpoint_age | GAUGE |
+| mysql.innodb.current_transactions | GAUGE |
+| mysql.innodb.data_fsyncs | RATE |
+| mysql.innodb.data_pending_fsyncs | GAUGE |
+| mysql.innodb.data_pending_reads | GAUGE |
+| mysql.innodb.data_pending_writes | GAUGE |
+| mysql.innodb.data_read | RATE |
+| mysql.innodb.data_written | RATE |
+| mysql.innodb.dblwr_pages_written | RATE |
+| mysql.innodb.dblwr_writes | RATE |
+| mysql.innodb.hash_index_cells_total | GAUGE |
+| mysql.innodb.hash_index_cells_used | GAUGE |
+| mysql.innodb.history_list_length | GAUGE |
+| mysql.innodb.ibuf_free_list | GAUGE |
+| mysql.innodb.ibuf_merged | RATE |
+| mysql.innodb.ibuf_merged_delete_marks | RATE |
+| mysql.innodb.ibuf_merged_deletes | RATE |
+| mysql.innodb.ibuf_merged_inserts | RATE |
+| mysql.innodb.ibuf_merges | RATE |
+| mysql.innodb.ibuf_segment_size | GAUGE |
+| mysql.innodb.ibuf_size | GAUGE |
+| mysql.innodb.lock_structs | RATE |
+| mysql.innodb.locked_tables | GAUGE |
+| mysql.innodb.locked_transactions | GAUGE |
+| mysql.innodb.log_waits | RATE |
+| mysql.innodb.log_write_requests | RATE |
+| mysql.innodb.log_writes | RATE |
+| mysql.innodb.lsn_current | RATE |
+| mysql.innodb.lsn_flushed | RATE |
+| mysql.innodb.lsn_last_checkpoint | RATE |
+| mysql.innodb.mem_adaptive_hash | GAUGE |
+| mysql.innodb.mem_additional_pool | GAUGE |
+| mysql.innodb.mem_dictionary | GAUGE |
+| mysql.innodb.mem_file_system | GAUGE |
+| mysql.innodb.mem_lock_system | GAUGE |
+| mysql.innodb.mem_page_hash | GAUGE |
+| mysql.innodb.mem_recovery_system | GAUGE |
+| mysql.innodb.mem_thread_hash | GAUGE |
+| mysql.innodb.mem_total | GAUGE |
+| mysql.innodb.os_file_fsyncs | RATE |
+| mysql.innodb.os_file_reads | RATE |
+| mysql.innodb.os_file_writes | RATE |
+| mysql.innodb.os_log_pending_fsyncs | GAUGE |
+| mysql.innodb.os_log_pending_writes | GAUGE |
+| mysql.innodb.os_log_written | RATE |
+| mysql.innodb.pages_created | RATE |
+| mysql.innodb.pages_read | RATE |
+| mysql.innodb.pages_written | RATE |
+| mysql.innodb.pending_aio_log_ios | GAUGE |
+| mysql.innodb.pending_aio_sync_ios | GAUGE |
+| mysql.innodb.pending_buffer_pool_flushes | GAUGE |
+| mysql.innodb.pending_checkpoint_writes | GAUGE |
+| mysql.innodb.pending_ibuf_aio_reads | GAUGE |
+| mysql.innodb.pending_log_flushes | GAUGE |
+| mysql.innodb.pending_log_writes | GAUGE |
+| mysql.innodb.pending_normal_aio_reads | GAUGE |
+| mysql.innodb.pending_normal_aio_writes | GAUGE |
+| mysql.innodb.queries_inside | GAUGE |
+| mysql.innodb.queries_queued | GAUGE |
+| mysql.innodb.read_views | GAUGE |
+| mysql.innodb.rows_deleted | RATE |
+| mysql.innodb.rows_inserted | RATE |
+| mysql.innodb.rows_read | RATE |
+| mysql.innodb.rows_updated | RATE |
+| mysql.innodb.s_lock_os_waits | RATE |
+| mysql.innodb.s_lock_spin_rounds | RATE |
+| mysql.innodb.s_lock_spin_waits | RATE |
+| mysql.innodb.semaphore_wait_time | GAUGE |
+| mysql.innodb.semaphore_waits | GAUGE |
+| mysql.innodb.tables_in_use | GAUGE |
+| mysql.innodb.x_lock_os_waits | RATE |
+| mysql.innodb.x_lock_spin_rounds | RATE |
+| mysql.innodb.x_lock_spin_waits | RATE |
+
+|`extra_performance_metrics` adds the following metrics:|
+|----------|--------|
+| mysql.performance.query_run_time.avg | GAUGE |
+| mysql.performance.digest_95th_percentile.avg_us | GAUGE |
+
+|`schema_size_metrics` adds the following metric:|
+|----------|--------|
+| mysql.info.schema.size | GAUGE |
+
+# Service Checks
+
+`mysql.replication.slave_running`:
+
+Returns CRITICAL for a slave that's not running, otherwise OK.
+
+`mysql.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
+
+# Further Reading
+
+Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.
