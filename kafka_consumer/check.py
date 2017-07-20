@@ -198,7 +198,7 @@ class KafkaCheck(AgentCheck):
                         topic=topic,
                         partition=partition
                     )
-                key = (consumer_group, topic, partition)
+                key = "{}:{}:{}".format(consumer_group, topic, partition)
                 self._send_event(title, message, consumer_group_tags, 'consumer_lag', key)
                 self.log.debug(message)
 
