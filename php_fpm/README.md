@@ -21,7 +21,7 @@ instances:
     ping_reply: pong                    # the reply to expect from ping; default is 'pong'
 #   user: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
 #   password: <YOUR_PASSWORD> # if the status and ping URLs require HTTP basic auth
-#   http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP 
+#   http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost 
 #   tags:
 #     - instance:foo
 ```
@@ -51,7 +51,7 @@ The php_fpm check is compatible with all major platforms.
 
 # Metrics 
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/masterphp_fpm/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv) for a list of metrics provided by this check.
 
 # Service Checks
 
