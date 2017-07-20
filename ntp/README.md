@@ -17,10 +17,10 @@ init_config:
 
 instances:
   - offset_threshold: 60 # seconds difference between local clock and NTP server when ntp.in_sync service check becomes CRITICAL; default is 60
-#   host: pool.ntp.org # set to use an NTP server of your choosen
+#   host: pool.ntp.org # set to use an NTP server of your choosing
 #   port: 1234         # set along with host
 #   version: 3         # to use a specific NTP version
-#   timeout: 5         # seconds to wait for a response from the NTP server
+#   timeout: 5         # seconds to wait for a response from the NTP server; default is 1
 ```
 
 Restart the Agent to effect any configuration changes.
