@@ -48,7 +48,7 @@ Run the Agent's `info` subcommand and look for `sqlserver` under the Checks sect
 
 # Compatibility
 
-The sqlserver check is compatible with all major platforms.
+The sqlserver check is compatible with all Windows and Linux platforms.
 
 # Metrics
 
@@ -57,3 +57,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/sqls
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
 # Service Checks
+
+**sqlserver.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
