@@ -15,7 +15,7 @@ The MongoDB check is packaged with the Agent, so simply [install the Agent](http
 
 ### Prepare MongoDB
 
-From your Mongo shell, create a read-only user in the `admin` database:
+In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
 ```
 # Authenticate as the admin user.
