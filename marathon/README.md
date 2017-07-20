@@ -21,9 +21,9 @@ init_config:
 
 instances:
   - url: https://<server>:<port> # the API endpoint of your Marathon master; required
-    #acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
-	  user: <username> # the user for marathon API or ACS token authentication
-	  password: <password> # the password for marathon API or ACS token authentication
+#   acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
+    user: <username> # the user for marathon API or ACS token authentication
+    password: <password> # the password for marathon API or ACS token authentication
 ```
 
 The function of `user` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `user` and `password` to directly authenticate to the Marathon API.
