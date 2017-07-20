@@ -1,13 +1,13 @@
 # CHANGELOG - varnish
 
-1.0.3 Unreleased
+1.0.3 / 2017-07-18
 ==================
 
 ### Changes
 
 * [BUGFIX] Fixes an issue with retrieving the backend service checks. [#582][]
 
-1.0.2 Unreleased
+1.0.2 / 2017-07-18
 ==================
 
 ### Changes
