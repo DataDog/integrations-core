@@ -104,7 +104,7 @@ Run the Agent's `info` subcommand and look for `solr` under the Checks section:
   ======
     [...]
 
-    mcache
+    solr
     -------
       - instance #0 [OK]
       - Collected 26 metrics, 0 events & 0 service checks
