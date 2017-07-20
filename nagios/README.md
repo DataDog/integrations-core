@@ -1,12 +1,14 @@
-# Nagios Check
+# Agent Check: Nagios
 
 # Overview
 
-The Nagios check watches your Nagios server's logs and sends events to your Datadog event stream. This lets you visualize and track problems with your Nagios-monitored infrastructure with a much nicer UI—the Datadog application—than Nagios provides.
+If you're heavily invested in Nagios, send events from your Nagios-monitored infrastructure to Datadog. This gives you richer alerting and helps you correlate Nagios events with metrics from your Datadog-monitored infrastructure.
 
-The check emits events for service flaps, host state changes, passive service checks, host and service downtimes, and more.
+The check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. The check can also send Nagios Perfdata as metrics to Datadog.
 
-The check can also collect Nagios Perfdata and send them as metrics to Datadog.
+* Watches your Nagios server's logs and sends events to your Datadog event stream. It emits eve
+
+The check emits events for service flaps, host state changes, passive service checks, host and service downtimes, and more. It can also send Nagios Perfdata to Datadog as metrics.
 
 # Installation
 
