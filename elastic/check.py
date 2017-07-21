@@ -69,6 +69,8 @@ class ESCheck(AgentCheck):
         "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current")
     }
 
+    PRIMARY_SHARD_INDEX_COUNT = 'elasticsearch.indices.count'
+
     PRIMARY_SHARD_METRICS_POST_1_0 = {
         "elasticsearch.primaries.merges.current": ("gauge", "_all.primaries.merges.current"),
         "elasticsearch.primaries.merges.current.docs": ("gauge", "_all.primaries.merges.current_docs"),
@@ -634,6 +636,10 @@ class ESCheck(AgentCheck):
                 )
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
+        # Process number of indexes in cluster
+        if "indexes" in data:
+            self.gauge(self.PRIMARY_SHARD_INDEX_COUNT, len(data["indices"]), tags=config.tags)
+
         for metric, desc in pshard_stats_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 
