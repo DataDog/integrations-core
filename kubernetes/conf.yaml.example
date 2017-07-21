@@ -97,8 +97,9 @@ instances:
   #
   # namespace_name_regexp:
 
-  # Node labels that should be collected and their name in host tags. Off by default, but some of them are redundant
-  # with metadata collected by cloud provider crawlers (AWS, GCE, Azure)
+  # Node labels that should be collected and their name in host tags. Off by default.
+  # Some of these labels are redundant with metadata collected by
+  # cloud provider crawlers (AWS, GCE, Azure)
   #
   # node_labels_to_host_tags:
   #   kubernetes.io/hostname: nodename
