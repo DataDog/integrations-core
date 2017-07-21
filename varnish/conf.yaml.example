@@ -4,10 +4,14 @@
 init_config:
 
 instances:
-  # The full path to the varnishstat binary
+  # The full path to the varnishstat binary and can contain additional arguments.
+  # In order to support monitoring a Varnish instance which is running as a Docker
+  # container we need to wrap commands (varnishstat) with scripts which
+  # perform a docker exec on the running container.  Passing along template variables
+  # (%%host%%, %%port%%) allow for targeting the proper container via service discovery.
   - varnishstat: /usr/bin/varnishstat
     # List of field inclusion blobs that will be passed to varnishstat with the
-    # -f options to filter which metrics to collect. 
+    # -f options to filter which metrics to collect.
     # See https://www.varnish-cache.org/docs/4.1/reference/varnishstat.html#options.
     # The exclusion filter with '^' is broken with 'varnishstat' version 4.0 to 4.1.6 and 5.0 to 5.1.2. See https://github.com/varnishcache/varnish-cache/issues/2320
     # Version 4.1.7 has been released and includes a fix for this. Using the exclusion blob with a broken version will silence the integration (no metric will be sent)
@@ -25,9 +29,11 @@ instances:
 
     # The (optional) path to the varnishadm binary will signal the check to
     # emit a service check status on backend health using `debug.health`.
+    # Similar to the varnishstat command this path can contain additional arguments
+    # in order to support service discovery.
     # The service check will be tagged by backend.
     # NOTE: The Agent must be able to access varnishadm as with root
-    # privilleges. You can configure your sudoers file for this:
+    # privileges. You can configure your sudoers file for this:
     #
     # example /etc/sudoers entry:
     #   dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
