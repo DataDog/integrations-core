@@ -40,7 +40,7 @@ class TestKafka(AgentCheckTest):
         """
         Testing Kafka_consumer check.
         """
-        self.run_check({'instances': instance})
+        self.run_check_twice({'instances': instance})
 
         for mname in METRICS:
             self.assertMetric(mname, at_least=1)
@@ -56,7 +56,7 @@ class TestKafka(AgentCheckTest):
         nogroup_instance[0].pop('consumer_groups')
         nogroup_instance[0]['monitor_unlisted_consumer_groups'] = True
 
-        self.run_check({'instances': instance})
+        self.run_check_twice({'instances': instance})
 
         for mname in METRICS:
             self.assertMetric(mname, at_least=1)
