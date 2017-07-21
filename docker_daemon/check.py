@@ -760,10 +760,6 @@ class DockerDaemon(AgentCheck):
             get_sd_backend(self.agentConfig).update_checks(changed_container_ids)
         if changed_container_ids:
             self.metadata_collector.invalidate_cache(events)
-            if Platform.is_nomad():
-                self.nomadutil.invalidate_cache(events)
-            elif Platform.is_ecs_instance():
-                self.ecsutil.invalidate_cache(events)
         return events
 
     def _pre_aggregate_events(self, api_events, containers_by_id):
