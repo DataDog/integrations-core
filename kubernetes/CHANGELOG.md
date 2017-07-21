@@ -1,5 +1,12 @@
 # CHANGELOG - kubernetes
 
+
+1.3.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] add an option to collect node labels as host tags
+
 1.2.0 / 2017-07-18
 ==================
 ### Changes
