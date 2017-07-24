@@ -38,10 +38,9 @@ PRIMARY_SHARD_METRICS = {
     "elasticsearch.primaries.search.query.current": ("gauge", "_all.primaries.search.query_current"),
     "elasticsearch.primaries.search.fetch.total": ("gauge", "_all.primaries.search.fetch_total"),
     "elasticsearch.primaries.search.fetch.time": ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
-    "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current")
+    "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current"),
+    "elasticsearch.indices.count": ("gauge", "indices", lambda indices: len(indices))
 }
-
-PRIMARY_SHARD_INDEX_COUNT = "elasticsearch.indices.count"
 
 PRIMARY_SHARD_METRICS_POST_1_0 = {
     "elasticsearch.primaries.merges.current": ("gauge", "_all.primaries.merges.current"),
@@ -582,7 +581,6 @@ class TestElastic(AgentCheckTest):
         self.run_check(config)
 
         pshard_stats_metrics = dict(PRIMARY_SHARD_METRICS)
-        pshard_stats_metrics.update({PRIMARY_SHARD_INDEX_COUNT: ("gauge",)})
         if get_es_version() >= [1, 0, 0]:
             pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
 
