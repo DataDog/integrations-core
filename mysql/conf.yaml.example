@@ -1,6 +1,8 @@
 init_config:
 
 instances:
+    # NOTE: Even if the server name is "localhost", the agent will connect to MySQL using TCP/IP, unless you also
+    # provide a value for the sock key (below).
   - server: localhost
     # user: my_username
     # pass: my_password
