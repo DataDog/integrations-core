@@ -63,7 +63,8 @@ class PostfixCheck(AgentCheck):
                 # can dd-agent user run sudo?
                 test_sudo = os.system('setsid sudo -l < /dev/null')
                 if test_sudo == 0:
-                    postfix_user = self.init_config.get('postfix_user')
+                    # default to `root` for backward compatibility
+                    postfix_user = self.init_config.get('postfix_user', 'root')
                     output, _, _ = get_subprocess_output(['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f'], self.log, False)
                     count = len(output.splitlines())
                 else:
