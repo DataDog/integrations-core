@@ -1,11 +1,17 @@
 # CHANGELOG - postgres
 
-1.0.3 / 2017-07-18
+1.0.4 / Unreleased
 ==================
 
 ### Changes
 
 * [MINOR] Allow specifying postgres port as string.
+
+1.0.3 / 2017-07-18
+==================
+
+### Changes
+
 * [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
 
 1.0.2 / 2017-06-05
