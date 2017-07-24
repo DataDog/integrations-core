@@ -5,6 +5,7 @@
 ### Changes
 
 * [BUGFIX] safely check volume list before accessing. See [#544][]
+* [BUGFIX] fix event collection on ecs and nomad. See [#616][]
 
 1.3.0 / 2017-07-18
 ==================
@@ -75,4 +76,5 @@
 [#509]: https://github.com/DataDog/integrations-core/issues/509
 [#544]: https://github.com/DataDog/integrations-core/issues/544
 [#553]: https://github.com/DataDog/integrations-core/issues/553
+[#616]: https://github.com/DataDog/integrations-core/issues/616
 [@sophaskins]: https://github.com/sophaskins
