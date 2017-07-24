@@ -13,11 +13,13 @@ from nose.plugins.attrib import attr
 from nose import SkipTest
 from kafka import KafkaConsumer, KafkaProducer
 
+from kazoo.client import KazooClient
+
 # project
 from tests.checks.common import AgentCheckTest
 
 
-instance = [{
+instances = [{
     'kafka_connect_str': '172.17.0.1:9092',
     'zk_connect_str': 'localhost:2181',
     # 'zk_prefix': '/0.8',
@@ -28,19 +30,26 @@ instance = [{
     }
 }]
 
-METRICS = [
+BROKER_METRICS = [
     'kafka.broker_offset',
+]
+
+CONSUMER_METRICS = [
     'kafka.consumer_offset',
     'kafka.consumer_lag',
 ]
 
+TOPICS = ['marvel', 'dc']
+PARTITIONS = [0, 1]
+
+SHUTDOWN = threading.Event()
+
 class Producer(threading.Thread):
-    daemon = True
 
     def run(self):
-        producer = KafkaProducer(bootstrap_servers=instance[0]['kafka_connect_str'])
+        producer = KafkaProducer(bootstrap_servers=instances[0]['kafka_connect_str'])
 
-        while True:
+        while not SHUTDOWN.is_set():
             producer.send('marvel', b"Peter Parker")
             producer.send('marvel', b"Bruce Banner")
             producer.send('marvel', b"Tony Stark")
@@ -51,39 +60,94 @@ class Producer(threading.Thread):
             producer.send('dc', b"Clark Kent")
             producer.send('dc', b"Arthur Curry")
             producer.send('dc', b"\xc2ShakalakaBoom")
-            time.sleep(5)
+            time.sleep(1)
 
 
-class Consumer(threading.Thread):
-    daemon = True
+class ZKConsumer(threading.Thread):
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=instance[0]['kafka_connect_str'],
+        zk_path_topic_tmpl = '/consumers/my_consumer/offsets/'
+        zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/{partition}'
+
+        zk_conn = KazooClient(instances[0]['zk_connect_str'], timeout=10)
+        zk_conn.start()
+
+        for topic in TOPICS:
+            for partition in PARTITIONS:
+                node_path = zk_path_partition_tmpl.format(topic=topic, partition=partition)
+                node = zk_conn.exists(node_path)
+                if not node:
+                    zk_conn.ensure_path(node_path)
+                    zk_conn.set(node_path, str(0))
+
+        consumer = KafkaConsumer(bootstrap_servers=instances[0]['kafka_connect_str'],
+                                 group_id="my_consumer",
+                                 auto_offset_reset='earliest',
+                                 enable_auto_commit=False)
+        consumer.subscribe(TOPICS)
+
+        while not SHUTDOWN.is_set():
+            response = consumer.poll(timeout_ms=500, max_records=10)
+            zk_trans = zk_conn.transaction()
+            for tp, records in response.iteritems():
+                topic = tp.topic
+                partition = tp.partition
+
+                offset = None
+                for record in records:
+                    if offset is None or record.offset > offset:
+                        offset = record.offset
+
+                if offset:
+                    zk_trans.set_data(
+                        os.path.join(zk_path_topic_tmpl.format(topic), str(partition)),
+                        str(offset)
+                    )
+
+            zk_trans.commit()
+
+        zk_conn.stop()
+
+class KConsumer(threading.Thread):
+
+    def run(self):
+        consumer = KafkaConsumer(bootstrap_servers=instances[0]['kafka_connect_str'],
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest')
-        consumer.subscribe(['marvel'])
+        consumer.subscribe(TOPICS)
 
-        for message in consumer:
-            pass
+        while not SHUTDOWN.is_set():
+            response = consumer.poll(timeout_ms=500, max_records=10)
+
 
 @attr(requires='kafka_consumer')
 class TestKafka(AgentCheckTest):
     """Basic Test for kafka_consumer integration."""
     CHECK_NAME = 'kafka_consumer'
+    THREADS = [Producer()]
 
-    def setUp(self):
-        threads = [
-            Producer(),
-            Consumer()
-        ]
+    def __init__(self, *args, **kwargs):
+        super(TestKafka, self).__init__(*args, **kwargs)
 
-        for t in threads:
-            t.start()
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
+            self.THREADS.append(KConsumer())
+        else:
+            self.THREADS.append(ZKConsumer())
 
-        # let's generate a few before running test.
-        time.sleep(10)
+    @classmethod
+    def setUpClass(cls):
+        cls.THREADS[0].start()
+        time.sleep(45)
+        cls.THREADS[1].start()
+        time.sleep(15)
 
-    def test_check(self):
+    @classmethod
+    def tearDownClass(cls):
+        SHUTDOWN.set()
+        for t in cls.THREADS:
+            t.join(5)
+
+    def test_check_zk(self):
         """
         Testing Kafka_consumer check.
         """
@@ -91,15 +155,23 @@ class TestKafka(AgentCheckTest):
         if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
             raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
 
-        self.run_check({'instances': instance})
+        self.run_check({'instances': instances})
 
-        for mname in METRICS:
-            self.assertMetric(mname, at_least=1)
+        for instance in instances:
+            for name, consumer_group in instance['consumer_groups'].iteritems():
+                for topic, partitions in consumer_group.iteritems():
+                    for partition in partitions:
+                        tags = ["topic:{}".format(topic),
+                                "partition:{}".format(partition)]
+                        for mname in BROKER_METRICS:
+                            self.assertMetric(mname, tags=tags, at_least=1)
+                        for mname in CONSUMER_METRICS:
+                            self.assertMetric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
 
         self.coverage_report()
 
 
-    def test_check_nogroups(self):
+    def test_check_nogroups_zk(self):
         """
         Testing Kafka_consumer check grabbing groups from ZK
         """
@@ -107,13 +179,20 @@ class TestKafka(AgentCheckTest):
         if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
             raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
 
-        nogroup_instance = copy.copy(instance)
-        nogroup_instance[0].pop('consumer_groups')
-        nogroup_instance[0]['monitor_unlisted_consumer_groups'] = True
+        nogroup_instances = copy.deepcopy(instances)
+        nogroup_instances[0].pop('consumer_groups')
+        nogroup_instances[0]['monitor_unlisted_consumer_groups'] = True
 
-        self.run_check({'instances': instance})
+        self.run_check({'instances': nogroup_instances})
 
-        for mname in METRICS:
-            self.assertMetric(mname, at_least=1)
+        for instance in nogroup_instances:
+            for topic in TOPICS:
+                for partition in PARTITIONS:
+                    tags = ["topic:{}".format(topic),
+                            "partition:{}".format(partition)]
+                    for mname in BROKER_METRICS:
+                        self.assertMetric(mname, tags=tags, at_least=1)
+                    for mname in CONSUMER_METRICS:
+                        self.assertMetric(mname, tags=tags + ["consumer_group:my_consumer"], at_least=1)
 
         self.coverage_report()

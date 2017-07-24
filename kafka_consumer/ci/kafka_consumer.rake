@@ -18,11 +18,11 @@ namespace :ci do
            #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml up -d)
       Wait.for 2181
       Wait.for 9092
-      wait_on_docker_logs('resources_kafka_1', 15, '[Kafka Server 1001], started')
-      wait_on_docker_logs('resources_zookeeper_1', 15, 'NodeExists for /brokers/ids')
+      wait_on_docker_logs('resources_kafka_1', 20, '[Kafka Server 1001], started')
+      wait_on_docker_logs('resources_zookeeper_1', 20, 'NodeExists for /brokers/ids')
       sh %(EXTERNAL_PORT=9091 EXTERNAL_JMX_PORT=9998 CONSUMER_OFFSET_STORAGE=#{kafka_consumer_options} docker-compose -f \
            #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml scale kafka=2)
-      wait_on_docker_logs('resources_kafka_2', 15, '[Kafka Server 1002], started')
+      wait_on_docker_logs('resources_kafka_2', 20, '[Kafka Server 1002], started')
     end
 
     task before_script: ['ci:common:before_script'] do
