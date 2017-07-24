@@ -2,7 +2,7 @@
 
 # Overview
 
-This check monitors the uptime, status, number of processes running under supervisord.
+This check monitors the uptime, status, and number of processes running under supervisord.
 
 # Installation
 
@@ -12,7 +12,7 @@ The Supervisor check is packaged with the Agent, so simply [install the Agent](h
 
 ## Prepare supervisord
 
-The Agent can collecet data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
+The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
 
 ### HTTP server
 
@@ -38,7 +38,7 @@ file=/var/run/supervisor.sock
 chmod=777
 ```
 
-If supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read from it.
+If supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
 
 ---
 
@@ -62,7 +62,7 @@ instances:
 #   socket: unix:///var/run//supervisor.sock
 ```
 
-Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists.
+Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
