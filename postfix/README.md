@@ -30,9 +30,9 @@ instances:
 For each mail queue in `queues`, the Agent forks a `find` on its directory. It uses `sudo`to do this, so you must add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`:
 
 ```
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
 
 Restart the Agent to start sending Postfix metrics to Datadog.

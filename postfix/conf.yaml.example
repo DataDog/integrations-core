@@ -8,6 +8,7 @@
 #          Defaults:dd-agent !requiretty
 
 init_config:
+  - postfix_user: postfix
 
 instances:
   - directory: /var/spool/postfix
