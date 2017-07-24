@@ -51,7 +51,7 @@ class Producer(threading.Thread):
             producer.send('dc', b"Clark Kent")
             producer.send('dc', b"Arthur Curry")
             producer.send('dc', b"\xc2ShakalakaBoom")
-            time.sleep(1)
+            time.sleep(5)
 
 
 class Consumer(threading.Thread):

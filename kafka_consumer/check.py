@@ -174,23 +174,25 @@ class KafkaCheck(AgentCheck):
                 # partitions_for_broker returns all partitions for which this
                 # broker is leader. So any partitions that don't currently have
                 # leaders will be missed. Ignore as they'll be caught on next check run.
-                for topic, partition in cli.cluster.partitions_for_broker(broker.nodeId):
-                    partitions_grouped_by_topic[topic].append(partition)
+                broker_partitions = cli.cluster.partitions_for_broker(broker.nodeId)
+                if broker_partitions:
+                    for topic, partition in broker_partitions:
+                        partitions_grouped_by_topic[topic].append(partition)
 
-                    # Construct the OffsetRequest
-                    timestamp = -1  # -1 for latest, -2 for earliest
-                    max_offsets = 1
-                    request = OffsetRequest[0](
-                        replica_id=-1,
-                        topics=[
-                            (topic, [
-                                (partition, timestamp, max_offsets) for partition in partitions])
-                            for topic, partitions in partitions_grouped_by_topic.iteritems()])
+                        # Construct the OffsetRequest
+                        timestamp = -1  # -1 for latest, -2 for earliest
+                        max_offsets = 1
+                        request = OffsetRequest[0](
+                            replica_id=-1,
+                            topics=[
+                                (topic, [
+                                    (partition, timestamp, max_offsets) for partition in partitions])
+                                for topic, partitions in partitions_grouped_by_topic.iteritems()])
 
-                response = self._make_blocking_req(cli, request, nodeid=broker.nodeId)
-                offsets, unleaded = self._process_highwater_offsets(request, instance, broker.nodeId, response)
-                highwater_offsets.update(offsets)
-                topic_partitions_without_a_leader.append(unleaded)
+                    response = self._make_blocking_req(cli, request, nodeid=broker.nodeId)
+                    offsets, unlead = self._process_highwater_offsets(request, instance, broker.nodeId, response)
+                    highwater_offsets.update(offsets)
+                    topic_partitions_without_a_leader.append(unlead)
         except Exception:
             self.log.exception('There was a problem collecting the high watermark offsets')
 
