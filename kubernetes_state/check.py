@@ -75,6 +75,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',
             'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
+            'kube_statefulset_replicas': 'statefulset.replicas_desired',
+            'kube_statefulset_status_replicas': 'statefulset.replicas',
         }
 
         self.ignore_metrics = [
@@ -97,6 +99,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicaset_status_observed_generation',
             'kube_replicationcontroller_metadata_generation',
             'kube_replicationcontroller_status_observed_generation',
+            'kube_statefulset_metadata_generation',
+            'kube_statefulset_status_observed_generation',
             # kube_node_status_phase has no use case as a service check
             'kube_node_status_phase',
             # These CronJob and Job metrics need use cases to determine how do implement
