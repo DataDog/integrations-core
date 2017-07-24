@@ -1,13 +1,13 @@
 # CHANGELOG - kafka_consumer
 
-1.0.1/2017-04-24
+1.0.1 / 2017-04-24
 ==================
 
 ### Changes
 
 * [DEPENDENCY] bumping kafka-python to 0.3.3. See [#272][] (Thanks [@jeffwidman][])
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
