@@ -67,3 +67,5 @@ kubernetes_state.limitrange.memory.max,,,,Maximum memory limit for this type,0,k
 kubernetes_state.limitrange.memory.default,,,,Default memory limit if not specified,0,kubernetes,k8s_state.mem.default
 kubernetes_state.limitrange.memory.default_request,,,,Default memory request if not specified,0,kubernetes,k8s_state.mem.default_request
 kubernetes_state.limitrange.memory.max_limit_request_ratio,,,,Maximum memory limit / request ratio,0,kubernetes,k8s_state.mem.max_ratio
+kubernetes_state.statefulset.replicas,gauge,,,,The number of replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas
+kubernetes_state.statefulset.replicas_desired,gauge,,,,The number of desired replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas_desired

@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-1.2.0 / Unreleased
+1.2.0 / 2017-07-18
 ==================
 
 ### Changes
@@ -9,14 +9,14 @@
 * [FEATURE] Add custom tags to metrics, event and service checks. See [#506][]
 * [FEATURE] Add a metric about the number of each connection states. See [#514][] (Thanks [@jamescarr][])
 
-1.1.0 / 06-05-2017
+1.1.0 / 2017-06-05
 ==================
 
 ### Changes
 
 * [IMPROVEMENT] Disable proxy if so-desired. See [#407][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

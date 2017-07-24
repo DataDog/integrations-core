@@ -1,20 +1,27 @@
 # CHANGELOG - kubernetes_state
 
-1.2.0 Unreleased
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Support for StatefulSet metrics
+
+1.2.0 / 2017-07-18
 ==================
 
 ### Changes
 
 * [FEATURE] Port to PrometheusCheck class and support for new 0.5.0 metrics
 
-1.1.0 06-05-2017
+1.1.0 / 2017-06-05
 ==================
 
 ### Changes
 
 * [FEATURE] Support more metrics from kube-state-metrics. See [dd-agent-3309](https://github.com/DataDog/dd-agent/pull/3309), [dd-agent-3352](https://github.com/DataDog/dd-agent/pull/3352) and [#343][]
 
-1.0.0 02-23-2017
+1.0.0 / 2017-02-23
 ==================
 
 ### Changes

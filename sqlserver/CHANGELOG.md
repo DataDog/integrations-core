@@ -4,14 +4,15 @@
 * [FEATURE] Implement the check to do a single bulk query of all of the metrics, and then filter
   locally, rather than one query per metric
   
-## 1.1.0 / Unreleased
+## 1.1.0 / 2017-07-18
 
 ### Changes
 
 * [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357][] and [#456][], thanks [@rlaveycal][]
 * [SANITY] Fix yaml example file spacing. See [#342][], thanks [@themsquared][]
 
-## 1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 
