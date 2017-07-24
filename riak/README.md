@@ -1,40 +1,53 @@
-# Riak Integration
+# Riak Check
 
-## Overview
+# Overview
 
-Get metrics from riak service in real time to:
+This check lets you track node, vnode and ring performance metrics from RiakKV or RiakTS.
 
-* Visualize Riak performance and utilization.
-* Correlate the performance of Riak with the rest of your applications.
+# Installation
 
-## Installation
+The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers. If you need the newest version of the check, install the `dd-check-riak` package.
 
-Install the `dd-check-riak` package manually or with your favorite configuration manager
+# Configuration
 
-## Configuration
+Create a file `riak.yaml` in the Agent's `conf.d` directory:
 
-1. Configure the Agent to connect to Riak
-Edit [conf.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example)
 ```
 init_config:
 
 instances:
-    -    url: http://127.0.0.1:8098/stats
+  - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
 ```
-2. Restart the Agent
 
-## Validation
+Restart the Agent to start sending Riak metrics to Datadog.
 
-When you run `datadog-agent info` you should see something like the following:
+# Validation
 
-    Checks
-    ======
+Run the Agent's `info` subcommand and look for `riak` under the Checks section:
 
-        riak
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 1 service checks
+```
+  Checks
+  ======
+    [...]
 
-## Compatibility
+    riak
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
 
-The riak check is compatible with all major platforms
+    [...]
+```
+
+# Compatibility
+
+The riak check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+**riak.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise OK.

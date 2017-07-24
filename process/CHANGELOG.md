@@ -1,13 +1,18 @@
 # CHANGELOG - process
 
-1.1.1 / Unreleased
+1.1.2 / Unreleased
+==================
+
+ * [IMPROVEMENT] Better logging when a process was not found. See [#609][]
+
+1.1.1 / 2017-07-18
 ==================
 
 ### Changes
 
 * [BUGFIX] Make process validation case-insensitve on Windows See [#479][]
 
-1.1.0 / Unreleased
+1.1.0 / 2017-06-05
 ==================
 
 ### Changes

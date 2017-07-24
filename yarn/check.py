@@ -95,6 +95,7 @@ DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
 DEFAULT_CUSTER_NAME = 'default_cluster'
 DEFAULT_COLLECT_APP_METRICS = True
+MAX_DETAILED_QUEUES = 100
 
 # Path to retrieve cluster metrics
 YARN_CLUSTER_METRICS_PATH = '/ws/v1/cluster/metrics'
@@ -222,7 +223,7 @@ class YarnCheck(AgentCheck):
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})
-        filter_queues = instance.get('filter_queues', [])
+        queue_blacklist = instance.get('queue_blacklist', [])
 
         if type(app_tags) is not dict:
             self.log.error('application_tags is incorrect: %s is not a dictionary', app_tags)
@@ -258,7 +259,7 @@ class YarnCheck(AgentCheck):
         if _is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
             self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
-        self._yarn_scheduler_metrics(rm_address, tags, filter_queues)
+        self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
 
     def _yarn_cluster_metrics(self, rm_address, addl_tags):
         '''
@@ -320,7 +321,7 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
 
-    def _yarn_scheduler_metrics(self, rm_address, addl_tags, filter_queues):
+    def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         '''
         Get metrics from YARN scheduler
         '''
@@ -330,12 +331,12 @@ class YarnCheck(AgentCheck):
             metrics_json = metrics_json['scheduler']['schedulerInfo']
 
             if metrics_json['type'] == 'capacityScheduler':
-                self._yarn_capacity_scheduler_metrics(metrics_json, addl_tags, filter_queues)
+                self._yarn_capacity_scheduler_metrics(metrics_json, addl_tags, queue_blacklist)
 
         except KeyError:
             pass
 
-    def _yarn_capacity_scheduler_metrics(self, metrics_json, addl_tags, filter_queues):
+    def _yarn_capacity_scheduler_metrics(self, metrics_json, addl_tags, queue_blacklist):
         '''
         Get metrics from YARN scheduler if it's type is capacityScheduler
         '''
@@ -346,12 +347,19 @@ class YarnCheck(AgentCheck):
 
         if metrics_json['queues'] is not None and metrics_json['queues']['queue'] is not None:
 
+            queues_count = 0
             for queue_json in metrics_json['queues']['queue']:
                 queue_name = queue_json['queueName']
 
-                if queue_name in filter_queues:
+                if queue_name in queue_blacklist:
                     self.log.debug('Queue "%s" is blacklisted. Ignoring it' % queue_name)
                     continue
+
+                queues_count += 1
+                if queues_count > MAX_DETAILED_QUEUES:
+                    self.warning("Found more than 100 queues, will only send metrics on first 100 queues. " +
+                        " Please filter the queues with the check's `queue_blacklist` parameter")
+                    break
 
                 tags = ['queue_name:%s' % str(queue_name)]
                 tags.extend(addl_tags)

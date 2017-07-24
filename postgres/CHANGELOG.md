@@ -1,18 +1,28 @@
 # CHANGELOG - postgres
 
-## 1.0.2 / Unreleased
+1.0.3 / 2017-07-18
+==================
+
+### Changes
+
+* [FEATURE] Collect pg_stat_archiver stats in PG>=9.4.
+
+1.0.2 / 2017-06-05
+==================
 
 ### Changes
 
 * [IMPROVEMENT] Provide a meaningful error when custom metrics are misconfigured. See [#446][]
 
-## 1.0.1 / 03-22-2017
+1.0.1 / 2017-03-22
+==================
 
 ### Changes
 
 * [DEPENDENCY] bump psycopg2 to 2.7.1. See [#295][].
 
-## 1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 
