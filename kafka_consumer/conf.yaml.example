@@ -18,6 +18,10 @@ instances:
   #   consumer_groups:
   #     my_consumer:
   #       my_topic: [0, 1, 4, 12]
+  #   # Setting monitor_unlisted_consumer_groups to True will tell the check to discover
+  #   # and fetch all offsets for all consumer groups stored in zookeeper. While this is
+  #   # often convenient, it can also put a lot of load on zookeeper, so use judiciously.
+  #   monitor_unlisted_consumer_groups: False
 
   # Production example with redundant hosts:
   # In a production environment, it's often useful to specify multiple
