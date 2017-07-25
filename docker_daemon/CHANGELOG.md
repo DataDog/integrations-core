@@ -74,9 +74,5 @@
 [#486]: https://github.com/DataDog/integrations-core/issues/486
 [#509]: https://github.com/DataDog/integrations-core/issues/509
 [#553]: https://github.com/DataDog/integrations-core/issues/553
-<<<<<<< HEAD
-[@sophaskins]: https://github.com/sophaskins
-=======
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [@sophaskins]: https://github.com/sophaskins
->>>>>>> a262cf1... remove uninitialised self.ecsutil & .nomadutil references
