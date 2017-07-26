@@ -14,6 +14,7 @@ Create a file `postfix.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
+  - postfix_user: postfix
 
 instances:
   # add one instance for each postfix service you want to track
@@ -27,12 +28,14 @@ instances:
 #     - optional_tag2
 ```
 
-For each mail queue in `queues`, the Agent forks a `find` on its directory. It uses `sudo`to do this, so you must add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`:
-
+For each mail queue in `queues`, the Agent forks a `find` on its directory.
+It uses `sudo` to do this with the privileges of the postfix user, so you must
+add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`,
+assuming postfix runs as `postfix`:
 ```
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
 
 Restart the Agent to start sending Postfix metrics to Datadog.
