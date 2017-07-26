@@ -13,7 +13,7 @@ and varnishadm in order to better support service discovery.
 
 ### Changes
 
-* [BUGFIX] Fixes an issue with retrieving the backend service checks. [#582][]
+* [BUGFIX] Fixes an issue with retrieving the backend service checks. Special thanks to @adongy for finding this! [#582][]
 
 1.0.2 / 2017-07-18
 ==================
