@@ -168,7 +168,7 @@ class KafkaCheck(AgentCheck):
             # error checking
             for broker in cli.cluster.brokers():
                 if not cli.ready(broker.nodeId):
-                    self.log.info('kafka broker unavailable this iteration - skipping')
+                    self.log.info('kafka broker (%s) unavailable this iteration - skipping', broker.nodeId)
                     continue
 
                 # Group partitions by topic in order to construct the OffsetRequest

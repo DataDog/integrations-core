@@ -39,8 +39,8 @@ CONSUMER_METRICS = [
     'kafka.consumer_lag',
 ]
 
-TOPICS = ['marvel', 'dc']
-PARTITIONS = [0, 1]
+TOPICS = ['marvel', 'dc', '__consumer_offsets']
+PARTITIONS = [0]
 
 SHUTDOWN = threading.Event()
 
@@ -137,15 +137,16 @@ class TestKafka(AgentCheckTest):
     @classmethod
     def setUpClass(cls):
         cls.THREADS[0].start()
-        time.sleep(45)
+        time.sleep(30)
         cls.THREADS[1].start()
-        time.sleep(15)
+        time.sleep(30)
 
     @classmethod
     def tearDownClass(cls):
         SHUTDOWN.set()
         for t in cls.THREADS:
-            t.join(5)
+            if t.is_alive():
+                t.join(5)
 
     def test_check_zk(self):
         """
@@ -160,13 +161,17 @@ class TestKafka(AgentCheckTest):
         for instance in instances:
             for name, consumer_group in instance['consumer_groups'].iteritems():
                 for topic, partitions in consumer_group.iteritems():
-                    for partition in partitions:
-                        tags = ["topic:{}".format(topic),
-                                "partition:{}".format(partition)]
+	            if topic is not '__consumer_offsets':
+                        for partition in partitions:
+                            tags = ["topic:{}".format(topic),
+                                    "partition:{}".format(partition)]
+                            for mname in BROKER_METRICS:
+                                self.assertMetric(mname, tags=tags, at_least=1)
+                            for mname in CONSUMER_METRICS:
+                                self.assertMetric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
+                    else:
                         for mname in BROKER_METRICS:
-                            self.assertMetric(mname, tags=tags, at_least=1)
-                        for mname in CONSUMER_METRICS:
-                            self.assertMetric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
+                            self.assertMetric(mname, at_least=1)
 
         self.coverage_report()
 
@@ -187,12 +192,16 @@ class TestKafka(AgentCheckTest):
 
         for instance in nogroup_instances:
             for topic in TOPICS:
-                for partition in PARTITIONS:
-                    tags = ["topic:{}".format(topic),
-                            "partition:{}".format(partition)]
+	        if topic is not '__consumer_offsets':
+                    for partition in PARTITIONS:
+	                tags = ["topic:{}".format(topic),
+                                "partition:{}".format(partition)]
+                        for mname in BROKER_METRICS:
+                            self.assertMetric(mname, tags=tags, at_least=1)
+                        for mname in CONSUMER_METRICS:
+                            self.assertMetric(mname, tags=tags + ["consumer_group:my_consumer"], at_least=1)
+                else:
                     for mname in BROKER_METRICS:
-                        self.assertMetric(mname, tags=tags, at_least=1)
-                    for mname in CONSUMER_METRICS:
-                        self.assertMetric(mname, tags=tags + ["consumer_group:my_consumer"], at_least=1)
+                        self.assertMetric(mname, at_least=1)
 
         self.coverage_report()
