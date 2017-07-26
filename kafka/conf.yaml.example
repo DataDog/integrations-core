@@ -315,6 +315,13 @@ init_config:
             alias: kafka.request.handler.avg.idle.pct.rate
     - include:
         domain: 'kafka.server'
+        bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
+        attribute:
+          OneMinuteRate:
+            metric_type: gauge
+            alias: kafka.request.handler.avg.idle.pct
+    - include:
+        domain: 'kafka.server'
         bean: 'kafka.server:type=ProducerRequestPurgatory,name=PurgatorySize'
         attribute:
           Value:
