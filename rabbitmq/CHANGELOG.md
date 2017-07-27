@@ -1,5 +1,12 @@
 # CHANGELOG - rabbitmq
 
+1.2.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Set aliveness service to CRITICAL if the rabbitmq server is down. See[#635][]
+
 1.2.0 / 2017-07-18
 ==================
 
@@ -28,4 +35,5 @@
 [#504]: https://github.com/DataDog/integrations-core/issues/504
 [#506]: https://github.com/DataDog/integrations-core/issues/506
 [#514]: https://github.com/DataDog/integrations-core/issues/514
+[#635]: https://github.com/DataDog/integrations-core/issues/635
 [@jamescarr]: https://github.com/jamescarr
