@@ -1,5 +1,12 @@
 # CHANGELOG - ssh_check
 
+1.1.1 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] drop dependency on winrandom_ctypes for windows
+
 1.1.0 / 2017-07-18
 ==================
 
