@@ -19,6 +19,7 @@ from checks import AgentCheck
 
 DEFAULT_KAFKA_TIMEOUT = 5
 DEFAULT_ZK_TIMEOUT = 5
+DEFAULT_KAFKA_RETRIES = 3
 
 CONTEXT_UPPER_BOUND = 100
 
@@ -27,10 +28,6 @@ class KafkaCheck(AgentCheck):
     """
     Check Consumer Lag for Kafka consumers that store their offsets in Zookeeper.
 
-    WARNING: Modern Kafka consumer store their offsets in Kafka rather than
-    zookeeper. You can monitor those offsets using the < TODO: TO BE NAMED > check.
-    This check only monitors zookeeper-based offsets.
-
     This check also returns broker highwater offsets.
     """
 
@@ -38,15 +35,17 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
-        self.zk_timeout = int(
+        self._zk_timeout = int(
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
-        self.kafka_timeout = int(
+        self._kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self.context_limit = int(
             init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
+        self._broker_retries = int(
+            init_config.get('kafka_retries', DEFAULT_KAFKA_RETRIES))
 
         self.kafka_clients = {}
-        self.broker_retries = 3
+
 
     def stop(self):
         """
@@ -170,7 +169,7 @@ class KafkaCheck(AgentCheck):
             attempts = 0
             processed = []
             pending = set([broker.nodeId for broker in cli.cluster.brokers()])
-            while len(pending) != 0 and self.broker_retries > attempts:
+            while len(pending) != 0 and self._broker_retries > attempts:
                 for node in processed:
                     pending.remove(node)
 
@@ -244,7 +243,7 @@ class KafkaCheck(AgentCheck):
         zk_path_topic_tmpl = zk_path_consumer + '{group}/offsets/'
         zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/'
 
-        zk_conn = KazooClient(zk_hosts_ports, timeout=self.zk_timeout)
+        zk_conn = KazooClient(zk_hosts_ports, timeout=self._zk_timeout)
         zk_conn.start()
         try:
             if consumer_groups is None:
