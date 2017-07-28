@@ -37,7 +37,8 @@ namespace :ci do
       sh %(docker start #{container_name})
 
       sh %(docker create --name #{container_name2} \
-            -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' #{container_name})" cassandra:#{cassandra_nodetool_version})
+            -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' #{container_name})" \
+            cassandra:#{cassandra_nodetool_version})
       sh %(docker start #{container_name2})
     end
 

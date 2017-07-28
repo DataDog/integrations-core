@@ -24,7 +24,7 @@ class TestCassandraNodetoolCheck(AgentCheckTest):
         'instances': [
             {
                 'nodetool': 'docker exec %s nodetool' % CASSANDRA_CONTAINER_NAME,
-                'keyspaces': ['test'],
+                'keyspaces': ['system', 'test'],
                 'username': 'controlRole',
                 'password': 'QED',
                 'tags': ['foo', 'bar']
@@ -37,6 +37,7 @@ class TestCassandraNodetoolCheck(AgentCheckTest):
 
         self.run_check(self.config)
 
+        # test per datacenter metrics
         self.assertEquals(mock_output.call_args[0][0],
                           ['docker', 'exec', CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p',
                           '7199', '-u', 'controlRole', '-pw', 'QED', 'status', '--', 'test'])
@@ -48,15 +49,14 @@ class TestCassandraNodetoolCheck(AgentCheckTest):
                           tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
         self.assertMetric('cassandra.nodetool.status.replication_factor', value=2,
                           tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
-        self.assertMetric('cassandra.nodetool.status.status', value=1,
-                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
-                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
-        self.assertMetric('cassandra.nodetool.status.owns', value=100,
-                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
-                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
-        self.assertMetric('cassandra.nodetool.status.load', value=223340,
-                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
-                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
+        # test per node metrics
+        tags = ['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
+                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar']
+        self.assertMetric('cassandra.nodetool.status.status', value=1, tags=tags)
+        self.assertMetric('cassandra.nodetool.status.owns', value=100, tags=tags + ['keyspace:test'])
+        self.assertMetric('cassandra.nodetool.status.load', value=223340, tags=tags)
+        self.assertServiceCheckOK('cassandra.nodetool.node_up', count=4)
+        self.assertServiceCheckCritical('cassandra.nodetool.node_up', count=1)
 
     @attr(requires='cassandra_nodetool')
     def test_integration(self):
