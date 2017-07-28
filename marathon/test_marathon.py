@@ -31,8 +31,14 @@ DEFAULT_CONFIG = {
     ]
 }
 
-def getMetricNames(metrics):
-    return [metric[0] for metric in metrics]
+Q_METRICS = [
+    'marathon.queue.count',
+    'marathon.queue.delay',
+    'marathon.queue.offers.processed',
+    'marathon.queue.offers.unused',
+    'marathon.queue.offers.reject.last',
+    'marathon.queue.offers.reject.launch',
+]
 
 class MarathonCheckTest(AgentCheckTest):
     CHECK_NAME = 'marathon'
@@ -53,6 +59,8 @@ class MarathonCheckTest(AgentCheckTest):
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=1)
         self.assertMetric('marathon.deployments', value=1)
+        for metric in Q_METRICS:
+            self.assertMetric(metric, at_least=1)
 
 
     def test_empty_responses(self):

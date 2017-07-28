@@ -129,7 +129,7 @@ class VarnishCheckTest(AgentCheckTest):
         config = self._get_config_by_version()
         config['instances'][0]['metrics_filter'] = ['^SMA.Transient.c_req']
         self.load_check(config)
-        version, _ = self.check._get_version_info(self._get_varnish_stat_path())
+        version, _ = self.check._get_version_info([self._get_varnish_stat_path()])
         if str(version) == '5.0.0':
             raise SkipTest('varnish bugfix for exclusion blob not released yet for version 5 so skip this test')
 

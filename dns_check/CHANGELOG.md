@@ -1,7 +1,7 @@
 # CHANGELOG - dns_check
 
 
-1.0.2 / Unreleased
+1.0.2 / 2017-07-18
 ==================
 
 ### Changes
@@ -15,7 +15,7 @@
 
 * [BUGFIX] use time.clock under windows. See [#330][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes

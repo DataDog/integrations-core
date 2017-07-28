@@ -1,46 +1,60 @@
-# Riakcs Integration
+# RiakCS Check
 
-## Overview
+# Overview
 
 Capture RiakCS metrics in Datadog to:
 
 * Visualize key RiakCS metrics.
 * Correlate RiakCS performance with the rest of your applications.
 
-## Installation
+# Installation
 
-Install the `dd-check-riakcs` package manually or with your favorite configuration manager
+The RiakCS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RiakCS nodes. If you need the newest version of the check, install the `dd-check-riakcs` package.
+# Configuration
 
-## Configuration
-
-1. Edit conf.yaml:
+Create a file `riakcs.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
 
 instances:
-  - access_id: access-key
-    access_secret: access-secret
-    #is_secure: True  # Uncomment and change to false if you are not using ssl
-    #host: localhost  # Hostname/IP of your riakcs node
-    #port: 8080  # port used by your riakcs node
-    #s3_root: s3.amazonaws.com # 
+  - host: localhost 
+    port: 8080 
+    access_id: <YOUR_ACCESS_KEY>
+    access_secret: <YOUR_ACCESS_SECRET>
+#   is_secure: true # set to false if your endpoint doesn't use SSL
+#   s3_root: s3.amazonaws.com # 
 ```
 
-2. Restart the Agent
+Restart the Agent to start sending RiakCS metrics to Datadog.
 
-## Validation
+# Validation
 
-When you run `datadog-agent info` you should see something like the following:
+Run the Agent's `info` subcommand and look for `riakcs` under the Checks section:
 
-    Checks
-    ======
+```
+  Checks
+  ======
+    [...]
 
-        riakcs
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    riakcs
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
 
-## Compatibility
+    [...]
+```
 
-The riakcs check is compatible with all major platforms
+# Compatibility
+
+The riakcs check is compatible with all major platforms.
+
+# Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv) for a list of metrics provided by this check.
+
+# Service Checks
+
+**riakcs.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
