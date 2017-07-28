@@ -40,7 +40,7 @@ CONSUMER_METRICS = [
 ]
 
 TOPICS = ['marvel', 'dc', '__consumer_offsets']
-PARTITIONS = [0]
+PARTITIONS = [0, 1]
 
 SHUTDOWN = threading.Event()
 
@@ -50,17 +50,18 @@ class Producer(threading.Thread):
         producer = KafkaProducer(bootstrap_servers=instances[0]['kafka_connect_str'])
 
         while not SHUTDOWN.is_set():
-            producer.send('marvel', b"Peter Parker")
-            producer.send('marvel', b"Bruce Banner")
-            producer.send('marvel', b"Tony Stark")
-            producer.send('marvel', b"Johhny Blaze")
-            producer.send('marvel', b"\xc2BoomShakalaka")
-            producer.send('dc', b"Diana Prince")
-            producer.send('dc', b"Bruce Wayne")
-            producer.send('dc', b"Clark Kent")
-            producer.send('dc', b"Arthur Curry")
-            producer.send('dc', b"\xc2ShakalakaBoom")
-            time.sleep(1)
+            for partition in PARTITIONS:
+                producer.send('marvel', b"Peter Parker", partition=partition)
+                producer.send('marvel', b"Bruce Banner", partition=partition)
+                producer.send('marvel', b"Tony Stark", partition=partition)
+                producer.send('marvel', b"Johhny Blaze", partition=partition)
+                producer.send('marvel', b"\xc2BoomShakalaka", partition=partition)
+                producer.send('dc', b"Diana Prince", partition=partition)
+                producer.send('dc', b"Bruce Wayne", partition=partition)
+                producer.send('dc', b"Clark Kent", partition=partition)
+                producer.send('dc', b"Arthur Curry", partition=partition)
+                producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
+                time.sleep(1)
 
 
 class ZKConsumer(threading.Thread):
@@ -137,9 +138,9 @@ class TestKafka(AgentCheckTest):
     @classmethod
     def setUpClass(cls):
         cls.THREADS[0].start()
-        time.sleep(10)
+        time.sleep(5)
         cls.THREADS[1].start()
-        time.sleep(10)
+        time.sleep(5)
 
     @classmethod
     def tearDownClass(cls):
@@ -199,10 +200,7 @@ class TestKafka(AgentCheckTest):
                             for mname in CONSUMER_METRICS:
                                 self.assertMetric(mname, tags=tags + ["consumer_group:my_consumer"], at_least=1)
                 else:
-                    for mname in BROKER_METRICS:
+                    for mname in BROKER_METRICS + CONSUMER_METRICS:
                         self.assertMetric(mname, at_least=1)
-                        for mname in CONSUMER_METRICS:
-                            tags = ['topic:__consumer_offsets', "consumer_group:my_consumer", "partition:0"]
-                            self.assertMetric(mname, tags=tags, at_least=1)
 
         self.coverage_report()

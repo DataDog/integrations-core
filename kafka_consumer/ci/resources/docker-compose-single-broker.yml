@@ -2,6 +2,8 @@ version: '2'
 services:
   zookeeper:
     image: wurstmeister/zookeeper
+    environment:
+      - ZOOKEEPER_VERSION
     ports:
       - "2181:2181"
   kafka:
@@ -12,7 +14,7 @@ services:
     environment:
       # KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
       KAFKA_ADVERTISED_HOST_NAME: 172.17.0.1
-      KAFKA_CREATE_TOPICS: "marvel:1:2,dc:1:2"
+      KAFKA_CREATE_TOPICS: "${KAFKA_TOPICS}"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
       KAFKA_OFFSETS_STORAGE: "${CONSUMER_OFFSET_STORAGE}"
