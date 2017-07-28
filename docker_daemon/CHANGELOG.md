@@ -1,10 +1,15 @@
 # CHANGELOG - docker_daemon
 
-1.3.1 / Unreleased
+1.3.2 / Unreleased
 ==================
 ### Changes
 
 * [BUGFIX] safely check volume list before accessing. See [#544][]
+
+1.3.1 / 2017-07-26 
+==================
+### Changes
+
 * [BUGFIX] fix event collection on ecs and nomad. See [#616][]
 
 1.3.0 / 2017-07-18
