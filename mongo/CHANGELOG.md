@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.2.1 / UNRELEASED
+==================
+### Changes
+
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][]
+
 1.2.0 / 2017-07-18
 ==================
 ### Changes
@@ -30,3 +36,4 @@
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
 [#491]: https://github.com/DataDog/integrations-core/issues/491
+[#625]: https://github.com/DataDog/integrations-core/pull/625

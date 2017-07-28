@@ -33,4 +33,6 @@ instances:
   # - kafka_connect_str:
   #   - <kafka_host1:port>
   #   - <kafka_host2:port>
-  #   zk_connect_str: <zk_host1:port>,<zk_host2:port>
+  #   zk_connect_str:
+  #   - <zk_host1:port>
+  #   - <zk_host2:port>
