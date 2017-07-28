@@ -1,11 +1,11 @@
 # CHANGELOG - mysql
 
-1.0.4 / UNRELEASED
+1.0.4 / Unreleased
 ==================
 
 ### Changes
 
-* [BUGFIX] MySQL: Fix bug when options dict is empty. See [637][]
+* [BUGFIX] Fix bug when options dict is empty. See [637][]
 
 1.0.3 / 2017-05-11
 ==================
