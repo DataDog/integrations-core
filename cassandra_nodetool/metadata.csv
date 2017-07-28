@@ -1,0 +1,3 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+cassandra.nodetool.status.replication_availability,gauge,,,,Percentage of data available per keyspace times replication factor,+1,cassandra_nodetool,available data
+cassandra.nodetool.status.replication_factor,gauge,,,,Replication factor per keyspace,0,cassandra_nodetool,replication factor

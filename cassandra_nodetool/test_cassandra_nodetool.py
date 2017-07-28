@@ -16,9 +16,9 @@ CASSANDRA_CONTAINER_NAME = 'dd-test-cassandra'
 def mock_output(*args):
     return Fixtures.read_file('nodetool_output', sdk_dir=FIXTURE_DIR), "", 0
 
-class TestCassandraCheck(AgentCheckTest):
+class TestCassandraNodetoolCheck(AgentCheckTest):
     """Basic Test for cassandra_check integration."""
-    CHECK_NAME = 'cassandra_check'
+    CHECK_NAME = 'cassandra_nodetool'
 
     config = {
         'instances': [
@@ -40,23 +40,29 @@ class TestCassandraCheck(AgentCheckTest):
         self.assertEquals(mock_output.call_args[0][0],
                           ['docker', 'exec', CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p',
                           '7199', '-u', 'controlRole', '-pw', 'QED', 'status', '--', 'test'])
-        self.assertMetric('cassandra.replication_availability', value=64.5,
+        self.assertMetric('cassandra.nodetool.status.replication_availability', value=64.5,
                           tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
-        self.assertMetric('cassandra.replication_availability', value=200,
+        self.assertMetric('cassandra.nodetool.status.replication_availability', value=200,
                           tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
-        self.assertMetric('cassandra.replication_factor', value=1,
+        self.assertMetric('cassandra.nodetool.status.replication_factor', value=1,
                           tags=['keyspace:test', 'datacenter:dc1', 'foo', 'bar'])
-        self.assertMetric('cassandra.replication_factor', value=2,
+        self.assertMetric('cassandra.nodetool.status.replication_factor', value=2,
                           tags=['keyspace:test', 'datacenter:dc2', 'foo', 'bar'])
+        self.assertMetric('cassandra.nodetool.status.status', value=1,
+                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
+                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
+        self.assertMetric('cassandra.nodetool.status.owns', value=100,
+                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
+                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
+        self.assertMetric('cassandra.nodetool.status.load', value=223340,
+                          tags=['datacenter:dc2', 'node_id:e521a2a4-39d3-4311-a195-667bf56450f4',
+                                'node_address:172.21.0.4', 'rack:RAC1', 'foo', 'bar'])
 
-        self.coverage_report()
-
-    @attr(requires='cassandra_check')
+    @attr(requires='cassandra_nodetool')
     def test_integration(self):
         self.run_check(self.config)
 
-        self.assertMetric('cassandra.replication_availability', value=200,
+        self.assertMetric('cassandra.nodetool.status.replication_availability', value=200,
                           tags=['keyspace:test', 'datacenter:datacenter1', 'foo', 'bar'])
-        self.assertMetric('cassandra.replication_factor', value=2,
+        self.assertMetric('cassandra.nodetool.status.replication_factor', value=2,
                           tags=['keyspace:test', 'datacenter:datacenter1', 'foo', 'bar'])
-        self.coverage_report()

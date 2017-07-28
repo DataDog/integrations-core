@@ -1,6 +1,6 @@
 require 'ci/common'
 
-def cassandra_check_version
+def cassandra_nodetool_version
   ENV['FLAVOR_VERSION'] || '2.1.14' # '2.0.17'
 end
 
@@ -16,7 +16,7 @@ cassandra_jmx_options = "-Dcom.sun.management.jmxremote.port=#{container_port}
   -Djava.rmi.server.hostname=localhost"
 
 namespace :ci do
-  namespace :cassandra_check do |flavor|
+  namespace :cassandra_nodetool do |flavor|
     task before_install: ['ci:common:before_install'] do
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
@@ -26,10 +26,10 @@ namespace :ci do
     end
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('cassandra_check')
+      Rake::Task['ci:common:install'].invoke('cassandra_nodetool')
       sh %(docker create --expose #{container_port} \
             -p #{container_port}:#{container_port} -e JMX_PORT=#{container_port} \
-            -e LOCAL_JMX=no -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_check_version})
+            -e LOCAL_JMX=no -e JVM_EXTRA_OPTS="#{cassandra_jmx_options}" --name #{container_name} cassandra:#{cassandra_nodetool_version})
       sh %(cp #{__dir__}/jmxremote.password #{__dir__}/jmxremote.password.tmp)
       sh %(chmod 400 #{__dir__}/jmxremote.password.tmp)
       sh %(docker cp #{__dir__}/jmxremote.password.tmp #{container_name}:/etc/cassandra/jmxremote.password)
@@ -37,7 +37,7 @@ namespace :ci do
       sh %(docker start #{container_name})
 
       sh %(docker create --name #{container_name2} \
-            -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' #{container_name})" cassandra:#{cassandra_check_version})
+            -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' #{container_name})" cassandra:#{cassandra_nodetool_version})
       sh %(docker start #{container_name2})
     end
 
@@ -50,7 +50,7 @@ namespace :ci do
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'cassandra_check'
+        'cassandra_nodetool'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
