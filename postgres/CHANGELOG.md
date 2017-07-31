@@ -1,10 +1,11 @@
 # CHANGELOG - postgres
 
-1.0.4 / Unreleased
+1.1.0 / Unreleased
 ==================
 
 ### Changes
 
+* [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#689][], thanks to [@Erouan50][]
 * [MINOR] Allow specifying postgres port as string.
 
 1.0.3 / 2017-07-18
