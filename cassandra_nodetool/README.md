@@ -54,3 +54,9 @@ When you run `datadog-agent info` you should see something like the following:
 # Compatibility
 
 The `cassandra_nodetool` check is compatible with all major platforms
+
+# Service Checks
+
+**cassandra.nodetool.node_up**:
+
+The agent sends this service check for each node of the monitored cluster. Returns CRITICAL if the node is down, otherwise OK.
