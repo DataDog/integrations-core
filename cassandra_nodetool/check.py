@@ -57,6 +57,7 @@ class CassandraNodetoolCheck(AgentCheck):
             out, err, _ = get_subprocess_output(cmd, self.log, False)
             if err or 'Error:' in out:
                 self.log.error('Error executing nodetool status: %s', err or out)
+                continue
             nodes = self._process_nodetool_output(out)
 
             percent_up_by_dc = defaultdict(float)
