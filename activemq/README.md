@@ -30,3 +30,6 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The activemq check is compatible with all major platforms
+
+## Further Reading
+See our blog post [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)
