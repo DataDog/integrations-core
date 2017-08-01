@@ -321,7 +321,7 @@ class MySql(AgentCheck):
         user = instance.get('user', '')
         password = str(instance.get('pass', ''))
         tags = instance.get('tags', [])
-        options = instance.get('options', {})
+        options = instance.get('options', {}) or {} # options could be None if empty in the YAML
         queries = instance.get('queries', [])
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', None)
