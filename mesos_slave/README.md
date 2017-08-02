@@ -42,6 +42,8 @@ Returns CRITICAL if the Agent cannot connect to the Mesos slave metrics endpoint
 
 The mesos_slave check creates a service check for each executor task, giving it one of the following statuses:
 
+|||
+|---|---|
 |Task status|resultant service check status
 |TASK_STARTING|AgentCheck.OK
 |TASK_RUNNING|AgentCheck.OK
