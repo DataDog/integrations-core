@@ -85,6 +85,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mong
 See the [MongoDB 3.0 Manual](https://docs.mongodb.org/manual/reference/command/dbStats/) for more detailed descriptions of some of these metrics.
 
 **NOTE**: The following metrics are NOT collected by default:
+
 |||
 |---|---|
 |metric prefix|what to add to `additional_metrics` to collect it|
