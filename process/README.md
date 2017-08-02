@@ -57,3 +57,7 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The process check is compatible with all major platforms
+
+## Further Reading
+
+See our blog post [Inspeqtor Process Monitoring with Datadog](https://www.datadoghq.com/blog/process-monitoring-inspeqtor-datadog/)
