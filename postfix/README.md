@@ -1,14 +1,14 @@
 # Postfix Check
 
-# Overview
+## Overview
 
 This check monitors the size of all your Postfix queues.
 
-# Installation
+## Installation
 
 The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers. If you need the newest version of the check, install the `dd-check-postfix` package.
 
-# Configuration
+## Configuration
 
 Create a file `postfix.yaml` in the Agent's `conf.d` directory:
 
@@ -40,7 +40,7 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type 
 
 Restart the Agent to start sending Postfix metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for postfix` under the Checks section:
 
@@ -57,10 +57,14 @@ Run the Agent's `info` subcommand and look for postfix` under the Checks section
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The postfix check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv) for a list of metrics provided by this check.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Postfix queue performance with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-postfix-queues/) about it.
