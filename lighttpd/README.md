@@ -95,3 +95,6 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ligh
 `- lighttpd.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, otherwise OK.
+
+# Further Reading
+See our blog post [Monitor Lighttpd web server metrics with Datadog](https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics/).
