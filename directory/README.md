@@ -32,7 +32,7 @@ Ensure that the user running the Agent process (usually `dd-agent`) has read acc
 
 Restart the Agent to begin sending metrics on your chosen directories to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `directory` under the Checks section:
 
