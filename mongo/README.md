@@ -1,17 +1,17 @@
 # MongoDB check
 
-# Overview
+## Overview
 
 Connect MongoDB to Datadog in order to:
 
 * Visualize key MongoDB metrics.
 * Correlate MongoDB performance with the rest of your applications.
 
-# Installation
+## Installation
 
 The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. If you need the newest version of the check, install the `dd-check-mongo` package.
 
-# Configuration
+## Configuration
 
 ### Prepare MongoDB
 
@@ -57,7 +57,7 @@ instances:
 
 Restart the Agent to start sending MongoDB metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `mongo` under the Checks section:
 
@@ -74,11 +74,11 @@ Run the Agent's `info` subcommand and look for `mongo` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The mongo check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv) for a list of metrics provided by this check.
 
@@ -86,6 +86,8 @@ See the [MongoDB 3.0 Manual](https://docs.mongodb.org/manual/reference/command/d
 
 **NOTE**: The following metrics are NOT collected by default:
 
+|||
+|---|---|
 |metric prefix|what to add to `additional_metrics` to collect it|
 |mongodb.collection|collection|
 |mongodb.commands|top|
@@ -101,19 +103,19 @@ See the [MongoDB 3.0 Manual](https://docs.mongodb.org/manual/reference/command/d
 |mongodb.tcmalloc|tcmalloc|
 |mongodb.metrics.commands|metrics.commands|
 
-# Events
+## Events
 
 **Replication state changes**:
 
 This check emits an event each time a Mongo node has a change in its replication state.
 
-# Service Checks
+## Service Checks
 
 `mongodb.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to MongoDB to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 

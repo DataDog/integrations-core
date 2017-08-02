@@ -1,14 +1,14 @@
 # Kong Integration
 
-# Overview
+## Overview
 
 The Agent's Kong check tracks total requests, response codes, client connections, and more.
 
-# Installation
+## Installation
 
 The Kong check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kong servers. If you need the newest version of the check, install the `dd-check-kong` package.
 
-# Configuration
+## Configuration
 
 Create a `kong.yaml` in the Datadog Agent's `conf.d` directory:
 
@@ -27,7 +27,7 @@ instances:
 
 Restart the Agent to begin sending Kong metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for kong` under the Checks section:
 
@@ -44,16 +44,20 @@ Run the Agent's `info` subcommand and look for kong` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The kong check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 `kong.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Kong with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-kong-datadog/) about it.

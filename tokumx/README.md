@@ -1,6 +1,6 @@
 # Agent Check: TokuMX
 
-# Overview
+## Overview
 
 This check collects TokuMX metrics like:
 
@@ -10,13 +10,13 @@ This check collects TokuMX metrics like:
 
 And more.
 
-# Installation
+## Installation
 
 The TokuMX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your TokuMX servers. If you need the newest version of the check, install the `dd-check-tokumx` package.
 
-# Configuration
+## Configuration
 
-## Prepare TokuMX
+### Prepare TokuMX
 
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
@@ -28,7 +28,7 @@ db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
 db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 ```
 
-## Connect the Agent
+### Connect the Agent
 
 Create a file `tokumx.yaml` in the Agent's `conf.d` directory:
 
@@ -41,7 +41,7 @@ instances:
 
 Restart the Agent to start sending TokuMX metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `tokuxmx` under the Checks section:
 
@@ -58,26 +58,26 @@ Run the Agent's `info` subcommand and look for `tokuxmx` under the Checks sectio
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The tokumx check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv) for a list of metrics provided by this check.
 
-# Events
+## Events
 
 **Replication state changes**:
 
 This check emits an event each time a TokuMX node has a change in its replication state.
 
-# Service Checks
+## Service Checks
 
 `tokumx.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
-See our [blog post](https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/) on monitoring TokuMX databases with Datadog.
+To get a better idea of how (or why) to monitor TokuMX databases with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/) about it.
