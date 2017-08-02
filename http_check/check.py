@@ -453,10 +453,14 @@ class HTTPCheck(NetworkCheck):
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
+            self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
             return Status.DOWN, 0, "%s" % (str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()
+
+        self.log.debug("Exp_date: %s", exp_date)
+        self.log.debug("days_left: %s", days_left)
 
         if days_left.days < 0:
             return Status.DOWN, days_left.days,"Expired by {0} days".format(days_left.days)
