@@ -1,6 +1,6 @@
 # Directory Check
 
-# Overview
+## Overview
 
 Capture metrics from directories and files of your choosing. The Agent will collect:
 
@@ -9,11 +9,11 @@ Capture metrics from directories and files of your choosing. The Agent will coll
   * age of the last modification
   * age of the creation
 
-# Installation
+## Installation
 
 The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
 
-# Configuration
+## Configuration
 
 Create a file `directory.yaml` in the Agent's `conf.d` directory:
 
@@ -49,18 +49,18 @@ Run the Agent's `info` subcommand and look for `directory` under the Checks sect
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Compatibility
+## Compatibility
 
 The directory check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks
 
-# Further Reading
+## Further Reading
