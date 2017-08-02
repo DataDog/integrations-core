@@ -30,3 +30,7 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The postgres check is compatible with all major platforms
+
+## Further Reading
+
+See our blog post [100x faster Postgres performance by changing 1 line](https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/)
