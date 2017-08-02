@@ -163,12 +163,12 @@ class TestKafka(AgentCheckTest):
             for name, consumer_group in instance['consumer_groups'].iteritems():
                 for topic, partitions in consumer_group.iteritems():
                     for partition in partitions:
-                        tags = ["topic:{}".format(topic),
+                        tags = [ "topic:{}".format(topic),
                                 "partition:{}".format(partition)]
                         for mname in BROKER_METRICS:
                             self.assertMetric(mname, tags=tags, at_least=1)
                         for mname in CONSUMER_METRICS:
-                            self.assertMetric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
+                            self.assertMetric(mname, tags=tags + ["source:zk", "consumer_group:{}".format(name)], at_least=1)
 
         # let's reassert for the __consumer_offsets - multiple partitions
         self.assertMetric('kafka.broker_offset', at_least=1)
@@ -198,7 +198,7 @@ class TestKafka(AgentCheckTest):
                         for mname in BROKER_METRICS:
                             self.assertMetric(mname, tags=tags, at_least=1)
                             for mname in CONSUMER_METRICS:
-                                self.assertMetric(mname, tags=tags + ["consumer_group:my_consumer"], at_least=1)
+                                self.assertMetric(mname, tags=tags + ["source:zk", "consumer_group:my_consumer"], at_least=1)
                 else:
                     for mname in BROKER_METRICS + CONSUMER_METRICS:
                         self.assertMetric(mname, at_least=1)
