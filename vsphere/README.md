@@ -1,14 +1,14 @@
 # Agent Check: VMWare vSphere
 
-# Overview
+## Overview
 
 This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
-# Installation
+## Installation
 
 The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server. If you need the newest version of the check, install the `dd-check-mcache` package.
 
-# Configuration
+## Configuration
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
@@ -36,7 +36,7 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 * `all_metrics` (Optional) - When set to true, this will collect EVERY metric from vCenter, which means a LOT of metrics you probably do not care about. We have selected a set of metrics that are interesting to monitor for you if false.
 * `event_config` (Optional) - Event config is a dictionary. For now the only switch you can flip is collect_vcenter_alarms which will send as events the alarms set in vCenter.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `vsphere` under the Checks section:
 
@@ -53,15 +53,15 @@ Run the Agent's `info` subcommand and look for `vsphere` under the Checks sectio
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The vsphere check is compatible with all Windows platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv) for a list of metrics provided by this check.
 
-# Events
+## Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It does NOT emit the following event types:
 
@@ -82,12 +82,12 @@ VmMessageEvent
 VmSuspendedEvent
 VmPoweredOffEvent
 
-# Service Checks
+## Service Checks
 
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

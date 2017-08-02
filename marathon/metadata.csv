@@ -13,3 +13,10 @@ marathon.tasksRunning,gauge,,task,,Number of tasks running for a given applicati
 marathon.tasksStaged,gauge,,task,,Number of tasks staged for a given application; tagged by app_id and version,0,marathon,tasks staged
 marathon.tasksHealthy,gauge,,task,,Number of healthy tasks for a given application; tagged by app_id and version,0,marathon,healthy tasks
 marathon.tasksUnhealthy,gauge,,task,,Number of unhealthy tasks for a given application; tagged by app_id and version,-1,marathon,unhealthy tasks
+marathon.queue.size,gauge,,task,,Number of app offer queues,0,marathon,num queues
+marathon.queue.count,gauge,,task,,Number of instances left to launch,0,marathon,count
+marathon.queue.delay,gauge,,second,,Wait before the next launch attempt,0,marathon,delay
+marathon.queue.offers.processed,gauge,,task,,The number of processed offers for this launch attempt,0,marathon,offers proc
+marathon.queue.offers.unused,gauge,,task,,The number of unused offers for this launch attempt,0,marathon,offers unused
+marathon.queue.offers.reject.last,gauge,,task,,Summary of unused offers for all last offers,0,marathon,offers rej
+marathon.queue.offers.reject.launch,gauge,,task,,Summary of unused offers for the launch attempt,0,marathon,offers rej

@@ -1,12 +1,10 @@
 # CHANGELOG - mysql
 
-1.0.4 / 2017-07-13
-==================
+1.0.5 / 2017-07-13
 
 ### Changes
 
 * [BUGFIX] MySQL: Fix slow query check for 95th us percentile. See [#586][]
-
 
 1.0.3 / 2017-05-11
 ==================

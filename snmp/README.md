@@ -1,14 +1,14 @@
 # SNMP Check
 
-# Overview
+## Overview
 
 This check lets you collect SNMP metrics from your network devices.
 
-# Installation
+## Installation
 
 The SNMP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host where you want to run the check. If you need the newest version of the check, install the `dd-check-snmp` package.
 
-# Configuration
+## Configuration
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
@@ -85,7 +85,7 @@ Put all your pysnmp MIBs into any directory and point the SNMP check to this dir
 
 Restart the Agent to start sending SNMP metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `snmp` under the Checks section:
 
@@ -102,17 +102,17 @@ Run the Agent's `info` subcommand and look for `snmp` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The snmp check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 The SNMP check doesn't generate any standard metrics, so [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv) is empty. 
 
 The check submits collects and submits the metrics you specify under the `snmp.*` namespace.
 
-# Service Checks
+## Service Checks
 
 **snmp.can_check**:
 

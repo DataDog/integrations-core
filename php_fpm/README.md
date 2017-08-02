@@ -1,14 +1,14 @@
 # PHP-FPM Check
 
-# Overview
+## Overview
 
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.
 
-# Installation
+## Installation
 
 The PHP-FPM check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use PHP-FPM. If you need the newest version of the check, install the `dd-check-php-fpm` package.
 
-# Configuration
+## Configuration
 
 Create a file `php_fpm.yaml` in the Agent's `conf.d` directory:
 
@@ -28,7 +28,7 @@ instances:
 
 Restart the Agent to start sending PHP-FPM metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `php_fpm` under the Checks section:
 
@@ -45,15 +45,15 @@ Run the Agent's `info` subcommand and look for `php_fpm` under the Checks sectio
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The php_fpm check is compatible with all major platforms.
 
-# Metrics 
+## Metrics 
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 `php_fpm.can_ping`:
 
