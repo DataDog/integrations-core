@@ -18,8 +18,7 @@ from kazoo.client import KazooClient
 # project
 from tests.checks.common import AgentCheckTest
 
-
-instances = [{
+zk_instance = {
     'kafka_connect_str': '172.17.0.1:9092',
     'zk_connect_str': 'localhost:2181',
     # 'zk_prefix': '/0.8',
@@ -28,7 +27,18 @@ instances = [{
             'marvel': [0]
         }
     }
-}]
+}
+
+kafka_instance = {
+    'kafka_connect_str': '172.17.0.1:9092',
+    'kafka_consumer_offsets': True,
+    'consumer_groups': {
+        'my_consumer': {
+            'marvel': [0]
+        }
+    }
+}
+
 
 BROKER_METRICS = [
     'kafka.broker_offset',
@@ -47,7 +57,7 @@ SHUTDOWN = threading.Event()
 class Producer(threading.Thread):
 
     def run(self):
-        producer = KafkaProducer(bootstrap_servers=instances[0]['kafka_connect_str'])
+        producer = KafkaProducer(bootstrap_servers=zk_instance['kafka_connect_str'])
 
         while not SHUTDOWN.is_set():
             for partition in PARTITIONS:
@@ -70,7 +80,7 @@ class ZKConsumer(threading.Thread):
         zk_path_topic_tmpl = '/consumers/my_consumer/offsets/'
         zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/{partition}'
 
-        zk_conn = KazooClient(instances[0]['zk_connect_str'], timeout=10)
+        zk_conn = KazooClient(zk_instance['zk_connect_str'], timeout=10)
         zk_conn.start()
 
         for topic in TOPICS:
@@ -81,7 +91,7 @@ class ZKConsumer(threading.Thread):
                     zk_conn.ensure_path(node_path)
                     zk_conn.set(node_path, str(0))
 
-        consumer = KafkaConsumer(bootstrap_servers=instances[0]['kafka_connect_str'],
+        consumer = KafkaConsumer(bootstrap_servers=zk_instance['kafka_connect_str'],
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest',
                                  enable_auto_commit=False)
@@ -112,7 +122,7 @@ class ZKConsumer(threading.Thread):
 class KConsumer(threading.Thread):
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=instances[0]['kafka_connect_str'],
+        consumer = KafkaConsumer(bootstrap_servers=kafka_instance['kafka_connect_str'],
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest')
         consumer.subscribe(TOPICS)
@@ -149,6 +159,7 @@ class TestKafka(AgentCheckTest):
             if t.is_alive():
                 t.join(5)
 
+
     def test_check_zk(self):
         """
         Testing Kafka_consumer check.
@@ -157,6 +168,7 @@ class TestKafka(AgentCheckTest):
         if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
             raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
 
+        instances = [zk_instance]
         self.run_check({'instances': instances})
 
         for instance in instances:
@@ -183,13 +195,14 @@ class TestKafka(AgentCheckTest):
         if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
             raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
 
-        nogroup_instances = copy.deepcopy(instances)
-        nogroup_instances[0].pop('consumer_groups')
-        nogroup_instances[0]['monitor_unlisted_consumer_groups'] = True
+        nogroup_instance = copy.deepcopy(zk_instance)
+        nogroup_instance.pop('consumer_groups')
+        nogroup_instance['monitor_unlisted_consumer_groups'] = True
 
-        self.run_check({'instances': nogroup_instances})
+        instances = [nogroup_instance]
+        self.run_check({'instances': instances})
 
-        for instance in nogroup_instances:
+        for instance in instances:
             for topic in TOPICS:
                 if topic is not '__consumer_offsets':
                     for partition in PARTITIONS:
@@ -203,4 +216,30 @@ class TestKafka(AgentCheckTest):
                     for mname in BROKER_METRICS + CONSUMER_METRICS:
                         self.assertMetric(mname, at_least=1)
 
+        self.coverage_report()
+
+    def test_check_kafka(self):
+        """
+        Testing Kafka_consumer check.
+        """
+
+        if os.environ.get('FLAVOR_OPTIONS','').lower() == "zookeeper":
+            raise SkipTest("Skipping test - environment not configured for Kafka consumer offsets")
+
+        instances = [kafka_instance]
+        self.run_check({'instances': instances})
+
+        for instance in instances:
+            for name, consumer_group in instance['consumer_groups'].iteritems():
+                for topic, partitions in consumer_group.iteritems():
+                    for partition in partitions:
+                        tags = [ "topic:{}".format(topic),
+                                "partition:{}".format(partition)]
+                        for mname in BROKER_METRICS:
+                            self.assertMetric(mname, tags=tags, at_least=1)
+                        for mname in CONSUMER_METRICS:
+                            self.assertMetric(mname, tags=tags + ["source:kafka", "consumer_group:{}".format(name)], at_least=1)
+
+        # let's reassert for the __consumer_offsets - multiple partitions
+        self.assertMetric('kafka.broker_offset', at_least=1)
         self.coverage_report()
