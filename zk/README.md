@@ -1,14 +1,14 @@
 # Agent Check: Zookeeper
 
-# Overview
+## Overview
 
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
 
-# Installation
+## Installation
 
 The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers. If you need the newest version of the check, install the `dd-check-zk` package.
 
-# Configuration
+## Configuration
 
 Create a file `zk.yaml` in the Agent's `conf.d` directory:
 
@@ -23,7 +23,7 @@ instances:
 
 Restart the Agent to start sending Zookeeper metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `zk` under the Checks section:
 
@@ -40,15 +40,15 @@ Run the Agent's `info` subcommand and look for `zk` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The Zookeeper check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zookeeper/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 **zookeeper.ruok**:
 
