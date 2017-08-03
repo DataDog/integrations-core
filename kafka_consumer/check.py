@@ -210,7 +210,7 @@ class KafkaCheck(AgentCheck):
             for broker in client.cluster.brokers():
                 try:
                     coord_resp = self._make_blocking_req(client, request, nodeid=broker.nodeId)
-                    if coord_resp:
+                    if coord_resp and coord_resp.error_code is not 0:
                         client.cluster.add_group_coordinator(group, coord_resp)
                         coord_id = client.cluster.coordinator_for_group(group)
                         if coord_id > 0:
@@ -467,10 +467,11 @@ class KafkaCheck(AgentCheck):
         # OffsetFetchRequest.
         request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
         response = self._make_blocking_req(client, request, nodeid=coord_id)
-
         consumer_offsets = {}
         for (topic, partition_offsets) in response.topics:
-            for partition, offset, _, _ in partition_offsets:
+            for partition, offset, _, error_code in partition_offsets:
+                if error_code is not 0:
+                    continue
                 consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
