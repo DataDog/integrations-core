@@ -14,9 +14,11 @@ from nose import SkipTest
 from kafka import KafkaConsumer, KafkaProducer
 
 from kazoo.client import KazooClient
+from docker import Client  # required by test setup
 
 # project
-from tests.checks.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest, log
+
 
 zk_instance = {
     'kafka_connect_str': '172.17.0.1:9092',
@@ -53,6 +55,9 @@ TOPICS = ['marvel', 'dc', '__consumer_offsets']
 PARTITIONS = [0, 1]
 
 SHUTDOWN = threading.Event()
+CLUSTER_READY = 'Stabilized group my_consumer'
+KAFKA_IMAGE_NAME = 'wurstmeister/kafka'
+DOCKER_TO = 10
 
 class Producer(threading.Thread):
 
@@ -135,6 +140,7 @@ class KConsumer(threading.Thread):
 class TestKafka(AgentCheckTest):
     """Basic Test for kafka_consumer integration."""
     CHECK_NAME = 'kafka_consumer'
+    MAX_SETUP_WAIT = 60
     THREADS = [Producer()]
 
     def __init__(self, *args, **kwargs):
@@ -147,10 +153,39 @@ class TestKafka(AgentCheckTest):
 
     @classmethod
     def setUpClass(cls):
+        """
+        Setup the consumer + producer, and wait for cluster
+        """
+        start = time.time()
+
         cls.THREADS[0].start()
         time.sleep(5)
         cls.THREADS[1].start()
         time.sleep(5)
+
+        try:
+            cli = Client(base_url='unix://var/run/docker.sock',
+                         timeout=DOCKER_TO)
+            containers = cli.containers()
+
+            nodes = []
+            for c in containers:
+                if KAFKA_IMAGE_NAME in c.get('Image'):
+                    nodes.append(c)
+
+            elapsed = time.time() - start
+            while elapsed < cls.MAX_SETUP_WAIT:
+                for node in nodes:
+                    log = cli.logs(node.get('Id'))
+                    if CLUSTER_READY in log:
+                        return
+
+                time.sleep(1)
+                elapsed = time.time() - start
+        except Exception:
+            pass
+
+        log.info('Unable to verify kafka cluster status - tests may fail')
 
     @classmethod
     def tearDownClass(cls):
@@ -159,14 +194,37 @@ class TestKafka(AgentCheckTest):
             if t.is_alive():
                 t.join(5)
 
+    def is_supported(self, flavors):
+        supported = False
+        version = os.environ.get('FLAVOR_VERSION')
+        flavor = os.environ.get('FLAVOR_OPTIONS','').lower()
+
+        if not version:
+            return False
+
+        for f in flavors:
+            if f == flavor:
+                supported = True
+
+        if not supported:
+            return False
+
+        if version is not 'latest':
+            version = version.split('-')[0]
+            version = tuple(s for s in version.split('.') if s.strip())
+            if flavor is 'kafka' and version <= self.check.LAST_ZKONLY_VERSION:
+                supported = False
+
+        return supported
+
 
     def test_check_zk(self):
         """
         Testing Kafka_consumer check.
         """
 
-        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
-            raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
+        if not self.is_supported(['zookeeper']):
+            raise SkipTest("Skipping test - not supported in current environment")
 
         instances = [zk_instance]
         self.run_check({'instances': instances})
@@ -192,8 +250,8 @@ class TestKafka(AgentCheckTest):
         Testing Kafka_consumer check grabbing groups from ZK
         """
 
-        if os.environ.get('FLAVOR_OPTIONS','').lower() == "kafka":
-            raise SkipTest("Skipping test - environment not configured for ZK consumer offsets")
+        if not self.is_supported(['zookeeper']):
+            raise SkipTest("Skipping test - not supported in current environment")
 
         nogroup_instance = copy.deepcopy(zk_instance)
         nogroup_instance.pop('consumer_groups')
@@ -223,8 +281,8 @@ class TestKafka(AgentCheckTest):
         Testing Kafka_consumer check.
         """
 
-        if os.environ.get('FLAVOR_OPTIONS','').lower() == "zookeeper":
-            raise SkipTest("Skipping test - environment not configured for Kafka consumer offsets")
+        if not self.is_supported(['kafka']):
+            raise SkipTest("Skipping test - not supported in current environment")
 
         instances = [kafka_instance]
         self.run_check({'instances': instances})
