@@ -1,16 +1,16 @@
 # Lighttpd Check
 
-# Overview
+## Overview
 
 The Agent's lighttpd check tracks uptime, bytes served, requests per second, response codes, and more.
 
-# Installation
+## Installation
 
 The lighttpd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your lighttpd servers. If you need the newest version of the check, install the `dd-check-lighttpd` package.
 
 You'll also need to install `mod_status` on your Lighttpd servers.
 
-# Configuration
+## Configuration
 
 Create a file `lighttpd.yaml` in the Agent's `conf.d` directory:
 
@@ -26,7 +26,7 @@ instances:
 
 Restart the Agent to begin sending lighttpd metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `lighttpd` under the Checks section:
 
@@ -43,11 +43,11 @@ Run the Agent's `info` subcommand and look for `lighttpd` under the Checks secti
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The lighttpd check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 The check collects different metrics depending on the major version of lighttpd.
 
@@ -90,8 +90,13 @@ It collects these metrics for lighttpd 2:
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv) for a description of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 `- lighttpd.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, otherwise OK.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics/) about it.
+

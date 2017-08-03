@@ -1,14 +1,14 @@
 # Redis Integration
 
-# Overview
+## Overview
 
 Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects a wealth of metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
 
-# Installation
+## Installation
 
 The Redis check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Redis servers. If you need the newest version of the check, install the `dd-check-redis` package.
 
-# Configuration
+## Configuration
 
 Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory:
 
@@ -26,7 +26,7 @@ See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob
 
 Restart the Agent to begin sending Redis metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `redis` under the Checks section:
 
@@ -43,9 +43,9 @@ Run the Agent's `info` subcommand and look for `redis` under the Checks section:
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-## Agent cannot connect
+### Agent cannot connect
 ```
     redisdb
     -------
@@ -55,7 +55,7 @@ Run the Agent's `info` subcommand and look for `redis` under the Checks section:
 
 Check that the connection info in `redisdb.yaml` is correct.
 
-## Agent cannot authenticate
+### Agent cannot authenticate
 ```
     redisdb
     -------
@@ -65,20 +65,20 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 Configure a `password` in `redisdb.yaml`.
 
-# Compatibility
+## Compatibility
 
 The redis check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv) for a list of metrics provided by this integration.
 
-# Service Checks
+## Service Checks
 
 `redis.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
 Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about how to monitor your Redis servers with Datadog.

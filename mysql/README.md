@@ -1,4 +1,6 @@
-# Overview
+# Mysql check
+
+## Overview
 
 The Datadog Agent can collect many metrics from MySQL databases, including:
 
@@ -9,11 +11,11 @@ The Datadog Agent can collect many metrics from MySQL databases, including:
 
 And many more. You can also invent your own metrics using custom SQL queries.
 
-# Installation
+## Installation
 
 The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers. If you need the newest version of the check, install the `dd-check-mysql` package.
 
-# Configuration
+## Configuration
 
 ### Prepare MySQL
 
@@ -77,7 +79,7 @@ See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/ma
 
 Restart the Agent to start sending MySQL metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `mysql` under the Checks section:
 
@@ -97,7 +99,7 @@ Run the Agent's `info` subcommand and look for `mysql` under the Checks section:
 
 If the status is not OK, see the Troubleshooting section.
 
-# Troubleshooting
+## Troubleshooting
 
 You may observe one of these common problems in the output of the Datadog Agent's `info` subcommand.
 
@@ -134,17 +136,19 @@ mysql> select user,host,process_priv from mysql.user where user='datadog';
 
 Review the Configuration section and grant the datadog user all necessary privileges. Do NOT grant all privileges on all databases to this user.
 
-# Compatibility
+## Compatibility
 
 The MySQL integration is supported on versions x.x+
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this check.
 
 The check does not collect all metrics by default. Set the following boolean configuration options to `true` to enable its metrics:
 
-|`extra_status_metrics`|
+`extra_status_metrics` adds the following metrics:
+
+|Metric name| Metric type|
 |----------|--------|
 | mysql.binlog.cache_disk_use | GAUGE |
 | mysql.binlog.cache_use | GAUGE |
@@ -180,7 +184,9 @@ The check does not collect all metrics by default. Set the following boolean con
 | mysql.performance.threads_cached | GAUGE |
 | mysql.performance.threads_created | MONOTONIC |
 
-|`extra_innodb_metrics`|
+`extra_innodb_metrics` adds the following metrics:
+
+|Metric name| Metric type|
 |----------|--------|
 | mysql.innodb.active_transactions | GAUGE |
 | mysql.innodb.buffer_pool_data | GAUGE |
@@ -268,16 +274,20 @@ The check does not collect all metrics by default. Set the following boolean con
 | mysql.innodb.x_lock_spin_rounds | RATE |
 | mysql.innodb.x_lock_spin_waits | RATE |
 
-|`extra_performance_metrics` adds the following metrics:|
+`extra_performance_metrics` adds the following metrics:
+
+|Metric name| Metric type|
 |----------|--------|
 | mysql.performance.query_run_time.avg | GAUGE |
 | mysql.performance.digest_95th_percentile.avg_us | GAUGE |
 
-|`schema_size_metrics` adds the following metric:|
+`schema_size_metrics` adds the following metric:
+
+|Metric name| Metric type|
 |----------|--------|
 | mysql.info.schema.size | GAUGE |
 
-# Service Checks
+## Service Checks
 
 `mysql.replication.slave_running`:
 
@@ -287,6 +297,6 @@ Returns CRITICAL for a slave that's not running, otherwise OK.
 
 Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
 Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.

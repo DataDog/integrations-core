@@ -1,16 +1,16 @@
 # Agent Check: TCP connectivity
 
-# Overview
+## Overview
 
 Monitor TCP connectivity and response time for any host and port.
 
-# Installation
+## Installation
 
 The TCP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
 
 If you need the newest version of the TCP check, install the `dd-check-tcp` package.
 
-# Configuration
+## Configuration
 
 Create a file `tcp_check.yaml` in the Agent's `conf.d` directory:
 
@@ -27,7 +27,7 @@ instances:
 
 Restart the Agent to start sending TCP service checks and response times to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `tcp_check` under the Checks section:
 
@@ -44,15 +44,15 @@ Run the Agent's `info` subcommand and look for `tcp_check` under the Checks sect
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The TCP check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 **`tcp.can_connect`**:
 

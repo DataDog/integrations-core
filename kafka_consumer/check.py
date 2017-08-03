@@ -187,19 +187,21 @@ class KafkaCheck(AgentCheck):
                 continue
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
             if consumer_lag < 0:
-                # This is a really bad scenario because new messages produced to
-                # the topic are never consumed by that particular consumer
-                # group. So still report the negative lag as a way of increasing
-                # visibility of the error.
-                title = "Consumer lag for consumer negative."
-                message = "Consumer lag for consumer group: {group}, topic: {topic}, " \
-                    "partition: {partition} is negative. This should never happen.".format(
+                # this will result in data loss, so emit an event for max visibility
+                title = "Negative consumer lag for group: {group}.".format(group=consumer_group)
+                message = "Consumer lag for Kafka consumer group: {group}, topic: {topic}, " \
+                    "partition: {partition} is negative.\n\n" \
+                    "This is theoretically impossible, yet may occur and will " \
+                    "result in data loss because the consumer group will miss " \
+                    "all messages produced to the partition until the lag turns " \
+                    "positive.".format(
                         group=consumer_group,
                         topic=topic,
                         partition=partition
                     )
                 key = "{}:{}:{}".format(consumer_group, topic, partition)
-                self._send_event(title, message, consumer_group_tags, 'consumer_lag', key)
+                self._send_event(title, message, consumer_group_tags, 'consumer_lag',
+                    key, severity="error")
                 self.log.debug(message)
 
             self.gauge('kafka.consumer_lag', consumer_lag,
@@ -224,12 +226,14 @@ class KafkaCheck(AgentCheck):
                                 assert isinstance(partition, int)
         return val
 
-    def _send_event(self, title, text, tags, type, aggregation_key):
+    def _send_event(self, title, text, tags, type, aggregation_key, severity='info'):
+        """Emit an event to the Datadog Event Stream."""
         event_dict = {
             'timestamp': int(time.time()),
             'source_type_name': self.SOURCE_TYPE_NAME,
             'msg_title': title,
             'event_type': type,
+            'alert_type': severity,
             'msg_text': text,
             'tags': tags,
             'aggregation_key': aggregation_key,
