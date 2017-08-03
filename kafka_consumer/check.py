@@ -205,16 +205,22 @@ class KafkaCheck(AgentCheck):
         request = GroupCoordinatorRequest[0](group)
 
         # not all brokers might return a good response... Try all of them
-        for broker in client.cluster.brokers():
-            try:
-                coord_resp = self._make_blocking_req(client, request, nodeid=broker.nodeId)
-                if coord_resp:
-                    client.cluster.add_group_coordinator(group, coord_resp)
-                    return client.cluster.coordinator_for_group(group)
-            except AssertionError:
-                continue
+        coord_id = None
+        for _ in range(self._broker_retries):
+            for broker in client.cluster.brokers():
+                try:
+                    coord_resp = self._make_blocking_req(client, request, nodeid=broker.nodeId)
+                    if coord_resp:
+                        client.cluster.add_group_coordinator(group, coord_resp)
+                        coord_id = client.cluster.coordinator_for_group(group)
+                        if coord_id > 0:
+                            return coord_id
+                except AssertionError:
+                    continue
+            else:
+                coord_id = None
 
-        return None
+        return coord_id
 
     def _process_highwater_offsets(self, request, instance, nodeid, response):
         highwater_offsets = {}
@@ -270,10 +276,12 @@ class KafkaCheck(AgentCheck):
         try:
             # store partitions that exist but unable to fetch offsets for later
             # error checking
-            attempts = 0
             processed = []
             pending = set([broker.nodeId for broker in cli.cluster.brokers()])
-            while len(pending) != 0 and self._broker_retries > attempts:
+            for _ in range(self._broker_retries):
+                if len(pending) == 0:
+                    break
+
                 for node in processed:
                     pending.remove(node)
 
@@ -310,7 +318,6 @@ class KafkaCheck(AgentCheck):
                         topic_partitions_without_a_leader.extend(unled)
 
                     processed.append(nodeId)
-                attempts += 1
         except Exception:
             self.log.exception('There was a problem collecting the high watermark offsets')
 
@@ -436,11 +443,14 @@ class KafkaCheck(AgentCheck):
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
                 coordinator_id = self._get_group_coordinator(cli, consumer_group)
-                offsets = self._get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
-                for (topic, partition), offset in offsets.iteritems():
-                    topics[topic].update([partition])
-                    key = (consumer_group, topic, partition)
-                    consumer_offsets[key] = offset
+                if coordinator_id:
+                    offsets = self._get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
+                    for (topic, partition), offset in offsets.iteritems():
+                        topics[topic].update([partition])
+                        key = (consumer_group, topic, partition)
+                        consumer_offsets[key] = offset
+                else:
+                    self.log.info("unable to find group coordinator for %s", consumer_group)
             except Exception:
                 self.log.exception('Could not read consumer offsets from kafka.')
 
