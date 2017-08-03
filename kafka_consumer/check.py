@@ -444,20 +444,22 @@ class KafkaCheck(AgentCheck):
             try:
                 coordinator_id = self._get_group_coordinator(cli, consumer_group)
                 if coordinator_id:
-                    offsets = self._get_consumer_offsets(cli, coordinator_id, consumer_group, topic_partitions)
-                    for (topic, partition), offset in offsets.iteritems():
-                        topics[topic].update([partition])
-                        key = (consumer_group, topic, partition)
-                        consumer_offsets[key] = offset
+                    offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions, coordinator_id)
                 else:
+                    offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions)
                     self.log.info("unable to find group coordinator for %s", consumer_group)
+
+                for (topic, partition), offset in offsets.iteritems():
+                    topics[topic].update([partition])
+                    key = (consumer_group, topic, partition)
+                    consumer_offsets[key] = offset
             except Exception:
                 self.log.exception('Could not read consumer offsets from kafka.')
 
         return topics, consumer_offsets
 
-    def _get_consumer_offsets(self, client, coord_id, consumer_group, topic_partitions):
-        version = client.check_version(coord_id)
+    def _get_consumer_offsets(self, client, consumer_group, topic_partitions, coord_id=None):
+        # version = client.check_version(coord_id)
 
         tps = defaultdict(set)
         for topic, partitions in topic_partitions.iteritems():
@@ -465,14 +467,16 @@ class KafkaCheck(AgentCheck):
 
         # TODO: find reliable way to decide what API version to use for
         # OffsetFetchRequest.
-        request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
-        response = self._make_blocking_req(client, request, nodeid=coord_id)
         consumer_offsets = {}
-        for (topic, partition_offsets) in response.topics:
-            for partition, offset, _, error_code in partition_offsets:
-                if error_code is not 0:
-                    continue
-                consumer_offsets[(topic, partition)] = offset
+        broker_ids = [coord_id] if coord_id else [b.nodeId for b in client.cluster.brokers()]
+        for broker_id in broker_ids:
+            request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
+            response = self._make_blocking_req(client, request, nodeid=broker_id)
+            for (topic, partition_offsets) in response.topics:
+                for partition, offset, _, error_code in partition_offsets:
+                    if error_code is not 0:
+                        continue
+                    consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
 
