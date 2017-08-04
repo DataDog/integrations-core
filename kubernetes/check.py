@@ -182,11 +182,13 @@ class Kubernetes(AgentCheck):
             self._update_pods_metrics(instance, pods_list)
             # cAdvisor & kubelet metrics, will fail if port 4194 is not open
             try:
-                self._update_metrics(instance, pods_list)
+                if int(instance.get('port', KubeUtil.DEFAULT_CADVISOR_PORT)) > 0:
+                    self._update_metrics(instance, pods_list)
             except ConnectionError:
                 self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
                              ''' limits/requests will not be collected. Please setup'''
-                             ''' your kubelet with the --cadvisor-port=4194 option''')
+                             ''' your kubelet with the --cadvisor-port=4194 option, or set port to 0'''
+                             ''' in this check's configuration to disable cAdvisor lookup.''')
             except Exception as err:
                 self.log.warning("Error while getting performance metrics: %s" % str(err))
 
