@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 kafka.net.bytes_out,gauge,10,byte,second,Outgoing byte rate.,0,kafka,bytes out
 kafka.net.bytes_in,gauge,10,byte,second,Incoming byte rate.,0,kafka,bytes in
 kafka.net.bytes_rejected,gauge,10,byte,second,Rejected byte rate.,-1,kafka,bytes rejected
-kafka.messages_in,gauge,10 ,message,,Incoming message rate.,0,kafka,messages in
+kafka.messages_in,gauge,10,message,,Incoming message rate.,0,kafka,messages in
 kafka.request.fetch.failed,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail
 kafka.request.fetch.failed_per_second,gauge,10,request,second,Rate of client fetch request failures per second.,-1,kafka,req fetch fail rate
 kafka.request.produce.time.avg,gauge,10,request,second,Average time for a produce request.,0,kafka,req prod time avg
