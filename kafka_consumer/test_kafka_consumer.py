@@ -66,17 +66,20 @@ class Producer(threading.Thread):
 
         while not SHUTDOWN.is_set():
             for partition in PARTITIONS:
-                producer.send('marvel', b"Peter Parker", partition=partition)
-                producer.send('marvel', b"Bruce Banner", partition=partition)
-                producer.send('marvel', b"Tony Stark", partition=partition)
-                producer.send('marvel', b"Johhny Blaze", partition=partition)
-                producer.send('marvel', b"\xc2BoomShakalaka", partition=partition)
-                producer.send('dc', b"Diana Prince", partition=partition)
-                producer.send('dc', b"Bruce Wayne", partition=partition)
-                producer.send('dc', b"Clark Kent", partition=partition)
-                producer.send('dc', b"Arthur Curry", partition=partition)
-                producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
-                time.sleep(1)
+                try:
+                    producer.send('marvel', b"Peter Parker", partition=partition)
+                    producer.send('marvel', b"Bruce Banner", partition=partition)
+                    producer.send('marvel', b"Tony Stark", partition=partition)
+                    producer.send('marvel', b"Johhny Blaze", partition=partition)
+                    producer.send('marvel', b"\xc2BoomShakalaka", partition=partition)
+                    producer.send('dc', b"Diana Prince", partition=partition)
+                    producer.send('dc', b"Bruce Wayne", partition=partition)
+                    producer.send('dc', b"Clark Kent", partition=partition)
+                    producer.send('dc', b"Arthur Curry", partition=partition)
+                    producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
+                    time.sleep(1)
+                except Exception:
+                    pass
 
 
 class ZKConsumer(threading.Thread):
@@ -176,8 +179,8 @@ class TestKafka(AgentCheckTest):
             elapsed = time.time() - start
             while elapsed < cls.MAX_SETUP_WAIT:
                 for node in nodes:
-                    log = cli.logs(node.get('Id'))
-                    if CLUSTER_READY in log:
+                    _log = cli.logs(node.get('Id'))
+                    if CLUSTER_READY in _log:
                         return
 
                 time.sleep(1)
