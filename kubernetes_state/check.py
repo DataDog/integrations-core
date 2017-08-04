@@ -77,6 +77,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
+            'kube_job_status_failed': 'job.failed',
+            'kube_job_status_succeeded': 'job.succeeded',
         }
 
         self.ignore_metrics = [
@@ -113,9 +115,7 @@ class KubernetesState(PrometheusCheck):
             'kube_job_spec_parallelism',
             'kube_job_status_active',
             'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
-            'kube_job_status_failed',     # Container number gauge, redundant with job-global kube_job_failed
             'kube_job_status_start_time',
-            'kube_job_status_succeeded',  # Container number gauge, redundant with job-global kube_job_complete
 
         ]
 

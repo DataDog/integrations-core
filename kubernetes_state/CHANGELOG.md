@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Support for StatefulSet metrics
+* [FEATURE] Add basic Job metrics
 
 1.2.0 / 2017-07-18
 ==================

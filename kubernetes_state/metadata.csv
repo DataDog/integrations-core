@@ -69,3 +69,5 @@ kubernetes_state.limitrange.memory.default_request,gauge,,,,Default memory reque
 kubernetes_state.limitrange.memory.max_limit_request_ratio,gauge,,,,Maximum memory limit / request ratio,0,kubernetes,k8s_state.mem.max_ratio
 kubernetes_state.statefulset.replicas,gauge,,,,The number of replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas
 kubernetes_state.statefulset.replicas_desired,gauge,,,,The number of desired replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas_desired
+kubernetes_state.job.status.failed,gauge,,,,Observed number of failed jobs,0,kubernetes,k8s_state.job.failed
+kubernetes_state.job.status.succeeded,gauge,,,,Observed number of succeeded jobs,0,kubernetes,k8s_state.job.succeeded
