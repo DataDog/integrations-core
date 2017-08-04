@@ -32,7 +32,7 @@ namespace :ci do
       Wait.for 9092
       wait_on_docker_logs('resources_kafka_1', 20, ' started (kafka.server.KafkaServer)')
       wait_on_docker_logs('resources_zookeeper_1', 20, 'NoNode for /brokers')
-      if Gem::Version::new(kafka_consumer_version) > Gem::Version::new(kafka_legacy)
+      if Gem::Version.new(kafka_consumer_version) > Gem::Version.new(kafka_legacy)
         wait_on_docker_logs('resources_kafka_1', 20, 'Created topic "marvel"')
         wait_on_docker_logs('resources_kafka_1', 20, 'Created topic "dc"')
       end
@@ -41,8 +41,6 @@ namespace :ci do
            ZOOKEEPER_VERSION=#{zookeeper_version} \
            docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml scale kafka=2)
       wait_on_docker_logs('resources_kafka_2', 20, ' started (kafka.server.KafkaServer)')
-
-
     end
 
     task before_script: ['ci:common:before_script'] do
