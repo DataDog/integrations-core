@@ -4,6 +4,7 @@
 
 from checks import CheckException
 from checks.prometheus_check import PrometheusCheck
+import re
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -77,6 +78,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
+            'kube_job_status_failed': 'job.failed',
+            'kube_job_status_succeeded': 'job.succeeded',
         }
 
         self.ignore_metrics = [
@@ -113,9 +116,7 @@ class KubernetesState(PrometheusCheck):
             'kube_job_spec_parallelism',
             'kube_job_status_active',
             'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
-            'kube_job_status_failed',     # Container number gauge, redundant with job-global kube_job_failed
             'kube_job_status_start_time',
-            'kube_job_status_succeeded',  # Container number gauge, redundant with job-global kube_job_complete
 
         ]
 
@@ -194,6 +195,13 @@ class KubernetesState(PrometheusCheck):
         else:
             return None
 
+    def _trim_job_tag(self, name):
+        """
+        Trims suffix of job names if they match -(\d{4,10})
+        """
+        pattern = "(-\d{4,10}$)"
+        return re.sub(pattern, '', name)
+
     # Labels attached: namespace, pod, phase=Pending|Running|Succeeded|Failed|Unknown
     # The phase gets not passed through; rather, it becomes the service check suffix.
     def kube_pod_status_phase(self, message, **kwargs):
@@ -217,7 +225,8 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append(self._format_tag(label.name, label.value))
+                trimmed_job = self._remove_job_tag(label.value)
+                tags.append(self._format_tag(label.name, trimmed_job))
             self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_failed(self, message, **kwargs):
@@ -225,8 +234,28 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append(self._format_tag(label.name, label.value))
+                trimmed_job = self._remove_job_tag(label.value)
+                tags.append(self._format_tag(label.name, trimmed_job))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
+
+    def kube_job_status_failed(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.job.failed'
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                trimmed_job = self._remove_job_tag(label.value)
+                tags.append(self._format_tag(label.name, trimmed_job))
+            self.increment(metric_name, metric.gauge.value, tags=tags)
+
+    def kube_job_status_succeeded(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.job.succeeded'
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                if label.name == 'job':
+                trimmed_job = self._remove_job_tag(label.value)
+                tags.append(self._format_tag(label.name, trimmed_job))
+            self.increment(metric_name, metric.gauge.value, tags=tags)
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node. """
