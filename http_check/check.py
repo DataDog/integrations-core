@@ -267,13 +267,14 @@ class HTTPCheck(NetworkCheck):
                            % (str(e), length))
             raise
 
+        tags_list = list(tags)
+        tags_list.append('url:%s' % addr)
+
         # Only report this metric if the site is not down
         if response_time and not service_checks:
             # Stop the timer as early as possible
             running_time = time.time() - start
             # Store tags in a temporary list so that we don't modify the global tags data structure
-            tags_list = list(tags)
-            tags_list.append('url:%s' % addr)
             self.gauge('network.http.response_time', running_time, tags=tags_list)
 
         # Check HTTP response status code
@@ -318,6 +319,14 @@ class HTTPCheck(NetworkCheck):
 
             else:
                 send_status_up("%s is UP" % addr)
+
+        # Report status as a metric as well
+        can_status = 1 if service_checks[0][1] == "UP" else 0
+        self.gauge('network.http.can_connect', can_status, tags=tags_list)
+
+        # cant_connect is useful for top lists
+        cant_status = 0 if service_checks[0][1] == "UP" else 1
+        self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
             status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
