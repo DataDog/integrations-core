@@ -1,5 +1,12 @@
 # CHANGELOG - http_check
 
+1.1.2 / 2017-08-07
+==================
+
+### Changes
+
+* [FEATURE] Report http connect status as metrics. See[#659][].
+
 1.1.1 / 2017-07-18
 ==================
 
