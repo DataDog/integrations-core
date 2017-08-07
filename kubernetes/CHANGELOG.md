@@ -6,7 +6,7 @@
 ### Changes
 
 * [FEATURE] add an option to collect node labels as host tags
-* [IMPROVEMENT] add custom tags to service checks
+* [IMPROVEMENT] add custom tags to service checks [#642][]
 
 1.2.0 / 2017-07-18
 ==================
