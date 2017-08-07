@@ -1023,6 +1023,9 @@ class MySql(AgentCheck):
                 elif len(row) == 18:
                     results['Innodb_pending_normal_aio_reads'] = long(row[4])
                     results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                elif len(row) == 22:
+                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                    results['Innodb_pending_normal_aio_writes'] = long(row[16])
                 else:
                     results['Innodb_pending_normal_aio_reads'] = long(row[4])
                     results['Innodb_pending_normal_aio_writes'] = long(row[7])
