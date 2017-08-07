@@ -58,6 +58,7 @@ init_config:
           - Value
           - Count
           - Mean
+          - 50thPercentile
           - 75thPercentile
           - 95thPercentile
           - 99thPercentile
