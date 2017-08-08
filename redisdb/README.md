@@ -1,14 +1,14 @@
 # Redis Integration
 
-# Overview
+## Overview
 
 Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects a wealth of metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
 
-# Installation
+## Installation
 
-The Agent's Redis check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Redis servers. If you need the newest version of the Redis check, install the `dd-check-redis` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The Redis check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Redis servers. If you need the newest version of the check, install the `dd-check-redis` package.
 
-# Configuration
+## Configuration
 
 Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory:
 
@@ -18,17 +18,15 @@ init_config:
 instances:
   - host: localhost
     port: 6379 # or wherever your redis listens
-    # if your redis uses a unix domain socket instead of TCP
-    #unix_socket_path: /var/run/redis/redis.sock
-    # if your redis requires auth
-    #password: myredispassword
+#   unix_socket_path: /var/run/redis/redis.sock # if your redis uses a socket instead of TCP
+#   password: myredispassword                   # if your redis requires auth
 ```
 
 See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
 Restart the Agent to begin sending Redis metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `redis` under the Checks section:
 
@@ -45,9 +43,9 @@ Run the Agent's `info` subcommand and look for `redis` under the Checks section:
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-## Agent cannot connect
+### Agent cannot connect
 ```
     redisdb
     -------
@@ -57,7 +55,7 @@ Run the Agent's `info` subcommand and look for `redis` under the Checks section:
 
 Check that the connection info in `redisdb.yaml` is correct.
 
-## Agent cannot authenticate
+### Agent cannot authenticate
 ```
     redisdb
     -------
@@ -67,20 +65,20 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 Configure a `password` in `redisdb.yaml`.
 
-# Compatibility
+## Compatibility
 
 The redis check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv) for a list of metrics provided by this integration.
 
-# Service Checks
+## Service Checks
 
 `redis.can_connect`:
 
-Returns CRITICAL if the Agent cannot connect to Redis to collect metrics.
+Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
-To get a better idea of how (or why) to integrate your Redis servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about it.
+Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about how to monitor your Redis servers with Datadog.

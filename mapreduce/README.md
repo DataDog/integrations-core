@@ -30,3 +30,7 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The mapreduce check is compatible with all major platforms
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Hadoop health and performance with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about it.

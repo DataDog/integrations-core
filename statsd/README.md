@@ -56,3 +56,9 @@ Returns CRITICAL if the StatsD server does not respond to the Agent's health sta
 **statsd.can_connect**:
 
 Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
+
+## Further Reading
+
+If you don't know what StatsD is and how does it work, check out [our blog post about it](https://www.datadoghq.com/blog/statsd/)
+
+To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/) about it.

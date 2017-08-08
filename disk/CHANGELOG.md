@@ -1,13 +1,13 @@
 # CHANGELOG - disk
 
-1.0.1 / Unreleased
+1.0.1 / 2017-07-18
 ==================
 
 ### Changes
 
 * [SANITY] Import `Platform` helper from `utils.platform` instead of deprecated `util`. See [#484][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
