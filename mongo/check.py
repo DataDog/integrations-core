@@ -760,7 +760,7 @@ class MongoDb(AgentCheck):
 
                 # need a new connection to deal with replica sets
                 setname = replSet.get('set')
-                cli = pymongo.mongo_client.MongoClient(
+                cli_rs = pymongo.mongo_client.MongoClient(
                     server,
                     socketTimeoutMS=timeout,
                     connectTimeoutMS=timeout,
@@ -768,9 +768,9 @@ class MongoDb(AgentCheck):
                     replicaset=setname,
                     read_preference=pymongo.ReadPreference.NEAREST,
                     **ssl_params)
-                db = cli[db_name]
+                db_rs = cli_rs[db_name]
 
-                if do_auth and not self._authenticate(db, username, password, use_x509):
+                if do_auth and not self._authenticate(db_rs, username, password, use_x509):
                     message = ("Mongo: cannot connect with config %s" % server)
                     self.service_check(
                         self.SERVICE_CHECK_NAME,
@@ -808,7 +808,7 @@ class MongoDb(AgentCheck):
 
                 if current is not None:
                     total = 0.0
-                    cfg = cli['local']['system.replset'].find_one()
+                    cfg = cli_rs['local']['system.replset'].find_one()
                     for member in cfg.get('members'):
                         total += member.get('votes', 1)
                         if member['_id'] == current['_id']:
