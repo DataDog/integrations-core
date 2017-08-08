@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [BUGFIX] Fix bug when options dict is empty. See [637][]
 * [BUGFIX] MySQL: Fix slow query check for 95th us percentile. See [#586][]
 
 1.0.3 / 2017-05-11
