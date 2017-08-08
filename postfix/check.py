@@ -24,11 +24,11 @@ class PostfixCheck(AgentCheck):
     YAML config options:
         "directory" - the value of 'postconf -h queue_directory'
         "queues" - the postfix mail queues you would like to get message count totals for
-    
-    Optionally we can run the check to use `postqueue -p` which is ran with set-group ID privileges, 
+
+    Optionally we can run the check to use `postqueue -p` which is ran with set-group ID privileges,
     so that dd-agent user can connect to Postfix daemon processes without sudo.
     """
-    
+
     def check(self, instance):
         config = self._get_config(instance)
 
@@ -38,7 +38,7 @@ class PostfixCheck(AgentCheck):
 
         if self.init_config.get('postqueue', False):
             self.log.debug('running the check using postqueue -p output')
-            self._get_postqueue_stats(directory, tags)
+            self._get_postqueue_stats(tags)
         else:
             self.log.debug('running the check in classic mode')
             self._get_queue_count(directory, queues, tags)
@@ -58,7 +58,7 @@ class PostfixCheck(AgentCheck):
 
         return instance_config
 
-    def _get_postqueue_stats(self, directory, tags):
+    def _get_postqueue_stats(self, tags):
         # postqueue gathers information for active, hold and deferred queue.
         #
         #     Each  queue entry shows the queue file ID, message size, arrival
@@ -74,7 +74,7 @@ class PostfixCheck(AgentCheck):
         #            ery  attempt  will  be  made  until the mail is taken off
         #            hold.
         #
-        
+
         postfix_conf, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
         postfix_version = postfix_conf.strip('\n').split('=')[1].strip()
         output, _, _ = get_subprocess_output(['postqueue', '-p'], self.log, False)
@@ -104,7 +104,6 @@ class PostfixCheck(AgentCheck):
 
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
-            self.log.info('Postfix queue: {}'.format(queue))
             queue_path = os.path.join(directory, queue)
             if not os.path.exists(queue_path):
                 raise Exception('%s does not exist' % queue_path)
@@ -118,7 +117,6 @@ class PostfixCheck(AgentCheck):
                 test_sudo = os.system('setsid sudo -l < /dev/null')
                 if test_sudo == 0:
                     # default to `root` for backward compatibility
-                
                     postfix_user = self.init_config.get('postfix_user', 'root')
                     output, _, _ = get_subprocess_output(['sudo', '-u', postfix_user, 'find', queue_path, '-type', 'f'], self.log, False)
                     count = len(output.splitlines())
