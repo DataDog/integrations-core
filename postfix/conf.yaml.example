@@ -8,7 +8,14 @@
 #          Defaults:dd-agent !requiretty
 
 init_config:
-  - postfix_user: postfix
+  postfix_user: postfix
+
+# Optional: Set `postqueue: True` to gather mail queue counts using `postqueue -p` without the use of sudo.
+# The caveat is that postqueue will gather message counts for only the hold, active, and deferred queues.
+# Postqueue binary is ran with set-group ID privileges, so that it can connect to Postfix daemon processes.
+# Only `tags` keys will be used from `instances` definition.  
+#
+#  postqueue: True
 
 instances:
   - directory: /var/spool/postfix
@@ -27,3 +34,4 @@ instances:
     tags:
       - optional_tag3
       - optional_tag4
+    
