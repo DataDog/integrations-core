@@ -1,35 +1,61 @@
-# Statsd Integration
+# Agent Check: StatsD
 
-## Overview
+# Overview
 
-Get metrics from statsd service in real time to:
+This check monitors the availability and uptime of non-Datadog StatsD servers. It also tracks the number of metrics, by metric type, received by StatsD.
 
-* Visualize and monitor statsd states
-* Be notified about statsd failovers and events.
+This check does NOT forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
-## Installation
+# Installation
 
-Install the `dd-check-statsd` package manually or with your favorite configuration manager
+The StatsD check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that run StatsD. If you need the newest version of the check, install the `dd-check-statsd` package.
 
-## Configuration
+# Configuration
 
-Edit the `statsd.yaml` file to point to your server and port, set the masters to monitor
+Create a file `statsd.yaml` in the Agent's `conf.d` directory:
 
-## Validation
+```
+init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+instances:
+  - host: localhost
+    port: 8126 # or wherever your statsd listens
+```
 
-    Checks
-    ======
+Restart the Agent to start sending StatsD metrics and service checks to Datadog.
 
-        statsd
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+# Validation
 
-## Compatibility
+Run the Agent's `info` subcommand and look for `statsd` under the Checks section:
 
-The statsd check is compatible with all major platforms
+```
+  Checks
+  ======
+    [...]
+
+    statsd
+    -------
+      - instance #0 [OK]
+      - Collected 3 metrics, 0 events & 2 service checks
+
+    [...]
+```
+
+# Compatibility
+
+The statsd check is compatible with all major platforms.
+
+# Metrics
+
+# Service Checks
+
+**statsd.is_up**:
+
+Returns CRITICAL if the StatsD server does not respond to the Agent's health status request, otherwise OK.
+
+**statsd.can_connect**:
+
+Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
 
 ## Further Reading
 

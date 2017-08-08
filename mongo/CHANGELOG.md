@@ -5,6 +5,7 @@
 ### Changes
 
 * [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][]
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][]
 
 1.2.0 / 2017-07-18
 ==================
@@ -37,3 +38,4 @@
 [#352]: https://github.com/DataDog/integrations-core/issues/352
 [#491]: https://github.com/DataDog/integrations-core/issues/491
 [#625]: https://github.com/DataDog/integrations-core/pull/625
+[#627]: https://github.com/DataDog/integrations-core/pull/627
