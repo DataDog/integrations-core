@@ -5,6 +5,14 @@
 
 ### Changes
 
+* [IMPROVEMENT] option to run the check using postqueue -p
+
+
+1.1.0 / Unreleased
+==================
+
+### Changes
+
 * [IMPROVEMENT] run the check as the postfix user, not root
 
 
