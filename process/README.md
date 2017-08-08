@@ -32,6 +32,8 @@ instances:
 
 You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check will the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).
 
+To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in the main `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this if you're running the Agent from a Docker container (i.e. [docker-dd-agent](https://github.com/DataDog/docker-dd-agent)) and want to monitor processes running on the server hosting your containers. To monitor processes running in your containers, see the [Docker check](https://github.com/DataDog/integrations-core/tree/master/docker_daemon).
+
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.
 
 Restart the Agent to start sending process metrics and service checks to Datadog.
