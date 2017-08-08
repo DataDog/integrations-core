@@ -78,7 +78,7 @@ class PostfixCheck(AgentCheck):
         postfix_conf, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
         postfix_version = postfix_conf.strip('\n').split('=')[1].strip()
         output, _, _ = get_subprocess_output(['postqueue', '-p'], self.log, False)
-        
+
         active_count = 0
         hold_count = 0
         deferred_count = 0
