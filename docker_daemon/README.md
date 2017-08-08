@@ -30,3 +30,7 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The docker_daemon check is compatible with all major platforms
+
+## Further Reading
+
+To get a better idea of how (or why) to integrate your docker daemon with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/the-docker-monitoring-problem/) about it.

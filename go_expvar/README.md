@@ -1,24 +1,24 @@
 # Go Expvar Integration
 
-# Overview
+## Overview
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
 
 If you prefer to instrument your Go code using only [dogstats-go](https://github.com/DataDog/datadog-go), you can still use this integration to collect memory-related metrics.
 
-# Installation
+## Installation
 
 The Go Expvar check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you run Go services whose metrics you want to collect.
 
-# Configuration
+## Configuration
 
-## Prepare your Go service
+### Prepare your Go service
 
 If your Go service doesn't use the [expvar package](https://golang.org/pkg/expvar/) already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar — i.e. you only want to collect your service's memory metrics — import the package using the blank identifier (`import _ "expvar"`).
 
 If your service doesn't already listen for HTTP requests (via the http package), [make it listen](https://golang.org/pkg/net/http/#ListenAndServe) locally, just for the Datadog Agent.
 
-## Connect the Agent
+### Connect the Agent
 
 Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
 
@@ -43,7 +43,7 @@ If you don't configure a `metrics` list, the Agent will still collect memstat me
 
 Restart the Agent to begin sending memstat and expvar metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `go_expvar` under the Checks section:
 
@@ -60,16 +60,18 @@ Run the Agent's `info` subcommand and look for `go_expvar` under the Checks sect
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The go_expvar check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv) for a list of metrics provided by this integration.
 
-# Service Checks
+## Service Checks
 
-# Events
+## Events
 
-# Further Reading
+## Further Reading
+
+To get a better idea of how (or why) to instrument your Go apps with Expvar and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/) about it.

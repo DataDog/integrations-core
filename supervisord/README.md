@@ -1,20 +1,20 @@
 # Agent Check: Supervisor
 
-# Overview
+## Overview
 
 This check monitors the uptime, status, and number of processes running under supervisord.
 
-# Installation
+## Installation
 
 The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes. If you need the newest version of the check, install the `dd-check-supervisord` package.
 
-# Configuration
+## Configuration
 
-## Prepare supervisord
+### Prepare supervisord
 
 The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
 
-### HTTP server
+#### HTTP server
 
 Add a block like this to supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
 
@@ -25,7 +25,7 @@ username=user  # optional
 password=pass  # optional
 ```
 
-### UNIX socket 
+#### UNIX socket 
 
 Add blocks like these to `/etc/supervisor.conf` (if they're not already there):
 
@@ -44,7 +44,7 @@ If supervisor is running as root, make sure `chmod` is set so that non-root user
 
 Reload supervisord.
 
-## Connect the Agent
+### Connect the Agent
 
 Create a file `supervisord.yaml` in the Agent's `conf.d` directory:
 
@@ -68,7 +68,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 Restart the Agent to start sending Supervisor metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `supervisord` under the Checks section:
 
@@ -85,15 +85,15 @@ Run the Agent's `info` subcommand and look for `supervisord` under the Checks se
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The supervisord check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+## Service Checks
 
 **supervisord.can_connect**:
 
@@ -106,15 +106,15 @@ The Agent submits this service check for all child processes of supervisord (if 
 This table shows the `supervisord.process.status` that results from each supervisord status:
 
 |supervisord status|supervisord.process.status|
-|---
-|STOPPED|CRITICAL
-|STARTING|UNKNOWN
-|RUNNING|OK
-|BACKOFF|CRITICAL
-|STOPPING|CRITICAL
-|EXITED|CRITICAL
-|FATAL|CRITICAL
-|UNKNOWN|UNKNOWN
+|---|---|
+|STOPPED|CRITICAL|
+|STARTING|UNKNOWN|
+|RUNNING|OK|
+|BACKOFF|CRITICAL|
+|STOPPING|CRITICAL|
+|EXITED|CRITICAL|
+|FATAL|CRITICAL|
+|UNKNOWN|UNKNOWN|
 
 # Further Reading
 

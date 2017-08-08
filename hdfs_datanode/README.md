@@ -1,18 +1,18 @@
 # HDFS DataNode Integration
 
-# Overview
+## Overview
 
 Track disk utilization and failed volumes on each of your HDFS DataNodes. This Agent check collects metrics for these, as well as block- and cache-related metrics.
 
 Use this check (hdfs_datanode) and its counterpart check (hdfs_namenode), not the older two-in-one check (hdfs); that check is deprecated.
 
-# Installation
+## Installation
 
 The HDFS DataNode check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your DataNodes.
 
-# Configuration
+## Configuration
 
-## Prepare the DataNode
+### Prepare the DataNode
 
 The Agent collects metrics from the DataNode's JMX remote interface. The interface is disabled by default, so enable it by setting the following option in `hadoop-env.sh` (usually found in $HADOOP_HOME/conf):
 
@@ -25,7 +25,7 @@ export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote
 
 Restart the DataNode process to enable the JMX interface.
 
-## Connect the Agent
+### Connect the Agent
 
 Create a file `hdfs_datanode.yaml` in the Agent's `conf.d` directory:
 
@@ -38,7 +38,7 @@ instances:
 
 Restart the Agent to begin sending DataNode metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `hdfs_datanode` under the Checks section:
 
@@ -55,24 +55,24 @@ Run the Agent's `info` subcommand and look for `hdfs_datanode` under the Checks 
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Compatibility
+## Compatibility
 
 The hdfs_datanode check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks
 
 `hdfs.datanode.jmx.can_connect`:
 
 Returns `Critical` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
-# Further Reading
+## Further Reading
 
 To get a better idea of how (or why) to integrate your HDFS DataNodes with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about monitoring Hadoop. In particular, [Part 2](https://www.datadoghq.com/blog/monitor-hadoop-metrics/) provides a useful walkthrough of key metrics.

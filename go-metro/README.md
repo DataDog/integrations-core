@@ -1,12 +1,12 @@
 # Agent Check: TCP RTT (go-metro)
 
-# Overview
+## Overview
 
 The TCP RTT check reports on roundtrip times between the host the agent is running on and any host it is communicating with. This check is passive and will only report RTT times for packets being sent and received from outside the check. The check itself will not send any packets.
 
 This check is only shipped in the 64-bit DEB and RPM Datadog Agent packages.
 
-# Installation
+## Installation
 
 The TCP RTT check—also known as [go-metro](https://github.com/DataDog/go-metro)—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
 
@@ -30,7 +30,7 @@ Finally, configure PCAP:
 $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ```
 
-# Configuration
+## Configuration
 
 Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
@@ -52,7 +52,7 @@ Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. The fo
         hosts:
           - app.datadoghq.com
 
-# Validation
+## Validation
 
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you run `sudo /etc/init.d/datadog-agent status`, you should see something similar to the following:
 
@@ -73,10 +73,10 @@ If the TCP RTT check has started you should see something similar to the go-metr
 
 This is a passive check, so unless there are packets actively being sent to the hosts mentioned in the yaml file, the metrics will not be reported.
 
-# Compatibility
+## Compatibility
 
 The TCP RTT check is compatible with Linux platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv) for a list of metrics provided by this check.

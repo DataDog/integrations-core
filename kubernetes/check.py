@@ -122,7 +122,7 @@ class Kubernetes(AgentCheck):
             self._collect_events = None
             self.event_retriever = None
 
-    def _perform_kubelet_checks(self, url):
+    def _perform_kubelet_checks(self, url, instance):
         service_check_base = NAMESPACE + '.kubelet.check'
         is_ok = True
         try:
@@ -140,21 +140,20 @@ class Kubernetes(AgentCheck):
                 service_check_name = service_check_base + '.' + matches.group(2)
                 status = matches.group(1)
                 if status == '+':
-                    self.service_check(service_check_name, AgentCheck.OK)
+                    self.service_check(service_check_name, AgentCheck.OK, tags=instance.get('tags', []))
                 else:
-                    self.service_check(service_check_name, AgentCheck.CRITICAL)
+                    self.service_check(service_check_name, AgentCheck.CRITICAL, tags=instance.get('tags', []))
                     is_ok = False
 
         except Exception as e:
             self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
             self.service_check(service_check_base, AgentCheck.CRITICAL,
-                               message='Kubelet check %s failed: %s' % (url, str(e)))
-
+                               message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance.get('tags', []))
         else:
             if is_ok:
-                self.service_check(service_check_base, AgentCheck.OK)
+                self.service_check(service_check_base, AgentCheck.OK, tags=instance.get('tags', []))
             else:
-                self.service_check(service_check_base, AgentCheck.CRITICAL)
+                self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
     def check(self, instance):
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
@@ -176,7 +175,7 @@ class Kubernetes(AgentCheck):
             pods_list = None
 
         # kubelet health checks
-        self._perform_kubelet_checks(self.kubeutil.kube_health_url)
+        self._perform_kubelet_checks(self.kubeutil.kube_health_url, instance)
 
         if pods_list is not None:
             # Will not fail if cAdvisor is not available
