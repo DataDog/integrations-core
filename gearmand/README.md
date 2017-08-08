@@ -1,6 +1,6 @@
 # Gearman Integration
 
-# Overview
+## Overview
 
 Collect Gearman metrics to:
 
@@ -8,11 +8,11 @@ Collect Gearman metrics to:
 * Know how many tasks are queued or running.
 * Correlate Gearman performance with the rest of your applications.
 
-# Installation
+## Installation
 
 The Gearman check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gearman job servers.
 
-# Configuration
+## Configuration
 
 Create a file `gearmand.yaml` in the Agent's `conf.d` directory:
 
@@ -26,7 +26,7 @@ instances:
 
 Restart the Agent to begin sending Gearman metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `gearmand` under the Checks section:
 
@@ -43,22 +43,22 @@ Run the Agent's `info` subcommand and look for `gearmand` under the Checks secti
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Compatibility
+## Compatibility
 
 The gearmand check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gearmand/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks
 
 `gearman.can_connect`:
 
 Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
 
-# Further Reading
+## Further Reading

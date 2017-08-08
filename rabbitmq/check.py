@@ -106,6 +106,7 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
+        self.cached_vhosts = {} # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -172,6 +173,7 @@ class RabbitMQ(AgentCheck):
                            auth=auth, ssl_verify=ssl_verify)
 
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+            self.cached_vhosts[base_url] = vhosts
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
 
@@ -186,6 +188,12 @@ class RabbitMQ(AgentCheck):
             msg = "Error executing check: {}".format(e)
             self.service_check('rabbitmq.status', AgentCheck.CRITICAL, custom_tags, message=msg)
             self.log.error(msg)
+
+            # tag every vhost as CRITICAL or they would keep the latest value, OK, in case the RabbitMQ server goes down
+            self.log.error("error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s" % (base_url, self.cached_vhosts))
+            for vhost in self.cached_vhosts.get(base_url, []):
+                self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
+
 
     def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
         try:

@@ -1,19 +1,19 @@
 # Btrfs Integration
 
-# Overview
+## Overview
 
 Get metrics from btrfs service in real time to:
 
 * Visualize and monitor btrfs states
 * Be notified about btrfs failovers and events.
 
-# Installation
+## Installation
 
 The Btrfs check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on every server that uses at least one Btrfs filesystem.
 
-# Configuration
+## Configuration
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
 
@@ -30,14 +30,14 @@ Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Compatibility
+## Compatibility
 
 The btrfs check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks

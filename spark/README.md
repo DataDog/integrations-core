@@ -79,3 +79,7 @@ The Agent submits one of the following service checks, depending on how you're r
 - **spark.resource_manager.can_connect**
 
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Hadoop & Spark with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-spark/) about it.
