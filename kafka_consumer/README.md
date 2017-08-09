@@ -1,8 +1,12 @@
-# kafka_consumer Integration
+# Agent Check: Kafka Consumer
 
 # Overview
 
-This Agent check only collects metrics for Kafka broker offset, consumer offset, and consumer lag. If you want to collect many more Kafka metrics, see the kafka check.
+This Agent check only collects metrics for message offsets. If you want to collect metrics about the Kafka brokers themselves, see the kafka check.
+
+This check fetches the highwater offsets from the Kafka brokers, consumer offsets for old-style consumers that store their offsets in zookeeper, and the calculated consumer lag (which is the difference between those two metrics).
+
+This check does NOT support Kafka versions > 0.8—it can't collect consumer offsets for new-style consumer groups which store their offsets in Kafka. If run such a version of Kafka, track [this issue on GitHub](https://github.com/DataDog/integrations-core/issues/457).
 
 # Installation
 
@@ -10,7 +14,7 @@ The Agent's Kafka consumer check is packaged with the Agent, so simply [install 
 
 # Configuration
 
-Create a `kafka.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `kafka_consumer.yaml` in the Datadog Agent's `conf.d` directory:
 
 ```
 init_config:
