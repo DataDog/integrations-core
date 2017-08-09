@@ -320,13 +320,14 @@ class HTTPCheck(NetworkCheck):
             else:
                 send_status_up("%s is UP" % addr)
 
-        # Report status as a metric as well
-        can_status = 1 if service_checks[0][1] == "UP" else 0
-        self.gauge('network.http.can_connect', can_status, tags=tags_list)
-
-        # cant_connect is useful for top lists
-        cant_status = 0 if service_checks[0][1] == "UP" else 1
-        self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
+        # Report status metrics as well
+        if service_checks:
+            can_status = 1 if service_checks[0][1] == "UP" else 0
+            self.gauge('network.http.can_connect', can_status, tags=tags_list)
+ 
+            # cant_connect is useful for top lists
+            cant_status = 0 if service_checks[0][1] == "UP" else 1
+            self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
             status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
