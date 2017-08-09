@@ -45,10 +45,15 @@ nginx.upstream.peers.id,gauge,,,,The ID of the server.,0,nginx,upstr peers id
 nginx.upstream.peers.received,gauge,,byte,,The total amount of data received from this server.,0,nginx,upstr peers rec
 nginx.upstream.peers.requests,gauge,,request,,The total number of client requests forwarded to this server.,0,nginx,upstr peers req
 nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,upstr peers resp 1xx
+nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,upstr peers resp 1xx count
 nginx.upstream.peers.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,upstr peers resp 2xx
+nginx.upstream.peers.responses.2xx_count,count,,response,,The number of responses with 2xx status code (shown as count).,0,nginx,upstr peers resp 2xx count
 nginx.upstream.peers.responses.3xx,gauge,,response,,The number of responses with 3xx status code.,0,nginx,upstr peers resp 3xx
+nginx.upstream.peers.responses.3xx_count,count,,response,,The number of responses with 3xx status code (shown as count).,0,nginx,upstr peers resp 3xx count
 nginx.upstream.peers.responses.4xx,gauge,,response,,The number of responses with 4xx status code.,0,nginx,upstr peers resp 4xx
+nginx.upstream.peers.responses.4xx_count,count,,response,,The number of responses with 4xx status code (shown as count).,0,nginx,upstr peers resp 4xx count
 nginx.upstream.peers.responses.5xx,gauge,,response,,The number of responses with 5xx status code.,0,nginx,upstr peers resp 5xx
+nginx.upstream.peers.responses.5xx_count,count,,response,,The number of responses with 5xx status code (shown as count).,0,nginx,upstr peers resp 5xx count
 nginx.upstream.peers.responses.total,gauge,,response,,The total number of responses obtained from this server.,0,nginx,upstr peers resp
 nginx.upstream.peers.selected,gauge,,millisecond,,The time (since Epoch) when the server was last selected to process a request (1.7.5).,0,nginx,upstr peers sel
 nginx.upstream.peers.sent,gauge,,byte,,The total amount of data sent to this server.,0,nginx,upstr peers sent

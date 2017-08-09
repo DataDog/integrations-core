@@ -76,7 +76,7 @@ The Agent submits this service check for each instance in `process.yaml`, taggin
 
 For an instance with no `thresholds` specified, the service check has a status of either CRITICAL (zero processes running) or OK (at least one process running).
 
-For an instance with `threshold` specified, consider these configured thresholds:
+For an instance with `thresholds` specified, consider this example:
 
 ```
 instances:
@@ -87,8 +87,12 @@ instances:
       warning: [3, 5]
 ```
 
-The Agent submits a `process.up` tagged `process:my_worker_process` whose status will be:
+The Agent submits a `process.up` tagged `process:my_worker_process` whose status is:
 
 - CRITICAL when there are less than 1 or more than 7 worker processes
 - WARNING when there are 1, 2, 6, or 7 worker processes
 - OK when there are 3, 4 or 5 worker processes
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/process-check-monitoring/) about it.

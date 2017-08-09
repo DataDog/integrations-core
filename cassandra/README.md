@@ -1,19 +1,19 @@
 # Cassandra Integration
 
-# Overview
+## Overview
 
 Get metrics from cassandra service in real time to:
 
 * Visualize and monitor cassandra states
 * Be notified about cassandra failovers and events.
 
-# Installation
+## Installation
 
 The Cassandra check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Cassandra nodes.
 
-# Configuration
+## Configuration
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `cassandra` under the Checks section:
 
@@ -30,20 +30,20 @@ Run the Agent's `info` subcommand and look for `cassandra` under the Checks sect
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Compatibility
+## Compatibility
 
 The cassandra check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks
 
-# Further Reading
+## Further Reading
 
 To get a better idea of how (or why) to integrate your Cassandra cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics) about it.
