@@ -1,28 +1,21 @@
 sudo: required
-
 language: python
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $HOME/dd-agent
+    - "$HOME/.cache/pip"
+    - "$HOME/dd-agent"
     - vendor/cache
-
 python:
-  - "2.7"
-
+  - '2.7'
 git:
   depth: 3
-
 branches:
   only:
     - master
-
 services:
   - docker
-
 matrix:
   fast_finish: true
-
 env:
   global:
     - NOSE_FILTER="not windows and not fixme"
@@ -36,6 +29,10 @@ env:
     - EXTRAS_BRANCH=master
     - JMXFETCH_URL="https://dd-jmxfetch.s3.amazonaws.com"
     - REQ_LOCALS="$TRAVIS_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
+    - ORACLE_COOKIE=sqldev
+    - ORACLE_SID=XE
+    - secure: pxuKVAQ7tsoeTysy39ukfGejT23d+Qml4d72cpqOHnRH2mQsQp3Hso4PPkay4fIsA/L2KMUl/d2BCNxtpZ/rHE68eeSXb1ajKrK34MegySrvNMX2TOaCE2KckVrdtwt18I+3mBdPb6136iJSWulA/Flz8P/3uIhkL/GFFgExT36t+ABv+zNDevHCljoEOh/p8rLeSFs6STwI+T5LMaLyq1qhyGvBG8pPNV4bX6qrX4sBfoaOs72BuvrVfkygyAbKYwFg/buwwLREp0zqPBlOxzlTJZ9ZS82RFUgsbmrfvGrqNrSdWXHyHv0i6iZro7v8ehxwGIRAzY0x8V6lk6RYvidDT7rOj6vxPfd1m+HZXMeJW4ZANoFcU6lYydeg89ba+oXkDAWwNgU3QexiaCoEULnkzMCutvVW5FVim0gt0mgzmTAFioK0+DyAZSKaw3wbHC5hYQTTg9aoagvcrhmrkKqFU7A2M65yuMUtZHaQDfPS14dL2wVzGj1HQa0vRYSAWH1MGYNlSlPEojIHWzOmf5qdA2mvJgYZn4s+UQRIxjDwCOKgq7ZKLSAGbc4nxerEPAdM7EUUQLcrnTCs+8ANEe+wkCBhnh8PyiDxelzoDT5cGQjs8SBb95vNBTPQRf/+W7jw6T2FWgiLgLVGX2qjzRAL6pTiz8JU57dIGf02Gmk=
+    - secure: UafJUOF2f5CxhNVG2zSm5f/RZsiZ92gcveyR4D9gexGgO/Wr64txOgk9IhsOfFP9p3TbQ/gEz1xrXzV5GkNqjIycbffysGdI+OF975jH9HP5Gu70VLB4xIaoVxcTvksoRlEyTjbCMY3aC2hkb+DzsgmS1lxLVkHbRyyMiARK9niLKgBUVtLxWUgc0UR6RVBKuRctUwF0yDDAwuKJ5DSLhGDsTBuPZhAfSyUw4p1rp/EYcGvXJXkczz+NGNQ9jRtYNqztbtQ3cJjogjdxT1bVQf5niys+cc9dx6qNRb6LmXdtrNxM3D6N8BqT0WySQr8n2U/sPsXFywoO4D1RG9ZpD/NRjUV4E+rapzKWlb+TeBlErbN4mPPTmdHZLIac3GRzxtFpzT/I64DR7gKREtDav3glVInBH6tgbJJFI6gz1CcFtXYQl9QtaTNi4Gb2gKgw7dcEKRdjFUrRmYbYkEH+Hn57iuUtCTfuaYCG7TzNkNz6i89kckbeFBTVypRgJjjJEg5M4kl4+JIlZrDPF35TBJnZshJWDV+syPkUy/lB86va+1PuM8eh6ee6cgvrD8JZvq5quAnE0mu3PJDNRapdc0RIJZTyFU58WGEhMzzQW9+cTm7c7AHs3moDM5Q603K0tQ6pKTCgxsCOH5RJUmoL2u0lKBP/ejqKypn7pAsUINk=
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
@@ -107,15 +104,17 @@ env:
     - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=statsd
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
-    - TRAVIS_FLAVOR=tcp_check    
+    - TRAVIS_FLAVOR=tcp_check
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.7
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
     # END OF TRAVIS MATRIX
-
 install:
+  - wget 'https://github.com/cbandy/travis-oracle/archive/v2.0.2.tar.gz'
+  - mkdir -p .travis/oracle
+  - tar x -C .travis/oracle --strip-components=1 -f v2.0.2.tar.gz
   - bundle install
   - bundle package
   - git -C $HOME/dd-agent pull || git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
@@ -123,12 +122,10 @@ install:
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - bundle exec rake setup_agent_libs
-
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
   - bundle exec rake requirements
-
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files
 # Since clobber only cleans the project directory,
@@ -136,6 +133,5 @@ script:
 before_cache:
   - rake clobber
   - find $HOME/.cache/pip $HOME/dd-agent -name *.pyc -delete
-
 after_script:
   - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
