@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-1.0.1 / Unreleased
+1.0.1 / 2017-07-18
 ==================
 
 * [IMPROVEMENT] fixes example of Kafka RequestHandlerAvgIdlePercent MBean. See [#517][], thanks [@svendx4f][]

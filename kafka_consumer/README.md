@@ -30,3 +30,7 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The kafka_consumer check is compatible with all major platforms
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Kafka consumer performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.

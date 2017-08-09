@@ -1,32 +1,47 @@
-# System_swap Integration
+# Agent Check: swap
 
 ## Overview
 
-Get metrics from system_swap service in real time to:
-
-* Visualize and monitor system_swap states
-* Be notified about system_swap failovers and events.
+This check monitors the number of bytes a host has swapped in and swapped out.
 
 ## Installation
 
-Install the `dd-check-system_swap` package manually or with your favorite configuration manager
+The system swap check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host.
 
 ## Configuration
 
-Edit the `system_swap.yaml` file to point to your server and port, set the masters to monitor
+Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory:
+
+```
+# This check takes no initial configuration
+init_config:
+
+instances: [{}]
+```
+
+Restart the Agent to start collecting swap metrics.
 
 ## Validation
 
-When you run `datadog-agent info` you should see something like the following:
+Run the Agent's `info` subcommand and look for `system_swap` under the Checks section:
 
-    Checks
-    ======
+```
+  Checks
+  ======
+    [...]
 
-        system_swap
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    system_swap
+    -------
+      - instance #0 [OK]
+      - Collected 2 metrics, 0 events & 0 service checks
+
+    [...]
+```
 
 ## Compatibility
 
-The system_swap check is compatible with all major platforms
+The system_swap check is compatible with all major platforms.
+
+## Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/system_swap/metadata.csv) for a list of metrics provided by this check.

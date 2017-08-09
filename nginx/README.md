@@ -1,6 +1,6 @@
 # NGINX check
 
-# Overview
+## Overview
 
 The Datadog Agent can collect many metrics from NGINX instances, including:
 
@@ -16,7 +16,7 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 And many more.
 
-# Installation
+## Installation
 
 The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the check, install the `dd-check-nginx` package.
 
@@ -38,7 +38,7 @@ http_stub_status_module
 
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX—enabling the module as you compile it—but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
-# Configuration
+## Configuration
 
 ### Prepare NGINX
 
@@ -87,7 +87,7 @@ instances:
 
 Restart the Agent to start sending NGINX metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
 
@@ -106,7 +106,7 @@ Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
 
 See the Troubleshooting section if the status is not OK.
 
-# Troubleshooting
+## Troubleshooting
 
 You may observe one of these common problems in the output of the Datadog Agent's info subcommand.
 
@@ -137,11 +137,11 @@ http{
 
 Otherwise, review the **Configuration** section.
 
-# Compatibility
+## Compatibility
 
 The NGINX check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv) for a full list of provided metrics.
 
@@ -164,15 +164,17 @@ These metrics don't refer exactly to the same metric, but they are somewhat rela
 
 Finally, these metrics have no good equivalent:
 
+|||
+|-------------------|-------------------|
 | nginx.net.reading | The current number of connections where nginx is reading the request header. |
 | nginx.net.writing | The current number of connections where nginx is writing the response back to the client. |
 
-# Service Checks
+## Service Checks
 
 `nginx.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to NGINX to collect metrics, otherwise OK.
 
-# Further Reading
+## Further Reading
 
 Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-nginx/) about how to monitor NGINX with Datadog.

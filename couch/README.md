@@ -1,17 +1,17 @@
 # CouchDB Integration
 
-# Overview
+## Overview
 
 Capture CouchDB data in Datadog to:
 
 * Visualize key CouchDB metrics.
 * Correlate CouchDB performance with the rest of your applications.
 
-# Installation
+## Installation
 
 The CouchDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your CouchDB servers.
 
-# Configuration
+## Configuration
 
 Create a file `couch.yaml` in the Agent's `conf.d` directory:
 
@@ -28,7 +28,7 @@ Optionally, provide a `db_whitelist` and `db_blacklist` to control which databas
 
 Restart the Agent to begin sending CouchDB metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `couch` under the Checks section:
 
@@ -45,20 +45,20 @@ Run the Agent's `info` subcommand and look for `couch` under the Checks section:
     [...]
 ```
 
-# Troubleshooting
+## Troubleshooting
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+## Events
 
-# Service Checks
+## Service Checks
 
 `couchdb.can_connect`:
 
 Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
-# Further Reading
+## Further Reading
 
 To get a better idea of how (or why) to integrate your CouchDB cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/) about it.
