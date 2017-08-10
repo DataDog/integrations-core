@@ -83,6 +83,7 @@ test:
         - rake ci:run[kubernetes_state]
         - rake ci:run[cassandra_nodetool]
         - rake ci:run[squid]
+        - rake ci:run[kubelet]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
