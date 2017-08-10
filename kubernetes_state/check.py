@@ -17,12 +17,6 @@ class KubernetesState(PrometheusCheck):
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances)
         self.NAMESPACE = 'kubernetes_state'
 
-        if 'labels_mapper' in init_config:
-            if isinstance(init_config['labels_mapper'], dict):
-                self.labels_mapper = init_config['labels_mapper']
-            else:
-                self.log.warning("labels_mapper should be a dictionnary")
-
         self.pod_phase_to_status = {
             'pending':   self.WARNING,
             'running':   self.OK,
@@ -129,6 +123,12 @@ class KubernetesState(PrometheusCheck):
         endpoint = instance.get('kube_state_url')
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
+
+        if 'labels_mapper' in instance:
+            if isinstance(instance['labels_mapper'], dict):
+                self.labels_mapper = instance['labels_mapper']
+            else:
+                self.log.warning("labels_mapper should be a dictionnary")
 
         send_buckets = instance.get('send_histograms_buckets', True)
         # By default we send the buckets.
