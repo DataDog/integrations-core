@@ -1,13 +1,13 @@
-# NGINX Integration
+# NGINX check
 
-# Overview
+## Overview
 
-The Datadog Agent can collect many metrics from NGINX instances, including those for:
+The Datadog Agent can collect many metrics from NGINX instances, including:
 
 * Total requests
 * Connections (accepted, handled, active)
 
-For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like those for:
+For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
 * Errors (4xx codes, 5xx codes)
 * Upstream servers (active connections, 5xx codes, health checks, etc)
@@ -16,37 +16,33 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 And many more.
 
-The Agent sends one NGINX-related service check: whether or not the Agent is successfully collecting NGINX metrics.
+## Installation
 
-The Agent does not send anything NGINX-related to your events stream.
-
-# Installation
-
-The NGINX integration - also known as the NGINX check - is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the NGINX check, install the `dd-check-nginx` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the check, install the `dd-check-nginx` package.
 
 ### NGINX status module
 
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
-* [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) - for open source NGINX
-* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) - only for NGINX Plus
+* [stub status module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) – for open source NGINX
+* [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) – only for NGINX Plus
 
-NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to the Configuration section now.
+NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
 
-If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to Configuration:
+If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
 ```
 $ nginx -V 2>&1| grep -o http_stub_status_module
 http_stub_status_module
 ```
 
-If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX (enabling the module as you compile it), but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
+If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX—enabling the module as you compile it—but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
-# Configuration
+## Configuration
 
 ### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains other NGINX configuration files (e.g. `/etc/nginx/conf.d/`):
+On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`):
 
 ```
 server {
@@ -69,15 +65,15 @@ server {
 }
 ```
 
-NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, Plus users should use `status`.
+NGINX Plus can also use `stub_status`, but since that module provides fewer metrics, you should use `status` if you're a Plus user.
 
 You may optionally configure HTTP basic authentication in the server block, but since the service is only listening locally, it's not necessary.
 
-Reload NGINX to enable the status endpoint. There's no need for a full restart.
+Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 ### Connect the Agent
 
-Create an `nginx.yaml` in the Agent's `conf.d` directory to connect the Agent to the NGINX status endpoint:
+Create an `nginx.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
@@ -91,7 +87,7 @@ instances:
 
 Restart the Agent to start sending NGINX metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
 
@@ -110,7 +106,7 @@ Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
 
 See the Troubleshooting section if the status is not OK.
 
-# Troubleshooting
+## Troubleshooting
 
 You may observe one of these common problems in the output of the Datadog Agent's info subcommand.
 
@@ -139,14 +135,46 @@ http{
 }
 ```
 
-Otherwise, review the Configuration section.
+Otherwise, review the **Configuration** section.
 
-# Compatibility
+## Compatibility
 
 The NGINX check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv) for a full list of provided metrics.
 
 Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](http://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
+
+A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
+
+| NGINX | NGINX Plus |
+|-------------------|-------------------|
+| nginx.net.connections | nginx.connections.active |
+| nginx.net.conn_opened_per_s | nginx.connections.accepted |
+| nginx.net.conn_dropped_per_s | nginx.connections.dropped |
+| nginx.net.request_per_s | nginx.requests.total |
+
+These metrics don't refer exactly to the same metric, but they are somewhat related:
+
+| NGINX | NGINX Plus |
+|-------------------|-------------------|
+| nginx.net.waiting | nginx.connections.idle|
+
+Finally, these metrics have no good equivalent:
+
+|||
+|-------------------|-------------------|
+| nginx.net.reading | The current number of connections where nginx is reading the request header. |
+| nginx.net.writing | The current number of connections where nginx is writing the response back to the client. |
+
+## Service Checks
+
+`nginx.can_connect`:
+
+Returns CRITICAL if the Agent cannot connect to NGINX to collect metrics, otherwise OK.
+
+## Further Reading
+
+Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-nginx/) about how to monitor NGINX with Datadog.

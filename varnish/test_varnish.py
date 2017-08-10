@@ -129,7 +129,7 @@ class VarnishCheckTest(AgentCheckTest):
         config = self._get_config_by_version()
         config['instances'][0]['metrics_filter'] = ['^SMA.Transient.c_req']
         self.load_check(config)
-        version, _ = self.check._get_version_info(self._get_varnish_stat_path())
+        version, _ = self.check._get_version_info([self._get_varnish_stat_path()])
         if str(version) == '5.0.0':
             raise SkipTest('varnish bugfix for exclusion blob not released yet for version 5 so skip this test')
 
@@ -154,6 +154,7 @@ class VarnishCheckTest(AgentCheckTest):
         self.run_check(config)
         args, _ = mock_subprocess.call_args
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
+        self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:default'], count=1)
 
         mock_version.return_value = LooseVersion('4.1.0'), True
         mock_geteuid.return_value = 1

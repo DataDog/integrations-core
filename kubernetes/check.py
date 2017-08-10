@@ -13,6 +13,9 @@ import re
 import time
 import calendar
 
+# 3p
+from requests.exceptions import ConnectionError
+
 # project
 from checks import AgentCheck
 from config import _is_affirmative
@@ -119,7 +122,7 @@ class Kubernetes(AgentCheck):
             self._collect_events = None
             self.event_retriever = None
 
-    def _perform_kubelet_checks(self, url):
+    def _perform_kubelet_checks(self, url, instance):
         service_check_base = NAMESPACE + '.kubelet.check'
         is_ok = True
         try:
@@ -137,21 +140,20 @@ class Kubernetes(AgentCheck):
                 service_check_name = service_check_base + '.' + matches.group(2)
                 status = matches.group(1)
                 if status == '+':
-                    self.service_check(service_check_name, AgentCheck.OK)
+                    self.service_check(service_check_name, AgentCheck.OK, tags=instance.get('tags', []))
                 else:
-                    self.service_check(service_check_name, AgentCheck.CRITICAL)
+                    self.service_check(service_check_name, AgentCheck.CRITICAL, tags=instance.get('tags', []))
                     is_ok = False
 
         except Exception as e:
             self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
             self.service_check(service_check_base, AgentCheck.CRITICAL,
-                               message='Kubelet check %s failed: %s' % (url, str(e)))
-
+                               message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance.get('tags', []))
         else:
             if is_ok:
-                self.service_check(service_check_base, AgentCheck.OK)
+                self.service_check(service_check_base, AgentCheck.OK, tags=instance.get('tags', []))
             else:
-                self.service_check(service_check_base, AgentCheck.CRITICAL)
+                self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
     def check(self, instance):
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
@@ -173,11 +175,20 @@ class Kubernetes(AgentCheck):
             pods_list = None
 
         # kubelet health checks
-        self._perform_kubelet_checks(self.kubeutil.kube_health_url)
+        self._perform_kubelet_checks(self.kubeutil.kube_health_url, instance)
 
         if pods_list is not None:
-            # kubelet metrics
-            self._update_metrics(instance, pods_list)
+            # Will not fail if cAdvisor is not available
+            self._update_pods_metrics(instance, pods_list)
+            # cAdvisor & kubelet metrics, will fail if port 4194 is not open
+            try:
+                self._update_metrics(instance, pods_list)
+            except ConnectionError:
+                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
+                             ''' limits/requests will not be collected. Please setup'''
+                             ''' your kubelet with the --cadvisor-port=4194 option''')
+            except Exception as err:
+                self.log.warning("Error while getting performance metrics: %s" % str(err))
 
         # kubelet events
         if self.event_retriever is not None:
@@ -417,7 +428,6 @@ class Kubernetes(AgentCheck):
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
-        self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
 
     def _update_node(self, instance):

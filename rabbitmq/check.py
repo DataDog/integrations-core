@@ -8,6 +8,7 @@ import re
 import time
 import urllib
 import urlparse
+from collections import defaultdict
 
 # 3p
 import requests
@@ -105,6 +106,7 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
+        self.cached_vhosts = {} # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -171,6 +173,7 @@ class RabbitMQ(AgentCheck):
                            auth=auth, ssl_verify=ssl_verify)
 
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+            self.cached_vhosts[base_url] = vhosts
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
 
@@ -185,6 +188,12 @@ class RabbitMQ(AgentCheck):
             msg = "Error executing check: {}".format(e)
             self.service_check('rabbitmq.status', AgentCheck.CRITICAL, custom_tags, message=msg)
             self.log.error(msg)
+
+            # tag every vhost as CRITICAL or they would keep the latest value, OK, in case the RabbitMQ server goes down
+            self.log.error("error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s" % (base_url, self.cached_vhosts))
+            for vhost in self.cached_vhosts.get(base_url, []):
+                self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
+
 
     def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
         try:
@@ -320,12 +329,17 @@ class RabbitMQ(AgentCheck):
                               ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
+        connection_states = defaultdict(int)
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
+                connection_states[conn['state']] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
+
+        for conn_state, nb_conn in connection_states.iteritems():
+            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
 
     def alert(self, base_url, max_detailed, size, object_type, custom_tags):
         key = "%s%s" % (base_url, object_type)

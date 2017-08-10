@@ -1,40 +1,53 @@
-# Riak Integration
+# Riak Check
 
 ## Overview
 
-Get metrics from riak service in real time to:
-
-* Visualize Riak performance and utilization.
-* Correlate the performance of Riak with the rest of your applications.
+This check lets you track node, vnode and ring performance metrics from RiakKV or RiakTS.
 
 ## Installation
 
-Install the `dd-check-riak` package manually or with your favorite configuration manager
+The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers. If you need the newest version of the check, install the `dd-check-riak` package.
 
 ## Configuration
 
-1. Configure the Agent to connect to Riak
-Edit [conf.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example)
+Create a file `riak.yaml` in the Agent's `conf.d` directory:
+
 ```
 init_config:
 
 instances:
-    -    url: http://127.0.0.1:8098/stats
+  - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
 ```
-2. Restart the Agent
+
+Restart the Agent to start sending Riak metrics to Datadog.
 
 ## Validation
 
-When you run `datadog-agent info` you should see something like the following:
+Run the Agent's `info` subcommand and look for `riak` under the Checks section:
 
-    Checks
-    ======
+```
+  Checks
+  ======
+    [...]
 
-        riak
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 1 service checks
+    riak
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
 
 ## Compatibility
 
-The riak check is compatible with all major platforms
+The riak check is compatible with all major platforms.
+
+## Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv) for a list of metrics provided by this check.
+
+## Service Checks
+
+**riak.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise OK.

@@ -1,6 +1,6 @@
 # Consul Integration
 
-# Overview
+## Overview
 
 The Datadog Agent collects many metrics from Consul nodes, including those for:
 
@@ -19,11 +19,11 @@ And many more.
 
 Finally, in addition to metrics, the Datadog Agent also sends a service check for each of Consul's health checks, and an event after each new leader election.
 
-# Installation
+## Installation
 
 The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Consul nodes. If you need the newest version of the Consul check, install the `dd-check-consul` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
-# Configuration
+## Configuration
 
 ### Connect Datadog Agent to Consul Agent
 
@@ -68,7 +68,7 @@ In the main Consul configuration file, add your `dogstatsd_addr` nested under th
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
-# Validation
+## Validation
 
 ### Datadog Agent to Consul Agent
 
@@ -108,11 +108,11 @@ $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 23176/consul
 ```
 
-# Compatibility
+## Compatibility
 
 The Consul check is compatible with all major platforms.
 
-# Metrics
+#@ Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
 
@@ -120,7 +120,7 @@ See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) fo
 
 See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coordinates.html) if you're curious about how the network latency metrics are calculated.
 
-# Service Checks
+## Service Checks
 
 `consul.check`:
 
@@ -129,13 +129,13 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
-# Events
+## Events
 
 `consul.new_leader`:
 
 The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
 
-# Further Reading
+## Further Reading
 
 To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
 

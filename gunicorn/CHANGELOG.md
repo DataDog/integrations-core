@@ -1,12 +1,14 @@
 # CHANGELOG - gunicorn
 
-## 1.1.0 05-23-2017
+1.1.0 / 2017-05-23
+==================
 
 ### Changes
 
 * [BUGFIX] tag all the metrics by app name, not only the service check. See [#414]
 
-## 1.0.0 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 

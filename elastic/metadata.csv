@@ -47,6 +47,7 @@ elasticsearch.indexing.delete.total,gauge,,document,,The total number of documen
 elasticsearch.indexing.index.current,gauge,,document,,The number of documents currently being indexed to an index.,0,elasticsearch,current indexing
 elasticsearch.indexing.index.time,gauge,,second,,The total time spent indexing documents to an index.,0,elasticsearch,total indexing time
 elasticsearch.indexing.index.total,gauge,,document,,The total number of documents indexed to an index.,0,elasticsearch,total indexed
+elasticsearch.indices.count,gauge,,index,,The number of indices in the cluster.,0,elasticsearch,number of indices
 elasticsearch.indices.indexing.index_failed,gauge,,,,The number of failed indexing operations.,-1,elasticsearch,index fails
 elasticsearch.indices.indexing.throttle_time,gauge,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
 elasticsearch.indices.query_cache.evictions,gauge,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions

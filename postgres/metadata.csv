@@ -39,7 +39,8 @@ postgresql.table.count,gauge,,table,,The number of user tables in this database.
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns
 postgresql.replication_delay,gauge,,second,,The current replication delay in seconds. Only available with postgresql 9.1 and newer,-1,postgres,repl delay
-postgres.replication_delay_bytes,gauge,,byte,,The current replication delay in bytes. Only available with postgresql 9.2 and newer,-1,postgres,repl delay bytes
+postgres.replication_delay_bytes,gauge,,byte,,Deprecated please use postgresql.replication_delay_bytes instead,-1,postgres,repl delay bytes
+postgresql.replication_delay_bytes,gauge,,byte,,The current replication delay in bytes. Only available with postgresql 9.2 and newer,-1,postgres,repl delay bytes
 postgresql.heap_blocks_read,gauge,,block,second,The number of disk blocks read from this table.,0,postgres,heap blks read
 postgresql.heap_blocks_hit,gauge,,hit,second,The number of buffer hits in this table.,0,postgres,heap blks hit
 postgresql.index_blocks_read,gauge,,block,second,The number of disk blocks read from all indexes on this table.,0,postgres,idx blks read
