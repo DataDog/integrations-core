@@ -14,23 +14,7 @@ The Agent's Kafka consumer check is packaged with the Agent, so simply [install 
 
 # Configuration
 
-Create a `kafka_consumer.yaml` in the Datadog Agent's `conf.d` directory:
-
-```
-init_config:
-#  Customize the ZooKeeper connection timeout here
-#  zk_timeout: 5
-#  Customize the Kafka connection timeout here
-#  kafka_timeout: 5
-
-instances:
-  # - kafka_connect_str: localhost:9092
-  #   zk_connect_str: localhost:2181
-  #   zk_prefix: /0.8
-  #   consumer_groups:
-  #     my_consumer:
-  #       my_topic: [0, 1, 4, 12]
-```
+Create a `kafka_consumer.yaml` file using [this sample conf file](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/conf.yaml.example) as an example. Then restart the Datadog Agent's to start sending metrics to Datadog.
 
 # Validation
 
@@ -51,7 +35,7 @@ Run the Agent's `info` subcommand and look for `kafka_consumer` under the Checks
 
 # Compatibility
 
-The kafka_consumer check is compatible with all major platforms
+The kafka_consumer check is compatible with all major platforms.
 
 # Metrics
 
