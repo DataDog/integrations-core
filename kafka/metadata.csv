@@ -9,8 +9,8 @@ kafka.request.produce.time.avg,gauge,10,request,second,Average time for a produc
 kafka.request.produce.time.99percentile,gauge,10,request,second,Time for produce requests for 99th percentile.,0,kafka,req prod time 99
 kafka.request.produce.failed_per_second,gauge,10,request,second,Rate of failed produce requests per second.,-1,kafka,req prod fail rate
 kafka.request.produce.failed,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail
-kafka.request.fetch.time.avg,gauge,10,request,second,Average time per fetch request.,0,kafka,req fetch time avg
-kafka.request.fetch.time.99percentile,gauge,10,request,second,Time for fetch requests for 99th percentile.,0,kafka,req fetch time 99
+kafka.request.fetch.time.avg,gauge,10,millisecond,,Average time per fetch request.,0,kafka,req fetch time avg
+kafka.request.fetch.time.99percentile,gauge,10,millisecond,,Time for fetch requests for 99th percentile.,0,kafka,req fetch time 99
 kafka.request.update_metadata.time.avg,gauge,10,millisecond,,Average time for a request to update metadata.,0,kafka,req update meta time avg
 kafka.request.update_metadata.time.99percentile,gauge,10,millisecond,,Time for update metadata requests for 99th percentile.,0,kafka,req update meta time 99
 kafka.request.metadata.time.avg,gauge,10,millisecond,,Average time for metadata request.,0,kafka,req meta time avg

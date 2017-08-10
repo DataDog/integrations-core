@@ -1,6 +1,6 @@
 # Mesos_slave Integration
 
-# Overview
+## Overview
 
 This Agent check collects metrics from Mesos slaves for:
 
@@ -12,27 +12,27 @@ And many more.
 
 This check also creates a service check for every executor task.
 
-# Installation
+## Installation
 
 Follow the instructions in our [blog post](https://www.datadoghq.com/blog/deploy-datadog-dcos/) to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
 
-# Configuration
+## Configuration
 
 Unless you want to configure a custom `mesos_slave.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
 
-# Validation
+## Validation
 
 In the Datadog app, search for `mesos.slave` in the Metrics Explorer.
 
-# Compatibility
+## Compatibility
 
 The mesos_slave check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv) for a list of metrics provided by this check.
 
-# Service Check
+## Service Check
 
 `mesos_slave.can_connect`:
 
@@ -42,6 +42,8 @@ Returns CRITICAL if the Agent cannot connect to the Mesos slave metrics endpoint
 
 The mesos_slave check creates a service check for each executor task, giving it one of the following statuses:
 
+|||
+|---|---|
 |Task status|resultant service check status
 |TASK_STARTING|AgentCheck.OK
 |TASK_RUNNING|AgentCheck.OK
@@ -52,6 +54,6 @@ The mesos_slave check creates a service check for each executor task, giving it 
 |TASK_STAGING |AgentCheck.OK
 |TASK_ERROR|AgentCheck.CRITICAL
 
-# Further Reading
+## Further Reading
 
 See our blog post [Installing Datadog on Mesos with DC/OS](https://www.datadoghq.com/blog/deploy-datadog-dcos/).

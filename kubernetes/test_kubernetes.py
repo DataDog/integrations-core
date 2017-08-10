@@ -50,6 +50,17 @@ METRICS = [
     ('kubernetes.memory.capacity', CAP),
 ]
 
+class MockIterLinesResponse:
+    """
+    Helper class to mock a text response from requests
+    """
+    def __init__(self, lines_array, status_code):
+        self.lines_array = lines_array
+        self.status_code = status_code
+
+    def iter_lines(self):
+        for line in self.lines_array:
+            yield line
 
 def KubeUtil_fake_retrieve_json_auth(url, timeout=10, params=None):
     if url.endswith("/namespaces"):
@@ -91,7 +102,7 @@ class TestKubernetes(AgentCheckTest):
     def test_metrics_1_1(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
-            '_perform_kubelet_checks': lambda x: None,
+            '_perform_kubelet_checks': lambda x,y: None,
         }
         config = {
             "instances": [
@@ -151,7 +162,7 @@ class TestKubernetes(AgentCheckTest):
     def test_historate_1_1(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
-            '_perform_kubelet_checks': lambda x: None,
+            '_perform_kubelet_checks': lambda x,y: None,
         }
         config = {
             "instances": [
@@ -221,7 +232,7 @@ class TestKubernetes(AgentCheckTest):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def test_metrics_1_2(self, *args):
         mocks = {
-            '_perform_kubelet_checks': lambda x: None,
+            '_perform_kubelet_checks': lambda x,y: None,
         }
         config = {
             "instances": [
@@ -274,7 +285,7 @@ class TestKubernetes(AgentCheckTest):
     def test_historate_1_2(self, *args):
         # To avoid the disparition of some gauges during the second check
         mocks = {
-            '_perform_kubelet_checks': lambda x: None,
+            '_perform_kubelet_checks': lambda x,y: None,
         }
         config = {
             "instances": [
@@ -402,6 +413,69 @@ class TestKubernetes(AgentCheckTest):
         # Can't use run_check_twice due to specific metrics
         self.run_check(config, force_reload=True)
         self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=None, count=1)
+
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
+    def test_fail_service_check_tagging(self, *args):
+        # To avoid the disparition of some gauges during the second check
+        config = {
+            "instances": [{"host": "foo", "tags":["tag:foo","tag:bar"]}]
+        }
+
+        # Can't use run_check_twice due to specific metrics
+        self.run_check(config, force_reload=True)
+        self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=["tag:foo","tag:bar"], count=1)
+
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet',
+                return_value='http://172.17.0.1:10255')
+    @mock.patch('utils.kubernetes.KubeUtil.perform_kubelet_query',
+                return_value=MockIterLinesResponse(["[+]ping ok","healthz check passed"], 200))
+    def test_ok_service_check_tagging(self, *args):
+        # To avoid the disparition of some gauges during the second check
+        config = {
+            "instances": [{"host": "foo", "tags":["tag:foo","tag:bar"]}]
+        }
+
+        # Can't use run_check_twice due to specific metrics
+        self.run_check(config, force_reload=True)
+
+        self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.OK, tags=["tag:foo","tag:bar"], count=1)
+        self.assertServiceCheck("kubernetes.kubelet.check.ping", status=AgentCheck.OK, tags=["tag:foo","tag:bar"], count=1)
+
+
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_json_auth')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_machine_info')
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_metrics',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list',
+                side_effect=Exception("Connection error"))
+    @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet',
+                return_value='http://172.17.0.1:10255')
+    @mock.patch('utils.kubernetes.KubeUtil.perform_kubelet_query',
+                return_value=MockIterLinesResponse(["[-]ping failed: reason withheld",
+                                                   "healthz check failed"], 200))
+    def test_critical_service_check_tagging(self, *args):
+        # To avoid the disparition of some gauges during the second check
+        config = {
+            "instances": [{"host": "foo", "tags":["tag:foo","tag:bar"]}]
+        }
+
+        # Can't use run_check_twice due to specific metrics
+        self.run_check(config, force_reload=True)
+
+        self.assertServiceCheck("kubernetes.kubelet.check", status=AgentCheck.CRITICAL, tags=["tag:foo","tag:bar"], count=1)
+        self.assertServiceCheck("kubernetes.kubelet.check.ping", status=AgentCheck.CRITICAL, tags=["tag:foo","tag:bar"], count=1)
 
 
 @attr(requires='kubernetes')

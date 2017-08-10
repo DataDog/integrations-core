@@ -181,79 +181,61 @@ class KafkaCheck(AgentCheck):
                 'consumer_group:%s' % consumer_group]
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
             if (topic, partition) not in highwater_offsets:
-                self.log.warn("Consumer offsets exist for topic: {topic} "
-                    "partition: {partition} but that topic partition doesn't "
-                    "actually exist in the cluster.".format(**locals()))
+                self.log.warn("Consumer offsets exist for topic: %s "
+                    "partition: %s but that topic partition doesn't "
+                    "actually exist in the cluster.", topic, partition)
                 continue
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
             if consumer_lag < 0:
-                # This is a really bad scenario because new messages produced to
-                # the topic are never consumed by that particular consumer
-                # group. So still report the negative lag as a way of increasing
-                # visibility of the error.
-                title = "Consumer lag for consumer negative."
-                message = "Consumer lag for consumer group: {group}, topic: {topic}, " \
-                    "partition: {partition} is negative. This should never happen.".format(
+                # this will result in data loss, so emit an event for max visibility
+                title = "Negative consumer lag for group: {group}.".format(group=consumer_group)
+                message = "Consumer lag for Kafka consumer group: {group}, topic: {topic}, " \
+                    "partition: {partition} is negative.\n\n" \
+                    "This is theoretically impossible, yet may occur and will " \
+                    "result in data loss because the consumer group will miss " \
+                    "all messages produced to the partition until the lag turns " \
+                    "positive.".format(
                         group=consumer_group,
                         topic=topic,
                         partition=partition
                     )
                 key = "{}:{}:{}".format(consumer_group, topic, partition)
-                self._send_event(title, message, consumer_group_tags, 'consumer_lag', key)
+                self._send_event(title, message, consumer_group_tags, 'consumer_lag',
+                    key, severity="error")
                 self.log.debug(message)
 
             self.gauge('kafka.consumer_lag', consumer_lag,
                tags=consumer_group_tags)
 
-    # Private config validation/marshalling functions
-
     def _validate_consumer_groups(self, val):
         # val = {'consumer_group': {'topic': [0, 1]}}
-        try:
-            # consumer groups are optional
-            assert isinstance(val, dict) or val is None
-            if val is not None:
-                for consumer_group, topics in val.iteritems():
-                    assert isinstance(consumer_group, basestring)
-                    # topics are optional
-                    assert isinstance(topics, dict) or topics is None
-                    if topics is not None:
-                        for topic, partitions in topics.iteritems():
-                            assert isinstance(topic, basestring)
-                            # partitions are optional
-                            assert isinstance(partitions, (list, tuple)) or partitions is None
-                            if partitions is not None:
-                                for partition in partitions:
-                                    assert isinstance(partition, int)
-            return val
-        except Exception as e:
-            self.log.exception(e)
-            raise Exception("""The `consumer_groups` value must be a mapping of mappings, like this:
-consumer_groups:
-  myconsumer0: # consumer group name
-    mytopic0: [0, 1] # topic_name: list of partitions
-  myconsumer1:
-    mytopic0: [0, 1, 2]
-    mytopic1: [10, 12]
-  myconsumer2:
-    mytopic0:
-  myconsumer3:
+        # consumer groups are optional
+        assert isinstance(val, dict) or val is None
+        if val is not None:
+            for consumer_group, topics in val.iteritems():
+                assert isinstance(consumer_group, basestring)
+                # topics are optional
+                assert isinstance(topics, dict) or topics is None
+                if topics is not None:
+                    for topic, partitions in topics.iteritems():
+                        assert isinstance(topic, basestring)
+                        # partitions are optional
+                        assert isinstance(partitions, (list, tuple)) or partitions is None
+                        if partitions is not None:
+                            for partition in partitions:
+                                assert isinstance(partition, int)
+        return val
 
-Note that each level of values is optional. Any omitted values will be fetched from Zookeeper.
-You can omit partitions (example: myconsumer2), topics (example: myconsumer3), and even consumer_groups.
-If you omit consumer_groups, you must set the flag 'monitor_unlisted_consumer_groups': True.
-If a value is omitted, the parent value must still be it's expected type (typically a dict).
-""")
-
-    def _send_event(self, title, text, tags, type, aggregation_key):
+    def _send_event(self, title, text, tags, type, aggregation_key, severity='info'):
+        """Emit an event to the Datadog Event Stream."""
         event_dict = {
             'timestamp': int(time.time()),
             'source_type_name': self.SOURCE_TYPE_NAME,
             'msg_title': title,
             'event_type': type,
+            'alert_type': severity,
             'msg_text': text,
             'tags': tags,
             'aggregation_key': aggregation_key,
         }
-
         self.event(event_dict)
