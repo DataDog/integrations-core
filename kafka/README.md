@@ -1,6 +1,6 @@
-# Kafka Integration
+# Agent Check: Kafka
 
-# Overview
+## Overview
 
 Connect Kafka to Datadog in order to:
 
@@ -11,21 +11,21 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the kafka_consumer check.
 
-# Installation
+## Installation
 
 The Agent's Kafka check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.
 
 The check collects metrics via JMX, so you'll need a JVM on each kafka node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). You can use the same JVM that Kafka uses.
 
-# Configuration
+## Configuration
 
 **The following instructions are for the Datadog agent >= 5.0. For agents before that, refer to the [older documentation](https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent).**
 
-Configure a `kafka.yaml` in the Datadog Agent's `conf.d` directory. Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. You can also find the latest versions on the GitHub repo, but note that the version there may be for a newer version of the Agent than what you've got installed.
+Configure a `kafka.yaml` in the Datadog Agent's `conf.d` directory. Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample conf file](https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example) as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
 
 After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka metrics to Datadog.
 
-# Validation
+## Validation
 
 Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
 
@@ -42,10 +42,14 @@ Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
-The kafka check is compatible with all major platforms
+The kafka check is compatible with all major platforms.
 
-# Metrics
+## Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv) for a list of metrics provided by this check.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Kafka performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.

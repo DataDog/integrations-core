@@ -14,7 +14,7 @@ The Agent's Kafka consumer check is packaged with the Agent, so simply [install 
 
 # Configuration
 
-Create a `kafka_consumer.yaml` file using [this sample conf file](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/conf.yaml.example) as an example. Then restart the Datadog Agent's to start sending metrics to Datadog.
+Create a `kafka_consumer.yaml` file using [this sample conf file](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/conf.yaml.example) as an example. Then restart the Datadog Agent to start sending metrics to Datadog.
 
 # Validation
 
@@ -40,3 +40,7 @@ The kafka_consumer check is compatible with all major platforms.
 # Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv) for a list of metrics provided by this check.
+
+## Further Reading
+
+To get a better idea of how (or why) to monitor Kafka consumer performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.
