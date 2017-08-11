@@ -4,11 +4,12 @@
 
 Track overall and per-pool stats on each of your twemproxy servers. This Agent check collects metrics for client and server connections and errors, request and response rates, bytes in and out of the proxy, and more.
 
-## Installation
+## Setup
+### Installation
 
 The Agent's twemproxy check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on each of your Twemproxy servers.
 
-## Configuration
+### Configuration
 
 Create a file `twemproxy.yaml` in the Agent's `conf.d` directory:
 
@@ -22,7 +23,7 @@ instances:
 
 Restart the Agent to begin sending twemproxy metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `twemproxy` under the Checks section:
 
@@ -43,11 +44,15 @@ Run the Agent's `info` subcommand and look for `twemproxy` under the Checks sect
 
 The twemproxy check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/twemproxy/metadata.csv) for a list of metrics provided by this check.
 
-## Service Checks
+### Events
+The Twemproxy check does not include any event at this time.
+
+### Service Checks
 
 `twemproxy.can_connect`:
 

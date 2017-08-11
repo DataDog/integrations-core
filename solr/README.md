@@ -4,13 +4,14 @@
 
 The Solr check tracks the state and performance of a Solr cluster. It collects metrics like number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
 
-## Installation
+## Setup
+### Installation
 
 The Solr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Solr nodes.
 
 This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Read the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for more information on that.
 
-## Configuration
+### Configuration
 
 Create a file `solr.yaml` in the Agent's `conf.d` directory:
 
@@ -95,7 +96,7 @@ Again, see the [JMX Check documentation](http://docs.datadoghq.com/integrations/
 
 Restart the Agent to start sending Solr metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `solr` under the Checks section:
 
@@ -116,6 +117,13 @@ Run the Agent's `info` subcommand and look for `solr` under the Checks section:
 
 The solr check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The Solr check does not include any event at this time.
+
+### Service Checks
+The Solr check does not include any service check at this time.

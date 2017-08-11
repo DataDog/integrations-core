@@ -10,11 +10,12 @@ This check watches your Nagios server's logs and sends events to your Datadog ev
 
 The check emits events for service flaps, host state changes, passive service checks, host and service downtimes, and more. It can also send Nagios Perfdata to Datadog as metrics.
 
-## Installation
+## Setup
+### Installation
 
 The Nagios check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Nagios servers. If you need the newest version of the check, install the `dd-check-nagios` package.
 
-## Configuration
+### Configuration
 
 Create a file `nagios.yaml` in the Agent's `conf.d` directory:
 
@@ -36,7 +37,7 @@ This check also works with Icinga, the popular fork of Nagios. If you use Icinga
 
 Restart the Agent to start sending Nagios events and (optionally) perfdata metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `nagios` under the Checks section:
 
@@ -57,11 +58,12 @@ Run the Agent's `info` subcommand and look for `nagios` under the Checks section
 
 The nagios check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 With a default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for perfdata and sumbits it as gauge metrics to Datadog.
 
-## Events
+### Events
 
 The check watches the Nagios events log for log lines containing these string, emitting an event for each such line:
 
@@ -78,6 +80,9 @@ The check watches the Nagios events log for log lines containing these string, e
 - PROCESS_SERVICE_CHECK_RESULT
 - SERVICE DOWNTIME ALERT
 
-## Further Reading
+### Service Checks
+The Nagios check does not include any service check at this time.
 
+## Further Reading
+### Blog Article
 To get a better idea of how to understand your Nagios alerts with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/nagios-monitoring/) about it.
