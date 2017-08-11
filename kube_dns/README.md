@@ -10,15 +10,16 @@ Get metrics from kube-dns service in real time to:
 See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for
 more informations about kube-dns
 
-## Installation
+## Setup
+### Installation
 
 Install the `dd-check-kube_dns` package manually or with your favorite configuration manager
 
-## Configuration
+### Configuration
 
 Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor
 
-### Using with service discovery
+#### Using with service discovery
 
 If you are using 1 dd-agent pod per kubernetes worker nodes, you could use the
 following annotations on your kube-dns pod to get the data retrieve
@@ -43,7 +44,7 @@ metadata:
    add the annotations to the metadata of the template's spec.
 
 
-## Validation
+### Validation
 
 When you run `datadog-agent info` you should see something like the following:
 
@@ -58,3 +59,13 @@ When you run `datadog-agent info` you should see something like the following:
 ## Compatibility
 
 The kube_dns check is compatible with all major platforms
+
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kube_dns/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Kube-DNS check does not include any event at this time.
+
+### Service Checks
+The Kube-DNS check does not include any service check at this time.

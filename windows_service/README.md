@@ -4,11 +4,12 @@
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
-## Installation
+## Setup
+### Installation
 
 The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
-## Configuration
+### Configuration
 
 Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
 
@@ -29,7 +30,7 @@ You must provide service names as they appear in services.msc's properties field
 
 Restart the Agent to start monitoring the services and sending service checks to Datadog.
 
-## Validation
+### Validation
 
 See the info page in the Agent Manager and look for `windows_service` under the Checks section:
 
@@ -50,8 +51,14 @@ See the info page in the Agent Manager and look for `windows_service` under the 
 
 The Windows Service check is compatible with all Windows platforms.
 
-## Service Checks
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv) for a list of metrics provided by this integration.
 
+### Events
+The Windows Service check does not include any event at this time.
+
+### Service Checks
 **windows_service.state**:
 
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
@@ -68,5 +75,5 @@ The Agent submits this service check for each Windows service configured in `ser
 |Unknown|UNKNOWN|
 
 ## Further Reading
-
+### Blog Article
 See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.

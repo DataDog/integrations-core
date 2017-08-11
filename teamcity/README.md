@@ -6,13 +6,13 @@ This check watches for build-related events and sends them to Datadog.
 
 Unlike most Agent checks, this one doesn't collect any metrics—just events.
 
-## Installation
+## Setup
+### Installation
 
 The Teamcity check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Teamcity servers. If you need the newest version of the check, install the `dd-check-teamcity` package.
 
-## Configuration
-
-### Prepare Teamcity
+### Configuration
+#### Prepare Teamcity
 
 Follow [Teamcity's documentation](https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login) to enable Guest Login. 
 
@@ -38,7 +38,7 @@ Add an item like the above to `instances` for each build configuration you want 
 
 Restart the Agent to start collecting and sending Teamcity events to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `teamcity` under the Checks section:
 
@@ -59,6 +59,16 @@ Run the Agent's `info` subcommand and look for `teamcity` under the Checks secti
 
 The teamcity check is compatible with all major platforms.
 
-## Further Reading
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv) for a list of metrics provided by this integration.
 
+### Events
+The Teamcity check does not include any event at this time.
+
+### Service Checks
+The Teamcity check does not include any service check at this time.
+
+## Further Reading
+### Blog Article
 To get a better idea of how (or why) to track performance impact of code changes with TeamCity and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/) about it.

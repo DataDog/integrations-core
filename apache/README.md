@@ -4,13 +4,14 @@
 
 The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
 
-## Installation
+## Setup
+### Installation
 
 The Apache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
 
 Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
-## Configuration
+### Configuration
 
 Create a file `apache.yaml` in the Agent's `conf.d` directory:
 
@@ -26,7 +27,7 @@ instances:
 
 Restart the Agent to start sending Apache metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `apache` under the Checks section:
 
@@ -47,16 +48,20 @@ Run the Agent's `info` subcommand and look for `apache` under the Checks section
 
 The Apache check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this check.
 
-## Service Checks
+### Events
+The Apache check does not include any event at this time.
+
+### Service Checks
 
 **apache.can_connect**:
 
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
 ## Further Reading
-
+### Blog Article
 To get a better idea of how (or why) to integrate your Apache web server with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/).

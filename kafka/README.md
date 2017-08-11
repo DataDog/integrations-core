@@ -11,13 +11,14 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the kafka_consumer check.
 
-## Installation
+## Setup
+### Installation
 
 The Agent's Kafka check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.
 
 The check collects metrics via JMX, so you'll need a JVM on each kafka node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). You can use the same JVM that Kafka uses.
 
-## Configuration
+### Configuration
 
 **The following instructions are for the Datadog agent >= 5.0. For agents before that, refer to the [older documentation](https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent).**
 
@@ -25,7 +26,7 @@ Configure a `kafka.yaml` in the Datadog Agent's `conf.d` directory. Kafka bean n
 
 After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
 
@@ -46,10 +47,16 @@ Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
 
 The kafka check is compatible with all major platforms.
 
-## Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv) for a list of metrics provided by this check.
 
-## Further Reading
+### Events
+The Kafka check does not include any event at this time.
 
+### Service Checks
+The Kafka check does not include any service check at this time.
+
+## Further Reading
+### Blog Article
 To get a better idea of how (or why) to monitor Kafka performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.
