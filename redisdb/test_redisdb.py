@@ -152,7 +152,8 @@ class TestRedis(AgentCheckTest):
         metrics = self._sort_metrics(r.get_metrics())
         keys = [m[0] for m in metrics]
         assert 'redis.net.commands' in keys
-        assert 'redis.net.commands.instantaneous' in keys
+        assert 'redis.net.instantaneous_ops_per_sec' in keys
+
 
         # Service metadata
         service_metadata = r.get_service_metadata()
