@@ -27,7 +27,7 @@ instances:
   # port: 4194
   # method: http
 
-  # cAdvisor port
+  # cAdvisor port, set it to 0 if cAdvisor is unavailable
  - port: 4194
   #
   # cAdvisor host
