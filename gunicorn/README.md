@@ -37,7 +37,7 @@ Restart the Agent to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
-Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a StatsD daemon. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
+Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a daemon that implements the StatsD protocol, such as [DogStatsD](https://docs.datadoghq.com/guides/dogstatsd). As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
 
 ### Validation
 
