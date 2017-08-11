@@ -117,4 +117,4 @@ Returns CRITICAL if the Agent cannot find a Gunicorn master process, or if canno
 ## Further Reading
 
 - To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).
-- Learn about [StatsD, what it is and how it can help you](https://www.datadoghq.com/blog/statsd)
+- Learn about [StatsD, what it is and how it can help you](https://www.datadoghq.com/blog/statsd).
