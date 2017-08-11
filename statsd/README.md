@@ -42,7 +42,7 @@ Run the Agent's `info` subcommand and look for `statsd` under the Checks section
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The statsd check is compatible with all major platforms.
 
@@ -53,7 +53,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/stat
 ### Events
 The StatsD check does not include any event at this time.
 
-## Service Checks
+### Service Checks
 
 **statsd.is_up**:
 

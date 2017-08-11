@@ -29,7 +29,7 @@ On Windows >= 2008 (or equivalent), instead run:
 C:/> winmgmt /resyncperf
 ```
 
-#### Connect the Agent \
+#### Connect the Agent
 
 Create a file `iis.yaml` in the Agent's `conf.d` directory:
 

@@ -65,13 +65,14 @@ Run the Agent's `info` subcommand and look for `haproxy` under the Checks sectio
 ## Compatibility
 The haproxy check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv) for a list of metrics provided by this integration.
 
-## Events
+### Events
 The Haproxy check does not include any event at this time.
 
-## Service Checks
+### Service Checks
 The Haproxy check does not include any service check at this time.
 
 ## Troubleshooting

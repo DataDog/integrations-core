@@ -32,7 +32,7 @@ When you run `datadog-agent info` you should see something like the following:
 
 The Agent_metrics check is compatible with all major platforms
 
-##Data Collected
+## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv) for a list of metrics provided by this integration.
 
