@@ -1,17 +1,18 @@
 # Process Check
 
-# Overview
+## Overview
 
 The process check lets you:
 
 * Collect resource usage metrics for specific running processes on any host: CPU, memory, I/O, number of threads, etc
 * Use [Process Monitors](http://docs.datadoghq.com/monitoring/#process): configure thresholds for how many instances of a specific process ought to be running and get alerts when the thresholds aren't met (see **Service Checks** below).
 
-# Installation
+## Setup
+### Installation
 
 The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check. If you need the newest version of the check, install the `dd-check-process` package.
 
-# Configuration
+### Configuration
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.
 
@@ -38,7 +39,7 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 Restart the Agent to start sending process metrics and service checks to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for process` under the Checks section:
 
@@ -58,18 +59,20 @@ Run the Agent's `info` subcommand and look for process` under the Checks section
 
 Each instance configured in `process.yaml` should have one `instance #<num> [OK]` line in the output, regardless of how many search_strings it might be configured with.
 
-# Compatibility
+## Compatibility
 
 The process check is compatible with all major platforms.
 
-# Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv) for a list of metrics provided by this check.
 
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
-# Service Checks
+### Events
+The Process check does not include any event at this time.
 
+### Service Checks
 **process.up**:
 
 The Agent submits this service check for each instance in `process.yaml`, tagging each with `process:<name>`.
@@ -94,5 +97,5 @@ The Agent submits a `process.up` tagged `process:my_worker_process` whose status
 - OK when there are 3, 4 or 5 worker processes
 
 ## Further Reading
-
+### Blog Article
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/process-check-monitoring/) about it.

@@ -4,15 +4,15 @@
 
 Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.
 
-## Installation
+## Setup
+### Installation
 
 The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
 Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
 
-## Configuration
-
-### Prepare IIS
+### Configuration
+#### Prepare IIS
 
 On your IIS servers, first resync the WMI counters.
 
@@ -29,7 +29,7 @@ On Windows >= 2008 (or equivalent), instead run:
 C:/> winmgmt /resyncperf
 ```
 
-### Connect the Agent \
+#### Connect the Agent \
 
 Create a file `iis.yaml` in the Agent's `conf.d` directory:
 
@@ -51,7 +51,7 @@ You can also monitor sites on remote IIS servers. See the [sample iis.conf](http
 
 Restart the Agent to begin sending IIS metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `iis` under the Checks section:
 
@@ -68,13 +68,15 @@ Run the Agent's `info` subcommand and look for `iis` under the Checks section:
     [...]
 ```
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv) for a list of metrics provided by this integration.
 
-## Events
+### Events
+The IIS check does not include any event at this time.
 
-## Service Checks
+### Service Checks
 
 `iis.site_up`:
 

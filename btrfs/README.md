@@ -7,13 +7,14 @@ Get metrics from btrfs service in real time to:
 * Visualize and monitor btrfs states
 * Be notified about btrfs failovers and events.
 
-## Installation
+## Setup
+### Installation
 
 The Btrfs check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on every server that uses at least one Btrfs filesystem.
 
-## Configuration
+### Configuration
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
 
@@ -30,14 +31,18 @@ Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
     [...]
 ```
 
-## Troubleshooting
-
 ## Compatibility
 
-The btrfs check is compatible with all major platforms.
+The Btrfs check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/btrfs/metadata.csv) for a list of metrics provided by this integration.
 
-## Events
+### Events
+The Btrfs check does not include any event at this time.
 
-## Service Checks
+### Service Checks
+The Btrfs check does not include any service check at this time.
+
+## Troubleshooting

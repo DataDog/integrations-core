@@ -9,18 +9,17 @@ The RabbitMQ check lets you:
 * Monitor vhosts for aliveness and number of connections
 
 And more.
-
-## Installation
+## Setup
+### Installation
 
 The RabbitMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RabbitMQ servers. If you need the newest version of the check, install the `dd-check-rabbitmq` package.
 
-## Configuration
-
-### Prepare RabbitMQ
+### Configuration
+#### Prepare RabbitMQ
 
 You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](https://www.rabbitmq.com/management.html) to enable it.
 
-### Connect the Agent
+#### Connect the Agent
 
 Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory:
 
@@ -47,7 +46,7 @@ There are options for `queues` and `nodes` that work similarly—the Agent check
 
 Restart the Agent to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `rabbitmq` under the Checks section:
 
@@ -68,19 +67,20 @@ Run the Agent's `info` subcommand and look for `rabbitmq` under the Checks secti
 
 The rabbitmq check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv) for a list of metrics provided by this check.
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` metrics by node name.
 
-## Events
+### Events
 
 For performance reasons, the RabbitMQ check self-limits the number of queues and nodes it will collect metrics for. If and when the check nears this limit, it emits a warning-level event to your event stream.
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for details about these limits.
 
-## Service Checks
+### Service Checks
 
 **rabbitmq.aliveness**:
 
