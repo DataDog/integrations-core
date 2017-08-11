@@ -226,7 +226,7 @@ class Redis(AgentCheck):
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'],
                   tags=tags)
-        self.gauge('redis.net.commands.instantaneous', info['instantaneous_ops_per_sec'],
+        self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'],
                   tags=tags)
 
         # Check some key lengths if asked

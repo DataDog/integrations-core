@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-1.1.1 / 2017-08-11
+1.2.0 / Unreleased
 ==================
 
 ### Changes
@@ -22,3 +22,5 @@
 ### Changes
 
 * [FEATURE] adds redisdb integration.
+
+[#672]: https://github.com/DataDog/integrations-core/pull/672
