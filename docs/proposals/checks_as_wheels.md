@@ -108,9 +108,10 @@ one is preferable.
 
 ### Package checks as Python Wheels
 
-The solution proposed is to migrate packaging and distribution of our checks
-from system packages built with Omnibus to _universal Python Wheels_ when possible,
-and _binary Wheels_ when we need to ship non-python artifacts.
+The solution proposed is to migrate packaging and distribution for checks in
+`integrations-core` and `integrations-extra` from system packages built with
+Omnibus to _universal Python Wheels_ when possible, and _binary Wheels_ when
+we need to ship non-python artifacts.
 
 The changes needed in the agent to support this additional method of checks
 distribution are the following:
@@ -121,6 +122,10 @@ it already works.
 The work needed to migrate a pure Python check to wheels is not that much, see
 the ntp check for an example:
 https://github.com/DataDog/integrations-core/tree/massi/whl-poc/ntp
+
+The ability of the agent to progammatically import and run a single Python
+module from a well known path in the filesystem will be preserved, so that
+we don't break any custom check in the wild.
 
 Moving to wheels wouldn’t solve any possible problem we’re facing in building
 and shipping `integrations-core` and `integrations-extra` but overall it might
