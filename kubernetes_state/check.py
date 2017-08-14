@@ -4,6 +4,7 @@
 
 from checks import CheckException
 from checks.prometheus_check import PrometheusCheck
+import re
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -77,8 +78,6 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
-            'kube_job_status_failed': 'job.failed',
-            'kube_job_status_succeeded': 'job.succeeded',
         }
 
         self.ignore_metrics = [
@@ -181,6 +180,13 @@ class KubernetesState(PrometheusCheck):
         else:
             return None
 
+    def _remove_job_tag(self, name):
+        """
+        Removes suffix of job names if they match -(\d{4,10})
+        """
+        pattern = "(-\d{4,10})"
+        return re.sub(pattern, '', name)
+
     # Labels attached: namespace, pod, phase=Pending|Running|Succeeded|Failed|Unknown
     # The phase gets not passed through; rather, it becomes the service check suffix.
     def kube_pod_status_phase(self, message, **kwargs):
@@ -204,7 +210,8 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                parsed_job = self._remove_job_tag(label.value)
+                tags.append('{}:{}'.format(label.name, parsed_job))
             self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_failed(self, message, **kwargs):
@@ -212,8 +219,33 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                parsed_job = self._remove_job_tag(label.value)
+                tags.append('{}:{}'.format(label.name, parsed_job))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
+
+    def kube_job_status_failed(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.job.failed'
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                if label.name == 'job':
+                    parsed_job = self._remove_job_tag(label.value)
+                    tags.append('{}:{}'.format(label.name, parsed_job))
+                else:
+                    tags.append('{}:{}'.format(label.name, label.value))
+            self.increment(metric_name, metric.gauge.value, tags=tags)
+
+    def kube_job_status_succeeded(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.job.succeeded'
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                if label.name == 'job':
+                    parsed_job = self._remove_job_tag(label.value)
+                    tags.append('{}:{}'.format(label.name, parsed_job))
+                else:
+                    tags.append('{}:{}'.format(label.name, label.value))
+            self.increment(metric_name, metric.gauge.value, tags=tags)
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node. """
