@@ -6,7 +6,7 @@
 ### Changes
 
 * [IMPROVEMENT] adds "redis.net.commands.instantaneous" metric [#672][].
-
+* [IMPROVEMENT] adds "redis.mem.maxmemory" metric
 
 1.1.0 / 2017-07-18
 ==================
