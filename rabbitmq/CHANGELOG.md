@@ -1,5 +1,12 @@
 # CHANGELOG - rabbitmq
 
+1.2.2 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add a metric to get the number of bindings for a queue.
+
 1.2.1 / Unreleased
 ==================
 
