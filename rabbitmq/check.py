@@ -255,6 +255,16 @@ class RabbitMQ(AgentCheck):
         self.log.debug('data : {}'.format(data))
         return data
 
+    def _get_tags(self, data, object_type, custom_tags):
+        tags = []
+        tag_list = TAGS_MAP[object_type]
+        for t in tag_list:
+            tag = data.get(t)
+            if tag:
+                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
+                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
+        return tags + custom_tags
+
     def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
@@ -306,15 +316,17 @@ class RabbitMQ(AgentCheck):
         if object_type is QUEUE_TYPE:
             for item in data:
                 vhost = item['vhost']
-                tags = ['queue:{}'.format(item['name'])]
+                #tags = ['queue:{}'.format(item['name'])]
+                tags = self._get_tags(item, object_type, custom_tags)
                 if vhost == '/':
                     vhost = '%2f'
                 url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, vhost, item['name'])
                 bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
                         ssl_verify=ssl_verify, proxies=instance_proxy))
-                self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags + custom_tags)
+                self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
     def _get_metrics(self, data, object_type, custom_tags):
+        '''
         tags = []
         tag_list = TAGS_MAP[object_type]
         for t in tag_list:
@@ -323,7 +335,9 @@ class RabbitMQ(AgentCheck):
                 # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
         tags.extend(custom_tags)
-
+        '''
+        tags = self._get_tags(data, object_type, custom_tags)
+        
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
