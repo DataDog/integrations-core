@@ -205,7 +205,7 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    def _filter_list(self, data, explicit_filters, regex_filters, object_type):
+    def _filter_list(self, data, explicit_filters, regex_filters, object_type, tag_families):
         if explicit_filters or regex_filters:
             matching_lines = []
             for data_line in data:
@@ -219,7 +219,8 @@ class RabbitMQ(AgentCheck):
                 for p in regex_filters:
                     match = re.search(p, name)
                     if match:
-                        if _is_affirmative(instance.get("tag_families", False)) and match.groups():
+                        #if _is_affirmative(instance.get("tag_families", False)) and match.groups():
+                        if _is_affirmative(tag_families) and match.groups():
                             data_line["queue_family"] = match.groups()[0]
                         matching_lines.append(data_line)
                         match_found = True
@@ -240,7 +241,7 @@ class RabbitMQ(AgentCheck):
                 for p in regex_filters:
                     match = re.search(p, absolute_name)
                     if match:
-                        if _is_affirmative(instance.get("tag_families", False)) and match.groups():
+                        if _is_affirmative(tag_families) and match.groups():
                             data_line["queue_family"] = match.groups()[0]
                         matching_lines.append(data_line)
                         match_found = True
@@ -284,7 +285,7 @@ class RabbitMQ(AgentCheck):
                 "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
 
         # a list of queues/nodes is specified. We process only those
-        data = self._filter_list(data, explicit_filters, regex_filters, object_type)
+        data = self._filter_list(data, explicit_filters, regex_filters, object_type, instance.get("tag_families", False))
 
         # if no filters are specified, check everything according to the limits
         if len(data) > ALERT_THRESHOLD * max_detailed:
