@@ -219,7 +219,6 @@ class RabbitMQ(AgentCheck):
                 for p in regex_filters:
                     match = re.search(p, name)
                     if match:
-                        #if _is_affirmative(instance.get("tag_families", False)) and match.groups():
                         if _is_affirmative(tag_families) and match.groups():
                             data_line["queue_family"] = match.groups()[0]
                         matching_lines.append(data_line)
@@ -246,13 +245,9 @@ class RabbitMQ(AgentCheck):
                         matching_lines.append(data_line)
                         match_found = True
                         break
-
                 if match_found:
                     continue
-
-            self.log.debug('matching_lines : {}'.format(matching_lines))
             return matching_lines
-        self.log.debug('data : {}'.format(data))
         return data
 
     def _get_tags(self, data, object_type, custom_tags):
@@ -316,7 +311,6 @@ class RabbitMQ(AgentCheck):
         if object_type is QUEUE_TYPE:
             for item in data:
                 vhost = item['vhost']
-                #tags = ['queue:{}'.format(item['name'])]
                 tags = self._get_tags(item, object_type, custom_tags)
                 if vhost == '/':
                     vhost = '%2f'
