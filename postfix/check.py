@@ -25,8 +25,45 @@ class PostfixCheck(AgentCheck):
         "directory" - the value of 'postconf -h queue_directory'
         "queues" - the postfix mail queues you would like to get message count totals for
 
-    Optionally we can run the check to use `postqueue -p` which is ran with set-group ID privileges,
-    so that dd-agent user can connect to Postfix daemon processes without sudo.
+    Optionally we can run the check to use "postqueue -p" which is ran with set-group ID privileges
+    so that the agent user can connect to Postfix daemon processes without sudo.
+
+    Monitoring the mail queue using "postqueu" will only monitor the following queues.
+    - hold
+    - active
+    - deferred
+    Unlike using the "sudo" method, the "incoming" queue will not be moitored. Postqueue does
+    not report on the "incomming" mail queue.
+
+    http://www.postfix.org/postqueue.1.html
+
+            postqueue gathers information for active, hold and deferred queue.
+
+                 Each  queue entry shows the queue file ID, message size, arrival
+                 time, sender, and the recipients that still need  to  be  deliv-
+                 ered.  If mail could not be delivered upon the last attempt, the
+                 reason for failure is shown. The queue ID string is followed  by
+                 an optional status character:
+
+                 *      The  message  is in the active queue, i.e. the message is
+                        selected for delivery.
+
+                 !      The message is in the hold queue, i.e. no further  deliv-
+                        ery  attempt  will  be  made  until the mail is taken off
+                        hold.
+
+    Postfix has internal access controls that limit activities on the mail queue. By default,
+    Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
+    maybe configured with access controls. You may need to grant the dd-agent user access to view
+    the mail queue.
+
+    postconf -e "authorized_mailq_users = dd-agent"
+
+    http://www.postfix.org/postqueue.1.html
+
+            authorized_mailq_users (static:anyone)
+                List of users who are authorized to view the queue.
+
     """
 
     def check(self, instance):
@@ -59,30 +96,36 @@ class PostfixCheck(AgentCheck):
         return instance_config
 
     def _get_postqueue_stats(self, tags):
-        # postqueue gathers information for active, hold and deferred queue.
-        #
-        #     Each  queue entry shows the queue file ID, message size, arrival
-        #     time, sender, and the recipients that still need  to  be  deliv-
-        #     ered.  If mail could not be delivered upon the last attempt, the
-        #     reason for failure is shown. The queue ID string is followed  by
-        #     an optional status character:
-        #
-        #     *      The  message  is in the active queue, i.e. the message is
-        #            selected for delivery.
-        #
-        #     !      The message is in the hold queue, i.e. no further  deliv-
-        #            ery  attempt  will  be  made  until the mail is taken off
-        #            hold.
-        #
 
-        postfix_conf, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
-        postfix_version = postfix_conf.strip('\n').split('=')[1].strip()
+        # get some intersting configuratin values from postconf
+        pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        postfix_version = pc_output.strip('\n').split('=')[1].strip()
+        pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
+        authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
+
+        self.log.debug('authorized_mailq_users : %s' % authorized_mailq_users)
+
         output, _, _ = get_subprocess_output(['postqueue', '-p'], self.log, False)
 
         active_count = 0
         hold_count = 0
         deferred_count = 0
 
+        # postque -p sample output
+        '''
+        root@postfix:/opt/datadog-agent/agent/checks.d# postqueue -p
+        ----Queue ID----- --Size-- ---Arrival Time---- --Sender/Recipient------
+        3xWyLP6Nmfz23fk        367 Tue Aug 15 16:17:33 root@postfix.devnull.home
+                                                            (deferred transport)
+                                                            alice@crypto.io
+
+        3xWyD86NwZz23ff!       358 Tue Aug 15 16:12:08 root@postfix.devnull.home
+                                                            (deferred transport)
+                                                            bob@crypto.io
+
+        -- 1 Kbytes in 2 Requests.
+        '''
+        
         for line in output.splitlines():
             if '*' in line:
                 active_count += 1
@@ -92,10 +135,8 @@ class PostfixCheck(AgentCheck):
                 continue
             if line[0:1].isdigit():
                 deferred_count += 1
+
         self.log.debug('Postfix Version: %s' % postfix_version)
-        self.log.debug('active_count: %d' % active_count)
-        self.log.debug('hold_count: %d' % hold_count)
-        self.log.debug('deferred_count: %d' % deferred_count)
 
         # Todo: add support for multiple instance by specifying a postqueue -p -c config_dir value
         self.gauge('postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:postfix'])
