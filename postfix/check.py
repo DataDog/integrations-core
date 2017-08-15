@@ -125,7 +125,7 @@ class PostfixCheck(AgentCheck):
 
         -- 1 Kbytes in 2 Requests.
         '''
-        
+
         for line in output.splitlines():
             if '*' in line:
                 active_count += 1
