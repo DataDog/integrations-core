@@ -205,36 +205,7 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
-        """
-        instance: the check instance
-        base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
-        object_type: either QUEUE_TYPE or NODE_TYPE
-        max_detailed: the limit of objects to collect for this type
-        filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
-        """
-        instance_proxy = self.get_instance_proxy(instance, base_url)
-        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
-                              ssl_verify=ssl_verify, proxies=instance_proxy)
-
-        # Make a copy of this list as we will remove items from it at each
-        # iteration
-        explicit_filters = list(filters['explicit'])
-        regex_filters = filters['regexes']
-
-        """ data is a list of nodes or queues:
-        data = [
-            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue1', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
-            {'status': 'running', 'node': 'rabbit@host, 'name': 'queue10', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
-            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue11', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
-            ...
-        ]
-        """
-        if len(explicit_filters) > max_detailed:
-            raise Exception(
-                "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
-
-        # a list of queues/nodes is specified. We process only those
+    def _filter_list(self, data, explicit_filters, regex_filters, object_type):
         if explicit_filters or regex_filters:
             matching_lines = []
             for data_line in data:
@@ -278,7 +249,42 @@ class RabbitMQ(AgentCheck):
                 if match_found:
                     continue
 
-            data = matching_lines
+            self.log.debug('matching_lines : {}'.format(matching_lines))
+            return matching_lines
+        self.log.debug('data : {}'.format(data))
+        return data
+
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
+        """
+        instance: the check instance
+        base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
+        object_type: either QUEUE_TYPE or NODE_TYPE
+        max_detailed: the limit of objects to collect for this type
+        filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
+        """
+        instance_proxy = self.get_instance_proxy(instance, base_url)
+        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+                              ssl_verify=ssl_verify, proxies=instance_proxy)
+
+        # Make a copy of this list as we will remove items from it at each
+        # iteration
+        explicit_filters = list(filters['explicit'])
+        regex_filters = filters['regexes']
+
+        """ data is a list of nodes or queues:
+        data = [
+            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue1', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
+            {'status': 'running', 'node': 'rabbit@host, 'name': 'queue10', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
+            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue11', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
+            ...
+        ]
+        """
+        if len(explicit_filters) > max_detailed:
+            raise Exception(
+                "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
+
+        # a list of queues/nodes is specified. We process only those
+        data = self._filter_list(data, explicit_filters, regex_filters, object_type)
 
         # if no filters are specified, check everything according to the limits
         if len(data) > ALERT_THRESHOLD * max_detailed:
@@ -293,6 +299,19 @@ class RabbitMQ(AgentCheck):
         for data_line in data[:max_detailed]:
             # We truncate the list of nodes/queues if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
+
+        # get a list of the number of bindings on a given queue
+        # /api/queues/vhost/name/bindings
+        if object_type is QUEUE_TYPE:
+            for item in data:
+                vhost = item['vhost']
+                tags = ['queue:{}'.format(item['name'])]
+                if vhost == '/':
+                    vhost = '%2f'
+                url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, vhost, item['name'])
+                bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                        ssl_verify=ssl_verify, proxies=instance_proxy))
+                self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags + custom_tags)
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = []
