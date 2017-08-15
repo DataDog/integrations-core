@@ -326,18 +326,7 @@ class RabbitMQ(AgentCheck):
                 self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
     def _get_metrics(self, data, object_type, custom_tags):
-        '''
-        tags = []
-        tag_list = TAGS_MAP[object_type]
-        for t in tag_list:
-            tag = data.get(t)
-            if tag:
-                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
-                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
-        tags.extend(custom_tags)
-        '''
         tags = self._get_tags(data, object_type, custom_tags)
-        
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
