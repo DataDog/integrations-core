@@ -19,6 +19,10 @@ FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 class TestNginx(unittest.TestCase):
 
     def setUp(self):
+        print os.environ.get('secretKey')
+        secret = os.environ.get('secretKey')
+        print secret[0:3]
+        print secret[3:]
         self.agent_config = {
             'version': '0.1',
             'api_key': 'toto'
