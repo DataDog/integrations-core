@@ -89,3 +89,7 @@ The Agent submits this service check for all vhosts (if `vhosts` is not configur
 **rabbitmq.status**:
 
 Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, otherwise OK.
+
+## Further Reading
+### Knowledge Base
+* [Tagging RabbitMQ queues by tag Family](https://help.datadoghq.com/hc/en-us/articles/211590103-Tagging-RabbitMQ-queues-by-tag-family)
