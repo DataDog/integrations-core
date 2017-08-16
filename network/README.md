@@ -58,3 +58,7 @@ The Network check does not include any event at this time.
 
 ### Service Checks
 The Network check does not include any service check at this time.
+
+## Further Reading
+### Knowledge Base
+* [Built a network monitor on an http check](https://help.datadoghq.com/hc/en-us/articles/115003314726-Built-a-network-monitor-on-an-http-check-)
