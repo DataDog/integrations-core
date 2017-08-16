@@ -891,6 +891,12 @@ class MySql(AgentCheck):
             self.warning("Privileges error accessing the process tables (must grant PROCESS): %s" % str(e))
             return {}
 
+    def _are_values_numeric(self, array):
+        for v in array:
+            if not v.isdigit():
+                return False
+        return True
+
     def _get_stats_from_innodb_status(self, db):
         # There are a number of important InnoDB metrics that are reported in
         # InnoDB status but are not otherwise present as part of the STATUS
@@ -1008,33 +1014,53 @@ class MySql(AgentCheck):
                 results['Innodb_os_file_writes'] = long(row[4])
                 results['Innodb_os_file_fsyncs'] = long(row[8])
             elif line.find('Pending normal aio reads:') == 0:
-                # Pending normal aio reads: 0, aio writes: 0,
-                # or Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
-                # or Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
-                # or Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
-                # or Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
-                # or Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
-                if len(row) == 14:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[10])
+                if len(row) == 8:
+                    # (len(row) == 8)  Pending normal aio reads: 0, aio writes: 0,
+                    if row[4].isdigit() and row[7].isdigit():
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[7])
+                    else:
+                        self.log.warning("Can't parse result line %s" % line)
+
+                elif len(row) == 14:
+                    # (len(row) == 14) Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
+                    if row[4].isdigit() and row[10].isdigit():
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[10])
+                    else:
+                        self.log.warning("Can't parse result line %s" % line)
+
                 elif len(row) == 16:
-                    try:
+                    # (len(row) == 16) Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+                    if self._are_values_numeric(row[4:8]) and self._are_values_numeric(row[11:15]):
                         results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
                                                                       long(row[6]) + long(row[7]))
                         results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
                                                                        long(row[13]) + long(row[14]))
-                    except:
+
+                    # (len(row) == 16) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
+                    elif self._are_values_numeric(row[4:9]) and self._are_values_numeric(row[12:15]):
                         results['Innodb_pending_normal_aio_reads'] = long(row[4])
                         results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                    else:
+                        self.log.warning("Can't parse result line %s" % line)
                 elif len(row) == 18:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                    # (len(row) == 18) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                    if row[4].isdigit() and row[7].isdigit():
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                    else:
+                        self.log.warning("Can't parse result line %s" % line)
                 elif len(row) == 22:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[16])
+                    # (len(row) == 22) Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                    if self._are_values_numeric(row[4:13]) and self._are_values_numeric(row[16:21]):
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[16])
+                    else:
+                        self.log.warning("Can't parse result line %s" % line)
                 else:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[7])
+                    self.log.warning("Can't parse result line %s" % line)
+
             elif line.find('ibuf aio reads') == 0:
                 #  ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
                 #  or ibuf aio reads:, log i/o's:, sync i/o's:
