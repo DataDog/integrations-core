@@ -97,10 +97,14 @@ def main():
     sys.stdout.flush()
     npm.logfile = sys.stdout
     if 'linux' in platform.system().lower():
-        npm.expect(u'updated 1 package', timeout=120)
+        npm.expect(u'instantclient@', timeout=120)
 
-    npm.expect(pexpect.EOF, timeout=120)
-    sys.stdout.flush()
+    try:
+        npm.expect(pexpect.EOF, timeout=120)
+    except Exception:
+        pass
+    finally:
+        sys.stdout.flush()
 
     print 'InstantClient installation complete.'
 
