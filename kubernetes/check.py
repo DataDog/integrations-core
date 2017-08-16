@@ -25,6 +25,7 @@ from utils.service_discovery.sd_backend import get_sd_backend
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
+LEADER_CANDIDATE = 'leader_candidate'
 
 DEFAULT_USE_HISTOGRAM = False
 DEFAULT_PUBLISH_ALIASES = False
@@ -90,6 +91,7 @@ class Kubernetes(AgentCheck):
 
         inst = instances[0] if instances is not None else None
         self.kubeutil = KubeUtil(instance=inst)
+
         if not self.kubeutil.kubelet_api_url:
             raise Exception('Unable to reach kubelet. Try setting the host parameter.')
 
@@ -98,6 +100,10 @@ class Kubernetes(AgentCheck):
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
+
+        self.leader_candidate = agentConfig.get(LEADER_CANDIDATE)
+        if self.leader_candidate:
+            self.kubeutil.refresh_leader()
 
         self.k8s_namespace_regexp = None
         if inst:
@@ -108,7 +114,7 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-            self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
+            self._collect_events = self.kubeutil.is_leader or _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
             if self._collect_events:
                 self.event_retriever = self.kubeutil.get_event_retriever()
             elif self.kubeutil.collect_service_tag:
@@ -156,6 +162,11 @@ class Kubernetes(AgentCheck):
                 self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
     def check(self, instance):
+        # Leader election
+        if self.leader_candidate:
+            self.kubeutil.refresh_leader()
+            self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
         self.enabled_gauges = ["{0}.{1}".format(NAMESPACE, x) for x in enabled_gauges]
@@ -493,7 +504,7 @@ class Kubernetes(AgentCheck):
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
             self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
 
-            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint)
+            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint).json()
             for namespace in namespaces.get('items', []):
                 name = namespace.get('metadata', {}).get('name', None)
                 if name and self.k8s_namespace_regexp.match(name):

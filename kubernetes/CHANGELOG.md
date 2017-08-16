@@ -8,6 +8,7 @@
 * [FEATURE] add an option to collect node labels as host tags. See [#614][]
 * [IMPROVEMENT] add custom tags to service checks [#642][]
 * [FEATURE] skip cAdvisor metrics if port is set to 0. See [#655][]
+* [FEATURE] enable event collection according to agent leader status. See [#687][]
 
 1.2.0 / 2017-07-18
 ==================
