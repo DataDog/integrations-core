@@ -122,3 +122,8 @@ The SNMP check does not include any event at this time.
 **snmp.can_check**:
 
 Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
+
+## Further Reading
+### Knowledge Base 
+* [How to monitor SNMP devices?](https://help.datadoghq.com/hc/en-us/articles/204797329-How-to-monitor-SNMP-devices-)
+* [List of commonly used/compatible OIDs](https://help.datadoghq.com/hc/en-us/articles/204616829-For-SNMP-does-Datadog-have-a-list-of-commonly-used-compatible-OIDs-)
