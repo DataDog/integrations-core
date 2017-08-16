@@ -1,58 +1,78 @@
-# Varnish Integration
+# Agent Check: Varnish
 
 ## Overview
 
-Connect Varnish to Datadog in order to:
+This check collects varnish metrics regarding:
 
-* Visualize your cache performance in real-time
-* Correlate the performance of Varnish with the rest of your applications
+* Clients: connections and requests
+* Cache performance: hits, evictions, etc
+* Threads: creation, failures, threads queued
+* Backends: successful, failed, retried connections
 
-## Installation
+It also submits service checks for the health of each backend.
 
-Install the `dd-check-varnish` package manually or with your favorite configuration manager
+## Setup
+### Installation
 
-## Configuration
+The varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers. If you need the newest version of the check, install the `dd-check-varnish` package.
 
-Configure the Agent to connect to Varnish
+### Configuration
 
- - Edit conf.d/varnish.yaml
+If you're running Varnish 4.1+, add the dd-agent system user to the varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
+
+Then, create a file `varnish.yaml` in the Agent's `conf.d` directory:
+
 ```
 init_config:
 
 instances:
-    - varnishstat: /usr/bin/varnishstat
-      tags:
-          - instance:production
+  - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
+    varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
+#   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
+#   tags:
+#     - instance:production
 ```
 
- - If you're running Varnish 4.1+, you must add the dd-agent user to the varnish group.
+If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
+
 ```
-sudo usermod -a -G varnish dd-agent
+dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
 ```
 
- - If you want the check to use `varnishadm` and send a service check, the agent must be able to access `varnishadm` with root privileges. For this, you can update your `/etc/sudoers` file with for example:
- ```
- dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
- ```
+Restart the Agent to start sending varnish metrics and service checks to Datadog.
 
+### Validation
 
+Run the Agent's `info` subcommand and look for `varnish` under the Checks section:
 
-## Validation
+```
+  Checks
+  ======
+    [...]
 
-When you run `datadog-agent info` you should see something like the following:
+    varnish
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
 
-    Checks
-    ======
-
-        varnish
-        -------
-          - instance #0 [OK]
-          - Collected 8 metrics & 0 events
-
+    [...]
+```
 ## Compatibility
 
-The Varnish check is compatible with all major platforms
+The Varnish check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The Varnish check does not include any event at this time.
+
+### Service Checks
+**varnish.backend_healthy**:
+
+The Agent submits this service check if you configure `varnishadm`. It submits a service check for each varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Further Reading
-
-To get a better idea of how (or why) to monitor Varnish with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/top-varnish-performance-metrics/) about it.
+### Blog Article
+See our [series of blog posts](https://www.datadoghq.com/blog/top-varnish-performance-metrics/) about monitoring varnish with Datadog.

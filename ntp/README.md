@@ -4,11 +4,12 @@
 
 Get alerts when your hosts drift out of sync with your chosen NTP server.
 
-## Installation
+## Setup
+### Installation
 
 The NTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) wherever you'd like to run the check. If you need the newest version of the check, install the `dd-check-ntp` package.
 
-## Configuration
+### Configuration
 
 The Agent enables the NTP check by default, but if you want to configure the check yourself, create a file `ntp.yaml` in the Agent's `conf.d` directory:
 
@@ -25,7 +26,7 @@ instances:
 
 Restart the Agent to effect any configuration changes.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `ntp` under the Checks section:
 
@@ -42,15 +43,18 @@ Run the Agent's `info` subcommand and look for `ntp` under the Checks section:
     [...]
 ```
 
-## Compatibility
+### Compatibility
 
 The NTP check is compatible with all major platforms.
 
-## Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv) for a list of metrics provided by this check.
 
-## Service Checks
+### Events
+The NTP check does not include any event at this time.
+
+### Service Checks
 
 `ntp.in_sync`:
 

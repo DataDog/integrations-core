@@ -1,5 +1,13 @@
 # CHANGELOG - redisdb
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] adds "redis.net.commands.instantaneous" metric [#672][].
+
+
 1.1.0 / 2017-07-18
 ==================
 
@@ -14,3 +22,5 @@
 ### Changes
 
 * [FEATURE] adds redisdb integration.
+
+[#672]: https://github.com/DataDog/integrations-core/pull/672

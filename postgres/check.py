@@ -718,6 +718,8 @@ SELECT s.schemaname,
     def check(self, instance):
         host = instance.get('host', '')
         port = instance.get('port', '')
+        if port != '':
+            port = int(port)
         user = instance.get('username', '')
         password = instance.get('password', '')
         tags = instance.get('tags', [])

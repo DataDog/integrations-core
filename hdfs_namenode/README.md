@@ -6,13 +6,13 @@ Monitor your primary _and_ standby HDFS NameNodes to know when your cluster fall
 
 Use this check (hdfs_namenode) and its counterpart check (hdfs_datanode), not the older two-in-one check (hdfs); that check is deprecated.
 
-## Installation
+## Setup
+### Installation
 
 The HDFS NameNode check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NameNodes.
 
-## Configuration
-
-### Prepare the NameNode
+### Configuration
+#### Prepare the NameNode
 
 The Agent collects metrics from the NameNode's JMX remote interface. The interface is disabled by default, so enable it by setting the following option in `hadoop-env.sh` (usually found in $HADOOP_HOME/conf):
 
@@ -25,7 +25,7 @@ export HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote
 
 Restart the NameNode process to enable the JMX interface.
 
-### Connect the Agent
+#### Connect the Agent
 
 Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory:
 
@@ -38,7 +38,7 @@ instances:
 
 Restart the Agent to begin sending NameNode metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `hdfs_namenode` under the Checks section:
 
@@ -55,24 +55,26 @@ Run the Agent's `info` subcommand and look for `hdfs_namenode` under the Checks 
     [...]
 ```
 
-## Troubleshooting
-
 ## Compatibility
 
 The hdfs_namenode check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv) for a list of metrics provided by this integration.
 
-## Events
+### Events
+The HDFS-namenode check does not include any event at this time.
 
-## Service Checks
+### Service Checks
 
 `hdfs.namenode.jmx.can_connect`:
 
 Returns `Critical` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
-## Further Reading
+## Troubleshooting
 
+## Further Reading
+### Blog Article
 To get a better idea of how (or why) to integrate your HDFS NameNodes with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about monitoring Hadoop. In particular, [Part 2](https://www.datadoghq.com/blog/monitor-hadoop-metrics/) provides a useful walkthrough of key metrics.
