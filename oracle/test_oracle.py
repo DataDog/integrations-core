@@ -4,15 +4,12 @@
 
 # stdlib
 import logging
-from types import ListType
-import unittest
 
 # 3p
 from nose.plugins.attrib import attr
 
 # project
-from tests.checks.common import get_check
-
+from tests.checks.common import AgentCheckTest
 
 logging.basicConfig()
 
@@ -47,23 +44,13 @@ instances:
 """
 
 @attr(requires='oracle')
-class TestOracle(unittest.TestCase):
+class TestOracle(AgentCheckTest):
     """Basic Test for oracle integration."""
     CHECK_NAME = 'oracle'
 
     def testOracle(self):
-        check, instances = get_check('oracle', CONFIG)
-        check.check(instances[0])
-        metrics = check.get_metrics()
-
-        # Make sure the base metrics loaded
-        base_metrics = check.SYS_METRICS.values()
-        ret_metrics = [m[0] for m in metrics]
-        for metric in base_metrics:
-            assert metric in ret_metrics
-
-        service_checks = check.get_service_checks()
-        service_checks_count = len(service_checks)
-        self.assertTrue(isinstance(metrics, ListType))
-        self.assertTrue(service_checks_count > 0)
-        self.assertEquals(len([sc for sc in service_checks if sc['check'] == check.SERVICE_CHECK_NAME]), 1, service_checks)
+        import os
+        for k,v in os.environ.iteritems():
+            print '{}={}'.format(k,v)
+        self.run_check_twice(CONFIG)
+        self.coverage_report()

@@ -18,7 +18,7 @@ from checks import AgentCheck
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 
 
-class OracleCheck(AgentCheck):
+class Oracle(AgentCheck):
 
     SERVICE_CHECK_NAME = 'oracle.can_connect'
     SYS_METRICS = {
