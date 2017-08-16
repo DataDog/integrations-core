@@ -124,8 +124,8 @@ install:
   - pip install pexpect==4.2.1
   - mkdir -p $ORACLE_DIR
   - $TRAVIS_BUILD_DIR/oracle/ci/resources/get_instantclient.py --agree=yes
-  - echo "$HOME/.cache/oracle/instantclient" > /etc/ld.so.conf.d/oracle_instantclient.conf
-  - ldconfig
+  - echo "$ORACLE_DIR/instantclient" | sudo tee /etc/ld.so.conf.d/oracle_instantclient.conf
+  - sudo ldconfig
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
