@@ -1011,15 +1011,21 @@ class MySql(AgentCheck):
                 # Pending normal aio reads: 0, aio writes: 0,
                 # or Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
                 # or Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+                # or Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
                 # or Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                # or Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
                 if len(row) == 14:
                     results['Innodb_pending_normal_aio_reads'] = long(row[4])
                     results['Innodb_pending_normal_aio_writes'] = long(row[10])
                 elif len(row) == 16:
-                    results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
-                                                                  long(row[6]) + long(row[7]))
-                    results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
-                                                                   long(row[13]) + long(row[14]))
+                    try:
+                        results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
+                                                                      long(row[6]) + long(row[7]))
+                        results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
+                                                                       long(row[13]) + long(row[14]))
+                    except:
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[12])
                 elif len(row) == 18:
                     results['Innodb_pending_normal_aio_reads'] = long(row[4])
                     results['Innodb_pending_normal_aio_writes'] = long(row[12])
