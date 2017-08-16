@@ -127,7 +127,7 @@ install:
   - $TRAVIS_BUILD_DIR/oracle/ci/resources/get_instantclient.py --agree=yes
   - echo "$ORACLE_HOME" | sudo tee /etc/ld.so.conf.d/oracle_instantclient.conf
   - sudo ldconfig
-  - ln -s $ORACLE_HOME/libclntsh.so.12.1 $ORACLE_HOME/libclntsh.so
+  - if [ ! -e $ORACLE_HOME/libclntsh.so ]; then ln -s $ORACLE_HOME/libclntsh.so.12.1 $ORACLE_HOME/libclntsh.so; fi
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
