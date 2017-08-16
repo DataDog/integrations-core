@@ -5,12 +5,10 @@
 # stdlib
 
 # 3rd party
-
 try:
     import cx_Oracle
-except ImportError, cx_Oracle.DatabaseError:
+except Exception as e:
     cx_Oracle = None
-
 
 # project
 from checks import AgentCheck

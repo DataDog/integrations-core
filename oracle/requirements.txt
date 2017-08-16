@@ -1,2 +1,2 @@
 # integration pip requirements
-cx_Oracle==6.0
+cx_Oracle==5.3
