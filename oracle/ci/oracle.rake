@@ -12,6 +12,10 @@ def oracle_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/oracle_#{oracle_version}"
 end
 
+def oracle_volume
+  "#{ENV['ORACLE_DIR']}/data"
+end
+
 container_name = 'dd-test-oracle'
 container_port = 1_521
 container_port_8080 = 80_80
@@ -28,13 +32,16 @@ namespace :ci do
       install_requirements('oracle/requirements.txt',
                            "--cache-dir #{ENV['PIP_CACHE']}",
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -p #{container_port}:1521 -p #{container_port_8080}:8080 --name #{container_name} \
-           -d #{oracle_repo}:#{oracle_version})
+      sh %(mkdir -p #{oracle_volume})
+      sh %(docker run  --shm-size=1024MB -p #{container_port}:1521 -p #{container_port_8080}:8080 \
+           --name #{container_name} -v #{oracle_volume}:/u01/app/oracle  -d #{oracle_repo}:#{oracle_version})
     end
 
     task before_script: ['ci:common:before_script'] do
       Wait.for container_port
       Wait.for container_port_8080
+      # it can be a loooong wait (600s TO)...
+      wait_on_docker_logs(container_name, 600, 'Database ready to use')
     end
 
     task script: ['ci:common:script'] do
