@@ -892,10 +892,7 @@ class MySql(AgentCheck):
             return {}
 
     def _are_values_numeric(self, array):
-        for v in array:
-            if not v.isdigit():
-                return False
-        return True
+        return all([v.isdigit() for v in array])
 
     def _get_stats_from_innodb_status(self, db):
         # There are a number of important InnoDB metrics that are reported in
