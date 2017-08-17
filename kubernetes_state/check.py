@@ -195,7 +195,7 @@ class KubernetesState(PrometheusCheck):
 
     def _trim_job_tag(self, name):
         """
-        Trims suffix of job names if they match -(\d{4,10})
+        Trims suffix of job names if they match -(\d{4,10}$)
         """
         pattern = "(-\d{4,10}$)"
         return re.sub(pattern, '', name)
@@ -223,7 +223,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._remove_job_tag(label.value)
+                trimmed_job = self._trim_job_tag(label.value)
                 tags.append(self._format_tag(label.name, trimmed_job))
             self.service_check(service_check_name, self.OK, tags=tags)
 
@@ -232,7 +232,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._remove_job_tag(label.value)
+                trimmed_job = self._trim_job_tag(label.value)
                 tags.append(self._format_tag(label.name, trimmed_job))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
 
@@ -241,7 +241,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._remove_job_tag(label.value)
+                trimmed_job = self._trim_job_tag(label.value)
                 tags.append(self._format_tag(label.name, trimmed_job))
             self.increment(metric_name, metric.gauge.value, tags=tags)
 
@@ -250,8 +250,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                if label.name == 'job':
-                trimmed_job = self._remove_job_tag(label.value)
+                trimmed_job = self._trim_job_tag(label.value)
                 tags.append(self._format_tag(label.name, trimmed_job))
             self.increment(metric_name, metric.gauge.value, tags=tags)
 
