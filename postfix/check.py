@@ -11,8 +11,10 @@ from checks import AgentCheck
 from utils.subprocess_output import get_subprocess_output
 
 class PostfixCheck(AgentCheck):
-    """This check provides metrics on the number of messages in a given postfix queue
+    """
+    This check provides metrics on the number of messages in a given postfix queue
 
+    [Using sudo]
     WARNING: the user that dd-agent runs as must have sudo access for the 'find' command
              sudo access is not required when running dd-agent as root (not recommended)
 
@@ -25,14 +27,20 @@ class PostfixCheck(AgentCheck):
         "directory" - the value of 'postconf -h queue_directory'
         "queues" - the postfix mail queues you would like to get message count totals for
 
-    Optionally we can run the check to use "postqueue -p" which is ran with set-group ID privileges
-    so that the agent user can connect to Postfix daemon processes without sudo.
+    [Using postqueue]
+    Optionally we can configure the agent to use a built in `postqueue -p` command
+    to get a count of messages in the `active`, `hold`, and `deferred` mail queues.
+    `postqueue` is exectued with set-group ID privileges without the need for sudo.
 
-    Monitoring the mail queue using "postqueu" will only monitor the following queues.
+    YAML config options:
+        "config_directory" - the value of 'postconf -h queue_directory'
+
+    WARNING: Monitoring the mail queue using "postqueue" will only monitor the following queues.
     - hold
     - active
     - deferred
-    Unlike using the "sudo" method, the "incoming" queue will not be moitored. Postqueue does
+
+    Unlike using the "sudo" method, the "incoming" queue will not be monitored. Postqueue does
     not report on the "incomming" mail queue.
 
     http://www.postfix.org/postqueue.1.html
@@ -54,7 +62,7 @@ class PostfixCheck(AgentCheck):
 
     Postfix has internal access controls that limit activities on the mail queue. By default,
     Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
-    maybe configured with access controls. You may need to grant the dd-agent user access to view
+    may be configured with stricter access controls, you may need to grant the dd-agent user access to view
     the mail queue.
 
     postconf -e "authorized_mailq_users = dd-agent"
@@ -70,32 +78,42 @@ class PostfixCheck(AgentCheck):
         config = self._get_config(instance)
 
         directory = config['directory']
+        postfix_config_dir = config['postfix_config_dir']
         queues = config['queues']
         tags = config['tags']
 
         if self.init_config.get('postqueue', False):
             self.log.debug('running the check using postqueue -p output')
-            self._get_postqueue_stats(tags)
+            self._get_postqueue_stats(postfix_config_dir, tags)
         else:
             self.log.debug('running the check in classic mode')
             self._get_queue_count(directory, queues, tags)
 
     def _get_config(self, instance):
         directory = instance.get('directory', None)
+        postfix_config_dir = instance.get('config_directory', None)
         queues = instance.get('queues', None)
         tags = instance.get('tags', [])
-        if not queues or not directory:
-            raise Exception('missing required yaml config entry')
+
+        if not self.init_config.get('postqueue', False):
+            self.log.debug('postqueue : get_config')
+            self.log.debug('postqueue: {}'.format(self.init_config.get('postqueue', False)))
+            if not queues or not directory:
+                raise Exception('using sudo: missing required yaml config entry')
+        else:
+            if not postfix_config_dir:
+                raise Exception('using postqueue: missing required yaml "config_directory" entry')
 
         instance_config = {
             'directory': directory,
+            'postfix_config_dir': postfix_config_dir,
             'queues': queues,
             'tags': tags,
         }
 
         return instance_config
 
-    def _get_postqueue_stats(self, tags):
+    def _get_postqueue_stats(self, postfix_config_dir, tags):
 
         # get some intersting configuratin values from postconf
         pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
@@ -103,9 +121,9 @@ class PostfixCheck(AgentCheck):
         pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
         authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
-        self.log.debug('authorized_mailq_users : %s' % authorized_mailq_users)
+        self.log.debug('authorized_mailq_users : {}'.format(authorized_mailq_users))
 
-        output, _, _ = get_subprocess_output(['postqueue', '-p'], self.log, False)
+        output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
 
         active_count = 0
         hold_count = 0
@@ -138,16 +156,15 @@ class PostfixCheck(AgentCheck):
 
         self.log.debug('Postfix Version: %s' % postfix_version)
 
-        # Todo: add support for multiple instance by specifying a postqueue -p -c config_dir value
-        self.gauge('postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:postfix'])
-        self.gauge('postfix.queue.size', hold_count, tags=tags + ['queue:hold', 'instance:postfix'])
-        self.gauge('postfix.queue.size', deferred_count, tags=tags + ['queue:deferred', 'instance:postfix'])
+        self.gauge('postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge('postfix.queue.size', hold_count, tags=tags + ['queue:hold', 'instance:{}'.format(postfix_config_dir)])
+        self.gauge('postfix.queue.size', deferred_count, tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)])
 
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
             queue_path = os.path.join(directory, queue)
             if not os.path.exists(queue_path):
-                raise Exception('%s does not exist' % queue_path)
+                raise Exception('{} does not exist'.format(queue_path))
 
             count = 0
             if os.geteuid() == 0:
@@ -165,8 +182,7 @@ class PostfixCheck(AgentCheck):
                     raise Exception('The dd-agent user does not have sudo access')
 
             # emit an individually tagged metric
-            self.gauge('postfix.queue.size', count, tags=tags + ['queue:%s' % queue, 'instance:%s' % os.path.basename(directory)])
-
+            self.gauge('postfix.queue.size', count, tags=tags + ['queue:{}'.format(queue), 'instance:{}'.format(os.path.basename(directory))])
             # these can be retrieved in a single graph statement
             # for example:
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}
