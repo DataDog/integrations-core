@@ -223,8 +223,11 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._trim_job_tag(label.value)
-                tags.append(self._format_tag(label.name, trimmed_job))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_failed(self, message, **kwargs):
@@ -232,8 +235,11 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._trim_job_tag(label.value)
-                tags.append(self._format_tag(label.name, trimmed_job))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
 
     def kube_job_status_failed(self, message, **kwargs):
@@ -241,8 +247,11 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._trim_job_tag(label.value)
-                tags.append(self._format_tag(label.name, trimmed_job))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.increment(metric_name, metric.gauge.value, tags=tags)
 
     def kube_job_status_succeeded(self, message, **kwargs):
@@ -250,8 +259,11 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                trimmed_job = self._trim_job_tag(label.value)
-                tags.append(self._format_tag(label.name, trimmed_job))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.increment(metric_name, metric.gauge.value, tags=tags)
 
     def kube_node_status_ready(self, message, **kwargs):
