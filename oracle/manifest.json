@@ -6,6 +6,6 @@
   "name": "oracle",
   "short_description": "oracle description.",
   "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": ["linux","mac_os"],
   "version": "0.1.0"
 }

@@ -1,2 +1,2 @@
 # integration pip requirements
-cx_Oracle==5.3
+cx_Oracle==5.3 ; sys_platform != 'win32'
