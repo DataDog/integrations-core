@@ -5,7 +5,8 @@
 
 ### Changes
 
-* [FEATURE] Support for StatefulSet metrics
+* [FEATURE] Support for StatefulSet metrics. See [#561][]
+* [FEATURE] Support tag renaming via the labels_mapper option. See [#651][]
 
 1.2.0 / 2017-07-18
 ==================

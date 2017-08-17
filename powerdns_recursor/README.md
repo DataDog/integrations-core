@@ -12,13 +12,13 @@ Track the performance of your PowerDNS recursors and monitor strange or worrisom
 
 And many more.
 
-## Installation
+## Setup
+### Installation
 
 The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your recursors.
 
-## Configuration
-
-### Prepare PowerDNS
+### Configuration
+#### Prepare PowerDNS
 
 This check collects performance statistics via pdns_recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. /etc/powerdns/recursor.conf):
 
@@ -36,7 +36,7 @@ If you're running pdns_recursor >= 4.1, just set `api-key`.
 
 Restart the recursor to enable the statistics API.
 
-### Connect the Agent
+#### Connect the Agent
 
 Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory:
 
@@ -52,8 +52,7 @@ instances:
 
 Restart the Agent to begin sending PowerDNS Recursor metrics to Datadog.
 
-## Validation
-
+### Validation
 Run the Agent's `info` subcommand and look for `powerdns_recursor` under the Checks section:
 
 ```
@@ -69,19 +68,20 @@ Run the Agent's `info` subcommand and look for `powerdns_recursor` under the Che
     [...]
 ```
 
-## Troubleshooting
-
 ## Compatibility
 
 The PowerDNS Recursor check is compatible with all major platforms.
 
-## Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv) for a list of metrics provided by this integration.
 
-## Service Checks
+### Events
+The PowerDns check does not include any event at this time.### Service Checks
 
+### Service Checks
 **`powerdns.recursor.can_connect`**:
 
 Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
 
+## Troubleshooting

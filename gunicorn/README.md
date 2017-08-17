@@ -11,15 +11,15 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 * Request duration (average, median, max, 95th percentile, etc)
 * Log message rate by log level (critical, error, warning, exception)
 
-## Installation
+## Setup
+### Installation
 
 The Datadog Agent's Gunicorn check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gunicorn servers. If you need the newest version of the Gunicorn check, install the `dd-check-gunicorn` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 The Gunicorn check requires your Gunicorn app's Python environment to have the [`setproctitle`](https://pypi.python.org/pypi/setproctitle) package; without it, the Datadog Agent will always report that it cannot find a `gunicorn` master process (and hence, cannot find workers, either). Install the `setproctitle` package in your app's Python environment if you want to collect the `gunicorn.workers` metric.
 
-## Configuration
-
-### Configure the Datadog Agent
+### Configuration
+#### Configure the Datadog Agent
 
 Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
 
@@ -35,11 +35,11 @@ instances:
 
 Restart the Agent to begin sending Gunicorn metrics to Datadog.
 
-### Connect Gunicorn to DogStatsD
+#### Connect Gunicorn to DogStatsD
 
-Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a StatsD daemon. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
+Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/stable/settings.html#statsd-host) to send its metrics to a daemon that implements the StatsD protocol, such as [DogStatsD](https://docs.datadoghq.com/guides/dogstatsd). As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `gunicorn` under the Checks section:
 
@@ -65,8 +65,26 @@ $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:38374         127.0.0.1:8125          ESTABLISHED 15500/gunicorn: mas
 ```
 
-## Troubleshooting
+## Compatibility
 
+The gunicorn check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration - those from the Agent _and_ those sent by Gunicorn to DogStatsD.
+
+### Events
+The Gunicorn check does not include any event at this time.
+
+### Service Checks
+
+`gunicorn.is_running`:
+
+Returns CRITICAL if the Agent cannot find a Gunicorn master process, or if cannot find any working or idle worker processes.
+
+
+## Troubleshooting
 ### Agent cannot find Gunicorn process
 ```
   Checks
@@ -100,20 +118,6 @@ ubuntu   18462 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
 
-## Compatibility
-
-The gunicorn check is compatible with all major platforms.
-
-## Metrics
-
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration - those from the Agent _and_ those sent by Gunicorn to DogStatsD.
-
-## Service Checks
-
-`gunicorn.is_running`:
-
-Returns CRITICAL if the Agent cannot find a Gunicorn master process, or if cannot find any working or idle worker processes.
-
 ## Further Reading
-
+### Blog Article
 To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).

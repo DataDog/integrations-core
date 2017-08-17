@@ -1,6 +1,6 @@
 # Spark Check
 
-# Overview
+## Overview
 
 The Spark check collects metrics for:
 
@@ -9,7 +9,8 @@ The Spark check collects metrics for:
 - Tasks: number of tasks active, skipped, failed, total
 - Job state: number of jobs active, completed, skipped, failed
 
-# Installation
+## Setup
+### Installation
 
 The Spark check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your:
 
@@ -19,7 +20,7 @@ The Spark check is packaged with the Agent, so simply [install the Agent](https:
 
 If you need the newest version of the check, install the `dd-check-spark` package.
 
-# Configuration
+### Configuration
 
 Create a file `spark.yaml` in the Agent's `conf.d` directory:
 
@@ -45,7 +46,7 @@ Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
 Restart the Agent to start sending Spark metrics to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `spark` under the Checks section:
 
@@ -62,16 +63,18 @@ Run the Agent's `info` subcommand and look for `spark` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The spark check is compatible with all major platforms.
 
-# Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+### Events
+The Spark check does not include any event at this time.
 
+### Service Checks
 The Agent submits one of the following service checks, depending on how you're running Spark:
 
 - **spark.standalone_master.can_connect**
@@ -81,5 +84,5 @@ The Agent submits one of the following service checks, depending on how you're r
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
 
 ## Further Reading
-
+### Blog Article
 To get a better idea of how (or why) to monitor Hadoop & Spark with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-spark/) about it.
