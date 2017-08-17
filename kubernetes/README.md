@@ -44,7 +44,7 @@ The Kubernetes check does not include any service check at this time.
 
 ## Troubleshooting
 ### Can I install the agent on my Kubernetes master node(s) ?
-Yes, since Kubernetes 1.6, the concept of [Taints and Tolerances](http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html) was introduced. Now rather than the master being off limits, it's simply tainted.  Add the required tolerance to the pod to run it:
+Yes, since Kubernetes 1.6, the concept of [Taints and tolerations](http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html) was introduced. Now rather than the master being off limits, it's simply tainted.  Add the required tolerance to the pod to run it:
 
 Add the following lines to your Deployment (or Daemonset if you are running a multi-master setup):
 ```
