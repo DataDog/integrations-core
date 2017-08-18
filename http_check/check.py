@@ -162,6 +162,8 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         username = instance.get('username')
         password = instance.get('password')
+        client_cert = instance.get('client_cert')
+        client_key = instance.get('client_key')
         http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
         timeout = int(instance.get('timeout', 10))
         config_headers = instance.get('headers', {})
@@ -186,12 +188,12 @@ class HTTPCheck(NetworkCheck):
         skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
-        return url, username, password, method, data, http_response_status_code, timeout, include_content,\
+        return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
             headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
             weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
-        addr, username, password, method, data, http_response_status_code, timeout, include_content, headers,\
+        addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
             ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
@@ -239,7 +241,8 @@ class HTTPCheck(NetworkCheck):
                              proxies = instance_proxy, allow_redirects=allow_redirects,
                              verify=False if disable_ssl_validation else instance_ca_certs,
                              json = data if method == 'post' and isinstance(data, dict) else None,
-                             data = data if method == 'post' and isinstance(data, basestring) else None)
+                             data = data if method == 'post' and isinstance(data, basestring) else None,
+                             cert = (client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
