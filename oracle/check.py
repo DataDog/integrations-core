@@ -115,7 +115,11 @@ class Oracle(AgentCheck):
             tablespace_tag = 'tablespace:%s' % row[0]
             used = row[1]
             size = row[2]
-            in_use = used / size * 100
+            if (used == 0) or (size == 0):
+                in_use = 0
+            else:
+                in_use = used / size * 100
+
             self.gauge('oracle.tablespace.used', used, tags=[tablespace_tag])
             self.gauge('oracle.tablespace.size', size, tags=[tablespace_tag])
             self.gauge('oracle.tablespace.in_use', in_use, tags=[tablespace_tag])
