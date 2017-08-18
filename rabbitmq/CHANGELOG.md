@@ -1,17 +1,12 @@
 # CHANGELOG - rabbitmq
 
-1.2.2 / Unreleased
+
+1.3.0 / Unreleased
 ==================
 
 ### Changes
 
 * [FEATURE] Add a metric to get the number of bindings for a queue.
-
-1.2.1 / Unreleased
-==================
-
-### Changes
-
 * [BUGFIX] Set aliveness service to CRITICAL if the rabbitmq server is down. See[#635][]
 
 1.2.0 / 2017-07-18

@@ -194,7 +194,6 @@ class RabbitMQ(AgentCheck):
             for vhost in self.cached_vhosts.get(base_url, []):
                 self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
 
-
     def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
         try:
             r = requests.get(url, auth=auth, proxies=proxies, timeout=self.default_integration_http_timeout, verify=ssl_verify)
@@ -309,15 +308,7 @@ class RabbitMQ(AgentCheck):
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
         if object_type is QUEUE_TYPE:
-            for item in data:
-                vhost = item['vhost']
-                tags = self._get_tags(item, object_type, custom_tags)
-                if vhost == '/':
-                    vhost = '%2f'
-                url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, vhost, item['name'])
-                bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
-                        ssl_verify=ssl_verify, proxies=instance_proxy))
-                self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
+            self._get_queue_bindings_metrics(data, instance, object_type)
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
@@ -336,6 +327,20 @@ class RabbitMQ(AgentCheck):
                 except ValueError:
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
+
+    def _get_queue_bindings_metrics(self, data, instance, object_type):
+        base_url, _, _, auth, ssl_verify, custom_tags = self._get_config(instance)
+        instance_proxy = self.get_instance_proxy(instance, base_url)
+
+        for item in data:
+            vhost = item['vhost']
+            tags = self._get_tags(item, object_type, custom_tags)
+            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), item['name'])
+            self.log.info('url: {}'.format(urlparse.urljoin(base_url, url)))
+            bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                    ssl_verify=ssl_verify, proxies=instance_proxy))
+
+            self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
     def get_connections_stat(self, instance, base_url, object_type, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
