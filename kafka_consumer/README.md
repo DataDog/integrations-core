@@ -48,6 +48,18 @@ The Kafka-consumer check does not include any event at this time.
 ### Service Checks
 The Kafka-consumer check does not include any service check at this time.
 
+## Troubleshooting
+### Specifying a non existent partition in your kafka_Consumer.yaml file
+If you get this error in your info.log:
+```
+instance - #0 [Error]: ''
+```
+
+Specify the specific partition of your environment for your topic in your kafka_Consumer.yaml file:
+```
+#my_topic [0, 1, 4, 12]
+```
+
 ## Further Reading
 ### Blog Article
 To get a better idea of how (or why) to monitor Kafka consumer performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.
