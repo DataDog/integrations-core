@@ -308,7 +308,8 @@ class RabbitMQ(AgentCheck):
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
         if object_type is QUEUE_TYPE:
-            self._get_queue_bindings_metrics(data, instance, object_type)
+            self._get_queue_bindings_metrics(base_url, custom_tags, data, instance_proxy,
+                                            instance, object_type, auth, ssl_verify)
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
@@ -328,15 +329,12 @@ class RabbitMQ(AgentCheck):
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
 
-    def _get_queue_bindings_metrics(self, data, instance, object_type):
-        base_url, _, _, auth, ssl_verify, custom_tags = self._get_config(instance)
-        instance_proxy = self.get_instance_proxy(instance, base_url)
-
+    def _get_queue_bindings_metrics(self, base_url, custom_tags, data, instance_proxy,
+                                    instance, object_type, auth=None, ssl_verify=True):
         for item in data:
             vhost = item['vhost']
             tags = self._get_tags(item, object_type, custom_tags)
             url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), item['name'])
-            self.log.info('url: {}'.format(urlparse.urljoin(base_url, url)))
             bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
                     ssl_verify=ssl_verify, proxies=instance_proxy))
 
