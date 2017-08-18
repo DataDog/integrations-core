@@ -1043,7 +1043,7 @@ class MySql(AgentCheck):
                         results['Innodb_pending_normal_aio_reads'] = long(row[4])
                         results['Innodb_pending_normal_aio_writes'] = long(row[16])
                 except ValueError as e:
-                    self.log.warning("Can't parse result line %s: %s", line, e)        
+                    self.log.warning("Can't parse result line %s: %s", line, e)
             elif line.find('ibuf aio reads') == 0:
                 #  ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
                 #  or ibuf aio reads:, log i/o's:, sync i/o's:
