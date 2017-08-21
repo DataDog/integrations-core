@@ -520,4 +520,4 @@ class SnmpCheck(NetworkCheck):
             self.gauge(metric_name, value, tags)
             return
 
-        self.log.warning("Unsupported metric type %s", snmp_class)
+        self.log.warning("Unsupported metric type %s for %s", snmp_class, metric_name)
