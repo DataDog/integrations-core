@@ -2,9 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+from collections import defaultdict
+
 from checks import CheckException
 from checks.prometheus_check import PrometheusCheck
-import re
+
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -136,7 +139,17 @@ class KubernetesState(PrometheusCheck):
         else:
             send_buckets = True
 
+        # Job counters are monotonic: they increase at every run of the job
+        # We want to send the delta via the `monotonic_count` method
+        self.job_succeeded_count = defaultdict(int)
+        self.job_failed_count = defaultdict(int)
+
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+
+        for job_tags, job_count in self.job_succeeded_count.iteritems():
+            self.monotonic_count(self.NAMESPACE + '.job.succeeded', job_count, list(job_tags))
+        for job_tags, job_count in self.job_failed_count.iteritems():
+            self.monotonic_count(self.NAMESPACE + '.job.failed', job_count, list(job_tags))
 
     def _condition_to_service_check(self, metric, sc_name, mapping, tags=None):
         """
@@ -252,7 +265,8 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, trimmed_job))
                 else:
                     tags.append(self._format_tag(label.name, label.value))
-            self.increment(metric_name, metric.gauge.value, tags=tags)
+            self.job_failed_count[frozenset(tags)] += metric.gauge.value
+
 
     def kube_job_status_succeeded(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.job.succeeded'
@@ -264,7 +278,7 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, trimmed_job))
                 else:
                     tags.append(self._format_tag(label.name, label.value))
-            self.increment(metric_name, metric.gauge.value, tags=tags)
+            self.job_succeeded_count[frozenset(tags)] += metric.gauge.value
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node. """
