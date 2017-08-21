@@ -1,16 +1,17 @@
 # DNS Integration
 
-# Overview
+## Overview
 
 Monitor the resolvability of and lookup times for any DNS records using nameservers of your choosing.
 
-# Installation
+## Setup
+### Installation
 
 The DNS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your DNS servers. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
 If you need the newest version of the DNS check, install the `dd-check-dns` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
-# Configuration
+### Configuration
 
 Create a file `dns_check.yaml` in the Agent's `conf.d` directory:
 
@@ -30,7 +31,7 @@ If you omit the `nameserver` option, the check will use whichever nameserver is 
 
 Restart the Agent to begin sending DNS service checks and response times to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `dns_check` under the Checks section:
 
@@ -48,19 +49,19 @@ Run the Agent's `info` subcommand and look for `dns_check` under the Checks sect
     [...]
 ```
 
-# Troubleshooting
-
-# Compatibility
+## Compatibility
 
 The DNS check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+### Events
+The DNS check does not include any event at this time.
 
-# Service Checks
+### Service Checks
 
 `dns.can_resolve`:
 
@@ -68,4 +69,6 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 
 Tagged by `hostname` and `record_type`.
 
-# Further Reading
+## Troubleshooting
+
+## Further Reading

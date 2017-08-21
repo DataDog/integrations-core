@@ -2,7 +2,7 @@
   "manifest_version": "0.1.0",
   "name": "MySQL",
   "display_name": "MySQL",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "support": "core",
   "supported_os": [
     "linux",

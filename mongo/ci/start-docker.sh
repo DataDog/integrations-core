@@ -76,3 +76,9 @@ echo "The shards have been initialized"
 echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
 docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
+
+echo "Setting test user"
+docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser", pwd: "testPass", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/authDB
+
+echo "Setting test user"
+docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser2", pwd: "testPass2", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/test

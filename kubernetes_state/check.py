@@ -75,6 +75,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_fully_labeled_replicas': 'replicationcontroller.fully_labeled_replicas',
             'kube_replicationcontroller_status_ready_replicas': 'replicationcontroller.replicas_ready',
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
+            'kube_statefulset_replicas': 'statefulset.replicas_desired',
+            'kube_statefulset_status_replicas': 'statefulset.replicas',
         }
 
         self.ignore_metrics = [
@@ -97,6 +99,8 @@ class KubernetesState(PrometheusCheck):
             'kube_replicaset_status_observed_generation',
             'kube_replicationcontroller_metadata_generation',
             'kube_replicationcontroller_status_observed_generation',
+            'kube_statefulset_metadata_generation',
+            'kube_statefulset_status_observed_generation',
             # kube_node_status_phase has no use case as a service check
             'kube_node_status_phase',
             # These CronJob and Job metrics need use cases to determine how do implement
@@ -119,6 +123,12 @@ class KubernetesState(PrometheusCheck):
         endpoint = instance.get('kube_state_url')
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
+
+        if 'labels_mapper' in instance:
+            if isinstance(instance['labels_mapper'], dict):
+                self.labels_mapper = instance['labels_mapper']
+            else:
+                self.log.warning("labels_mapper should be a dictionnary")
 
         send_buckets = instance.get('send_histograms_buckets', True)
         # By default we send the buckets.
@@ -165,6 +175,13 @@ class KubernetesState(PrometheusCheck):
                 return label.value
         return None
 
+    def _format_tag(self, name, value):
+        """
+        Lookups the labels_mapper table to see if replacing the tag name is
+        necessary, then returns a "name:value" tag string
+        """
+        return '%s:%s' % (self.labels_mapper.get(name, name), value)
+
     def _label_to_tag(self, name, labels, tag_name=None):
         """
         Search for `name` in labels name and returns corresponding tag string.
@@ -173,7 +190,7 @@ class KubernetesState(PrometheusCheck):
         """
         value = self._extract_label_value(name, labels)
         if value:
-            return '%s:%s' % (tag_name or name, value)
+            return self._format_tag(tag_name or name, value)
         else:
             return None
 
@@ -190,7 +207,7 @@ class KubernetesState(PrometheusCheck):
                 if label.name == 'phase':
                     phase = label.value.lower()
                 else:
-                    tags.append('{}:{}'.format(label.name, label.value))
+                    tags.append(self._format_tag(label.name, label.value))
             #TODO: add deployment/replicaset?
             status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
             self.service_check(check_basename + phase, status, tags=tags)
@@ -200,7 +217,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_failed(self, message, **kwargs):
@@ -208,7 +225,7 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
 
     def kube_node_status_ready(self, message, **kwargs):
@@ -252,9 +269,9 @@ class KubernetesState(PrometheusCheck):
         statuses = ('schedulable', 'unschedulable')
         if message.type < len(METRIC_TYPES):
             for metric in message.metric:
-                tags = ['{}:{}'.format(label.name, label.value) for label in metric.label]
+                tags = [self._format_tag(label.name, label.value) for label in metric.label]
                 status = statuses[int(getattr(metric, METRIC_TYPES[message.type]).value)]  # value can be 0 or 1
-                tags.append('status:{}'.format(status))
+                tags.append(self._format_tag('status', status))
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))

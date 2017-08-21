@@ -1,32 +1,79 @@
-# Windows_service Integration
+# Agent Check: Windows Service
 
 ## Overview
 
-Get metrics from windows_service service in real time to:
+This check monitors the state of any Windows Service and submits a service check to Datadog.
 
-* Visualize and monitor windows_service states
-* Be notified about windows_service failovers and events.
+## Setup
+### Installation
 
-## Installation
+The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
-Install the `dd-check-windows_service` package manually or with your favorite configuration manager
+### Configuration
 
-## Configuration
+Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
 
-Edit the `windows_service.yaml` file to point to your server and port, set the masters to monitor
+```
+init_config:
 
-## Validation
+instances:
+  - host: . # dot means localhost
+#   username: <REMOTESERVER>\<REMOTEUSER> # if 'host' is a remote host
+#   password: <PASSWORD>
 
-When you run `datadog-agent info` you should see something like the following:
+# list at least one service to monitor
+    services:
+#     - wmiApSrv
+```
 
-    Checks
-    ======
+You must provide service names as they appear in services.msc's properties field (e.g. wmiApSrv), NOT the display name (e.g. WMI Performance Adapter).
 
-        windows_service
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Restart the Agent to start monitoring the services and sending service checks to Datadog.
+
+### Validation
+
+See the info page in the Agent Manager and look for `windows_service` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    windows_service
+    -------
+      - instance #0 [OK]
+      - Collected 0 metrics, 0 events & 1 service check
+
+    [...]
+```
 
 ## Compatibility
 
-The windows_service check is compatible with all major platforms
+The Windows Service check is compatible with all Windows platforms.
+
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Windows Service check does not include any event at this time.
+
+### Service Checks
+**windows_service.state**:
+
+The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
+
+|Windows status|windows_service.state|
+|---|---|
+|Stopped|CRITICAL|
+|Start Pending|WARNING|
+|Stop Pending|WARNING|
+|Running|OK|
+|Continue Pending|WARNING|
+|Pause Pending|WARNING|
+|Paused|WARNING|
+|Unknown|UNKNOWN|
+
+## Further Reading
+### Blog Article
+See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.

@@ -117,7 +117,7 @@ instances:
     # include: ["docker_image:ubuntu", "docker_image:debian"]
     #
     # include all, except ubuntu and Kubernetes pause containers.
-    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*"]
+    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*", "image_name:openshift/origin-pod"]
     # include: []
     #
     # Default: include all containers except for Kubernetes pause containers.

@@ -1,12 +1,20 @@
 # CHANGELOG - mongo
 
-1.2.0 / Unreleased
+1.3.0 / UNRELEASED
+==================
+### Changes
+
+* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][]
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][]
+
+1.2.0 / 2017-07-18
 ==================
 ### Changes
 
 * [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][]
 
-1.1.0 / Unreleased
+1.1.0 / 2017-06-05
 ==================
 ### Changes
 
@@ -18,7 +26,7 @@
 
 * [BUGFIX] Redact username/password in logs, etc. See [#326][] and [#347][]
 
-1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
@@ -30,3 +38,6 @@
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
 [#491]: https://github.com/DataDog/integrations-core/issues/491
+[#625]: https://github.com/DataDog/integrations-core/pull/625
+[#627]: https://github.com/DataDog/integrations-core/pull/627
+[#691]: https://github.com/DataDog/integrations-core/pull/691

@@ -12,21 +12,32 @@ init_config:
   # min_collection_interval: 600
 
 instances:
-  # - kafka_connect_str: localhost:9092
-  #   zk_connect_str: localhost:2181
-  #   zk_prefix: /0.8
-  #   consumer_groups:
-  #     my_consumer:
-  #       my_topic: [0, 1, 4, 12]
-
-  # Production example with redundant hosts:
   # In a production environment, it's often useful to specify multiple
   # Kafka / Zookeper nodes for a single check instance. This way you
   # only generate a single check process, but if one host goes down,
   # KafkaClient / KazooClient will try contacting the next host.
   # Details: https://github.com/DataDog/dd-agent/issues/2943
-  #
-  # - kafka_connect_str:
-  #   - <kafka_host1:port>
-  #   - <kafka_host2:port>
-  #   zk_connect_str: <zk_host1:port>,<zk_host2:port>
+  - kafka_connect_str:
+      - localhost:9092
+      - another_kafka_broker:9092
+    zk_connect_str:
+      - localhost:2181
+      - another_zookeeper:2181
+    # zk_prefix: /0.8
+    consumer_groups:
+      my_consumer:  # consumer group name
+        my_topic: [0, 1, 4, 12]  # topic_name: list of partitions
+      # Note that each level of values is optional. Any omitted values will be
+      # fetched from Zookeeper. You can omit partitions (example: myconsumer2),
+      # topics (example: myconsumer3), and even consumer_groups. If you omit
+      # consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
+      # If a value is omitted, the parent value must still be it's expected type,
+      # which is typically a dict.
+      myconsumer2:
+        mytopic0:
+      myconsumer3:
+    # Setting monitor_unlisted_consumer_groups to True will tell the check to
+    # discover and fetch all offsets for all consumer groups stored in zookeeper.
+    # While this is convenient, it can also put a lot of load on zookeeper, so
+    # use judiciously.
+    monitor_unlisted_consumer_groups: False
