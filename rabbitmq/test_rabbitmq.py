@@ -88,6 +88,7 @@ COMMON_METRICS = [
 
 Q_METRICS = [
     'consumers',
+    'bindings.count',
     'memory',
     'messages',
     'messages.rate',
