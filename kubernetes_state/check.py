@@ -256,7 +256,6 @@ class KubernetesState(PrometheusCheck):
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
 
     def kube_job_status_failed(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.job.failed'
         for metric in message.metric:
             tags = []
             for label in metric.label:
@@ -269,7 +268,6 @@ class KubernetesState(PrometheusCheck):
 
 
     def kube_job_status_succeeded(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.job.succeeded'
         for metric in message.metric:
             tags = []
             for label in metric.label:
