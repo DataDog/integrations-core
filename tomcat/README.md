@@ -10,13 +10,14 @@ This check collects Tomcat metrics like:
 
 And more.
 
-## Installation
+## Setup
+### Installation
 
 The Tomcat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Tomcat servers.
 
 This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation](http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html) to do that.
 
-## Configuration
+### Configuration
 
 Create a file `tomcat.yaml` in the Agent's `conf.d` directory:
 
@@ -97,7 +98,7 @@ See the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) 
 
 Restart the Agent to start sending Tomcat metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `tomcat` under the Checks section:
 
@@ -118,10 +119,16 @@ Run the Agent's `info` subcommand and look for `tomcat` under the Checks section
 
 The tomcat check is compatible with all major platforms.
 
-## Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv) for a list of metrics provided by this check.
 
-## Further Reading
+### Events
+The Tomcat check does not include any event at this time.
 
+### Service Checks
+The Tomcat check does not include any service check at this time.
+
+## Further Reading
+### Blog Article
 See our [blog post](https://www.datadoghq.com/blog/monitor-tomcat-metrics/) about monitoring Tomcat with Datadog.

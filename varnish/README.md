@@ -1,6 +1,6 @@
 # Agent Check: Varnish
 
-# Overview
+## Overview
 
 This check collects varnish metrics regarding:
 
@@ -11,11 +11,12 @@ This check collects varnish metrics regarding:
 
 It also submits service checks for the health of each backend.
 
-# Installation
+## Setup
+### Installation
 
 The varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers. If you need the newest version of the check, install the `dd-check-varnish` package.
 
-# Configuration
+### Configuration
 
 If you're running Varnish 4.1+, add the dd-agent system user to the varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
 
@@ -40,7 +41,7 @@ dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
 
 Restart the Agent to start sending varnish metrics and service checks to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `varnish` under the Checks section:
 
@@ -56,20 +57,22 @@ Run the Agent's `info` subcommand and look for `varnish` under the Checks sectio
 
     [...]
 ```
-# Compatibility
+## Compatibility
 
 The Varnish check is compatible with all major platforms.
 
-# Service Checks
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv) for a list of metrics provided by this check.
 
+### Events
+The Varnish check does not include any event at this time.
+
+### Service Checks
 **varnish.backend_healthy**:
 
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each varnish backend, tagging each with `backend:<backend_name>`.
 
-# Further Reading
-
+## Further Reading
+### Blog Article
 See our [series of blog posts](https://www.datadoghq.com/blog/top-varnish-performance-metrics/) about monitoring varnish with Datadog.
-
-# Metrics
-
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv) for a list of metrics provided by this check.

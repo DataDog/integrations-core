@@ -4,11 +4,12 @@
 
 This check monitors the number of bytes a host has swapped in and swapped out.
 
-## Installation
+## Setup
+### Installation
 
 The system swap check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host.
 
-## Configuration
+### Configuration
 
 Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory:
 
@@ -21,7 +22,7 @@ instances: [{}]
 
 Restart the Agent to start collecting swap metrics.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `system_swap` under the Checks section:
 
@@ -42,6 +43,13 @@ Run the Agent's `info` subcommand and look for `system_swap` under the Checks se
 
 The system_swap check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/system_swap/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The System Swap check does not include any event at this time.
+
+### Service Checks
+The System Swap check does not include any service check at this time.

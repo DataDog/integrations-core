@@ -1,9 +1,10 @@
 # CHANGELOG - mongo
 
-1.2.1 / UNRELEASED
+1.3.0 / UNRELEASED
 ==================
 ### Changes
 
+* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
 * [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][]
 * [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][]
 
@@ -39,3 +40,4 @@
 [#491]: https://github.com/DataDog/integrations-core/issues/491
 [#625]: https://github.com/DataDog/integrations-core/pull/625
 [#627]: https://github.com/DataDog/integrations-core/pull/627
+[#691]: https://github.com/DataDog/integrations-core/pull/691

@@ -1,16 +1,17 @@
 # Agent Check: Cassandra Nodetool
 
-# Overview
+## Overview
 
 This check collects metrics for your Cassandra cluster that are not available through [jmx integration](https://github.com/DataDog/integrations-core/tree/master/cassandra).
 It uses the `nodetool` utility to collect them.
 
-# Installation
+## Setup
+### Installation
 
 The varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your cassandra nodes.
 If you need the newest version of the check, install the `dd-check-cassandra_nodetool` package.
 
-# Configuration
+### Configuration
 
 Create a file `cassandra_nodetool.yaml` in the Agent's `conf.d` directory:
 ```
@@ -39,7 +40,7 @@ instances:
   # tags: []
 ```
 
-# Validation
+### Validation
 
 When you run `datadog-agent info` you should see something like the following:
 
@@ -51,12 +52,22 @@ When you run `datadog-agent info` you should see something like the following:
           - instance #0 [OK]
           - Collected 39 metrics, 0 events & 7 service checks
 
-# Compatibility
+## Compatibility
 
 The `cassandra_nodetool` check is compatible with all major platforms
 
-# Service Checks
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Cassandra_nodetool check does not include any event at this time.
+
+### Service Checks
 
 **cassandra.nodetool.node_up**:
-
 The agent sends this service check for each node of the monitored cluster. Returns CRITICAL if the node is down, otherwise OK.
+
+## Further Reading
+### Blog Article
+To get a better idea of how (or why) to integrate your Cassandra cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics) about it.

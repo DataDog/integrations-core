@@ -6,6 +6,7 @@ The Hadoop Mapreduce check lets you monitor the status and duration of map and r
 
 To collect other Hadoop-related metrics, see the hdfs_datanode, hdfs_namenode, and yarn checks.
 
+
 # Installation
 
 The Agent's Mapreduce check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Hadoop cluster's master nodes. If you need the newest version of the check, install the `dd-check-mapreduce` package.

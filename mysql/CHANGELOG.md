@@ -1,5 +1,12 @@
 # CHANGELOG - mysql
 
+1.0.5 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Add new innodb aio read/write format and prevent future crashes from new formate. See [#660][]
+
 1.0.4 / 2017-07-13
 ==================
 
@@ -45,3 +52,4 @@
 [#291]: https://github.com/DataDog/integrations-core/issues/291
 [#329]: https://github.com/DataDog/integrations-core/issues/329
 [#394]: https://github.com/DataDog/integrations-core/issues/394
+[#660]: https://github.com/DataDog/integrations-core/issues/660

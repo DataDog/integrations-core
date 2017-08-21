@@ -4,11 +4,12 @@
 
 This check lets you collect SNMP metrics from your network devices.
 
-## Installation
+## Setup
+### Installation
 
 The SNMP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host where you want to run the check. If you need the newest version of the check, install the `dd-check-snmp` package.
 
-## Configuration
+### Configuration
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
@@ -43,7 +44,7 @@ instances:
 
 List each SNMP device as a distinct instance, and for each instance, list any SNMP counters and gauges you like in the `metrics` option. There are a few ways to specify what metrics to collect.
 
-### MIB and symbol
+#### MIB and symbol
 
 ```
     metrics:
@@ -51,7 +52,7 @@ List each SNMP device as a distinct instance, and for each instance, list any SN
         symbol: udpInDatagrams
 ```
 
-### OID and name
+#### OID and name
 
 ```
     metrics:
@@ -59,7 +60,7 @@ List each SNMP device as a distinct instance, and for each instance, list any SN
         name: tcpActiveOpens # what to use in the metric name; can be anything
 ```
 
-### MIB and table
+#### MIB and table
 
 ```
     metrics:
@@ -75,7 +76,7 @@ List each SNMP device as a distinct instance, and for each instance, list any SN
 
 This lets you collect metrics on all rows in a table (`symbols`) and specify how to tag each metric (`metric_tags`).
 
-### Use your own MIB
+#### Use your own MIB
 
 The SNMP check can collect MIB data that is formatted via [pysnmp](https://pypi.python.org/pypi/pysnmp). You can use the `build-pysnmp-mibs` script that ships with pysnmp to generate such data.
 
@@ -85,7 +86,7 @@ Put all your pysnmp MIBs into any directory and point the SNMP check to this dir
 
 Restart the Agent to start sending SNMP metrics to Datadog.
 
-## Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `snmp` under the Checks section:
 
@@ -106,14 +107,23 @@ Run the Agent's `info` subcommand and look for `snmp` under the Checks section:
 
 The snmp check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 The SNMP check doesn't generate any standard metrics, so [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv) is empty. 
 
 The check submits collects and submits the metrics you specify under the `snmp.*` namespace.
 
-## Service Checks
+### Events
+The SNMP check does not include any event at this time.
+
+### Service Checks
 
 **snmp.can_check**:
 
 Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
+
+## Further Reading
+### Knowledge Base 
+* [How to monitor SNMP devices?](https://help.datadoghq.com/hc/en-us/articles/204797329-How-to-monitor-SNMP-devices-)
+* [List of commonly used/compatible OIDs](https://help.datadoghq.com/hc/en-us/articles/204616829-For-SNMP-does-Datadog-have-a-list-of-commonly-used-compatible-OIDs-)
