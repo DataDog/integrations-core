@@ -1,5 +1,12 @@
 # CHANGELOG - http_check
 
+1.1.2 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Improved logging. See #652.
+
 1.1.1 / 2017-07-18
 ==================
 
