@@ -7,6 +7,7 @@ import logging
 
 # 3p
 from nose.plugins.attrib import attr
+import cx_Oracle
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -37,6 +38,9 @@ CONFIG = {
 
 SERVICE_CHECK_NAME = 'oracle.can_connect'
 METRICS = [
+    'oracle.tablespace.used',
+    'oracle.tablespace.size',
+    'oracle.tablespace.in_use',
     'oracle.buffer_cachehit_ratio',
     'oracle.cursor_cachehit_ratio',
     'oracle.library_cachehit_ratio',
@@ -67,6 +71,28 @@ METRICS = [
 class TestOracle(AgentCheckTest):
     """Basic Test for oracle integration."""
     CHECK_NAME = 'oracle'
+
+    def setUp(self):
+        conn_string = 'cx_Oracle/welcome@//localhost:1521/xe'
+        connection = cx_Oracle.connect(conn_string)
+
+        # mess around a bit to pupulate metrics
+        cursor = connection.cursor()
+        cursor.execute("select 'X' from dual")
+
+        # truncate
+        cursor.execute("truncate table TestTempTable")
+
+        # insert
+        rows = [ { u"value" : n } for n in range(250) ]
+        cursor.arraysize = 100
+        statement = "insert into TestTempTable (IntCol) values (:value)"
+        cursor.executemany(statement, rows)
+        connection.commit()
+
+        # select
+        cursor.execute("select count(*) from TestTempTable")
+        _, = cursor.fetchone()
 
     def testOracle(self):
         self.run_check_twice(CONFIG)

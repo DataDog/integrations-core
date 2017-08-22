@@ -34,7 +34,8 @@ namespace :ci do
                            "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
       sh %(mkdir -p #{oracle_volume})
       sh %(docker run  --shm-size=1024MB -p #{container_port}:1521 -p #{container_port_8080}:8080 \
-           --name #{container_name} -v #{oracle_volume}:/u01/app/oracle  -d #{oracle_repo}:#{oracle_version})
+           --name #{container_name} -v #{__dir__}/resources:/docker-entrypoint-initdb.d -v #{oracle_volume}:/u01/app/oracle \
+           -e WEB_CONSOLE=false -d #{oracle_repo}:#{oracle_version})
     end
 
     task before_script: ['ci:common:before_script'] do
