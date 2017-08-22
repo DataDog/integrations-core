@@ -435,7 +435,7 @@ class Network(AgentCheck):
             #          -7       -6       -5        -4       -3       -2        -1
             for h in ("Ipkts", "Ierrs", "Ibytes", "Opkts", "Oerrs", "Obytes", "Coll"):
                 if h not in headers:
-                    self.logger.error("%s not found in %s; cannot parse" % (h, headers))
+                    self.log.error("%s not found in %s; cannot parse" % (h, headers))
                     return False
 
             current = None

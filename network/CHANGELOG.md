@@ -1,5 +1,12 @@
 # CHANGELOG - network
 
+1.2.2 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix incorrect `log.error` call in BSD check.
+
 1.2.1 / 2017-07-18
 ==================
 
