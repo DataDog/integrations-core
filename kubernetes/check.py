@@ -101,7 +101,7 @@ class Kubernetes(AgentCheck):
         else:
             self._sd_backend = None
 
-        self.leader_candidate = agentConfig.get(LEADER_CANDIDATE)
+        self.leader_candidate = inst.get(LEADER_CANDIDATE)
         if self.leader_candidate:
             self.kubeutil.refresh_leader()
 
@@ -114,19 +114,8 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-            self._collect_events = self.kubeutil.is_leader or _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
-            if self._collect_events:
-                self.event_retriever = self.kubeutil.get_event_retriever()
-            elif self.kubeutil.collect_service_tag:
-                # Only fetch service and pod events for service mapping
-                event_delay = inst.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
-                                                                         delay=event_delay)
-            else:
-                self.event_retriever = None
-        else:
-            self._collect_events = None
             self.event_retriever = None
+            self._configure_event_collection(inst)
 
     def _perform_kubelet_checks(self, url, instance):
         service_check_base = NAMESPACE + '.kubelet.check'
@@ -161,11 +150,29 @@ class Kubernetes(AgentCheck):
             else:
                 self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
+    def _configure_event_collection(self, instance):
+        self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+        if self._collect_events:
+            if self.event_retriever:
+                self.event_retriever.set_kinds(None)
+                self.event_retriever.set_delay(None)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever()
+        elif self.kubeutil.collect_service_tag:
+            # Only fetch service and pod events for service mapping
+            event_delay = instance.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
+            if self.event_retriever:
+                self.event_retriever.set_kinds(['Service', 'Pod'])
+                self.event_retriever.set_delay(event_delay)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
+                                                                         delay=event_delay)
+        else:
+            self.event_retriever = None
+
     def check(self, instance):
         # Leader election
-        if self.leader_candidate:
-            self.kubeutil.refresh_leader()
-            self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+        self.refresh_leader_status(instance)
 
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
@@ -540,3 +547,23 @@ class Kubernetes(AgentCheck):
                 'tags': tags,
             }
             self.event(dd_event)
+
+    def refresh_leader_status(self, instance):
+        """
+        calls kubeutil.refresh_leader and compares the resulting
+        leader status with the previous one.
+        If it changed, update the event collection logic
+        """
+        if not self.leader_candidate:
+            return
+
+        leader_status = self.kubeutil.is_leader
+        self.kubeutil.refresh_leader()
+
+        # nothing changed, no-op
+        if leader_status == self.kubeutil.is_leader:
+            return
+        # else, reset the event collection config
+        else:
+            self.log.info("Leader status changed, updating event collection config...")
+            self._configure_event_collection(instance)
