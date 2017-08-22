@@ -706,13 +706,13 @@ class TestKubeutil(unittest.TestCase):
             # tls_settings, expected_params
             (
                 {},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': None}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'content-type': 'application/json'}, 'cert': None}
             ), (
                 {'bearer_token': 'foo_tok'},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok'}, 'cert': None}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok', 'content-type': 'application/json'}, 'cert': None}
             ), (
                 {'bearer_token': 'foo_tok','apiserver_client_cert': ('foo.crt', 'foo.key')},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': ('foo.crt', 'foo.key')}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'content-type': 'application/json'}, 'cert': ('foo.crt', 'foo.key')}
             ),
         ]
 
@@ -726,7 +726,7 @@ class TestKubeutil(unittest.TestCase):
         self.kubeutil.tls_settings = {'bearer_token': 'foo_tok'}
         self.kubeutil.CA_CRT_PATH = __file__
         self.kubeutil.retrieve_json_auth('url')
-        r.get.assert_called_with('url', verify=__file__, timeout=10, params=None, headers={'Authorization': 'Bearer foo_tok'}, cert=None)
+        r.get.assert_called_with('url', verify=__file__, timeout=3, params=None, headers={'Authorization': 'Bearer foo_tok', 'content-type': 'application/json'}, cert=None)
 
     def test_get_node_info(self):
         with mock.patch('utils.kubernetes.KubeUtil._fetch_host_data') as f:
