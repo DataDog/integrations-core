@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
-import os
-
 # 3rd party
 from nose.plugins.attrib import attr
 
