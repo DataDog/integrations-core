@@ -1,11 +1,11 @@
 require 'ci/common'
 
 def couch_version
-  ENV['FLAVOR_VERSION'] || 'couchdb:1.6.1'
+  ENV['FLAVOR_VERSION'] || '1.6.1'
 end
 
 def couch_2?
-  couch_version.include? '2.0'
+  couch_version.start_with? '2.'
 end
 
 def couch_rootdir
@@ -29,7 +29,12 @@ namespace :ci do
                     else
                       %()
                     end
-      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d #{couch_version} ) + docker_args
+      docker_image = if ['2.0-dev'].include?(couch_version)
+                       "klaemo/couchdb:#{couch_version}"
+                     else
+                       "couchdb:#{couch_version}"
+                     end
+      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d #{docker_image} ) + docker_args
     end
 
     task before_script: ['ci:common:before_script'] do
