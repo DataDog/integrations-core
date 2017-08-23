@@ -318,6 +318,7 @@ class SQLServer(AgentCheck):
             conn_str += 'Password=%s;' % (password)
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
+            conn_str += instance.get('connection_string', '')
         return conn_str
 
 
