@@ -5,6 +5,7 @@
 ### Changes
 
 * [BUGFIX] safely check volume list before accessing. See [#544][]
+* [BUGFIX] make it a bit safer. See [#701][]
 
 1.3.1 / 2017-07-26 
 ==================
