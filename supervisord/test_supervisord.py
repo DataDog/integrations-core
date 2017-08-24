@@ -454,7 +454,7 @@ Stop time: \nExit Status: 0"""
     def norm_service_check(service_check):
         '''Removes timestamp, host_name, message and id'''
         for field in ['timestamp', 'host_name', 'message', 'id']:
-            service_check.pop(field)
+            service_check.pop(field, None)
         return service_check
 
 
