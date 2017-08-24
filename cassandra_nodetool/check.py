@@ -20,13 +20,20 @@ TO_BYTES = {
     'MB': 1e6,
     'GB': 1e9,
     'TB': 1e12,
+
+    # only available in cassandra 3.11 or later
+    'iB': 1,
+    'KiB': 1e3,
+    'MiB': 1e6,
+    'GiB': 1e9,
+    'TiB': 1e12,
 }
 
 class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')
     node_status_re = re.compile('^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
-                                '(?P<load>\d+\.\d*) (?P<load_unit>(K|M|G|T)?B) +\d+ +'
+                                '(?P<load>\d+\.\d*) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
                                 '(?P<owns>(\d+\.\d+)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
