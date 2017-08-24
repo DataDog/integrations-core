@@ -26,6 +26,6 @@
 [#342]: https://github.com/DataDog/integrations-core/issues/342
 [#357]: https://github.com/DataDog/integrations-core/issues/357
 [#456]: https://github.com/DataDog/integrations-core/issues/456
-[#703]: https://github.com/DataDog/integrations-core/pull/703 
+[#703]: https://github.com/DataDog/integrations-core/issues/703 
 [@rlaveycal]: https://github.com/rlaveycal
 [@themsquared]: https://github.com/themsquared
