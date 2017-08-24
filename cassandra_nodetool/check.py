@@ -53,6 +53,9 @@ class CassandraNodetoolCheck(AgentCheck):
         # Flag to send service checks only once and not for every keyspace
         send_service_checks = True
 
+        if not keyspaces:
+            self.log.info("No keyspaces set in the configuration: no metrics will be sent")
+
         for keyspace in keyspaces:
             # Build the nodetool command
             cmd = nodetool_cmd + ['-h', host, '-p', port]
