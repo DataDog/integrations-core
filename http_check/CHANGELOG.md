@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [IMPROVEMENT] Improved logging. See #652.
+* [IMPROVEMENT] Improved logging. See [#652][].
 
 1.1.1 / 2017-07-18
 ==================
@@ -33,3 +33,4 @@
 [#249]: https://github.com/DataDog/integrations-core/issues/249
 [#328]: https://github.com/DataDog/integrations-core/issues/328
 [#461]: https://github.com/DataDog/integrations-core/issues/461
+[#652]: https://github.com/DataDog/integrations-core/issues/652
