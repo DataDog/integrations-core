@@ -1,19 +1,13 @@
 # CHANGELOG - mysql
 
-1.0.5 / Unreleased
+1.0.4 / Unreleased
 ==================
 
 ### Changes
 
-* [BUGFIX] Add new innodb aio read/write format and prevent future crashes from new formate. See [#660][]
-
-1.0.4 / 2017-07-13
-==================
-
-### Changes
-
-* [BUGFIX] Fix bug when options dict is empty. See [637][]
-* [BUGFIX] MySQL: Fix slow query check for 95th us percentile. See [#586][]
+* [BUGFIX] Add new innodb aio read/write format and prevent future crashes from new format. See [#660][]
+* [BUGFIX] Fix bug when options dict is empty. See [#637][]
+* [BUGFIX] Fix slow query check for 95th us percentile. See [#586][], thanks [@EdwardMcConnell][]
 
 1.0.3 / 2017-05-11
 ==================
@@ -52,4 +46,7 @@
 [#291]: https://github.com/DataDog/integrations-core/issues/291
 [#329]: https://github.com/DataDog/integrations-core/issues/329
 [#394]: https://github.com/DataDog/integrations-core/issues/394
+[#586]: https://github.com/DataDog/integrations-core/issues/586
+[#637]: https://github.com/DataDog/integrations-core/issues/637
 [#660]: https://github.com/DataDog/integrations-core/issues/660
+[@EdwardMcConnell]: https://github.com/EdwardMcConnell

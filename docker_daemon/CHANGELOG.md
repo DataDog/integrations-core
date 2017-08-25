@@ -4,10 +4,11 @@
 ==================
 ### Changes
 
+* [IMPROVEMENT] Add "image_name:openshift/origin-pod" to suggested exclude list. See [#641][]
 * [BUGFIX] safely check volume list before accessing. See [#544][]
 * [BUGFIX] make it a bit safer. See [#701][]
 
-1.3.1 / 2017-07-26 
+1.3.1 / 2017-07-26
 ==================
 ### Changes
 
@@ -83,4 +84,6 @@
 [#544]: https://github.com/DataDog/integrations-core/issues/544
 [#553]: https://github.com/DataDog/integrations-core/issues/553
 [#616]: https://github.com/DataDog/integrations-core/issues/616
+[#641]: https://github.com/DataDog/integrations-core/issues/641
+[#701]: https://github.com/DataDog/integrations-core/issues/701
 [@sophaskins]: https://github.com/sophaskins
