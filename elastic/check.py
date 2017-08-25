@@ -356,8 +356,11 @@ class ESCheck(AgentCheck):
         # Support URLs that have a path in them from the config, for
         # backwards-compatibility.
         parsed = urlparse.urlparse(url)
-        if parsed[2] != "":
+        if parsed[2] != "" and parsed[2] == '/':
             url = "%s://%s" % (parsed[0], parsed[1])
+        else:
+            url = "%s://%s/%s" % (parsed[0], parsed[1], parsed[2])
+
         port = parsed.port
         host = parsed.hostname
 
