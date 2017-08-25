@@ -74,7 +74,8 @@ instances:
     password: my_password
     
     # Optional, specify a custom connection string to be used
-    # connection_string: "my_string"
+    # Options such as "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True" can be used here
+    # connection_string: "my_connection_string"
     
     # Optional, timeout in seconds for the connection and each command run
     # command_timeout: 30
