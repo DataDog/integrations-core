@@ -318,7 +318,6 @@ class SQLServer(AgentCheck):
             conn_str += 'Password=%s;' % (password)
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
-            conn_str += '%s;' % instance.get('connection_string', '')
         return conn_str
 
 
@@ -507,12 +506,13 @@ class SQLServer(AgentCheck):
         ]
 
         try:
+            cs = '%s;' % instance.get('connection_string', '')
             if self._get_connector(instance) == 'adodbapi':
-                cs = self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
+                cs += self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout':timeout, 'autocommit':True})
             else:
-                cs = self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
+                cs += self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
                 rawconn = pyodbc.connect(cs, timeout=timeout)
 
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
