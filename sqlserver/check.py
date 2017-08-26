@@ -506,7 +506,8 @@ class SQLServer(AgentCheck):
         ]
 
         try:
-            cs = '%s;' % instance.get('connection_string', '')
+            cs = instance.get('connection_string', '')
+            cs += ';' if cs != '' else ''
             if self._get_connector(instance) == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
                 # autocommit: true disables implicit transaction
