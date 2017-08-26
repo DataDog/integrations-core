@@ -5,8 +5,8 @@
 ### Changes
 
 * [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
-* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][]
-* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][]
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][], thanks [@dtbartle][]
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][], thanks [@dtbartle][]
 
 1.2.0 / 2017-07-18
 ==================
@@ -38,6 +38,7 @@
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
 [#491]: https://github.com/DataDog/integrations-core/issues/491
-[#625]: https://github.com/DataDog/integrations-core/pull/625
-[#627]: https://github.com/DataDog/integrations-core/pull/627
-[#691]: https://github.com/DataDog/integrations-core/pull/691
+[#625]: https://github.com/DataDog/integrations-core/issues/625
+[#627]: https://github.com/DataDog/integrations-core/issues/627
+[#691]: https://github.com/DataDog/integrations-core/issues/691
+[@dtbartle]: https://github.com/dtbartle

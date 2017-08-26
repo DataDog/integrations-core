@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#689][] and [#699][], thanks to [@Erouan50][]
+* [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639][] and [#699][], thanks to [@Erouan50][]
 * [MINOR] Allow specifying postgres port as string. See [#607][], thanks [@infothrill][]
 
 1.0.3 / 2017-07-18
@@ -40,7 +40,7 @@
 [#295]: https://github.com/DataDog/integrations-core/issues/295
 [#446]: https://github.com/DataDog/integrations-core/issues/446
 [#607]: https://github.com/DataDog/integrations-core/issues/607
-[#689]: https://github.com/DataDog/integrations-core/issues/689
+[#639]: https://github.com/DataDog/integrations-core/issues/639
 [#699]: https://github.com/DataDog/integrations-core/issues/699
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill
