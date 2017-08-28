@@ -18,6 +18,7 @@ INSTANCE = {
     'metrics': [
         ['File Read Operations/sec', 'pdh.system.file_read_per_sec', 'gauge'],
         ['File Write Bytes/sec', 'pdh.system.file_write_bytes_sec', 'gauge'],
+    ]
 }
 
 INSTANCE_METRICS = [
