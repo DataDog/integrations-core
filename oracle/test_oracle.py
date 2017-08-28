@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -60,7 +60,7 @@ METRICS = [
     'oracle.sorts_per_user_call',
     'oracle.rows_per_sort',
     'oracle.disk_sorts',
-    'oracle.memroy_sorts_ratio',
+    'oracle.memory_sorts_ratio',
     'oracle.database_wait_time_ratio',
     'oracle.enqueue_timeouts',
     'oracle.session_limit_usage',

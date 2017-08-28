@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -38,7 +38,7 @@ class Oracle(AgentCheck):
         'Total Sorts Per User Call':        'oracle.sorts_per_user_call',
         'Rows Per Sort':                    'oracle.rows_per_sort',
         'Disk Sort Per Sec':                'oracle.disk_sorts',
-        'Memory Sorts Ratio':               'oracle.memroy_sorts_ratio',
+        'Memory Sorts Ratio':               'oracle.memory_sorts_ratio',
         'Database Wait Time Ratio':         'oracle.database_wait_time_ratio',
         'Enqueue Timeouts Per Sec':         'oracle.enqueue_timeouts',
         'Session Limit %':                  'oracle.session_limit_usage',

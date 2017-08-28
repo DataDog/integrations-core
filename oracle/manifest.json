@@ -7,5 +7,6 @@
   "short_description": "oracle description.",
   "support": "contrib",
   "supported_os": ["linux","mac_os"],
-  "version": "0.1.0"
+  "version": "1.0.0",
+  "guid": "6c4ddc46-2763-4c56-8b71-c838b7f82d7b"
 }
