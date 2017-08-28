@@ -46,8 +46,8 @@ DEFAULT_ENABLED_GAUGES = [
 
 GAUGE = AgentCheck.gauge
 RATE = AgentCheck.rate
-HISTORATE = AgentCheck.generate_historate_func(["container_name"])
-HISTO = AgentCheck.generate_histogram_func(["container_name"])
+HISTORATE = AgentCheck.generate_historate_func(["container_name", "pod_name", "kube_replica_set", "kube_replication_controller"])
+HISTO = AgentCheck.generate_histogram_func(["container_name", "pod_name", "kube_replica_set", "kube_replication_controller"])
 FUNC_MAP = {
     GAUGE: {True: HISTO, False: GAUGE},
     RATE: {True: HISTORATE, False: RATE}
