@@ -4,6 +4,7 @@
 
 # stdlib
 import logging
+import time
 
 # 3p
 from nose.plugins.attrib import attr
@@ -84,7 +85,7 @@ class TestOracle(AgentCheckTest):
         cursor.execute("truncate table TestTempTable")
 
         # insert
-        rows = [ { u"value" : n } for n in range(250) ]
+        rows = [{u"value": n} for n in range(250)]
         cursor.arraysize = 100
         statement = "insert into TestTempTable (IntCol) values (:value)"
         cursor.executemany(statement, rows)
@@ -93,6 +94,9 @@ class TestOracle(AgentCheckTest):
         # select
         cursor.execute("select count(*) from TestTempTable")
         _, = cursor.fetchone()
+
+        # wait to populate
+        time.sleep(90)
 
     def testOracle(self):
         self.run_check_twice(CONFIG)
