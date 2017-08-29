@@ -222,6 +222,7 @@ class YarnCheck(AgentCheck):
 
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
+        validate_ssl = instance.get('validate_ssl', True)
         app_tags = instance.get('application_tags', {})
         queue_blacklist = instance.get('queue_blacklist', [])
 
