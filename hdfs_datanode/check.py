@@ -65,9 +65,9 @@ class HDFSDataNode(AgentCheck):
         validate_ssl = instance.get('validate_ssl', True)
 
         # Get metrics from JMX
-        self._hdfs_datanode_metrics(jmx_address)
+        self._hdfs_datanode_metrics(jmx_address, validate_ssl)
 
-    def _hdfs_datanode_metrics(self, jmx_uri):
+    def _hdfs_datanode_metrics(self, jmx_uri, validate_ssl):
         '''
         Get HDFS data node metrics from JMX
         '''
