@@ -1,5 +1,12 @@
 # CHANGELOG - yarn
 
+1.2.0 / 2017-08-29
+==================
+
+### Changes
+
+* [FEATURE] adds configuration option to ignore SSL validation. See [#713][]
+
 1.1.0 / 2017-07-18
 ==================
 
