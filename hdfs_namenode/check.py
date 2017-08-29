@@ -113,7 +113,7 @@ class HDFSNameNode(AgentCheck):
         '''
         Get HDFS namenode metrics from JMX
         '''
-        response = self._rest_request_to_json(jmx_uri, validate_ssl
+        response = self._rest_request_to_json(jmx_uri, validate_ssl,
             JMX_PATH,
             query_params={'qry':bean_name})
 
