@@ -255,17 +255,17 @@ class YarnCheck(AgentCheck):
         tags.append('cluster_name:%s' % cluster_name)
 
         # Get metrics from the Resource Manager
-        self._yarn_cluster_metrics(rm_address, tags)
+        self._yarn_cluster_metrics(rm_address, validate_ssl, tags)
         if _is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
-            self._yarn_app_metrics(rm_address, app_tags, tags)
-        self._yarn_node_metrics(rm_address, tags)
-        self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
+            self._yarn_app_metrics(rm_address, validate_ssl, app_tags, tags)
+        self._yarn_node_metrics(rm_address, validate_ssl, tags)
+        self._yarn_scheduler_metrics(rm_address, validate_ssl, tags, queue_blacklist)
 
-    def _yarn_cluster_metrics(self, rm_address, addl_tags):
+    def _yarn_cluster_metrics(self, rm_address, validate_ssl, addl_tags):
         '''
         Get metrics related to YARN cluster
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_CLUSTER_METRICS_PATH)
 
         if metrics_json:
 
@@ -274,12 +274,12 @@ class YarnCheck(AgentCheck):
             if yarn_metrics is not None:
                 self._set_yarn_metrics_from_json(addl_tags, yarn_metrics, YARN_CLUSTER_METRICS)
 
-    def _yarn_app_metrics(self, rm_address, app_tags, addl_tags):
+    def _yarn_app_metrics(self, rm_address, validate_ssl, app_tags, addl_tags):
         '''
         Get metrics for running applications
         '''
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            rm_address, validate_ssl,
             YARN_APPS_PATH,
             states=YARN_APPLICATION_STATES
         )
@@ -304,11 +304,11 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
-    def _yarn_node_metrics(self, rm_address, addl_tags):
+    def _yarn_node_metrics(self, rm_address, validate_ssl, addl_tags):
         '''
         Get metrics related to YARN nodes
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_NODES_PATH)
 
         if (metrics_json and metrics_json['nodes'] is not None and
                 metrics_json['nodes']['node'] is not None):
@@ -321,11 +321,11 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
 
-    def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
+    def _yarn_scheduler_metrics(self, rm_address, validate_ssl, addl_tags, queue_blacklist):
         '''
         Get metrics from YARN scheduler
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_SCHEDULER_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_SCHEDULER_PATH)
 
         try:
             metrics_json = metrics_json['scheduler']['schedulerInfo']
@@ -403,7 +403,7 @@ class YarnCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown', metric_type)
 
-    def _rest_request_to_json(self, address, object_path, *args, **kwargs):
+    def _rest_request_to_json(self, address, validate_ssl, object_path, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
@@ -429,7 +429,7 @@ class YarnCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=validate_ssl)
             response.raise_for_status()
             response_json = response.json()
 
