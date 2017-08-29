@@ -7,8 +7,17 @@
 from collections import defaultdict
 import time
 import os
+import subprocess
+import sys
 # 3p
 import psutil
+
+
+# Main entry point is meant for checks needing privilege escalation with sudo
+if __name__ == "__main__":
+    if sys.argv[1] == "num_fds":
+        print psutil.Process(int(sys.argv[2])).num_fds()
+    sys.exit(0)
 
 # project
 from checks import AgentCheck
@@ -201,6 +210,14 @@ class ProcessCheck(AgentCheck):
             self.log.debug("psutil method %s not implemented", method)
         except psutil.AccessDenied:
             self.log.debug("psutil was denied acccess for method %s", method)
+            if method == 'num_fds' and Platform.is_unix():
+                try:
+                    # It is up the agent's packager to grant corresponding sudo policy on unix platforms
+                    result = int(subprocess.check_output(['sudo', sys.executable, __file__, method, str(process.pid)]))
+                except subprocess.CalledProcessError as e:
+                    self.log.exception("running psutil method %s with sudo failed with return code %d", method, e.returncode)
+                except:
+                    self.log.exception("running psutil method %s with sudo also failed", method)
         except psutil.NoSuchProcess:
             self.warning("Process {0} disappeared while scanning".format(process.pid))
 
