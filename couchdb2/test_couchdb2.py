@@ -13,8 +13,7 @@ from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 
 node1 = {
-    'protocol': 'http',
-    'host': '127.0.0.1',
+    'host': 'http://127.0.0.1',
     'cport': '15984',
     'backdoor': '15986',
     'user': 'dduser',
@@ -22,8 +21,7 @@ node1 = {
 }
 
 node2 = {
-    'protocol': 'http',
-    'host': '127.0.0.1',
+    'host': 'http://127.0.0.1',
     'cport': '25984',
     'backdoor': '25986',
     'user': 'dduser',
@@ -31,8 +29,7 @@ node2 = {
 }
 
 node3 = {
-    'protocol': 'http',
-    'host': '127.0.0.1',
+    'host': 'http://127.0.0.1',
     'cport': '35934',
     'backdoor': '35986',
     'user': 'dduser',
@@ -61,17 +58,37 @@ class TestCouchdb2(AgentCheckTest):
         """
         self.run_check({"instances": [node1, node2, node3]})
 
-        tags = ['instance:127.0.0.1']
+        tags = ['instance:http://127.0.0.1']
         for gauge in self.gauges:
             self.assertMetric(gauge, tags=tags)
 
         for node in [node1, node2, node3]:
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.OK,
-                                    tags=["instance:{0}://{1}:{2}".format(node['protocol'], node['host'], node['backdoor'])],
+                                    tags=["instance:{0}:{1}".format(node['host'], node['backdoor'])],
                                     count=1)
-
 
         # Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
+    def test_bad_config(self):
+        conf = node1.copy()
+        conf.pop('host')
+        self.assertRaises(
+                Exception,
+                lambda: self.run_check({"instances": [conf]})
+                )
+
+    def test_wrong_config(self):
+        conf = node1.copy()
+        conf['backdoor'] = 11111
+
+        self.assertRaises(
+                Exception,
+                lambda: self.run_check({"instances": [conf]})
+                )
+
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                status=AgentCheck.CRITICAL,
+                tags=["instance:{0}:{1}".format(conf['host'], conf['backdoor'])],
+                count=1)

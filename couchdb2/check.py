@@ -41,9 +41,11 @@ class Couchdb2Check(AgentCheck):
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
     def check(self, instance):
-        server = "{0}://{1}".format(instance.get('protocol', None), instance.get('host', None))
+        server = instance.get('host', None)
+        if server is None:
+            raise Exception("A host must be given")
 
-        tags=['instance:%s' % instance.get('host', None)]
+        tags=['instance:%s' % server]
         self._build_metrics(self._get_node_stats(server, instance), tags)
 
 
