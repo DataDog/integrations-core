@@ -67,10 +67,9 @@ class TestCouchdb2(AgentCheckTest):
             self.assertMetric(gauge, tags=tags)
 
         for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-            t = list(tags)
-            t.append("db:{0}".format(db))
+            tags = ['instance:http://127.0.0.1', "db:{0}".format(db)]
             for gauge in self.by_db_gauges:
-                self.assertMetric(gauge, tags=t)
+                self.assertMetric(gauge, tags=tags)
 
         for node in [node1, node2, node3]:
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
@@ -102,3 +101,22 @@ class TestCouchdb2(AgentCheckTest):
                 status=AgentCheck.CRITICAL,
                 tags=["instance:{0}:{1}".format(conf['host'], conf['backdoor'])],
                 count=1)
+
+    def test_db_whitelisting(self):
+        confs = []
+
+        for n in [node1, node2, node3]:
+            node = node1.copy()
+            node['db_whitelist'] = ['kennel']
+            confs.append(node)
+
+        self.run_check({"instances": confs})
+
+        for db in ['_users', '_global_changes', '_metadata', '_replicator']:
+            tags = ['instance:http://127.0.0.1', "db:{0}".format(db)]
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=tags, count=0)
+
+        tags = ['instance:http://127.0.0.1', 'db:kennel']
+        for gauge in self.by_db_gauges:
+            self.assertMetric(gauge, tags=tags)
