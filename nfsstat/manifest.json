@@ -4,9 +4,9 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "nfsstat",
-  "short_description": "nfsstat description.",
+  "short_description": "nfsstat gets nfsiostat-sysstat metrics.",
   "guid": "9f2fe3a7-ae19-4da9-a253-ae817a5557ab",
   "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": ["linux"],
   "version": "0.1.0"
 }

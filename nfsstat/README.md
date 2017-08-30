@@ -2,10 +2,7 @@
 
 ## Overview
 
-Get metrics from nfsstat service in real time to:
-
-* Visualize and monitor nfsstat states
-* Be notified about nfsstat failovers and events.
+nfsiostat-sysstat is a tool that gets metrics from NFS mounts. This check grabs these metrics.
 
 ## Installation
 
@@ -29,4 +26,4 @@ When you run `datadog-agent info` you should see something like the following:
 
 ## Compatibility
 
-The nfsstat check is compatible with all major platforms
+The nfsstat check is compatible with linux
