@@ -90,10 +90,13 @@ class Kubernetes(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         inst = instances[0] if instances is not None else None
-        self.kubeutil = KubeUtil(instance=inst)
+        self.kubeutil = KubeUtil(init_config=init_config, instance=inst)
 
-        if not self.kubeutil.kubelet_api_url:
-            raise Exception('Unable to reach kubelet. Try setting the host parameter.')
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.log.warning("Kubelet client failed to initialized for now, pausing the Kubernetes check.")
+            else:
+                raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
 
         if agentConfig.get('service_discovery') and \
            agentConfig.get('service_discovery_backend') == 'docker':
@@ -173,6 +176,14 @@ class Kubernetes(AgentCheck):
     def check(self, instance):
         # Leader election
         self.refresh_leader_status(instance)
+
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.kubeutil.init_kubelet(instance)
+                self.log.warning("Kubelet client is not initialized, Kubernetes check is paused.")
+                return
+            else:
+                raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
 
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)

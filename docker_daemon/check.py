@@ -169,7 +169,6 @@ class DockerDaemon(AgentCheck):
                             agentConfig, instances=instances)
 
         self.init_success = False
-        self.docker_client = None
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
         self.init()
@@ -179,17 +178,17 @@ class DockerDaemon(AgentCheck):
             instance = self.instances[0]
 
             self.docker_util = DockerUtil()
+            if not self.docker_util.client:
+                raise Exception("Failed to initialize Docker client.")
 
-            self.docker_client = self.docker_util.client
             self.docker_gateway = DockerUtil.get_gateway()
-
             self.metadata_collector = MetadataCollector()
 
+            self.kubeutil = None
             if Platform.is_k8s():
                 try:
                     self.kubeutil = KubeUtil()
                 except Exception as ex:
-                    self.kubeutil = None
                     self.log.error("Couldn't instantiate the kubernetes client, "
                         "subsequent kubernetes calls will fail as well. Error: %s" % str(ex))
 
@@ -257,7 +256,7 @@ class DockerDaemon(AgentCheck):
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
 
-            if self.docker_client is None:
+            if self.docker_util.client is None:
                 message = "Unable to connect to Docker daemon"
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                    message=message)
@@ -320,9 +319,9 @@ class DockerDaemon(AgentCheck):
     def _count_and_weigh_images(self):
         try:
             tags = self._get_tags()
-            active_images = self.docker_client.images(all=False)
+            active_images = self.docker_util.client.images(all=False)
             active_images_len = len(active_images)
-            all_images_len = len(self.docker_client.images(quiet=True, all=True))
+            all_images_len = len(self.docker_util.client.images(quiet=True, all=True))
             self.gauge("docker.images.available", active_images_len, tags=tags)
             self.gauge("docker.images.intermediate", (all_images_len - active_images_len), tags=tags)
 
@@ -344,7 +343,7 @@ class DockerDaemon(AgentCheck):
         all_containers_count = Counter()
 
         try:
-            containers = self.docker_client.containers(all=True, size=must_query_size)
+            containers = self.docker_util.client.containers(all=True, size=must_query_size)
         except Exception as e:
             message = "Unable to list Docker containers: {0}".format(e)
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
@@ -380,7 +379,7 @@ class DockerDaemon(AgentCheck):
             # crawling for pids.
             if custom_cgroups or healthchecks:
                 try:
-                    inspect_dict = self.docker_client.inspect_container(container_name)
+                    inspect_dict = self.docker_util.client.inspect_container(container_name)
                     container['_pid'] = inspect_dict['State']['Pid']
                     container['health'] = inspect_dict['State'].get('Health', {})
                 except Exception as e:
@@ -595,8 +594,8 @@ class DockerDaemon(AgentCheck):
         """Report volume count per state (dangling or not)"""
         m_func = FUNC_MAP[GAUGE][self.use_histogram]
 
-        attached_volumes = self.docker_client.volumes(filters={'dangling': False})
-        dangling_volumes = self.docker_client.volumes(filters={'dangling': True})
+        attached_volumes = self.docker_util.client.volumes(filters={'dangling': False})
+        dangling_volumes = self.docker_util.client.volumes(filters={'dangling': True})
         attached_count = len(attached_volumes.get('Volumes', []) or [])
         dangling_count = len(dangling_volumes.get('Volumes', []) or [])
         m_func(self, 'docker.volume.count', attached_count, tags=['volume_state:attached'])
@@ -898,7 +897,7 @@ class DockerDaemon(AgentCheck):
             # 'docker.data.percent': None,
             # 'docker.metadata.percent': None
         }
-        info = self.docker_client.info()
+        info = self.docker_util.client.info()
         driver_status = info.get('DriverStatus', [])
         if not driver_status:
             self.log.warning('Disk metrics collection is enabled but docker info did not'
