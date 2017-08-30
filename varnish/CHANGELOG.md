@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-1.0.4 Unreleased
+1.0.4 2017-08-28
 ==================
 
 ### Changes

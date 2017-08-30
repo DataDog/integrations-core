@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-1.2.2 / Unreleased
+1.2.2 / 2017-08-28
 ==================
 
 ### Changes
