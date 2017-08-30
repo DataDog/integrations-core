@@ -84,23 +84,23 @@ class TestCouchdb2(AgentCheckTest):
         conf = node1.copy()
         conf.pop('host')
         self.assertRaises(
-                Exception,
-                lambda: self.run_check({"instances": [conf]})
-                )
+            Exception,
+            lambda: self.run_check({"instances": [conf]})
+        )
 
     def test_wrong_config(self):
         conf = node1.copy()
         conf['backdoor'] = 11111
 
         self.assertRaises(
-                Exception,
-                lambda: self.run_check({"instances": [conf]})
-                )
+            Exception,
+            lambda: self.run_check({"instances": [conf]})
+        )
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
-                status=AgentCheck.CRITICAL,
-                tags=["instance:{0}:{1}".format(conf['host'], conf['backdoor'])],
-                count=1)
+                                status=AgentCheck.CRITICAL,
+                                tags=["instance:{0}:{1}".format(conf['host'], conf['backdoor'])],
+                                count=1)
 
     def test_db_whitelisting(self):
         confs = []

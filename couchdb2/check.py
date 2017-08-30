@@ -53,14 +53,14 @@ class Couchdb2Check(AgentCheck):
         if server is None:
             raise Exception("A host must be given")
 
-        tags=["instance:{0}".format(server)]
+        tags = ["instance:{0}".format(server)]
         self._build_metrics(self._get_node_stats(server, instance), tags)
 
         db_whitelist = instance.get('db_whitelist', None)
         cport_url = "{0}:{1}".format(server, instance.get('cport', 5984))
         for db in self._get(urljoin(cport_url, "/_all_dbs"), instance):
             if db_whitelist is None or db in db_whitelist:
-                tags=["instance:{0}".format(server), "db:{0}".format(db)]
+                tags = ["instance:{0}".format(server), "db:{0}".format(db)]
                 self._build_db_metrics(self._get(urljoin(cport_url, db), instance), tags)
 
     def _get_node_stats(self, server, instance):
@@ -110,4 +110,3 @@ class Couchdb2Check(AgentCheck):
                          timeout=int(instance.get('timeout', self.TIMEOUT)))
         r.raise_for_status()
         return r.json()
-

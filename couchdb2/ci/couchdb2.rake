@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def couchdb2_version
-    ENV['FLAVOR_VERSION'] || '2.0-dev'
+  ENV['FLAVOR_VERSION'] || '2.0-dev'
 end
 
 def couchdb2_rootdir
@@ -20,7 +20,9 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('couchdb2')
-      sh %(docker run -p #{container_port}:#{container_port} -p 15984:15984 -p 15986:15986 -p 25984:25984 -p 25986:25986 -p 35984:35984 -p 35986:35986 --name #{container_name} -d klaemo/couchdb:#{couchdb2_version} --admin=dduser:pawprint --with-haproxy)
+      sh %(docker run -p #{container_port}:#{container_port} \
+        -p 15984:15984 -p 15986:15986 -p 25984:25984 -p 25986:25986 -p 35984:35984 -p 35986:35986 \
+        --name #{container_name} -d klaemo/couchdb:#{couchdb2_version} --admin=dduser:pawprint --with-haproxy)
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -57,7 +59,7 @@ namespace :ci do
     task :execute do
       exception = nil
       begin
-        %w[before_install install before_script].each do |u|
+        %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
         if !ENV['SKIP_TEST']
