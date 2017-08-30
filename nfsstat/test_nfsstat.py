@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-from nose.plugins.attrib import attr
 import os
 
 # 3p
