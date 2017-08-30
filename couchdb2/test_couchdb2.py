@@ -30,7 +30,7 @@ node2 = {
 
 node3 = {
     'host': 'http://127.0.0.1',
-    'cport': '35934',
+    'cport': '35984',
     'backdoor': '35986',
     'user': 'dduser',
     'password': 'pawprint'
@@ -45,12 +45,16 @@ class TestCouchdb2(AgentCheckTest):
 
     def __init__(self, *args, **kwargs):
         AgentCheckTest.__init__(self, *args, **kwargs)
-        self.gauges = []
+        self.cluster_gauges = []
+        self.by_db_gauges = []
         with open('couchdb2/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next()
             for row in reader:
-                self.gauges.append(row[0])
+                if row[0].startswith("couchdb.by_db."):
+                    self.by_db_gauges.append(row[0])
+                else:
+                    self.cluster_gauges.append(row[0])
 
     def test_check(self):
         """
@@ -59,8 +63,14 @@ class TestCouchdb2(AgentCheckTest):
         self.run_check({"instances": [node1, node2, node3]})
 
         tags = ['instance:http://127.0.0.1']
-        for gauge in self.gauges:
+        for gauge in self.cluster_gauges:
             self.assertMetric(gauge, tags=tags)
+
+        for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+            t = list(tags)
+            t.append("db:{0}".format(db))
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=t)
 
         for node in [node1, node2, node3]:
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,

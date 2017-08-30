@@ -40,14 +40,27 @@ class Couchdb2Check(AgentCheck):
             elif type(value) is dict:
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
+
+    def _build_db_metrics(self, data, tags):
+        for key, value in data['sizes'].items():
+            self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
+
+        for key in ['purge_seq', 'doc_del_count', 'doc_count']:
+            self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
+
     def check(self, instance):
         server = instance.get('host', None)
         if server is None:
             raise Exception("A host must be given")
 
-        tags=['instance:%s' % server]
+        tags=["instance:{0}".format(server)]
         self._build_metrics(self._get_node_stats(server, instance), tags)
 
+        cport_url = "{0}:{1}".format(server, instance.get('cport', 5984))
+        for db in self._get(urljoin(cport_url, "/_all_dbs"), instance):
+            t = list(tags)
+            t.append("db:{0}".format(db))
+            self._build_db_metrics(self._get(urljoin(cport_url, db), instance), t)
 
     def _get_node_stats(self, server, instance):
         server = "{0}:{1}".format(server, instance.get('backdoor', 5986))
