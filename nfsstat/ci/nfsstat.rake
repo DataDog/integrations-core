@@ -1,29 +1,29 @@
 require 'ci/common'
 
-def nfsstats_version
+def nfsstat_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def nfsstats_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/nfsstats_#{nfsstats_version}"
+def nfsstat_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/nfsstat_#{nfsstat_version}"
 end
 
 namespace :ci do
-  namespace :nfsstats do |flavor|
+  namespace :nfsstat do |flavor|
     task before_install: ['ci:common:before_install']
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('nfsstats')
+      Rake::Task['ci:common:install'].invoke('nfsstat')
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name nfsstats source/nfsstats:nfsstats_version)
-      # sh %(docker start nfsstats)
+      # sh %(docker create -p XXX:YYY --name nfsstat source/nfsstat:nfsstat_version)
+      # sh %(docker start nfsstat)
     end
 
     task before_script: ['ci:common:before_script']
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'nfsstats'
+        'nfsstat'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
@@ -33,8 +33,8 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop nfsstats)
-    #   sh %(docker rm nfsstats)
+    #   sh %(docker stop nfsstat)
+    #   sh %(docker rm nfsstat)
     # end
 
     task :execute do
