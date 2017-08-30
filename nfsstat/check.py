@@ -13,21 +13,17 @@ from utils.subprocess_output import get_subprocess_output
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
 
-class NfsstatCheck(AgentCheck):
+class NfsStatCheck(AgentCheck):
 
     def check(self, instance):
-        # get the mounts, to get some additional metadata for tags
-        with open("/proc/mounts") as f:
-            mounts_raw = f.readlines()
-
-        all_mounts = [l.strip().split() for l in mounts_raw]
-
         # get the stats from nfsiostat-sysstat
         stat_out, _, _ = get_subprocess_output("nfsiostat-sysstat", self.log)
         all_devices = [l.strip().split() for l in stat_out.splitlines()]
         devices_raw = [l for l in all_devices[1:] if l]
-        devices = []
 
+        all_mounts = self.get_mounts()
+
+        devices = []
         for d in devices_raw:
             if d[0] == "Filesystem:":
                 continue
@@ -45,6 +41,18 @@ class NfsstatCheck(AgentCheck):
             self.gauge('nfsstat.ops_per_sec', device.ops, tags=device.tags)
             self.gauge('nfsstat.read_ops_per_sec', device.read_ops, tags=device.tags)
             self.gauge('nfsstat.write_ops_per_sec', device.write_ops, tags=device.tags)
+
+    def get_mounts(self):
+        mounts_raw = self.read_mounts()
+        self.log.info(mounts_raw)
+        all_mounts = [l.strip().split() for l in mounts_raw]
+        return all_mounts
+
+    def read_mounts(self):
+        # get the mounts, to get some additional metadata for tags
+        with open("/proc/mounts") as f:
+            mounts_raw = f.readlines()
+        return mounts_raw
 
 
 class Device(object):
@@ -70,6 +78,6 @@ class Device(object):
     def set_mount(self, mounts):
         for m in mounts:
             if m[0] == self.device_name:
-                self.mount = m[0]
+                self.mount = m[1]
                 self.tags.append("nfs_mount:{0}".format(self.mount))
                 break
