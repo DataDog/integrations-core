@@ -81,7 +81,6 @@ test:
         - rake ci:run[docker_daemon]
         - rake ci:run[kubernetes]
         - rake ci:run[cassandra_nodetool]
-        - rake ci:run[nfsstat]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

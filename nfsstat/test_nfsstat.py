@@ -30,8 +30,6 @@ def mock_mounts():
     mounts = Fixtures.read_file('mounts', sdk_dir=FIXTURE_DIR)
     return mounts.splitlines()
 
-
-@attr(requires='nfsstat')
 class TestNfsstat(AgentCheckTest):
     """Basic Test for nfsstat integration."""
     CHECK_NAME = 'nfsstat'
