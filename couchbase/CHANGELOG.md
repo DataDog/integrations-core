@@ -1,6 +1,6 @@
 # CHANGELOG - couchbase
 
-1.1.1 / Unreleased
+1.1.1 / 2017-08-28
 ==================
 
 ### Changes

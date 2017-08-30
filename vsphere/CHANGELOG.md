@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-1.0.3 / Unreleased
+1.0.3 / 2017-08-28
 ==================
 
 ### Changes

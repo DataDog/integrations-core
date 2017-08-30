@@ -8,7 +8,7 @@
 * [FEATURE] discovery of groups, topics and partitions. See [#633][] (Thanks [@jeffwidman][])
 
 
-1.0.2 / Unreleased
+1.0.2 / 2017-08-28
 ==================
 
 ### Changes
