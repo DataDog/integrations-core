@@ -29,7 +29,7 @@ end
 def release_date(rel_date)
   changelogs = find_changelogs
   changelogs.each do |f|
-    changelog_out = File.read(f).gsub(/unreleased|Unreleased/, rel_date.to_s)
+    changelog_out = File.read(f).gsub(/unreleased/i, rel_date.to_s)
     File.open(f, 'w') do |out|
       out << changelog_out
     end
