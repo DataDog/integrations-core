@@ -4,6 +4,7 @@
 
 # stdlib
 import os
+from nose.plugins.attrib import attr
 
 # 3p
 import mock
@@ -12,15 +13,15 @@ import mock
 from tests.checks.common import AgentCheckTest, Fixtures
 
 metrics = [
-    'nfsstat.blocks_read_per_sec',
-    'nfsstat.blocks_written_per_sec',
-    'nfsstat.blocks_read_direct_per_sec',
-    'nfsstat.blocks_written_direct_per_sec',
-    'nfsstat.blocks_read_from_server_per_sec',
-    'nfsstat.blocks_written_to_server_per_sec',
-    'nfsstat.ops_per_sec',
-    'nfsstat.read_ops_per_sec',
-    'nfsstat.write_ops_per_sec',
+    'system.nfs.read_per_sec',
+    'system.nfs.writes_per_sec',
+    'system.nfs.read_direct_per_sec',
+    'system.nfs.writes_direct_per_sec',
+    'system.nfs.read_from_server_per_sec',
+    'system.nfs.written_to_server_per_sec',
+    'system.nfs.ops_per_sec',
+    'system.nfs.read_ops_per_sec',
+    'system.nfs.write_ops_per_sec',
 ]
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
@@ -29,6 +30,7 @@ def mock_mounts():
     mounts = Fixtures.read_file('mounts', sdk_dir=FIXTURE_DIR)
     return mounts.splitlines()
 
+@attr(requires='nfsstat')
 class TestNfsstat(AgentCheckTest):
     """Basic Test for nfsstat integration."""
     CHECK_NAME = 'nfsstat'

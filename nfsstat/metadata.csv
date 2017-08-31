@@ -1,1 +1,10 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+system.nfs.read_per_sec,gauge,,byte,second,Number of bytes read by applications via the read(2) system call interface,0,nfsstat,reads per sec
+system.nfs.writes_per_sec,gauge,,byte,second,Number of bytes written by applications via the write(2) system call interface,0,nfsstat,writes per sec
+system.nfs.read_direct_per_sec,gauge,,byte,second,Number of bytes read from files opened with the O_DIRECT flag,0,nfsstat,direct reads per sec
+system.nfs.writes_direct_per_sec,gauge,,byte,second,Number of bytes written to files opened with the O_DIRECT flag,0,nfsstat,direct writes per sec
+system.nfs.read_from_server_per_sec,gauge,,byte,second,Number of bytes read from the server by the NFS client via an NFS READ request,0,nfsstat,server reads per sec
+system.nfs.written_to_server_per_sec,gauge,,byte,second,Number of bytes written to the server by the NFS client via an NFS WRITE request,0,nfsstat,server writes per sec
+system.nfs.ops_per_sec,gauge,,operation,second,Number of operations that were issued to the filesystem per second,0,nfsstat,ops per sec
+system.nfs.read_ops_per_sec,gauge,,operation,second,Number of 'read' operations that were issued to the filesystem per second,0,nfsstat,read ops per sec
+system.nfs.write_ops_per_sec,gauge,,operation,second,Number of 'write' operations that were issued to the filesystem per second,0,nfsstat,write ops per sec
