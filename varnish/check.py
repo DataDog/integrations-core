@@ -321,13 +321,13 @@ reload_2017-08-25T14:33:03.test2 probe      Healthy 5/5
                     status = tokens[1].lower()
                     if (status == 'probe'):
                         probestatus = tokens[2].lower()
-                        if backend != None:
+                        if backend is not None:
                             backends_by_status[probestatus].append((backend, ''))
                     elif (status == 'healthy'):
-                        if backend != None:
+                        if backend is not None:
                             backends_by_status[status].append((backend, ''))
                     elif (status == 'sick'):
-                        if backend != None:
+                        if backend is not None:
                             backends_by_status['forcesick'].append((backend, ''))
 
         for status, backends in backends_by_status.iteritems():
