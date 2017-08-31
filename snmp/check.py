@@ -12,6 +12,7 @@ import pysnmp.proto.rfc1902 as snmp_type
 from pysnmp.smi import builder
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from pysnmp.error import PySnmpError
+from pyasn1.type.univ import OctetString
 
 # project
 from checks.network_checks import NetworkCheck, Status
@@ -198,8 +199,10 @@ class SnmpCheck(NetworkCheck):
         context_name = ''
 
         if "user" in instance:
-            if 'context' in instance:
-                context_name = instance['context']
+            if 'context_engine_id' in instance:
+                context_engine_id = OctetString(instance['context_engine_id'])
+            if 'context_name' in instance:
+                context_name = instance['context_name']
 
         return context_engine_id, context_name
 
