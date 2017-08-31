@@ -313,7 +313,7 @@ reload_2017-08-25T14:33:03.test2 probe      Healthy 5/5
         backend, status, message = None, None, None
         for line in output.split("\n"):
             tokens = line.strip().split()
-            if len(tokens) > 0:
+            if len(tokens) > 2:
                 if tokens[0] != 'Backend':
                     backend_split = tokens[0].split('.')
                     if len(backend_split) > 1:
