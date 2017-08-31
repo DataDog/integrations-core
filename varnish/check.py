@@ -18,7 +18,8 @@ from utils.subprocess_output import get_subprocess_output
 class BackendStatus(object):
     HEALTHY = 'healthy'
     SICK = 'sick'
-    ALL = (HEALTHY, SICK)
+    FORCESICK = 'forcesick'
+    ALL = (HEALTHY, SICK, FORCESICK)
 
     @classmethod
     def to_check_status(cls, status):
@@ -26,6 +27,8 @@ class BackendStatus(object):
             return AgentCheck.OK
         elif status == cls.SICK:
             return AgentCheck.CRITICAL
+        elif status == cls.FORCESICK:
+            return AgentCheck.WARNING
         return AgentCheck.UNKNOWN
 
 class Varnish(AgentCheck):
@@ -135,7 +138,7 @@ class Varnish(AgentCheck):
             if version < LooseVersion('4.1.0'):
                 cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'backend.list', '-p'])
+                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'backend.list'])
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
@@ -146,7 +149,10 @@ class Varnish(AgentCheck):
                 self.log.error('Error getting service check from varnishadm: %s', err)
 
             if output:
-                self._parse_varnishadm(output)
+                if version < LooseVersion('4.1.0'):
+                    self._parse_varnishadm(output)
+                else:
+                    self._parse_varnishadm_backend_list(output)
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
@@ -282,6 +288,47 @@ class Varnish(AgentCheck):
                         self.log.exception('Error when parsing message from varnishadm')
                         message = ''
                     backends_by_status[status].append((backend, message))
+
+        for status, backends in backends_by_status.iteritems():
+            check_status = BackendStatus.to_check_status(status)
+            for backend, message in backends:
+                tags = ['backend:%s' % backend]
+                self.service_check(self.SERVICE_CHECK_NAME, check_status,
+                                   tags=tags, message=message)
+
+
+    def _parse_varnishadm_backend_list(self, output):
+        """ Parse out service checks from varnishadm.
+
+        Example output:
+
+Backend name                   Admin      Probe
+reload_2017-08-25T14:33:03.localhost probe      Healthy (no probe)
+reload_2017-08-25T14:33:03.test1 probe      Healthy (no probe)
+reload_2017-08-25T14:33:03.test2 probe      Healthy 5/5
+
+        """
+        # Process status by backend.
+        backends_by_status = defaultdict(list)
+        backend, status, message = None, None, None
+        for line in output.split("\n"):
+            tokens = line.strip().split()
+            if len(tokens) > 0:
+                if tokens[0] != 'Backend':
+                    backend_split = tokens[0].split('.')
+                    if len(backend_split) > 1:
+                        backend = backend_split[1]
+                    status = tokens[1].lower()
+                    if (status == 'probe'):
+                        probestatus = tokens[2].lower()
+                        if backend != None:
+                            backends_by_status[probestatus].append((backend, ''))
+                    elif (status == 'healthy'):
+                        if backend != None:
+                            backends_by_status[status].append((backend, ''))
+                    elif (status == 'sick'):
+                        if backend != None:
+                            backends_by_status['forcesick'].append((backend, ''))
 
         for status, backends in backends_by_status.iteritems():
             check_status = BackendStatus.to_check_status(status)
