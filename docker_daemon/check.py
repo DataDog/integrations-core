@@ -256,10 +256,15 @@ class DockerDaemon(AgentCheck):
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
 
-            if self.docker_util.client is None:
-                message = "Unable to connect to Docker daemon"
+            try:
+                if self.docker_util.client is None:
+                    message = "Unable to connect to Docker daemon"
+                    self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                                       message=message)
+                    return
+            except Exception as ex:
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   message=message)
+                                   message=str(ex))
                 return
 
             if not self.init_success:

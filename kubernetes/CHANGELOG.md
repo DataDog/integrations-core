@@ -1,6 +1,12 @@
 # CHANGELOG - kubernetes
 
 
+1.4.0 / UNRELEASED
+==================
+### Changes
+
+* [FEATURE] Add an option to retry kubelet connection if it's not up at start time. See [#722][]
+
 1.3.0 / 2017-08-28
 ==================
 ### Changes

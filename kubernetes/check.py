@@ -174,9 +174,6 @@ class Kubernetes(AgentCheck):
             self.event_retriever = None
 
     def check(self, instance):
-        # Leader election
-        self.refresh_leader_status(instance)
-
         if not self.kubeutil.init_success:
             if self.kubeutil.left_init_retries > 0:
                 self.kubeutil.init_kubelet(instance)
@@ -184,6 +181,9 @@ class Kubernetes(AgentCheck):
                 return
             else:
                 raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
+
+        # Leader election
+        self.refresh_leader_status(instance)
 
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
