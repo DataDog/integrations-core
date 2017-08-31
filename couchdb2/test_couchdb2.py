@@ -13,27 +13,24 @@ from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 
 node1 = {
-    'host': 'http://127.0.0.1',
-    'cport': '15984',
-    'backdoor': '15986',
+    'host': 'http://127.0.0.1:5984',
     'user': 'dduser',
-    'password': 'pawprint'
+    'password': 'pawprint',
+    'name': 'node1@127.0.0.1'
 }
 
 node2 = {
-    'host': 'http://127.0.0.1',
-    'cport': '25984',
-    'backdoor': '25986',
+    'host': 'http://127.0.0.1:5984',
     'user': 'dduser',
-    'password': 'pawprint'
+    'password': 'pawprint',
+    'name': 'node2@127.0.0.1'
 }
 
 node3 = {
-    'host': 'http://127.0.0.1',
-    'cport': '35984',
-    'backdoor': '35986',
+    'host': 'http://127.0.0.1:5984',
     'user': 'dduser',
-    'password': 'pawprint'
+    'password': 'pawprint',
+    'name': 'node3@127.0.0.1'
 }
 
 # NOTE: Feel free to declare multiple test classes if needed
@@ -62,19 +59,20 @@ class TestCouchdb2(AgentCheckTest):
         """
         self.run_check({"instances": [node1, node2, node3]})
 
-        tags = ['instance:http://127.0.0.1']
-        for gauge in self.cluster_gauges:
-            self.assertMetric(gauge, tags=tags)
+        tags = map(lambda n: ["instance:{0}".format(n['name'])], [node1, node2, node3])
+        for tag in tags:
+            for gauge in self.cluster_gauges:
+                self.assertMetric(gauge, tags=tag)
 
-        for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-            tags = ['instance:http://127.0.0.1', "db:{0}".format(db)]
-            for gauge in self.by_db_gauges:
-                self.assertMetric(gauge, tags=tags)
+            for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+                tags = [tag[0], "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags)
 
         for node in [node1, node2, node3]:
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.OK,
-                                    tags=["instance:{0}:{1}".format(node['host'], node['backdoor'])],
+                                    tags=["instance:{0}".format(node["name"])],
                                     count=1)
 
         # Raises when COVERAGE=true and coverage < 100%
@@ -90,7 +88,7 @@ class TestCouchdb2(AgentCheckTest):
 
     def test_wrong_config(self):
         conf = node1.copy()
-        conf['backdoor'] = 11111
+        conf['host'] = "http://127.0.0.1:11111"
 
         self.assertRaises(
             Exception,
@@ -99,7 +97,7 @@ class TestCouchdb2(AgentCheckTest):
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.CRITICAL,
-                                tags=["instance:{0}:{1}".format(conf['host'], conf['backdoor'])],
+                                tags=["instance:{0}".format(conf['name'])],
                                 count=1)
 
     def test_db_whitelisting(self):
@@ -112,11 +110,12 @@ class TestCouchdb2(AgentCheckTest):
 
         self.run_check({"instances": confs})
 
-        for db in ['_users', '_global_changes', '_metadata', '_replicator']:
-            tags = ['instance:http://127.0.0.1', "db:{0}".format(db)]
-            for gauge in self.by_db_gauges:
-                self.assertMetric(gauge, tags=tags, count=0)
+        for n in confs:
+            for db in ['_users', '_global_changes', '_metadata', '_replicator']:
+                tags = ["instance:{0}".format(n['name']), "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags, count=0)
 
-        tags = ['instance:http://127.0.0.1', 'db:kennel']
-        for gauge in self.by_db_gauges:
-            self.assertMetric(gauge, tags=tags)
+            tags = ["instance:{0}".format(n['name']), 'db:kennel']
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=tags)

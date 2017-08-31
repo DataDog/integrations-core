@@ -53,41 +53,41 @@ class Couchdb2Check(AgentCheck):
         if server is None:
             raise Exception("A host must be given")
 
-        tags = ["instance:{0}".format(server)]
-        self._build_metrics(self._get_node_stats(server, instance), tags)
+        name = instance.get('name', None)
+        if name is None:
+            raise Exception("At least one name is required")
+
+        tags = ["instance:{0}".format(name)]
+        self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
 
         db_whitelist = instance.get('db_whitelist', None)
-        cport_url = "{0}:{1}".format(server, instance.get('cport', 5984))
-        for db in self._get(urljoin(cport_url, "/_all_dbs"), instance):
+        for db in self._get(urljoin(server, "/_all_dbs"), instance):
             if db_whitelist is None or db in db_whitelist:
-                tags = ["instance:{0}".format(server), "db:{0}".format(db)]
-                self._build_db_metrics(self._get(urljoin(cport_url, db), instance), tags)
+                tags = ["instance:{0}".format(name), "db:{0}".format(db)]
+                self._build_db_metrics(self._get(urljoin(server, db), instance), tags)
 
-    def _get_node_stats(self, server, instance):
-        server = "{0}:{1}".format(server, instance.get('backdoor', 5986))
-        url = urljoin(server, '/_stats')
+    def _get_node_stats(self, server, name, instance, tags):
+        url = urljoin(server, "/_node/{}/_stats".format(name))
 
         # Fetch initial stats and capture a service check based on response.
-        service_check_tags = ['instance:%s' % server]
         stats = None
         try:
             stats = self._get(url, instance)
         except requests.exceptions.Timeout as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
+                tags=tags, message="Request timeout: {0}, {1}".format(url, e))
             raise
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e.message))
+                tags=tags, message=str(e.message))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e))
+                tags=tags, message=str(e))
             raise
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                tags=service_check_tags,
-                message='Connection to %s was successful' % url)
+                tags=tags, message='Connection to %s was successful' % url)
 
         # No overall stats? bail out now
         if stats is None:

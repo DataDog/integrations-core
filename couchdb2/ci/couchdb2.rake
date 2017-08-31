@@ -21,7 +21,6 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('couchdb2')
       sh %(docker run -p #{container_port}:#{container_port} \
-        -p 15984:15984 -p 15986:15986 -p 25984:25984 -p 25986:25986 -p 35984:35984 -p 35986:35986 \
         --name #{container_name} -d klaemo/couchdb:#{couchdb2_version} --admin=dduser:pawprint --with-haproxy)
     end
 
@@ -36,10 +35,6 @@ namespace :ci do
       sleep_for 10
       # Create a test database
       sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
-
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/_node/node1@127.0.0.1/_config/httpd/bind_address -d '"0.0.0.0"')
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/_node/node2@127.0.0.1/_config/httpd/bind_address -d '"0.0.0.0"')
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/_node/node3@127.0.0.1/_config/httpd/bind_address -d '"0.0.0.0"')
     end
 
     task script: ['ci:common:script'] do
