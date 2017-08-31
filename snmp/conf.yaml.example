@@ -75,6 +75,7 @@ instances:
   #   privKey: private_key
   #   authProtocol: authProtocol
   #   privProtocol: privProtocol
+  #   context: contextName  # optional v3-only parameter
   #   timeout: 1 # second, by default
   #   retries: 5
   #   tags:
