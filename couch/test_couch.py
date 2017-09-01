@@ -61,10 +61,10 @@ class CouchTestCase(AgentCheckTest):
             tags = ['instance:http://localhost:5984']
             self.assertMetric(gauge, tags=tags, at_least=0)
 
-        self.assertServiceCheck(self.check.checker.SERVICE_CHECK_NAME,
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
                                 tags=['instance:http://localhost:5984'],
-                                count=1)
+                                count=2) # One per DB + one to get the version
 
         self.coverage_report()
 
@@ -74,7 +74,7 @@ class CouchTestCase(AgentCheckTest):
             lambda: self.run_check({"instances": [{"server": "http://localhost:5985"}]})
         )
 
-        self.assertServiceCheck(self.check.checker.SERVICE_CHECK_NAME,
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.CRITICAL,
                                 tags=['instance:http://localhost:5985'],
                                 count=1)
@@ -149,7 +149,7 @@ class TestCouchdb2(AgentCheckTest):
         """
         Testing Couchdb2 check.
         """
-        self.run_check({"init_config":{"version": "2.0.0"}, "instances": [self.NODE1, self.NODE2, self.NODE3]})
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
         tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
         for tag in tags:
@@ -161,11 +161,16 @@ class TestCouchdb2(AgentCheckTest):
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
 
-        for node in [self.NODE1, self.NODE2, self.NODE3]:
-            self.assertServiceCheck(self.check.checker.SERVICE_CHECK_NAME,
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                status=AgentCheck.OK,
+                                tags=["instance:{0}".format(self.NODE1["name"])],
+                                count=2) # One for the version, one for the server stats
+
+        for node in [self.NODE2, self.NODE3]:
+            self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.OK,
                                     tags=["instance:{0}".format(node["name"])],
-                                    count=1)
+                                    count=1) # One for the server stats, the version is already loaded
 
         # Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
@@ -175,7 +180,7 @@ class TestCouchdb2(AgentCheckTest):
         conf.pop('server')
         self.assertRaises(
             Exception,
-            lambda: self.run_check({"init_config":{"version": "2.0.0"}, "instances": [conf]})
+            lambda: self.run_check({"instances": [conf]})
         )
 
     def test_wrong_config(self):
@@ -184,10 +189,10 @@ class TestCouchdb2(AgentCheckTest):
 
         self.assertRaises(
             Exception,
-            lambda: self.run_check({"init_config":{"version": "2.0.0"}, "instances": [conf]})
+            lambda: self.run_check({"instances": [conf]})
         )
 
-        self.assertServiceCheck(self.check.checker.SERVICE_CHECK_NAME,
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.CRITICAL,
                                 tags=["instance:{0}".format(conf['name'])],
                                 count=1)
@@ -200,7 +205,7 @@ class TestCouchdb2(AgentCheckTest):
             node['db_whitelist'] = ['kennel']
             confs.append(node)
 
-        self.run_check({"init_config":{"version": "2.0.0"}, "instances": confs})
+        self.run_check({"instances": confs})
 
         for n in confs:
             for db in ['_users', '_global_changes', '_metadata', '_replicator']:

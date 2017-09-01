@@ -18,7 +18,6 @@ Create a file `couch.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
-  version: <your CouchDB version> # Defaults to 1.x
 
 instances:
   - server: http://localhost:5984 # or wherever your CouchDB is listening

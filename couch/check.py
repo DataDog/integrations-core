@@ -4,6 +4,7 @@
 
 # stdlib
 from urlparse import urljoin
+from urlparse import urlparse
 from urllib import quote
 
 # 3rd party
@@ -16,19 +17,14 @@ from util import headers
 class CouchDb(AgentCheck):
 
     TIMEOUT = 5
+    SERVICE_CHECK_NAME = 'couchdb.can_connect'
+    SOURCE_TYPE_NAME = 'couchdb'
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        version = init_config.get('version', '1.x')
         self.checker = None
-        if version.startswith('1.'):
-            self.checker = CouchDB1(self, name, init_config, agentConfig, instances)
-        elif version.startswith('2.'):
-            self.checker = CouchDB2(self, name, init_config, agentConfig, instances)
-        else:
-            raise Exception("Unkown version {0}".format(version))
 
-    def get(self, url, instance):
+    def get(self, url, instance, service_check_tags, run_check=False):
         "Hit a given URL and return the parsed json"
         self.log.debug('Fetching CouchDB stats at url: %s' % url)
 
@@ -39,12 +35,42 @@ class CouchDb(AgentCheck):
         # Override Accept request header so that failures are not redirected to the Futon web-ui
         request_headers = headers(self.agentConfig)
         request_headers['Accept'] = 'text/json'
-        r = requests.get(url, auth=auth, headers=request_headers,
+
+
+        try:
+            r = requests.get(url, auth=auth, headers=request_headers,
                          timeout=int(instance.get('timeout', self.TIMEOUT)))
-        r.raise_for_status()
+            r.raise_for_status()
+            if run_check:
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
+                    tags=service_check_tags,
+                    message='Connection to %s was successful' % url)
+        except requests.exceptions.Timeout as e:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
+            raise
+        except requests.exceptions.HTTPError as e:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                tags=service_check_tags, message=str(e.message))
+            raise
+        except Exception as e:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                tags=service_check_tags, message=str(e))
+            raise
         return r.json()
 
     def check(self, instance):
+        server = self.get_server(instance)
+        if self.checker is None:
+            name = instance.get('name', server)
+            version = self.get(self.get_server(instance), instance, ["instance:{0}".format(name)], True)['version']
+            if version.startswith('1.'):
+                self.checker = CouchDB1(self)
+            elif version.startswith('2.'):
+                self.checker = CouchDB2(self)
+            else:
+                raise Exception("Unkown version {0}".format(version))
+
         self.checker.check(instance)
 
     def get_server(self, instance):
@@ -57,13 +83,9 @@ class CouchDB1:
     """Extracts stats from CouchDB via its REST API
     http://wiki.apache.org/couchdb/Runtime_Statistics
     """
-
     MAX_DB = 50
-    SERVICE_CHECK_NAME = 'couchdb.can_connect'
-    SOURCE_TYPE_NAME = 'couchdb'
-    TIMEOUT = 5
 
-    def __init__(self, agent_check, name, init_config, agentConfig, instances=None):
+    def __init__(self, agent_check):
         self.db_blacklist = {}
         self.agent_check = agent_check
 
@@ -85,10 +107,11 @@ class CouchDB1:
 
     def check(self, instance):
         server = self.agent_check.get_server(instance)
-        data = self.get_data(server, instance)
-        self._create_metric(data, tags=['instance:%s' % server])
+        tags = ['instance:%s' % server]
+        data = self.get_data(server, instance, tags)
+        self._create_metric(data, tags=tags)
 
-    def get_data(self, server, instance):
+    def get_data(self, server, instance, tags):
         # The dictionary to be returned.
         couchdb = {'stats': None, 'databases': {}}
 
@@ -97,26 +120,7 @@ class CouchDB1:
 
         url = urljoin(server, endpoint)
 
-        # Fetch initial stats and capture a service check based on response.
-        service_check_tags = ['instance:%s' % server]
-        try:
-            overall_stats = self.agent_check.get(url, instance)
-        except requests.exceptions.Timeout as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
-            raise
-        except requests.exceptions.HTTPError as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e.message))
-            raise
-        except Exception as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e))
-            raise
-        else:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                tags=service_check_tags,
-                message='Connection to %s was successful' % url)
+        overall_stats = self.agent_check.get(url, instance, tags, True)
 
         # No overall stats? bail out now
         if overall_stats is None:
@@ -134,7 +138,7 @@ class CouchDB1:
         self.db_blacklist.setdefault(server,[])
         self.db_blacklist[server].extend(instance.get('db_blacklist',[]))
         whitelist = set(db_whitelist) if db_whitelist else None
-        databases = set(self.agent_check.get(url, instance)) - set(self.db_blacklist[server])
+        databases = set(self.agent_check.get(url, instance, tags)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
 
         if len(databases) > self.MAX_DB:
@@ -144,7 +148,7 @@ class CouchDB1:
         for dbName in databases:
             url = urljoin(server, quote(dbName, safe = ''))
             try:
-                db_stats = self.agent_check.get(url, instance)
+                db_stats = self.agent_check.get(url, instance, tags)
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
@@ -158,9 +162,7 @@ class CouchDB1:
 
 class CouchDB2:
 
-    SERVICE_CHECK_NAME = 'couchdb.can_connect'
-
-    def __init__(self, agent_check, name, init_config, agentConfig, instances=None):
+    def __init__(self, agent_check):
         self.agent_check = agent_check
 
     def _build_metrics(self, data, tags, prefix = 'couchdb'):
@@ -199,33 +201,16 @@ class CouchDB2:
         self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
 
         db_whitelist = instance.get('db_whitelist', None)
-        for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance):
+        for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
             if db_whitelist is None or db in db_whitelist:
                 tags = ["instance:{0}".format(name), "db:{0}".format(db)]
-                self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance), tags)
+                self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
 
     def _get_node_stats(self, server, name, instance, tags):
         url = urljoin(server, "/_node/{}/_stats".format(name))
 
         # Fetch initial stats and capture a service check based on response.
-        stats = None
-        try:
-            stats = self.agent_check.get(url, instance)
-        except requests.exceptions.Timeout as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=tags, message="Request timeout: {0}, {1}".format(url, e))
-            raise
-        except requests.exceptions.HTTPError as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=tags, message=str(e.message))
-            raise
-        except Exception as e:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=tags, message=str(e))
-            raise
-        else:
-            self.agent_check.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                tags=tags, message='Connection to %s was successful' % url)
+        stats = self.agent_check.get(url, instance, tags, True)
 
         # No overall stats? bail out now
         if stats is None:
