@@ -60,6 +60,10 @@ The Couch check does not include any event at this time.
 
 `couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
+### Caveats
+
+For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
+
 ## Troubleshooting
 
 If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:

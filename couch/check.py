@@ -4,7 +4,6 @@
 
 # stdlib
 from urlparse import urljoin
-from urlparse import urlparse
 from urllib import quote
 
 # 3rd party
@@ -88,6 +87,7 @@ class CouchDB1:
     def __init__(self, agent_check):
         self.db_blacklist = {}
         self.agent_check = agent_check
+        self.gauge = agent_check.gauge
 
     def _create_metric(self, data, tags=None):
         overall_stats = data.get('stats', {})
@@ -95,7 +95,7 @@ class CouchDB1:
             for metric, val in stats.items():
                 if val['current'] is not None:
                     metric_name = '.'.join(['couchdb', key, metric])
-                    self.agent_check.gauge(metric_name, val['current'], tags=tags)
+                    self.gauge(metric_name, val['current'], tags=tags)
 
         for db_name, db_stats in data.get('databases', {}).items():
             for name, val in db_stats.items():
@@ -103,7 +103,7 @@ class CouchDB1:
                     metric_name = '.'.join(['couchdb', 'by_db', name])
                     metric_tags = list(tags)
                     metric_tags.append('db:%s' % db_name)
-                    self.agent_check.gauge(metric_name, val, tags=metric_tags, device_name=db_name)
+                    self.gauge(metric_name, val, tags=metric_tags, device_name=db_name)
 
     def check(self, instance):
         server = self.agent_check.get_server(instance)
@@ -164,6 +164,7 @@ class CouchDB2:
 
     def __init__(self, agent_check):
         self.agent_check = agent_check
+        self.gauge = agent_check.gauge
 
     def _build_metrics(self, data, tags, prefix = 'couchdb'):
         for key, value in data.items():
@@ -174,21 +175,21 @@ class CouchDB2:
                             continue
                         elif metric == "percentile":
                             for pair in value:
-                                self.agent_check.gauge("{0}.{1}.percentile.{2}".format(prefix, key, pair[0]), pair[1], tags=tags)
+                                self.gauge("{0}.{1}.percentile.{2}".format(prefix, key, pair[0]), pair[1], tags=tags)
                         else:
-                            self.agent_check.gauge("{0}.{1}.{2}".format(prefix, key, metric), value, tags=tags)
+                            self.gauge("{0}.{1}.{2}".format(prefix, key, metric), value, tags=tags)
                 else:
-                    self.agent_check.gauge("{0}.{1}".format(prefix, key), value["value"], tags=tags)
+                    self.gauge("{0}.{1}".format(prefix, key), value["value"], tags=tags)
             elif type(value) is dict:
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
 
     def _build_db_metrics(self, data, tags):
         for key, value in data['sizes'].items():
-            self.agent_check.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
+            self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
 
         for key in ['purge_seq', 'doc_del_count', 'doc_count']:
-            self.agent_check.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
+            self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
 
     def check(self, instance):
         server = self.agent_check.get_server(instance)
