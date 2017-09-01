@@ -8,8 +8,54 @@ def couch_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/couch_#{couch_version}"
 end
 
+class ArgsProvider
+  attr_reader :version
+
+  def initialize(couch_version)
+    @version = couch_version.split('.').first
+    @couch_version = couch_version
+  end
+
+  def docker_image
+    case @version
+    when '1'
+      "couchdb:#{@couch_version}"
+    when '2'
+      "klaemo/couchdb:#{@couch_version}"
+    end
+  end
+
+  def docker_args
+    case @version
+    when '2'
+      '--admin=dduser:pawprint --with-haproxy'
+    else
+      ''
+    end
+  end
+
+  def logs_witness
+    case @version
+    when '1'
+      'CouchDB has started'
+    when '2'
+      'Password:'
+    end
+  end
+
+  def nose_filter
+    case @version
+    when '1'
+      'couch_version==\'1.x\''
+    when '2'
+      'couch_version==\'2.x\''
+    end
+  end
+end
+
 container_name = 'dd-test-couch'
 container_port = 5984
+provider = ArgsProvider.new(couch_version)
 
 namespace :ci do
   namespace :couch do |flavor|
@@ -20,36 +66,33 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('couch')
-      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d couchdb:#{couch_version})
+      sh %(docker run -p #{container_port}:#{container_port}\
+        --name #{container_name} -d #{provider.docker_image} #{provider.docker_args})
     end
 
     task before_script: ['ci:common:before_script'] do
       Wait.for container_port
       count = 0
-      logs = `docker logs dd-test-couch 2>&1`
-      puts 'Waiting for couchdb to come up'
-      until count == 20 || logs.include?('CouchDB has started')
+      logs = `docker logs #{container_name} 2>&1`
+      until count == 20 || logs.include?(provider.logs_witness)
         sleep_for 2
-        logs = `docker logs dd-test-couch 2>&1`
+        logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      puts 'couchdb is up!' if logs.include? 'CouchDB has started'
+
+      sleep_for 10 if provider.version == '2'
+
       # Create a test database
-      sh %(curl -X PUT http://localhost:5984/kennel)
-
-      # Create a user
-      sh %(curl -X PUT http://localhost:5984/_config/admins/dduser -d '"pawprint"')
-
-      # Restrict test databse to authenticated user
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/kennel/_security \
-           -d '{"admins":{"names":[],"roles":[]},"members":{"names":["dduser"],"roles":[]}}')
+      if provider.version == '2'
+        sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
+      else
+        sh %(curl -X PUT http://localhost:5984/kennel)
+      end
     end
 
     task script: ['ci:common:script'] do
-      this_provides = [
-        'couch'
-      ]
-      Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      ENV['NOSE_FILTER'] = provider.nose_filter
+      Rake::Task['ci:common:run_tests'].invoke(['couch'])
     end
 
     task before_cache: ['ci:common:before_cache']
