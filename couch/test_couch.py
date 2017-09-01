@@ -134,8 +134,10 @@ class TestCouchdb2(AgentCheckTest):
         AgentCheckTest.__init__(self, *args, **kwargs)
         self.cluster_gauges = []
         self.by_db_gauges = []
-        with open('couch/metadata2.csv', 'rb') as csvfile:
+        with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
+            reader.next() # This one skips the headers
+            reader.next() # This and the next one skip CouchDB 1.x specific metrics not included in 2.x
             reader.next()
             for row in reader:
                 if row[0].startswith("couchdb.by_db."):
