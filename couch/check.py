@@ -15,6 +15,35 @@ from util import headers
 
 
 class CouchDb(AgentCheck):
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        self.checker = CouchDB1_6(name, init_config, agentConfig, instances)
+
+    def _get(self, url, instance):
+        "Hit a given URL and return the parsed json"
+        self.log.debug('Fetching CouchDB stats at url: %s' % url)
+
+        auth = None
+        if 'user' in instance and 'password' in instance:
+            auth = (instance['user'], instance['password'])
+
+        # Override Accept request header so that failures are not redirected to the Futon web-ui
+        request_headers = headers(self.agentConfig)
+        request_headers['Accept'] = 'text/json'
+        r = requests.get(url, auth=auth, headers=request_headers,
+                         timeout=int(instance.get('timeout', self.TIMEOUT)))
+        r.raise_for_status()
+        return r.json()
+
+    def check(self, instance):
+        self.checker.check(instance)
+
+    def _get_server(self, instance):
+        server = instance.get('server', None)
+        if server is None:
+            raise Exception("A server must be specified")
+        return server
+
+class CouchDB1_6(CouchDb):
     """Extracts stats from CouchDB via its REST API
     http://wiki.apache.org/couchdb/Runtime_Statistics
     """
@@ -44,25 +73,8 @@ class CouchDb(AgentCheck):
                     metric_tags.append('db:%s' % db_name)
                     self.gauge(metric_name, val, tags=metric_tags, device_name=db_name)
 
-    def _get_stats(self, url, instance):
-        "Hit a given URL and return the parsed json"
-        self.log.debug('Fetching Couchdb stats at url: %s' % url)
-
-        auth = None
-        if 'user' in instance and 'password' in instance:
-            auth = (instance['user'], instance['password'])
-        # Override Accept request header so that failures are not redirected to the Futon web-ui
-        request_headers = headers(self.agentConfig)
-        request_headers['Accept'] = 'text/json'
-        r = requests.get(url, auth=auth, headers=request_headers,
-                         timeout=int(instance.get('timeout', self.TIMEOUT)))
-        r.raise_for_status()
-        return r.json()
-
     def check(self, instance):
-        server = instance.get('server', None)
-        if server is None:
-            raise Exception("A server must be specified")
+        server = self._get_server(instance)
         data = self.get_data(server, instance)
         self._create_metric(data, tags=['instance:%s' % server])
 
@@ -78,7 +90,7 @@ class CouchDb(AgentCheck):
         # Fetch initial stats and capture a service check based on response.
         service_check_tags = ['instance:%s' % server]
         try:
-            overall_stats = self._get_stats(url, instance)
+            overall_stats = self._get(url, instance)
         except requests.exceptions.Timeout as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                 tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
@@ -112,7 +124,7 @@ class CouchDb(AgentCheck):
         self.db_blacklist.setdefault(server,[])
         self.db_blacklist[server].extend(instance.get('db_blacklist',[]))
         whitelist = set(db_whitelist) if db_whitelist else None
-        databases = set(self._get_stats(url, instance)) - set(self.db_blacklist[server])
+        databases = set(self._get(url, instance)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
 
         if len(databases) > self.MAX_DB:
@@ -122,7 +134,7 @@ class CouchDb(AgentCheck):
         for dbName in databases:
             url = urljoin(server, quote(dbName, safe = ''))
             try:
-                db_stats = self._get_stats(url, instance)
+                db_stats = self._get(url, instance)
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
