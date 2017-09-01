@@ -1,5 +1,11 @@
 # CHANGELOG - kubernetes
 
+1.6.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Honor docker_histo_striptags option in datadog.conf for histograms [#725][]
+
 1.5.0 / 2017-10-10
 ==================
 ### Changes

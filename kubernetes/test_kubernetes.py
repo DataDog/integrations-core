@@ -181,20 +181,22 @@ class TestKubernetes(AgentCheckTest):
             ]
         }
         # Can't use run_check_twice due to specific metrics
-        self.run_check_twice(config, mocks=mocks, force_reload=True)
+        self.run_check_twice(config, mocks=mocks, force_reload=True,
+                             agent_config={'docker_histo_striptags': 'container_name,pod_name,kube_replica_set'})
+
 
         metric_suffix = ["count", "avg", "median", "max", "95percentile"]
 
         expected_tags = [
-            (['pod_name:no_pod'], [MEM, CPU, NET, DISK, DISK_USAGE, NET_ERRORS]),
-            (['kube_replication_controller:propjoe', 'kube_namespace:default', 'pod_name:default/propjoe-dhdzk'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
-            (['kube_replication_controller:fluentd-cloud-logging-kubernetes-minion', 'kube_namespace:kube-system', 'pod_name:kube-system/fluentd-cloud-logging-kubernetes-minion-mu4w'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
-            (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['kube_replication_controller:propjoe', 'kube_namespace:default', 'pod_name:default/propjoe-dhdzk'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['kube_replication_controller:kube-ui-v1','kube_namespace:kube-system', 'pod_name:kube-system/kube-ui-v1-sv2sq'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['kube_replication_controller:propjoe', 'kube_namespace:default', 'pod_name:default/propjoe-lkc3l'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['kube_replication_controller:haproxy-6db79c7bbcac01601ac35bcdb18868b3', 'kube_namespace:default', 'pod_name:default/haproxy-6db79c7bbcac01601ac35bcdb18868b3-rr7la'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            ([], [MEM, CPU, NET, DISK, DISK_USAGE, NET_ERRORS]),
+            (['kube_replication_controller:propjoe', 'kube_namespace:default'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
+            (['kube_replication_controller:fluentd-cloud-logging-kubernetes-minion', 'kube_namespace:kube-system'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
+            (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            (['kube_replication_controller:propjoe', 'kube_namespace:default'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            (['kube_replication_controller:kube-ui-v1','kube_namespace:kube-system'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            (['kube_replication_controller:propjoe', 'kube_namespace:default'], [MEM, CPU, FS, NET, NET_ERRORS]),
+            (['kube_replication_controller:haproxy-6db79c7bbcac01601ac35bcdb18868b3', 'kube_namespace:default'], [MEM, CPU, FS, NET, NET_ERRORS]),
             (['kube_replication_controller:l7-lb-controller', 'kube_namespace:kube-system'], [PODS]),
             (['kube_replication_controller:redis-slave', 'kube_namespace:default'], [PODS]),
             (['kube_replication_controller:frontend', 'kube_namespace:default'], [PODS]),
@@ -302,20 +304,21 @@ class TestKubernetes(AgentCheckTest):
         }
 
         # Can't use run_check_twice due to specific metrics
-        self.run_check_twice(config, mocks=mocks, force_reload=True)
+        self.run_check_twice(config, mocks=mocks, force_reload=True,
+                             agent_config={'docker_histo_striptags': 'container_name,pod_name,kube_replica_set,kube_replication_controller'})
 
         metric_suffix = ["count", "avg", "median", "max", "95percentile"]
 
         expected_tags = [
             (['container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
-              'image_tag:massi_ingest_k8s_events', 'pod_name:dd-agent-1rxlh',
+              'image_tag:massi_ingest_k8s_events',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
+              'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
             (['container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
-              'image_tag:2.0', 'pod_name:dd-agent-1rxlh',
-              'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
-              'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
-            (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
+              'image_tag:2.0', 'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
+              'kube_daemon_set:dd-agent', 'kube_container_name:POD'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
+            ([], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
+            (['kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
 
