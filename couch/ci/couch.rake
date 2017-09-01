@@ -34,15 +34,6 @@ class ArgsProvider
     end
   end
 
-  def logs_witness
-    case @version
-    when '1'
-      'CouchDB has started'
-    when '2'
-      'Password:'
-    end
-  end
-
   def nose_filter
     case @version
     when '1'
@@ -71,16 +62,8 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for container_port
-      count = 0
-      logs = `docker logs #{container_name} 2>&1`
-      until count == 20 || logs.include?(provider.logs_witness)
-        sleep_for 2
-        logs = `docker logs #{container_name} 2>&1`
-        count += 1
-      end
-
-      sleep_for 10 if provider.version == '2'
+      Wait.for 'http://localhost:5984', 30
+      sleep_for 5 if provider.version == '2'
 
       # Create a test database
       if provider.version == '2'
