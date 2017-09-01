@@ -13,7 +13,7 @@ from checks import AgentCheck
 
 class CouchDB2:
 
-    SERVICE_CHECK_NAME = 'couchdb2.can_connect'
+    SERVICE_CHECK_NAME = 'couchdb.can_connect'
 
     def __init__(self, agent_check, name, init_config, agentConfig, instances=None):
         self.agent_check = agent_check

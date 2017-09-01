@@ -18,11 +18,13 @@ Create a file `couch.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
+  version: <your CouchDB version> # Defaults to 1.x
 
 instances:
   - server: http://localhost:5984 # or wherever your CouchDB is listening
   #user: <your_username>
   #password: <your_password>
+  #name: <A node's Erlang name> # Only for CouchDB 2.x
 ```
 
 Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
@@ -57,9 +59,7 @@ The Couch check does not include any event at this time.
 
 ### Service Checks
 
-`couchdb.can_connect`:
-
-Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
+`couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
 ## Troubleshooting
 
