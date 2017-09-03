@@ -57,10 +57,10 @@ EVENT_TYPE = 'kubernetes'
 
 # Mapping between k8s events and ddog alert types per
 # https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/client-go/tools/record/event.go#L60
-K8S_ALERT_MAP = { 
-    'Warning': 'warning', 
+K8S_ALERT_MAP = {
+    'Warning': 'warning',
     'Normal': 'info'
-} 
+}
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
