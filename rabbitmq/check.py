@@ -353,7 +353,8 @@ class RabbitMQ(AgentCheck):
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
-                connection_states[conn['state']] += 1
+                if conn.get('state'):
+                    connection_states[conn['state']] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
