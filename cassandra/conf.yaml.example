@@ -311,7 +311,8 @@ init_config:
               metric_type: counter
               alias: jmx.gc.major_collection_time
      # Deprecated metrics for pre Cassandra 3.0 versions compatibility.
-     # If you are using cassandra 2, the metrics below will be user, otherwise ignored.
+     # If you are using cassandra 2, the metrics below will be used,
+     # otherwise they will be ignored.
     - include:
         domain: org.apache.cassandra.metrics
         type: ColumnFamily
