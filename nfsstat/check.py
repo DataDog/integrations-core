@@ -19,15 +19,17 @@ class NfsStatCheck(AgentCheck):
 
     def check(self, instance):
         # if they set the path, use that
-        if instance.get("nfsiostat_path"):
-            nfs_cmd = instance.get("nfsiostat_path")
+        if instance.get('nfsiostat_path'):
+            nfs_cmd = instance.get('nfsiostat_path')
         else:
             # if not, check if it's installed in the opt dir, if so use that
-            if os.path.exists("/opt/datadog-agent/embedded/sbin/nfsiostat"):
-                nfs_cmd = "/opt/datadog-agent/embedded/sbin/nfsiostat"
+            if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
+                nfs_cmd = '/opt/datadog-agent/embedded/sbin/nfsiostat'
             # if not, then check if it is in the default place
-            elif os.path.exists("/usr/local/sbin/nfsiostat"):
-                nfs_cmd = "/usr/local/sbin/nfsiostat"
+            elif os.path.exists('/usr/local/sbin/nfsiostat'):
+                nfs_cmd = '/usr/local/sbin/nfsiostat'
+            else:
+                raise Exception('nfsstat check requires nfsiostat be installed, please install it (through nfs-utils) or set the path to the installed version')
 
         stat_out, err, _ = get_subprocess_output(nfs_cmd, self.log)
         all_devices = []
@@ -35,7 +37,7 @@ class NfsStatCheck(AgentCheck):
         for l in stat_out.splitlines():
             if not l:
                 continue
-            elif l.find("mounted on") >= 0 and len(this_device) > 0:
+            elif l.find('mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
                 device = Device(this_device, self.log)
                 all_devices.append(device)
@@ -67,8 +69,8 @@ class Device(object):
         self.log.info(self._device_header)
         self.device_name = self._device_header[0]
         self.mount = self._device_header[-1][:-1]
-        self.nfs_server = self.device_name.split(":")[0]
-        self.nfs_export = self.device_name.split(":")[1]
+        self.nfs_server = self.device_name.split(':')[0]
+        self.nfs_export = self.device_name.split(':')[1]
 
     def _parse_ops(self):
         ops = self._device_data[2]
@@ -81,7 +83,7 @@ class Device(object):
         self.read_kb = float(read_data[1])
         self.read_kb_per_s = float(read_data[2])
         self.read_retrans = float(read_data[3])
-        self.read_retrans_pct = read_data[4].strip("(").strip(")").strip("%")
+        self.read_retrans_pct = read_data[4].strip('(').strip(')').strip('%')
         self.read_retrans_pct = float(self.read_retrans_pct)
         self.read_avg_rtt = float(read_data[5])
         self.read_avg_exe = float(read_data[6])
@@ -92,7 +94,7 @@ class Device(object):
         self.write_kb = float(write_data[1])
         self.write_kb_per_s = float(write_data[2])
         self.write_retrans = float(write_data[3])
-        self.write_retrans_pct = write_data[4].strip("(").strip(")").strip("%")
+        self.write_retrans_pct = write_data[4].strip('(').strip(')').strip('%')
         self.write_retrans_pct = float(self.write_retrans_pct)
         self.write_avg_rtt = float(write_data[5])
         self.write_avg_exe = float(write_data[6])
@@ -105,23 +107,23 @@ class Device(object):
 
     def send_metrics(self, gauge):
         metric_prefix = 'system.nfs.'
-        gauge(metric_prefix + "ops", self.ops, tags=self.tags)
-        gauge(metric_prefix + "rpc_bklog", self.rpc_bklog, tags=self.tags)
+        gauge(metric_prefix + 'ops', self.ops, tags=self.tags)
+        gauge(metric_prefix + 'rpc_bklog', self.rpc_bklog, tags=self.tags)
 
-        read_metric_prefix = metric_prefix + "read"
-        gauge(read_metric_prefix + ".ops", self.read_ops, tags=self.tags)
+        read_metric_prefix = metric_prefix + 'read'
+        gauge(read_metric_prefix + '.ops', self.read_ops, tags=self.tags)
         gauge(read_metric_prefix, self.read_kb, tags=self.tags)
-        gauge(read_metric_prefix + "_per_s", self.read_kb_per_s, tags=self.tags)
-        gauge(read_metric_prefix + ".retrans", self.read_retrans, tags=self.tags)
-        gauge(read_metric_prefix + ".retrans.pct", self.read_retrans_pct, tags=self.tags)
-        gauge(read_metric_prefix + ".rtt", self.read_avg_rtt, tags=self.tags)
-        gauge(read_metric_prefix + ".exe", self.read_avg_exe, tags=self.tags)
+        gauge(read_metric_prefix + '_per_s', self.read_kb_per_s, tags=self.tags)
+        gauge(read_metric_prefix + '.retrans', self.read_retrans, tags=self.tags)
+        gauge(read_metric_prefix + '.retrans.pct', self.read_retrans_pct, tags=self.tags)
+        gauge(read_metric_prefix + '.rtt', self.read_avg_rtt, tags=self.tags)
+        gauge(read_metric_prefix + '.exe', self.read_avg_exe, tags=self.tags)
 
-        write_metric_prefix = metric_prefix + "write"
-        gauge(write_metric_prefix + ".ops", self.write_ops, tags=self.tags)
+        write_metric_prefix = metric_prefix + 'write'
+        gauge(write_metric_prefix + '.ops', self.write_ops, tags=self.tags)
         gauge(write_metric_prefix, self.write_kb, tags=self.tags)
-        gauge(write_metric_prefix + "_per_s", self.write_kb_per_s, tags=self.tags)
-        gauge(write_metric_prefix + ".retrans", self.write_retrans, tags=self.tags)
-        gauge(write_metric_prefix + ".retrans.pct", self.write_retrans_pct, tags=self.tags)
-        gauge(write_metric_prefix + ".rtt", self.write_avg_rtt, tags=self.tags)
-        gauge(write_metric_prefix + ".exe", self.write_avg_exe, tags=self.tags)
+        gauge(write_metric_prefix + '_per_s', self.write_kb_per_s, tags=self.tags)
+        gauge(write_metric_prefix + '.retrans', self.write_retrans, tags=self.tags)
+        gauge(write_metric_prefix + '.retrans.pct', self.write_retrans_pct, tags=self.tags)
+        gauge(write_metric_prefix + '.rtt', self.write_avg_rtt, tags=self.tags)
+        gauge(write_metric_prefix + '.exe', self.write_avg_exe, tags=self.tags)
