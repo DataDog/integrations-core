@@ -47,4 +47,5 @@
 [#514]: https://github.com/DataDog/integrations-core/issues/514
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
+[#729]: https://github.com/DataDog/integrations-core/pull/729
 [@jamescarr]: https://github.com/jamescarr
