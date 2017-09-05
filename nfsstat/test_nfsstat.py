@@ -41,9 +41,10 @@ class TestNfsstat(AgentCheckTest):
     CHECK_NAME = 'nfsstat'
 
     CONFIG = {
-        'instances': [{
+        'init_config': [{
             'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat'
-        }]
+        }],
+        'instances': [{}]
     }
 
     def setUp(self):
