@@ -58,10 +58,7 @@ class TestNfsstat(AgentCheckTest):
         """
         Testing Nfsstat check.
         """
-        config = {
-            'instances': [{}]
-        }
-        self.run_check(config)
+        self.run_check(self.CONFIG)
 
         nfs_server_tag = 'nfs_server:192.168.34.1'
         nfs_export_tag = 'nfs_export:/exports/nfs/datadog/{0}'
