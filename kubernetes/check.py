@@ -324,7 +324,7 @@ class Kubernetes(AgentCheck):
 
         tags.append('container_name:%s' % container_name)
 
-        container_image = subcontainer['spec'].get('image')
+        container_image = self.kubeutil.image_name_resolver(subcontainer['spec'].get('image'))
         if container_image:
             tags.append('container_image:%s' % container_image)
 
