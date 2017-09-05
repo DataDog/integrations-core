@@ -1,12 +1,12 @@
 # CHANGELOG - rabbitmq
 
 
-1.3.1 / 2017-09-04
+1.3.1 / Unreleased
 ==================
 
 ### Changes
 
-* [BUGFIX] Add a key check before updating connection state metric.
+* [BUGFIX] Add a key check before updating connection state metric. See [#729][]
 
 
 1.3.0 / 2017-08-28
