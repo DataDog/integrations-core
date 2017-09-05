@@ -2,7 +2,7 @@ init_config:
   # We ship a version of nfsiostat with the agent binary,
   # but if you are using a source install,
   # you may have to specify the location of nfsiostat
-  # - nfsiostat_path: /usr/local/sbin/nfsiostat
+  # nfsiostat_path: /usr/local/sbin/nfsiostat
 
 instances:
   # Only once instance should be used per box
