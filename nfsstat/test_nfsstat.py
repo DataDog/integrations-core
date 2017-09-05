@@ -50,7 +50,7 @@ class TestNfsstat(AgentCheckTest):
         """
         Load the check so its ready for patching.
         """
-        self.load_check({'instances': [self.CONFIG]})
+        self.load_check(self.CONFIG)
 
     @mock.patch('_nfsstat.get_subprocess_output',
                 return_value=(Fixtures.read_file('nfsiostat', sdk_dir=FIXTURE_DIR), "", 0))
