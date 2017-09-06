@@ -1,4 +1,5 @@
 require 'ci/common'
+require 'net/http'
 
 def couch_version
   ENV['FLAVOR_VERSION'] || '1.6.1'
@@ -63,11 +64,27 @@ namespace :ci do
 
     task before_script: ['ci:common:before_script'] do
       Wait.for 'http://localhost:5984', 30
-      sleep_for 5 if provider.version == '2'
 
       # Create a test database
       if provider.version == '2'
         sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
+
+        times = 0
+        data = []
+        uri = URI("http://localhost:5984/_node/node1@127.0.0.1/_stats")
+        req = Net::HTTP::Get.new(uri)
+        req.basic_auth('dduser', 'pawprint')
+
+        puts "Waiting for stats to be generated on the nodes..."
+        while times < 20 || data.empty?
+          res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+            http.request(req)
+          end
+          data = JSON.parse(res.body)
+          times += 1
+          sleep 0.5
+        end
+
       else
         sh %(curl -X PUT http://localhost:5984/kennel)
       end
