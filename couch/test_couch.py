@@ -137,10 +137,11 @@ class TestCouchdb2(AgentCheckTest):
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
-            reader.next() # This and the next one skip CouchDB 1.x specific metrics not included in 2.x
-            reader.next()
             for row in reader:
-                if row[0].startswith("couchdb.by_db."):
+                if row[0] in ['couchdb.couchdb.request_time', 'couchdb.by_db.disk_size']:
+                    # Skip CouchDB 1.x specific metrics
+                    continue
+                elif row[0].startswith("couchdb.by_db."):
                     self.by_db_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
@@ -216,3 +217,23 @@ class TestCouchdb2(AgentCheckTest):
             tags = ["instance:{0}".format(n['name']), 'db:kennel']
             for gauge in self.by_db_gauges:
                 self.assertMetric(gauge, tags=tags)
+
+    def test_db_blacklisting(self):
+        confs = []
+
+        for n in [self.NODE1, self.NODE2, self.NODE3]:
+            node = self.NODE1.copy()
+            node['db_blacklist'] = ['kennel']
+            confs.append(node)
+
+        self.run_check({"instances": confs})
+
+        for n in confs:
+            for db in ['_users', '_global_changes', '_metadata', '_replicator']:
+                tags = ["instance:{0}".format(n['name']), "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags)
+
+            tags = ["instance:{0}".format(n['name']), 'db:kennel']
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=tags, count=0)

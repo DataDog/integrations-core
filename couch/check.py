@@ -202,8 +202,9 @@ class CouchDB2:
         self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
 
         db_whitelist = instance.get('db_whitelist', None)
+        db_blacklist = instance.get('db_blacklist', [])
         for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
-            if db_whitelist is None or db in db_whitelist:
+            if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
                 tags = ["instance:{0}".format(name), "db:{0}".format(db)]
                 self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
 
