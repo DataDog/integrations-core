@@ -13,9 +13,10 @@ instances:
   # only the first 50 databases will be checked.
   #
   - server: http://localhost:5984
-    # user: username                # optional
-    # password: password            # optional
-    # timeout: 5                    # in seconds
+    name: <Erlang name of the machine>    # Required if using CouchDB 2.x
+    # user: username                      # optional
+    # password: password                  # optional
+    # timeout: 5                          # optional. in seconds. Defaults to 5
     # db_whitelist:
     #  - db1
     #  - db2

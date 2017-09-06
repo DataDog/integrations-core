@@ -71,11 +71,11 @@ namespace :ci do
 
         times = 0
         data = []
-        uri = URI("http://localhost:5984/_node/node1@127.0.0.1/_stats")
+        uri = URI('http://localhost:5984/_node/node1@127.0.0.1/_stats')
         req = Net::HTTP::Get.new(uri)
         req.basic_auth('dduser', 'pawprint')
 
-        puts "Waiting for stats to be generated on the nodes..."
+        puts 'Waiting for stats to be generated on the nodes...'
         while times < 20 || data.empty?
           res = Net::HTTP.start(uri.hostname, uri.port) do |http|
             http.request(req)
