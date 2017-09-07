@@ -153,21 +153,21 @@ class KafkaCheck(AgentCheck):
         # which just creates confusion because it's theoretically impossible.
 
         # Fetch consumer group offsets from Zookeeper
-        zk_hosts_ports = self.read_config(instance, 'zk_connect_str')
+        zk_hosts_ports = self._read_config(instance, 'zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
 
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         if instance.get('monitor_unlisted_consumer_groups', False):
             consumer_groups = None
         else:
-            consumer_groups = self.read_config(instance, 'consumer_groups',
-                                               cast=self._validate_consumer_groups)
+            consumer_groups = self._validate_consumer_groups(
+                self._read_config(instance, 'consumer_groups'))
 
         consumer_offsets = self._get_zk_consumer_offsets(
             zk_hosts_ports, consumer_groups, zk_prefix)
 
         # Fetch the broker highwater offsets
-        kafka_hosts_ports = self.read_config(instance, 'kafka_connect_str')
+        kafka_hosts_ports = self._read_config(instance, 'kafka_connect_str')
         highwater_offsets = self._get_highwater_offsets(kafka_hosts_ports)
 
         # Report the broker highwater offset
@@ -206,6 +206,14 @@ class KafkaCheck(AgentCheck):
 
             self.gauge('kafka.consumer_lag', consumer_lag,
                tags=consumer_group_tags)
+
+    @staticmethod
+    def _read_config(instance, key):
+        val = instance.get(key)
+        if val is None:
+            raise Exception('Must provide `%s` value in instance config' % key)
+
+        return val
 
     def _validate_consumer_groups(self, val):
         # val = {'consumer_group': {'topic': [0, 1]}}
