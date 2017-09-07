@@ -20,6 +20,22 @@ init_config:
   # tls_cacert: /path/to/ca.pem
   # tls_verify: True
 
+  # Initialization retries
+  #
+  # if the agent is expected to start before Docker,
+  # use these settings to configure the retry policy.
+  #
+  # init_retry_interval defines how long (in seconds) the docker client
+  # will wait before retrying initialization.
+  # Defaults to 0.
+  #
+  # init_retry_interval: 20
+  #
+  # init_retries configures how many retries are made before failing permanently.
+  # Defaults to 0.
+  #
+  # init_retries: 5
+
 instances:
   - ## Daemon and system configuration
     ##
@@ -166,9 +182,9 @@ instances:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
     # List of docker event attributes to add as tags of the datadog events
     # Defaults to None.
-    # 
+    #
     # event_attributes_as_tags: ["signal"]
-    
+
     ## Rate Filtering
     ##
 
