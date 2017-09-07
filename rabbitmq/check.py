@@ -353,6 +353,7 @@ class RabbitMQ(AgentCheck):
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
+                # 'state' does not exist for direct type connections.
                 connection_states[conn.get('state', 'direct')] += 1
 
         for vhost, nb_conn in stats.iteritems():
