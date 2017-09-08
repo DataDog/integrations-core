@@ -6,6 +6,7 @@
 
 Collects metrics from the pgbouncer database.
 """
+
 # stdlib
 import urlparse
 
@@ -14,7 +15,6 @@ import psycopg2 as pg
 
 # project
 from checks import AgentCheck, CheckException
-
 
 class ShouldRestartException(Exception):
     pass
@@ -50,7 +50,7 @@ class PgBouncer(AgentCheck):
             ('database', 'db'),
             ('user', 'user'),
         ],
-        'metrics': [
+        'metrics':  [
             ('cl_active',            ('pgbouncer.pools.cl_active', GAUGE)),
             ('cl_waiting',           ('pgbouncer.pools.cl_waiting', GAUGE)),
             ('sv_active',            ('pgbouncer.pools.sv_active', GAUGE)),
@@ -89,6 +89,7 @@ class PgBouncer(AgentCheck):
         try:
             cursor = db.cursor()
             results = None
+
             for scope in metric_scope:
 
                 metrics = scope['metrics']
@@ -100,6 +101,7 @@ class PgBouncer(AgentCheck):
                     cursor.execute(query)
 
                     results = cursor.fetchall()
+
                 except pg.Error as e:
                     self.log.warning("Not all metrics may be available: %s" % str(e))
                     continue
@@ -109,9 +111,13 @@ class PgBouncer(AgentCheck):
                         continue
 
                     desc = scope['descriptors']
+
+                    # Some versions of pgbouncer have extra fields at the end of SHOW POOLS
                     if len(row) == len(cols) + len(desc) + 1:
-                        # Some versions of pgbouncer have an extra field at the end of show pools
                         row = row[:-1]
+                    elif len(row) == len(cols) + len(desc) + 2:
+                        row = row[:-2]
+
                     assert len(row) == len(cols) + len(desc)
 
                     tags = list(instance_tags)
