@@ -43,7 +43,7 @@ Restart the Agent to start sending Postfix metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for postfix under the Checks section:
+Run the Agent's `info` subcommand and look for `postfix` under the Checks section:
 
 ```
   Checks
