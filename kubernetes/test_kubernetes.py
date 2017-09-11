@@ -50,6 +50,19 @@ METRICS = [
     ('kubernetes.memory.capacity', CAP),
 ]
 
+
+class MockResponse:
+    """
+    Helper class to mock a json response from requests
+    """
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
 class MockIterLinesResponse:
     """
     Helper class to mock a text response from requests
@@ -64,9 +77,9 @@ class MockIterLinesResponse:
 
 def KubeUtil_fake_retrieve_json_auth(url, timeout=10, params=None):
     if url.endswith("/namespaces"):
-        return json.loads(Fixtures.read_file("namespaces.json", sdk_dir=FIXTURE_DIR, string_escape=False))
+        return MockResponse(json.loads(Fixtures.read_file("namespaces.json", sdk_dir=FIXTURE_DIR, string_escape=False)), 200)
     if url.endswith("/events"):
-        return json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))
+        return MockResponse(json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False)), 200)
     return {}
 
 
@@ -622,7 +635,7 @@ class TestKubeutil(unittest.TestCase):
         ]
 
         for node_list, expected_result in node_lists:
-            with mock.patch('utils.kubernetes.kubeutil.KubeUtil.retrieve_json_auth', return_value=node_list):
+            with mock.patch('utils.kubernetes.kubeutil.KubeUtil.retrieve_json_auth', return_value=MockResponse(node_list, 200)):
                 self.assertEqual(self.kubeutil.get_node_hostname('ip-10-0-0-179'), expected_result)
 
     def test_extract_kube_pod_tags(self):
@@ -693,13 +706,13 @@ class TestKubeutil(unittest.TestCase):
             # tls_settings, expected_params
             (
                 {},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': None}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'content-type': 'application/json'}, 'cert': None}
             ), (
                 {'bearer_token': 'foo_tok'},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok'}, 'cert': None}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'Authorization': 'Bearer foo_tok', 'content-type': 'application/json'}, 'cert': None}
             ), (
                 {'bearer_token': 'foo_tok','apiserver_client_cert': ('foo.crt', 'foo.key')},
-                {'verify': False, 'timeout': 10, 'params': None, 'headers': None, 'cert': ('foo.crt', 'foo.key')}
+                {'verify': False, 'timeout': 3, 'params': None, 'headers': {'content-type': 'application/json'}, 'cert': ('foo.crt', 'foo.key')}
             ),
         ]
 
@@ -713,7 +726,7 @@ class TestKubeutil(unittest.TestCase):
         self.kubeutil.tls_settings = {'bearer_token': 'foo_tok'}
         self.kubeutil.CA_CRT_PATH = __file__
         self.kubeutil.retrieve_json_auth('url')
-        r.get.assert_called_with('url', verify=__file__, timeout=10, params=None, headers={'Authorization': 'Bearer foo_tok'}, cert=None)
+        r.get.assert_called_with('url', verify=__file__, timeout=3, params=None, headers={'Authorization': 'Bearer foo_tok', 'content-type': 'application/json'}, cert=None)
 
     def test_get_node_info(self):
         with mock.patch('utils.kubernetes.KubeUtil._fetch_host_data') as f:

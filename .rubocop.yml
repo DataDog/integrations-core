@@ -16,3 +16,6 @@ Style/Documentation:
 
 Style/SingleLineBlockParams:
   Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false

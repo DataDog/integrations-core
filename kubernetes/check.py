@@ -25,6 +25,7 @@ from utils.service_discovery.sd_backend import get_sd_backend
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
+LEADER_CANDIDATE = 'leader_candidate'
 
 DEFAULT_USE_HISTOGRAM = False
 DEFAULT_PUBLISH_ALIASES = False
@@ -89,15 +90,23 @@ class Kubernetes(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         inst = instances[0] if instances is not None else None
-        self.kubeutil = KubeUtil(instance=inst)
-        if not self.kubeutil.kubelet_api_url:
-            raise Exception('Unable to reach kubelet. Try setting the host parameter.')
+        self.kubeutil = KubeUtil(init_config=init_config, instance=inst)
+
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.log.warning("Kubelet client failed to initialized for now, pausing the Kubernetes check.")
+            else:
+                raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
 
         if agentConfig.get('service_discovery') and \
            agentConfig.get('service_discovery_backend') == 'docker':
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
+
+        self.leader_candidate = inst.get(LEADER_CANDIDATE)
+        if self.leader_candidate:
+            self.kubeutil.refresh_leader()
 
         self.k8s_namespace_regexp = None
         if inst:
@@ -108,19 +117,8 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-            self._collect_events = _is_affirmative(inst.get('collect_events', DEFAULT_COLLECT_EVENTS))
-            if self._collect_events:
-                self.event_retriever = self.kubeutil.get_event_retriever()
-            elif self.kubeutil.collect_service_tag:
-                # Only fetch service and pod events for service mapping
-                event_delay = inst.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
-                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
-                                                                         delay=event_delay)
-            else:
-                self.event_retriever = None
-        else:
-            self._collect_events = None
             self.event_retriever = None
+            self._configure_event_collection(inst)
 
     def _perform_kubelet_checks(self, url, instance):
         service_check_base = NAMESPACE + '.kubelet.check'
@@ -155,7 +153,38 @@ class Kubernetes(AgentCheck):
             else:
                 self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
 
+    def _configure_event_collection(self, instance):
+        self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+        if self._collect_events:
+            if self.event_retriever:
+                self.event_retriever.set_kinds(None)
+                self.event_retriever.set_delay(None)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever()
+        elif self.kubeutil.collect_service_tag:
+            # Only fetch service and pod events for service mapping
+            event_delay = instance.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
+            if self.event_retriever:
+                self.event_retriever.set_kinds(['Service', 'Pod'])
+                self.event_retriever.set_delay(event_delay)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
+                                                                         delay=event_delay)
+        else:
+            self.event_retriever = None
+
     def check(self, instance):
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.kubeutil.init_kubelet(instance)
+                self.log.warning("Kubelet client is not initialized, Kubernetes check is paused.")
+                return
+            else:
+                raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
+
+        # Leader election
+        self.refresh_leader_status(instance)
+
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
         self.enabled_gauges = ["{0}.{1}".format(NAMESPACE, x) for x in enabled_gauges]
@@ -295,7 +324,7 @@ class Kubernetes(AgentCheck):
 
         tags.append('container_name:%s' % container_name)
 
-        container_image = subcontainer['spec'].get('image')
+        container_image = self.kubeutil.image_name_resolver(subcontainer['spec'].get('image'))
         if container_image:
             tags.append('container_image:%s' % container_image)
 
@@ -493,7 +522,7 @@ class Kubernetes(AgentCheck):
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
             self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
 
-            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint)
+            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint).json()
             for namespace in namespaces.get('items', []):
                 name = namespace.get('metadata', {}).get('name', None)
                 if name and self.k8s_namespace_regexp.match(name):
@@ -529,3 +558,23 @@ class Kubernetes(AgentCheck):
                 'tags': tags,
             }
             self.event(dd_event)
+
+    def refresh_leader_status(self, instance):
+        """
+        calls kubeutil.refresh_leader and compares the resulting
+        leader status with the previous one.
+        If it changed, update the event collection logic
+        """
+        if not self.leader_candidate:
+            return
+
+        leader_status = self.kubeutil.is_leader
+        self.kubeutil.refresh_leader()
+
+        # nothing changed, no-op
+        if leader_status == self.kubeutil.is_leader:
+            return
+        # else, reset the event collection config
+        else:
+            self.log.info("Leader status changed, updating event collection config...")
+            self._configure_event_collection(instance)
