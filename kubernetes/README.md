@@ -43,25 +43,36 @@ The Kubernetes check does not include any event at this time.
 The Kubernetes check does not include any service check at this time.
 
 ## Troubleshooting
+### Can I install the agent on my Kubernetes master node(s) ?
+Yes, since Kubernetes 1.6, the concept of [Taints and tolerations](http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html) was introduced. Now rather than the master being off limits, it's simply tainted.  Add the required toleration to the pod to run it:
 
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
+Add the following lines to your Deployment (or Daemonset if you are running a multi-master setup):
+```
+spec:
+ tolerations: 
+ - key: node-role.kubernetes.io/master
+   effect: NoSchedule
+```
 
-### Visit the Knowledge Base
+### Why is the Kubernetes check failing with a ConnectTimeout error to port 10250?
+The agent assumes that the kubelet API is available at the default gateway of the container. If that's not the case because you are using a software defined networks like Calico or Flannel, the agent needs to be specified using an environment variable:
+```
+          - name: KUBERNETES_KUBELET_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+```
+See [this PR](https://github.com/DataDog/dd-agent/pull/3051)
 
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
+###  Why is there a container in each Kubernetes pod with 0% CPU and minimal disk/ram?
+These are pause containers (docker_image:gcr.io/google_containers/pause.*) that K8s injects into every pod to keep it populated even if the "real” container is restarting/stopped. 
 
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 
 ## Further Reading
 ### Blog Article
 To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
+
+### Knowledge Base 
+* [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
+* [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
