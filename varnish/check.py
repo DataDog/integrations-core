@@ -288,7 +288,7 @@ class Varnish(AgentCheck):
                 if tokens == ['Backend', 'name', 'Admin', 'Probe']:
                     # skip the column headers that exist in new output format
                     next
-                elif len(tokens) >= 4 and tokens[1] == 'probe':
+                elif len(tokens) >= 4 and tokens[1] in ['probe', 'healthy', 'sick']:
                     # parse new output format
                     # the backend name will include the vcl name
                     # so split on first . to remove prefix

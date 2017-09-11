@@ -1,5 +1,12 @@
 # CHANGELOG - varnish
 
+1.0.6 Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] `varnishadm backend.list -p` can contain `probe`, `healthy`, `sick` in output if `varnishadm backend.set_health` is used.
+
 1.0.5 Unreleased
 ==================
 
