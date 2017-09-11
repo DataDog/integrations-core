@@ -298,11 +298,11 @@ instances:
       - '^mysq.$'
       - invalid_process""",
         'instances': [{
-                               'name': 'server0',
-                               'host': 'localhost',
-                               'port': 9001,
-                               'proc_regex': ['^mysq.$', 'invalid_process']
-                               }],
+                       'name': 'server0',
+                       'host': 'localhost',
+                       'port': 9001,
+                       'proc_regex': ['^mysq.$', 'invalid_process']
+                      }],
         'expected_metrics': {
             'server0': [
                 ('supervisord.process.count', 1,
@@ -340,7 +340,6 @@ instances:
 
     def test_check(self):
         """Integration test for supervisord check. Using a mocked supervisord."""
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
@@ -402,14 +401,11 @@ State: RUNNING
 Start time: 2014-11-01 04:16:28
 Stop time: \nExit Status: 0"""
 
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
         }
-        check, _ = check_class.from_yaml(yaml_text=self.TEST_CASES[0]['yaml'],
-                                         check_name='supervisord',
-                                         agentConfig=agentConfig)
+        check = load_check('supervisord', self.TEST_CASES[0]['yaml'], agentConfig)
         self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
