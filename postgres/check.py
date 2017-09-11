@@ -47,6 +47,7 @@ class PostgreSql(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
 
     # turning columns into tags
+
     DB_METRICS = {
         'descriptors': [
             ('datname', 'db')
@@ -57,7 +58,23 @@ SELECT datname,
        %s
   FROM pg_stat_database
  WHERE datname not ilike 'template%%'
+   AND datname not ilike 'rdsadmin'
    AND datname not ilike 'postgres'
+""",
+        'relation': False,
+    }
+
+    # Copy of the previous DB_METRICS, _including_ the default 'postgres' database
+    DB_METRICS_WITH_DEFAULT = {
+        'descriptors': [
+            ('datname', 'db')
+        ],
+        'metrics': {},
+        'query': """
+SELECT datname,
+       %s
+  FROM pg_stat_database
+ WHERE datname not ilike 'template%%'
    AND datname not ilike 'rdsadmin'
 """,
         'relation': False,
@@ -488,7 +505,7 @@ SELECT s.schemaname,
                 self.log.warn('Failed to parse config element=%s, check syntax' % str(element))
         return config
 
-    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, interface_error, programming_error):
+    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, do_collect_default_db, interface_error, programming_error):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -514,7 +531,12 @@ SELECT s.schemaname,
         if db_instance_metrics is not None:
             # FIXME: constants shouldn't be modified
             self.DB_METRICS['metrics'] = db_instance_metrics
-            metric_scope.append(self.DB_METRICS)
+            self.DB_METRICS_WITH_DEFAULT['metrics'] = db_instance_metrics
+            # DB_METRICS query is chosen according to do_collect_default_db parameter
+            if not(do_collect_default_db):
+                metric_scope.append(self.DB_METRICS)
+            else:
+                metric_scope.append(self.DB_METRICS_WITH_DEFAULT)
 
         if bgw_instance_metrics is not None:
             # FIXME: constants shouldn't be modified
@@ -730,6 +752,7 @@ SELECT s.schemaname,
         # Default value for `count_metrics` is True for backward compatibility
         count_metrics = _is_affirmative(instance.get('collect_count_metrics', True))
         database_size_metrics = _is_affirmative(instance.get('collect_database_size_metrics', True))
+        do_collect_default_db = _is_affirmative(instance.get('do_collect_default_database', False))
 
         if relations and not dbname:
             self.warning('"dbname" parameter must be set when using the "relations" parameter.')
@@ -764,11 +787,11 @@ SELECT s.schemaname,
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, do_collect_default_db, interface_error, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, use_cached=False)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, do_collect_default_db, interface_error, programming_error)
 
         if db is not None:
             service_check_tags = self._get_service_check_tags(host, port, dbname)

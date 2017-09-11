@@ -7,6 +7,7 @@
 
 * [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639][] and [#699][], thanks to [@Erouan50][]
 * [MINOR] Allow specifying postgres port as string. See [#607][], thanks [@infothrill][]
+* [IMPROVEMENT] Add option for including the default database 'postgres' when gathering stats [#740][]
 
 1.0.3 / 2017-07-18
 ==================
@@ -42,5 +43,7 @@
 [#607]: https://github.com/DataDog/integrations-core/issues/607
 [#639]: https://github.com/DataDog/integrations-core/issues/639
 [#699]: https://github.com/DataDog/integrations-core/issues/699
+[#689]: https://github.com/Erouan50/integrations-core/issues/689
+[#740]: https://github.com/DataDog/integrations-core/pull/740
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill
