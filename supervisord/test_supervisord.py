@@ -346,7 +346,7 @@ instances:
         }
 
         for tc in self.TEST_CASES:
-            check = load_check('supervisord', tc['yaml'], agentConfig)
+            check = load_check('supervisord', {'init_config': {}, 'instances': tc['instances']}, agentConfig)
             self.assertTrue(check is not None, msg=check)
             for instance in tc['instances']:
                 name = instance['name']
@@ -405,7 +405,7 @@ Stop time: \nExit Status: 0"""
             'version': '0.1',
             'api_key': 'tota'
         }
-        check = load_check('supervisord', self.TEST_CASES[0]['yaml'], agentConfig)
+        check = load_check('supervisord', {'init_config': {}, 'instances': self.TEST_CASES[0]['instances']}, agentConfig)
         self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
