@@ -30,7 +30,7 @@ Restart the Agent to begin sending Kong metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for kong` under the Checks section:
+Run the Agent's `info` subcommand and look for kong under the Checks section:
 
 ```
   Checks

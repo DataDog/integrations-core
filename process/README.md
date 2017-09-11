@@ -41,7 +41,7 @@ Restart the Agent to start sending process metrics and service checks to Datadog
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for process` under the Checks section:
+Run the Agent's `info` subcommand and look for process under the Checks section:
 
 ```
   Checks
