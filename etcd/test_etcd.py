@@ -115,6 +115,6 @@ class CheckEtcdTest(AgentCheckTest):
 
         self.assertServiceCheckCritical(self.check.SERVICE_CHECK_NAME,
                                         count=1,
-                                        tags=['url:http://localhost:2379/test/v2/stats/self'])
+                                        tags=['url:http://localhost:2379/test'])
 
         self.coverage_report()
