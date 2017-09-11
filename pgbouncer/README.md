@@ -28,6 +28,16 @@ instances:
 #     - role:main
 ```
 
+In your PGBouncer userlist.txt file add
+```
+  "datadog" "<your_pass>"
+```
+
+Next, in your PGBouncer pgbouncer.ini file add
+```
+stats_users = datadog
+```
+
 Restart the Agent to start sending PgBouncer metrics to Datadog.
 
 ### Validation

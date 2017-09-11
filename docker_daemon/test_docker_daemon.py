@@ -7,6 +7,7 @@ import logging
 import mock
 
 # 3p
+from docker import Client
 from nose.plugins.attrib import attr
 
 # project
@@ -25,7 +26,7 @@ CONTAINERS_TO_RUN = [
 MOCK_CONFIG = {
     "init_config": {},
     "instances": [{
-        "url": "unix://var/run/docker.sock",
+        "url": "unix://var/run/w00t.sock",
         "collect_disk_stats": True,
     }]
 }
@@ -36,6 +37,7 @@ POD_NAME_LABEL = "io.kubernetes.pod.name"
 def reset_docker_settings():
     """Populate docker settings with default, dummy settings"""
     DockerUtil().set_docker_settings({}, {})
+    DockerUtil()._client = Client(**DockerUtil().settings)
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemonDown(AgentCheckTest):
@@ -45,6 +47,10 @@ class TestCheckDockerDaemonDown(AgentCheckTest):
     @mock.patch('docker.client.Client._retrieve_server_version',
                 side_effect=Exception("Connection timeout"))
     def test_docker_down(self, *args):
+        DockerUtil().set_docker_settings({}, {})
+        DockerUtil().last_init_retry = None
+        DockerUtil().left_init_retries = 10
+        DockerUtil()._client = None
         self.run_check(MOCK_CONFIG, force_reload=True)
         self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=None, count=1)
 
@@ -54,7 +60,6 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
     CHECK_NAME = 'docker_daemon'
 
     def test_event_attributes_tag(self):
-        self.docker_client = DockerUtil().client
         config = {
             "init_config": {},
             "instances": [{
@@ -65,17 +70,20 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
         }
 
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
+        DockerUtil().last_init_retry = None
+        DockerUtil().left_init_retries = 10
+        DockerUtil()._client = None
 
-        container_fail = self.docker_client.create_container(
+        container_fail = DockerUtil().client.create_container(
             "nginx:latest", detach=True, name='event-tags-test', entrypoint='/bin/false')
         log.debug('start nginx:latest with entrypoint /bin/false')
-        self.docker_client.start(container_fail)
-        log.debug('container exited with %s' % self.docker_client.wait(container_fail, 1))
+        DockerUtil().client.start(container_fail)
+        log.debug('container exited with %s' % DockerUtil().client.wait(container_fail, 1))
         # Wait 1 second after exit so the event will be picked up
         from time import sleep
         sleep(1)
         self.run_check(config, force_reload=True)
-        self.docker_client.remove_container(container_fail)
+        DockerUtil().client.remove_container(container_fail)
 
         # Previous tests might have left unprocessed events, to be ignored
         filtered_events = []
@@ -237,7 +245,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
         self.second_network = self.docker_client.create_network("second", driver="bridge")['Id']
 
         for c in CONTAINERS_TO_RUN:
-            images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"][0].startswith(c)]
+            images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"] and i["RepoTags"][0].startswith(c)]
             if len(images) == 0:
                 for line in self.docker_client.pull(c, stream=True):
                     print line
@@ -516,7 +524,6 @@ class TestCheckDockerDaemon(AgentCheckTest):
             "tls_client_key": cur_loc,
             "tls_cacert": cur_loc,
             "tls": True
-
         }
 
         instance = {
@@ -524,9 +531,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
         }
 
         DockerUtil().set_docker_settings(init_config, instance)
-        client = DockerUtil().client
-        self.assertEqual(client.verify, cur_loc)
-        self.assertEqual(client.cert, (cur_loc, cur_loc))
+        DockerUtil()._client = Client(**DockerUtil().settings)
+        self.assertEqual(DockerUtil().client.verify, cur_loc)
+        self.assertEqual(DockerUtil().client.cert, (cur_loc, cur_loc))
         reset_docker_settings()
 
     def test_labels_collection(self):

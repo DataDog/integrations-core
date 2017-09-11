@@ -1,12 +1,21 @@
 # CHANGELOG - docker_daemon
 
-1.3.2 / Unreleased
+
+1.4.0 / Unreleased
 ==================
 ### Changes
 
-* [BUGFIX] safely check volume list before accessing. See [#544][]
+* [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
 
-1.3.1 / 2017-07-26 
+1.3.2 / 2017-08-28
+==================
+### Changes
+
+* [IMPROVEMENT] Add "image_name:openshift/origin-pod" to suggested exclude list. See [#641][]
+* [BUGFIX] safely check volume list before accessing. See [#544][]
+* [BUGFIX] make it a bit safer. See [#701][]
+
+1.3.1 / 2017-07-26
 ==================
 ### Changes
 
@@ -82,4 +91,6 @@
 [#544]: https://github.com/DataDog/integrations-core/issues/544
 [#553]: https://github.com/DataDog/integrations-core/issues/553
 [#616]: https://github.com/DataDog/integrations-core/issues/616
+[#641]: https://github.com/DataDog/integrations-core/issues/641
+[#701]: https://github.com/DataDog/integrations-core/issues/701
 [@sophaskins]: https://github.com/sophaskins
