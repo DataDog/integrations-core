@@ -16,7 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_check_class, load_check
+from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
@@ -298,11 +298,11 @@ instances:
       - '^mysq.$'
       - invalid_process""",
         'instances': [{
-                       'name': 'server0',
-                       'host': 'localhost',
-                       'port': 9001,
-                       'proc_regex': ['^mysq.$', 'invalid_process']
-                      }],
+            'name': 'server0',
+            'host': 'localhost',
+            'port': 9001,
+            'proc_regex': ['^mysq.$', 'invalid_process']
+        }],
         'expected_metrics': {
             'server0': [
                 ('supervisord.process.count', 1,
