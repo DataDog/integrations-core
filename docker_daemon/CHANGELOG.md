@@ -1,6 +1,14 @@
 # CHANGELOG - docker_daemon
 
-1.3.2 / Unreleased
+
+1.4.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
+* [FEATURE] Add client-side event filtering by event type. See [#744][]
+
+1.3.2 / 2017-08-28
 ==================
 ### Changes
 

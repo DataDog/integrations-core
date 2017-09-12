@@ -1,6 +1,6 @@
 # CHANGELOG - openstack
 
-1.0.1 / Unreleased
+1.0.1 / 2017-08-28
 ==================
 
 ### Changes

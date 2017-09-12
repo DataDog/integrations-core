@@ -6,9 +6,9 @@
 ### Changes
 
 * [FEATURE] discovery of groups, topics and partitions. See [#633][] (Thanks [@jeffwidman][])
+* [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733][]
 
-
-1.0.2 / Unreleased
+1.0.2 / 2017-08-28
 ==================
 
 ### Changes
@@ -38,4 +38,5 @@
 [#624]: https://github.com/DataDog/integrations-core/issues/624
 [#633]: https://github.com/DataDog/integrations-core/issues/633
 [#684]: https://github.com/DataDog/integrations-core/issues/684
+[#733]: https://github.com/DataDog/integrations-core/issues/733
 [@jeffwidman]: https://github.com/jeffwidman

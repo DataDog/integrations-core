@@ -70,7 +70,7 @@ These are pause containers (docker_image:gcr.io/google_containers/pause.*) that 
 The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 
 ## Further Reading
-### Blog Article
+### Datadog Blog
 To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
 
 ### Knowledge Base 

@@ -41,6 +41,13 @@ instances:
     # username: user
     # password: pass
 
+    # If your service uses client side certificates, you can optionally
+    # specify a client certificate and key files that will be used in the check.
+    # The private key to your local certificate must be unencrypted.
+    #
+    # client_cert: /opt/client.crt
+    # client_key: /opt/client.key
+
     # The (optional) http_response_status_code parameter will instruct the check
     # to look for a particular HTTP response status code or a Regex identifying
     # a set of possible status codes.

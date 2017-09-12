@@ -1,6 +1,13 @@
 # CHANGELOG - http_check
 
-1.1.2 / Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add support for client side certificate. See[#688][].
+
+1.1.2 / 2017-08-28
 ==================
 
 ### Changes
@@ -34,3 +41,4 @@
 [#328]: https://github.com/DataDog/integrations-core/issues/328
 [#461]: https://github.com/DataDog/integrations-core/issues/461
 [#652]: https://github.com/DataDog/integrations-core/issues/652
+[#688]: https://github.com/DataDog/integrations-core/pull/688

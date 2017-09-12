@@ -1,7 +1,15 @@
 # CHANGELOG - rabbitmq
 
 
-1.3.0 / Unreleased
+1.3.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Add a key check before updating connection state metric. See [#729][]
+
+
+1.3.0 / 2017-08-28
 ==================
 
 ### Changes
@@ -39,4 +47,5 @@
 [#514]: https://github.com/DataDog/integrations-core/issues/514
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
+[#729]: https://github.com/DataDog/integrations-core/pull/729
 [@jamescarr]: https://github.com/jamescarr
