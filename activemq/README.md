@@ -63,5 +63,4 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
 See our blog post [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)

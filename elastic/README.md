@@ -84,5 +84,4 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 Check that the `url` in `elastic.yaml` is correct.
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/) about it.

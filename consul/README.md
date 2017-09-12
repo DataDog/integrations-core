@@ -158,7 +158,6 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
 
 * [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog) - a more in-depth explanation of Datadog-Consul integration

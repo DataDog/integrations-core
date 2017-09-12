@@ -137,7 +137,6 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
 * [Start here](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) if you're using the WiredTiger storage engine.

@@ -80,5 +80,8 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
+### Blog Article
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+
 ### Knowledge Base
 * [Built a network monitor on an http check](https://help.datadoghq.com/hc/en-us/articles/115003314726-Built-a-network-monitor-on-an-http-check-)
