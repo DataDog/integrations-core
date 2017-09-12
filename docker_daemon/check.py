@@ -816,7 +816,8 @@ class DockerDaemon(AgentCheck):
                             container_tags.add('%s:%s' % (attr, event['Actor']['Attributes'][attr]))
 
                 normal_prio_events.append((event, container_name))
-            self.log.debug('%d events were filtered out' % filtered_events_count)
+            if filtered_events_count:
+                self.log.debug('%d events were filtered out because of ignored event type' % filtered_events_count)
 
 
             normal_event = self._create_dd_event(normal_prio_events, image_name, container_tags, priority='Normal')
