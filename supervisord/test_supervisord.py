@@ -16,7 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_check_class
+from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
@@ -119,7 +119,7 @@ instances:
     - name: server1
       host: localhost
       port: 9001""",
-        'expected_instances': [{
+        'instances': [{
             'host': 'localhost',
             'name': 'server1',
             'port': 9001
@@ -168,7 +168,7 @@ instances:
       - webapp
   - name: server1
     host: 10.60.130.82""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9001,
@@ -226,7 +226,7 @@ instances:
   - name: server0
     host: invalid_host
     port: 9009""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'invalid_host',
             'port': 9009
@@ -242,7 +242,7 @@ instances:
     port: 9010
     user: invalid_user
     pass: invalid_pass""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9010,
@@ -261,7 +261,7 @@ instances:
     proc_names:
       - mysql
       - invalid_process""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9001,
@@ -297,12 +297,12 @@ instances:
     proc_regex:
       - '^mysq.$'
       - invalid_process""",
-        'expected_instances': [{
-                               'name': 'server0',
-                               'host': 'localhost',
-                               'port': 9001,
-                               'proc_regex': ['^mysq.$', 'invalid_process']
-                               }],
+        'instances': [{
+            'name': 'server0',
+            'host': 'localhost',
+            'port': 9001,
+            'proc_regex': ['^mysq.$', 'invalid_process']
+        }],
         'expected_metrics': {
             'server0': [
                 ('supervisord.process.count', 1,
@@ -340,20 +340,15 @@ instances:
 
     def test_check(self):
         """Integration test for supervisord check. Using a mocked supervisord."""
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
         }
 
         for tc in self.TEST_CASES:
-            check, instances = check_class.from_yaml(yaml_text=tc['yaml'],
-                                                     check_name='supervisord',
-                                                     agentConfig=agentConfig)
-
+            check = load_check('supervisord', {'init_config': {}, 'instances': tc['instances']}, agentConfig)
             self.assertTrue(check is not None, msg=check)
-            self.assertEquals(tc['expected_instances'], instances)
-            for instance in instances:
+            for instance in tc['instances']:
                 name = instance['name']
 
                 try:
@@ -406,14 +401,11 @@ State: RUNNING
 Start time: 2014-11-01 04:16:28
 Stop time: \nExit Status: 0"""
 
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
         }
-        check, _ = check_class.from_yaml(yaml_text=self.TEST_CASES[0]['yaml'],
-                                         check_name='supervisord',
-                                         agentConfig=agentConfig)
+        check = load_check('supervisord', {'init_config': {}, 'instances': self.TEST_CASES[0]['instances']}, agentConfig)
         self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
