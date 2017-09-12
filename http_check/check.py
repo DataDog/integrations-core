@@ -30,7 +30,7 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
 # project
 from checks.network_checks import EventType, NetworkCheck, Status
 from config import _is_affirmative
-from util import headers as agent_headers
+from utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
 CONTENT_LENGTH = 200

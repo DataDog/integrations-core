@@ -12,7 +12,7 @@ import simplejson as json
 
 # project
 from checks import AgentCheck
-from util import headers
+from utils.headers import headers
 
 
 UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [

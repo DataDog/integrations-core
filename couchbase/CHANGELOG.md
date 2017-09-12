@@ -6,6 +6,7 @@
 ### Changes
 
 * [BUGFIX] Fix the conversion of request_time* metrics. See [#705][]
+* [DEPRECATION] Removes the deprecated headers function. See [#743][]
 
 1.1.0 / 2017-07-18
 ==================

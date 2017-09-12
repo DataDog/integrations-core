@@ -13,7 +13,7 @@ import requests
 # project
 from checks import AgentCheck
 from config import _is_affirmative
-from util import headers
+from utils.headers import headers
 
 
 class NodeNotFound(Exception):

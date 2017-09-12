@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Updates the Service Check tag to only use the base URL
+* [DEPRECATION] Removes the deprecated headers function. See [#743][]
 
 1.0.0 / 2017-03-22
 ==================

@@ -1,5 +1,12 @@
 # CHANGELOG - nginx
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [DEPRECATION] Removes the deprecated headers function. See [#743][]
+
 1.1.0 / 2017-07-18
 ==================
 
