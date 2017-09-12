@@ -60,8 +60,7 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
-
+### Datadog Blog
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
 ### Knowledge Base
