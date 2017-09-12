@@ -845,3 +845,37 @@ class TestCheckDockerDaemon(AgentCheckTest):
         # last 2 points should be dropped so the rate should be 0
         self.assertMetric('docker.cpu.user', value=0.0)
         self.assertMetric('docker.cpu.system', value=0.0)
+
+    def test_filter_event_type(self):
+        """ Testing event type filtering"""
+        event_list = [
+            {"status":"create","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"create","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221851,"timeNano":1505221851874332240},
+            {"status":"pause","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"pause","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221892,"timeNano":1505221892885900077},
+            {"status":"top","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"top","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221910,"timeNano":1505221910331861955},
+        ]
+        dict_mock = {"redis":event_list}
+
+        # Testing with the default config
+        self.run_check(MOCK_CONFIG, force_reload=True)
+        result = self.check._format_events(dict_mock, {})
+
+        self.assertEqual(1, len(result))
+        self.assertIn('create', result[0]['msg_text'])
+        self.assertIn('pause', result[0]['msg_text'])
+        self.assertNotIn('top', result[0]['msg_text'])
+
+        # Testing with a custom config
+        mock_config_top = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/w00t.sock",
+                "filtered_event_types": ["pause"]
+            }]
+        }
+        self.run_check(mock_config_top, force_reload=True)
+        resulttop = self.check._format_events(dict_mock, {})
+
+        self.assertEqual(1, len(resulttop))
+        self.assertIn('create', resulttop[0]['msg_text'])
+        self.assertNotIn('pause', resulttop[0]['msg_text'])
+        self.assertIn('top', resulttop[0]['msg_text'])

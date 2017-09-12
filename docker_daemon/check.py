@@ -139,6 +139,11 @@ EXCLUDED_ATTRIBUTES = [
     'name',
     'container',
 ]
+DEFAULT_FILTERED_EVENT_TYPES = [
+    'top',
+    'exec_create',
+    'exec_start',
+]
 
 CONTAINER = "container"
 PERFORMANCE = "performance"
@@ -240,6 +245,8 @@ class DockerDaemon(AgentCheck):
             self.collect_disk_stats = _is_affirmative(instance.get('collect_disk_stats', False))
             self.collect_exit_codes = _is_affirmative(instance.get('collect_exit_codes', False))
             self.collect_ecs_tags = _is_affirmative(instance.get('ecs_tags', True)) and Platform.is_ecs_instance()
+
+            self.filtered_event_types = tuple(instance.get("filtered_event_types", DEFAULT_FILTERED_EVENT_TYPES))
 
             self.capped_metrics = instance.get('capped_metrics')
 
@@ -788,10 +795,14 @@ class DockerDaemon(AgentCheck):
         events = []
         for image_name, event_group in aggregated_events.iteritems():
             container_tags = set()
-            low_prio_events = []
+            filtered_events_count = 0
             normal_prio_events = []
 
             for event in event_group:
+                # Only keep events that are not configured to be filtered out
+                if event['status'].startswith(self.filtered_event_types):
+                    filtered_events_count += 1
+                    continue
                 container_name = event['id'][:11]
 
                 if event['id'] in containers_by_id:
@@ -804,15 +815,10 @@ class DockerDaemon(AgentCheck):
                         if attr in event['Actor']['Attributes'] and attr not in EXCLUDED_ATTRIBUTES:
                             container_tags.add('%s:%s' % (attr, event['Actor']['Attributes'][attr]))
 
-                # health checks generate tons of these so we treat them separately and lower their priority
-                if event['status'].startswith('exec_create:') or event['status'].startswith('exec_start:'):
-                    low_prio_events.append((event, container_name))
-                else:
-                    normal_prio_events.append((event, container_name))
+                normal_prio_events.append((event, container_name))
+            if filtered_events_count:
+                self.log.debug('%d events were filtered out because of ignored event type' % filtered_events_count)
 
-            exec_event = self._create_dd_event(low_prio_events, image_name, container_tags, priority='Low')
-            if exec_event:
-                events.append(exec_event)
 
             normal_event = self._create_dd_event(normal_prio_events, image_name, container_tags, priority='Normal')
             if normal_event:
