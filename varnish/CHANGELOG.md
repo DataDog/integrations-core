@@ -1,5 +1,12 @@
 # CHANGELOG - varnish
 
+1.0.5 Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix `varnishadm backend.list -p` parsing for newer versions of Varnish.
+
 1.0.4 2017-08-28
 ==================
 
