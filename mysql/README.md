@@ -302,5 +302,4 @@ mysql> select user,host,process_priv from mysql.user where user='datadog';
 Review the Configuration section and grant the datadog user all necessary privileges. Do NOT grant all privileges on all databases to this user.
 
 ## Further Reading
-### Blog Article
 Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.

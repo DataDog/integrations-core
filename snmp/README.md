@@ -144,6 +144,9 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
+### Datadog Blog
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+
 ### Knowledge Base 
 * [How to monitor SNMP devices?](https://help.datadoghq.com/hc/en-us/articles/204797329-How-to-monitor-SNMP-devices-)
 * [List of commonly used/compatible OIDs](https://help.datadoghq.com/hc/en-us/articles/204616829-For-SNMP-does-Datadog-have-a-list-of-commonly-used-compatible-OIDs-)
