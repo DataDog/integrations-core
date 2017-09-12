@@ -6,7 +6,6 @@
 import copy
 
 # 3p
-from mock import Mock
 from nose.plugins.attrib import attr
 
 # project

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import traceback
 # project
 from checks import AgentCheck
 from utils.containers import hash_mutable
@@ -26,20 +25,20 @@ class PDHCheck(AgentCheck):
         self._counters = {}
         self._metrics = {}
         self._tags = {}
-        
+
         try:
             for instance in instances:
                 key = hash_mutable(instance)
                 counterset = instance.get('countersetname')
-                
+
                 cfg_tags = instance.get('tags')
                 if cfg_tags is not None:
-                    tags =cfg_tags.join(",")
+                    tags = cfg_tags.join(",")
                     self._tags[key] = list(tags) if tags else []
 
                 metrics = instance.get('metrics')
                 # list of the metrics.  Each entry is itself an entry,
-                # which is the pdh name, datadog metric name, type, and the 
+                # which is the pdh name, datadog metric name, type, and the
                 # pdh counter object
                 self._metrics[key] = []
                 for inst_name, dd_name, mtype in metrics:
@@ -48,7 +47,7 @@ class PDHCheck(AgentCheck):
                     entry = [inst_name, dd_name, m, obj]
                     self.log.debug("entry: %s" % str(entry))
                     self._metrics[key].append(entry)
-            
+
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
