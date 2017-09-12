@@ -90,5 +90,4 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to track performance impact of code changes with TeamCity and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/) about it.

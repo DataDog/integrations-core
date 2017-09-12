@@ -63,5 +63,4 @@ You can also contact our Support Team via email at [support@datadoghq.com](mailt
 Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate your docker daemon with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/the-docker-monitoring-problem/) about it.
