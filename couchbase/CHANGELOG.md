@@ -1,6 +1,6 @@
 # CHANGELOG - couchbase
 
-1.1.1 / Unreleased
+1.2.0 / Unreleased
 ==================
 
 ### Changes
