@@ -15,7 +15,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 
 1. **Make sure that [JMX Remote is enabled](http://activemq.apache.org/jmx.html) on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`
-{{< highlight yaml >}}
+```yaml
 instances:
   - host: localhost
     port: 7199
@@ -77,18 +77,18 @@ init_config:
           metric_type: gauge
         MemoryPercentUsage:
           alias: activemq.broker.memory_pct
-          metric_type: gauge
-{{< /highlight >}}
+          metric_type: gauge
+```
 
 3. Restart the agent
-{{< highlight shell >}}
+```bash
 sudo /etc/init.d/datadog-agent restart
 
 
 if [ $(sudo supervisorctl status | egrep "datadog-agent.*RUNNING" | wc -l) == 3 ]; \
 then echo -e "\e[0;32mAgent is running\e[0m"; \
 else echo -e "\e[031mAgent is not running\e[0m"; fi
-{{< /highlight >}}
+```
 
 {{< insert-example-links check="none" >}}
 
