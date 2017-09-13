@@ -528,7 +528,11 @@ class MySql(AgentCheck):
 
         if _is_affirmative(options.get('replication', False)):
             # Get replica stats
-            results.update(self._get_replica_stats(db))
+            is_mariadb = self._get_is_mariadb(db, host)
+            replication_channel = options.get('replication_channel')
+            if replication_channel:
+                self.service_check_tags.append("channel:{0}".format(replication_channel))
+            results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
             nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
             results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
@@ -671,6 +675,13 @@ class MySql(AgentCheck):
             version = version[0].split('.')
             self.mysql_version[hostkey] = version
             return version
+
+    def _get_is_mariadb(self, db, host):
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
+            result = cursor.fetchone()
+
+            return result[0] == 1
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
@@ -847,11 +858,17 @@ class MySql(AgentCheck):
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s" % str(e))
             return False
 
-    def _get_replica_stats(self, db):
+    def _get_replica_stats(self, db, is_mariadb, replication_channel):
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 replica_results = {}
-                cursor.execute("SHOW SLAVE STATUS;")
+                if is_mariadb and replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
+                    cursor.execute("SHOW SLAVE STATUS;")
+                elif replication_channel:
+                    cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
+                else:
+                    cursor.execute("SHOW SLAVE STATUS;")
                 slave_results = cursor.fetchone()
                 if slave_results:
                     replica_results.update(slave_results)

@@ -1,5 +1,12 @@
 # CHANGELOG - mysql
 
+1.0.5 / 2017-10-26
+==================
+
+### Changes
+
+* [FEATURE] Add support for multi-source replication in both MariaDB and MySQL
+
 1.0.4 / 2017-08-28
 ==================
 
