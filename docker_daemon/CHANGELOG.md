@@ -7,6 +7,7 @@
 
 * [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
 * [FEATURE] Add client-side event filtering by event type. See [#744][]
+* [FEATURE] Update the check to be Agent6 ready. See [#750][]
 
 1.3.2 / 2017-08-28
 ==================
@@ -94,4 +95,5 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+[#750]: https://github.com/DataDog/integrations-core/issues/750
 [@sophaskins]: https://github.com/sophaskins
