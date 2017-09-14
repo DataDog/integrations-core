@@ -15,6 +15,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 
 1. **Make sure that [JMX Remote is enabled](http://activemq.apache.org/jmx.html) on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`
+
 ```yaml
 instances:
   - host: localhost
@@ -81,6 +82,7 @@ init_config:
 ```
 
 3. Restart the agent
+
 ```bash
 sudo /etc/init.d/datadog-agent restart
 
