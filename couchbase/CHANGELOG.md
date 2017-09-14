@@ -1,11 +1,12 @@
 # CHANGELOG - couchbase
 
-1.1.1 / Unreleased
+1.2.0 / Unreleased
 ==================
 
 ### Changes
 
 * [BUGFIX] Fix the conversion of request_time* metrics. See [#705][]
+* [DEPRECATION] Removes the deprecated headers function. See [#743][]
 
 1.1.0 / 2017-07-18
 ==================

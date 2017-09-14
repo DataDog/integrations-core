@@ -11,7 +11,7 @@ import requests
 
 # project
 from checks import AgentCheck
-from util import headers
+from utils.headers import headers
 
 # Constants
 COUCHBASE_STATS_PATH = '/pools/default'

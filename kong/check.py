@@ -11,7 +11,7 @@ import simplejson as json
 
 # project
 from checks import AgentCheck
-from util import headers
+from utils.headers import headers
 
 
 class Kong(AgentCheck):

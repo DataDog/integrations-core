@@ -14,7 +14,7 @@ from nose.plugins.attrib import attr
 # project
 from config import AGENT_VERSION
 from tests.checks.common import AgentCheckTest
-from util import headers as agent_headers
+from utils.headers import headers as agent_headers
 
 RESULTS_TIMEOUT = 20
 

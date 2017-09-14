@@ -11,7 +11,7 @@ import requests
 
 # project
 from checks import AgentCheck
-from util import headers
+from utils.headers import headers
 
 
 class CouchDb(AgentCheck):

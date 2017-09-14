@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Add support for client side certificate. See[#688][].
+* [DEPRECATION] Removes the deprecated headers function. See [#743][]
 
 1.1.2 / 2017-08-28
 ==================
