@@ -35,10 +35,28 @@ CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
 
 DISK_STATS_RE = re.compile('([0-9.]+)\s?([a-zA-Z]+)')
 
+def generate_historate_func(cls, excluding_tags):
+    def fct(self, metric, value, tags=None, hostname=None, device_name=None):
+        cls.historate(self, metric, value, excluding_tags,
+            tags=tags, hostname=hostname, device_name=device_name)
+    return fct
+
+def generate_histogram_func(cls, excluding_tags):
+    def fct(self, metric, value, tags=None, hostname=None, device_name=None):
+        tags = list(tags) # Use a copy of the list to avoid removing tags from originial
+        for tag in list(tags):
+            for exc_tag in excluding_tags:
+                if tag.startswith(exc_tag + ":"):
+                    tags.remove(tag)
+
+        cls.histogram(self, metric, value, tags=tags, hostname=hostname,
+            device_name=device_name)
+    return fct
+
 GAUGE = AgentCheck.gauge
 RATE = AgentCheck.rate
-HISTORATE = AgentCheck.generate_historate_func(["container_name"])
-HISTO = AgentCheck.generate_histogram_func(["container_name"])
+HISTORATE = generate_historate_func(AgentCheck, ["container_name"])
+HISTO = generate_histogram_func(AgentCheck, ["container_name"])
 FUNC_MAP = {
     GAUGE: {True: HISTO, False: GAUGE},
     RATE: {True: HISTORATE, False: RATE}
@@ -182,7 +200,7 @@ class DockerDaemon(AgentCheck):
         try:
             instance = self.instances[0]
 
-            self.docker_util = DockerUtil()
+            self.docker_util = DockerUtil(init_config=self.init_config, instance=instance)
             if not self.docker_util.client:
                 raise Exception("Failed to initialize Docker client.")
 
