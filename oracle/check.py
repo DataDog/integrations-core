@@ -46,9 +46,6 @@ class Oracle(AgentCheck):
         'Temp Space Used':                  'oracle.temp_space_used',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
     def check(self, instance):
         if not cx_Oracle:
             msg = """Cannot run the Oracle check until the Oracle instant client is available:
