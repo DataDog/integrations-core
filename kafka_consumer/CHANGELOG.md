@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753][]
 * [FEATURE] discovery of groups, topics and partitions. See [#633][] (Thanks [@jeffwidman][])
 * [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733][]
 
@@ -39,4 +40,5 @@
 [#633]: https://github.com/DataDog/integrations-core/issues/633
 [#684]: https://github.com/DataDog/integrations-core/issues/684
 [#733]: https://github.com/DataDog/integrations-core/issues/733
+[#753]: https://github.com/DataDog/integrations-core/issues/753
 [@jeffwidman]: https://github.com/jeffwidman
