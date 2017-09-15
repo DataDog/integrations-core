@@ -57,8 +57,11 @@ class DNSCheck(NetworkCheck):
 
         # If a specific DNS server was defined use it, else use the system default
         nameserver = instance.get('nameserver')
+        nameserver_port = instance.get('port')
         if nameserver is not None:
             resolver.nameservers = [nameserver]
+        if nameserver_port is not None:
+            resolver.port = [port]
 
         timeout = float(instance.get('timeout', self.default_timeout))
         resolver.lifetime = timeout
