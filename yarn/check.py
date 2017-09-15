@@ -229,9 +229,9 @@ class YarnCheck(AgentCheck):
     # On initialize, handle anything related to Kerberos authentication
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(YarnCheck, self).__init__(name, init_config, agentConfig, instances)
-        kerberos_auth = self.init_config.get('kerberos_auth', false)
-        basic_auth = self.init_config.get('basic_auth', false)
-        digest_auth = self.init_config.get('digest_auth', false)
+        kerberos_auth = self.init_config.get('kerberos_auth', False)
+        basic_auth = self.init_config.get('basic_auth', False)
+        digest_auth = self.init_config.get('digest_auth', False)
         
         # Kerberos Authentication
         if kerberos_auth:
