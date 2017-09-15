@@ -37,7 +37,8 @@ The kubernetes check is compatible with all major platforms
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
-The Kubernetes check does not include any event at this time.
+
+Since dd-agent 5.17, [enable the agent leader election option](#how-to-elect-a-leader-agent-in-order-to-avoid-duplicated-events) in order to gather events from your kubernetese nodes without any duplicated events.
 
 ### Service Checks
 The Kubernetes check does not include any service check at this time.
@@ -76,3 +77,70 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 ### Knowledge Base 
 * [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
 * [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
+
+### How to elect a leader agent in order to avoid duplicated events?
+
+Since dd-agent 5.17, the agent has a leader election option for kubernetes.
+Every agent a leader candidate, and they will perform a leader election among themselves using kubernetes components.
+The elected leader will be the only one responsible for collecting events.
+
+**This functionality is disabled by default**. 
+
+To enable it you need to set the variables `collect_events`, `leader_candidate` to true in your [kubernetes.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L89) file.
+
+Internally it uses [ConfigMaps](https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core) so you will need to get list, delete and create access to the ConfigMap resource.
+Use this Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions:
+
+```yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: datadog
+rules:
+- nonResourceURLs:
+  - "/version"  # Used to get apiserver version metadata
+  - "/healthz"  # Healthcheck
+  verbs: ["get"]
+- apiGroups: [""]
+  resources:
+    - "nodes"
+    - "namespaces"  #
+    - "events"      # Cluster events + kube_service cache invalidation
+    - "services"    # kube_service tag
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources:
+    - "configmaps"
+  resourceNames: ["datadog-leader-elector"]
+  verbs: ["get", "delete", "update"]
+- apiGroups: [""]
+  resources:
+    - "configmaps"
+  verbs: ["create"]
+---
+# You need to use that account for your dd-agent DaemonSet
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: datadog
+automountServiceAccountToken: true
+---
+# Your admin user needs the same permissions to be able to grant them
+# Easiest way is to bind your user to the cluster-admin role
+# See https://cloud.google.com/container-engine/docs/role-based-access-control#setting_up_role-based_access_control
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: datadog
+subjects:
+- kind: ServiceAccount
+  name: datadog
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: datadog
+  apiGroup: rbac.authorization.k8s.io
+```
+
+In your `kubernetes.yaml` file you will see the [leader_lease_duration](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L118) parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**. 
+The longer it is, the less hard we hit the apiserver with requests, but it also means that if the leader dies and under certain conditions there can be an event blackout until the lease expires and a new leader takes over.
