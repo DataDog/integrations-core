@@ -1,2 +1,2 @@
 # integration pip requirements
-requests-kerberos == 1.1.0
+requests-kerberos ==  0.11.0
