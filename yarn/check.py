@@ -474,7 +474,7 @@ class YarnCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=validate_ssl, auth=requests_authentication)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=validate_ssl, auth=self.requests_authentication)
             response.raise_for_status()
             response_json = response.json()
 
