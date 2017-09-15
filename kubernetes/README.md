@@ -70,18 +70,10 @@ These are pause containers (docker_image:gcr.io/google_containers/pause.*) that 
 
 The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 
-## Further Reading
-### Datadog Blog
-To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
-
-### Knowledge Base 
-* [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
-* [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
-
 ### How to elect a leader agent in order to avoid duplicated events?
 
 Since dd-agent 5.17, the agent has a leader election option for kubernetes.
-Every agent a leader candidate, and they will perform a leader election among themselves using kubernetes components.
+Every agent is a leader candidate, and they will perform a leader election among themselves using kubernetes components.
 The elected leader will be the only one responsible for collecting events.
 
 **This functionality is disabled by default**. 
@@ -143,4 +135,12 @@ roleRef:
 ```
 
 In your `kubernetes.yaml` file you will see the [leader_lease_duration](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L118) parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**. 
-The longer it is, the less hard we hit the apiserver with requests, but it also means that if the leader dies and under certain conditions there can be an event blackout until the lease expires and a new leader takes over.
+The longer it is, the less hard your agent hits the apiserver with requests, but it also means that if the leader dies (and under certain conditions) there can be an event blackout until the lease expires and a new leader takes over.
+
+## Further Reading
+### Datadog Blog
+To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
+
+### Knowledge Base 
+* [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
+* [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
