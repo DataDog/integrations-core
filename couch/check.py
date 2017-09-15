@@ -191,22 +191,28 @@ class CouchDB2:
         for key in ['purge_seq', 'doc_del_count', 'doc_count']:
             self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
 
+    def _get_instance_names(self, server, instance):
+        name = instance.get('name', None)
+        if name is None:
+            url = urljoin(server, "/_membership")
+            names = self.agent_check.get(url, instance, [])['cluster_nodes']
+            return names
+        else:
+            return [name]
+
     def check(self, instance):
         server = self.agent_check.get_server(instance)
 
-        name = instance.get('name', None)
-        if name is None:
-            raise Exception("At least one name is required")
+        for name in self._get_instance_names(server, instance):
+            tags = ["instance:{0}".format(name)]
+            self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
 
-        tags = ["instance:{0}".format(name)]
-        self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
-
-        db_whitelist = instance.get('db_whitelist', None)
-        db_blacklist = instance.get('db_blacklist', [])
-        for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
-            if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
-                tags = ["instance:{0}".format(name), "db:{0}".format(db)]
-                self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
+            db_whitelist = instance.get('db_whitelist', None)
+            db_blacklist = instance.get('db_blacklist', [])
+            for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
+                if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
+                    tags = ["instance:{0}".format(name), "db:{0}".format(db)]
+                    self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
 
     def _get_node_stats(self, server, name, instance, tags):
         url = urljoin(server, "/_node/{}/_stats".format(name))

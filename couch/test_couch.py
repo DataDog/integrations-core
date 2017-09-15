@@ -202,7 +202,7 @@ class TestCouchdb2(AgentCheckTest):
         confs = []
 
         for n in [self.NODE1, self.NODE2, self.NODE3]:
-            node = self.NODE1.copy()
+            node = n.copy()
             node['db_whitelist'] = ['kennel']
             confs.append(node)
 
@@ -222,7 +222,7 @@ class TestCouchdb2(AgentCheckTest):
         confs = []
 
         for n in [self.NODE1, self.NODE2, self.NODE3]:
-            node = self.NODE1.copy()
+            node = n.copy()
             node['db_blacklist'] = ['kennel']
             confs.append(node)
 
@@ -237,3 +237,33 @@ class TestCouchdb2(AgentCheckTest):
             tags = ["instance:{0}".format(n['name']), 'db:kennel']
             for gauge in self.by_db_gauges:
                 self.assertMetric(gauge, tags=tags, count=0)
+
+    def test_check_without_names(self):
+        conf = self.NODE1.copy()
+        conf.pop('name')
+
+        self.run_check({"instances": [conf]})
+
+        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
+        for tag in tags:
+            for gauge in self.cluster_gauges:
+                self.assertMetric(gauge, tags=tag)
+
+            for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+                tags = [tag[0], "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags)
+
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                status=AgentCheck.OK,
+                                tags=["instance:{0}".format(conf["server"])],
+                                count=1) # One for the version as we don't have any names to begin with
+
+        for node in [self.NODE1, self.NODE2, self.NODE3]:
+            self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                    status=AgentCheck.OK,
+                                    tags=["instance:{0}".format(node["name"])],
+                                    count=1) # One for the server stats, the version is already loaded
+
+        # Raises when COVERAGE=true and coverage < 100%
+        self.coverage_report()
