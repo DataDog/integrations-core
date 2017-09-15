@@ -18,6 +18,7 @@ class CouchDb(AgentCheck):
     TIMEOUT = 5
     SERVICE_CHECK_NAME = 'couchdb.can_connect'
     SOURCE_TYPE_NAME = 'couchdb'
+    MAX_DB = 50
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -82,7 +83,6 @@ class CouchDB1:
     """Extracts stats from CouchDB via its REST API
     http://wiki.apache.org/couchdb/Runtime_Statistics
     """
-    MAX_DB = 50
 
     def __init__(self, agent_check):
         self.db_blacklist = {}
@@ -141,9 +141,10 @@ class CouchDB1:
         databases = set(self.agent_check.get(url, instance, tags)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
 
-        if len(databases) > self.MAX_DB:
-            self.warning('Too many databases, only the first %s will be checked.' % self.MAX_DB)
-            databases = list(databases)[:self.MAX_DB]
+        max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
+        if len(databases) > max_dbs_per_check:
+            self.agent_check.warning('Too many databases, only the first %s will be checked.' % max_dbs_per_check)
+            databases = list(databases)[:max_dbs_per_check]
 
         for dbName in databases:
             url = urljoin(server, quote(dbName, safe = ''))
@@ -161,6 +162,8 @@ class CouchDB1:
         return couchdb
 
 class CouchDB2:
+
+    MAX_NODES_PER_CHECK = 20
 
     def __init__(self, agent_check):
         self.agent_check = agent_check
@@ -196,23 +199,28 @@ class CouchDB2:
         if name is None:
             url = urljoin(server, "/_membership")
             names = self.agent_check.get(url, instance, [])['cluster_nodes']
-            return names
+            return names[:instance.get('max_nodes_per_check', self.MAX_NODES_PER_CHECK)]
         else:
             return [name]
 
     def check(self, instance):
         server = self.agent_check.get_server(instance)
 
+        max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         for name in self._get_instance_names(server, instance):
             tags = ["instance:{0}".format(name)]
             self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
 
             db_whitelist = instance.get('db_whitelist', None)
             db_blacklist = instance.get('db_blacklist', [])
+            scanned_dbs = 0
             for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
                     tags = ["instance:{0}".format(name), "db:{0}".format(db)]
                     self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
+                    scanned_dbs += 1
+                    if scanned_dbs >= max_dbs_per_check:
+                        break
 
     def _get_node_stats(self, server, name, instance, tags):
         url = urljoin(server, "/_node/{}/_stats".format(name))

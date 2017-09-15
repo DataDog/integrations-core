@@ -20,7 +20,7 @@ class CouchTestCase(AgentCheckTest):
     CHECK_NAME = 'couch'
 
     # Publicly readable databases
-    DB_NAMES = ['_users', '_replicator', 'kennel']
+    DB_NAMES = ['_replicator', '_users', 'kennel']
 
     GLOBAL_GAUGES = [
         'couchdb.couchdb.auth_cache_hits',
@@ -102,6 +102,14 @@ class CouchTestCase(AgentCheckTest):
                     self.assertMetric(gauge, tags=tags, count=0)
                 else:
                     self.assertMetric(gauge, tags=tags, count=1)
+
+    def test_only_max_nodes_are_scanned(self):
+        self.config['instances'][0]['max_dbs_per_check'] = 1
+        self.run_check(self.config)
+        for db_name in self.DB_NAMES[1:]:
+            tags = ['instance:http://localhost:5984', 'db:{0}'.format(db_name)]
+            for gauge in self.CHECK_GAUGES:
+                self.assertMetric(gauge, tags=tags, count=0)
 
 @attr(requires='couch')
 @attr(couch_version='2.x')
@@ -267,3 +275,68 @@ class TestCouchdb2(AgentCheckTest):
 
         # Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
+
+    def test_only_max_nodes_are_scanned(self):
+        conf = self.NODE1.copy()
+        conf.pop('name')
+        conf['max_nodes_per_check'] = 2
+
+        self.run_check({"instances": [conf]})
+
+        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2])
+        for tag in tags:
+            for gauge in self.cluster_gauges:
+                self.assertMetric(gauge, tags=tag)
+
+            for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+                tags = [tag[0], "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags)
+
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                status=AgentCheck.OK,
+                                tags=["instance:{0}".format(conf["server"])],
+                                count=1) # One for the version as we don't have any names to begin with
+
+        for node in [self.NODE1, self.NODE2]:
+            self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                    status=AgentCheck.OK,
+                                    tags=["instance:{0}".format(node["name"])],
+                                    count=1) # One for the server stats, the version is already loaded
+
+        tags = ["instance:{0}".format(self.NODE3['name'])]
+        for gauge in self.cluster_gauges:
+            self.assertMetric(gauge, tags=tags, count=0)
+
+        for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
+            tags = [tags[0], "db:{0}".format(db)]
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=tags, count=0)
+
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                status=AgentCheck.OK,
+                                tags=tags,
+                                count=0)
+
+        # Raises when COVERAGE=true and coverage < 100%
+        self.coverage_report()
+
+    def test_only_max_dbs_are_scanned(self):
+        confs = []
+
+        for n in [self.NODE1, self.NODE2, self.NODE3]:
+            node = n.copy()
+            node['max_dbs_per_check'] = 1
+            confs.append(node)
+
+        self.run_check({"instances": confs})
+
+        for n in confs:
+            for db in ['kennel', '_users', '_metadata', '_replicator']:
+                tags = ["instance:{0}".format(n['name']), "db:{0}".format(db)]
+                for gauge in self.by_db_gauges:
+                    self.assertMetric(gauge, tags=tags, count=0)
+
+            tags = ["instance:{0}".format(n['name']), 'db:_global_changes']
+            for gauge in self.by_db_gauges:
+                self.assertMetric(gauge, tags=tags, count=1)

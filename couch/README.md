@@ -24,6 +24,8 @@ instances:
   #user: <your_username>
   #password: <your_password>
   #name: <A node's Erlang name> # Only for CouchDB 2.x
+  #max_nodes_per_check: If no name is specified, the agent will scan all nodes up. As that may be very long, you can limit how many to collect per check. Default: 20
+  #max_dbs_per_check. Maximum number of databases to report on. Default: 50
 ```
 
 Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
