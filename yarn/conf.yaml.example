@@ -20,6 +20,10 @@ instances:
     # Optionally remove yarn.app metrics from metric collection.
     # Defaults to true
     # collect_app_metrics: true
+    
+    # Optionally override SSL validation. Sometimes when using proxies or self-signed certs
+    # we'll want to override validation.
+    # validate_ssl: true
 
     # Optional tags to be applied to every emitted metric.
     # tags:
