@@ -81,10 +81,15 @@ yarn.queue.maxApplicationsPerUser       The maximum number of active application
 '''
 # stdlib
 from urlparse import urljoin, urlsplit, urlunsplit
+from subprocess import Popen, PIPE
 
 # 3rd party
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 import requests
+
+# 3rd party Kerberos Authentication
+from requests_kerberos import HTTPKerberosAuth
 
 # Project
 from checks import AgentCheck
@@ -217,9 +222,49 @@ class YarnCheck(AgentCheck):
         'queue',
         'user'
     ]
+    
+    # Our Authentication Method. Defaults to None
+    requests_authentication = None
+    
+    # On initialize, handle anything related to Kerberos authentication
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        super(YarnCheck, self).__init__(name, init_config, agentConfig, instances)
+        kerberos_auth = self.init_config.get('kerberos_auth', false)
+        basic_auth = self.init_config.get('basic_auth', false)
+        digest_auth = self.init_config.get('digest_auth', false)
+        
+        # Kerberos Authentication
+        if kerberos_auth:
+            kerberos_user = self.init_config.get('kerberos_user', "")
+            kerberos_realm = self.init_config.get('kerberos_realm', "")
+            kerberos_password = self.init_config.get('kerberos_password', "")
+            # Run kinit via subprocess
+            kinit = '/usr/bin/kinit'
+            kinit_args = [ kinit, '%s@%s' % (kerberos_user, kerberos_realm) ]
+            kinit = Popen(kinit_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            kinit.stdin.write('%s\n' % kerberos_password)
+            kinit.wait()
+            # Apply the Kerberos HTTP Auth
+            requests_authentication = HTTPKerberosAuth()
+        # Basic Authentication
+        elif basic_auth:
+            basic_user = self.init_config.get('basic_user', "")
+            basic_password = self.init_config.get('basic_password', "")
+            # Apply the HTTP Basic Auth
+            requests_authentication = HTTPBasicAuth(basic_user,basic_password)
+        # Digest Authentication
+        elif basic_auth:
+            digest_user = self.init_config.get('digest_user', "")
+            digest_password = self.init_config.get('digest_password', "")
+            # Apply the HTTP Digest Auth
+            requests_authentication = HTTPDigestAuth(basic_user,basic_password)
+        
+        ### HANDLE SOME OTHER AUTH FORMS IN THE FUTURE ###
+        # 1. HTTP Basic
+        # 2. HTTP Digest
+        # 3. ...
 
     def check(self, instance):
-
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})
@@ -237,7 +282,6 @@ class YarnCheck(AgentCheck):
 
         # Collected by default
         app_tags['app_name'] = 'name'
-
 
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
@@ -429,7 +473,7 @@ class YarnCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, auth=requests_authentication)
             response.raise_for_status()
             response_json = response.json()
 

@@ -1,5 +1,23 @@
 init_config:
+  # Variety of HTTP and Kerberos Authentication Options
+  # NOTE: ONLY ONE WILL WORK AT A TIME.
 
+  # Kerberos Authentication Option
+  # kerberos_auth: false
+  # kerberos_user: "your_user"
+  # kerberos_realm: "YOUR.REALM"
+  # kerberos_password: "y0urp@ssword"
+  
+  # HTTP Basic Authentication Option
+  # basic_auth: false
+  # basic_user: "your_user"
+  # basic_password: "y0urp@ssword"
+  
+  # HTTP Digest Authentication Option
+  # digest_auth: false
+  # digest_user: "your_user"
+  # digest_password: "y0urp@ssword"
+   
 instances:
   # The YARN check retrieves metrics from YARNS's ResourceManager. This
   # check must be run from the Master Node and the ResourceManager URI must
