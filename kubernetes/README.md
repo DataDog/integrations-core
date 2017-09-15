@@ -78,10 +78,10 @@ The elected leader will be the only one responsible for collecting events.
 
 **This functionality is disabled by default**. 
 
-To enable it you need to set the variables `collect_events`, `leader_candidate` to true in your [kubernetes.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L89) file.
+To enable it you need to set the variables `leader_candidate` to true in your kubernetes.yaml file.
 
 Internally it uses [ConfigMaps](https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core) so you will need to get list, delete and create access to the ConfigMap resource.
-Use this Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions:
+Use this Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions buy [applying this datadog service account to your pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/).
 
 ```yaml
 kind: ClusterRole
