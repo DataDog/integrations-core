@@ -61,7 +61,7 @@ class DNSCheck(NetworkCheck):
         if nameserver is not None:
             resolver.nameservers = [nameserver]
         if nameserver_port is not None:
-            resolver.port = [port]
+            resolver.port = [nameserver_port]
 
         timeout = float(instance.get('timeout', self.default_timeout))
         resolver.lifetime = timeout
