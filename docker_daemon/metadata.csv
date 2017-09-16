@@ -59,6 +59,12 @@ docker.mem.sw_limit.avg,gauge,,byte,,Average value of docker.mem.sw_limit. Ordin
 docker.mem.sw_limit.count,rate,,sample,second,The rate that the value of docker.mem.sw_limit was sampled,0,docker,mem + sw limit count
 docker.mem.sw_limit.max,gauge,,byte,,Max value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit max
 docker.mem.sw_limit.median,gauge,,byte,,Median value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit median
+docker.mem.reservation_limit,gauge,,byte,,"The memory reservation limit for the container, if set",0,docker,mem soft limit
+docker.mem.reservation_limit.95percentile,gauge,,byte,,95th percentile of docker.mem.reservation_limit. Ordinarily this value will not change,0,docker,soft limit 95%
+docker.mem.reservation_limit.avg,gauge,,byte,,Average value of docker.mem.reservation_limit. Ordinarily this value will not change,0,docker,soft limit avg
+docker.mem.reservation_limit.count,rate,,sample,second,The rate that the value of docker.mem.reservation_limit was sampled,0,docker,soft limit count
+docker.mem.reservation_limit.max,gauge,,byte,,Max value of docker.mem.reservation_limit. Ordinarily this value will not change,0,docker,soft limit max
+docker.mem.reservation_limit.median,gauge,,byte,,Median value of docker.mem.reservation_limit. Ordinarily this value will not change,0,docker,soft limit median
 docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, if the limit is set",0,docker,mem in use
 docker.mem.in_use.95percentile,gauge,,fraction,,95th percentile of docker.mem.in_use,0,docker,mem in use 95%
 docker.mem.in_use.avg,gauge,,fraction,,Average value of docker.mem.in_use,0,docker,mem in use avg

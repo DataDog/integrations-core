@@ -70,6 +70,13 @@ CGROUP_METRICS = [
         }
     },
     {
+        "cgroup": "memory",
+        "file": "memory.soft_limit_in_bytes",
+        "metrics": {
+            "softlimit": ("docker.mem.reservation_limit", GAUGE),
+        },
+    },
+    {
         "cgroup": "cpuacct",
         "file": "cpuacct.stat",
         "metrics": {
@@ -994,6 +1001,8 @@ class DockerDaemon(AgentCheck):
                     return self._parse_blkio_metrics(fp.read().splitlines())
                 elif 'cpuacct.usage' in stat_file:
                     return dict({'usage': str(int(fp.read())/10000000)})
+                elif 'memory.soft_limit_in_bytes' in stat_file:
+                    return dict({'softlimit': int(fp.read())})
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:
