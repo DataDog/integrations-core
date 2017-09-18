@@ -14,6 +14,9 @@ The Btrfs check is packaged with the Agent, so simply [install the Agent](https:
 
 ### Configuration
 
+1. Configure the Agent according to your needs, edit `conf.d/btrfs.yaml`
+2. Restart the Agent
+
 ### Validation
 
 Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
