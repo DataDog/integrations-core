@@ -15,7 +15,6 @@ from urlparse import urlparse
 
 # 3rd party
 import requests
-import tornado
 
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
@@ -132,13 +131,19 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    CA_CERTS = [
-        '/opt/datadog-agent/embedded/ssl/certs/cacert.pem',
-        os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'),
-        '/etc/ssl/certs/ca-certificates.crt',
-    ]
+    ca_certs = ['/opt/datadog-agent/embedded/ssl/certs/cacert.pem']
 
-    for f in CA_CERTS:
+    try:
+        import tornado
+    except ImportError:
+        # if `tornado` is not present, simply ignore its certificates
+        pass
+    else:
+        ca_certs.append(os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'))
+
+    ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
+
+    for f in ca_certs:
         if os.path.exists(f):
             return f
     return None

@@ -23,6 +23,9 @@ instances:
   - server: http://localhost:5984 # or wherever your CouchDB is listening
   #user: <your_username>
   #password: <your_password>
+  #name: <A node's Erlang name> # Only for CouchDB 2.x
+  #max_nodes_per_check: If no name is specified, the agent will scan all nodes up. As that may be very long, you can limit how many to collect per check. Default: 20
+  #max_dbs_per_check. Maximum number of databases to report on. Default: 50
 ```
 
 Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
@@ -57,9 +60,11 @@ The Couch check does not include any event at this time.
 
 ### Service Checks
 
-`couchdb.can_connect`:
+`couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
-Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
+### Caveats
+
+For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
 
 ## Troubleshooting
 
