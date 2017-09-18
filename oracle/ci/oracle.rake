@@ -28,7 +28,7 @@ namespace :ci do
       sh %(#{ENV['TRAVIS_BUILD_DIR']}/oracle/ci/resources/get_instantclient.py --agree=yes)
       sh %(echo #{ENV['ORACLE_HOME']} | sudo tee /etc/ld.so.conf.d/oracle_instantclient.conf)
       sh %(sudo ldconfig)
-      if !File.exists?("#{ENV['ORACLE_HOME']}/libclntsh.so")
+      unless File.exist?("#{ENV['ORACLE_HOME']}/libclntsh.so")
         sh %(ln -s #{ENV['ORACLE_HOME']}/libclntsh.so.12.1 #{ENV['ORACLE_HOME']}/libclntsh.so)
       end
       `docker kill $(docker ps -q --filter name=#{container_name}) || true`
