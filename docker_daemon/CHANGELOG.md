@@ -1,7 +1,7 @@
 # CHANGELOG - docker_daemon
 
 
-1.4.0 / Unreleased
+1.4.0 / 2017-09-12
 ==================
 ### Changes
 
