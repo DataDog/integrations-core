@@ -62,7 +62,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_
 The DNS check does not include any event at this time.
 
 ### Service Checks
+This agent check tags all service checks it collects with:
 
+  * `nameserver:<nameserver_in_yaml>`
+  * `resolved_hostname:<hostname_in_yaml>`
+  
 `dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.
