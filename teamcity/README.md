@@ -64,7 +64,7 @@ The teamcity check is compatible with all major platforms.
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
-The Teamcity check does not include any event at this time.
+All Teamcity events are forwared to your Datadog application.
 
 ### Service Checks
 The Teamcity check does not include any service check at this time.

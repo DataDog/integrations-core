@@ -39,7 +39,7 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
 
-Restart the Agent to start sending Postfix metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Postfix metrics to Datadog.
 
 ### Validation
 
