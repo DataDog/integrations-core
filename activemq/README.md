@@ -2,35 +2,118 @@
 
 ## Overview
 
-Get metrics from activemq service in real time to:
-
-* Visualize and monitor activemq states
-* Be notified about activemq failovers and events.
+The ActiveMQ check lets you collect metrics for brokers and queues, producers and consumers, and more.
 
 ## Setup
 ### Installation
 
-Install the `dd-check-activemq` package manually or with your favorite configuration manager
+The Agent's ActiveMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your ActiveMQ nodes.
+
+The check collects metrics via JMX, so you'll need a JVM on each node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). We recommend using an Oracle-provided JVM.
 
 ### Configuration
 
-Edit the `activemq.yaml` file to point to your server and port, set the masters to monitor
+1. **Make sure that [JMX Remote is enabled](http://activemq.apache.org/jmx.html) on your ActiveMQ server.**
+2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`
+
+```
+instances:
+  - host: localhost
+    port: 7199
+    user: username
+    password: password
+    name: activemq_instance
+# List of metrics to be collected by the integration
+# You should not have to modify this.
+init_config:
+  conf:
+    - include:
+      Type: Queue
+      attribute:
+        AverageEnqueueTime:
+          alias: activemq.queue.avg_enqueue_time
+          metric_type: gauge
+        ConsumerCount:
+          alias: activemq.queue.consumer_count
+          metric_type: gauge
+        ProducerCount:
+          alias: activemq.queue.producer_count
+          metric_type: gauge
+        MaxEnqueueTime:
+          alias: activemq.queue.max_enqueue_time
+          metric_type: gauge
+        MinEnqueueTime:
+          alias: activemq.queue.min_enqueue_time
+          metric_type: gauge
+        MemoryPercentUsage:
+          alias: activemq.queue.memory_pct
+          metric_type: gauge
+        QueueSize:
+          alias: activemq.queue.size
+          metric_type: gauge
+        DequeueCount:
+          alias: activemq.queue.dequeue_count
+          metric_type: counter
+        DispatchCount:
+          alias: activemq.queue.dispatch_count
+          metric_type: counter
+        EnqueueCount:
+          alias: activemq.queue.enqueue_count
+          metric_type: counter
+        ExpiredCount:
+          alias: activemq.queue.expired_count
+          type: counter
+        InFlightCount:
+          alias: activemq.queue.in_flight_count
+          metric_type: counter
+
+    - include:
+      Type: Broker
+      attribute:
+        StorePercentUsage:
+          alias: activemq.broker.store_pct
+          metric_type: gauge
+        TempPercentUsage:
+          alias: activemq.broker.temp_pct
+          metric_type: gauge
+        MemoryPercentUsage:
+          alias: activemq.broker.memory_pct
+          metric_type: gauge
+```
+
+3. Restart the agent
+
+```bash
+sudo /etc/init.d/datadog-agent restart
+
+
+if [ $(sudo supervisorctl status | egrep "datadog-agent.*RUNNING" | wc -l) == 3 ]; \
+then echo -e "\e[0;32mAgent is running\e[0m"; \
+else echo -e "\e[031mAgent is not running\e[0m"; fi
+```
+
+{{< insert-example-links check="none" >}}
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+Run the Agent's `info` subcommand and look for `activemq` under the Checks section:
 
-    Checks
-    ======
+```
+  Checks
+  ======
+    [...]
 
-        activemq
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    activemq
+    -------
+      - instance #0 [OK]
+      - Collected 8 metrics, 0 events & 0 service checks
+
+    [...]
+```
 
 ## Compatibility
 
-The activemq check is compatible with all major platforms
+The ActiveMQ check only runs on Linux or Mac (OS X or macOS).
 
 ## Data Collected
 ### Metrics
