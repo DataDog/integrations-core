@@ -1,2 +1,2 @@
 # integration pip requirements
-supervisor==3.3.3
+cx_Oracle==6.0.1
