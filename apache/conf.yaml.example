@@ -22,3 +22,16 @@ instances:
     # the check if the time to receive the server status from the Apache server
     # exceeds the receive_timeout value (in seconds)
     # receive_timeout: 15
+logs:
+  - type: file
+    path: /var/log/apache2/access.log
+    source: apache
+    sourcecategory: http_web_access
+    service: webapp
+        
+  - type: file
+    path: /var/log/apache2/error.log
+    source: apache
+    sourcecategory: http_web_access
+    service: webapp
+        appname: apache

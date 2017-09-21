@@ -46,3 +46,8 @@ instances:
     #   - my_collection
     #   - my_other_collection
     #
+logs:
+  - type: file
+    path: /var/log/mongodb/mongodb.log
+    service: database
+    source: mongodb
