@@ -141,6 +141,6 @@ The docker_daemon check ignores them through a default exclusion list, but they 
 ### Datadog Blog
 To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
 
-### Knowledge Base 
+### Knowledge Base
 * [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
 * [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
