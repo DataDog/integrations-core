@@ -42,6 +42,8 @@ class KafkaCheck(AgentCheck):
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
+        self.context_limit = int(
+            init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
 
     def _get_highwater_offsets(self, kafka_hosts_ports):
         """
@@ -168,11 +170,11 @@ class KafkaCheck(AgentCheck):
         consumer_offsets = self._get_zk_consumer_offsets(
             zk_hosts_ports, consumer_groups, zk_prefix)
 
-        if len(consumer_offsets) > CONTEXT_UPPER_BOUND:
-            self.log.warning("Discovered %s contexts - this exceeds the maximum number of "
-                             "contexts permitted by the check. Please narrow your target by "
-                             "specifying in your YAML what consumer groups, topics and "
-                             "partitions you wish to monitor.", len(consumer_offsets))
+        if len(consumer_offsets) > self.context_limit:
+            self.warning("Discovered %s partition contexts - this exceeds the maximum "
+                         "number of contexts permitted by the check. Please narrow your "
+                         "target by specifying in your YAML what consumer groups, topics "
+                         "and partitions you wish to monitor." % len(consumer_offsets))
             return
 
         # Fetch the broker highwater offsets
@@ -187,18 +189,13 @@ class KafkaCheck(AgentCheck):
         # Report the consumer group offsets and consumer lag
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.iteritems():
             if (topic, partition) not in highwater_offsets:
-                self.log.debug("[%s] topic: %s partition: %s was not available in the broker "
-                               "- skipping consumer submission", consumer_group, topic, partition)
+                self.log.warn("[%s] topic: %s partition: %s was not available in the consumer "
+                              "- skipping consumer submission", consumer_group, topic, partition)
                 continue
 
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition,
                 'consumer_group:%s' % consumer_group]
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
-            if (topic, partition) not in highwater_offsets:
-                self.log.warn("Consumer offsets exist for topic: %s "
-                    "partition: %s but that topic partition doesn't "
-                    "actually exist in the cluster.", topic, partition)
-                continue
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
             if consumer_lag < 0:
                 # this will result in data loss, so emit an event for max visibility
