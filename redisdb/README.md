@@ -84,5 +84,4 @@ Check that the connection info in `redisdb.yaml` is correct.
 Configure a `password` in `redisdb.yaml`.
 
 ## Further Reading
-### Blog Article
 Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about how to monitor your Redis servers with Datadog.

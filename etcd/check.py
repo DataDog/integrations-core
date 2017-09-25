@@ -152,21 +152,21 @@ class Etcd(AgentCheck):
                                tags=["url:{0}".format(url)])
 
     def _get_self_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/self",  ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout)
 
     def _get_store_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/store",  ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout)
 
     def _get_leader_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/leader", ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout)
 
-    def _get_json(self, url, ssl_params, timeout):
+    def _get_json(self, url, path, ssl_params, timeout):
         try:
             certificate = None
             if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
                 certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
             verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-            r = requests.get(url, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+            r = requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

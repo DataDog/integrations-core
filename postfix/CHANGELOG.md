@@ -5,6 +5,8 @@
 
 * [IMPROVEMENT] option to run the check using postqueue -p
 
+=======
+
 1.1.0 / 2017-08-28
 ==================
 

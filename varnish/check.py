@@ -264,14 +264,37 @@ class Varnish(AgentCheck):
             ================================================================
             ----------------------------------------------------------HHH--- Happy
 
+        Example output (new output format):
+
+            Backend name                   Admin      Probe
+            boot.default                   probe      Healthy (no probe)
+            boot.backend2                  probe      Healthy 4/4
+              Current states  good:  4 threshold:  3 window:  4
+              Average response time of good probes: 0.002504
+              Oldest ================================================== Newest
+              --------------------------------------------------------------44 Good IPv4
+              --------------------------------------------------------------XX Good Xmit
+              --------------------------------------------------------------RR Good Recv
+              ------------------------------------------------------------HHHH Happy
+
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
         backend, status, message = None, None, None
         for line in output.split("\n"):
-            tokens = line.strip().split(' ')
+            # split string and remove all empty fields
+            tokens = filter(None, line.strip().split(' '))
             if len(tokens) > 0:
-                if tokens[0] == 'Backend':
+                if tokens == ['Backend', 'name', 'Admin', 'Probe']:
+                    # skip the column headers that exist in new output format
+                    next
+                elif len(tokens) >= 4 and tokens[1] == 'probe':
+                    # parse new output format
+                    # the backend name will include the vcl name
+                    # so split on first . to remove prefix
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[2].lower()
+                elif tokens[0] == 'Backend':
                     backend = tokens[1]
                     status = tokens[-1].lower()
                 elif tokens[0] == 'Current' and backend is not None:

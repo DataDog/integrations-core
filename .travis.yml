@@ -1,28 +1,22 @@
 sudo: required
-
 language: python
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $HOME/dd-agent
+    - "$HOME/.cache/pip"
+    - "$HOME/.cache/oracle"
+    - "$HOME/dd-agent"
     - vendor/cache
-
 python:
-  - "2.7"
-
+  - '2.7'
 git:
   depth: 3
-
 branches:
   only:
     - master
-
 services:
   - docker
-
 matrix:
   fast_finish: true
-
 env:
   global:
     - NOSE_FILTER="not windows and not fixme"
@@ -36,6 +30,10 @@ env:
     - EXTRAS_BRANCH=master
     - JMXFETCH_URL="https://dd-jmxfetch.s3.amazonaws.com"
     - REQ_LOCALS="$TRAVIS_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
+    - ORACLE_DIR="$HOME/.cache/oracle"
+    - ORACLE_HOME="$ORACLE_DIR/instantclient"
+    - secure: B6zL+2Zi0sjcPPSU2G0J/wxHxuQ89gA8UlrhINI13bZ6euoeMiZCr0Bhh/eXlqjezj8uawaN3ux/dQNG5/u3zMk4/HHESlaPvoxG5Gocw0nh5mhqiAuYabNDOL3YWCVw53WXpDD0f64jg6rl6be4m3gU6HYiZteKFNkC00Kndg3nL+CTSvhJVVYeLSu4R6GKdPBsKwZVSibHFg1oRnBCFHzfHoQwTxPtin6AjmKu750h0hl29sfP/vC7CErVkHtyANT/L5p6Venvz7x6gLMnx6+7vEQCAHRO1OAfzInYLHj1i8vRvKgH7QjvAJVPgToLcwxXujE5ZAEhmqdnfRf23/+7/I9Ne+l9SgOh4uRVPVe8z0Jb9fJRsw508zj1z502DBvH07Dy52JSLF9xK2zQ/5SzAUoeUre1z33WLE82KcpHGg4QJme4zXRXxVNtmdWSIa8+UT/K2M1CK30kzxHr7b7tzTK+7QBNx2mZNZUQLcHvlMTi+NGJmP212ogn+zMJ827bBZvNzLq7Rs345RAPeXja+2znfLIiguRG4wrP804hvh9fUJY0psJc85iurSW8JcGHHJwy+IUGOJYEEf55EZMaoECNiq0RU+EdABykiJiP5bAhpF530f1KfUYFX6vXVoFM4rXxDxad39+DpbQ5XRguKk+KdmUiH5Hhb7qulzU=
+    - secure: pm42Zj8DnzUkbZ9Ne+HeyUzPaFj3nVMjZ2cVvtxfx3ERfJPVeXSjZSZSNagMORYNe3VngGARCutfoedokHqXC4b21rrsqNhy43wCwdyVHQQKroAfwUAS3A9mPny58LrG8RToklvGJPwHKE8Klwg4mAehK0j3jJ7OYh9hsszK+bgF9g3ygV0ZwNS7Jej8fSfAH5WOMsqAwn57doXZcrmvgwpDJDQfQuoJdEn4aQ0TYf9dSuebS9CuWTZEzUegrbjQU/EYuL3T3QBzHsG5C0efoHNgfebfRW5PAfGjfHgzD00IdB8LWlKJGxyIk6381rWLC7rQqlkMly22vv/hL/qnnhcJmvd/CpB3OgVerIqG6NVibhmK+66wKZd2j7kj9jkUyv/hcKsm7F31cAZjzN+nm6VQasgx3LD2ENI7nwqtzRIZrrbUvvTtfkXJsw65SRShhxsLkO+Tzn5bWKaOX5gR84JGpr1IRA3JS3Yal5ZaVsZefQ4bO5Ipkd8sTR7+ozetMTPy/an5IwoaK3fMzPOz1L6YeKZakrQVX0/BjSmaKRWV9PRK6r5dBIGozepWopkxiQpTvMuDVHdYSuKSkEVPlva4U1b+WyAoFF+nebPWJjIg8TQZOyYaO5vXYI6tn7UkknMWaOKC3H61x6WxhsmoszJ+wMOSVo4kuxBNZOwRt2k=
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
@@ -47,6 +45,7 @@ env:
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
     - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
+    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
     - TRAVIS_FLAVOR=consul FLAVOR_VERSION=v0.6.4
     - TRAVIS_FLAVOR=consul FLAVOR_VERSION=0.7.2
     - TRAVIS_FLAVOR=docker_daemon
@@ -90,6 +89,7 @@ env:
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.11.8
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.10.2
     - TRAVIS_FLAVOR=openstack
+    - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
     - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=latest
@@ -107,14 +107,13 @@ env:
     - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=statsd
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
-    - TRAVIS_FLAVOR=tcp_check    
+    - TRAVIS_FLAVOR=tcp_check
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.7
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
     # END OF TRAVIS MATRIX
-
 install:
   - bundle install
   - bundle package
@@ -123,12 +122,11 @@ install:
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - bundle exec rake setup_agent_libs
-
+  - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
   - bundle exec rake requirements
-
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files
 # Since clobber only cleans the project directory,
@@ -136,6 +134,5 @@ script:
 before_cache:
   - rake clobber
   - find $HOME/.cache/pip $HOME/dd-agent -name *.pyc -delete
-
 after_script:
   - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

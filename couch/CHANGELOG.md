@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+1.1.0 / 2017-09-01
+==================
+
+### Changes
+
+* [FEATURE] adds CouchDB 2.x integration.
+
 1.0.1 / 2017-04-24
 ==================
 

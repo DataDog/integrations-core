@@ -178,5 +178,4 @@ http{
 Otherwise, review the **Configuration** section.
 
 ## Further Reading
-### Blog Article
 Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-nginx/) about how to monitor NGINX with Datadog.

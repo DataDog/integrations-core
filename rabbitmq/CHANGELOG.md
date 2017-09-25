@@ -1,10 +1,20 @@
 # CHANGELOG - rabbitmq
 
-1.2.1 / Unreleased
+
+1.3.1 / Unreleased
 ==================
 
 ### Changes
 
+* [BUGFIX] Add a key check before updating connection state metric. See [#729][]
+
+
+1.3.0 / 2017-08-28
+==================
+
+### Changes
+
+* [FEATURE] Add a metric to get the number of bindings for a queue. See [#674][]
 * [BUGFIX] Set aliveness service to CRITICAL if the rabbitmq server is down. See[#635][]
 
 1.2.0 / 2017-07-18
@@ -36,4 +46,6 @@
 [#506]: https://github.com/DataDog/integrations-core/issues/506
 [#514]: https://github.com/DataDog/integrations-core/issues/514
 [#635]: https://github.com/DataDog/integrations-core/issues/635
+[#674]: https://github.com/DataDog/integrations-core/issues/674
+[#729]: https://github.com/DataDog/integrations-core/pull/729
 [@jamescarr]: https://github.com/jamescarr
