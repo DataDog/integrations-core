@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes
 
-1.4.0 / UNRELEASED
+1.4.0 / 2017-09-12
 ==================
 ### Changes
 
