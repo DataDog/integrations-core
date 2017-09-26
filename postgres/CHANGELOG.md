@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined
+* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined See[#776][]
 
 1.1.0 / 2017-08-28
 ==================
@@ -49,5 +49,6 @@
 [#607]: https://github.com/DataDog/integrations-core/issues/607
 [#639]: https://github.com/DataDog/integrations-core/issues/639
 [#699]: https://github.com/DataDog/integrations-core/issues/699
+[#776]: https://github.com/DataDog/integrations-core/issues/776
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill
