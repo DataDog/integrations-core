@@ -1,5 +1,12 @@
 # CHANGELOG - postgres
 
+1.1.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined
+
 1.1.0 / 2017-08-28
 ==================
 

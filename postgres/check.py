@@ -606,7 +606,7 @@ SELECT s.schemaname,
                             config_schemas = relations_config[relname]['schemas']
                             if config_schemas and desc_map['schema'] not in config_schemas:
                                 continue
-                        except KeyError:
+                        except (KeyError,UnboundLocalError):
                             pass
 
                     # Build tags
