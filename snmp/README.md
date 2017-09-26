@@ -110,9 +110,7 @@ The snmp check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-The SNMP check doesn't generate any standard metrics, so [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv) is empty. 
-
-The check submits collects and submits the metrics you specify under the `snmp.*` namespace.
+The SNMP check will submits specified metrics under the `snmp.*` namespace.
 
 ### Events
 The SNMP check does not include any event at this time.
