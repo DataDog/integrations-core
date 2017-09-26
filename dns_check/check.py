@@ -91,20 +91,19 @@ class DNSCheck(NetworkCheck):
         except dns.exception.Timeout:
             tags = self._get_tags(instance)
             self.log.exception('DNS resolution of {0} timed out'.format(hostname))
-            self.gauge('DNS Resolution', 0, tags=tags) #DNS Resolved
-            return  Status.UP, 'DOWN'
+            self.gauge('DNS Resolution', 0, tags=tags) # DNS Resolved
+            return Status.UP, 'DOWN'
 
         except Exception:
             tags = self._get_tags(instance)
             self.log.exception('DNS resolution of {0} has failed.'.format(hostname))
-            self.gauge('DNS Resolution', 0, tags=tags) #DNS Not Resolving
-           
-            return  Status.UP, 'DOWN'
+            self.gauge('DNS Resolution', 0, tags=tags) # DNS Not Resolving
+            return Status.UP, 'DOWN'
 
         else:
             tags = self._get_tags(instance)
             if response_time > 0:
-                self.gauge('DNS Resolution', 1, tags=tags) #DNS Resolved
+                self.gauge('DNS Resolution', 1, tags=tags) # DNS Resolved
                 self.log.debug('Resolved hostname: {0}'.format(hostname))
             return Status.UP, 'UP'
 
