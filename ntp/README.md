@@ -2,7 +2,11 @@
 
 ## Overview
 
-Get alerts when your hosts drift out of sync with your chosen NTP server.
+The Network Time Protocol (NTP) integration is enabled by default and reports the time offset from an ntp server every 15 minutes. When the local agent's time is more than 15 seconds off from the Datadog service and the other hosts that you are monitoring, you may experience:
+
+* Incorrect alert triggers
+* Metric delays
+* Gaps in graphs of metrics
 
 ## Setup
 ### Installation
@@ -24,7 +28,14 @@ instances:
 #   timeout: 5         # seconds to wait for a response from the NTP server; default is 1
 ```
 
-Restart the Agent to effect any configuration changes.
+Configuration Options:
+
+* `host` (Optional) - Host name of alternate ntp server, for example `pool.ntp.org`
+* `port` (Optional) - What port to use
+* `version` (Optional) - ntp version
+* `timeout` (Optional) - Response timeout
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to effect any configuration changes.
 
 ### Validation
 

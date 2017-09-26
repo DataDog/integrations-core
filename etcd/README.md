@@ -52,6 +52,8 @@ The etcd check is compatible with all major platforms.
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv) for a list of metrics provided by this integration.
 
+etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
+
 ### Events
 The Etcd check does not include any event at this time.
 

@@ -12,9 +12,14 @@ Get metrics from cassandra service in real time to:
 
 The Cassandra check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Cassandra nodes.
 
+We recommend the use of Oracle's JDK for this integration. 
+
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](https://docs.datadoghq.com/integrations/java/) for more detailed instructions. If you need to monitor more metrics, please send us an email at support@datadoghq.com
+
 ### Configuration
 
-No configuration steps are required for the Cassandra check at this time
+1. Configure the Agent to connect to Cassandra, just edit `conf.d/cassandra.yaml`
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent)
 
 ### Validation
 

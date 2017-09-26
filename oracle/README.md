@@ -7,7 +7,8 @@ Get metrics from oracle service in real time to:
 * Visualize and monitor oracle states
 * Be notified about oracle failovers and events.
 
-## Installation
+## Setup
+### Installation
 
 Install the `dd-check-oracle` package manually or with your favorite configuration manager
 
@@ -20,6 +21,7 @@ unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
 unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export ORACLE_HOME=/opt/oracle/instantclient/
 ```
+
 From this point we'll need to make sure the relevant oracle libs are in the `LD_LIBRARY_PATH`:
 
 ```
@@ -32,11 +34,11 @@ That should make the oracle `instantclient` dynamic libs be reachable in the hos
 
 Please do not hesitate to contact support or open an issue should you encounter any problems.
 
-## Configuration
+### Configuration
 
 Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor
 
-## Validation
+### Validation
 
 When you run `datadog-agent info` you should see something like the following:
 
@@ -48,6 +50,39 @@ When you run `datadog-agent info` you should see something like the following:
           - instance #0 [OK]
           - Collected 18 metrics, 0 events & 1 service checks
 
-## Compatibility
+### Compatibility
 
 The oracle check is currently compatible with the linux and darwin-based OS
+
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The oracle check does not include any event at this time.
+
+### Service Checks
+The oracle check does not include any service check at this time.
+
+## Troubleshooting
+
+If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
+
+### Visit the Knowledge Base
+
+Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
+
+### Web Support
+
+Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
+
+### By Email
+
+You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
+
+### Over Slack
+
+Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

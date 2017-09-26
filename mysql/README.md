@@ -22,8 +22,19 @@ The MySQL check is included in the Datadog Agent package, so simply [install the
 On each MySQL server, create a database user for the Datadog Agent:
 
 ```
-mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<YOUR_CHOSEN_PASSWORD>';
+mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
+```
+
+Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
+
+```
+mysql -u datadog --password=<UNIQUEPASSWORD> -e "show status" | \
+grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
+echo -e "\033[0;31mCannot connect to MySQL\033[0m"
+mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
+echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 ```
 
 The Agent needs a few privileges to collect metrics. Grant its user ONLY the following privileges:
@@ -106,7 +117,7 @@ The MySQL integration is supported on versions x.x+
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this integration.
 
 The check does not collect all metrics by default. Set the following boolean configuration options to `true` to enable its metrics:
 
