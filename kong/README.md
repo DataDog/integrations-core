@@ -52,7 +52,7 @@ The kong check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Kong check does not include any event at this time.

@@ -20,7 +20,7 @@ instances:
   - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
 ```
 
-Restart the Agent to start sending Riak metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Riak metrics to Datadog.
 
 ### Validation
 

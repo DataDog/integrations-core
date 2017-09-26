@@ -4,7 +4,7 @@
 
 This check monitors the availability and uptime of non-Datadog StatsD servers. It also tracks the number of metrics, by metric type, received by StatsD.
 
-This check does NOT forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
+This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
 ## Setup
 ### Installation

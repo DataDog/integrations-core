@@ -23,9 +23,20 @@ instances:
 #   password: myredispassword                   # if your redis requires auth
 ```
 
+Configuration Options:
+
+* `unix_socket_path` - (Optional) - Can be used instead of `host` and `port`.
+* `db`, `password`, and `socket_timeout` - (Optional) - Additional connection options.
+* `warn_on_missing_keys` - (Optional) - Display a warning in the info page if the keys we're tracking are missing.
+* `slowlog-max-len` - (Optional) - Maximum number of entries to fetch from the slow query log. By default, the check will
+        read this value from the redis config. If it's above 128, it will default to 128 due to potential increased latency
+        to retrieve more than 128 slowlog entries every 15 seconds. If you need to get more entries from the slow query logs
+        set the value here. Warning: It may impact the performance of your redis instance
+* `command_stats` - (Optional) - Collect INFO COMMANDSTATS output as metrics.
+
 See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
-Restart the Agent to begin sending Redis metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending Redis metrics to Datadog.
 
 ### Validation
 
@@ -84,4 +95,4 @@ Check that the connection info in `redisdb.yaml` is correct.
 Configure a `password` in `redisdb.yaml`.
 
 ## Further Reading
-Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about how to monitor your Redis servers with Datadog.
+Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/) about how to monitor your Redis servers with Datadog. We detail the key performance metrics, how to collect them, and how to use Datadog to monitor Redis.

@@ -27,7 +27,7 @@ instances:
 #    - optional_tag
 ```
 
-Restart the Agent to begin sending memcache metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending memcache metrics to Datadog.
 
 ### Validation
 
@@ -89,5 +89,4 @@ Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.c
 
 ## Further Reading
 Read more about monitoring memcache with Datadog in [this blog post](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/), and how you can instrument Memcached performance metrics with DogStatsD [in this blog post](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)
-
-Learn how to monitor ElastiCache performance metrics with Redis or Memcached in [this blog post](https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/)
+To learn more details about the different metrics, go to [this blog entry](http://www.pal-blog.de/entwicklung/perl/memcached-statistics-stats-command.html) and learn how to monitor ElastiCache performance metrics with Redis or Memcached in [this blog post](https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/)

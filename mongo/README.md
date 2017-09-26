@@ -55,7 +55,7 @@ instances:
 
 
 
-Restart the Agent to start sending MongoDB metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending MongoDB metrics to Datadog.
 
 ### Validation
 
