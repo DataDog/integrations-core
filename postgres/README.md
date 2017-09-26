@@ -164,6 +164,6 @@ postgres
 --------
   - instance #0 [ERROR]: 'Missing relation parameter in custom metric'
   - Collected 0 metrics, 0 events & 0 service checks
-``
+```
 
 You should also check the `/var/log/datadog/collector.log` file for more information.
