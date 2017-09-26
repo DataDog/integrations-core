@@ -7,6 +7,8 @@ Capture CouchDB data in Datadog to:
 * Visualize key CouchDB metrics.
 * Correlate CouchDB performance with the rest of your applications.
 
+For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
+
 ## Setup
 ### Installation
 
@@ -61,10 +63,6 @@ The Couch check does not include any event at this time.
 ### Service Checks
 
 `couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
-
-### Caveats
-
-For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
 
 ## Troubleshooting
 

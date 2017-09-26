@@ -28,7 +28,7 @@ instances:
 #   s3_root: s3.amazonaws.com # 
 ```
 
-Restart the Agent to start sending RiakCS metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending RiakCS metrics to Datadog.
 
 ### Validation
 

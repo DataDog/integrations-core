@@ -18,15 +18,35 @@ The TokuMX check is packaged with the Agent, so simply [install the Agent](https
 ### Configuration
 #### Prepare TokuMX
 
-In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
+1.  Install the Python MongoDB module on your MongoDB server using the following command:
 
-```
-# Authenticate as the admin user.
-use admin
-db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
-# Add a user for Datadog Agent
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-```
+        sudo pip install --upgrade "pymongo<3.0"
+
+
+2.  You can verify that the module is installed using this command:
+
+        python -c "import pymongo" 2>&1 | grep ImportError && \
+        echo -e "\033[0;31mpymongo python module - Missing\033[0m" || \
+        echo -e "\033[0;32mpymongo python module - OK\033[0m"
+
+
+3.  Start the mongo shell.In it create a read-only user for the Datadog Agent in the `admin` database:
+
+        # Authenticate as the admin user.
+        use admin
+        db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
+        # Add a user for Datadog Agent
+        db.addUser("datadog", "<UNIQUEPASSWORD>", true)
+
+
+4.  Verify that you created the user with the following command (not in the mongo shell).
+
+        python -c 'from pymongo import Connection; print Connection().admin.authenticate("datadog", "<UNIQUEPASSWORD>")' | \
+        grep True && \
+        echo -e "\033[0;32mdatadog user - OK\033[0m" || \
+        echo -e "\033[0;31mdatadog user - Missing\033[0m"
+
+For more details about creating and managing users in MongoDB, refer to [the MongoDB documentation](http://www.mongodb.org/display/DOCS/Security+and+Authentication).
 
 #### Connect the Agent
 
@@ -39,7 +59,7 @@ instances:
   - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
 ```
 
-Restart the Agent to start sending TokuMX metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending TokuMX metrics to Datadog.
 
 ### Validation
 

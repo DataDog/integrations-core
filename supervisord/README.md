@@ -63,9 +63,20 @@ instances:
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
+Configuration Options
+
+* `name` (Required) - An arbitrary name to identify the supervisord server.
+* `host` (Optional) - Defaults to localhost. The host where supervisord server is running.
+* `port` (Optional) - Defaults to 9001. The port number.
+* `user` (Optional) - Username
+* `pass` (Optional) - Password
+* `proc_names` (Optional) - Dictionary of process names to monitor
+* `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
+* `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
+
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
-Restart the Agent to start sending Supervisor metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Supervisor metrics to Datadog.
 
 ### Validation
 

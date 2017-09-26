@@ -11,9 +11,21 @@ You can also create your own metrics by having the check run custom queries.
 
 The SQL Server check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your SQL Server instances. If you need the newest version of the check, install the `dd-check-sqlserver` package.
 
+Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties. 
+**Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**
+
 ### Configuration
 
-Create a file `sqlserver.yaml` in the Agent's `conf.d` directory:
+1. Create a read-only user to connect to your server:
+
+```
+CREATE LOGIN datadog WITH PASSWORD = 'YOUR_PASSWORD';
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT on sys.dm_os_performance_counters to datadog;
+GRANT VIEW SERVER STATE to datadog;
+```
+
+2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory:
 
 ```
 init_config:
@@ -28,7 +40,7 @@ instances:
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example) for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-Restart the Agent to start sending SQL Server metrics to Datadog.
+3. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending SQL Server metrics to Datadog.
 
 ### Validation
 

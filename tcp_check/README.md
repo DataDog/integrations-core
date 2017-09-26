@@ -26,7 +26,17 @@ instances:
     collect_response_time: true # to collect network.tcp.response_time. Default is false.
 ```
 
-Restart the Agent to start sending TCP service checks and response times to Datadog.
+Configuration Options
+
+* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`.
+* `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
+* `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
+* `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
+* `collect_response_time` (Optional) - Defaults to false. If this is not set to true, no response time metric will be collected. If it is set to true, the metric returned is `network.tcp.response_time`.
+* `skip_event` (Optional) - Defaults to false. Set to true to skip creating an event. This option will be removed in a future version and will default to true.
+* `tags` (Optional) - Tags to be assigned to the metric.
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending TCP service checks and response times to Datadog.
 
 ### Validation
 

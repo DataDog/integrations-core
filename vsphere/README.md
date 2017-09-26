@@ -67,48 +67,29 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/vsph
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It does NOT emit the following event types:
 
-AlarmStatusChangedEvent:Gray
-VmBeingHotMigratedEvent
-VmResumedEvent
-VmReconfiguredEvent
-VmPoweredOnEvent
-VmMigratedEvent
-TaskEvent:Initialize powering On
-TaskEvent:Power Off virtual machine
-TaskEvent:Power On virtual machine
-TaskEvent:Reconfigure virtual machine
-TaskEvent:Relocate virtual machine
-TaskEvent:Suspend virtual machine
-TaskEvent:Migrate virtual machine
-VmMessageEvent
-VmSuspendedEvent
-VmPoweredOffEvent
+* AlarmStatusChangedEvent:Gray
+* VmBeingHotMigratedEvent
+* VmResumedEvent
+* VmReconfiguredEvent
+* VmPoweredOnEvent
+* VmMigratedEvent
+* TaskEvent:Initialize powering On
+* TaskEvent:Power Off virtual machine
+* TaskEvent:Power On virtual machine
+* TaskEvent:Reconfigure virtual machine
+* TaskEvent:Relocate virtual machine
+* TaskEvent:Suspend virtual machine
+* TaskEvent:Migrate virtual machine
+* VmMessageEvent
+* VmSuspendedEvent
+* VmPoweredOffEvent
 
 ### Service Checks
 
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
-
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.
