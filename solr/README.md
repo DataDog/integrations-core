@@ -253,4 +253,27 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 `sudo /etc/init.d/datadog-agent jmx collect`
 
 ## Further Reading
+## Blog Article
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+
+## Knowledge Base
+### Parsing a string value into a number
+If your jmxfetch returns only string values like **false** and **true** and you want to transform it into a Datadog gauge metric for advanced usages. For instance if you want the following equivalence for your jmxfetch: 
+
+```
+"myJmxfetch:false" = myJmxfetch:0 
+"myJmxfetch:true" = myJmxfetch:1
+```
+
+You may use the `attribute` filter as follow:
+
+```
+...
+    attribute:
+          myJmxfetch:
+            alias: your_metric_name
+            metric_type: gauge
+            values:
+              "false": 0
+              "true": 1
+```
