@@ -13,7 +13,7 @@ The Elasticsearch check is packaged with the Datadog Agent, so simply [install t
 
 ### Configuration
 
-Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory:
+1. Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory:
 
 ```
 init_config:
@@ -29,7 +29,7 @@ If you're collecting Elasticsearch metrics from just one Datadog Agent running o
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-Restart the Agent to begin sending Elasticsearch metrics to Datadog.
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending Elasticsearch metrics to Datadog.
 
 ### Validation
 

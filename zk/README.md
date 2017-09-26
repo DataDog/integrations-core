@@ -48,7 +48,7 @@ The Zookeeper check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zookeeper/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
 The Zookeeper check does not include any event at this time.

@@ -12,7 +12,7 @@ This check collects metrics from Mesos masters for:
 And many more.
 ## Setup
 ### Installation
-
+The installation is the same on Mesos with and without DC/OS. 
 Run the docker-dd-agent container on each of your Mesos master nodes:
 
 ```
@@ -46,7 +46,7 @@ The mesos_master check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Mesos-master check does not include any event at this time.
