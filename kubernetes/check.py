@@ -264,7 +264,7 @@ class Kubernetes(AgentCheck):
         # kube_container_name is the name of the Kubernetes container resource,
         # not the name of the docker container (that's tagged as container_name)
         kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
-        tags.append(u"pod_name:{1}".format(pod_name))
+        tags.append(u"pod_name:{0}".format(pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
         tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
