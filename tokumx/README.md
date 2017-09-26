@@ -32,15 +32,14 @@ The TokuMX check is packaged with the Agent, so simply [install the Agent](https
 
 3.  Start the mongo shell.In it create a read-only user for the Datadog Agent in the `admin` database:
 
-```
-# Authenticate as the admin user.
-use admin
-db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
-# Add a user for Datadog Agent
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-```
+        # Authenticate as the admin user.
+        use admin
+        db.auth("admin", "<YOUR_TOKUMX_ADMIN_PASSWORD>")
+        # Add a user for Datadog Agent
+        db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 
-5.  Verify that you created the user with the following command (not in the mongo shell).
+
+4.  Verify that you created the user with the following command (not in the mongo shell).
 
         python -c 'from pymongo import Connection; print Connection().admin.authenticate("datadog", "<UNIQUEPASSWORD>")' | \
         grep True && \
