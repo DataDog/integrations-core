@@ -1,6 +1,12 @@
 # CHANGELOG - docker_daemon
 
 
+1.4.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Remove namespace from pod_name tag. See [#770][]
+
 1.4.0 / 2017-09-12
 ==================
 ### Changes
