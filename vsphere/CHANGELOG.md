@@ -1,5 +1,12 @@
 # CHANGELOG - vsphere
 
+1.0.4 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix a possible leak of the vSphere password in the collector logs.
+
 1.0.3 / 2017-08-28
 ==================
 
