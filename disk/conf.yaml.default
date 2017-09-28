@@ -16,9 +16,14 @@ instances:
 
     # The (optional) excluded_disks parameter will instruct the check to
     # ignore this list of disks.
+    # Linux example:
     # excluded_disks:
     #   - /dev/sda1
     #   - /dev/sda2
+    #
+    # Windows example:
+    # excluded_disks:
+    #  - F:\
     #
     # The (optional) excluded_disk_re parameter will instruct the check to
     # ignore all disks matching this regex.

@@ -33,7 +33,7 @@ Run the Agent's `info` subcommand and look for `disk` under the Checks section:
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Disk check does not include any event at this time.

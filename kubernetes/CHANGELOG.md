@@ -1,5 +1,12 @@
 # CHANGELOG - kubernetes
 
+1.5.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] remove namespace from pod_name tag. See [#770][]
+* [BUGFIX] stop reporting cAdvisor metrics about non-container objects. See [#770][]
+
 1.4.0 / 2017-09-12
 ==================
 ### Changes
