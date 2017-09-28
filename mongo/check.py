@@ -300,6 +300,8 @@ class MongoDb(AgentCheck):
         "wiredTiger.cache.maximum bytes configured": GAUGE,
         "wiredTiger.cache.maximum page size at eviction": GAUGE,
         "wiredTiger.cache.modified pages evicted": GAUGE,
+        "wiredTiger.cache.pages read into cache": GAUGE, # noqa
+        "wiredTiger.cache.pages written from cache": GAUGE, # noqa
         "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),  # noqa
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (RATE, "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum"),  # noqa
         "wiredTiger.cache.pages evicted by application threads": RATE,

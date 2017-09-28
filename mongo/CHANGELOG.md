@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.4.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][]
+
 1.3.0 / 2017-08-28
 ==================
 ### Changes
