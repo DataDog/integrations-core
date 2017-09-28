@@ -11,8 +11,8 @@ instances:
     #
     # The 'datacenter' tag should be the name of the Cassandra data center the node belongs to.
     tags:
-        environment: default_environment
-        datacenter: default_datacenter
+      environment: default_environment
+      datacenter: default_datacenter
   #   user: username
   #   password: password
   #   process_name_regex: .*process_name.* # Instead of specifying a host, and port. The agent can connect using the attach api.
@@ -133,13 +133,13 @@ init_config:
         attribute:
           - 75thPercentile
           - 95thPercentile
-        exclude:
-          keyspace:
-            - system
-            - system_auth
-            - system_distributed
-            - system_schema
-            - system_traces
+      exclude:
+        keyspace:
+          - system
+          - system_auth
+          - system_distributed
+          - system_schema
+          - system_traces
     - include:
         domain: org.apache.cassandra.metrics
         type: Table
@@ -275,10 +275,10 @@ init_config:
             alias: jmx.gc.minor_collection_time
     # Old Gen Collectors (Major collections)
     - include:
-       domain: java.lang
-       type: GarbageCollector
-       name: MarkSweepCompact
-       attribute:
+        domain: java.lang
+        type: GarbageCollector
+        name: MarkSweepCompact
+        attribute:
           CollectionCount:
             metric_type: counter
             alias: jmx.gc.major_collection_count
@@ -376,13 +376,13 @@ init_config:
         attribute:
           - 75thPercentile
           - 95thPercentile
-        exclude:
-          keyspace:
-            - system
-            - system_auth
-            - system_distributed
-            - system_schema
-            - system_traces
+      exclude:
+        keyspace:
+          - system
+          - system_auth
+          - system_distributed
+          - system_schema
+          - system_traces
     - include:
         domain: org.apache.cassandra.metrics
         type: ColumnFamily
