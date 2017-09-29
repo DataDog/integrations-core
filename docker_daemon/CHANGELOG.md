@@ -1,5 +1,9 @@
 # CHANGELOG - docker_daemon
 
+1.6.0 / Unreleased
+==================
+### Changes
+* [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 
 1.5.0 / 2017-10-10
 ==================
@@ -100,7 +104,9 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+<<<<<<< HEAD
 [#722]: https://github.com/DataDog/integrations-core/issues/722
 [#744]: https://github.com/DataDog/integrations-core/issues/744
 [#770]: https://github.com/DataDog/integrations-core/issues/770
+[#782]: https://github.com/DataDog/integrations-core/issues/782
 [@sophaskins]: https://github.com/sophaskins
