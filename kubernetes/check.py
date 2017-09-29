@@ -264,7 +264,7 @@ class Kubernetes(AgentCheck):
         # kube_container_name is the name of the Kubernetes container resource,
         # not the name of the docker container (that's tagged as container_name)
         kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
-        tags.append(u"pod_name:{0}/{1}".format(pod_namespace, pod_name))
+        tags.append(u"pod_name:{0}".format(pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
         tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
@@ -319,8 +319,8 @@ class Kubernetes(AgentCheck):
             # The first alias seems to always match the docker container name
             container_name = subcontainer['aliases'][0]
         else:
-            # We default to the container id
-            container_name = subcontainer['name']
+            self.log.debug("Subcontainer doesn't have a name, skipping.")
+            return
 
         tags.append('container_name:%s' % container_name)
 
@@ -403,6 +403,9 @@ class Kubernetes(AgentCheck):
         container_tags = {}
         for subcontainer in metrics:
             c_id = subcontainer.get('id')
+            if 'aliases' not in subcontainer:
+                # it means the subcontainer is about a higher-level entity than a container
+                continue
             try:
                 tags = self._update_container_metrics(instance, subcontainer, kube_labels)
                 if c_id:
