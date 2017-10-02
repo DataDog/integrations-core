@@ -53,7 +53,8 @@ The Windows Service check is compatible with all Windows platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv) for a list of metrics provided by this integration.
+
+The Windows Service check does not include any metrics at this time.
 
 ### Events
 The Windows Service check does not include any event at this time.

@@ -532,8 +532,8 @@ class VSphereCheck(AgentCheck):
 
             if not mor_by_mor_name:
                 self.log.warning(
-                    u"Unable to extract hosts' tags for `%s` vSphere instance."
-                    u"Is the check failing on this instance?", instance
+                    u"Unable to extract hosts' tags for vSphere instance named %s"
+                    u"Is the check failing on this instance?", i_key
                 )
                 continue
 

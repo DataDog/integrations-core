@@ -37,7 +37,7 @@ To have the check search for processes in a path other than `/proc`, set `procfs
 
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.
 
-Restart the Agent to start sending process metrics and service checks to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending process metrics and service checks to Datadog.
 
 ### Validation
 

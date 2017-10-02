@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
-from checks.wmi_check import WinWMICheck
+from checks.winwmi_check import WinWMICheck
 from utils.containers import hash_mutable
 from utils.timeout import TimeoutException
 
