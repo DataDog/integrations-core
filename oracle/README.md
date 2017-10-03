@@ -12,7 +12,7 @@ Get metrics from Oracle Database servers in real time to:
 
 Install the `dd-check-oracle` package manually or with your favorite configuration manager
 
-We cannot ship the oracle `instantclient` libraries with the agent or the standalone check due to licensing issues. Although the required `cx_Oracle` python library will be bundled, you will still need to install the `instantclient` for it to work (hard-requirement). The steps to do so would trypically be:
+We cannot ship the oracle `instantclient` libraries with the agent or the standalone check due to licensing issues. Although the required `cx_Oracle` python library will be bundled, you will still need to install the `instantclient` for it to work (hard-requirement). The steps to do so would typically be:
 
 ```
 mkdir -p /opt/oracle/ && cd /opt/oracle/
@@ -36,7 +36,7 @@ Please do not hesitate to contact support or open an issue should you encounter 
 
 ### Configuration
 
-Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor
+Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor.
 
 ### Validation
 
@@ -52,7 +52,7 @@ When you run `datadog-agent info` you should see something like the following:
 
 ### Compatibility
 
-The Oracle check is currently compatible with Linux and macOS
+The Oracle check is currently compatible with Linux and macOS.
 
 ## Data Collected
 ### Metrics
