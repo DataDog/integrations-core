@@ -32,8 +32,6 @@ sudo ldconfig
 
 That should make the Oracle `instantclient` dynamic libs be reachable in the host system `LD_LIBRARY_PATH` and the python package `cx_Oracle`.
 
-Please do not hesitate to contact support or open an issue should you encounter any problems.
-
 ### Configuration
 
 Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor.
