@@ -52,7 +52,7 @@ When you run `datadog-agent info` you should see something like the following:
 
 ### Compatibility
 
-The Oracle check is currently compatible with the Linux and macOS
+The Oracle check is currently compatible with Linux and macOS
 
 ## Data Collected
 ### Metrics
