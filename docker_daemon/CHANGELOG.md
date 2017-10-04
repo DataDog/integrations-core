@@ -1,10 +1,31 @@
 # CHANGELOG - docker_daemon
 
-1.3.1 / Unreleased
+
+1.5.0 / Unreleased
 ==================
 ### Changes
 
+* [IMPROVEMENT] Remove namespace from pod_name tag. See [#770][]
+
+1.4.0 / 2017-09-12
+==================
+### Changes
+
+* [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
+* [FEATURE] Add client-side event filtering by event type. See [#744][]
+
+1.3.2 / 2017-08-28
+==================
+### Changes
+
+* [IMPROVEMENT] Add "image_name:openshift/origin-pod" to suggested exclude list. See [#641][]
 * [BUGFIX] safely check volume list before accessing. See [#544][]
+* [BUGFIX] make it a bit safer. See [#701][]
+
+1.3.1 / 2017-07-26
+==================
+### Changes
+
 * [BUGFIX] fix event collection on ecs and nomad. See [#616][]
 
 1.3.0 / 2017-07-18
@@ -77,4 +98,6 @@
 [#544]: https://github.com/DataDog/integrations-core/issues/544
 [#553]: https://github.com/DataDog/integrations-core/issues/553
 [#616]: https://github.com/DataDog/integrations-core/issues/616
+[#641]: https://github.com/DataDog/integrations-core/issues/641
+[#701]: https://github.com/DataDog/integrations-core/issues/701
 [@sophaskins]: https://github.com/sophaskins

@@ -1,6 +1,6 @@
 # Consul Integration
 
-# Overview
+## Overview
 
 The Datadog Agent collects many metrics from Consul nodes, including those for:
 
@@ -19,13 +19,14 @@ And many more.
 
 Finally, in addition to metrics, the Datadog Agent also sends a service check for each of Consul's health checks, and an event after each new leader election.
 
-# Installation
+## Setup
+### Installation
 
 The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Consul nodes. If you need the newest version of the Consul check, install the `dd-check-consul` package; this package's check will override the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
-# Configuration
+### Configuration
 
-### Connect Datadog Agent to Consul Agent
+#### Connect Datadog Agent to Consul Agent
 
 Create a `consul.yaml` in the Datadog Agent's `conf.d` directory:
 
@@ -52,7 +53,7 @@ See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/m
 
 Restart the Agent to start sending Consul metrics to Datadog.
 
-### Connect Consul Agent to DogStatsD
+#### Connect Consul Agent to DogStatsD
 
 In the main Consul configuration file, add your `dogstatsd_addr` nested under the top-level `telemetry` key:
 
@@ -68,9 +69,9 @@ In the main Consul configuration file, add your `dogstatsd_addr` nested under th
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
-# Validation
+### Validation
 
-### Datadog Agent to Consul Agent
+#### Datadog Agent to Consul Agent
 
 Run the Agent's `info` subcommand and look for `consul` under the Checks section:
 
@@ -99,7 +100,7 @@ Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Ag
     2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/coordinate/nodes (84.95µs) from=127.0.0.1:53780
 ```
 
-### Consul Agent to DogStatsD
+#### Consul Agent to DogStatsD
 
 Use `netstat` to verify that Consul is sending its metrics, too:
 
@@ -108,11 +109,12 @@ $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 23176/consul
 ```
 
-# Compatibility
+## Compatibility
 
 The Consul check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
 
@@ -120,7 +122,13 @@ See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) fo
 
 See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coordinates.html) if you're curious about how the network latency metrics are calculated.
 
-# Service Checks
+### Events
+
+`consul.new_leader`:
+
+The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
+
+### Service Checks
 
 `consul.check`:
 
@@ -129,14 +137,27 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
-# Events
+## Troubleshooting
 
-`consul.new_leader`:
+If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
 
-The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
+### Visit the Knowledge Base
 
-# Further Reading
+Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
 
+### Web Support
+
+Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
+
+### By Email
+
+You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
+
+### Over Slack
+
+Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+
+## Further Reading
 To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
 
 * [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog) - a more in-depth explanation of Datadog-Consul integration

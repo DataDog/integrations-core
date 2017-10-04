@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-1.1.2 / Unreleased
+1.1.2 / 2017-08-28
 ==================
 
  * [IMPROVEMENT] Better logging when a process was not found. See [#609][]

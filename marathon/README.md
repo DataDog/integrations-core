@@ -1,17 +1,18 @@
 # Marathon Integration
 
-# Overview
+## Overview
 
 The Agent's Marathon check lets you:
 
 * Track the state and health of every application: see configured memory, disk, cpu, and instances; monitor the number of healthy and unhealthy tasks
 * Monitor the number of queued applications and the number of deployments
 
-# Installation
+## Setup
+### Installation
 
 The Marathon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Marathon master. If you need the newest version of the check, install the `dd-check-marathon` package.
 
-# Configuration
+### Configuration
 
 Create a file `marathon.yaml` in the Agent's `conf.d` directory:
 
@@ -30,7 +31,7 @@ The function of `user` and `password` depends on whether or not you configure `a
 
 Restart the Agent to begin sending Marathon metrics to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `marathon` under the Checks section:
 
@@ -47,16 +48,42 @@ Run the Agent's `info` subcommand and look for `marathon` under the Checks secti
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The marathon check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this integration.
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this check.
+### Events
+The Marathon check does not include any event at this time.
 
-# Service Checks
+### Service Checks
 
 `marathon.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to the Marathon API to collect metrics, otherwise OK.
+
+## Troubleshooting
+
+If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
+
+### Visit the Knowledge Base
+
+Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
+
+### Web Support
+
+Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
+
+### By Email
+
+You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
+
+### Over Slack
+
+Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

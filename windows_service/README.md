@@ -1,14 +1,15 @@
 # Agent Check: Windows Service
 
-# Overview
+## Overview
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
-# Installation
+## Setup
+### Installation
 
 The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
-# Configuration
+### Configuration
 
 Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
 
@@ -29,7 +30,7 @@ You must provide service names as they appear in services.msc's properties field
 
 Restart the Agent to start monitoring the services and sending service checks to Datadog.
 
-# Validation
+### Validation
 
 See the info page in the Agent Manager and look for `windows_service` under the Checks section:
 
@@ -46,12 +47,19 @@ See the info page in the Agent Manager and look for `windows_service` under the 
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The Windows Service check is compatible with all Windows platforms.
 
-# Service Checks
+## Data Collected
+### Metrics
 
+The Windows Service check does not include any metrics at this time.
+
+### Events
+The Windows Service check does not include any event at this time.
+
+### Service Checks
 **windows_service.state**:
 
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
@@ -67,6 +75,25 @@ The Agent submits this service check for each Windows service configured in `ser
 |Paused|WARNING|
 |Unknown|UNKNOWN|
 
-# Further Reading
+## Troubleshooting
 
+If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
+
+### Visit the Knowledge Base
+
+Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
+
+### Web Support
+
+Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
+
+### By Email
+
+You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
+
+### Over Slack
+
+Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+
+## Further Reading
 See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.

@@ -25,6 +25,9 @@ mesos.cluster.slaves_inactive,gauge,,,,Number of inactive slaves,0,mesos,inactiv
 mesos.cluster.cpus_percent,gauge,,percent,,Percentage of allocated CPUs,0,mesos,cpus percent
 mesos.cluster.cpus_used,gauge,,,,Number of allocated CPUs,0,mesos,cpus used
 mesos.cluster.cpus_total,gauge,,,,Number of CPUs,1,mesos,cpus total
+mesos.cluster.gpus_percent,gauge,,percent,,Percentage of allocated GPUs,0,mesos,gpus percent
+mesos.cluster.gpus_used,gauge,,,,Number of allocated GPUs,0,mesos,gpus used
+mesos.cluster.gpus_total,gauge,,,,Number of GPUs,1,mesos,gpus total
 mesos.cluster.disk_percent,gauge,,percent,,Percentage of allocated disk space,-1,mesos,disk percent
 mesos.cluster.disk_used,gauge,,mebibyte,,Allocated disk space,-1,mesos,disk used
 mesos.cluster.disk_total,gauge,,mebibyte,,Disk space,1,mesos,disk total

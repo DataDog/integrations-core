@@ -2,8 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+from collections import defaultdict
+
 from checks import CheckException
 from checks.prometheus_check import PrometheusCheck
+
 
 METRIC_TYPES = ['counter', 'gauge']
 
@@ -113,9 +117,7 @@ class KubernetesState(PrometheusCheck):
             'kube_job_spec_parallelism',
             'kube_job_status_active',
             'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
-            'kube_job_status_failed',     # Container number gauge, redundant with job-global kube_job_failed
             'kube_job_status_start_time',
-            'kube_job_status_succeeded',  # Container number gauge, redundant with job-global kube_job_complete
 
         ]
 
@@ -124,6 +126,12 @@ class KubernetesState(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
 
+        if 'labels_mapper' in instance:
+            if isinstance(instance['labels_mapper'], dict):
+                self.labels_mapper = instance['labels_mapper']
+            else:
+                self.log.warning("labels_mapper should be a dictionnary")
+
         send_buckets = instance.get('send_histograms_buckets', True)
         # By default we send the buckets.
         if send_buckets is not None and str(send_buckets).lower() == 'false':
@@ -131,7 +139,17 @@ class KubernetesState(PrometheusCheck):
         else:
             send_buckets = True
 
+        # Job counters are monotonic: they increase at every run of the job
+        # We want to send the delta via the `monotonic_count` method
+        self.job_succeeded_count = defaultdict(int)
+        self.job_failed_count = defaultdict(int)
+
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+
+        for job_tags, job_count in self.job_succeeded_count.iteritems():
+            self.monotonic_count(self.NAMESPACE + '.job.succeeded', job_count, list(job_tags))
+        for job_tags, job_count in self.job_failed_count.iteritems():
+            self.monotonic_count(self.NAMESPACE + '.job.failed', job_count, list(job_tags))
 
     def _condition_to_service_check(self, metric, sc_name, mapping, tags=None):
         """
@@ -169,6 +187,13 @@ class KubernetesState(PrometheusCheck):
                 return label.value
         return None
 
+    def _format_tag(self, name, value):
+        """
+        Lookups the labels_mapper table to see if replacing the tag name is
+        necessary, then returns a "name:value" tag string
+        """
+        return '%s:%s' % (self.labels_mapper.get(name, name), value)
+
     def _label_to_tag(self, name, labels, tag_name=None):
         """
         Search for `name` in labels name and returns corresponding tag string.
@@ -177,9 +202,16 @@ class KubernetesState(PrometheusCheck):
         """
         value = self._extract_label_value(name, labels)
         if value:
-            return '%s:%s' % (tag_name or name, value)
+            return self._format_tag(tag_name or name, value)
         else:
             return None
+
+    def _trim_job_tag(self, name):
+        """
+        Trims suffix of job names if they match -(\d{4,10}$)
+        """
+        pattern = "(-\d{4,10}$)"
+        return re.sub(pattern, '', name)
 
     # Labels attached: namespace, pod, phase=Pending|Running|Succeeded|Failed|Unknown
     # The phase gets not passed through; rather, it becomes the service check suffix.
@@ -194,7 +226,7 @@ class KubernetesState(PrometheusCheck):
                 if label.name == 'phase':
                     phase = label.value.lower()
                 else:
-                    tags.append('{}:{}'.format(label.name, label.value))
+                    tags.append(self._format_tag(label.name, label.value))
             #TODO: add deployment/replicaset?
             status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
             self.service_check(check_basename + phase, status, tags=tags)
@@ -204,7 +236,11 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_failed(self, message, **kwargs):
@@ -212,8 +248,35 @@ class KubernetesState(PrometheusCheck):
         for metric in message.metric:
             tags = []
             for label in metric.label:
-                tags.append('{}:{}'.format(label.name, label.value))
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
             self.service_check(service_check_name, self.CRITICAL, tags=tags)
+
+    def kube_job_status_failed(self, message, **kwargs):
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
+            self.job_failed_count[frozenset(tags)] += metric.gauge.value
+
+
+    def kube_job_status_succeeded(self, message, **kwargs):
+        for metric in message.metric:
+            tags = []
+            for label in metric.label:
+                if label.name == 'job':
+                    trimmed_job = self._trim_job_tag(label.value)
+                    tags.append(self._format_tag(label.name, trimmed_job))
+                else:
+                    tags.append(self._format_tag(label.name, label.value))
+            self.job_succeeded_count[frozenset(tags)] += metric.gauge.value
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node. """
@@ -256,9 +319,9 @@ class KubernetesState(PrometheusCheck):
         statuses = ('schedulable', 'unschedulable')
         if message.type < len(METRIC_TYPES):
             for metric in message.metric:
-                tags = ['{}:{}'.format(label.name, label.value) for label in metric.label]
+                tags = [self._format_tag(label.name, label.value) for label in metric.label]
                 status = statuses[int(getattr(metric, METRIC_TYPES[message.type]).value)]  # value can be 0 or 1
-                tags.append('status:{}'.format(status))
+                tags.append(self._format_tag('status', status))
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))

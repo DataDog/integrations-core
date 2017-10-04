@@ -1,5 +1,19 @@
 # CHANGELOG - vsphere
 
+1.0.4 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix a possible leak of the vSphere password in the collector logs.
+
+1.0.3 / 2017-08-28
+==================
+
+### Changes
+
+* [BUGFIX] Fix case where metrics metadata don't contain what we expect.
+
 1.0.2 / 2017-07-18
 ==================
 

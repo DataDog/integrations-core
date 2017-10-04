@@ -88,6 +88,7 @@ COMMON_METRICS = [
 
 Q_METRICS = [
     'consumers',
+    'bindings.count',
     'memory',
     'messages',
     'messages.rate',
@@ -227,6 +228,25 @@ class TestRabbitMQ(AgentCheckTest):
         sc = self.service_checks[0]
         self.assertEqual(sc['check'], 'rabbitmq.status')
         self.assertEqual(sc['status'], AgentCheck.CRITICAL)
+
+        # test aliveness service_checks on server down
+        self.check.cached_vhosts = {"http://example.com/": ["vhost1", "vhost2"]}
+        self.run_check({"instances": [{"rabbitmq_api_url": "http://example.com"}]})
+        self.assertEqual(len(self.service_checks), 3)
+        sc = self.service_checks[0]
+        self.assertEqual(sc['check'], 'rabbitmq.status')
+        self.assertEqual(sc['status'], AgentCheck.CRITICAL)
+
+        sc = self.service_checks[1]
+        self.assertEqual(sc['check'], 'rabbitmq.aliveness')
+        self.assertEqual(sc['status'], AgentCheck.CRITICAL)
+        self.assertEqual(sc['tags'], [u'vhost:vhost1'])
+
+        sc = self.service_checks[2]
+        self.assertEqual(sc['check'], 'rabbitmq.aliveness')
+        self.assertEqual(sc['status'], AgentCheck.CRITICAL)
+        self.assertEqual(sc['tags'], [u'vhost:vhost2'])
+
 
         self.check._get_data = mock.MagicMock()
         self.run_check({"instances": [{"rabbitmq_api_url": "http://example.com"}]})

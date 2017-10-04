@@ -20,6 +20,22 @@ init_config:
   # tls_cacert: /path/to/ca.pem
   # tls_verify: True
 
+  # Initialization retries
+  #
+  # if the agent is expected to start before Docker,
+  # use these settings to configure the retry policy.
+  #
+  # init_retry_interval defines how long (in seconds) the docker client
+  # will wait before retrying initialization.
+  # Defaults to 0.
+  #
+  # init_retry_interval: 20
+  #
+  # init_retries configures how many retries are made before failing permanently.
+  # Defaults to 0.
+  #
+  # init_retries: 5
+
 instances:
   - ## Daemon and system configuration
     ##
@@ -36,6 +52,14 @@ instances:
     # Defaults to true.
     #
     # collect_events: false
+
+    # By default we do not collect events with a status ['top', 'exec_start', 'exec_create'].
+    # Here can be added additional statuses to be filtered. 
+    # List of available statuses can be found here https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # filtered_event_types:
+    #    - 'top'
+    #    - 'exec_start'
+    #    - 'exec_create'
 
     # Collect disk usage per container with docker.container.size_rw and
     # docker.container.size_rootfs metrics.
@@ -117,7 +141,7 @@ instances:
     # include: ["docker_image:ubuntu", "docker_image:debian"]
     #
     # include all, except ubuntu and Kubernetes pause containers.
-    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*"]
+    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*", "image_name:openshift/origin-pod"]
     # include: []
     #
     # Default: include all containers except for Kubernetes pause containers.
@@ -166,9 +190,9 @@ instances:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
     # List of docker event attributes to add as tags of the datadog events
     # Defaults to None.
-    # 
+    #
     # event_attributes_as_tags: ["signal"]
-    
+
     ## Rate Filtering
     ##
 

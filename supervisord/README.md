@@ -1,20 +1,19 @@
 # Agent Check: Supervisor
 
-# Overview
+## Overview
 
 This check monitors the uptime, status, and number of processes running under supervisord.
 
-# Installation
+## Setup
+### Installation
 
 The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes. If you need the newest version of the check, install the `dd-check-supervisord` package.
 
-# Configuration
-
-## Prepare supervisord
+### Configuration
+#### Prepare supervisord
 
 The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
-
-### HTTP server
+##### HTTP server
 
 Add a block like this to supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
 
@@ -25,7 +24,7 @@ username=user  # optional
 password=pass  # optional
 ```
 
-### UNIX socket 
+##### UNIX socket 
 
 Add blocks like these to `/etc/supervisor.conf` (if they're not already there):
 
@@ -44,7 +43,7 @@ If supervisor is running as root, make sure `chmod` is set so that non-root user
 
 Reload supervisord.
 
-## Connect the Agent
+#### Connect the Agent
 
 Create a file `supervisord.yaml` in the Agent's `conf.d` directory:
 
@@ -64,11 +63,22 @@ instances:
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
+Configuration Options
+
+* `name` (Required) - An arbitrary name to identify the supervisord server.
+* `host` (Optional) - Defaults to localhost. The host where supervisord server is running.
+* `port` (Optional) - Defaults to 9001. The port number.
+* `user` (Optional) - Username
+* `pass` (Optional) - Password
+* `proc_names` (Optional) - Dictionary of process names to monitor
+* `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
+* `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
+
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
-Restart the Agent to start sending Supervisor metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Supervisor metrics to Datadog.
 
-# Validation
+### Validation
 
 Run the Agent's `info` subcommand and look for `supervisord` under the Checks section:
 
@@ -85,15 +95,19 @@ Run the Agent's `info` subcommand and look for `supervisord` under the Checks se
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The supervisord check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+### Events
+The Supervisord check does not include any event at this time.
+
+### Service Checks
 
 **supervisord.can_connect**:
 
@@ -106,16 +120,35 @@ The Agent submits this service check for all child processes of supervisord (if 
 This table shows the `supervisord.process.status` that results from each supervisord status:
 
 |supervisord status|supervisord.process.status|
-|---
-|STOPPED|CRITICAL
-|STARTING|UNKNOWN
-|RUNNING|OK
-|BACKOFF|CRITICAL
-|STOPPING|CRITICAL
-|EXITED|CRITICAL
-|FATAL|CRITICAL
-|UNKNOWN|UNKNOWN
+|---|---|
+|STOPPED|CRITICAL|
+|STARTING|UNKNOWN|
+|RUNNING|OK|
+|BACKOFF|CRITICAL|
+|STOPPING|CRITICAL|
+|EXITED|CRITICAL|
+|FATAL|CRITICAL|
+|UNKNOWN|UNKNOWN|
 
-# Further Reading
+## Troubleshooting
 
+If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
+
+### Visit the Knowledge Base
+
+Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
+
+### Web Support
+
+Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
+
+### By Email
+
+You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
+
+### Over Slack
+
+Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+
+## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/) about monitoring Supervisor with Datadog.
