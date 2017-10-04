@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def sqlserver_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '2017-latest'
 end
 
 container_repo = "microsoft/mssql-server-linux:#{sqlserver_version}"
