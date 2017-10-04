@@ -1,6 +1,8 @@
 # Package checks as Python wheels
 - Authors: Massimiliano Pippi
 - Date: 2017-06-08
+- Discussion: https://github.com/DataDog/integrations-core/pull/634
+- Status: accepted
 
 ## Overview
 
