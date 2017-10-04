@@ -2,7 +2,7 @@
 
 ## Overview
 
-nfsiostat-sysstat is a tool that gets metrics from NFS mounts. This check grabs these metrics.
+nfsiostat is a tool that gets metrics from NFS mounts. This check grabs these metrics.
 
 ## Setup
 ### Installation
@@ -11,7 +11,7 @@ Install the `dd-check-nfsstat` package manually or with your favorite configurat
 
 ### Configuration
 
-Edit the `nfsstat.yaml` file to point to your server and port, set the masters to monitor
+Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use the one included with the binary installer.
 
 ### Validation
 

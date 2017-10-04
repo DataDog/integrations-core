@@ -1,10 +1,17 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.nfs.read_per_sec,gauge,,byte,second,Number of bytes read by applications via the read(2) system call interface,0,nfsstat,reads per sec
-system.nfs.writes_per_sec,gauge,,byte,second,Number of bytes written by applications via the write(2) system call interface,0,nfsstat,writes per sec
-system.nfs.read_direct_per_sec,gauge,,byte,second,Number of bytes read from files opened with the O_DIRECT flag,0,nfsstat,direct reads per sec
-system.nfs.writes_direct_per_sec,gauge,,byte,second,Number of bytes written to files opened with the O_DIRECT flag,0,nfsstat,direct writes per sec
-system.nfs.read_from_server_per_sec,gauge,,byte,second,Number of bytes read from the server by the NFS client via an NFS READ request,0,nfsstat,server reads per sec
-system.nfs.written_to_server_per_sec,gauge,,byte,second,Number of bytes written to the server by the NFS client via an NFS WRITE request,0,nfsstat,server writes per sec
-system.nfs.ops_per_sec,gauge,,operation,second,Number of operations that were issued to the filesystem per second,0,nfsstat,ops per sec
-system.nfs.read_ops_per_sec,gauge,,operation,second,Number of 'read' operations that were issued to the filesystem per second,0,nfsstat,read ops per sec
-system.nfs.write_ops_per_sec,gauge,,operation,second,Number of 'write' operations that were issued to the filesystem per second,0,nfsstat,write ops per sec
+system.nfs.ops,gauge,,operation,second,operations per second,0,nfsstat,ops per sec
+system.nfs.rpc_bklog,gauge,,item,,length of the backlog queue,0,nfsstat,rpc backlog
+system.nfs.read_per_op,gauge,,byte,operation,this is the number of kB read per operation,0,nfsstat,read per operation
+system.nfs.read.ops,gauge,,operation,second,this is the number of read operations per second,0,nfsstat,operations per sec
+system.nfs.read_per_s,gauge,,byte,second,this is the number of kB read per second,0,nfsstat,reads per sec
+system.nfs.read.retrans,gauge,,operation,,this is the number of retransmissions in read operations,-1,nfsstat,read retransmissions
+system.nfs.read.retrans.pct,gauge,,percent,,this is the percent of retransmissions in read operations,-1,nfsstat,read percent retransmissions
+system.nfs.read.rtt,gauge,,millisecond,read operation round trip time,-1,nfsstat,read round trip time
+system.nfs.read.exe,gauge,,millisecond,this is the time between making a read rpc request and the request being completed,,-1,nfsstat,read execution time
+system.nfs.write_per_op,gauge,,byte,operation,this is the number of kB written per operation
+system.nfs.write.ops,gauge,,operation,second,this is the number of write operations per second
+system.nfs.write_per_s,gauge,,byte,second,this is the number of kB written per second
+system.nfs.write.retrans,gauge,,operation,,this is the number of retransmissions in write operations,-1,nfsstat,retransmissions
+system.nfs.write.retrans.pct,gauge,,percent,,this is the percent of retransmissions in write operations,-1,nfsstat,percent retransmissions
+system.nfs.write.rtt,gauge,,millisecond,,write operation round trip time,-1,nfsstat,write round trip time
+system.nfs.write.exe,gauge,,millisecond,,this is the time between making a write rpc request and the request being completed,,-1,nfsstat,write execution time
