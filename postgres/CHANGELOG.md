@@ -1,5 +1,12 @@
 # CHANGELOG - postgres
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Adding an option to include the default 'postgres' database when gathering stats [#740][]
+
 1.1.0 / 2017-08-28
 ==================
 
@@ -7,7 +14,6 @@
 
 * [IMPROVEMENT] Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639][] and [#699][], thanks to [@Erouan50][]
 * [MINOR] Allow specifying postgres port as string. See [#607][], thanks [@infothrill][]
-* [IMPROVEMENT] Add option for including the default database 'postgres' when gathering stats [#740][]
 
 1.0.3 / 2017-07-18
 ==================
