@@ -1,5 +1,12 @@
 # CHANGELOG - disk
 
+1.0.2 / Unreleased
+==================
+
+### Changes
+
+* [BUG] Skip now works with NFS secure mounts too. See #484.
+
 1.0.1 / 2017-07-18
 ==================
 
