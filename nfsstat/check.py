@@ -84,8 +84,6 @@ class Device(object):
         self.read_ops = float(read_data[0])
         self.read_kb_per_s = float(read_data[1])
         self.read_kb_per_op = float(read_data[2])
-        self.read_b_per_s = self.read_kb_per_s * 1000
-        self.read_b_per_op = self.read_kb_per_op * 1000
         self.read_retrans = float(read_data[3])
         self.read_retrans_pct = read_data[4].strip('(').strip(')').strip('%')
         self.read_retrans_pct = float(self.read_retrans_pct)
@@ -97,8 +95,6 @@ class Device(object):
         self.write_ops = float(write_data[0])
         self.write_kb_per_s = float(write_data[1])
         self.write_kb_per_op = float(write_data[2])
-        self.write_b_per_s = self.write_kb_per_s * 1000
-        self.write_b_per_op = self.write_kb_per_op * 1000
         self.write_retrans = float(write_data[3])
         self.write_retrans_pct = write_data[4].strip('(').strip(')').strip('%')
         self.write_retrans_pct = float(self.write_retrans_pct)
@@ -118,8 +114,8 @@ class Device(object):
 
         read_metric_prefix = metric_prefix + 'read'
         gauge(read_metric_prefix + '.ops', self.read_ops, tags=self.tags)
-        gauge(read_metric_prefix + '_per_op', self.read_b_per_op, tags=self.tags)
-        gauge(read_metric_prefix + '_per_s', self.read_b_per_s, tags=self.tags)
+        gauge(read_metric_prefix + '_per_op', self.read_kb_per_op, tags=self.tags)
+        gauge(read_metric_prefix + '_per_s', self.read_kb_per_s, tags=self.tags)
         gauge(read_metric_prefix + '.retrans', self.read_retrans, tags=self.tags)
         gauge(read_metric_prefix + '.retrans.pct', self.read_retrans_pct, tags=self.tags)
         gauge(read_metric_prefix + '.rtt', self.read_avg_rtt, tags=self.tags)
@@ -127,8 +123,8 @@ class Device(object):
 
         write_metric_prefix = metric_prefix + 'write'
         gauge(write_metric_prefix + '.ops', self.write_ops, tags=self.tags)
-        gauge(write_metric_prefix + '_per_op', self.write_b_per_op, tags=self.tags)
-        gauge(write_metric_prefix + '_per_s', self.write_b_per_s, tags=self.tags)
+        gauge(write_metric_prefix + '_per_op', self.write_kb_per_op, tags=self.tags)
+        gauge(write_metric_prefix + '_per_s', self.write_kb_per_s, tags=self.tags)
         gauge(write_metric_prefix + '.retrans', self.write_retrans, tags=self.tags)
         gauge(write_metric_prefix + '.retrans.pct', self.write_retrans_pct, tags=self.tags)
         gauge(write_metric_prefix + '.rtt', self.write_avg_rtt, tags=self.tags)
