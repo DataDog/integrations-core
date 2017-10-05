@@ -67,37 +67,29 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/vsph
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It does NOT emit the following event types:
 
-AlarmStatusChangedEvent:Gray
-VmBeingHotMigratedEvent
-VmResumedEvent
-VmReconfiguredEvent
-VmPoweredOnEvent
-VmMigratedEvent
-TaskEvent:Initialize powering On
-TaskEvent:Power Off virtual machine
-TaskEvent:Power On virtual machine
-TaskEvent:Reconfigure virtual machine
-TaskEvent:Relocate virtual machine
-TaskEvent:Suspend virtual machine
-TaskEvent:Migrate virtual machine
-VmMessageEvent
-VmSuspendedEvent
-VmPoweredOffEvent
+* AlarmStatusChangedEvent:Gray
+* VmBeingHotMigratedEvent
+* VmResumedEvent
+* VmReconfiguredEvent
+* VmPoweredOnEvent
+* VmMigratedEvent
+* TaskEvent:Initialize powering On
+* TaskEvent:Power Off virtual machine
+* TaskEvent:Power On virtual machine
+* TaskEvent:Reconfigure virtual machine
+* TaskEvent:Relocate virtual machine
+* TaskEvent:Suspend virtual machine
+* TaskEvent:Migrate virtual machine
+* VmMessageEvent
+* VmSuspendedEvent
+* VmPoweredOffEvent
 
 ### Service Checks
 
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
-
 ## Troubleshooting
-### How should the Datadog Agent be set up with vCenter and ESX?
-
-{{< img src="integrations/vmware/vmware_agent.png" >}}
-
-### How will a VMware integration impact my monthly billing?
-
-The base pricing is $15 per virtual machine per month. For general info on Datadog pricing, please visit our [Billing FAQ][4] page.
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

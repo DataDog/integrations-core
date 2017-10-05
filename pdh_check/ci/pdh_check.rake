@@ -1,42 +1,41 @@
 require 'ci/common'
 
-def sqlserver_version
-  ENV['FLAVOR_VERSION'] || '2017-latest'
+def pdh_check_version
+  ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-container_repo = "microsoft/mssql-server-linux:#{sqlserver_version}"
-container_name = 'dd-test-sqlserver'
-container_port = 1443
-sqlserver_sa_pass = 'dd-ci'
+def pdh_check_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/pdh_check_#{pdh_check_version}"
+end
 
 namespace :ci do
-  namespace :sqlserver do |flavor|
+  namespace :pdh_check do |flavor|
     task before_install: ['ci:common:before_install']
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('sqlserver')
-
-      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
-           --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
+      Rake::Task['ci:common:install'].invoke('pdh_check')
+      # sample docker usage
+      # sh %(docker create -p XXX:YYY --name pdh_check source/pdh_check:pdh_check_version)
+      # sh %(docker start pdh_check)
     end
 
     task before_script: ['ci:common:before_script']
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'sqlserver'
+        'pdh_check'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup'] do
-      unless Gem.win_platform?
-        sh %(docker stop #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
-        sh %(docker rm #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
-      end
-    end
+    task cleanup: ['ci:common:cleanup']
+    # sample cleanup task
+    # task cleanup: ['ci:common:cleanup'] do
+    #   sh %(docker stop pdh_check)
+    #   sh %(docker rm pdh_check)
+    # end
 
     task :execute do
       exception = nil
