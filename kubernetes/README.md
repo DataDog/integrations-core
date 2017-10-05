@@ -27,7 +27,7 @@ To enable leader election you need to set the variable `leader_candidate` to tru
 
 This feature relies on [ConfigMaps](https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core) , so you will need to grant Datadog Agent get, list, delete and create access to the ConfigMap resource.
 
-Use this Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions buy [applying this datadog service account to your pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/).
+Use these Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions by [applying this datadog service account to your pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/).
 
 ```yaml
 kind: ClusterRole
