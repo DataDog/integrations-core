@@ -54,7 +54,7 @@ The kyototycoon check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-The Kyototycoon check does not include any metric at this time.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
 The Kyototycoon check does not include any event at this time.
