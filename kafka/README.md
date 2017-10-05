@@ -97,4 +97,7 @@ If you're running Java based Producers and Consumers, uncomment this section of 
 If you are using custom Producer and Consumer clients that are not written in Java and/or not exposing mBeans, having this enabled would still collect zero metrics. To still submit your metrics from your code use [dogstatsd](https://docs.datadoghq.com/guides/dogstatsd/).
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Kafka performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.
+
+* [Monitoring Kafka performance metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/)
+* [Collecting Kafka performance metrics](https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/)
+* [Monitoring Kafka with Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)

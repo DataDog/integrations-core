@@ -89,7 +89,9 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
+
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.
