@@ -14,7 +14,7 @@ from tests.checks.common import AgentCheckTest, Fixtures
 metrics = [
     'system.nfs.ops',
     'system.nfs.rpc_bklog',
-    'system.nfs.read_per_op,
+    'system.nfs.read_per_op',
     'system.nfs.read.ops',
     'system.nfs.read_per_s',
     'system.nfs.read.retrans',
