@@ -85,7 +85,7 @@ class Device(object):
         self.read_kb_per_s = float(read_data[1])
         self.read_kb_per_op = float(read_data[2])
         self.read_b_per_s = self.read_kb_per_s * 1000
-        self.read_b_per_op = self.read_kb * 1000
+        self.read_b_per_op = self.read_kb_per_op * 1000
         self.read_retrans = float(read_data[3])
         self.read_retrans_pct = read_data[4].strip('(').strip(')').strip('%')
         self.read_retrans_pct = float(self.read_retrans_pct)
@@ -98,7 +98,7 @@ class Device(object):
         self.write_kb_per_s = float(write_data[1])
         self.write_kb_per_op = float(write_data[2])
         self.write_b_per_s = self.write_kb_per_s * 1000
-        self.write_b_per_op = self.write_kb * 1000
+        self.write_b_per_op = self.write_kb_per_op * 1000
         self.write_retrans = float(write_data[3])
         self.write_retrans_pct = write_data[4].strip('(').strip(')').strip('%')
         self.write_retrans_pct = float(self.write_retrans_pct)
