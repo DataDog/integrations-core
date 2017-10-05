@@ -23,6 +23,11 @@ container_port_8080 = 80_80
 namespace :ci do
   namespace :oracle do |flavor|
     task before_install: ['ci:common:before_install'] do
+      puts ENV
+      puts ENV["ORACLE_USER"][0...3]
+      puts ENV["ORACLE_USER"][3...100000]
+      puts ENV["ORACLE_PASS"][0...3]
+      puts ENV["ORACLE_PASS"][3...100000]
       sh %(pip install pexpect==4.2.1)
       sh %(mkdir -p #{ENV['ORACLE_DIR']})
       sh %(#{ENV['TRAVIS_BUILD_DIR']}/oracle/ci/resources/get_instantclient.py --agree=yes)
