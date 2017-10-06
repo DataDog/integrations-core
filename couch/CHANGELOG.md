@@ -1,6 +1,13 @@
 # CHANGELOG - couch
 
-1.1.0 / 2017-09-01
+2.1.0 / 2017-10-5
+=================
+
+### Changes
+
+* [FEATURE] collects Erlang VM stats from the `_system` endpoint.
+
+2.0.0 / 2017-09-01
 ==================
 
 ### Changes
