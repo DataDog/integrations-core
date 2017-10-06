@@ -304,7 +304,7 @@ class Varnish(AgentCheck):
                         # If we can't parse a message still send a status.
                         self.log.exception('Error when parsing message from varnishadm')
                         message = ''
-                    backends_by_status[status].append((backend, message))
+                backends_by_status[status].append((backend, message))
 
         for status, backends in backends_by_status.iteritems():
             check_status = BackendStatus.to_check_status(status)
