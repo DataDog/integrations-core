@@ -2,8 +2,7 @@
 
 ## Overview
 
-Get metrics from Oracle Database servers in real time to:
-* Visualize and monitor your Oracle Database's availability and performance metrics.
+Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance metrics.
 
 ## Setup
 ### Installation
@@ -20,15 +19,13 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export ORACLE_HOME=/opt/oracle/instantclient/
 ```
 
-From this point we'll need to make sure the relevant Oracle libraries are in the `LD_LIBRARY_PATH`:
+From this point we'll need to ensure that relevant Oracle libraries are in the `LD_LIBRARY_PATH`:
 
 ```
 if [ ! -e $ORACLE_HOME/libclntsh.so ]; then ln -s $ORACLE_HOME/libclntsh.so.12.1 $ORACLE_HOME/libclntsh.so; fi
 echo "$ORACLE_HOME" | sudo tee /etc/ld.so.conf.d/oracle_instantclient.conf
 sudo ldconfig
 ```
-
-That should make the Oracle `instantclient` dynamic libs be reachable in the host system `LD_LIBRARY_PATH` and the python package `cx_Oracle`.
 
 ### Configuration
 
