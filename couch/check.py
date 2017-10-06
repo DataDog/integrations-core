@@ -214,6 +214,17 @@ class CouchDB2:
             else:
                 self.gauge("{0}.{1}".format(prefix, key), value, tags)
 
+    def _build_active_tasks_metrics(self, data, tags, prefix = 'couchdb.active_tasks'):
+        for task in data:
+            if task['type'] == 'replication':
+                rtags = list(tags)
+                for tag in ['node', 'doc_id', 'source', 'target', 'user']:
+                    rtags.append("{0}:{1}".format(tag, task[tag]))
+                rtags.append("type:{0}".format('continuous' if task['continuous'] else 'one-time'))
+
+                for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked']:
+                    self.gauge("{0}.{1}.{2}".format(prefix, task['type'], metric), task[metric], rtags)
+
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)
         if name is None:
@@ -231,6 +242,7 @@ class CouchDB2:
             tags = ["instance:{0}".format(name)]
             self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
             self._build_system_metrics(self._get_system_stats(server, name, instance, tags), tags)
+            self._build_active_tasks_metrics(self._get_active_tasks(server, name, instance, tags), tags)
 
             db_whitelist = instance.get('db_whitelist', None)
             db_blacklist = instance.get('db_blacklist', [])
@@ -260,3 +272,12 @@ class CouchDB2:
 
         # Fetch _system (Erlang) stats.
         return self.agent_check.get(url, instance, tags)
+
+    def _get_active_tasks(self, server, name, instance, tags):
+        url = urljoin(server, "/_active_tasks")
+
+        tasks = self.agent_check.get(url, instance, tags)
+
+        print tasks
+
+        return [task for task in tasks if task['node'] == name]

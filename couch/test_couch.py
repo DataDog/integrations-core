@@ -4,8 +4,11 @@
 
 # stdlib
 import csv
+import time
 
 # 3rd party
+import requests
+import json
 from nose.plugins.attrib import attr
 
 # project
@@ -143,6 +146,7 @@ class TestCouchdb2(AgentCheckTest):
         self.cluster_gauges = []
         self.by_db_gauges = []
         self.erlang_gauges = []
+        self.active_tasks_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -154,6 +158,8 @@ class TestCouchdb2(AgentCheckTest):
                     self.by_db_gauges.append(row[0])
                 elif row[0].startswith("couchdb.erlang"):
                     self.erlang_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks"):
+                    self.active_tasks_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -352,3 +358,30 @@ class TestCouchdb2(AgentCheckTest):
             tags = ["instance:{0}".format(n['name']), 'db:_global_changes']
             for gauge in self.by_db_gauges:
                 self.assertMetric(gauge, tags=tags, count=1)
+
+    def test_replication_metrics(self):
+        url = self.NODE1['server'] + '/_replicator'
+        replication_body = {
+                '_id': 'my_replication_id',
+                'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
+                'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
+                'create_target': True,
+                'continuous': True
+        }
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(replication_body))
+        r.raise_for_status()
+
+        count = 0
+        attempts = 0
+        while count != 1 and attempts < 20:
+            attempts += 1
+            time.sleep(1)
+            r = requests.get(self.NODE1['server'] + '/_active_tasks', auth=(self.NODE1['user'], self.NODE1['password']))
+            r.raise_for_status()
+            count = len(re.json())
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for gauge in self.active_tasks_gauges:
+            self.assertMetric(gauge)
+
