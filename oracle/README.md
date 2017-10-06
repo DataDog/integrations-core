@@ -3,9 +3,7 @@
 ## Overview
 
 Get metrics from Oracle Database servers in real time to:
-
-* Visualize and monitor Oracle Database service status.
-* Be notified about Oracle Database cluster failovers and events.
+* Visualize and monitor your Oracle Database's availability and performance metrics.
 
 ## Setup
 ### Installation
@@ -57,7 +55,7 @@ The Oracle check is currently compatible with Linux and macOS.
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
-The Oracle Database check does not include any event at this time.
+The Oracle Database check does not include any events at this time.
 
 ### Service Checks
-The Oracle Database check does not include any service check at this time.
+The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
