@@ -2,7 +2,7 @@
 
 ## Overview
 
-Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance metrics.
+Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
 
 ## Setup
 ### Installation
