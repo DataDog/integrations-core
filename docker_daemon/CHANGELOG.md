@@ -1,5 +1,19 @@
 # CHANGELOG - docker_daemon
 
+
+1.5.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Remove namespace from pod_name tag. See [#770][]
+
+1.4.0 / 2017-09-12
+==================
+### Changes
+
+* [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
+* [FEATURE] Add client-side event filtering by event type. See [#744][]
+
 1.3.2 / 2017-08-28
 ==================
 ### Changes

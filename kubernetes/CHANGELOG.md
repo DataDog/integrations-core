@@ -1,5 +1,18 @@
 # CHANGELOG - kubernetes
 
+1.5.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] remove namespace from pod_name tag. See [#770][]
+* [BUGFIX] stop reporting cAdvisor metrics about non-container objects. See [#770][]
+
+1.4.0 / 2017-09-12
+==================
+### Changes
+
+* [FEATURE] Add an option to retry kubelet connection if it's not up at start time. See [#722][]
+* [BUGFIX] fix container_image names reported as sha checksums [#731][]
 
 1.3.0 / 2017-08-28
 ==================

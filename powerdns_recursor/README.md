@@ -85,3 +85,7 @@ The PowerDns check does not include any event at this time.### Service Checks
 Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

@@ -137,9 +137,10 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
-## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
-* [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog) - a more in-depth explanation of Datadog-Consul integration
-* [Consul at Datadog](https://engineering.datadoghq.com/consul-at-datadog/) - how Datadog Engineering uses Consul
+## Further Reading
+
+* [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog)
+* [Consul at Datadog](https://engineering.datadoghq.com/consul-at-datadog/)

@@ -1,5 +1,13 @@
 # CHANGELOG - varnish
 
+1.0.5 Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix `varnishadm backend.list -p` parsing for newer versions of Varnish.
+* [BUGFIX] `varnishadm backend.list -p` can contain `probe`, `healthy`, `sick` in output if `varnishadm backend.set_health` is used.
+
 1.0.4 2017-08-28
 ==================
 

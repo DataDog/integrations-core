@@ -73,3 +73,9 @@ The PGboucer check does not include any event at this time.
 `pgbouncer.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to PgBouncer to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

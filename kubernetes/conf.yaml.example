@@ -1,4 +1,19 @@
 init_config:
+  # Initialization retries
+  #
+  # if the agent is expected to start before Kubelet,
+  # use these settings to configure the retry policy.
+  #
+  # init_retry_interval defines how long (in seconds) the kubelet client
+  # will wait before retrying initialization.
+  # Defaults to 0.
+  #
+  # init_retry_interval: 20
+  #
+  # init_retries configures how many retries are made before failing permanently.
+  # Defaults to 0.
+  #
+  # init_retries: 5
 
 instances:
   # The kubernetes check retrieves metrics from cadvisor running under kubelet on each node.

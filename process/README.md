@@ -37,11 +37,11 @@ To have the check search for processes in a path other than `/proc`, set `procfs
 
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.
 
-Restart the Agent to start sending process metrics and service checks to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending process metrics and service checks to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for process` under the Checks section:
+Run the Agent's `info` subcommand and look for `process` under the Checks section:
 
 ```
   Checks
@@ -96,6 +96,8 @@ The Agent submits a `process.up` tagged `process:my_worker_process` whose status
 - WARNING when there are 1, 2, 6, or 7 worker processes
 - OK when there are 3, 4 or 5 worker processes
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/process-check-monitoring/) about it.

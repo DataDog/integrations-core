@@ -532,8 +532,8 @@ class VSphereCheck(AgentCheck):
 
             if not mor_by_mor_name:
                 self.log.warning(
-                    u"Unable to extract hosts' tags for `%s` vSphere instance."
-                    u"Is the check failing on this instance?", instance
+                    u"Unable to extract hosts' tags for vSphere instance named %s"
+                    u"Is the check failing on this instance?", i_key
                 )
                 continue
 
@@ -964,19 +964,3 @@ class VSphereCheck(AgentCheck):
         ### <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'])
         ### </TEST-INSTRUMENTATION>
-
-if __name__ == '__main__':
-    check, _instances = VSphereCheck.from_yaml('conf.d/vsphere.yaml')
-    try:
-        for i in xrange(200):
-            print "Loop %d" % i
-            for instance in check.instances:
-                check.check(instance)
-                if check.has_events():
-                    print 'Events: %s' % (check.get_events())
-                print 'Metrics: %d' % (len(check.get_metrics()))
-            time.sleep(10)
-    except Exception as e:
-        print "Whoops something happened {0}".format(traceback.format_exc())
-    finally:
-        check.stop()

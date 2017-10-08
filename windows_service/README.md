@@ -53,7 +53,8 @@ The Windows Service check is compatible with all Windows platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv) for a list of metrics provided by this integration.
+
+The Windows Service check does not include any metrics at this time.
 
 ### Events
 The Windows Service check does not include any event at this time.
@@ -74,6 +75,11 @@ The Agent submits this service check for each Windows service configured in `ser
 |Paused|WARNING|
 |Unknown|UNKNOWN|
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.
+
+* [Monitoring Windows Server 2012](https://www.datadoghq.com/blog/monitoring-windows-server-2012/)
+* [How to collect Windows Server 2012 metrics](https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/)
+* [Monitoring Windows Server 2012 with Datadog](https://www.datadoghq.com/blog/windows-server-monitoring/)
