@@ -262,6 +262,8 @@ class DockerDaemon(AgentCheck):
             # Initialization can fail if cgroups are not ready or docker daemon is down. So we retry if needed
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
+            # TODO: delete (added for test) (possible init failure)
+            self.custom_tags = instance.get("tags", [])
 
             try:
                 if self.docker_util.client is None:
