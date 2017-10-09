@@ -65,8 +65,7 @@ class Oracle(AgentCheck):
         con = self._get_connection(server, user, password, service)
 
         self._get_sys_metrics(con, tags)
-
-        self._get_tablespace_metrics(con)
+        self._get_tablespace_metrics(con, tags)
 
     def _get_config(self, instance):
         self.server = instance.get('server', None)
@@ -104,7 +103,7 @@ class Oracle(AgentCheck):
             if metric_name in self.SYS_METRICS:
                 self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
 
-    def _get_tablespace_metrics(self, con):
+    def _get_tablespace_metrics(self, con, tags):
         query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
         cur = con.cursor()
         cur.execute(query)
@@ -119,6 +118,6 @@ class Oracle(AgentCheck):
             else:
                 in_use = used / size * 100
 
-            self.gauge('oracle.tablespace.used', used, tags=[tablespace_tag])
-            self.gauge('oracle.tablespace.size', size, tags=[tablespace_tag])
-            self.gauge('oracle.tablespace.in_use', in_use, tags=[tablespace_tag])
+            self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
+            self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
+            self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
