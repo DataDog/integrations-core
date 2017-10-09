@@ -216,14 +216,18 @@ class CouchDB2:
 
     def _build_active_tasks_metrics(self, data, tags, prefix = 'couchdb.active_tasks'):
         for task in data:
+            rtags = list(tags)
+            rtags.append("node:{0}".format(task['node']))
             if task['type'] == 'replication':
-                rtags = list(tags)
-                for tag in ['node', 'doc_id', 'source', 'target', 'user']:
+                for tag in ['doc_id', 'source', 'target', 'user']:
                     rtags.append("{0}:{1}".format(tag, task[tag]))
                 rtags.append("type:{0}".format('continuous' if task['continuous'] else 'one-time'))
 
                 for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked']:
                     self.gauge("{0}.{1}.{2}".format(prefix, task['type'], metric), task[metric], rtags)
+            elif task['type'] == 'database_compaction':
+                for metric in ['changes_done', 'progress', 'total_changes']:
+                    self.gauge("{0}.db_compaction.{1}".format(prefix, metric), task[metric], rtags)
 
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)
@@ -278,6 +282,6 @@ class CouchDB2:
 
         tasks = self.agent_check.get(url, instance, tags)
 
-        print tasks
+        #  print tasks
 
         return [task for task in tasks if task['node'] == name]

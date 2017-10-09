@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+from urlparse import urljoin
 import csv
 import time
 
@@ -146,7 +147,8 @@ class TestCouchdb2(AgentCheckTest):
         self.cluster_gauges = []
         self.by_db_gauges = []
         self.erlang_gauges = []
-        self.active_tasks_gauges = []
+        self.replication_tasks_gauges = []
+        self.compaction_tasks_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -158,8 +160,10 @@ class TestCouchdb2(AgentCheckTest):
                     self.by_db_gauges.append(row[0])
                 elif row[0].startswith("couchdb.erlang"):
                     self.erlang_gauges.append(row[0])
-                elif row[0].startswith("couchdb.active_tasks"):
-                    self.active_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.replication"):
+                    self.replication_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.db_compaction"):
+                    self.compaction_tasks_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -378,10 +382,57 @@ class TestCouchdb2(AgentCheckTest):
             time.sleep(1)
             r = requests.get(self.NODE1['server'] + '/_active_tasks', auth=(self.NODE1['user'], self.NODE1['password']))
             r.raise_for_status()
-            count = len(re.json())
+            count = len(r.json())
 
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
-        for gauge in self.active_tasks_gauges:
+        for gauge in self.replication_tasks_gauges:
             self.assertMetric(gauge)
 
+    def test_compaction_metrics(self):
+        url = urljoin(self.NODE1['server'], 'kennel')
+        body = {
+            '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
+            'data': str(time.time())
+        }
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+        r.raise_for_status()
+
+        update_url = urljoin(self.NODE1['server'], 'kennel/{0}'.format(body['_id']))
+
+        for _ in xrange(1000):
+            rev = r.json()['rev']
+            body['data'] = str(time.time())
+            body['_rev'] = rev
+            r = requests.put(update_url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+            r.raise_for_status()
+
+            r2 = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
+            r2.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel/_ensure_full_commit')
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
+        r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel/_compact')
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
+        r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], '_global_changes/_compact')
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
+        r.raise_for_status()
+
+        #  count = 0
+        #  attempts = 0
+        #  while count != 1 and attempts < 20:
+            #  attempts += 1
+            #  r = requests.get(self.NODE1['server'] + '/_active_tasks', auth=(self.NODE1['user'], self.NODE1['password']))
+            #  r.raise_for_status()
+            #  count = len(r.json())
+            #  time.sleep(1)
+            #  print r.json()
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for gauge in self.compaction_tasks_gauges:
+            self.assertMetric(gauge)
