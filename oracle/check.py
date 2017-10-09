@@ -72,7 +72,7 @@ class Oracle(AgentCheck):
         user = instance.get('user', None)
         password = instance.get('password', None)
         service = instance.get('service_name', None)
-        tags = instance.get('tags', None)
+        tags = instance.get('tags', [])
         return (self.server, user, password, service, tags)
 
     def _get_connection(self, server, user, password, service):
