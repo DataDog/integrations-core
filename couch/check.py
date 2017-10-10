@@ -217,7 +217,6 @@ class CouchDB2:
     def _build_active_tasks_metrics(self, data, tags, prefix = 'couchdb.active_tasks'):
         for task in data:
             rtags = list(tags)
-            rtags.append("node:{0}".format(task['node']))
             if task['type'] == 'replication':
                 for tag in ['doc_id', 'source', 'target', 'user']:
                     rtags.append("{0}:{1}".format(tag, task[tag]))
@@ -226,8 +225,14 @@ class CouchDB2:
                 for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked']:
                     self.gauge("{0}.{1}.{2}".format(prefix, task['type'], metric), task[metric], rtags)
             elif task['type'] == 'database_compaction':
+                rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
                 for metric in ['changes_done', 'progress', 'total_changes']:
                     self.gauge("{0}.db_compaction.{1}".format(prefix, metric), task[metric], rtags)
+            elif task['type'] == 'indexer':
+                rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
+                rtags.append("design_document:{0}".format(task['design_document'].split('/')[-1]))
+                for metric in ['changes_done', 'progress', 'total_changes']:
+                    self.gauge("{0}.indexer.{1}".format(prefix, metric), task[metric], rtags)
 
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)

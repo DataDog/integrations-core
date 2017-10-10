@@ -6,6 +6,7 @@
 from urlparse import urljoin
 import csv
 import time
+import threading
 
 # 3rd party
 import requests
@@ -149,6 +150,7 @@ class TestCouchdb2(AgentCheckTest):
         self.erlang_gauges = []
         self.replication_tasks_gauges = []
         self.compaction_tasks_gauges = []
+        self.indexing_tasks_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -164,6 +166,8 @@ class TestCouchdb2(AgentCheckTest):
                     self.replication_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.db_compaction"):
                     self.compaction_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.indexer"):
+                    self.indexing_tasks_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -197,7 +201,7 @@ class TestCouchdb2(AgentCheckTest):
                                     tags=["instance:{0}".format(node["name"])],
                                     count=1) # One for the server stats, the version is already loaded
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_bad_config(self):
@@ -292,7 +296,7 @@ class TestCouchdb2(AgentCheckTest):
                                     tags=["instance:{0}".format(node["name"])],
                                     count=1) # One for the server stats, the version is already loaded
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_only_max_nodes_are_scanned(self):
@@ -340,7 +344,7 @@ class TestCouchdb2(AgentCheckTest):
                                 tags=tags,
                                 count=0)
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_only_max_dbs_are_scanned(self):
@@ -400,7 +404,7 @@ class TestCouchdb2(AgentCheckTest):
 
         update_url = urljoin(self.NODE1['server'], 'kennel/{0}'.format(body['_id']))
 
-        for _ in xrange(1000):
+        for _ in xrange(500):
             rev = r.json()['rev']
             body['data'] = str(time.time())
             body['_rev'] = rev
@@ -410,10 +414,6 @@ class TestCouchdb2(AgentCheckTest):
             r2 = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
             r2.raise_for_status()
 
-        url = urljoin(self.NODE1['server'], 'kennel/_ensure_full_commit')
-        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
-        r.raise_for_status()
-
         url = urljoin(self.NODE1['server'], 'kennel/_compact')
         r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
         r.raise_for_status()
@@ -422,17 +422,49 @@ class TestCouchdb2(AgentCheckTest):
         r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
         r.raise_for_status()
 
-        #  count = 0
-        #  attempts = 0
-        #  while count != 1 and attempts < 20:
-            #  attempts += 1
-            #  r = requests.get(self.NODE1['server'] + '/_active_tasks', auth=(self.NODE1['user'], self.NODE1['password']))
-            #  r.raise_for_status()
-            #  count = len(r.json())
-            #  time.sleep(1)
-            #  print r.json()
-
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
         for gauge in self.compaction_tasks_gauges:
             self.assertMetric(gauge)
+
+    def test_indexing_metrics(self):
+        url = urljoin(self.NODE1['server'], 'kennel/_design/dummy')
+        dd_body = {
+            'language': 'javascript',
+            'views': {
+                'all': {
+                    'map': 'function(doc) { emit(doc._id, 1); }'
+                }
+            }
+        }
+
+        r = requests.put(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(dd_body))
+        r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel')
+        for _ in xrange(100):
+            r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
+            r.raise_for_status()
+
+        class AsyncReq(threading.Thread):
+            def __init__(self, url, auth):
+                self._url = url
+                self._auth = auth
+                threading.Thread.__init__(self)
+
+            def run(self):
+                r = requests.get(self._url, auth=self._auth)
+                r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel/_design/dummy/_view/all')
+        t = AsyncReq(url, (self.NODE1['user'], self.NODE1['password']))
+        t.start()
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for node in [self.NODE1, self.NODE2, self.NODE3]:
+            for gauge in self.indexing_tasks_gauges:
+                self.assertMetric(gauge, tags=['database:kennel', 'design_document:dummy', 'instance:{0}'.format(node['name'])])
+
+        t.join()
+
