@@ -56,9 +56,15 @@ FUNC_MAP = {
 EVENT_TYPE = 'kubernetes'
 
 # Mapping between k8s events and ddog alert types per
+<<<<<<< HEAD
 # https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/client-go/tools/record/event.go#L60
 K8S_ALERT_MAP = {
     'Warning': 'warning',
+=======
+# https://github.com/kubernetes/kubernetes/blob/adb75e1fd17b11e6a0256a4984ef9b18957d94ce/staging/src/k8s.io/client-go/1.4/tools/record/event.go#L59
+K8S_ALERT_MAP = { 
+    'Warning': 'warning', 
+>>>>>>> Fix link to k8s events and leverage dict get to obtain the event type
     'Normal': 'info'
 }
 
@@ -555,10 +561,7 @@ class Kubernetes(AgentCheck):
             message = event.get('message')
             source = event.get('source')
             k8s_event_type = event.get('type')
-            if k8s_event_type in K8S_ALERT_MAP:
-                alert_type = K8S_ALERT_MAP[k8s_event_type]
-            else:
-                alert_type = "info"
+            alert_type = K8S_ALERT_MAP.get(k8s_event_type, 'info')
 
             if source:
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
