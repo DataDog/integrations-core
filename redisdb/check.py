@@ -239,7 +239,11 @@ class Redis(AgentCheck):
             else:
                 l_tags = list(tags)
                 for key in key_list:
-                    key_type = conn.type(key)
+                    try:
+                        key_type = conn.type(key)
+                    except redis.ResponseError:
+                      self.log.info("key {} on remote server; skipping".format(key))
+                      continue
                     key_tags = l_tags + ['key:' + key]
 
                     if key_type == 'list':
