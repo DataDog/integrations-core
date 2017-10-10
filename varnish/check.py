@@ -280,14 +280,15 @@ class Varnish(AgentCheck):
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
-        backend, status, message = None, None, None
         for line in output.split("\n"):
+            backend, status, message = None, None, None
             # split string and remove all empty fields
             tokens = filter(None, line.strip().split(' '))
+
             if len(tokens) > 0:
                 if tokens == ['Backend', 'name', 'Admin', 'Probe']:
                     # skip the column headers that exist in new output format
-                    next
+                    continue
                 elif len(tokens) >= 4 and tokens[1] in ['probe', 'healthy', 'sick']:
                     # parse new output format
                     # the backend name will include the vcl name
@@ -297,13 +298,16 @@ class Varnish(AgentCheck):
                 elif tokens[0] == 'Backend':
                     backend = tokens[1]
                     status = tokens[-1].lower()
-                elif tokens[0] == 'Current' and backend is not None:
+
+                if tokens[0] == 'Current' and backend is not None:
                     try:
                         message = ' '.join(tokens[2:]).strip()
                     except Exception:
                         # If we can't parse a message still send a status.
                         self.log.exception('Error when parsing message from varnishadm')
                         message = ''
+
+                if backend is not None:
                     backends_by_status[status].append((backend, message))
 
         for status, backends in backends_by_status.iteritems():
