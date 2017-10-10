@@ -1,12 +1,12 @@
 # CHANGELOG - kafka_consumer
 
-1.1.0 / Unreleased
+1.1.0 / 2017-10-10
 ==================
 
 ### Changes
 
-* [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753][]
 * [FEATURE] discovery of groups, topics and partitions. See [#633][] (Thanks [@jeffwidman][])
+* [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753][]
 * [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733][]
 
 1.0.2 / 2017-08-28

@@ -1,7 +1,7 @@
 # CHANGELOG - docker_daemon
 
 
-1.5.0 / Unreleased
+1.5.0 / 2017-10-10
 ==================
 ### Changes
 
@@ -100,4 +100,7 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+[#722]: https://github.com/DataDog/integrations-core/issues/722
+[#744]: https://github.com/DataDog/integrations-core/issues/744
+[#770]: https://github.com/DataDog/integrations-core/issues/770
 [@sophaskins]: https://github.com/sophaskins
