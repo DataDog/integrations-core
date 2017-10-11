@@ -263,7 +263,7 @@ class DockerDaemon(AgentCheck):
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
             # TODO: delete (added for test) (possible init failure)
-            self.custom_tags = instance.get("tags", [])
+            # self.custom_tags = instance.get("tags", [])
 
             try:
                 if self.docker_util.client is None:
