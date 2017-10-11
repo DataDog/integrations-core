@@ -1,12 +1,12 @@
 # CHANGELOG - varnish
 
-1.0.5 Unreleased
+1.0.5 2017-10-10
 ==================
 
 ### Changes
 
-* [BUGFIX] Fix `varnishadm backend.list -p` parsing for newer versions of Varnish.
-* [BUGFIX] `varnishadm backend.list -p` can contain `probe`, `healthy`, `sick` in output if `varnishadm backend.set_health` is used.
+* [BUGFIX] Fixes broken service check behavior. See [#795][].
+* [BUGFIX] Fix `varnishadm backend.list -p` parsing for newer versions of Varnish. See [#739][]. (Thanks [@philipseidel][])
 
 1.0.4 2017-08-28
 ==================
@@ -49,5 +49,7 @@ and varnishadm in order to better support service discovery. See [#498][], thank
 [#361]: https://github.com/DataDog/integrations-core/issues/361
 [#498]: https://github.com/DataDog/integrations-core/issues/498
 [#582]: https://github.com/DataDog/integrations-core/issues/582
+[#739]: https://github.com/DataDog/integrations-core/issues/739
+[#795]: https://github.com/DataDog/integrations-core/issues/795
 [@adongy]: https://github.com/adongy
 [@philipseidel]: https://github.com/philipseidel
