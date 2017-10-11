@@ -10,6 +10,36 @@
 init_config:
   postfix_user: postfix
 
+# Optional: Set `postqueue: True` to gather mail queue counts using `postqueue -p` without the use of sudo.
+# The caveat is that postqueue will gather message counts for only the `hold`, `active`, and `deferred` queues.
+# The `incoming` mail queue will not be monitored.
+# Postqueue binary is ran with set-group ID privileges, so that it can connect to Postfix daemon processes.
+# Only `tags` keys will be used from `instances` definition.
+#
+# Postfix has internal access controls that limit activities on the mail queue. By default,
+# Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
+# may be configured with stricter access controls, you may need to grant the dd-agent user access to view
+# the mail queue.
+#
+# postconf -e "authorized_mailq_users = dd-agent"
+#
+# http://www.postfix.org/postqueue.1.html
+#
+#        authorized_mailq_users (static:anyone)
+#            List of users who are authorized to view the queue.
+#
+#  postqueue: true
+#
+# The config_directory option only applies when `postqueue: true`.
+# The config_directory is the location of the Postfix configuration directory
+# where main.cf lives.
+#
+# instances:
+#  - config_directory: /etc/postfix
+#    tags:
+#      - optional_tag
+#      - optional_tag0
+
 instances:
   - directory: /var/spool/postfix
     queues:
