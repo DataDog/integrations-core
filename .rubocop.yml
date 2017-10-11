@@ -19,3 +19,16 @@ Style/SingleLineBlockParams:
 
 Style/PercentLiteralDelimiters:
   Enabled: false
+
+Metrics/BlockLength:
+  Max: 100
+
+Lint/RescueWithoutErrorClass:
+  Enabled: false
+
+Layout/EndOfLine:
+  Enabled: false
+
+Naming/VariableNumber:
+  Enabled: false
+
