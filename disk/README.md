@@ -33,7 +33,7 @@ Run the Agent's `info` subcommand and look for `disk` under the Checks section:
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Disk check does not include any event at this time.
@@ -42,3 +42,7 @@ The Disk check does not include any event at this time.
 The Disk check does not include any service check at this time.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

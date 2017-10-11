@@ -2,13 +2,13 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.18.0",
   "name": "wmi_check",
   "short_description": "Collect and graph any WMI metrics.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "d70f5c68-873d-436e-bddb-dbb3e107e3b5"
 }

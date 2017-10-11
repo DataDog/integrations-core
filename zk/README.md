@@ -48,7 +48,7 @@ The Zookeeper check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zookeeper/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
 The Zookeeper check does not include any event at this time.
@@ -62,3 +62,9 @@ Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, ot
 **zookeeper.mode**:
 
 The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise CRITICAL.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

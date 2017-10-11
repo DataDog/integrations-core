@@ -18,7 +18,7 @@ if docker ps | grep dd-test-postgres >/dev/null; then
   bash postgres/ci/stop-docker.sh
 fi
 
-POSTGRES00_ID=$(docker run -p $PORT:5432 --name $NAME -v $CI_PATH/resources:/docker-entrypoint-initdb.d -e POSTGRES_PASSWORD=datadog -d postgres:latest)
+POSTGRES00_ID=$(docker run -p $PORT:5432 --name $NAME -v $CI_PATH/resources:/docker-entrypoint-initdb.d -e POSTGRES_PASSWORD=datadog -d postgres:${FLAVOR_VERSION})
 POSTGRES00_IP=$(docker inspect ${POSTGRES00_ID} | grep '"IPAddress"' | cut -d':' -f2 | cut -d'"' -f2)
 POSTGRES00_IP=$(echo $POSTGRES00_IP | cut -d " " -f2)
 

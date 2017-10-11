@@ -30,7 +30,7 @@ Restart the Agent to begin sending Kong metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for kong` under the Checks section:
+Run the Agent's `info` subcommand and look for `kong` under the Checks section:
 
 ```
   Checks
@@ -52,7 +52,7 @@ The kong check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Kong check does not include any event at this time.
@@ -63,6 +63,9 @@ The Kong check does not include any event at this time.
 
 Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to monitor Kong with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-kong-datadog/) about it.
+
+* [Monitor Kong with our new Datadog integration](https://www.datadoghq.com/blog/monitor-kong-datadog/)

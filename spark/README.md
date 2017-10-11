@@ -83,6 +83,9 @@ The Agent submits one of the following service checks, depending on how you're r
 
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to monitor Hadoop & Spark with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-spark/) about it.
+
+* [Hadoop & Spark monitoring with Datadog](https://www.datadoghq.com/blog/monitoring-spark/)
