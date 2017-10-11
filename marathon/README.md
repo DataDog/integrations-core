@@ -54,7 +54,7 @@ The marathon check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Marathon check does not include any event at this time.
@@ -64,3 +64,9 @@ The Marathon check does not include any event at this time.
 `marathon.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to the Marathon API to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

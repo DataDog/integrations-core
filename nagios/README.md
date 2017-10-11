@@ -83,6 +83,9 @@ The check watches the Nagios events log for log lines containing these string, e
 ### Service Checks
 The Nagios check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how to understand your Nagios alerts with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/nagios-monitoring/) about it.
+
+* [Understand your Nagios alerts with Datadog](https://www.datadoghq.com/blog/nagios-monitoring/)

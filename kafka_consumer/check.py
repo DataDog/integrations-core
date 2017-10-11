@@ -17,6 +17,8 @@ from checks import AgentCheck
 DEFAULT_KAFKA_TIMEOUT = 5
 DEFAULT_ZK_TIMEOUT = 5
 
+CONTEXT_UPPER_BOUND = 100
+
 
 class KafkaCheck(AgentCheck):
     """
@@ -40,6 +42,8 @@ class KafkaCheck(AgentCheck):
             init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
         self.kafka_timeout = int(
             init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
+        self.context_limit = int(
+            init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
 
     def _get_highwater_offsets(self, kafka_hosts_ports):
         """
@@ -153,21 +157,28 @@ class KafkaCheck(AgentCheck):
         # which just creates confusion because it's theoretically impossible.
 
         # Fetch consumer group offsets from Zookeeper
-        zk_hosts_ports = self.read_config(instance, 'zk_connect_str')
+        zk_hosts_ports = self._read_config(instance, 'zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
 
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         if instance.get('monitor_unlisted_consumer_groups', False):
             consumer_groups = None
         else:
-            consumer_groups = self.read_config(instance, 'consumer_groups',
-                                               cast=self._validate_consumer_groups)
+            consumer_groups = self._validate_consumer_groups(
+                self._read_config(instance, 'consumer_groups'))
 
         consumer_offsets = self._get_zk_consumer_offsets(
             zk_hosts_ports, consumer_groups, zk_prefix)
 
+        if len(consumer_offsets) > self.context_limit:
+            self.warning("Discovered %s partition contexts - this exceeds the maximum "
+                         "number of contexts permitted by the check. Please narrow your "
+                         "target by specifying in your YAML what consumer groups, topics "
+                         "and partitions you wish to monitor." % len(consumer_offsets))
+            return
+
         # Fetch the broker highwater offsets
-        kafka_hosts_ports = self.read_config(instance, 'kafka_connect_str')
+        kafka_hosts_ports = self._read_config(instance, 'kafka_connect_str')
         highwater_offsets = self._get_highwater_offsets(kafka_hosts_ports)
 
         # Report the broker highwater offset
@@ -177,14 +188,14 @@ class KafkaCheck(AgentCheck):
 
         # Report the consumer group offsets and consumer lag
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.iteritems():
+            if (topic, partition) not in highwater_offsets:
+                self.log.warn("[%s] topic: %s partition: %s was not available in the consumer "
+                              "- skipping consumer submission", consumer_group, topic, partition)
+                continue
+
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition,
                 'consumer_group:%s' % consumer_group]
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
-            if (topic, partition) not in highwater_offsets:
-                self.log.warn("Consumer offsets exist for topic: %s "
-                    "partition: %s but that topic partition doesn't "
-                    "actually exist in the cluster.", topic, partition)
-                continue
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
             if consumer_lag < 0:
                 # this will result in data loss, so emit an event for max visibility
@@ -206,6 +217,14 @@ class KafkaCheck(AgentCheck):
 
             self.gauge('kafka.consumer_lag', consumer_lag,
                tags=consumer_group_tags)
+
+    @staticmethod
+    def _read_config(instance, key):
+        val = instance.get(key)
+        if val is None:
+            raise Exception('Must provide `%s` value in instance config' % key)
+
+        return val
 
     def _validate_consumer_groups(self, val):
         # val = {'consumer_group': {'topic': [0, 1]}}

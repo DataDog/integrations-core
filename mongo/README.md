@@ -55,7 +55,7 @@ instances:
 
 
 
-Restart the Agent to start sending MongoDB metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending MongoDB metrics to Datadog.
 
 ### Validation
 
@@ -116,8 +116,10 @@ This check emits an event each time a Mongo node has a change in its replication
 
 Returns CRITICAL if the Agent cannot connect to MongoDB to collect metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
 * [Start here](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) if you're using the WiredTiger storage engine.

@@ -76,6 +76,9 @@ The Go-Expvar check does not include any event at this time.
 ### Service Checks
 The Go-Expvar check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to instrument your Go apps with Expvar and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/) about it.
+
+* [Instrument your Go apps with Expvar and Datadog](https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/)

@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.4.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][] (Thanks [@dnavre][])
+
 1.3.0 / 2017-08-28
 ==================
 ### Changes
@@ -41,4 +47,6 @@
 [#625]: https://github.com/DataDog/integrations-core/issues/625
 [#627]: https://github.com/DataDog/integrations-core/issues/627
 [#691]: https://github.com/DataDog/integrations-core/issues/691
+[#769]: https://github.com/DataDog/integrations-core/issues/769
+[@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle

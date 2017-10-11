@@ -72,7 +72,7 @@ The gunicorn check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration - those from the Agent _and_ those sent by Gunicorn to DogStatsD.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Gunicorn check does not include any event at this time.
@@ -119,5 +119,4 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).
