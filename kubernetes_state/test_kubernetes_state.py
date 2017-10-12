@@ -36,6 +36,13 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.daemonset.scheduled',
         NAMESPACE + '.daemonset.misscheduled',
         NAMESPACE + '.daemonset.desired',
+        # hpa
+        NAMESPACE + '.hpa.min_replicas',
+        NAMESPACE + '.hpa.max_replicas',
+        NAMESPACE + '.hpa.target_cpu',
+        NAMESPACE + '.hpa.current_cpu',
+        NAMESPACE + '.hpa.desired_replicas',
+        NAMESPACE + '.hpa.current_replicas',
         # pods
         NAMESPACE + '.pod.ready',
         NAMESPACE + '.pod.scheduled',
