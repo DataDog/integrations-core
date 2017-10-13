@@ -8,7 +8,7 @@ GEM
       httparty (~> 0.14)
       rake (~> 11.0)
       rubocop (~> 0.38)
-    httparty (0.15.5)
+    httparty (0.15.6)
       multi_xml (>= 0.5.2)
     multi_xml (0.6.0)
     parallel (1.12.0)
