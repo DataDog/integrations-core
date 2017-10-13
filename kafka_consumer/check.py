@@ -98,8 +98,8 @@ class KafkaCheck(AgentCheck):
 
         if not topics:
             # val = {'consumer_group': {'topic': [0, 1]}}
-            for _, topic_partitions in consumer_groups.iteritems():
-                for (topic, partitions), offset in topic_partitions.iteritems():
+            for _, tps in consumer_groups.iteritems():
+                for topic, partitions in tps.iteritems():
                     topics[topic].update(partitions)
 
         warn_msg = """ Discovered %s partition contexts - this exceeds the maximum
