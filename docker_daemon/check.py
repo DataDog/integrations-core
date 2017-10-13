@@ -183,6 +183,9 @@ class DockerDaemon(AgentCheck):
         try:
             instance = self.instances[0]
 
+            # Getting custom tags for service checks when docker is down
+            self.custom_tags = instance.get("tags", [])
+
             self.docker_util = DockerUtil()
             if not self.docker_util.client:
                 raise Exception("Failed to initialize Docker client.")
@@ -206,7 +209,6 @@ class DockerDaemon(AgentCheck):
             self._disable_net_metrics = False
 
             # Set tagging options
-            self.custom_tags = instance.get("tags", [])
             self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
             self.kube_pod_tags = {}
 
@@ -262,8 +264,6 @@ class DockerDaemon(AgentCheck):
             # Initialization can fail if cgroups are not ready or docker daemon is down. So we retry if needed
             # https://github.com/DataDog/dd-agent/issues/1896
             self.init()
-            # TODO: delete (added for test) (possible init failure)
-            # self.custom_tags = instance.get("tags", [])
 
             try:
                 if self.docker_util.client is None:
