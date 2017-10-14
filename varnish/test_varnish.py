@@ -159,7 +159,7 @@ class VarnishCheckTest(AgentCheckTest):
     @mock.patch('_varnish.geteuid')
     @mock.patch('_varnish.Varnish._get_version_info')
     @mock.patch('_varnish.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
-    def test_command_line_post_varnish4(self, mock_subprocess, mock_version, mock_geteuid):
+    def test_command_line_manually_unhealthy(self, mock_subprocess, mock_version, mock_geteuid):
         mock_version.return_value = LooseVersion('4.0.0'), True
         mock_geteuid.return_value = 0
 
