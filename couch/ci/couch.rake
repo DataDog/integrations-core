@@ -68,6 +68,7 @@ namespace :ci do
       # Create a test database
       if provider.version == '2'
         sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
+        sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel/_design/dummy -d '{"language":"javascript","views":{"all":{"map":"function(doc) { emit(doc._id, doc); }"}, "by_data":{ "map": "function(doc) { emit(doc.data, doc); }"}}}')
 
         times = 0
         data = []

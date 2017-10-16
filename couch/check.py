@@ -221,9 +221,8 @@ class CouchDB2:
                 for tag in ['doc_id', 'source', 'target', 'user']:
                     rtags.append("{0}:{1}".format(tag, task[tag]))
                 rtags.append("type:{0}".format('continuous' if task['continuous'] else 'one-time'))
-
                 for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked']:
-                    self.gauge("{0}.{1}.{2}".format(prefix, task['type'], metric), task[metric], rtags)
+                    self.gauge("{0}.replication.{1}".format(prefix, metric), task[metric], rtags)
             elif task['type'] == 'database_compaction':
                 rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
                 for metric in ['changes_done', 'progress', 'total_changes']:
@@ -233,6 +232,14 @@ class CouchDB2:
                 rtags.append("design_document:{0}".format(task['design_document'].split('/')[-1]))
                 for metric in ['changes_done', 'progress', 'total_changes']:
                     self.gauge("{0}.indexer.{1}".format(prefix, metric), task[metric], rtags)
+            elif task['type'] == 'view_compaction':
+                rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
+                rtags.append("design_document:{0}".format(task['design_document'].split('/')[-1]))
+                if task.get('phase', None) is not None:
+                    rtags.append("phase:{0}".format(task['phase']))
+                for metric in ['changes_done', 'progress', 'total_changes']:
+                    if task.get(metric, None) is not None:
+                        self.gauge("{0}.view_compaction.{1}".format(prefix, metric), task[metric], rtags)
 
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)

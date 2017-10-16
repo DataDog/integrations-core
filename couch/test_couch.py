@@ -7,6 +7,9 @@ from urlparse import urljoin
 import csv
 import time
 import threading
+import random
+import string
+import re
 
 # 3rd party
 import requests
@@ -151,6 +154,7 @@ class TestCouchdb2(AgentCheckTest):
         self.replication_tasks_gauges = []
         self.compaction_tasks_gauges = []
         self.indexing_tasks_gauges = []
+        self.view_compaction_tasks_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -168,6 +172,8 @@ class TestCouchdb2(AgentCheckTest):
                     self.compaction_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.indexer"):
                     self.indexing_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.view_compaction"):
+                    self.view_compaction_tasks_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -404,7 +410,7 @@ class TestCouchdb2(AgentCheckTest):
 
         update_url = urljoin(self.NODE1['server'], 'kennel/{0}'.format(body['_id']))
 
-        for _ in xrange(500):
+        for _ in xrange(50):
             rev = r.json()['rev']
             body['data'] = str(time.time())
             body['_rev'] = rev
@@ -428,21 +434,8 @@ class TestCouchdb2(AgentCheckTest):
             self.assertMetric(gauge)
 
     def test_indexing_metrics(self):
-        url = urljoin(self.NODE1['server'], 'kennel/_design/dummy')
-        dd_body = {
-            'language': 'javascript',
-            'views': {
-                'all': {
-                    'map': 'function(doc) { emit(doc._id, 1); }'
-                }
-            }
-        }
-
-        r = requests.put(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(dd_body))
-        r.raise_for_status()
-
         url = urljoin(self.NODE1['server'], 'kennel')
-        for _ in xrange(100):
+        for _ in xrange(50):
             r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
             r.raise_for_status()
 
@@ -468,3 +461,95 @@ class TestCouchdb2(AgentCheckTest):
 
         t.join()
 
+    def test_view_compaction_metrics(self):
+        class LoadGenerator(threading.Thread):
+            STOP = 0
+            RUN = 1
+
+            def __init__(self, server, auth):
+                self._server = server
+                self._auth = auth
+                self._status = self.RUN
+                threading.Thread.__init__(self)
+
+            def run(self):
+                docs = []
+                count = 0
+                while self._status == self.RUN:
+                    count += 1
+                    if count%5 == 0:
+                        self.compact_views()
+                    theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+                    docs.append(self.post_doc(theid))
+                    docs = map(lambda x: self.update_doc(x), docs)
+                    self.generate_views()
+
+            def generate_views(self):
+                url = urljoin(self._server, 'kennel/_design/dummy/_view/all')
+                try:
+                    r = requests.get(url, auth=self._auth, timeout=1)
+                    r.raise_for_status()
+                except requests.exceptions.Timeout as e:
+                    None
+                url = urljoin(self._server, 'kennel/_design/dummy/_view/by_data')
+                try:
+                    r = requests.get(url, auth=self._auth, timeout=1)
+                    r.raise_for_status()
+                except requests.exceptions.Timeout as e:
+                    None
+
+            def update_doc(self, doc):
+                body = {
+                    'data': str(random.randint(0, 1000000000)),
+                    '_rev': doc['rev']
+                }
+
+                r = requests.put(urljoin(self._server, 'kennel/{0}'.format(doc['id'])), auth=self._auth, headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+                r.raise_for_status()
+                return r.json()
+
+            def post_doc(self, doc_id):
+                body = {
+                    "_id": doc_id,
+                    "data": str(time.time())
+                }
+                r = requests.post(urljoin(self._server, 'kennel'), auth=self._auth, headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+                r.raise_for_status()
+                return r.json()
+
+            def compact_views(self):
+                url = urljoin(self._server, 'kennel/_compact/dummy')
+                r = requests.post(url, auth=self._auth, headers={ 'Content-Type': 'application/json' })
+                r.raise_for_status()
+
+            def stop(self):
+                self._status = self.STOP
+
+        threads = []
+        for _ in range(40):
+            t = LoadGenerator(self.NODE1['server'], (self.NODE1['user'], self.NODE1['password']))
+            t.start()
+            threads.append(t)
+
+        metric_found = False
+        tries = 0
+        while not metric_found and tries < 20:
+            tries += 1
+            self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+            for m_name, ts, val, mdata in self.metrics:
+                if re.search('view_compaction', m_name) is not None:
+                    metric_found = True
+                    print "FOUND AT: {0}".format(tries)
+                    for gauge in self.view_compaction_tasks_gauges:
+                        self.assertMetric(gauge)
+                    break
+
+        for t in threads:
+            t.stop()
+
+        for t in threads:
+            t.join()
+
+        if tries >= 20:
+            self.fail("Could not find the view_compaction happening")
