@@ -1,5 +1,15 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+
+0.1.1/ Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] modify node_status_re to match load values without decmials.
+
+
+
 0.1.0/ 2017-08-28
 ==================
 
