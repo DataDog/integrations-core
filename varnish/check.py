@@ -289,12 +289,18 @@ class Varnish(AgentCheck):
                 if tokens == ['Backend', 'name', 'Admin', 'Probe']:
                     # skip the column headers that exist in new output format
                     continue
-                elif len(tokens) >= 4 and tokens[1] in ['probe', 'healthy', 'sick']:
-                    # parse new output format
-                    # the backend name will include the vcl name
-                    # so split on first . to remove prefix
+                # parse new output format
+                # the backend name will include the vcl name
+                # so split on first . to remove prefix
+                elif len(tokens) >= 4 and tokens[1] in ['healthy', 'sick']:
+                    # If the backend health was overriden, lets grab the
+                    # overriden value instead of the probed health
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[1].lower()
+                elif len(tokens) >= 4 and tokens[1] == 'probe':
                     backend = tokens[0].split('.', 1)[-1]
                     status = tokens[2].lower()
+                # Parse older Varnish backend output
                 elif tokens[0] == 'Backend':
                     backend = tokens[1]
                     status = tokens[-1].lower()
