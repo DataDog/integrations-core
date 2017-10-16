@@ -268,14 +268,12 @@ class DockerDaemon(AgentCheck):
             try:
                 if self.docker_util.client is None:
                     message = "Unable to connect to Docker daemon"
-                    tags = list(self.custom_tags)
                     self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                       message=message, tags=tags)
+                                       message=message, tags=self.custom_tags)
                     return
             except Exception as ex:
-                tags = list(self.custom_tags)
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   message=str(ex), tags=tags)
+                                   message=str(ex), tags=self.custom_tags)
                 return
 
             if not self.init_success:
@@ -362,14 +360,12 @@ class DockerDaemon(AgentCheck):
             containers = self.docker_util.client.containers(all=True, size=must_query_size)
         except Exception as e:
             message = "Unable to list Docker containers: {0}".format(e)
-            tags = list(self.custom_tags)
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message=message, tags=tags)
+                               message=message, tags=self.custom_tags)
             raise Exception(message)
 
         else:
-            tags = list(self.custom_tags)
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.custom_tags)
 
         # Create a set of filtered containers based on the exclude/include rules
         # and cache these rules in docker_util
