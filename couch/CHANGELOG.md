@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+2.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] collects CouchDB active tasks stats
+
 2.1.0 / 2017-10-5
 =================
 

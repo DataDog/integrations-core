@@ -376,13 +376,13 @@ class TestCouchdb2(AgentCheckTest):
     def test_replication_metrics(self):
         url = self.NODE1['server'] + '/_replicator'
         replication_body = {
-                '_id': 'my_replication_id',
-                'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
-                'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
-                'create_target': True,
-                'continuous': True
+            '_id': 'my_replication_id',
+            'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
+            'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
+            'create_target': True,
+            'continuous': True
         }
-        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(replication_body))
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(replication_body))
         r.raise_for_status()
 
         count = 0
@@ -405,7 +405,7 @@ class TestCouchdb2(AgentCheckTest):
             '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
             'data': str(time.time())
         }
-        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(body))
         r.raise_for_status()
 
         update_url = urljoin(self.NODE1['server'], 'kennel/{0}'.format(body['_id']))
@@ -414,18 +414,18 @@ class TestCouchdb2(AgentCheckTest):
             rev = r.json()['rev']
             body['data'] = str(time.time())
             body['_rev'] = rev
-            r = requests.put(update_url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+            r = requests.put(update_url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(body))
             r.raise_for_status()
 
-            r2 = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
+            r2 = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps({"_id": str(time.time())}))
             r2.raise_for_status()
 
         url = urljoin(self.NODE1['server'], 'kennel/_compact')
-        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'})
         r.raise_for_status()
 
         url = urljoin(self.NODE1['server'], '_global_changes/_compact')
-        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' })
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'})
         r.raise_for_status()
 
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
@@ -436,7 +436,7 @@ class TestCouchdb2(AgentCheckTest):
     def test_indexing_metrics(self):
         url = urljoin(self.NODE1['server'], 'kennel')
         for _ in xrange(50):
-            r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={ 'Content-Type': 'application/json' }, data=json.dumps({ "_id": str(time.time())}))
+            r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps({"_id": str(time.time())}))
             r.raise_for_status()
 
         class AsyncReq(threading.Thread):
@@ -477,7 +477,7 @@ class TestCouchdb2(AgentCheckTest):
                 count = 0
                 while self._status == self.RUN:
                     count += 1
-                    if count%5 == 0:
+                    if count % 5 == 0:
                         self.compact_views()
                     theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                     docs.append(self.post_doc(theid))
@@ -489,13 +489,13 @@ class TestCouchdb2(AgentCheckTest):
                 try:
                     r = requests.get(url, auth=self._auth, timeout=1)
                     r.raise_for_status()
-                except requests.exceptions.Timeout as e:
+                except requests.exceptions.Timeout:
                     None
                 url = urljoin(self._server, 'kennel/_design/dummy/_view/by_data')
                 try:
                     r = requests.get(url, auth=self._auth, timeout=1)
                     r.raise_for_status()
-                except requests.exceptions.Timeout as e:
+                except requests.exceptions.Timeout:
                     None
 
             def update_doc(self, doc):
@@ -504,7 +504,7 @@ class TestCouchdb2(AgentCheckTest):
                     '_rev': doc['rev']
                 }
 
-                r = requests.put(urljoin(self._server, 'kennel/{0}'.format(doc['id'])), auth=self._auth, headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+                r = requests.put(urljoin(self._server, 'kennel/{0}'.format(doc['id'])), auth=self._auth, headers={'Content-Type': 'application/json'}, data=json.dumps(body))
                 r.raise_for_status()
                 return r.json()
 
@@ -513,13 +513,13 @@ class TestCouchdb2(AgentCheckTest):
                     "_id": doc_id,
                     "data": str(time.time())
                 }
-                r = requests.post(urljoin(self._server, 'kennel'), auth=self._auth, headers={ 'Content-Type': 'application/json' }, data=json.dumps(body))
+                r = requests.post(urljoin(self._server, 'kennel'), auth=self._auth, headers={'Content-Type': 'application/json'}, data=json.dumps(body))
                 r.raise_for_status()
                 return r.json()
 
             def compact_views(self):
                 url = urljoin(self._server, 'kennel/_compact/dummy')
-                r = requests.post(url, auth=self._auth, headers={ 'Content-Type': 'application/json' })
+                r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
                 r.raise_for_status()
 
             def stop(self):
