@@ -1,5 +1,12 @@
 # CHANGELOG - varnish
 
+1.0.6 Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fixes pulling backend service check when its manually overriden. See [#][].
+
 1.0.5 2017-10-10
 ==================
 
@@ -53,3 +60,4 @@ and varnishadm in order to better support service discovery. See [#498][], thank
 [#795]: https://github.com/DataDog/integrations-core/issues/795
 [@adongy]: https://github.com/adongy
 [@philipseidel]: https://github.com/philipseidel
+[#805]: https://github.com/DataDog/integrations-core/issues/805
