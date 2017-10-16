@@ -4,7 +4,6 @@
 
 # stdlib
 import random
-import time
 from collections import defaultdict
 from time import time, sleep
 
@@ -87,7 +86,10 @@ class KafkaCheck(AgentCheck):
 
         topics = defaultdict(set)
         kafka_consumer_offsets = None
-        kafka_version = self._get_kafka_version(self._get_kafka_client(instance))
+
+        cli = self._get_kafka_client(instance)
+        cli._maybe_refresh_metadata()
+        kafka_version = self._get_kafka_version(cli)
         if collect_kafka_consumer_offsets:
             # For now, consumer groups are mandatory if not using ZK
             if not zk_hosts_ports and not consumer_groups:
@@ -163,7 +165,7 @@ class KafkaCheck(AgentCheck):
             self.log.debug("Unable to determine compatibility.")
             return False
 
-        return version>self.LAST_ZKONLY_VERSION
+        return version > self.LAST_ZKONLY_VERSION
 
     def _get_random_node_id(self, client):
         brokers = client.cluster.brokers()
@@ -318,8 +320,6 @@ class KafkaCheck(AgentCheck):
                 if partition_leader is not None and partition_leader > -1:
                     leader_tp[partition_leader][topic].update([partition])
 
-        partitions_grouped_by_topic = defaultdict(list)
-
         max_offsets = 1
         for nodeId, tps in leader_tp.iteritems():
             # Construct the OffsetRequest
@@ -368,9 +368,7 @@ class KafkaCheck(AgentCheck):
                     key, severity="error")
                 self.log.debug(message)
 
-            self.gauge('kafka.consumer_lag', consumer_lag,
-            tags=consumer_group_tags)
-        pass
+            self.gauge('kafka.consumer_lag', consumer_lag, tags=consumer_group_tags)
 
     def _get_zk_path_children(self, zk_conn, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
@@ -537,7 +535,7 @@ class KafkaCheck(AgentCheck):
     def _send_event(self, title, text, tags, type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
-            'timestamp': int(time.time()),
+            'timestamp': int(time()),
             'source_type_name': self.SOURCE_TYPE_NAME,
             'msg_title': title,
             'event_type': type,
