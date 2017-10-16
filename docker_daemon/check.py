@@ -183,6 +183,9 @@ class DockerDaemon(AgentCheck):
         try:
             instance = self.instances[0]
 
+            # Getting custom tags for service checks when docker is down
+            self.custom_tags = instance.get("tags", [])
+
             self.docker_util = DockerUtil()
             if not self.docker_util.client:
                 raise Exception("Failed to initialize Docker client.")
@@ -206,7 +209,6 @@ class DockerDaemon(AgentCheck):
             self._disable_net_metrics = False
 
             # Set tagging options
-            self.custom_tags = instance.get("tags", [])
             self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
             self.kube_pod_tags = {}
 
@@ -267,11 +269,11 @@ class DockerDaemon(AgentCheck):
                 if self.docker_util.client is None:
                     message = "Unable to connect to Docker daemon"
                     self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                       message=message)
+                                       message=message, tags=self.custom_tags)
                     return
             except Exception as ex:
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   message=str(ex))
+                                   message=str(ex), tags=self.custom_tags)
                 return
 
             if not self.init_success:
@@ -359,11 +361,11 @@ class DockerDaemon(AgentCheck):
         except Exception as e:
             message = "Unable to list Docker containers: {0}".format(e)
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message=message)
+                               message=message, tags=self.custom_tags)
             raise Exception(message)
 
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.custom_tags)
 
         # Create a set of filtered containers based on the exclude/include rules
         # and cache these rules in docker_util
