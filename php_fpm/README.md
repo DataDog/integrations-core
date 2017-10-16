@@ -27,6 +27,14 @@ instances:
 #     - instance:foo
 ```
 
+Configuration Options:
+
+* `status_url` (Required) - URL for the PHP FPM status page defined in the fpm pool config file (pm.status_path)
+* `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
+* `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
+* `user` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `password` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 Restart the Agent to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
@@ -64,6 +72,8 @@ The php-fpm check does not include any event at this time.
 
 Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
 
-## Further Reading
-### Blog Article
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

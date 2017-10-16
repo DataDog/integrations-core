@@ -4,7 +4,7 @@
 
 This check monitors the availability and uptime of non-Datadog StatsD servers. It also tracks the number of metrics, by metric type, received by StatsD.
 
-This check does NOT forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
+This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
 ## Setup
 ### Installation
@@ -63,8 +63,10 @@ Returns CRITICAL if the StatsD server does not respond to the Agent's health sta
 
 Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 If you don't know what StatsD is and how does it work, check out [our blog post about it](https://www.datadoghq.com/blog/statsd/)
 
 To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/) about it.

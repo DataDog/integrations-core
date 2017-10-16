@@ -62,6 +62,11 @@ The Apache check does not include any event at this time.
 
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your Apache web server with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/).
+
+* [Monitoring Apache web server performance](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/)
+* [How to collect Apache performance metrics](https://www.datadoghq.com/blog/collect-apache-performance-metrics/)
+* [How to monitor Apache web server with Datadog](https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/)

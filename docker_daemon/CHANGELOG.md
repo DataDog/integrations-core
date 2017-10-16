@@ -1,11 +1,18 @@
 # CHANGELOG - docker_daemon
 
 
-1.4.0 / Unreleased
+1.5.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] Remove namespace from pod_name tag. See [#770][]
+
+1.4.0 / 2017-09-12
 ==================
 ### Changes
 
 * [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
+* [FEATURE] Add client-side event filtering by event type. See [#744][]
 
 1.3.2 / 2017-08-28
 ==================
@@ -93,4 +100,7 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+[#722]: https://github.com/DataDog/integrations-core/issues/722
+[#744]: https://github.com/DataDog/integrations-core/issues/744
+[#770]: https://github.com/DataDog/integrations-core/issues/770
 [@sophaskins]: https://github.com/sophaskins
