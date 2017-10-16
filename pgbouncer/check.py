@@ -50,7 +50,7 @@ class PgBouncer(AgentCheck):
             ('database', 'db'),
             ('user', 'user'),
         ],
-        'metrics':  [
+        'metrics': [
             ('cl_active',            ('pgbouncer.pools.cl_active', GAUGE)),
             ('cl_waiting',           ('pgbouncer.pools.cl_waiting', GAUGE)),
             ('sv_active',            ('pgbouncer.pools.sv_active', GAUGE)),
