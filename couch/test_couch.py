@@ -155,6 +155,7 @@ class TestCouchdb2(AgentCheckTest):
         self.compaction_tasks_gauges = []
         self.indexing_tasks_gauges = []
         self.view_compaction_tasks_gauges = []
+        self.by_dd_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -176,10 +177,10 @@ class TestCouchdb2(AgentCheckTest):
                     self.indexing_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.view_compaction"):
                     self.view_compaction_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.by_dd."):
+                    self.by_dd_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
-
-
 
     def test_check(self):
         """
@@ -187,18 +188,21 @@ class TestCouchdb2(AgentCheckTest):
         """
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2, self.NODE3])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
-                    self.assertMetric(gauge, tags=tags)
+                    self.assertMetric(gauge, tags=[tag, "db:{0}".format(db)])
 
             for gauge in self.erlang_gauges:
                 self.assertMetric(gauge)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -282,18 +286,22 @@ class TestCouchdb2(AgentCheckTest):
 
         self.run_check({"instances": [conf]})
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2, self.NODE3])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
+                tags = [tag, "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
 
             for gauge in self.erlang_gauges:
                 self.assertMetric(gauge)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -319,15 +327,19 @@ class TestCouchdb2(AgentCheckTest):
         for gauge in self.erlang_gauges:
             self.assertMetric(gauge)
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
+                tags = [tag, "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
