@@ -166,6 +166,8 @@ class TestCouchdb2(AgentCheckTest):
                     self.by_db_gauges.append(row[0])
                 elif row[0].startswith("couchdb.erlang"):
                     self.erlang_gauges.append(row[0])
+                elif row[0] in ['couchdb.active_tasks.replication.count', 'couchdb.active_tasks.db_compaction.count', 'couchdb.active_tasks.indexer.count', 'couchdb.active_tasks.view_compaction.count']:
+                    self.cluster_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.replication"):
                     self.replication_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.db_compaction"):
@@ -176,6 +178,8 @@ class TestCouchdb2(AgentCheckTest):
                     self.view_compaction_tasks_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
+
+
 
     def test_check(self):
         """
@@ -531,25 +535,25 @@ class TestCouchdb2(AgentCheckTest):
             t.start()
             threads.append(t)
 
-        metric_found = False
         tries = 0
-        while not metric_found and tries < 20:
-            tries += 1
-            self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+        try:
+            metric_found = False
+            while not metric_found and tries < 20:
+                tries += 1
+                self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
-            for m_name, ts, val, mdata in self.metrics:
-                if re.search('view_compaction', m_name) is not None:
-                    metric_found = True
-                    print "FOUND AT: {0}".format(tries)
-                    for gauge in self.view_compaction_tasks_gauges:
-                        self.assertMetric(gauge)
-                    break
+                for m_name, ts, val, mdata in self.metrics:
+                    if re.search('view_compaction\.progress', m_name) is not None:
+                        metric_found = True
+                        for gauge in self.view_compaction_tasks_gauges:
+                            self.assertMetric(gauge)
+                        break
+        finally:
+            for t in threads:
+                t.stop()
 
-        for t in threads:
-            t.stop()
-
-        for t in threads:
-            t.join()
+            for t in threads:
+                t.join()
 
         if tries >= 20:
             self.fail("Could not find the view_compaction happening")

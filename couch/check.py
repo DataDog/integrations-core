@@ -215,7 +215,14 @@ class CouchDB2:
                 self.gauge("{0}.{1}".format(prefix, key), value, tags)
 
     def _build_active_tasks_metrics(self, data, tags, prefix = 'couchdb.active_tasks'):
+        counts = {
+            'replication': 0,
+            'database_compaction': 0,
+            'indexer': 0,
+            'view_compaction': 0
+        }
         for task in data:
+            counts[task['type']] += 1
             rtags = list(tags)
             if task['type'] == 'replication':
                 for tag in ['doc_id', 'source', 'target', 'user']:
@@ -240,6 +247,11 @@ class CouchDB2:
                 for metric in ['changes_done', 'progress', 'total_changes']:
                     if task.get(metric, None) is not None:
                         self.gauge("{0}.view_compaction.{1}".format(prefix, metric), task[metric], rtags)
+
+        for metric, count in counts.items():
+            if metric == "database_compaction":
+                metric = "db_compaction"
+            self.gauge("{0}.{1}.count".format(prefix, metric), count, tags)
 
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)
