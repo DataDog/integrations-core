@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+2.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] collects and submits CouchDB design docs metrics.
+
 2.2.0 / Unreleased
 ==================
 
