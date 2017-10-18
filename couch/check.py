@@ -228,7 +228,9 @@ class CouchDB2:
                 for tag in ['doc_id', 'source', 'target', 'user']:
                     rtags.append("{0}:{1}".format(tag, task[tag]))
                 rtags.append("type:{0}".format('continuous' if task['continuous'] else 'one-time'))
-                for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked']:
+                for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked', 'changes_pending']:
+                    if task[metric] is None:
+                        task[metric] = 0
                     self.gauge("{0}.replication.{1}".format(prefix, metric), task[metric], rtags)
             elif task['type'] == 'database_compaction':
                 rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
