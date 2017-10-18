@@ -9,11 +9,11 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 Install the `dd-check-oracle` package manually or with your favorite configuration manager
 
-We cannot ship the oracle `instantclient` libraries with the agent or the standalone check due to licensing restrictions. Although the required `cx_Oracle` python library will be bundled with the agent, you will still need to install the `instantclient` library for it to work (hard-requirement).
+In order to use the Oracle integration you must install Oracle's `instantclient` libraries by following the instructions below.  Due to licensing restrictions we are unable to include this library in our agent.
 
 You may download `instantclient` directly from Oracle [here](https://www.oracle.com/technetwork/database/features/instant-client/index.html).
 
-The steps to set this up would typically be:
+The steps to set up `instantclient` to work with the integration would typically be:
 
 ```
 mkdir -p /opt/oracle/ && cd /opt/oracle/
