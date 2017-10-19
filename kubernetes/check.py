@@ -55,6 +55,13 @@ FUNC_MAP = {
 
 EVENT_TYPE = 'kubernetes'
 
+# Mapping between k8s events and ddog alert types per
+# https://github.com/kubernetes/kubernetes/blob/adb75e1fd17b11e6a0256a4984ef9b18957d94ce/staging/src/k8s.io/client-go/1.4/tools/record/event.go#L59
+K8S_ALERT_MAP = {
+    'Warning': 'warning',
+    'Normal': 'info'
+}
+
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
 FACTORS = {
@@ -547,6 +554,9 @@ class Kubernetes(AgentCheck):
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
             source = event.get('source')
+            k8s_event_type = event.get('type')
+            alert_type = K8S_ALERT_MAP.get(k8s_event_type, 'info')
+
             if source:
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
@@ -557,6 +567,7 @@ class Kubernetes(AgentCheck):
                 'msg_title': title,
                 'msg_text': msg_body,
                 'source_type_name': EVENT_TYPE,
+                'alert_type': alert_type,
                 'event_object': 'kubernetes:{}'.format(involved_obj.get('name')),
                 'tags': tags,
             }
