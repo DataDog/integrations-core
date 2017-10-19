@@ -56,7 +56,9 @@ setup(
     packages=['check', 'check.ntp'],
 
     # Run-time dependencies
-    install_requires=runtime_reqs,
+    install_requires=[
+        'ntplib==0.3.3',
+    ],
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
