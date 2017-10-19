@@ -4,15 +4,29 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
+import simplejson as json
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+runtime_reqs = []
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    for line in f.readlines():
+        req = line.rpartition('#')
+        if req[0]:
+            runtime_reqs.append(req[0])
+
+version = None
+with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
+    manifest = json.load(f)
+    version = manifest.get('version')
+
 setup(
     name='datadog.check.btrfs',
-    version='1.1.0',
+    version=version,
     description='The Btrfs check',
     long_description=long_description,
     keywords='datadog agent btrfs check',
@@ -42,9 +56,7 @@ setup(
     packages=['check', 'check.btrfs'],
 
     # Run-time dependencies
-    install_requires=[
-        'psutil==4.4.1',
-    ],
+    install_requires=runtime_reqs,
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
