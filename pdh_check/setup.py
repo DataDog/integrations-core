@@ -25,11 +25,11 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.ntp',
+    name='datadog.check.pdh_check',
     version=version,
-    description='The NTP check',
+    description='The PDH check',
     long_description=long_description,
-    keywords='datadog agent ntp check',
+    keywords='datadog agent pdh_check check',
 
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.ntp'],
+    packages=['check', 'check.pdh_check'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.ntp': ['ntp.yaml.default']},
+    package_data={b'check.pdh_check': ['pdh_check.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'ntp=check.ntp:main',
+            'pdh_check=check.pdh_check:main',
         ],
     },
 )
