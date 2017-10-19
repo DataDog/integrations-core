@@ -3,6 +3,7 @@
 1.6.0 / Unreleased
 ==================
 ### Changes
+* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 
 1.5.0 / 2017-10-10
