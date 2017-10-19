@@ -39,7 +39,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check.ntp'],
+    packages=['check', 'check.ntp'],
 
     # Run-time dependencies
     install_requires=[
