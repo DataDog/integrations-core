@@ -23,13 +23,18 @@ version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     manifest = json.load(f)
     version = manifest.get('version')
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
-    name='datadog.check.ntp',
+    name='datadog.check.haproxy',
     version=version,
-    description='The NTP check',
+    description='The HAProxy check',
     long_description=long_description,
-    keywords='datadog agent ntp check',
+    keywords='datadog agent haproxy check',
 
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
@@ -53,7 +58,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.ntp'],
+    packages=['check', 'check.haproxy'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +81,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.ntp': ['ntp.yaml.default']},
+    package_data={b'check.haproxy': ['haproxy.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'ntp=check.ntp:main',
+            'haproxy=check.haproxy:main',
         ],
     },
 )
