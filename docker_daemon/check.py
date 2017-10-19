@@ -436,6 +436,7 @@ class DockerDaemon(AgentCheck):
 
         if entity is not None:
             pod_name = None
+            namespace = None
             # Get labels as tags
             labels = entity.get("Labels")
             if labels is not None:
@@ -492,8 +493,8 @@ class DockerDaemon(AgentCheck):
                             tags.append('%s:%s' % (tag_name, str(t).strip()))
 
             # Add kube labels and creator/service tags
-            if Platform.is_k8s():
-                kube_tags = self.kube_pod_tags.get(pod_name)
+            if Platform.is_k8s() and namespace and pod_name:
+                kube_tags = self.kube_pod_tags.get("{0}/{1}".format(namespace, pod_name))
                 if kube_tags:
                     tags.extend(list(kube_tags))
 

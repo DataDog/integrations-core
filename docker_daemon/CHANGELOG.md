@@ -1,5 +1,10 @@
 # CHANGELOG - docker_daemon
 
+1.6.0 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
 
 1.5.0 / Unreleased
 ==================
@@ -100,4 +105,5 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+[#817]: https://github.com/DataDog/integrations-core/issues/817
 [@sophaskins]: https://github.com/sophaskins
