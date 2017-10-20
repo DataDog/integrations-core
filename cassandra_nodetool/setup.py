@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.cassandra_nodetool'],
+    packages=['datadog.cassandra_nodetool'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,

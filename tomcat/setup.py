@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.tomcat'],
+    packages=['datadog.tomcat'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,

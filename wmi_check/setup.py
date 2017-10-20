@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.wmi_check'],
+    packages=['datadog.wmi_check'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,

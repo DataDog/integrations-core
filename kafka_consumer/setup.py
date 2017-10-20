@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.kafka_consumer'],
+    packages=['datadog.kafka_consumer'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
