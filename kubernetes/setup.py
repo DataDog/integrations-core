@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.kubernetes'],
+    packages=['check', 'datadog.kubernetes'],
 
     # Run-time dependencies
     install_requires=[
@@ -78,13 +78,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.kubernetes': ['kubernetes.yaml.example']},
+    package_data={b'datadog.kubernetes': ['kubernetes.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'kubernetes=check.kubernetes:main',
+            'kubernetes=datadog.kubernetes:main',
         ],
     },
 )

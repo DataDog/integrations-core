@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.wmi_check'],
+    packages=['check', 'datadog.wmi_check'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.wmi_check': ['wmi_check.yaml.example']},
+    package_data={b'datadog.wmi_check': ['wmi_datadog.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'wmi_check=check.wmi_check:main',
+            'wmi_check=datadog.wmi_check:main',
         ],
     },
 )
