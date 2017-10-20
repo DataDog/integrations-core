@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.hdfs_datanode'],
+    packages=['datadog.hdfs_datanode'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
