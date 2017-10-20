@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.system_swap'],
+    packages=['check', 'datadog.system_swap'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.system_swap': ['system_swap.yaml.example']},
+    package_data={b'datadog.system_swap': ['system_swap.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'system_swap=check.system_swap:main',
+            'system_swap=datadog.system_swap:main',
         ],
     },
 )

@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.vsphere'],
+    packages=['check', 'datadog.vsphere'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.vsphere': ['vsphere.yaml.example']},
+    package_data={b'datadog.vsphere': ['vsphere.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'vsphere=check.vsphere:main',
+            'vsphere=datadog.vsphere:main',
         ],
     },
 )

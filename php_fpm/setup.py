@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.php_fpm'],
+    packages=['check', 'datadog.php_fpm'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.php_fpm': ['php_fpm.yaml.example']},
+    package_data={b'datadog.php_fpm': ['php_fpm.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'php_fpm=check.php_fpm:main',
+            'php_fpm=datadog.php_fpm:main',
         ],
     },
 )
