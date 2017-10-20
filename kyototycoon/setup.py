@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.kyototycoon'],
+    packages=['datadog.kyototycoon'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
