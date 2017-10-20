@@ -56,7 +56,7 @@ setup(
     packages=['datadog.ntp'],
 
     # Run-time dependencies
-    install_requires=runtime_reqs,
+    install_requires=list(set(runtime_reqs)),
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
