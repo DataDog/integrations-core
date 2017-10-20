@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.hdfs_namenode'],
+    packages=['check', 'datadog.hdfs_namenode'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.hdfs_namenode': ['hdfs_namenode.yaml.example']},
+    package_data={b'datadog.hdfs_namenode': ['hdfs_namenode.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'hdfs_namenode=check.hdfs_namenode:main',
+            'hdfs_namenode=datadog.hdfs_namenode:main',
         ],
     },
 )

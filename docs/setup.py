@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.ntp'],
+    packages=['check', 'datadog.ntp'],
 
     # Run-time dependencies
     install_requires=[
@@ -78,13 +78,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.ntp': ['ntp.yaml.default']},
+    package_data={b'datadog.ntp': ['ntp.yaml.default']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'ntp=check.ntp:main',
+            'ntp=datadog.ntp:main',
         ],
     },
 )

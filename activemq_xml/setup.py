@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.activemq_xml'],
+    packages=['datadog.activemq_xml'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.activemq_xml': ['activemq_xml.yaml.example']},
+    package_data={b'datadog.activemq_xml': ['activemq_xml.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'activemq_xml=check.activemq_xml:main',
+            'activemq_xml=datadog.activemq_xml:main',
         ],
     },
 )

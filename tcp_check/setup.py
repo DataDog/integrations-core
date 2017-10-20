@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.tcp_check'],
+    packages=['check', 'datadog.tcp_check'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.tcp_check': ['tcp_check.yaml.example']},
+    package_data={b'datadog.tcp_check': ['tcp_datadog.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'tcp_check=check.tcp_check:main',
+            'tcp_check=datadog.tcp_check:main',
         ],
     },
 )
