@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.kubernetes_state'],
+    packages=['datadog.kubernetes_state'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
