@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.pdh_check'],
+    packages=['datadog.pdh_check'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,

@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.varnish'],
+    packages=['datadog.varnish'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
