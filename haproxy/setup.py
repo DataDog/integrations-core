@@ -58,7 +58,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.haproxy'],
+    packages=['datadog.haproxy'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,

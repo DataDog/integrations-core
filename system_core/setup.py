@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'datadog.system_core'],
+    packages=['datadog.system_core'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
