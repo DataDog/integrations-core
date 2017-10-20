@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.kube_dns'],
+    packages=['check', 'datadog.kube_dns'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.kube_dns': ['kube_dns.yaml.example']},
+    package_data={b'datadog.kube_dns': ['kube_dns.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'kube_dns=check.kube_dns:main',
+            'kube_dns=datadog.kube_dns:main',
         ],
     },
 )

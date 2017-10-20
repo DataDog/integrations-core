@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.supervisord'],
+    packages=['check', 'datadog.supervisord'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.supervisord': ['supervisord.yaml.example']},
+    package_data={b'datadog.supervisord': ['supervisord.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'supervisord=check.supervisord:main',
+            'supervisord=datadog.supervisord:main',
         ],
     },
 )

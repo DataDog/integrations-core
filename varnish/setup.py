@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.varnish'],
+    packages=['check', 'datadog.varnish'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.varnish': ['varnish.yaml.example']},
+    package_data={b'datadog.varnish': ['varnish.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'varnish=check.varnish:main',
+            'varnish=datadog.varnish:main',
         ],
     },
 )
