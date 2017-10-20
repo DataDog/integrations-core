@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.rabbitmq'],
+    packages=['check', 'datadog.rabbitmq'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.rabbitmq': ['rabbitmq.yaml.example']},
+    package_data={b'datadog.rabbitmq': ['rabbitmq.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'rabbitmq=check.rabbitmq:main',
+            'rabbitmq=datadog.rabbitmq:main',
         ],
     },
 )

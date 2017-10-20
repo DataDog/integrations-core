@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.sqlserver'],
+    packages=['check', 'datadog.sqlserver'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.sqlserver': ['sqlserver.yaml.example']},
+    package_data={b'datadog.sqlserver': ['sqlserver.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'sqlserver=check.sqlserver:main',
+            'sqlserver=datadog.sqlserver:main',
         ],
     },
 )
