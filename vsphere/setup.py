@@ -12,7 +12,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-runtime_reqs = []
+runtime_reqs = ['datadog-base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = line.rpartition('#')
@@ -56,7 +56,7 @@ setup(
     packages=['datadog.vsphere'],
 
     # Run-time dependencies
-    install_requires=runtime_reqs,
+    install_requires=list(set(runtime_reqs)),
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
