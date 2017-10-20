@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.tomcat'],
+    packages=['check', 'datadog.tomcat'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.tomcat': ['tomcat.yaml.example']},
+    package_data={b'datadog.tomcat': ['tomcat.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'tomcat=check.tomcat:main',
+            'tomcat=datadog.tomcat:main',
         ],
     },
 )

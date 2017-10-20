@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['check', 'check.spark'],
+    packages=['check', 'datadog.spark'],
 
     # Run-time dependencies
     install_requires=runtime_reqs,
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'check.spark': ['spark.yaml.example']},
+    package_data={b'datadog.spark': ['spark.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'spark=check.spark:main',
+            'spark=datadog.spark:main',
         ],
     },
 )
