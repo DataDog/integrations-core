@@ -24,6 +24,7 @@ instances:
   #       export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1
   #
   - server: 127.0.0.1
+    service_name: my_sid
     user: my_username
     password: my_password
     tags:

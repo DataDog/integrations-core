@@ -78,24 +78,10 @@ The Haproxy check does not include any event at this time.
 The Haproxy check does not include any service check at this time.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-To get a better idea of how (or why) to integrate your HAProxy servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/) about it.
+
+* [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)
+* [How to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)
+* [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)
