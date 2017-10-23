@@ -37,6 +37,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.daemonset.misscheduled',
         NAMESPACE + '.daemonset.desired',
         # hpa
+        # TODO: uncomment when any of HPA checks are in the test protobuf.bin
         NAMESPACE + '.hpa.min_replicas',
         NAMESPACE + '.hpa.max_replicas',
         NAMESPACE + '.hpa.target_cpu',
@@ -80,7 +81,7 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf1.x.x.bin')
         with open(f_name, 'rb') as f:
             mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
 
@@ -95,12 +96,15 @@ class TestKubernetesState(AgentCheckTest):
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.node.memory_pressure', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
         # TODO: uncomment when any of these are in the test protobuf.bin
-        # self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
-        # self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
-        # self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
 
         for metric in self.METRICS:
             self.assertMetric(metric)

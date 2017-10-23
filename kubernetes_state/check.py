@@ -182,6 +182,53 @@ class KubernetesState(PrometheusCheck):
                 else:
                     self.log.debug("Unable to handle %s - unknown condition %s" % (sc_name, label.value))
 
+    def _condition_to_tag_check(self, metric, base_sc_name, mapping, tags=None):
+        """
+        Metrics from kube-state-metrics have changed
+        For example:
+        kube_node_status_condition{condition="Ready",node="ip-172-33-39-189.eu-west-1.compute.internal",status="true"} 1
+        kube_node_status_condition{condition="OutOfDisk",node="ip-172-33-57-130.eu-west-1.compute.internal",status="false"} 1
+        metric {
+          label { name: "condition", value: "true"
+          }
+          # other labels here
+          gauge { value: 1.0 }
+        }
+
+        This function evaluates metrics containing conditions and sends a service check
+        based on a provided condition->check mapping dict
+        """
+        if bool(metric.gauge.value) is False:
+            return  # Ignore if gauge is not 1
+        p = False
+        for label in metric.label:
+            if label.name == 'condition' and label.value == 'Ready':
+                service_check_name = base_sc_name + '.ready'
+                mapping = self.condition_to_status_positive
+                p = True
+            if label.name == 'condition' and label.value == 'OutOfDisk':
+                service_check_name = base_sc_name + '.out_of_disk'
+                mapping = self.condition_to_status_negative
+                p = True
+            if label.name == 'condition' and label.value == 'DiskPressure':
+                service_check_name = base_sc_name + '.disk_pressure'
+                mapping = self.condition_to_status_negative
+                p = True
+            if label.name == 'condition' and label.value == 'NetworkUnavailable':
+                service_check_name = base_sc_name + '.network_unavailable'
+                mapping = self.condition_to_status_negative
+                p = True
+            if label.name == 'condition' and label.value == 'MemoryPressure':
+                service_check_name = base_sc_name + '.memory_pressure'
+                mapping = self.condition_to_status_negative
+                p = True
+            if label.name == 'status' and p:
+                self.service_check(service_check_name, mapping[label.value], tags=tags)
+                self.log.debug("%s %s %s" % (service_check_name, mapping[label.value], tags))
+                p = False
+            else:
+                self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label.value))
+
     def _extract_label_value(self, name, labels):
         """
         Search for `name` in labels name and returns
@@ -284,8 +331,15 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, label.value))
             self.job_succeeded_count[frozenset(tags)] += metric.gauge.value
 
+    def kube_node_status_condition(self, message, **kwargs):
+        """ The ready status of a cluster node. >v1.0.0"""
+        base_check_name = self.NAMESPACE + '.node'
+        for metric in message.metric:
+            self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
+                                         tags=[self._label_to_tag("node", metric.label)])
+
     def kube_node_status_ready(self, message, **kwargs):
-        """ The ready status of a cluster node. """
+        """ The ready status of a cluster node."""
         service_check_name = self.NAMESPACE + '.node.ready'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_positive,
