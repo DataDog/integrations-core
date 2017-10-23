@@ -767,12 +767,14 @@ class TestKubeutil(unittest.TestCase):
         events = json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))['items']
         for ev in events:
             tags = KubeUtil().extract_event_tags(ev)
-            # there should be 4 tags except for some events where source.host is missing
-            self.assertTrue(len(tags) >= 3)
+            # there should be 6 tags except for some events where source.host is missing
+            self.assertTrue(len(tags) >= 5)
 
             tag_names = [tag.split(':')[0] for tag in tags]
             self.assertIn('reason', tag_names)
             self.assertIn('namespace', tag_names)
             self.assertIn('object_type', tag_names)
-            if len(tags) == 4:
+            self.assertIn('object_name', tag_names)
+            self.assertIn('source_component', tag_names)
+            if len(tags) == 6:
                 self.assertIn('node_name', tag_names)
