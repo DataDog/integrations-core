@@ -21,10 +21,10 @@ from checks import AgentCheck
 from config import _is_affirmative
 
 # Kafka Errors
-KAFKA_NO_ERROR = 0
-KAFKA_UNKNOWN_ERROR = -1
-KAFKA_UNKNOWN_TOPIC_OR_PARTITION = 3
-KAFKA_NOT_LEADER_FOR_PARTITION = 6
+KAFKA_NO_ERROR = KafkaErrors.NoError.errno
+KAFKA_UNKNOWN_ERROR = KafkaErrors.UnknownError.errno
+KAFKA_UNKNOWN_TOPIC_OR_PARTITION = KafkaErrors.UnknownTopicOrPartitionError.errno
+KAFKA_NOT_LEADER_FOR_PARTITION = KafkaErrors.NotLeaderForPartitionError.errno
 
 DEFAULT_KAFKA_TIMEOUT = 5
 DEFAULT_ZK_TIMEOUT = 5
@@ -32,6 +32,12 @@ DEFAULT_KAFKA_RETRIES = 3
 
 CONTEXT_UPPER_BOUND = 100
 
+
+class BadKafkaConsumerConfiguration(Exception):
+    pass
+
+class NoKafkaBrokersAvailable(Exception):
+    pass
 
 class KafkaCheck(AgentCheck):
     """
@@ -53,6 +59,7 @@ class KafkaCheck(AgentCheck):
             init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._broker_retries = int(
             init_config.get('kafka_retries', DEFAULT_KAFKA_RETRIES))
+        self._zk_last_ts = {}
 
         self.kafka_clients = {}
 
@@ -68,7 +75,8 @@ class KafkaCheck(AgentCheck):
         # Fetch consumer group offsets from Zookeeper
         zk_hosts_ports = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
-        collect_kafka_consumer_offsets = _is_affirmative(
+        zk_interval = int(instance.get('zk_iteration_ival', 0))
+        get_kafka_consumer_offsets = _is_affirmative(
             instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
 
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
@@ -80,7 +88,8 @@ class KafkaCheck(AgentCheck):
                                                 cast=self._validate_consumer_groups)
 
         zk_consumer_offsets = None
-        if zk_hosts_ports:
+        if zk_hosts_ports and \
+                self._should_zk(zk_hosts_ports, zk_interval, get_kafka_consumer_offsets):
             zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
                 zk_hosts_ports, consumer_groups, zk_prefix)
 
@@ -90,10 +99,10 @@ class KafkaCheck(AgentCheck):
         cli = self._get_kafka_client(instance)
         cli._maybe_refresh_metadata()
         kafka_version = self._get_kafka_version(cli)
-        if collect_kafka_consumer_offsets:
+        if get_kafka_consumer_offsets:
             # For now, consumer groups are mandatory if not using ZK
             if not zk_hosts_ports and not consumer_groups:
-                raise Exception('Invalid configuration - if you\'re not collecing '
+                raise BadKafkaConsumerConfiguration('Invalid configuration - if you\'re not collecing '
                                 'offset from ZK you _must_ specify consumer groups')
             if self._kafka_compatible(kafka_version):
                 kafka_consumer_offsets, topics = self._get_kafka_consumer_offsets(instance, consumer_groups)
@@ -151,7 +160,7 @@ class KafkaCheck(AgentCheck):
     def _get_kafka_client(self, instance):
         kafka_conn_str = self._read_config(instance, 'kafka_connect_str')
         if not kafka_conn_str:
-            raise Exception('Bad instance')
+            raise BadKafkaConsumerConfiguration('Bad instance configuration')
 
         instance_key = self._get_instance_key(instance)
         if kafka_conn_str not in self.kafka_clients:
@@ -170,58 +179,58 @@ class KafkaCheck(AgentCheck):
     def _get_random_node_id(self, client):
         brokers = client.cluster.brokers()
         if not brokers:
-            raise Exception('No known available brokers... make this a specific exception')
-        nodeid = random.sample(brokers, 1)[0].nodeId
+            raise NoKafkaBrokersAvailable('No available brokers.')
+        node_id = random.sample(brokers, 1)[0].nodeId
 
-        return nodeid
+        return node_id
 
-    def _make_req_async(self, client, request, nodeid=None, cb=None):
-        if not nodeid:
-            nodeid = self._get_random_node_id(client)
+    def _make_req_async(self, client, request, node_id=None, cb=None):
+        if not node_id:
+            node_id = self._get_random_node_id(client)
 
-        future = client.send(nodeid, request)
+        future = client.send(node_id, request)
         if cb:
-            future.add_callback(cb, request, nodeid, self.current_ts)
+            future.add_callback(cb, request, node_id, self.current_ts)
 
-    def _ensure_ready_node(self, client, nodeid):
-        if not nodeid:
-            raise Exception("nodeid is None")
+    def _ensure_ready_node(self, client, node_id):
+        if not node_id:
+            raise Exception("node_id is None")
 
         attempts = 0
-        while not client.ready(nodeid):
+        while not client.ready(node_id):
             if attempts > DEFAULT_KAFKA_RETRIES:
-                self.log.error("unable to connect to broker id: {} after {} attempts".format(nodeid, DEFAULT_KAFKA_RETRIES))
+                self.log.error("unable to connect to broker id: {} after {} attempts".format(node_id, DEFAULT_KAFKA_RETRIES))
                 break
             attempts = attempts + 1
             delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01 # starting at 20 ms
-            self.log.info("broker id: %s is not ready yet, sleeping for %f ms", nodeid, delay * 10)
 
             future = client.cluster.request_update()
             client.poll(future=future)
             if future.failed():
                 if future.retriable():
                     if isinstance(future.exception, KafkaErrors.NodeNotReadyError):
+                        self.log.debug("broker id: %s is not ready yet, sleeping for %f ms", node_id, delay * 10)
                         sleep(delay)
                         continue
 
                 raise future.exception
 
-    def _make_blocking_req(self, client, request, nodeid=None):
-        if not nodeid:
-            nodeid = self._get_random_node_id(client)
+    def _make_blocking_req(self, client, request, node_id=None):
+        if not node_id:
+            node_id = self._get_random_node_id(client)
 
-        self._ensure_ready_node(client, nodeid)
+        self._ensure_ready_node(client, node_id)
 
-        future = client.send(nodeid, request)
+        future = client.send(node_id, request)
         client.poll(future=future)  # block until we get response.
         assert future.succeeded()
         response = future.value
 
         return response
 
-    def _get_kafka_version(self, client, nodeid=None):
-        if nodeid:
-            return client.check_version(node_id=nodeid)
+    def _get_kafka_version(self, client, node_id=None):
+        if node_id:
+            return client.check_version(node_id=node_id)
 
         for broker in client.cluster.brokers():
             version = client.check_version(node_id=broker.nodeId)
@@ -238,12 +247,12 @@ class KafkaCheck(AgentCheck):
         for _ in range(self._broker_retries):
             for broker in client.cluster.brokers():
                 try:
-                    coord_resp = self._make_blocking_req(client, request, nodeid=broker.nodeId)
+                    coord_resp = self._make_blocking_req(client, request, node_id=broker.nodeId)
                     # 0 means that there is no error
                     if coord_resp and coord_resp.error_code is 0:
                         client.cluster.add_group_coordinator(group, coord_resp)
                         coord_id = client.cluster.coordinator_for_group(group)
-                        if coord_id >= 0:
+                        if coord_id is not None and coord_id >= 0:
                             return coord_id
                 except AssertionError:
                     continue
@@ -252,7 +261,7 @@ class KafkaCheck(AgentCheck):
 
         return coord_id
 
-    def _process_highwater_offsets(self, request, instance, nodeid, response):
+    def _process_highwater_offsets(self, request, instance, node_id, response):
         highwater_offsets = {}
         topic_partitions_without_a_leader = []
 
@@ -321,7 +330,7 @@ class KafkaCheck(AgentCheck):
                     leader_tp[partition_leader][topic].update([partition])
 
         max_offsets = 1
-        for nodeId, tps in leader_tp.iteritems():
+        for node_id, tps in leader_tp.iteritems():
             # Construct the OffsetRequest
             request = OffsetRequest[0](
                 replica_id=-1,
@@ -330,8 +339,8 @@ class KafkaCheck(AgentCheck):
                         (partition, OffsetResetStrategy.LATEST, max_offsets) for partition in partitions])
                     for topic, partitions in tps.iteritems()])
 
-            response = self._make_blocking_req(cli, request, nodeid=nodeId)
-            offsets, unled = self._process_highwater_offsets(request, instance, nodeId, response)
+            response = self._make_blocking_req(cli, request, node_id=node_id)
+            offsets, unled = self._process_highwater_offsets(request, instance, node_id, response)
             highwater_offsets.update(offsets)
             topic_partitions_without_a_leader.extend(unled)
 
@@ -490,23 +499,51 @@ class KafkaCheck(AgentCheck):
         # TODO: find reliable way to decide what API version to use for
         # OffsetFetchRequest.
         consumer_offsets = {}
-        broker_ids = [coord_id] if coord_id else [b.nodeId for b in client.cluster.brokers()]
+        if coord_id is not None and coord_id>=0:
+            broker_ids = [coord_id]
+        else:
+            broker_ids = [b.nodeId for b in client.cluster.brokers()]
+
         for broker_id in broker_ids:
-            request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
-            response = self._make_blocking_req(client, request, nodeid=broker_id)
+            offset_request = self._get_consumer_offset_request(client)
+
+            request = offset_request(consumer_group, list(tps.iteritems()))
+            response = self._make_blocking_req(client, request, node_id=broker_id)
             for (topic, partition_offsets) in response.topics:
                 for partition, offset, _, error_code in partition_offsets:
                     if error_code is not 0:
                         continue
-                    consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
+
+    def _get_consumer_offset_request(self, client):
+        version = client.config.get('api_version')
+        request_idx = 1
+
+        if version < (0, 8, 2):
+            request_idx = 0
+
+        return OffsetFetchRequest[request_idx]
+
+    def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
+        if not kafka_collect or not interval:
+            return True
+
+        now = time()
+        last = self._zk_last_ts.get(zk_hosts_ports)
+
+        should_zk = False
+        if not last or (now-last)>=interval:
+            self._zk_last_ts[zk_hosts_ports] = last
+            should_zk = True
+
+        return should_zk
 
     @staticmethod
     def _read_config(instance, key, cast=None):
         val = instance.get(key)
         if val is None:
-            raise Exception('Must provide `%s` value in instance config' % key)
+            raise BadKafkaConsumerConfiguration('Must provide `%s` value in instance config' % key)
 
         if cast is None:
             return val

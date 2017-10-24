@@ -37,6 +37,9 @@ instances:
     zk_connect_str:
       - localhost:2181
       - another_zookeeper:2181
+    # zk_iteration_ival: 1  # how many seconds between ZK consumer offset
+                            # collections. If kafka consumer offsets disabled
+                            # this has no effect.
     # zk_prefix: /0.8
     # kafka_consumer_offsets: false
     consumer_groups:
