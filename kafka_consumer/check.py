@@ -499,7 +499,7 @@ class KafkaCheck(AgentCheck):
         # TODO: find reliable way to decide what API version to use for
         # OffsetFetchRequest.
         consumer_offsets = {}
-        if coord_id is not None and coord_id>=0:
+        if coord_id is not None and coord_id >= 0:
             broker_ids = [coord_id]
         else:
             broker_ids = [b.nodeId for b in client.cluster.brokers()]
@@ -533,7 +533,7 @@ class KafkaCheck(AgentCheck):
         last = self._zk_last_ts.get(zk_hosts_ports)
 
         should_zk = False
-        if not last or (now-last)>=interval:
+        if not last or (now-last) >= interval:
             self._zk_last_ts[zk_hosts_ports] = last
             should_zk = True
 
