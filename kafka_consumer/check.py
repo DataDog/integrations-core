@@ -513,6 +513,7 @@ class KafkaCheck(AgentCheck):
                 for partition, offset, _, error_code in partition_offsets:
                     if error_code is not 0:
                         continue
+                    consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
 
@@ -530,10 +531,10 @@ class KafkaCheck(AgentCheck):
             return True
 
         now = time()
-        last = self._zk_last_ts.get(zk_hosts_ports)
+        last = self._zk_last_ts.get(zk_hosts_ports, 0)
 
         should_zk = False
-        if not last or (now-last) >= interval:
+        if (now-last) >= interval:
             self._zk_last_ts[zk_hosts_ports] = last
             should_zk = True
 
