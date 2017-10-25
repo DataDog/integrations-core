@@ -39,7 +39,7 @@ Restart the Agent to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `php_fpm` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `php_fpm` under the Checks section:
 
 ```
   Checks

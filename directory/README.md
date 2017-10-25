@@ -35,7 +35,7 @@ Ensure that the user running the Agent process (usually `dd-agent`) has read acc
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `directory` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `directory` under the Checks section:
 
 ```
   Checks

@@ -94,7 +94,7 @@ Restart the Agent to start sending MySQL metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mysql` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mysql` under the Checks section:
 
 ```
   Checks

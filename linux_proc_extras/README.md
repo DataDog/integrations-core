@@ -17,7 +17,7 @@ Edit the `linux_proc_extras.yaml` file to point to your server and port, set the
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `linux_proc_extras` under the Checks section:
 
     Checks
     ======

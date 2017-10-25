@@ -41,14 +41,14 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `process` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `process` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    mcache
+    process
     -------
       - instance #0 [OK]
       - instance #1 [OK]

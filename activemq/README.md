@@ -96,7 +96,7 @@ else echo -e "\e[031mAgent is not running\e[0m"; fi
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `activemq` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `activemq` under the Checks section:
 
 ```
   Checks

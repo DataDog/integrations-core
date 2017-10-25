@@ -41,7 +41,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `gunicorn` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gunicorn` under the Checks section:
 
 ```
   Checks

@@ -204,7 +204,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `solr` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `solr` under the Checks section:
 
 ```
   Checks

@@ -26,7 +26,7 @@ Restart the Agent to start sending Windows events to Datadog.
 
 ### Validation
 
-See the info page in the Agent Manager and look for `win32_event_log` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `win32_event_log` under the Checks section:
 
 ```
   Checks

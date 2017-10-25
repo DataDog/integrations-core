@@ -39,7 +39,7 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `vsphere` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `vsphere` under the Checks section:
 
 ```
   Checks

@@ -73,7 +73,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 #### Datadog Agent to Consul Agent
 
-Run the Agent's `info` subcommand and look for `consul` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `consul` under the Checks section:
 
 ```
   Checks

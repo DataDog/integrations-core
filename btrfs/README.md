@@ -19,7 +19,7 @@ The Btrfs check is packaged with the Agent, so simply [install the Agent](https:
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `btrfs` under the Checks section:
 
 ```
   Checks

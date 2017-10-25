@@ -23,7 +23,7 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `cassandra` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `cassandra` under the Checks section:
 
 ```
   Checks

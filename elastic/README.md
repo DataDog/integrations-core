@@ -33,7 +33,7 @@ See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/
 
 ### Validation
 
-Run the Agent's info subcommand and look for `elastic` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `elastic` under the Checks section:
 
 ```
   Checks

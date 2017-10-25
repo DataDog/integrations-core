@@ -18,7 +18,7 @@ Edit the `wmi_check.yaml` file to point to your server and port, set the masters
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `wmi_check` under the Checks section:
 
     Checks
     ======

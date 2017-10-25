@@ -17,7 +17,7 @@ Edit the `pdh_check.yaml` file to collect Windows performance data. See the [sam
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `pdh_check` under the Checks section:
 
     Checks
     ======

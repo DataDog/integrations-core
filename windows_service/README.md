@@ -32,7 +32,7 @@ Restart the Agent to start monitoring the services and sending service checks to
 
 ### Validation
 
-See the info page in the Agent Manager and look for `windows_service` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `windows_service` under the Checks section:
 
 ```
   Checks

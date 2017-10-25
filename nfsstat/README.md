@@ -15,7 +15,7 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nfsstat` under the Checks section:
 
     Checks
     ======
