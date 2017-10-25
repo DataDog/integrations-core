@@ -225,12 +225,12 @@ class ConsulCheck(AgentCheck):
         return services
 
     def _get_service_tags(self, service, tags):
-        service_tags = []
+        service_tags = ['consul_service_id:{0}'.format(service)]
 
         for tag in tags:
             service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
 
-        return ['consul_service_id:{0}'.format(service)] + service_tags
+        return service_tags
 
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
