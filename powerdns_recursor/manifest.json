@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893"
+  "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
+  "public_title": "Datadog-Power DNS Recursor Integration",
+  "categories":["web", "network"],
+  "doc_link": "https://docs.datadoghq.com/integrations/powerdns_recursor/",
+  "is_public": true,
+  "has_logo": true
 }

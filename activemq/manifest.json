@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05"
+  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
+  "public_title": "Datadog-ActiveMQ Integration",
+  "categories":["processing", "messaging"],
+  "doc_link": "https://docs.datadoghq.com/integrations/activemq/",
+  "is_public": true,
+  "has_logo": true
 }

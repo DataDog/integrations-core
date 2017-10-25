@@ -10,5 +10,10 @@
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "2289acf0-e413-4384-83f7-88157b430805"
+  "guid": "2289acf0-e413-4384-83f7-88157b430805",
+  "public_title": "Datadog-Windows Services Integration",
+  "categories":["os & system"],
+  "doc_link": "https://docs.datadoghq.com/integrations/windows_service/",
+  "is_public": true,
+  "has_logo": true
 }

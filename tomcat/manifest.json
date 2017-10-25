@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997"
+  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997",
+  "public_title": "Datadog-Tomcat Integration",
+  "categories":["web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/tomcat/",
+  "is_public": true,
+  "has_logo": true
 }

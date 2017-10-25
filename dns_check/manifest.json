@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "31e4c84c-fc4b-4cd4-97ed-0331bf4e2023"
+  "guid": "31e4c84c-fc4b-4cd4-97ed-0331bf4e2023",
+  "public_title": "Datadog-DNS Check Integration",
+  "categories":["network", "web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/dns_check/",
+  "is_public": true,
+  "has_logo": true
 }

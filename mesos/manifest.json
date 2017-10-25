@@ -11,5 +11,10 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "public_title": "Datadog-Mesos Integration",
+  "categories":["configuration & deployment", "containers", "orchestration"],
+  "doc_link": "https://docs.datadoghq.com/integrations/mesos/",
+  "is_public": true,
+  "has_logo": true
 }

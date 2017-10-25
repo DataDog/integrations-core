@@ -12,5 +12,10 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "public_title": "Datadog-Jenkins Integration",
+  "categories":["configuration & deployment"],
+  "doc_link": "https://docs.datadoghq.com/integrations/jenkins/",
+  "is_public": true,
+  "has_logo": true
 }

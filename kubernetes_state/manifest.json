@@ -12,5 +12,10 @@
     "mac_os"
   ],
   "version": "1.3.0",
-  "use_omnibus_reqs": true
+  "use_omnibus_reqs": true,
+  "public_title": "Datadog-Kubernetes State Integration",
+  "categories":["orchestration", "containers"],
+  "doc_link": "https://docs.datadoghq.com/integrations/kubernetes_state/",
+  "is_public": true,
+  "has_logo": true
 }

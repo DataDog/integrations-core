@@ -12,5 +12,10 @@
   ],
   "package_deps": false,
   "version": "1.0.2",
-  "guid": "51386802-4502-4991-b592-27eff1ca111c"
+  "guid": "51386802-4502-4991-b592-27eff1ca111c",
+  "public_title": "Datadog-PGbouncer Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/pgbouncer/",
+  "is_public": true,
+  "has_logo": true
 }

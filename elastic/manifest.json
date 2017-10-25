@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.1",
-  "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a"
+  "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a",
+  "public_title": "Datadog-ElasticSearch Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/elasticsearch/",
+  "is_public": true,
+  "has_logo": true
 }
