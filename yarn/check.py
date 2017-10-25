@@ -81,10 +81,15 @@ yarn.queue.maxApplicationsPerUser       The maximum number of active application
 '''
 # stdlib
 from urlparse import urljoin, urlsplit, urlunsplit
+from subprocess import Popen, PIPE
 
 # 3rd party
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 import requests
+
+# 3rd party Kerberos Authentication
+from requests_kerberos import HTTPKerberosAuth
 
 # Project
 from checks import AgentCheck
@@ -217,11 +222,52 @@ class YarnCheck(AgentCheck):
         'queue',
         'user'
     ]
+    
+    # Our Authentication Method. Defaults to None
+    requests_authentication = None
+    
+    # On initialize, handle anything related to Kerberos authentication
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        super(YarnCheck, self).__init__(name, init_config, agentConfig, instances)
+        kerberos_auth = self.init_config.get('kerberos_auth', False)
+        basic_auth = self.init_config.get('basic_auth', False)
+        digest_auth = self.init_config.get('digest_auth', False)
+        
+        # Kerberos Authentication
+        if kerberos_auth:
+            kerberos_user = self.init_config.get('kerberos_user', "")
+            kerberos_realm = self.init_config.get('kerberos_realm', "")
+            kerberos_password = self.init_config.get('kerberos_password', "")
+            # Run kinit via subprocess
+            kinit = '/usr/bin/kinit'
+            kinit_args = [ kinit, '%s@%s' % (kerberos_user, kerberos_realm) ]
+            kinit = Popen(kinit_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            kinit.stdin.write('%s\n' % kerberos_password)
+            kinit.wait()
+            # Apply the Kerberos HTTP Auth
+            requests_authentication = HTTPKerberosAuth()
+        # Basic Authentication
+        elif basic_auth:
+            basic_user = self.init_config.get('basic_user', "")
+            basic_password = self.init_config.get('basic_password', "")
+            # Apply the HTTP Basic Auth
+            requests_authentication = HTTPBasicAuth(basic_user,basic_password)
+        # Digest Authentication
+        elif basic_auth:
+            digest_user = self.init_config.get('digest_user', "")
+            digest_password = self.init_config.get('digest_password', "")
+            # Apply the HTTP Digest Auth
+            requests_authentication = HTTPDigestAuth(basic_user,basic_password)
+        
+        ### HANDLE SOME OTHER AUTH FORMS IN THE FUTURE ###
+        # 1. HTTP Basic
+        # 2. HTTP Digest
+        # 3. ...
 
     def check(self, instance):
-
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
+        validate_ssl = instance.get('validate_ssl', True)
         app_tags = instance.get('application_tags', {})
         queue_blacklist = instance.get('queue_blacklist', [])
 
@@ -237,7 +283,6 @@ class YarnCheck(AgentCheck):
 
         # Collected by default
         app_tags['app_name'] = 'name'
-
 
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
@@ -255,17 +300,17 @@ class YarnCheck(AgentCheck):
         tags.append('cluster_name:%s' % cluster_name)
 
         # Get metrics from the Resource Manager
-        self._yarn_cluster_metrics(rm_address, tags)
+        self._yarn_cluster_metrics(rm_address, validate_ssl, tags)
         if _is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
-            self._yarn_app_metrics(rm_address, app_tags, tags)
-        self._yarn_node_metrics(rm_address, tags)
-        self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
+            self._yarn_app_metrics(rm_address, validate_ssl, app_tags, tags)
+        self._yarn_node_metrics(rm_address, validate_ssl, tags)
+        self._yarn_scheduler_metrics(rm_address, validate_ssl, tags, queue_blacklist)
 
-    def _yarn_cluster_metrics(self, rm_address, addl_tags):
+    def _yarn_cluster_metrics(self, rm_address, validate_ssl, addl_tags):
         '''
         Get metrics related to YARN cluster
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_CLUSTER_METRICS_PATH)
 
         if metrics_json:
 
@@ -274,12 +319,12 @@ class YarnCheck(AgentCheck):
             if yarn_metrics is not None:
                 self._set_yarn_metrics_from_json(addl_tags, yarn_metrics, YARN_CLUSTER_METRICS)
 
-    def _yarn_app_metrics(self, rm_address, app_tags, addl_tags):
+    def _yarn_app_metrics(self, rm_address, validate_ssl, app_tags, addl_tags):
         '''
         Get metrics for running applications
         '''
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            rm_address, validate_ssl,
             YARN_APPS_PATH,
             states=YARN_APPLICATION_STATES
         )
@@ -304,11 +349,11 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
-    def _yarn_node_metrics(self, rm_address, addl_tags):
+    def _yarn_node_metrics(self, rm_address, validate_ssl, addl_tags):
         '''
         Get metrics related to YARN nodes
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_NODES_PATH)
 
         if (metrics_json and metrics_json['nodes'] is not None and
                 metrics_json['nodes']['node'] is not None):
@@ -321,11 +366,11 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
 
-    def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
+    def _yarn_scheduler_metrics(self, rm_address, validate_ssl, addl_tags, queue_blacklist):
         '''
         Get metrics from YARN scheduler
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_SCHEDULER_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, validate_ssl, YARN_SCHEDULER_PATH)
 
         try:
             metrics_json = metrics_json['scheduler']['schedulerInfo']
@@ -403,7 +448,7 @@ class YarnCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown', metric_type)
 
-    def _rest_request_to_json(self, address, object_path, *args, **kwargs):
+    def _rest_request_to_json(self, address, validate_ssl, object_path, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
@@ -429,7 +474,7 @@ class YarnCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=validate_ssl, auth=self.requests_authentication)
             response.raise_for_status()
             response_json = response.json()
 
