@@ -182,3 +182,4 @@ mongodb.collection.maxSize,gauge,,byte,,Maximum size of a capped collection in b
 mongodb.collection.storageSize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
 mongodb.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,mongodb,number of indices on collection
 mongodb.collection.indexSizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
+mongodb.collection.indexes.accesses.ops,gauge,,access,,Number of time the index was used.,0,mongodb,index usage
