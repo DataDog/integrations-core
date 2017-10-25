@@ -1,5 +1,12 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+0.1.1/ Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix a case where metrics would not be sent for some nodes
+
 0.1.0/ 2017-08-28
 ==================
 
