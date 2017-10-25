@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.14.0",
   "name": "kube_dns",
-  "short_description": "kube_dns description.",
+  "short_description": "Track all your Kube DNS metrics with Datadog",
   "guid": "3c05ed97-bf34-4061-83c4-e742d7daa5f8",
   "support": "contrib",
   "supported_os": ["linux","mac_os","windows"],

@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.14.0",
   "name": "http_check",
-  "short_description": "http_check description.",
+  "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
   "support": "core",
   "supported_os": [
     "linux",

@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.15.0",
   "name": "kubernetes_state",
-  "short_description": "kubernetes_state description.",
+  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
   "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
   "support": "contrib",
   "supported_os": [
