@@ -15,7 +15,7 @@ The Ceph check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `ceph.yaml` in the Agent's `conf.d` directory:
+Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml](https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

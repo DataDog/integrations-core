@@ -14,7 +14,7 @@ Install the `dd-check-wmi_check` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `wmi_check.yaml` file to point to your server and port, set the masters to monitor
+Edit the `wmi_check.yaml` file to point to your server and port, set the masters to monitor. See the [sample wmi_check.yaml](https://github.com/DataDog/integrations-core/blob/master/wmi_check/conf.yaml.default) for all available configuration options.
 
 ### Validation
 

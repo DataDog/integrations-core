@@ -19,7 +19,7 @@ The Couchbase check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `couchbase.yaml` in the Agent's `conf.d` directory:
+Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml](https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

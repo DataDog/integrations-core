@@ -13,7 +13,7 @@ If you need the newest version of the TCP check, install the `dd-check-tcp` pack
 
 ### Configuration
 
-Create a file `tcp_check.yaml` in the Agent's `conf.d` directory:
+Create a file `tcp_check.yaml` in the Agent's `conf.d` directory. See the [sample tcp_check.yaml](https://github.com/DataDog/integrations-core/blob/master/tcp_check/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

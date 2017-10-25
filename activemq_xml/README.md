@@ -14,7 +14,7 @@ Install the `dd-check-activemq_xml` package manually or with your favorite confi
 
 ### Configuration
 
-Edit the `activemq_xml.yaml` file to point to your server and port, set the masters to monitor
+Edit the `activemq_xml.yaml` file to point to your server and port, set the masters to monitor. See the [sample activemq_xml.yaml](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/conf.yaml.example) for all available configuration options.
 
 ### Validation
 

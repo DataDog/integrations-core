@@ -14,7 +14,7 @@ The Marathon check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `marathon.yaml` in the Agent's `conf.d` directory:
+Create a file `marathon.yaml` in the Agent's `conf.d` directory. See the [sample marathon.yaml](https://github.com/DataDog/integrations-core/blob/master/marathon/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

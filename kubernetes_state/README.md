@@ -14,7 +14,7 @@ Install the `dd-check-kubernetes_state` package manually or with your favorite c
 
 ### Configuration
 
-Edit the `kubernetes_state.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kubernetes_state.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/conf.yaml.default) for all available configuration options.
 
 ### Validation
 

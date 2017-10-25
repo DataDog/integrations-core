@@ -16,7 +16,7 @@ The CouchDB check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-Create a file `couch.yaml` in the Agent's `conf.d` directory:
+Create a file `couch.yaml` in the Agent's `conf.d` directory. See the [sample  couch.yaml](https://github.com/DataDog/integrations-core/blob/master/couch/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

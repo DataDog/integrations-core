@@ -31,7 +31,7 @@ C:/> winmgmt /resyncperf
 
 #### Connect the Agent
 
-Create a file `iis.yaml` in the Agent's `conf.d` directory:
+Create a file `iis.yaml` in the Agent's `conf.d` directory. See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

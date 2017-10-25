@@ -50,7 +50,7 @@ For more details about creating and managing users in MongoDB, refer to [the Mon
 
 #### Connect the Agent
 
-Create a file `tokumx.yaml` in the Agent's `conf.d` directory:
+Create a file `tokumx.yaml` in the Agent's `conf.d` directory. See the [sample tokumx.yaml](https://github.com/DataDog/integrations-core/blob/master/tokumx/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

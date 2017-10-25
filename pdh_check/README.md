@@ -13,7 +13,7 @@ Install the `dd-check-pdh_check` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `pdh_check.yaml` file to collect Windows performance data
+Edit the `pdh_check.yaml` file to collect Windows performance data. See the [sample pdh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/pdh_check/conf.yaml.default) for all available configuration options.
 
 ### Validation
 

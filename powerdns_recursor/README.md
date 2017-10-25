@@ -38,7 +38,7 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory:
+Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory. See the [sample powerdns_recursor.yaml](https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

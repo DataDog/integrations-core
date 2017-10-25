@@ -15,7 +15,7 @@ The Gearman check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-Create a file `gearmand.yaml` in the Agent's `conf.d` directory:
+Create a file `gearmand.yaml` in the Agent's `conf.d` directory. See the [sample gearmand.yaml](https://github.com/DataDog/integrations-core/blob/master/gearmand/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

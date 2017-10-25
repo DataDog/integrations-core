@@ -22,7 +22,7 @@ If you need the newest version of the check, install the `dd-check-spark` packag
 
 ### Configuration
 
-Create a file `spark.yaml` in the Agent's `conf.d` directory:
+Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample spark.yaml](https://github.com/DataDog/integrations-core/blob/master/spark/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

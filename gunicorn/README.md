@@ -21,7 +21,7 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 ### Configuration
 #### Configure the Datadog Agent
 
-Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sample gunicorn.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

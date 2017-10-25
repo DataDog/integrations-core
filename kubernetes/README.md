@@ -14,7 +14,7 @@ Install the `dd-check-kubernetes` package manually or with your favorite configu
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.default) for all available configuration options.
 
 ### Gathering kubernetes events
 

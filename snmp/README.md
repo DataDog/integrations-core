@@ -13,7 +13,7 @@ The SNMP check is packaged with the Agent, so simply [install the Agent](https:/
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example `snmp.yaml`:
+Here's an example `snmp.yaml`. See the [sample snmp.yaml](https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

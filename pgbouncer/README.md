@@ -11,7 +11,7 @@ The PgBouncer check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `pgbouncer.yaml` in the Agent's `conf.d` directory:
+Create a file `pgbouncer.yaml` in the Agent's `conf.d` directory. See the [sample pgbouncer.yaml](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

@@ -21,7 +21,7 @@ You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](h
 
 #### Connect the Agent
 
-Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory:
+Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory. See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

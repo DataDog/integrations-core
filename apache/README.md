@@ -13,7 +13,7 @@ Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
 ### Configuration
 
-Create a file `apache.yaml` in the Agent's `conf.d` directory:
+Create a file `apache.yaml` in the Agent's `conf.d` directory. See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

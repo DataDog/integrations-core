@@ -11,7 +11,7 @@ Install the `dd-check-nfsstat` package manually or with your favorite configurat
 
 ### Configuration
 
-Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use the one included with the binary installer.
+Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.yaml](https://github.com/DataDog/integrations-core/blob/master/nfsstat/conf.yaml.default) for all available configuration options.
 
 ### Validation
 

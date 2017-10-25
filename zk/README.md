@@ -11,7 +11,7 @@ The Zookeeper check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `zk.yaml` in the Agent's `conf.d` directory:
+Create a file `zk.yaml` in the Agent's `conf.d` directory. See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

@@ -66,7 +66,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Connect the Agent
 
-Create a basic `mysql.yaml` in the Agent's `conf.d` directory to connect it to the MySQL server:
+Create a basic `mysql.yaml` in the Agent's `conf.d` directory to connect it to the MySQL server. See the [sample mysql.yaml](https://github.com/DataDog/integrations-core/blob/master/mysql/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

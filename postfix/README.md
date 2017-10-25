@@ -17,7 +17,7 @@ Optionally, you can configure the agent to use a built in `postqueue -p` command
 **WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
 
 ### Using sudo
-Create a file `postfix.yaml` in the Agent's `conf.d` directory:
+Create a file `postfix.yaml` in the Agent's `conf.d` directory. See the [sample postfix.yaml](https://github.com/DataDog/integrations-core/blob/master/postfix/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

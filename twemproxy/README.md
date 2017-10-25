@@ -11,7 +11,7 @@ The Agent's twemproxy check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Create a file `twemproxy.yaml` in the Agent's `conf.d` directory:
+Create a file `twemproxy.yaml` in the Agent's `conf.d` directory. See the [sample twemproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/twemproxy/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

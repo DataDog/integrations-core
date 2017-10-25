@@ -13,7 +13,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-Create a file `solr.yaml` in the Agent's `conf.d` directory:
+Create a file `solr.yaml` in the Agent's `conf.d` directory. See the [sample solr.yaml](https://github.com/DataDog/integrations-core/blob/master/solr/conf.yaml.default) for all available configuration options:
 
 ```
 instances:

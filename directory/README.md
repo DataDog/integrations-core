@@ -16,7 +16,7 @@ The directory check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-1. Edit your `directory.yaml` file in the Agent's `conf.d` directory:
+1. Edit your `directory.yaml` file in the Agent's `conf.d` directory. See the [sample directory.yaml](https://github.com/DataDog/integrations-core/blob/master/directory/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

@@ -13,7 +13,7 @@ If you need the newest version of the HTTP check, install the `dd-check-http` pa
 
 ### Configuration
 
-Create a file `http_check.yaml` in the Agent's `conf.d` directory:
+Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

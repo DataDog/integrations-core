@@ -45,7 +45,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Create a file `supervisord.yaml` in the Agent's `conf.d` directory:
+Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

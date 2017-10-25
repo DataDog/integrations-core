@@ -11,7 +11,7 @@ The Kong check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a `kong.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `kong.yaml` in the Datadog Agent's `conf.d` directory. See the [sample kong.yaml](https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
