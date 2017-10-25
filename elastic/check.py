@@ -635,10 +635,6 @@ class ESCheck(AgentCheck):
                 )
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
-        # Process number of indexes in cluster
-        if "indexes" in data:
-            self.gauge(self.PRIMARY_SHARD_INDEX_COUNT, len(data["indices"]), tags=config.tags)
-
         for metric, desc in pshard_stats_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 

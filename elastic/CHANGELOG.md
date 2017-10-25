@@ -1,4 +1,10 @@
 # CHANGELOG - elastic
+1.0.2 / Unreleased
+==================
+
+### Changes
+
+* [BUG] Fixes bug for retreiving indices count. See [#806][]
 
 1.0.1 / 2017-08-28
 ==================
