@@ -111,6 +111,38 @@ class TestKubernetesState(AgentCheckTest):
 
         self.assert_resourcequota()
 
+    @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
+    def test__update_kube_state_metrics_v040(self, mock_poll):
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
+        with open(f_name, 'rb') as f:
+            mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
+
+        config = {
+            'instances': [{
+                'host': 'foo',
+                'kube_state_url': 'http://foo',
+            }]
+        }
+
+        self.run_check(config)
+
+        self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
+        # TODO: uncomment when any of these are in the test protobuf.bin
+        #self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
+        #self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
+        #self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
+
+        for metric in self.METRICS:
+            if not metric.startswith(NAMESPACE + '.hpa'):
+                self.assertMetric(metric)
+            if metric not in self.ZERO_METRICS:
+                self.assertMetricNotAllZeros(metric)
+
+        self.assert_resourcequota()
+
     def assert_resourcequota(self):
         """ The metric name is created dynamically so we just check some exist. """
         for m in self.metrics:
