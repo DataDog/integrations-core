@@ -145,7 +145,7 @@ Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.c
 
 [Compose](https://docs.docker.com/compose/overview/) is a Docker tool that simplifies building applications on Docker by allowing you to define, build and run multiple containers as a single application.
 
-While the [Single Container Installation](#single-container-installation) instructions above will get the stock Datadog Agent container running, you will most likely want to enable integrations for other containerized services that are part of your Compose application. To do this, you'll need to combine integration YAML files with the base Datadog Agent image to create your Datadog Agent container. Then you'll need to add your container to the Compose YAML.
+While the Single Container Installation instructions above will get the stock Datadog Agent container running, you will most likely want to enable integrations for other containerized services that are part of your Compose application. To do this, you'll need to combine integration YAML files with the base Datadog Agent image to create your Datadog Agent container. Then you'll need to add your container to the Compose YAML.
 
 ##### Example: Monitoring Redis
 
