@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.5.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#606][]
+
 1.4.0 / 2017-10-10
 ==================
 ### Changes
