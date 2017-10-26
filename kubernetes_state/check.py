@@ -55,8 +55,6 @@ class KubernetesState(PrometheusCheck):
             'kube_deployment_status_replicas_updated': 'deployment.replicas_updated',
             'kube_hpa_spec_min_replicas': 'hpa.min_replicas',
             'kube_hpa_spec_max_replicas': 'hpa.max_replicas',
-            'kube_hpa_spec_target_cpu': 'hpa.target_cpu',
-            'kube_hpa_status_current_cpu': 'hpa.current_cpu',
             'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
             'kube_hpa_status_current_replicas': 'hpa.current_replicas',
             'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',

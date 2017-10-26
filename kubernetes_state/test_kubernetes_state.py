@@ -40,8 +40,6 @@ class TestKubernetesState(AgentCheckTest):
         # TODO: uncomment when any of HPA checks are in the test protobuf.bin
         NAMESPACE + '.hpa.min_replicas',
         NAMESPACE + '.hpa.max_replicas',
-        NAMESPACE + '.hpa.target_cpu',
-        NAMESPACE + '.hpa.current_cpu',
         NAMESPACE + '.hpa.desired_replicas',
         NAMESPACE + '.hpa.current_replicas',
         # pods

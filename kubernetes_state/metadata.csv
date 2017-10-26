@@ -41,8 +41,6 @@ kubernetes_state.node.status,gauge,,,,Submitted with a value of 1 for each node 
 kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.min_replicas
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas
 kubernetes_state.hpa.target_cpu,gauge,,,,Target CPU percentage of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.target_cpu
-kubernetes_state.hpa.current_cpu,gauge,,,,Current CPU percentage of the pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.current_cpu
-kubernetes_state.hpa.current_replicas,gauge,,,,Current number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.current_replicas
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas
 kubernetes_state.pod.ready,gauge,,,,Whether the pod is ready to serve requests,1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
