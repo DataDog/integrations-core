@@ -336,7 +336,8 @@ class ESCheck(AgentCheck):
     CLUSTER_PENDING_TASKS = {
         "elasticsearch.pending_tasks_total": ("gauge", "pending_task_total"),
         "elasticsearch.pending_tasks_priority_high": ("gauge", "pending_tasks_priority_high"),
-        "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent")
+        "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent"),
+        "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
     }
 
     SOURCE_TYPE_NAME = 'elasticsearch'
@@ -599,14 +600,18 @@ class ESCheck(AgentCheck):
 
     def _process_pending_tasks_data(self, data, config):
         p_tasks = defaultdict(int)
+        average_time_in_queue = 0
 
         for task in data.get('tasks', []):
             p_tasks[task.get('priority')] += 1
+            average_time_in_queue += task.get('time_in_queue_millis', 0)
 
+        total = sum(p_tasks.values())
         node_data = {
-            'pending_task_total':               sum(p_tasks.values()),
+            'pending_task_total':               total,
             'pending_tasks_priority_high':      p_tasks['high'],
             'pending_tasks_priority_urgent':    p_tasks['urgent'],
+            'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1), # if total is 0
         }
 
         for metric in self.CLUSTER_PENDING_TASKS:
