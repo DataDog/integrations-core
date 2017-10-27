@@ -1,5 +1,5 @@
-from .ntp import NtpCheck
+from . import ntp
 
-def main():
-    check = NtpCheck(name='ntp', init_config=None, agentConfig={})
-    check.check({})
+NtpCheck = ntp.NtpCheck
+
+__all__ = ['ntp']
