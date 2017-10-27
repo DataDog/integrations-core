@@ -135,9 +135,8 @@ class SQLServer(AgentCheck):
                     db_exists, context = self._check_db_exists(instance)
 
                 if db_exists:
-                    if instance.get('stored_procedure') is None:
-                        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
-                            self._make_metric_list_to_collect(instance, self.custom_metrics)
+                    with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
+                        self._make_metric_list_to_collect(instance, self.custom_metrics)
                 else:
                     # How much do we care that the DB doesn't exist?
                     ignore = _is_affirmative(instance.get("ignore_missing_database", False))
@@ -153,7 +152,7 @@ class SQLServer(AgentCheck):
                 self.log.exception("Skipping SQL Server instance")
                 continue
             except Exception as e:
-                self.log.exception("INitialization exception %s", str(e))
+                self.log.exception("Initialization exception %s", str(e))
                 continue
 
     def _check_db_exists(self, instance):
@@ -445,10 +444,10 @@ class SQLServer(AgentCheck):
     def check(self, instance):
         if self.do_check[self._conn_key(instance, self.DEFAULT_DB_KEY)]:
             proc = instance.get('stored_procedure')
-            if proc is None:
+            self.do_stored_procedure_check(instance, proc)
+            if proc:
+                self.log.debug("Stored procedure detected, running proc: %s", proc)
                 self.do_perf_counter_check(instance)
-            else:
-                self.do_stored_procedure_check(instance, proc)
         else:
             self.log.debug("Skipping check")
 
