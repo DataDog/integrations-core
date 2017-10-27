@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.php_fpm',
+    name='datadog-php_fpm',
     version=version,
     description='The PHP FPM check',
     long_description=long_description,

@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.kafka_consumer',
+    name='datadog-kafka_consumer',
     version=version,
     description='The Kafka Consumer check',
     long_description=long_description,

@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.system_core',
+    name='datadog-system_core',
     version=version,
     description='The System Core check',
     long_description=long_description,

@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.dns_check',
+    name='datadog-dns_check',
     version=version,
     description='The DNS check',
     long_description=long_description,

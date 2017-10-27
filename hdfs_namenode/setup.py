@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.hdfs_namenode',
+    name='datadog-hdfs_namenode',
     version=version,
     description='The HDFS Namenode check',
     long_description=long_description,
