@@ -11,7 +11,7 @@ The Windows Service check is packaged with the Agent, so simply [install the Age
 
 ### Configuration
 
-Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
+Create a file `windows_service.yaml` in the Agent's `conf.d` directory. See the [sample windwos_service.yaml](https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -32,7 +32,7 @@ Restart the Agent to start monitoring the services and sending service checks to
 
 ### Validation
 
-See the info page in the Agent Manager and look for `windows_service` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `windows_service` under the Checks section:
 
 ```
   Checks

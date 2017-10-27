@@ -15,7 +15,7 @@ The disk check is enabled by default, and the Agent will collect metrics on all 
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `disk` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `disk` under the Checks section:
 
 ```
   Checks

@@ -27,7 +27,7 @@ Restart the NameNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory:
+Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory. See the [sample hdfs_namenode.yaml](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -40,7 +40,7 @@ Restart the Agent to begin sending NameNode metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `hdfs_namenode` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `hdfs_namenode` under the Checks section:
 
 ```
   Checks

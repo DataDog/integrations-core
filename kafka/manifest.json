@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.1",
-  "guid": "f201c0b7-4b31-4528-9955-ae756a4580b8"
+  "guid": "f201c0b7-4b31-4528-9955-ae756a4580b8",
+  "public_title": "Datadog-Kafka Integration",
+  "categories":["processing", "messaging"],
+  "doc_link": "https://docs.datadoghq.com/integrations/kafka/",
+  "is_public": true,
+  "has_logo": true
 }

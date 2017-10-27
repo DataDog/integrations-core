@@ -10,5 +10,10 @@
     "linux"
   ],
   "version": "1.0.0",
-  "guid": "566466b0-1422-44ef-b14f-493a64e7b58a"
+  "guid": "566466b0-1422-44ef-b14f-493a64e7b58a",
+  "public_title": "Datadog-Cacti Integration",
+  "categories":["monitoring"],
+  "doc_link": "https://docs.datadoghq.com/integrations/cacti/",
+  "is_public": true,
+  "has_logo": true
 }

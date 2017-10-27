@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "68100352-b993-43e6-9dc8-5ecd498e160b"
+  "guid": "68100352-b993-43e6-9dc8-5ecd498e160b",
+  "public_title": "Datadog-FluentD Integration",
+  "categories":["logging"],
+  "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
+  "is_public": true,
+  "has_logo": true
 }

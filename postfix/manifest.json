@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.1.0",
-  "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4"
+  "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4",
+  "public_title": "Datadog-Postfix Integration",
+  "categories":["Collaboration"],
+  "doc_link": "https://docs.datadoghq.com/integrations/postfix/",
+  "is_public": true,
+  "has_logo": true
 }

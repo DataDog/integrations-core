@@ -11,7 +11,7 @@ The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `ssh_check.yaml` in the Agent's `conf.d` directory:
+Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -31,7 +31,7 @@ Restart the Agent to start sending SSH/SFTP metrics and service checks to Datado
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `ssh_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ssh_check` under the Checks section:
 
 ```
   Checks
