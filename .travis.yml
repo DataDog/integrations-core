@@ -26,7 +26,7 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
     - SDK_TESTING=true
     - BUNDLE_PATH=$TRAVIS_BUILD_DIR/vendor/cache
-    - DD_AGENT_BRANCH=$TRAVIS_BRANCH
+    - DD_AGENT_BRANCH=jaime/wheels
     - EXTRAS_BRANCH=master
     - JMXFETCH_URL="https://dd-jmxfetch.s3.amazonaws.com"
     - REQ_LOCALS="$TRAVIS_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
@@ -136,8 +136,9 @@ install:
   - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
   - bundle exec rake setup_agent_libs
 script:
-  - cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && python setup.py bdist_wheel && pip install . && cd -
   - bundle exec rake prep_travis_ci
+  - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
+  - cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && python setup.py bdist_wheel && pip install . && cd -
   - bundle exec rake ci:run
   - bundle exec rake requirements
 # we should clean generated files before we save the cache
