@@ -13,7 +13,8 @@ If you need the newest version of the check, install the `dd-check-cassandra_nod
 
 ### Configuration
 
-Create a file `cassandra_nodetool.yaml` in the Agent's `conf.d` directory:
+Create a file `cassandra_nodetool.yaml` in the Agent's `conf.d` directory. See the [sample cassandra_nodetool.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/conf.yaml.example) for all available configuration options:
+
 ```
 init_config:
   # command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
@@ -42,7 +43,7 @@ instances:
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `cassandra_nodetool` under the Checks section:
 
     Checks
     ======

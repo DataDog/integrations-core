@@ -182,6 +182,12 @@ class ESCheck(AgentCheck):
         "jvm.mem.heap_max": ("gauge", "jvm.mem.heap_max_in_bytes"),
         "jvm.mem.non_heap_committed": ("gauge", "jvm.mem.non_heap_committed_in_bytes"),
         "jvm.mem.non_heap_used": ("gauge", "jvm.mem.non_heap_used_in_bytes"),
+        "jvm.mem.pools.young.used": ("gauge", "jvm.mem.pools.young.used_in_bytes"),
+        "jvm.mem.pools.young.max": ("gauge", "jvm.mem.pools.young.max_in_bytes"),
+        "jvm.mem.pools.old.used": ("gauge", "jvm.mem.pools.old.used_in_bytes"),
+        "jvm.mem.pools.old.max": ("gauge", "jvm.mem.pools.old.max_in_bytes"),
+        "jvm.mem.pools.survivor.used": ("gauge", "jvm.mem.pools.survivor.used_in_bytes"),
+        "jvm.mem.pools.survivor.max": ("gauge", "jvm.mem.pools.survivor.max_in_bytes"),
         "jvm.threads.count": ("gauge", "jvm.threads.count"),
         "jvm.threads.peak_count": ("gauge", "jvm.threads.peak_count"),
         "elasticsearch.fs.total.total_in_bytes": ("gauge", "fs.total.total_in_bytes"),
@@ -635,10 +641,6 @@ class ESCheck(AgentCheck):
                 )
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
-        # Process number of indexes in cluster
-        if "indexes" in data:
-            self.gauge(self.PRIMARY_SHARD_INDEX_COUNT, len(data["indices"]), tags=config.tags)
-
         for metric, desc in pshard_stats_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 

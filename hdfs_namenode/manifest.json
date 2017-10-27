@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.0.0",
-  "guid": "41454590-0a25-4146-9c74-9d377db42764"
+  "guid": "41454590-0a25-4146-9c74-9d377db42764",
+  "public_title": "Datadog-HDFS Namenode Integration",
+  "categories":["processing", "os & system"],
+  "doc_link": "https://docs.datadoghq.com/integrations/hdfs_namenode/",
+  "is_public": true,
+  "has_logo": true
 }

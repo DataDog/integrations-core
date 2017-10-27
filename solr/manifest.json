@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "0235124a-0207-44dd-aede-f578a6d46b26"
+  "guid": "0235124a-0207-44dd-aede-f578a6d46b26",
+  "public_title": "Datadog-Solr Integration",
+  "categories":["data store", "search"],
+  "doc_link": "https://docs.datadoghq.com/integrations/solr/",
+  "is_public": true,
+  "has_logo": true
 }

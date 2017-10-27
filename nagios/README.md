@@ -17,7 +17,7 @@ The Nagios check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `nagios.yaml` in the Agent's `conf.d` directory:
+Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml](https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -39,7 +39,7 @@ Restart the Agent to start sending Nagios events and (optionally) perfdata metri
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `nagios` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nagios` under the Checks section:
 
 ```
   Checks

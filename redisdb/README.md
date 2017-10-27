@@ -11,7 +11,7 @@ The Redis check is packaged with the Agent, so simply [install the Agent](https:
 
 ### Configuration
 
-Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory. See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -40,7 +40,7 @@ See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `redis` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `redisdb` under the Checks section:
 
 ```
   Checks

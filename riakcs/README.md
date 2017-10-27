@@ -14,7 +14,7 @@ The RiakCS check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `riakcs.yaml` in the Agent's `conf.d` directory:
+Create a file `riakcs.yaml` in the Agent's `conf.d` directory. See the [sample riakcs.yaml](https://github.com/DataDog/integrations-core/blob/master/riakcs/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -32,7 +32,7 @@ instances:
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `riakcs` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `riakcs` under the Checks section:
 
 ```
   Checks

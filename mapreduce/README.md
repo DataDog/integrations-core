@@ -14,11 +14,11 @@ Install the `dd-check-mapreduce` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor
+Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml](https://github.com/DataDog/integrations-core/blob/master/mapreduce/conf.yaml.default) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mapreduce` under the Checks section:
 
     Checks
     ======

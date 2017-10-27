@@ -224,6 +224,14 @@ class ConsulCheck(AgentCheck):
 
         return services
 
+    def _get_service_tags(self, service, tags):
+        service_tags = ['consul_service_id:{0}'.format(service)]
+
+        for tag in tags:
+            service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
+
+        return service_tags
+
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
         instance_state = self._instance_states[hash_mutable(instance)]
@@ -310,7 +318,7 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
-                service_tags = ['consul_service_id:{0}'.format(service)]
+                service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 
