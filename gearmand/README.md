@@ -15,7 +15,7 @@ The Gearman check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-Create a file `gearmand.yaml` in the Agent's `conf.d` directory:
+Create a file `gearmand.yaml` in the Agent's `conf.d` directory. See the [sample gearmand.yaml](https://github.com/DataDog/integrations-core/blob/master/gearmand/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -29,7 +29,7 @@ Restart the Agent to begin sending Gearman metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `gearmand` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gearmand` under the Checks section:
 
 ```
   Checks
@@ -63,5 +63,7 @@ The Gearmand check does not include any event at this time.
 Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

@@ -4,7 +4,7 @@
 
 This check monitors the availability and uptime of non-Datadog StatsD servers. It also tracks the number of metrics, by metric type, received by StatsD.
 
-This check does NOT forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
+This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
 ## Setup
 ### Installation
@@ -13,7 +13,7 @@ The StatsD check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `statsd.yaml` in the Agent's `conf.d` directory:
+Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml](https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -27,7 +27,7 @@ Restart the Agent to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `statsd` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `statsd` under the Checks section:
 
 ```
   Checks
@@ -63,8 +63,10 @@ Returns CRITICAL if the StatsD server does not respond to the Agent's health sta
 
 Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 If you don't know what StatsD is and how does it work, check out [our blog post about it](https://www.datadoghq.com/blog/statsd/)
 
 To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/) about it.

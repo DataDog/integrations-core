@@ -14,7 +14,7 @@ The Marathon check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `marathon.yaml` in the Agent's `conf.d` directory:
+Create a file `marathon.yaml` in the Agent's `conf.d` directory. See the [sample marathon.yaml](https://github.com/DataDog/integrations-core/blob/master/marathon/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -33,7 +33,7 @@ Restart the Agent to begin sending Marathon metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `marathon` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `marathon` under the Checks section:
 
 ```
   Checks
@@ -54,7 +54,7 @@ The marathon check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Marathon check does not include any event at this time.
@@ -64,3 +64,9 @@ The Marathon check does not include any event at this time.
 `marathon.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to the Marathon API to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

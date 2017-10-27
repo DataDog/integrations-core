@@ -16,7 +16,7 @@ The directory check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `directory.yaml` in the Agent's `conf.d` directory:
+1. Edit your `directory.yaml` file in the Agent's `conf.d` directory. See the [sample directory.yaml](https://github.com/DataDog/integrations-core/blob/master/directory/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -31,11 +31,11 @@ instances:
 
 Ensure that the user running the Agent process (usually `dd-agent`) has read access to the directories, subdirectories, and files you configure.
 
-Restart the Agent to begin sending metrics on your chosen directories to Datadog.
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent).
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `directory` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `directory` under the Checks section:
 
 ```
   Checks
@@ -66,5 +66,7 @@ The Directory check does not include any event at this time.
 The Directory check does not include any service check at this time.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

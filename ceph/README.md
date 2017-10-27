@@ -15,7 +15,7 @@ The Ceph check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `ceph.yaml` in the Agent's `conf.d` directory:
+Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml](https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -33,7 +33,7 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `ceph` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ceph` under the Checks section:
 
 ```
   Checks
@@ -60,7 +60,8 @@ The Ceph check does not include any event at this time.
 The Ceph check does not include any service check at this time.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your Ceph cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-ceph-datadog/) about it.
+
+* [Monitor Ceph: From node status to cluster-wide performance](https://www.datadoghq.com/blog/monitor-ceph-datadog/)

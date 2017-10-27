@@ -1,2 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 network.http.response_time,gauge,,second,,"The response time of an HTTP request to a given url, tagged by url, e.g. 'url:http://example.com'.",-1,network,http resp time
+http.ssl.days_left,gauge,,day,,"Days until SSL certificate expiration",+1,network,days till expiration

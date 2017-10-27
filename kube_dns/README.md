@@ -17,7 +17,7 @@ Install the `dd-check-kube_dns` package manually or with your favorite configura
 
 ### Configuration
 
-Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor. See the [sample kube_dns.yaml](https://github.com/DataDog/integrations-core/blob/master/kube_dns/conf.yaml.default) for all available configuration options.
 
 #### Using with service discovery
 
@@ -46,7 +46,7 @@ metadata:
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kube_dns` under the Checks section:
 
     Checks
     ======
@@ -69,3 +69,9 @@ The Kube-DNS check does not include any event at this time.
 
 ### Service Checks
 The Kube-DNS check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

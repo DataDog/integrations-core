@@ -14,7 +14,7 @@ The RiakCS check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `riakcs.yaml` in the Agent's `conf.d` directory:
+Create a file `riakcs.yaml` in the Agent's `conf.d` directory. See the [sample riakcs.yaml](https://github.com/DataDog/integrations-core/blob/master/riakcs/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -28,11 +28,11 @@ instances:
 #   s3_root: s3.amazonaws.com # 
 ```
 
-Restart the Agent to start sending RiakCS metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending RiakCS metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `riakcs` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `riakcs` under the Checks section:
 
 ```
   Checks
@@ -65,6 +65,8 @@ The RiackCS check does not include any event at this time.
 
 Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability/) about it.

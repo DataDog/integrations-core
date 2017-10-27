@@ -17,7 +17,8 @@ is available in our contribution guidelines.
 ### Versioning
 
 - [ ] Bumped the version check in `manifest.json`
-- [ ] Updated `CHANGELOG.md`
+- [ ] Updated `CHANGELOG.md`. Please use `Unreleased` as the date in the title
+  for the new section.
 
 ### Additional Notes
 

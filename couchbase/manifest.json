@@ -11,6 +11,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
-  "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59"
+  "version": "1.1.1",
+  "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
+  "public_title": "Datadog-CouchBase Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/couchbase/",
+  "is_public": true,
+  "has_logo": true
 }

@@ -15,7 +15,7 @@ The etcd check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `etcd.yaml` in the Agent's `conf.d` directory:
+Create a file `etcd.yaml` in the Agent's `conf.d` directory. See the [sample etcd.yaml](https://github.com/DataDog/integrations-core/blob/master/etcd/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -28,7 +28,7 @@ Restart the Agent to begin sending etcd metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `etcd` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `etcd` under the Checks section:
 
 ```
   Checks
@@ -52,6 +52,8 @@ The etcd check is compatible with all major platforms.
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv) for a list of metrics provided by this integration.
 
+etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
+
 ### Events
 The Etcd check does not include any event at this time.
 
@@ -62,7 +64,7 @@ The Etcd check does not include any event at this time.
 Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoint.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate etcd with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-etcd-performance/) about it.

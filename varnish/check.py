@@ -264,23 +264,56 @@ class Varnish(AgentCheck):
             ================================================================
             ----------------------------------------------------------HHH--- Happy
 
+        Example output (new output format):
+
+            Backend name                   Admin      Probe
+            boot.default                   probe      Healthy (no probe)
+            boot.backend2                  probe      Healthy 4/4
+              Current states  good:  4 threshold:  3 window:  4
+              Average response time of good probes: 0.002504
+              Oldest ================================================== Newest
+              --------------------------------------------------------------44 Good IPv4
+              --------------------------------------------------------------XX Good Xmit
+              --------------------------------------------------------------RR Good Recv
+              ------------------------------------------------------------HHHH Happy
+
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
-        backend, status, message = None, None, None
         for line in output.split("\n"):
-            tokens = line.strip().split(' ')
+            backend, status, message = None, None, None
+            # split string and remove all empty fields
+            tokens = filter(None, line.strip().split(' '))
+
             if len(tokens) > 0:
-                if tokens[0] == 'Backend':
+                if tokens == ['Backend', 'name', 'Admin', 'Probe']:
+                    # skip the column headers that exist in new output format
+                    continue
+                # parse new output format
+                # the backend name will include the vcl name
+                # so split on first . to remove prefix
+                elif len(tokens) >= 4 and tokens[1] in ['healthy', 'sick']:
+                    # If the backend health was overriden, lets grab the
+                    # overriden value instead of the probed health
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[1].lower()
+                elif len(tokens) >= 4 and tokens[1] == 'probe':
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[2].lower()
+                # Parse older Varnish backend output
+                elif tokens[0] == 'Backend':
                     backend = tokens[1]
                     status = tokens[-1].lower()
-                elif tokens[0] == 'Current' and backend is not None:
+
+                if tokens[0] == 'Current' and backend is not None:
                     try:
                         message = ' '.join(tokens[2:]).strip()
                     except Exception:
                         # If we can't parse a message still send a status.
                         self.log.exception('Error when parsing message from varnishadm')
                         message = ''
+
+                if backend is not None:
                     backends_by_status[status].append((backend, message))
 
         for status, backends in backends_by_status.iteritems():

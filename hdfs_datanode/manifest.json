@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.0.0",
-  "guid": "c1409bbd-ff4a-4616-9948-6dc7f4910942"
+  "guid": "c1409bbd-ff4a-4616-9948-6dc7f4910942",
+  "public_title": "Datadog-HDFS Datanode Integration",
+  "categories":["processing", "os & system"],
+  "doc_link": "https://docs.datadoghq.com/integrations/hdfs_datanode/",
+  "is_public": true,
+  "has_logo": true
 }

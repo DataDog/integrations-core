@@ -33,7 +33,7 @@ $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 ### Configuration
 
-Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml](https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.default) for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
     init_config:
       snaplen: 512
@@ -88,3 +88,9 @@ The Go-metro check does not include any event at this time.
 
 ### Service Checks
 The Go-metro check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

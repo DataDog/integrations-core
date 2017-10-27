@@ -10,7 +10,7 @@ import pythoncom
 
 # project
 from checks import AgentCheck
-from checks.wmi_check import WinWMICheck, WMIMetric
+from checks.winwmi_check import WinWMICheck, WMIMetric
 from config import _is_affirmative
 from utils.containers import hash_mutable
 from utils.timeout import TimeoutException

@@ -22,7 +22,7 @@ If you need the newest version of the check, install the `dd-check-spark` packag
 
 ### Configuration
 
-Create a file `spark.yaml` in the Agent's `conf.d` directory:
+Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample spark.yaml](https://github.com/DataDog/integrations-core/blob/master/spark/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -48,7 +48,7 @@ Restart the Agent to start sending Spark metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `spark` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `spark` under the Checks section:
 
 ```
   Checks
@@ -83,6 +83,9 @@ The Agent submits one of the following service checks, depending on how you're r
 
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to monitor Hadoop & Spark with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-spark/) about it.
+
+* [Hadoop & Spark monitoring with Datadog](https://www.datadoghq.com/blog/monitoring-spark/)
