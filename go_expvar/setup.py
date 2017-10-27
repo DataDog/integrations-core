@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.go_expvar',
+    name='datadog-go_expvar',
     version=version,
     description='The Go Expvar check',
     long_description=long_description,

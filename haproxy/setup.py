@@ -30,7 +30,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='datadog.check.haproxy',
+    name='datadog-haproxy',
     version=version,
     description='The HAProxy check',
     long_description=long_description,

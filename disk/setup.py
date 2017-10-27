@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.disk',
+    name='datadog-disk',
     version=version,
     description='The Disk check',
     long_description=long_description,
