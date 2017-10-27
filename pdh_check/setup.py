@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.pdh_check',
+    name='datadog-pdh_check',
     version=version,
     description='The PDH check',
     long_description=long_description,

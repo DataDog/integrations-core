@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.twemproxy',
+    name='datadog-twemproxy',
     version=version,
     description='The Twemproxy check',
     long_description=long_description,

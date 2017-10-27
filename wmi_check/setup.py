@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.wmi_check',
+    name='datadog-wmi_check',
     version=version,
     description='The WMI check',
     long_description=long_description,

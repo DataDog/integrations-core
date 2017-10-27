@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.kubernetes',
+    name='datadog-kubernetes',
     version=version,
     description='The Kubernetes check',
     long_description=long_description,

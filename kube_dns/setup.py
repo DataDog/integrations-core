@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.kube_dns',
+    name='datadog-kube_dns',
     version=version,
     description='The KubeDNS check',
     long_description=long_description,

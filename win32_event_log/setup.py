@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.win32_event_log',
+    name='datadog-win32_event_log',
     version=version,
     description='The Win32 Event Log check',
     long_description=long_description,

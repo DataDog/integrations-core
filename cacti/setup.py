@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.cacti',
+    name='datadog-cacti',
     version=version,
     description='The Cacti check',
     long_description=long_description,
