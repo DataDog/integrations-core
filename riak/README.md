@@ -11,7 +11,7 @@ The Riak check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.default) for all available configuration options:
+Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

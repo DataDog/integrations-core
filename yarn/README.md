@@ -16,7 +16,7 @@ The YARN check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `yarn.yaml` in the Agent's `conf.d` directory. See the [sample yarn.yaml](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.default) for all available configuration options.:
+Create a file `yarn.yaml` in the Agent's `conf.d` directory. See the [sample yarn.yaml](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for all available configuration options.:
 
 ```
 init_config:

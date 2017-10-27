@@ -11,7 +11,7 @@ The system swap check is packaged with the Agent, so simply [install the Agent](
 
 ### Configuration
 
-Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory. See the [sample system_swap.yaml](https://github.com/DataDog/integrations-core/blob/master/system_swap/conf.yaml.default) for all available configuration options:
+Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory. See the [sample system_swap.yaml](https://github.com/DataDog/integrations-core/blob/master/system_swap/conf.yaml.example) for all available configuration options:
 
 ```
 # This check takes no initial configuration

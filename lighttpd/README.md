@@ -13,7 +13,7 @@ You'll also need to install `mod_status` on your Lighttpd servers.
 
 ### Configuration
 
-Create a file `lighttpd.yaml` in the Agent's `conf.d` directory. See the [sample lighttpd.yaml](https://github.com/DataDog/integrations-core/blob/master/lighttpd/conf.yaml.default) for all available configuration options:
+Create a file `lighttpd.yaml` in the Agent's `conf.d` directory. See the [sample lighttpd.yaml](https://github.com/DataDog/integrations-core/blob/master/lighttpd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

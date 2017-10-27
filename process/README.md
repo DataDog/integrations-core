@@ -16,7 +16,7 @@ The process check is packaged with the Agent, so simply [install the Agent](http
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.
 
-While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes. See the [sample process.yaml](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.default) for all available configuration options:
+While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes. See the [sample process.yaml](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

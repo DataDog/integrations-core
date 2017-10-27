@@ -17,7 +17,7 @@ The Nagios check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml](https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.default) for all available configuration options:
+Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml](https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
