@@ -37,7 +37,6 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.daemonset.misscheduled',
         NAMESPACE + '.daemonset.desired',
         # hpa
-        # TODO: uncomment when any of HPA checks are in the test protobuf.bin
         NAMESPACE + '.hpa.min_replicas',
         NAMESPACE + '.hpa.max_replicas',
         NAMESPACE + '.hpa.desired_replicas',
@@ -68,6 +67,18 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.daemonset.misscheduled',
         NAMESPACE + '.container.terminated',
         NAMESPACE + '.container.waiting',
+    ]
+
+    ZERO_METRICS_V040 = [
+        NAMESPACE + '.deployment.replicas_unavailable',
+        NAMESPACE + '.deployment.paused',
+        NAMESPACE + '.daemonset.misscheduled',
+        NAMESPACE + '.container.terminated',
+        NAMESPACE + '.container.waiting',
+        NAMESPACE + '.hpa.min_replicas',
+        NAMESPACE + '.hpa.max_replicas',
+        NAMESPACE + '.hpa.desired_replicas',
+        NAMESPACE + '.hpa.current_replicas',
     ]
 
     def assertMetricNotAllZeros(self, metric_name):
@@ -138,7 +149,7 @@ class TestKubernetesState(AgentCheckTest):
         for metric in self.METRICS:
             if not metric.startswith(NAMESPACE + '.hpa'):
                 self.assertMetric(metric)
-            if metric not in self.ZERO_METRICS:
+            if metric not in self.ZERO_METRICS_V040:
                 self.assertMetricNotAllZeros(metric)
 
         self.assert_resourcequota()
