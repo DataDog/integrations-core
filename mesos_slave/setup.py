@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.mesos_slave',
+    name='datadog-mesos_slave',
     version=version,
     description='The Mesos slave check',
     long_description=long_description,

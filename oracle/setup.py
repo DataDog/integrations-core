@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.oracle',
+    name='datadog-oracle',
     version=version,
     description='The Oracle Database check',
     long_description=long_description,
@@ -76,7 +76,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.oracle': ['oracle.yaml.example']},
+    package_data={b'datadog.oracle': ['oracle.yaml.example', '../../manifest.json']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent

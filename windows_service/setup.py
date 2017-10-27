@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.windows_service',
+    name='datadog-windows_service',
     version=version,
     description='The Windows Service check',
     long_description=long_description,

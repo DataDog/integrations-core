@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.tomcat',
+    name='datadog-tomcat',
     version=version,
     description='The Tomcat check',
     long_description=long_description,
