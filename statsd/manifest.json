@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "4830acf3-626b-42ff-a1db-3f37babd0ae6"
+  "guid": "4830acf3-626b-42ff-a1db-3f37babd0ae6",
+  "public_title": "Datadog-StatsD Integration",
+  "categories":["monitoring"],
+  "doc_link": "https://docs.datadoghq.com/integrations/statsd/",
+  "is_public": true,
+  "has_logo": true
 }

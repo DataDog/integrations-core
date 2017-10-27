@@ -13,11 +13,11 @@ Install the `dd-check-linux_proc_extras` package manually or with your favorite 
 
 ### Configuration
 
-Edit the `linux_proc_extras.yaml` file to point to your server and port, set the masters to monitor
+Edit the `linux_proc_extras.yaml` file to point to your server and port, set the masters to monitor. See the [sample linux_proc_extras.yaml](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/conf.yaml.default) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `linux_proc_extras` under the Checks section:
 
     Checks
     ======

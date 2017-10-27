@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.1.1",
-  "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8"
+  "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
+  "public_title": "Datadog-SSH Check Integration",
+  "categories":["network"],
+  "doc_link": "https://docs.datadoghq.com/integrations/ssh_check/",
+  "is_public": true,
+  "has_logo": true
 }

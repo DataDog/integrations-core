@@ -28,7 +28,7 @@ After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka m
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kafka` under the Checks section:
 
 ```
   Checks

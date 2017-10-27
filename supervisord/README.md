@@ -45,7 +45,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Create a file `supervisord.yaml` in the Agent's `conf.d` directory:
+Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -80,7 +80,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `supervisord` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `supervisord` under the Checks section:
 
 ```
   Checks

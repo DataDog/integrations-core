@@ -21,7 +21,7 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 ### Configuration
 #### Configure the Datadog Agent
 
-Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sample gunicorn.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:
@@ -41,7 +41,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `gunicorn` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gunicorn` under the Checks section:
 
 ```
   Checks
