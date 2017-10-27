@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.mcache',
+    name='datadog-mcache',
     version=version,
     description='The Memcache check',
     long_description=long_description,

@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.nginx',
+    name='datadog-nginx',
     version=version,
     description='The Nginx check',
     long_description=long_description,

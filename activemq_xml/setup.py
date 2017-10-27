@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.activemq_xml',
+    name='datadog-activemq_xml',
     version=version,
     description='The ActiveMQ XML check',
     long_description=long_description,

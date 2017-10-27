@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.http_check',
+    name='datadog-http_check',
     version=version,
     description='The HTTP check',
     long_description=long_description,

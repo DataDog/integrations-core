@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.linux_proc_extras',
+    name='datadog-linux_proc_extras',
     version=version,
     description='The Linux Proc Extras check',
     long_description=long_description,
