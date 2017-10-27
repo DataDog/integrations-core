@@ -307,7 +307,8 @@ CLUSTER_HEALTH_METRICS = {
 CLUSTER_PENDING_TASKS = {
     "elasticsearch.pending_tasks_total": ("gauge", "pending_task_total"),
     "elasticsearch.pending_tasks_priority_high": ("gauge", "pending_tasks_priority_high"),
-    "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent")
+    "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent"),
+    "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
 }
 
 
