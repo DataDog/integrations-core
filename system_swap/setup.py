@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.system_swap',
+    name='datadog-system_swap',
     version=version,
     description='The System Swap check',
     long_description=long_description,

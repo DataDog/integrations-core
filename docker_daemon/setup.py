@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.docker_daemon',
+    name='datadog-docker_daemon',
     version=version,
     description='The Docker Daemon check',
     long_description=long_description,

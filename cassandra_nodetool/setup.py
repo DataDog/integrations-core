@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.cassandra_nodetool',
+    name='datadog-cassandra_nodetool',
     version=version,
     description='The Cassandra Nodetool check',
     long_description=long_description,

@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.agent_metrics',
+    name='datadog-agent_metrics',
     version=version,
     description='The Agent Metrics check',
     long_description=long_description,

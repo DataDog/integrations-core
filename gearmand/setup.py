@@ -25,7 +25,7 @@ with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     version = manifest.get('version')
 
 setup(
-    name='datadog.check.gearmand',
+    name='datadog-gearmand',
     version=version,
     description='The Gearmand check',
     long_description=long_description,
