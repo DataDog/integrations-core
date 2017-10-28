@@ -13,7 +13,7 @@ The vSphere check is packaged with the Agent, so simply [install the Agent](http
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
-Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory. See the [sample vsphere.yaml](https://github.com/DataDog/integrations-core/blob/master/vsphere/conf.yaml.default) for all available configuration options:
+Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory. See the [sample vsphere.yaml](https://github.com/DataDog/integrations-core/blob/master/vsphere/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

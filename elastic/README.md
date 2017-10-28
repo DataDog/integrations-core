@@ -13,7 +13,7 @@ The Elasticsearch check is packaged with the Datadog Agent, so simply [install t
 
 ### Configuration
 
-1. Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.default) for all available configuration options:
+1. Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

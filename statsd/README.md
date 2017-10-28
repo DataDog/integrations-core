@@ -13,7 +13,7 @@ The StatsD check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml](https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.default) for all available configuration options:
+Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml](https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

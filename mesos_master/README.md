@@ -31,7 +31,7 @@ Substitute your Datadog API key and Mesos Master's API URL into the command abov
 
 ### Configuration
 
-If you passed the correct Master URL when starting docker-dd-agent, the Agent is already using a default `mesos_master.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.yaml](https://github.com/DataDog/integrations-core/blob/master/mesos_master/conf.yaml.default) for all available configuration options.
+If you passed the correct Master URL when starting docker-dd-agent, the Agent is already using a default `mesos_master.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.yaml](https://github.com/DataDog/integrations-core/blob/master/mesos_master/conf.yaml.example) for all available configuration options.
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.yaml`.
 
