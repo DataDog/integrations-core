@@ -133,11 +133,11 @@ install:
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - pip install -r requirements-test.txt
-  - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
   - bundle exec rake setup_agent_libs
+  - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
+  - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
-  - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
   - cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && python setup.py bdist_wheel && pip install . && cd -
   - bundle exec rake ci:run
   - bundle exec rake requirements
