@@ -44,14 +44,29 @@ install:
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
+  - cd sqlserver
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd iis
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd windows_service
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd wmi_check
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd pdh_check
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - ps: (cd sqlserver) -and (python setup.py bdist_wheel) -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
-  - ps: (cd iis) -and (python setup.py bdist_wheel) -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
-  - ps: (cd windows_service) -and (python setup.py bdist_wheel) -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
-  - ps: (cd wmi_check) -and (python setup.py bdist_wheel) -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
-  - ps: (cd pdh_check) -and (python setup.py bdist_wheel) -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
