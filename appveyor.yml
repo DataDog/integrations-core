@@ -40,7 +40,10 @@ install:
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
   - ps: pip install wheel
-  - ps: (cd datadog-base) -and ('python setup.py bdist_wheel') -and (& "$env:PYTHON/Scripts/pip.exe" install .) -and (cd ..)
+  - cd datadog-base
+  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
