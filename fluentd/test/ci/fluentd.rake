@@ -14,7 +14,7 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('fluentd')
-      sh %(bash fluentd/ci/start-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/fluentd/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
@@ -29,7 +29,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash fluentd/ci/stop-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/fluentd/ci/stop-docker.sh)
     end
 
     task :execute do
