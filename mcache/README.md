@@ -11,7 +11,7 @@ The memcache check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml](https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.default) for all available configuration options:
+Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml](https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

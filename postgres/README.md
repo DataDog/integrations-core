@@ -32,7 +32,7 @@ When it prompts for a password, enter the one used in the first command.
 
 ### Configuration
 
-Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.default) for all available configuration options.
+Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
 Configuration Options:
 

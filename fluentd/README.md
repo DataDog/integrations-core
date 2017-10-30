@@ -27,7 +27,7 @@ In your fluentd configuration, add a `monitor_agent` source:
 
 #### Connect the Datadog Agent
 
-Create a file `fluentd.yaml` in the Agent's `conf.d` directory. See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.default) for all available configuration options:
+Create a file `fluentd.yaml` in the Agent's `conf.d` directory. See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
