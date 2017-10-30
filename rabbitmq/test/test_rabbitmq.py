@@ -322,7 +322,7 @@ class TestRabbitMQ(AgentCheckTest):
         sys.path.pop()
 
     def test__get_data(self):
-        with mock.patch('check.requests') as r:
+        with mock.patch('datadog.rabbitmq.rabbitmq.requests') as r:
             from datadog.rabbitmq import RabbitMQ  # pylint: disable=import-error,no-name-in-module
             from datadog.rabbitmq.rabbitmq import RabbitMQException  # pylint: disable=import-error,no-name-in-module
             check = RabbitMQ('rabbitmq', {}, {"instances": [{"rabbitmq_api_url": "http://example.com"}]})
