@@ -8,7 +8,7 @@ set -e
 
 if docker ps | grep dd-test-tokumx >/dev/null; then
   echo 'the containers already exist, we have to remove them'
-  bash tokumx/ci/stop-docker.sh
+  bash tokumx/test/ci/stop-docker.sh
 fi
 
 SHARD00_ID=$(docker run --privileged -p $PORT:$PORT --name $NAME -d datadog/tokumx mongod --bind_ip 0.0.0.0 --port $PORT)
