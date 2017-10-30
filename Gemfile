@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'datadog-sdk-testing', '~> 0.7.4'
-gem 'rake', '~> 11.3.0'
-gem 'rubocop', '~> 0.50.0'
+gem 'datadog-sdk-testing', '~> 0.8.0'
+gem 'rake', '~> 12.0'
+gem 'rubocop', '~> 0.51.0'
