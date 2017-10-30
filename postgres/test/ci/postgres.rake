@@ -10,7 +10,7 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('postgres')
-      sh %(bash postgres/ci/start-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/postgres/test/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
@@ -25,7 +25,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash postgres/ci/start-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/postgres/ci/start-docker.sh)
     end
 
     task :execute do
