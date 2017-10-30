@@ -29,11 +29,11 @@ namespace :ci do
       `#{gunicorn_rootdir}/venv/bin/python #{gunicorn_rootdir}/venv/get-pip.py`
       `#{gunicorn_rootdir}/venv/bin/pip install gunicorn==#{gunicorn_version} gevent setproctitle`
       `#{gunicorn_rootdir}/venv/bin/pip install setproctitle`
-      cp "#{ENV['SDK_HOME']}/gunicorn/ci/conf.py", "#{gunicorn_rootdir}/conf.py"
+      cp "#{ENV['SDK_HOME']}/gunicorn/test/ci/conf.py", "#{gunicorn_rootdir}/conf.py"
       open("#{gunicorn_rootdir}/conf.py", 'a') do |f|
         f.puts "chdir = \"#{gunicorn_rootdir}/app\""
       end
-      cp "#{ENV['SDK_HOME']}/gunicorn/ci/app.py", "#{gunicorn_rootdir}/app/app.py"
+      cp "#{ENV['SDK_HOME']}/gunicorn/test/ci/app.py", "#{gunicorn_rootdir}/app/app.py"
       Process.spawn "#{gunicorn_rootdir}/venv/bin/gunicorn --config=#{gunicorn_rootdir}/conf.py --name=dd-test-gunicorn app:app"
     end
 
