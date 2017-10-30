@@ -75,7 +75,7 @@ class SystemCoreTestCase(AgentCheckTest):
 
     def test_system_core(self):
         psutil_mock = MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
-        with patch('_system_core.psutil.cpu_times', psutil_mock):
+        with patch('datadog.system_core.system_core.psutil.cpu_times', psutil_mock):
             self.run_check_twice(self.config)
 
         self.assertMetric('system.core.count', value=4, count=1)
