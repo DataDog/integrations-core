@@ -14,7 +14,7 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('tokumx')
-      sh %(bash tokumx/ci/start-docker.sh)
+      sh %(bash #{'SDK_HOME'}/tokumx/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
@@ -29,7 +29,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash tokumx/ci/stop-docker.sh)
+      sh %(bash #{'SDK_HOME'}/tokumx/ci/stop-docker.sh)
     end
 
     task :execute do
