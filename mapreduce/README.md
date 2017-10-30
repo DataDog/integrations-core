@@ -14,7 +14,7 @@ Install the `dd-check-mapreduce` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml](https://github.com/DataDog/integrations-core/blob/master/mapreduce/conf.yaml.default) for all available configuration options.
+Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml](https://github.com/DataDog/integrations-core/blob/master/mapreduce/conf.yaml.example) for all available configuration options.
 
 ### Validation
 

@@ -11,7 +11,7 @@ The PHP-FPM check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-Create a file `php_fpm.yaml` in the Agent's `conf.d` directory. See the [sample php_fpm.yaml](https://github.com/DataDog/integrations-core/blob/master/php_fpm/conf.yaml.default) for all available configuration options:
+Create a file `php_fpm.yaml` in the Agent's `conf.d` directory. See the [sample php_fpm.yaml](https://github.com/DataDog/integrations-core/blob/master/php_fpm/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
