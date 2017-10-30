@@ -142,7 +142,7 @@ class ProcessCheckTest(AgentCheckTest):
         {
             'config': {
                 'name': 'test_9',
-                'pid_file': 'process/ci/fixtures/test_pid_file',
+                'pid_file': 'process/test/ci/fixtures/test_pid_file',
             },
             'mocked_processes': set([1])
         }
