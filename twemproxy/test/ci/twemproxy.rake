@@ -19,7 +19,7 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('twemproxy')
       # sample docker usage
-      sh %(twemproxy/ci/start-docker.sh #{docker_addr})
+      sh %(#{ENV['SDK_HOME']}/twemproxy/test/ci/start-docker.sh #{docker_addr})
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -40,7 +40,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(twemproxy/ci/stop-docker.sh #{docker_addr})
+      sh %(#{ENV['SDK_HOME']}/twemproxy/test/ci/stop-docker.sh #{docker_addr})
     end
     # sample cleanup task
     # task cleanup: ['ci:common:cleanup'] do
