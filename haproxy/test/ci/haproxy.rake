@@ -19,8 +19,8 @@ namespace :ci do
       sh %(docker create -v $VOLATILE_DIR/haproxy:/tmp -p 3835:3835 --name dd-haproxy haproxy:#{haproxy_version})
       sh %(docker create -p 3836:3836 --name dd-haproxy-open haproxy:#{haproxy_version})
 
-      sh %(docker cp `pwd`/haproxy/test/ci/haproxy.cfg dd-haproxy:/usr/local/etc/haproxy/haproxy.cfg)
-      sh %(docker cp `pwd`/haproxy/test/ci/haproxy-open.cfg dd-haproxy-open:/usr/local/etc/haproxy/haproxy.cfg)
+      sh %(docker cp #{ENV['SDK_HOME']}/haproxy/test/ci/haproxy.cfg dd-haproxy:/usr/local/etc/haproxy/haproxy.cfg)
+      sh %(docker cp #{ENV['SDK_HOME']}/haproxy/test/ci/haproxy-open.cfg dd-haproxy-open:/usr/local/etc/haproxy/haproxy.cfg)
 
       sh %(docker start dd-haproxy)
       sh %(docker start dd-haproxy-open)
