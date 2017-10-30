@@ -74,9 +74,9 @@ setup(
 
     # Testing setup and dependencies
     tests_require=[
-            'nose',
-            'coverage',
-            'datadog_agent_tk>=5.15',
+        'nose',
+        'coverage',
+        'datadog_agent_tk>=5.15',
     ],
     test_suite='nose.collector',
 
