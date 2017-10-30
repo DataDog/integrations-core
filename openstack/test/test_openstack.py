@@ -17,12 +17,13 @@ from checks import AgentCheck
 
 
 OS_CHECK_NAME = 'openstack'
+OS_CHECK_MODULE = 'datadog.openstack.openstack'
 
-OpenStackProjectScope = load_class(OS_CHECK_NAME, "OpenStackProjectScope")
-KeystoneCatalog = load_class(OS_CHECK_NAME, "KeystoneCatalog")
-IncompleteConfig = load_class(OS_CHECK_NAME, "IncompleteConfig")
-IncompleteAuthScope = load_class(OS_CHECK_NAME, "IncompleteAuthScope")
-IncompleteIdentity = load_class(OS_CHECK_NAME, "IncompleteIdentity")
+OpenStackProjectScope = load_class(OS_CHECK_MODULE, "OpenStackProjectScope")
+KeystoneCatalog = load_class(OS_CHECK_MODULE, "KeystoneCatalog")
+IncompleteConfig = load_class(OS_CHECK_MODULE, "IncompleteConfig")
+IncompleteAuthScope = load_class(OS_CHECK_MODULE, "IncompleteAuthScope")
+IncompleteIdentity = load_class(OS_CHECK_MODULE, "IncompleteIdentity")
 
 
 class MockHTTPResponse(object):
