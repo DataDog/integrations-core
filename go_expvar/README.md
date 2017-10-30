@@ -21,7 +21,7 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-Create a file `go_expvar.yaml` in the Agent's `conf.d` directory. See the [sample go_expvar.yaml](https://github.com/DataDog/integrations-core/blob/master/go_expvar/conf.yaml.default) for all available configuration options:
+Create a file `go_expvar.yaml` in the Agent's `conf.d` directory. See the [sample go_expvar.yaml](https://github.com/DataDog/integrations-core/blob/master/go_expvar/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

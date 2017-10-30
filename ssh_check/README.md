@@ -11,7 +11,7 @@ The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.default) for all available configuration options:
+Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
