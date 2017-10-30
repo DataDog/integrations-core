@@ -163,9 +163,9 @@ class VarnishCheckTest(AgentCheckTest):
                 self.assertMetric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
 
     # Test the varnishadm output for version >= 4.x with manually set health
-    @mock.patch('_varnish.geteuid')
-    @mock.patch('_varnish.Varnish._get_version_info')
-    @mock.patch('_varnish.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
+    @mock.patch('datadog.varnish.varnish.geteuid')
+    @mock.patch('datadog.varnish.varnish.Varnish._get_version_info')
+    @mock.patch('datadog.varnish.varnish.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
     def test_command_line_manually_unhealthy(self, mock_subprocess, mock_version, mock_geteuid):
         mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
@@ -189,9 +189,9 @@ class VarnishCheckTest(AgentCheckTest):
 
 
     # Test the Varnishadm output for version >= 4.x
-    @mock.patch('_varnish.geteuid')
-    @mock.patch('_varnish.Varnish._get_version_info')
-    @mock.patch('_varnish.get_subprocess_output', side_effect=backend_list_mock)
+    @mock.patch('datadog.varnish.varnish.geteuid')
+    @mock.patch('datadog.varnish.varnish.Varnish._get_version_info')
+    @mock.patch('datadog.varnish.varnish.get_subprocess_output', side_effect=backend_list_mock)
     def test_command_line_post_varnish4(self, mock_subprocess, mock_version, mock_geteuid):
         mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
@@ -237,9 +237,9 @@ class VarnishCheckTest(AgentCheckTest):
         self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the varnishadm output for Varnish < 4.x
-    @mock.patch('_varnish.geteuid')
-    @mock.patch('_varnish.Varnish._get_version_info')
-    @mock.patch('_varnish.get_subprocess_output', side_effect=debug_health_mock)
+    @mock.patch('datadog.varnish.varnish.geteuid')
+    @mock.patch('datadog.varnish.varnish.Varnish._get_version_info')
+    @mock.patch('datadog.varnish.varnish.get_subprocess_output', side_effect=debug_health_mock)
     def test_command_line(self, mock_subprocess, mock_version, mock_geteuid):
         mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
