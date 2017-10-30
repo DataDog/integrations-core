@@ -59,11 +59,11 @@ class TestCacti(AgentCheckTest):
         """
         self.load_check({'instances': [self.CACTI_CONFIG]})
 
-    @mock.patch('datadog.catci.cacti.pymysql')
-    @mock.patch('datadog.catci.cacti.rrdtool')
-    @mock.patch('datadog.catci.Cacti._get_rrd_info', return_value=MOCK_INFO)
-    @mock.patch('datadog.catci.Cacti._get_rrd_fetch', return_value=MOCK_FETCH)
-    @mock.patch('datadog.catci.Cacti._fetch_rrd_meta', return_value=MOCK_RRD_META)
+    @mock.patch('datadog.cacti.cacti.pymysql')
+    @mock.patch('datadog.cacti.cacti.rrdtool')
+    @mock.patch('datadog.cacti.Cacti._get_rrd_info', return_value=MOCK_INFO)
+    @mock.patch('datadog.cacti.Cacti._get_rrd_fetch', return_value=MOCK_FETCH)
+    @mock.patch('datadog.cacti.Cacti._fetch_rrd_meta', return_value=MOCK_RRD_META)
     def testCheck(self, mock_pymysql, mock_rrdtool, mock_rrdtool_info, mock_rrdtool_fetch, mock_rrdtool_meta):
         config = {
             'instances': [self.CACTI_CONFIG]
@@ -78,8 +78,8 @@ class TestCacti(AgentCheckTest):
         self.assertMetric('system.mem.buffered.max', value=2)
         self.assertMetric('system.mem.buffered', value=2)
 
-    @mock.patch('datadog.catci.cacti.pymysql')
-    @mock.patch('datadog.catci.cacti.rrdtool')
+    @mock.patch('datadog.cacti.cacti.pymysql')
+    @mock.patch('datadog.cacti.cacti.rrdtool')
     def testCactiMetrics(self, mock_pymysql, mock_rrdtool):
         config = {
             'instances': [self.CACTI_CONFIG]
