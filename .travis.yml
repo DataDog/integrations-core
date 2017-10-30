@@ -138,7 +138,7 @@ install:
   - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
-  - [ -e $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR/setup.py ] && cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && python setup.py bdist_wheel && pip install . && cd -
+  - if [ -e $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR/setup.py ]; then cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && python setup.py bdist_wheel && pip install . && cd - ; fi
   - bundle exec rake ci:run
   - bundle exec rake requirements
 # we should clean generated files before we save the cache
