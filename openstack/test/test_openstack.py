@@ -17,7 +17,7 @@ from checks import AgentCheck
 
 
 OS_CHECK_NAME = 'openstack'
-OS_CHECK_MODULE = 'datadog.openstack.openstack'
+OS_CHECK_MODULE = 'openstack.openstack'
 
 OpenStackProjectScope = load_class(OS_CHECK_MODULE, "OpenStackProjectScope")
 KeystoneCatalog = load_class(OS_CHECK_MODULE, "KeystoneCatalog")
@@ -226,7 +226,7 @@ class OSProjectScopeTest(TestCase):
 
         self.assertRaises(IncompleteConfig, OpenStackProjectScope.from_config, init_config, bad_instance_config)
 
-        with patch("_openstack.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
+        with patch("datadog.openstack.openstack.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
             append_config = good_instance_config.copy()
             append_config["append_tenant_id"] = True
             scope = OpenStackProjectScope.from_config(init_config, append_config)
@@ -292,7 +292,7 @@ class TestOpenstack(AgentCheckTest):
 
         self.assertRaises(KeyError, self.check.get_scope_for_instance, instance)
 
-        with patch("_openstack.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
+        with patch("datadog.openstack.openstack.OpenStackProjectScope.request_auth_token", return_value=MOCK_HTTP_RESPONSE):
             scope = self.check.ensure_auth_scope(instance)
 
             self.assertEqual(self.check.get_scope_for_instance(instance), scope)
@@ -320,12 +320,12 @@ class TestOpenstack(AgentCheckTest):
         self.check.CACHE_TTL["aggregates"] = 1
         expected_aggregates = {"hyp_1": ["aggregate:staging", "availability_zone:test"]}
 
-        with patch("_openstack.OpenStackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
+        with patch("datadog.openstack.OpenStackCheck.get_all_aggregate_hypervisors", return_value=expected_aggregates):
             self.assertEqual(self.check._get_and_set_aggregate_list(), expected_aggregates)
             sleep(1.5)
             self.assertTrue(self.check._is_expired("aggregates"))
 
-    @patch("_openstack.OpenStackCheck.get_all_server_ids", return_value=ALL_IDS)
+    @patch("datadog.openstack.OpenStackCheck.get_all_server_ids", return_value=ALL_IDS)
     def test_server_exclusion(self, *args):
         """
         Exclude networks using regular expressions.
@@ -344,12 +344,12 @@ class TestOpenstack(AgentCheckTest):
         # cleanup
         self.check.exclude_server_id_rules = set([])
 
-    @patch("_openstack.OpenStackCheck.get_all_network_ids", return_value=ALL_IDS)
+    @patch("datadog.openstack.OpenStackCheck.get_all_network_ids", return_value=ALL_IDS)
     def test_network_exclusion(self, *args):
         """
         Exclude networks using regular expressions.
         """
-        with patch("_openstack.OpenStackCheck.get_stats_for_single_network") \
+        with patch("datadog.openstack.OpenStackCheck.get_stats_for_single_network") \
                 as mock_get_stats_single_network:
 
             self.check.exclude_network_id_rules = set([re.compile(rule) for rule in self.EXCLUDED_NETWORK_IDS])
