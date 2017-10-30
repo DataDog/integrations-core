@@ -56,9 +56,7 @@ setup(
     packages=['datadog.kubernetes'],
 
     # Run-time dependencies
-    install_requires=[
-        'kuberneteslib==0.3.3',
-    ],
+    install_requires=list(set(runtime_reqs)),
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
