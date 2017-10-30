@@ -183,7 +183,7 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('_disk.get_subprocess_output',
+    @mock.patch('datadog.disk.disk.get_subprocess_output',
                 return_value=(Fixtures.read_file('debian-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_debian(self, mock_df_output, mock_statvfs):
@@ -201,7 +201,7 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('_disk.get_subprocess_output',
+    @mock.patch('datadog.disk.disk.get_subprocess_output',
                 return_value=(Fixtures.read_file('freebsd-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_freebsd(self, mock_df_output, mock_statvfs):
@@ -219,7 +219,7 @@ class TestCheckDisk(AgentCheckTest):
 
         self.coverage_report()
 
-    @mock.patch('_disk.get_subprocess_output',
+    @mock.patch('datadog.disk.disk.get_subprocess_output',
                 return_value=(Fixtures.read_file('centos-df-Tk', sdk_dir=FIXTURE_DIR), "", 0))
     @mock.patch('os.statvfs', return_value=MockInodesMetrics())
     def test_no_psutil_centos(self, mock_df_output, mock_statvfs):
