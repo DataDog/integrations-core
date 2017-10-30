@@ -1,5 +1,5 @@
 from . import http_check
 
- = http_check.
+HTTPCheck = http_check.HTTPCheck
 
 __all__ = ['http_check']
