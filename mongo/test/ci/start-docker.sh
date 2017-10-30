@@ -14,7 +14,7 @@ MONGO_VERSION=${FLAVOR_VERSION-3.0.1}
 
 if docker ps | grep dd-test-mongo >/dev/null; then
   echo 'the containers already exist, we have to remove them'
-  bash mongo/ci/stop-docker.sh
+  bash $SDK_HOME/mongo/test/ci/stop-docker.sh
 fi
 
 SHARD00_ID=$(docker run -p $PORT:$PORT --expose $PORT --name $NAME -d mongo:$MONGO_VERSION mongod --replSet rs0 --bind_ip 0.0.0.0 --port $PORT)
