@@ -14,7 +14,7 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('mongo')
-      sh %(bash mongo/ci/start-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/mongo/test/ci/start-docker.sh)
     end
 
     task before_script: ['ci:common:before_script']
@@ -31,7 +31,7 @@ namespace :ci do
     # task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      sh %(bash mongo/ci/stop-docker.sh)
+      sh %(bash #{ENV['SDK_HOME']}/mongo/test/ci/stop-docker.sh)
     end
 
     task :execute do
