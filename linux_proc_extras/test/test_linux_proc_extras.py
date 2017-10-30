@@ -57,7 +57,7 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
             self.check.get_stat_info()
             self.check.get_stat_info()
 
-        with patch('_linux_proc_extras.get_subprocess_output', return_value=
+        with patch('datadog.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=
                    (Fixtures.read_file('process_stats', sdk_dir=ci_dir), "", 0)):
             self.check.get_process_states()
 
