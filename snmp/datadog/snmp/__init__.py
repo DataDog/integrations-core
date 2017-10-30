@@ -1,5 +1,5 @@
 from . import snmp
 
- = snmp.
+SnmpCheck = snmp.SnmpCheck
 
 __all__ = ['snmp']
