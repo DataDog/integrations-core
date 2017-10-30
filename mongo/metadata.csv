@@ -12,6 +12,7 @@ mongodb.connections.available,gauge,,connection,,Number of unused available inco
 mongodb.connections.current,gauge,,connection,,Number of connections to the database server from clients.,0,mongodb,connections current
 mongodb.cursors.timedout,gauge,,cursor,,Total number of cursors that have timed out since the server process started.,0,mongodb,cursors timed out
 mongodb.cursors.totalopen,gauge,,cursor,,Number of cursors that MongoDB is maintaining for clients,0,mongodb,cursors open
+mongodb.dbs,gauge,,item,,Total number of existing databases,0,mongodb,databases
 mongodb.dur.commits,gauge,,transaction,,Number of transactions written to the journal during the last journal group commit interval.,0,mongodb,dur commits
 mongodb.dur.commitsinwritelock,gauge,,commit,,Count of the commits that occurred while a write lock was held.,0,mongodb,dur commits in write lock
 mongodb.dur.compression,gauge,,fraction,,Compression ratio of the data written to the journal.,1,mongodb,dur compression
