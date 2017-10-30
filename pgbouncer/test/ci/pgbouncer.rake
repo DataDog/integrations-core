@@ -10,8 +10,8 @@ end
 
 pgname = 'dd-test-postgres'
 pgbname = 'dd-test-pgbouncer'
-pg_resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/pgbouncer/ci/resources/pg'
-pgb_resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/pgbouncer/ci/resources/pgb'
+pg_resources_path = (ENV['SDK_HOME']).to_s + '/pgbouncer/test/ci/resources/pg'
+pgb_resources_path = (ENV['SDK_HOME']).to_s + '/pgbouncer/test/ci/resources/pgb'
 
 namespace :ci do
   namespace :pgbouncer do |flavor|
