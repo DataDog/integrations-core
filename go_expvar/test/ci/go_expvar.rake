@@ -14,7 +14,7 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('go_expvar')
-      sh %(docker build -t datadog-test-expvar #{ENV['TRAVIS_BUILD_DIR']}/go_expvar/ci/)
+      sh %(docker build -t datadog-test-expvar #{ENV['SDK_HOME']}/go_expvar/test/ci/)
       sh %(docker run -dt --name datadog-test-expvar -p 8079:8079 datadog-test-expvar)
       sleep_for 5
       sh %(while ! curl -s http://localhost:8079?user=123456; do echo "Waiting for application"; sleep 5; done)
