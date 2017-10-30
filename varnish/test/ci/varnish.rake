@@ -10,7 +10,7 @@ namespace :ci do
 
     task :install do
       target = varnish_version.split('.')[0]
-      sh %(docker-compose -f varnish/ci/docker-compose.yml up -d varnish#{target})
+      sh %(docker-compose -f #{ENV['SDK_HOME']}/varnish/test/ci/docker-compose.yml up -d varnish#{target})
     end
 
     task before_script: ['ci:common:before_script']
@@ -22,7 +22,7 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker-compose -f varnish/ci/docker-compose.yml down)
+      sh %(docker-compose -f #{ENV['SDK_HOME']}/varnish/test/ci/docker-compose.yml down)
     end
 
     task :execute do
