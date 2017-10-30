@@ -60,3 +60,10 @@ The Oracle Database check does not include any events at this time.
 
 ### Service Checks
 The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+* [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)
