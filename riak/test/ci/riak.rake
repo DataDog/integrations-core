@@ -9,7 +9,7 @@ def riak_rootdir
 end
 
 container_name = 'dd-test-riak'
-resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/riak/ci/resources'
+resources_path = (ENV['SDK_HOME']).to_s + '/riak/test/ci/resources'
 
 namespace :ci do
   namespace :riak do |flavor|
