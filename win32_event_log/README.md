@@ -11,7 +11,7 @@ The Windows Event Log check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Create a file `win32_event_log.yaml` in the Agent's `conf.d` directory. See the [sample win32_event_log.yaml](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/conf.yaml.default) for all available configuration options:
+Create a file `win32_event_log.yaml` in the Agent's `conf.d` directory. See the [sample win32_event_log.yaml](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

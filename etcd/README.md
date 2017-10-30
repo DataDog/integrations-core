@@ -15,7 +15,7 @@ The etcd check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `etcd.yaml` in the Agent's `conf.d` directory. See the [sample etcd.yaml](https://github.com/DataDog/integrations-core/blob/master/etcd/conf.yaml.default) for all available configuration options:
+Create a file `etcd.yaml` in the Agent's `conf.d` directory. See the [sample etcd.yaml](https://github.com/DataDog/integrations-core/blob/master/etcd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

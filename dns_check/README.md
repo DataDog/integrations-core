@@ -13,7 +13,7 @@ If you need the newest version of the DNS check, install the `dd-check-dns` pack
 
 ### Configuration
 
-Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.default) for all available configuration options:
+Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
