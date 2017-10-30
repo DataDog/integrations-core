@@ -1,7 +1,7 @@
 require 'ci/common'
 
 container_name = 'dd-test-snmp'
-resources_path = (ENV['TRAVIS_BUILD_DIR']).to_s + '/snmp/ci/resources'
+resources_path = (ENV['SDK_HOME']).to_s + '/snmp/test/ci/resources'
 
 namespace :ci do
   namespace :snmp do |flavor|
