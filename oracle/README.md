@@ -9,7 +9,11 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 Install the `dd-check-oracle` package manually or with your favorite configuration manager
 
-We cannot ship the oracle `instantclient` libraries with the agent or the standalone check due to licensing issues. Although the required `cx_Oracle` python library will be bundled, you will still need to install the `instantclient` for it to work (hard-requirement). The steps to do so would typically be:
+In order to use the Oracle integration you must install Oracle's `instantclient` libraries by following the instructions below.  Due to licensing restrictions we are unable to include this library in our agent.
+
+You may download `instantclient` directly from Oracle [here](https://www.oracle.com/technetwork/database/features/instant-client/index.html).
+
+The steps to set up `instantclient` to work with the integration would typically be:
 
 ```
 mkdir -p /opt/oracle/ && cd /opt/oracle/
@@ -29,11 +33,11 @@ sudo ldconfig
 
 ### Configuration
 
-Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor.
+Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `oracle` under the Checks section:
 
     Checks
     ======
@@ -56,3 +60,10 @@ The Oracle Database check does not include any events at this time.
 
 ### Service Checks
 The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

@@ -31,7 +31,7 @@ C:/> winmgmt /resyncperf
 
 #### Connect the Agent
 
-Create a file `iis.yaml` in the Agent's `conf.d` directory:
+Create a file `iis.yaml` in the Agent's `conf.d` directory. See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -76,7 +76,7 @@ Here's an example of configuration that would check the current machine and a re
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `iis` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `iis` under the Checks section:
 
 ```
   Checks
