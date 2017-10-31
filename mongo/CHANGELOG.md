@@ -1,10 +1,15 @@
 # CHANGELOG - mongo
 
-1.5.0 / [UNRELEASED]
+1.6.0 / [UNRELEASED]
 ==================
 ### Changes
 
 * [BUGFIX] Fixed mongo instance locking bug. See [#836][]
+
+1.5.0 / 2017-10-31
+==================
+
+* [FEATURE] Collect metrics about indexes usage. See [#823][]
 
 1.4.0 / 2017-10-10
 ==================
@@ -55,5 +60,6 @@
 [#627]: https://github.com/DataDog/integrations-core/issues/627
 [#691]: https://github.com/DataDog/integrations-core/issues/691
 [#769]: https://github.com/DataDog/integrations-core/issues/769
+[#823]: https://github.com/DataDog/integrations-core/issues/823
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
