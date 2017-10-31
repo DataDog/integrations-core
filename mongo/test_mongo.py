@@ -261,6 +261,7 @@ class TestMongo(unittest.TestCase):
 
         metric_val_checks = {
             'mongodb.asserts.msgps': lambda x: x >= 0,
+            'mongodb.dbs': lambda x: x == 3,
             'mongodb.fsynclocked': lambda x: x >= 0,
             'mongodb.globallock.activeclients.readers': lambda x: x >= 0,
             'mongodb.metrics.cursor.open.notimeout': lambda x: x >= 0,
