@@ -852,7 +852,7 @@ class MongoDb(AgentCheck):
         # Mongo versions >= 3.2 support listing only the database name (does not require database locks)
         mongo_version = cli.server_info().get('version', '0.0')
         if LooseVersion(mongo_version) >= LooseVersion("3.2"):
-             cmd.update(nameOnly=True)
+            cmd.update(nameOnly=True)
 
         res = cli._database_default_options("admin").command(cmd, session=None)
         cursor = {
