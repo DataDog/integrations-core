@@ -15,6 +15,7 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 * SSL (handshakes, failed handshakes, etc)
 
 And many more.
+
 ## Setup
 ### Installation
 
@@ -41,7 +42,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 ### Configuration
 #### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`):
+On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`). See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options:
 
 ```
 server {
@@ -88,7 +89,7 @@ Restart the Agent to start sending NGINX metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nginx` under the Checks section:
 
 ```
   Checks
@@ -112,7 +113,7 @@ The NGINX check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv) for a full list of provided metrics.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv) for a full list of provided metrics by this integration.
 
 Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](http://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
 
@@ -178,5 +179,8 @@ http{
 Otherwise, review the **Configuration** section.
 
 ## Further Reading
-### Blog Article
-Read our [series of blog posts](https://www.datadoghq.com/blog/how-to-monitor-nginx/) about how to monitor NGINX with Datadog.
+### Knowledge Base
+The data pulled from the NGINX Plus status page are described in the [NGINX docs](http://nginx.org/en/docs/http/ngx_http_status_module.html#data).
+
+### Datadog Blog
+Learn more about how to monitor NGINX performance metrics thanks to [our series of posts](https://www.datadoghq.com/blog/how-to-monitor-nginx/). We detail the key performance metrics, [how to collect them](https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html), and [how to use Datadog to monitor NGINX](https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html).

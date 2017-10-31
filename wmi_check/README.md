@@ -14,11 +14,11 @@ Install the `dd-check-wmi_check` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `wmi_check.yaml` file to point to your server and port, set the masters to monitor
+Edit the `wmi_check.yaml` file to point to your server and port, set the masters to monitor. See the [sample wmi_check.yaml](https://github.com/DataDog/integrations-core/blob/master/wmi_check/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `wmi_check` under the Checks section:
 
     Checks
     ======
@@ -41,3 +41,9 @@ The WMI check does not include any event at this time.
 
 ### Service Checks
 The WMI check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

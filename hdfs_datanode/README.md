@@ -27,7 +27,7 @@ Restart the DataNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Create a file `hdfs_datanode.yaml` in the Agent's `conf.d` directory:
+Create a file `hdfs_datanode.yaml` in the Agent's `conf.d` directory. See the [sample hdfs_datanode.yaml](https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -40,7 +40,7 @@ Restart the Agent to begin sending DataNode metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `hdfs_datanode` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `hdfs_datanode` under the Checks section:
 
 ```
   Checks
@@ -73,7 +73,11 @@ The HDFS-datanode check does not include any event at this time.
 Returns `Critical` if the Agent cannot connect to the DataNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your HDFS DataNodes with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about monitoring Hadoop. In particular, [Part 2](https://www.datadoghq.com/blog/monitor-hadoop-metrics/) provides a useful walkthrough of key metrics.
+
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [How to monitor Hadoop metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)
+* [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)
+* [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)

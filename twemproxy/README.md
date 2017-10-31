@@ -11,7 +11,7 @@ The Agent's twemproxy check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Create a file `twemproxy.yaml` in the Agent's `conf.d` directory:
+Create a file `twemproxy.yaml` in the Agent's `conf.d` directory. See the [sample twemproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/twemproxy/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -25,7 +25,7 @@ Restart the Agent to begin sending twemproxy metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `twemproxy` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `twemproxy` under the Checks section:
 
 ```
   Checks
@@ -57,3 +57,9 @@ The Twemproxy check does not include any event at this time.
 `twemproxy.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to the Twemproxy stats endpoint to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

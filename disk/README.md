@@ -11,11 +11,11 @@ The disk check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-The disk check is enabled by default, and the Agent will collect metrics on all local partitions. If you want to configure the check with custom options, create a file `disk.yaml` in the Agent's `conf.d` directory. See the [sample disk.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.default) for all available configuration options.
+The disk check is enabled by default, and the Agent will collect metrics on all local partitions. If you want to configure the check with custom options, create a file `disk.yaml` in the Agent's `conf.d` directory. See the [sample disk.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `disk` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `disk` under the Checks section:
 
 ```
   Checks
@@ -33,7 +33,7 @@ Run the Agent's `info` subcommand and look for `disk` under the Checks section:
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Disk check does not include any event at this time.
@@ -42,3 +42,7 @@ The Disk check does not include any event at this time.
 The Disk check does not include any service check at this time.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

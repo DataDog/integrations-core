@@ -11,7 +11,7 @@ The Zookeeper check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `zk.yaml` in the Agent's `conf.d` directory:
+Create a file `zk.yaml` in the Agent's `conf.d` directory. See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -26,7 +26,7 @@ Restart the Agent to start sending Zookeeper metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `zk` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `zk` under the Checks section:
 
 ```
   Checks
@@ -48,7 +48,7 @@ The Zookeeper check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zookeeper/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
 The Zookeeper check does not include any event at this time.
@@ -62,3 +62,9 @@ Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, ot
 **zookeeper.mode**:
 
 The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise CRITICAL.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

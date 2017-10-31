@@ -39,7 +39,7 @@ db.createUser({
 
 #### Connect the Agent
 
-Create a file `mongodb.yaml` in the Agent's `conf.d` directory:
+Create a file `mongodb.yaml` in the Agent's `conf.d` directory. See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongodb/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -55,11 +55,11 @@ instances:
 
 
 
-Restart the Agent to start sending MongoDB metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending MongoDB metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mongo` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mongo` under the Checks section:
 
 ```
   Checks
@@ -116,8 +116,10 @@ This check emits an event each time a Mongo node has a change in its replication
 
 Returns CRITICAL if the Agent cannot connect to MongoDB to collect metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
 * [Start here](https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/) if you're using the WiredTiger storage engine.

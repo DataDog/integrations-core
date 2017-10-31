@@ -14,9 +14,12 @@ The Btrfs check is packaged with the Agent, so simply [install the Agent](https:
 
 ### Configuration
 
+1. Configure the Agent according to your needs, edit `conf.d/btrfs.yaml`. See the [sample btrfs.yaml](https://github.com/DataDog/integrations-core/blob/master/btrfs/conf.yaml.example) for all available configuration options.
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent)
+
 ### Validation
 
-Run the Agent's `info` subcommand and look for `btrfs` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `btrfs` under the Checks section:
 
 ```
   Checks
@@ -46,3 +49,8 @@ The Btrfs check does not include any event at this time.
 The Btrfs check does not include any service check at this time.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

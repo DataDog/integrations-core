@@ -11,6 +11,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
-  "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73"
+  "version": "1.1.0",
+  "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73",
+  "public_title": "Datadog-Ceph Integration",
+  "categories":["orchestration", "containers", "configuration & deployment", "orchestration"],
+  "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
+  "is_public": true,
+  "has_logo": true
 }

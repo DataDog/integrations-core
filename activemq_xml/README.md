@@ -14,11 +14,11 @@ Install the `dd-check-activemq_xml` package manually or with your favorite confi
 
 ### Configuration
 
-Edit the `activemq_xml.yaml` file to point to your server and port, set the masters to monitor
+Edit the `activemq_xml.yaml` file to point to your server and port, set the masters to monitor. See the [sample activemq_xml.yaml](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `activemq_xml` under the Checks section:
 
     Checks
     ======
@@ -42,6 +42,9 @@ The Activemq_xml check does not include any event at this time.
 ### Service Checks
 The Activemq_xml check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-See our blog post [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)
+
+* [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)

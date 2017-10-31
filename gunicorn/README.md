@@ -21,7 +21,7 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 ### Configuration
 #### Configure the Datadog Agent
 
-Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sample gunicorn.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -41,7 +41,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `gunicorn` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gunicorn` under the Checks section:
 
 ```
   Checks
@@ -72,7 +72,7 @@ The gunicorn check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration - those from the Agent _and_ those sent by Gunicorn to DogStatsD.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Gunicorn check does not include any event at this time.
@@ -119,5 +119,4 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
 
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).

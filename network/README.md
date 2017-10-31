@@ -11,7 +11,7 @@ The network check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory:
+The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory. See the [sample network.yaml](https://github.com/DataDog/integrations-core/blob/master/network/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -30,7 +30,7 @@ Restart the Agent to effect any configuration changes.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `network` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `network` under the Checks section:
 
 ```
   Checks
@@ -51,7 +51,7 @@ The network check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Network check does not include any event at this time.
@@ -59,6 +59,12 @@ The Network check does not include any event at this time.
 ### Service Checks
 The Network check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
+### Datadog Blog
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+
 ### Knowledge Base
 * [Built a network monitor on an http check](https://help.datadoghq.com/hc/en-us/articles/115003314726-Built-a-network-monitor-on-an-http-check-)

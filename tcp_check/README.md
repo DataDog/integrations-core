@@ -13,7 +13,7 @@ If you need the newest version of the TCP check, install the `dd-check-tcp` pack
 
 ### Configuration
 
-Create a file `tcp_check.yaml` in the Agent's `conf.d` directory:
+Create a file `tcp_check.yaml` in the Agent's `conf.d` directory. See the [sample tcp_check.yaml](https://github.com/DataDog/integrations-core/blob/master/tcp_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -26,11 +26,21 @@ instances:
     collect_response_time: true # to collect network.tcp.response_time. Default is false.
 ```
 
-Restart the Agent to start sending TCP service checks and response times to Datadog.
+Configuration Options
+
+* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`.
+* `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
+* `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
+* `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
+* `collect_response_time` (Optional) - Defaults to false. If this is not set to true, no response time metric will be collected. If it is set to true, the metric returned is `network.tcp.response_time`.
+* `skip_event` (Optional) - Defaults to false. Set to true to skip creating an event. This option will be removed in a future version and will default to true.
+* `tags` (Optional) - Tags to be assigned to the metric.
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending TCP service checks and response times to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `tcp_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `tcp_check` under the Checks section:
 
 ```
   Checks
@@ -66,3 +76,9 @@ Returns DOWN if the Agent cannot connect to the configured `host` and `port`, ot
 Older versions of the TCP check only emitted events to reflect changes in connectivity. This was eventually deprecated in favor of service checks, but you can still have the check emit events by setting `skip_event: false`.
 
 To create alert conditions on this service check in the Datadog app, click **Network** on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not **Integration**.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

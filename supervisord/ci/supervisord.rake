@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def supervisord_version
-  ENV['FLAVOR_VERSION'] || '3.3.0'
+  ENV['FLAVOR_VERSION'] || '3.3.3'
 end
 
 def supervisord_rootdir
@@ -24,7 +24,7 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('supervisord')
       sh %(docker run -d --name #{container_name} -p #{container_port}:#{container_port} \
-           -v #{supervisord_rootdir}:/supervisor datadog/docker-library:supervisord_3_3_0)
+           -v #{supervisord_rootdir}:/supervisor datadog/docker-library:supervisord_3_3_3)
     end
 
     task before_script: ['ci:common:before_script'] do

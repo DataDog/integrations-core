@@ -13,7 +13,7 @@ If you need the newest version of the DNS check, install the `dd-check-dns` pack
 
 ### Configuration
 
-Create a file `dns_check.yaml` in the Agent's `conf.d` directory:
+Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -33,7 +33,7 @@ Restart the Agent to begin sending DNS service checks and response times to Data
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `dns_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `dns_check` under the Checks section:
 
 ```
   Checks
@@ -62,7 +62,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_
 The DNS check does not include any event at this time.
 
 ### Service Checks
+This agent check tags all service checks it collects with:
 
+  * `nameserver:<nameserver_in_yaml>`
+  * `resolved_hostname:<hostname_in_yaml>`
+  
 `dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.
@@ -70,5 +74,7 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 Tagged by `hostname` and `record_type`.
 
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

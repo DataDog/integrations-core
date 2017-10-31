@@ -28,7 +28,7 @@ The Datadog Agent's Consul Check is included in the Agent package, so simply [in
 
 #### Connect Datadog Agent to Consul Agent
 
-Create a `consul.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `consul.yaml` in the Datadog Agent's `conf.d` directory. See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -73,7 +73,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 #### Datadog Agent to Consul Agent
 
-Run the Agent's `info` subcommand and look for `consul` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `consul` under the Checks section:
 
 ```
   Checks
@@ -137,9 +137,10 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
-## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your Consul cluster with Datadog, check out our blog posts:
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
-* [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog) - a more in-depth explanation of Datadog-Consul integration
-* [Consul at Datadog](https://engineering.datadoghq.com/consul-at-datadog/) - how Datadog Engineering uses Consul
+## Further Reading
+
+* [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog)
+* [Consul at Datadog](https://engineering.datadoghq.com/consul-at-datadog/)

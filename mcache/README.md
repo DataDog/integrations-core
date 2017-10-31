@@ -11,7 +11,7 @@ The memcache check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `mcache.yaml` in the Agent's `conf.d` directory:
+Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml](https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -27,11 +27,11 @@ instances:
 #    - optional_tag
 ```
 
-Restart the Agent to begin sending memcache metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending memcache metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mcache` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mcache` under the Checks section:
 
 ```
   Checks
@@ -67,8 +67,11 @@ The Mcache check does not include any event at this time.
 
 Returns CRITICAL if the Agent cannot connect to memcache to collect metrics, otherwise OK.
 
-## Further Reading
-### Blog Article
-Read more about monitoring memcache with Datadog in [this blog post](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/), and how you can instrument Memcached performance metrics with DogStatsD [in this blog post](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
-Learn how to monitor ElastiCache performance metrics with Redis or Memcached in [this blog post](https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/)
+## Further Reading
+
+* [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)
+* [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)
+* [Monitoring ElastiCache performance metrics with Redis or Memcached](https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/)

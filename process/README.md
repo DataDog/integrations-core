@@ -16,7 +16,7 @@ The process check is packaged with the Agent, so simply [install the Agent](http
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.
 
-While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes:
+While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes. See the [sample process.yaml](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -37,18 +37,18 @@ To have the check search for processes in a path other than `/proc`, set `procfs
 
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.
 
-Restart the Agent to start sending process metrics and service checks to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending process metrics and service checks to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for process` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `process` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    mcache
+    process
     -------
       - instance #0 [OK]
       - instance #1 [OK]
@@ -96,6 +96,8 @@ The Agent submits a `process.up` tagged `process:my_worker_process` whose status
 - WARNING when there are 1, 2, 6, or 7 worker processes
 - OK when there are 3, 4 or 5 worker processes
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/process-check-monitoring/) about it.

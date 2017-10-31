@@ -16,7 +16,7 @@ The Teamcity check is packaged with the Agent, so simply [install the Agent](htt
 
 Follow [Teamcity's documentation](https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login) to enable Guest Login. 
 
-Create a file `teamcity.yaml` in the Agent's `conf.d` directory:
+Create a file `teamcity.yaml` in the Agent's `conf.d` directory. See the [sample teamcity.yaml](https://github.com/DataDog/integrations-core/blob/master/teamcity/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -40,7 +40,7 @@ Restart the Agent to start collecting and sending Teamcity events to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `teamcity` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `teamcity` under the Checks section:
 
 ```
   Checks
@@ -61,14 +61,17 @@ The teamcity check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv) for a list of metrics provided by this integration.
+The Teamcity check does not include any metric at this time.
 
 ### Events
-The Teamcity check does not include any event at this time.
+All Teamcity events are forwared to your Datadog application.
 
 ### Service Checks
 The Teamcity check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to track performance impact of code changes with TeamCity and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/) about it.
+
+* [Track performance impact of code changes with TeamCity and Datadog.](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)
