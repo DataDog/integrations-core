@@ -33,7 +33,7 @@ sudo ldconfig
 
 ### Configuration
 
-Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.default) for all available configuration options.
+Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
@@ -60,3 +60,10 @@ The Oracle Database check does not include any events at this time.
 
 ### Service Checks
 The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

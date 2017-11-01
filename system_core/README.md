@@ -11,7 +11,7 @@ The system_core check is packaged with the Agent, so simply [install the Agent](
 
 ### Configuration
 
-Create a file `system_core.yaml` in the Agent's `conf.d` directory. See the [sample system_core.yaml](https://github.com/DataDog/integrations-core/blob/master/system_core/conf.yaml.default) for all available configuration options:
+Create a file `system_core.yaml` in the Agent's `conf.d` directory. See the [sample system_core.yaml](https://github.com/DataDog/integrations-core/blob/master/system_core/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

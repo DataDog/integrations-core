@@ -27,7 +27,7 @@ Restart the NameNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory. See the [sample hdfs_namenode.yaml](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/conf.yaml.default) for all available configuration options:
+Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory. See the [sample hdfs_namenode.yaml](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
