@@ -32,7 +32,7 @@ Display Name                       Name               Install State
             [X] Static Content     Web-Static-Content     Installed
 ```
 
-You can add the missing features with install-windowsfeature web-common-http, this will require a restart of the system to work properly.
+You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
 
 ### Configuration
 #### Prepare IIS
