@@ -5,10 +5,8 @@ import sys
 import getopt
 import logging
 import hashlib
-import urllib
 import platform
 
-import requests
 from requests import Session
 from bs4 import BeautifulSoup
 import simplejson as json
@@ -31,8 +29,6 @@ def oracle_dl(target_url, target_local, sha, destination, username, password):
     s.cookies.set('oraclelicense', 'accept-ic_winx8664-cookie', domain='oracle.com')
     s.cookies.set('oraclelicense', 'accept-ic_winx8664-cookie', domain='download.oracle.com')
 
-    login_url = 'http://www.oracle.com/webapps/redirect/signon'
-    login_url_redir = 'https://login.oracle.com/oaam_server/login.do'
     login_steptwo_url = 'https://login.oracle.com:443/oaam_server/oamLoginPage.jsp'
     login_form_url = 'https://login.oracle.com/oaam_server/loginAuth.do'
 
@@ -115,7 +111,7 @@ def sha256(fname):
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_sha256.update(chunk)
-    return hash_md5.hexdigest()
+    return hash_sha256.hexdigest()
 
 def get_members(zip):
     parts = []
@@ -230,7 +226,7 @@ def main():
 
             zip = ZipFile(target_zip)
             zip.extractall(target_dir, get_members(zip))
-        except Exception as e:
+        except Exception:
             log.exception("There was a problem downloading the target")
 
     print 'InstantClient installation complete.'
