@@ -10,6 +10,29 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
 Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
+You can check for this using the following command:
+
+```
+Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
+```
+
+This class should be installed as part of the web-http-common Windows Feature:
+
+```
+PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
+
+Display Name                       Name               Install State
+------------                       ----               -------------
+[X] Web Server (IIS)               Web-Server             Installed
+    [X] Web Server                 Web-WebServer          Installed
+        [X] Common HTTP Features   Web-Common-Http        Installed
+            [X] Default Document   Web-Default-Doc        Installed
+            [X] Directory Browsing Web-Dir-Browsing       Installed
+            [X] HTTP Errors        Web-Http-Errors        Installed
+            [X] Static Content     Web-Static-Content     Installed
+```
+
+You can add the missing features with install-windowsfeature web-common-http, this will require a restart of the system to work properly.
 
 ### Configuration
 #### Prepare IIS
