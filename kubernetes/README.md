@@ -14,7 +14,7 @@ Install the `dd-check-kubernetes` package manually or with your favorite configu
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example) for all available configuration options.
 
 ### Gathering kubernetes events
 
@@ -85,7 +85,7 @@ The longer it is, the less hard your agent hits the apiserver with requests, but
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kubernetes` under the Checks section:
 
     Checks
     ======

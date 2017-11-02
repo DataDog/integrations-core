@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "e1ed642c-8a15-420c-954b-6fb894905956"
+  "guid": "e1ed642c-8a15-420c-954b-6fb894905956",
+  "public_title": "Datadog-Riak Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/riak/",
+  "is_public": true,
+  "has_logo": true
 }

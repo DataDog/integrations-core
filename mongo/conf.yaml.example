@@ -46,3 +46,6 @@ instances:
     #   - my_collection
     #   - my_other_collection
     #
+    # Collect indexes access metrics for every index in every collections in
+    # the 'collections' list. This is available starting mongo 3.2.
+    # collections_indexes_stats: false

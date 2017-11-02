@@ -34,7 +34,7 @@ Restart HAProxy to enable the stats endpoint.
 
 ### Connect the Agent
 
-Create a file `haproxy.yaml` in the Agent's `conf.d` directory:
+Create a file `haproxy.yaml` in the Agent's `conf.d` directory. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -49,7 +49,7 @@ Restart the Agent to begin sending HAProxy metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `haproxy` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `haproxy` under the Checks section:
 
 ```
   Checks
