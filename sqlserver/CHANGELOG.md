@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+1.2.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fixes issue to collect all metrics when `stored_procedure` is defined. See [#830][].
+
 1.2.0 / 2017-10-10
 ==================
 
@@ -29,5 +36,6 @@
 [#357]: https://github.com/DataDog/integrations-core/issues/357
 [#456]: https://github.com/DataDog/integrations-core/issues/456
 [#573]: https://github.com/DataDog/integrations-core/issues/573
+[#830]: https://github.com/DataDog/integrations-core/issues/830
 [@rlaveycal]: https://github.com/rlaveycal
 [@themsquared]: https://github.com/themsquared
