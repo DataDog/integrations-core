@@ -1,6 +1,7 @@
 # CHANGELOG - mongo
 
 1.5.0 / Unreleased
+==================
 ### Changes
 
 * [FEATURE] Collect metrics about indexes usage. See [#823][]
