@@ -5,6 +5,9 @@ import urllib
 
 # 3p
 import pymongo
+from pymongo.command_cursor import CommandCursor
+from bson.son import SON
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 # project
 from checks import AgentCheck
@@ -862,7 +865,21 @@ class MongoDb(AgentCheck):
         except KeyError:
             pass
 
-        dbnames = cli.database_names()
+        cmd = SON([("listDatabases", 1)])
+
+        # Mongo versions >= 3.2 support listing only the database name (does not require database locks)
+        mongo_version = cli.server_info().get('version', '0.0')
+        if LooseVersion(mongo_version) >= LooseVersion("3.2"):
+            cmd.update(nameOnly=True)
+
+        res = cli._database_default_options("admin").command(cmd, session=None)
+        cursor = {
+            "id": 0,
+            "firstBatch": res["databases"],
+            "ns": "admin.$cmd",
+        }
+
+        dbnames = [doc["name"] for doc in CommandCursor(cli.admin["$cmd"], cursor, None)]
         self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
         for db_n in dbnames:
