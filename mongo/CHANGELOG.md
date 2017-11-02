@@ -1,5 +1,12 @@
 # CHANGELOG - mongo
 
+1.5.0 / Unreleased
+### Changes
+
+* [FEATURE] Collect metrics about indexes usage. See [#823][]
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#606][]
+
+
 1.4.0 / 2017-10-10
 ==================
 ### Changes
@@ -48,5 +55,6 @@
 [#627]: https://github.com/DataDog/integrations-core/issues/627
 [#691]: https://github.com/DataDog/integrations-core/issues/691
 [#769]: https://github.com/DataDog/integrations-core/issues/769
+[#823]: https://github.com/DataDog/integrations-core/issues/823
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
