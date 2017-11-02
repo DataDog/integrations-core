@@ -859,9 +859,9 @@ class MySql(AgentCheck):
             return False
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
+        replica_results = {}
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-                replica_results = {}
                 if is_mariadb and replication_channel:
                     cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
                     cursor.execute("SHOW SLAVE STATUS;")
@@ -872,16 +872,27 @@ class MySql(AgentCheck):
                 slave_results = cursor.fetchone()
                 if slave_results:
                     replica_results.update(slave_results)
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            errno, msg = e.args
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+                # MariaDB complains when you try to get slave status with a
+                # connection name on the master, without connection name it
+                # responds an empty string as expected.
+                # Mysql behaves the same with or without connection name.
+                pass
+            else:
+                self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
+
+        try:
+            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
-
-                return replica_results
-
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
-            return {}
+            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s" % str(e))
+
+        return replica_results
 
     def _get_slave_status(self, db, above_560, nonblocking):
         """
