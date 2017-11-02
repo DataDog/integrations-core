@@ -496,8 +496,6 @@ class KafkaCheck(AgentCheck):
                 partitions = client.cluster.available_partitions_for_topic(topic)
             tps[topic] = tps[unicode(topic)].union(set(partitions))
 
-        # TODO: find reliable way to decide what API version to use for
-        # OffsetFetchRequest.
         consumer_offsets = {}
         if coord_id is not None and coord_id >= 0:
             broker_ids = [coord_id]
