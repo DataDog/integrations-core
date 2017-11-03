@@ -79,7 +79,9 @@ instances:
     tags:
       - optional_tag
 
-  # get metrics from custom proc in MyDB but only if the database is writeable (i.e. it's the master in an availability group)
+  # Get metrics from custom proc in MyDB but only if the database is writeable (i.e. it's the master in an availability group)
+  # Note: Custom proc must be defined in its own instance
+
   # - host: HOST,PORT
   #   database: MyDB
   #   username: my_username

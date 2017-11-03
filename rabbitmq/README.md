@@ -21,7 +21,7 @@ You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](h
 
 #### Connect the Agent
 
-Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory:
+Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory. See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -58,7 +58,7 @@ Configuration Options
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `rabbitmq` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `rabbitmq` under the Checks section:
 
 ```
   Checks
@@ -101,24 +101,7 @@ The Agent submits this service check for all vhosts (if `vhosts` is not configur
 Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, otherwise OK.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 ### Datadog Blog

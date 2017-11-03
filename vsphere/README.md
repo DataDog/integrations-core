@@ -13,7 +13,7 @@ The vSphere check is packaged with the Agent, so simply [install the Agent](http
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
-Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory:
+Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory. See the [sample vsphere.yaml](https://github.com/DataDog/integrations-core/blob/master/vsphere/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -39,7 +39,7 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `vsphere` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `vsphere` under the Checks section:
 
 ```
   Checks
@@ -89,7 +89,9 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
+
 ## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

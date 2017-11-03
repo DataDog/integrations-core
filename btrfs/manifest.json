@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.0.0",
-  "guid": "54f9329a-8270-4f5a-bd4b-cd169abfc791"
+  "guid": "54f9329a-8270-4f5a-bd4b-cd169abfc791",
+  "public_title": "Datadog-Btrfs Integration",
+  "categories":["os & system"],
+  "doc_link": "https://docs.datadoghq.com/integrations/btrfs/",
+  "is_public": true,
+  "has_logo": true
 }

@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "2661668b-d804-4c8d-96a7-8019525add8c"
+  "guid": "2661668b-d804-4c8d-96a7-8019525add8c",
+  "public_title": "Datadog-Kyoto Tycoon Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/kyototycoon/",
+  "is_public": true,
+  "has_logo": true
 }

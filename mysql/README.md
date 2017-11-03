@@ -26,6 +26,8 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+Please note that `@'localhost'` is only for local connections, use the hostname/IP of your agent for remote connections, learn more [here](https://dev.mysql.com/doc/refman/5.7/en/adding-users.html)
+
 Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
 
 ```
@@ -64,7 +66,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Connect the Agent
 
-Create a basic `mysql.yaml` in the Agent's `conf.d` directory to connect it to the MySQL server:
+Create a basic `mysql.yaml` in the Agent's `conf.d` directory to connect it to the MySQL server. See the [sample mysql.yaml](https://github.com/DataDog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -92,7 +94,7 @@ Restart the Agent to start sending MySQL metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mysql` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mysql` under the Checks section:
 
 ```
   Checks

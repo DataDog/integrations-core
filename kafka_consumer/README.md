@@ -19,7 +19,7 @@ Create a `kafka_consumer.yaml` file using [this sample conf file](https://github
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `kafka_consumer` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kafka_consumer` under the Checks section:
 
 ```
   Checks
@@ -61,4 +61,9 @@ Specify the specific partition of your environment for your topic in your kafka_
 ```
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Kafka consumer performance metrics with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/) about it.
+
+## Further Reading
+
+* [Monitoring Kafka performance metrics](https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/)
+* [Collecting Kafka performance metrics](https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/)
+* [Monitoring Kafka with Datadog](https://www.datadoghq.com/blog/monitor-kafka-with-datadog/)

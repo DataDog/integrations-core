@@ -11,7 +11,7 @@ The Kong check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a `kong.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `kong.yaml` in the Datadog Agent's `conf.d` directory. See the [sample kong.yaml](https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -30,7 +30,7 @@ Restart the Agent to begin sending Kong metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `kong` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kong` under the Checks section:
 
 ```
   Checks
@@ -64,24 +64,8 @@ The Kong check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Kong with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-kong-datadog/) about it.
+
+* [Monitor Kong with our new Datadog integration](https://www.datadoghq.com/blog/monitor-kong-datadog/)

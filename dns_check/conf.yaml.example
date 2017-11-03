@@ -4,10 +4,15 @@ init_config:
 instances:
     - name: example
       hostname: www.example.org
+
       # please notice: nameservers must be a valid IP address
       nameserver: 
           - 127.0.0.1
           - 127.0.0.2
+          
+      # Optionally specify your nameserver's port
+      # nameserver_port: 53
+      
       timeout: 8
 
       # Specify an (optional) `record_type` to customize the record type
