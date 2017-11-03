@@ -21,7 +21,7 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 ### Configuration
 #### Configure the Datadog Agent
 
-Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory:
+Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sample gunicorn.yaml](https://github.com/DataDog/integrations-core/blob/master/disk/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -41,7 +41,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `gunicorn` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gunicorn` under the Checks section:
 
 ```
   Checks
@@ -72,7 +72,7 @@ The gunicorn check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration - those from the Agent _and_ those sent by Gunicorn to DogStatsD.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 The Gunicorn check does not include any event at this time.
@@ -117,26 +117,6 @@ ubuntu   18457 16695  5 20:26 pts/0    00:00:00 gunicorn: master [my_app]
 ubuntu   18462 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
-
-## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
 
 ## Further Reading
 To get a better idea of how (or why) to integrate your Gunicorn apps with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-gunicorn-performance/).

@@ -1,5 +1,13 @@
 # CHANGELOG - postgres
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Adding an option to include the default 'postgres' database when gathering stats [#740][]
+* [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined See[#776][]
+
 1.1.0 / 2017-08-28
 ==================
 
@@ -42,5 +50,8 @@
 [#607]: https://github.com/DataDog/integrations-core/issues/607
 [#639]: https://github.com/DataDog/integrations-core/issues/639
 [#699]: https://github.com/DataDog/integrations-core/issues/699
+[#689]: https://github.com/Erouan50/integrations-core/issues/689
+[#740]: https://github.com/DataDog/integrations-core/pull/740
+[#776]: https://github.com/DataDog/integrations-core/issues/776
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill

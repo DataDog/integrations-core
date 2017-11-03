@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.0.1",
-  "guid": "bdd65394-92ff-4d51-bbe3-ba732663fdb2"
+  "guid": "bdd65394-92ff-4d51-bbe3-ba732663fdb2",
+  "public_title": "Datadog-Gearmand Integration",
+  "categories":["processing"],
+  "doc_link": "https://docs.datadoghq.com/integrations/gearmand/",
+  "is_public": true,
+  "has_logo": true
 }

@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+1.2.0 Unreleased
+==================
+
+* [FEATURE] Add service tags to metrics
+
 1.1.0 / 2017-07-18
 ==================
 

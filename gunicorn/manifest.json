@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.1.0",
-  "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f"
+  "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
+  "public_title": "Datadog-Gunicorn Integration",
+  "categories":["web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",
+  "is_public": true,
+  "has_logo": true
 }
