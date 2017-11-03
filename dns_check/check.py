@@ -118,11 +118,11 @@ class DNSCheck(NetworkCheck):
 
         try:
             nameservers = instance.get('nameserver') or dns.resolver.Resolver().nameservers
-            tags.append('nameservers:{0}'.format(nameserver))
+            tags.append('nameservers:{0}'.format(nameservers))
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
-        tags = custom_tags + ['nameservers:{0}'.format(nameserver),
+        tags = custom_tags + ['nameservers:{0}'.format(nameservers),
                               'resolved_hostname:{0}'.format(hostname),
                               'instance:{0}'.format(instance_name),
                               'record_type:{0}'.format(record_type)]
