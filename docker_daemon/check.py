@@ -73,7 +73,7 @@ CGROUP_METRICS = [
         "cgroup": "memory",
         "file": "memory.soft_limit_in_bytes",
         "metrics": {
-            "softlimit": ("docker.mem.reservation_limit", GAUGE),
+            "softlimit": ("docker.mem.soft_limit", GAUGE),
         },
     },
     {
