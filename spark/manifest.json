@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.1",
-  "guid": "f7a5a40f-f73c-465a-be8f-b2b371c706a2"
+  "guid": "f7a5a40f-f73c-465a-be8f-b2b371c706a2",
+  "public_title": "Datadog-Spark Integration",
+  "categories":["processing"],
+  "doc_link": "https://docs.datadoghq.com/integrations/spark/",
+  "is_public": true,
+  "has_logo": true
 }

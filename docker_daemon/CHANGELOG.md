@@ -1,5 +1,10 @@
 # CHANGELOG - docker_daemon
 
+1.6.0 / Unreleased
+==================
+### Changes
+* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
+* [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 
 1.5.0 / 2017-10-10
 ==================
@@ -103,4 +108,5 @@
 [#722]: https://github.com/DataDog/integrations-core/issues/722
 [#744]: https://github.com/DataDog/integrations-core/issues/744
 [#770]: https://github.com/DataDog/integrations-core/issues/770
+[#782]: https://github.com/DataDog/integrations-core/issues/782
 [@sophaskins]: https://github.com/sophaskins

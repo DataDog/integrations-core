@@ -96,7 +96,9 @@ env:
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.10.2
     - TRAVIS_FLAVOR=openstack
     - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=debian-jessie  # pgbouncer-1.5.4
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=debian-stretch # pgbouncer-1.7.2
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=ubuntu-xenial  # pgbouncer-1.7
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
     - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=9.6
     - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=3.7.3
@@ -127,8 +129,8 @@ install:
   - git -C $HOME/integrations-extras pull || git clone -b $EXTRAS_BRANCH --depth 1 https://github.com/DataDog/integrations-extras.git $HOME/integrations-extras
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
+  - pip install -r requirements-test.txt
   - bundle exec rake setup_agent_libs
-  - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run

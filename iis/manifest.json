@@ -10,5 +10,10 @@
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba"
+  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
+  "public_title": "Datadog-IIS Integration",
+  "categories":["web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/iis/",
+  "is_public": true,
+  "has_logo": true
 }

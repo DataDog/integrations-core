@@ -13,7 +13,7 @@ The SNMP check is packaged with the Agent, so simply [install the Agent](https:/
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example `snmp.yaml`:
+Here's an example `snmp.yaml`. See the [sample snmp.yaml](https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -88,7 +88,7 @@ Restart the Agent to start sending SNMP metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `snmp` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `snmp` under the Checks section:
 
 ```
   Checks

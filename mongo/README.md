@@ -39,7 +39,7 @@ db.createUser({
 
 #### Connect the Agent
 
-Create a file `mongodb.yaml` in the Agent's `conf.d` directory:
+Create a file `mongodb.yaml` in the Agent's `conf.d` directory. See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongodb/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -59,7 +59,7 @@ instances:
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mongo` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mongo` under the Checks section:
 
 ```
   Checks

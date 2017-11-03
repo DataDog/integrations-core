@@ -182,6 +182,12 @@ class ESCheck(AgentCheck):
         "jvm.mem.heap_max": ("gauge", "jvm.mem.heap_max_in_bytes"),
         "jvm.mem.non_heap_committed": ("gauge", "jvm.mem.non_heap_committed_in_bytes"),
         "jvm.mem.non_heap_used": ("gauge", "jvm.mem.non_heap_used_in_bytes"),
+        "jvm.mem.pools.young.used": ("gauge", "jvm.mem.pools.young.used_in_bytes"),
+        "jvm.mem.pools.young.max": ("gauge", "jvm.mem.pools.young.max_in_bytes"),
+        "jvm.mem.pools.old.used": ("gauge", "jvm.mem.pools.old.used_in_bytes"),
+        "jvm.mem.pools.old.max": ("gauge", "jvm.mem.pools.old.max_in_bytes"),
+        "jvm.mem.pools.survivor.used": ("gauge", "jvm.mem.pools.survivor.used_in_bytes"),
+        "jvm.mem.pools.survivor.max": ("gauge", "jvm.mem.pools.survivor.max_in_bytes"),
         "jvm.threads.count": ("gauge", "jvm.threads.count"),
         "jvm.threads.peak_count": ("gauge", "jvm.threads.peak_count"),
         "elasticsearch.fs.total.total_in_bytes": ("gauge", "fs.total.total_in_bytes"),
@@ -330,7 +336,8 @@ class ESCheck(AgentCheck):
     CLUSTER_PENDING_TASKS = {
         "elasticsearch.pending_tasks_total": ("gauge", "pending_task_total"),
         "elasticsearch.pending_tasks_priority_high": ("gauge", "pending_tasks_priority_high"),
-        "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent")
+        "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent"),
+        "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
     }
 
     SOURCE_TYPE_NAME = 'elasticsearch'
@@ -593,14 +600,18 @@ class ESCheck(AgentCheck):
 
     def _process_pending_tasks_data(self, data, config):
         p_tasks = defaultdict(int)
+        average_time_in_queue = 0
 
         for task in data.get('tasks', []):
             p_tasks[task.get('priority')] += 1
+            average_time_in_queue += task.get('time_in_queue_millis', 0)
 
+        total = sum(p_tasks.values())
         node_data = {
-            'pending_task_total':               sum(p_tasks.values()),
+            'pending_task_total':               total,
             'pending_tasks_priority_high':      p_tasks['high'],
             'pending_tasks_priority_urgent':    p_tasks['urgent'],
+            'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1), # if total is 0
         }
 
         for metric in self.CLUSTER_PENDING_TASKS:
@@ -635,10 +646,6 @@ class ESCheck(AgentCheck):
                 )
 
     def _process_pshard_stats_data(self, data, config, pshard_stats_metrics):
-        # Process number of indexes in cluster
-        if "indexes" in data:
-            self.gauge(self.PRIMARY_SHARD_INDEX_COUNT, len(data["indices"]), tags=config.tags)
-
         for metric, desc in pshard_stats_metrics.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 

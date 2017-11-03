@@ -11,7 +11,7 @@ The PgBouncer check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `pgbouncer.yaml` in the Agent's `conf.d` directory:
+Create a file `pgbouncer.yaml` in the Agent's `conf.d` directory. See the [sample pgbouncer.yaml](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -42,7 +42,7 @@ Restart the Agent to start sending PgBouncer metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `pgbouncer` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `pgbouncer` under the Checks section:
 
 ```
   Checks

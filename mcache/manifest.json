@@ -11,5 +11,10 @@
     "mac_os"
   ],
   "version": "1.0.0",
-  "guid": "b1c4033c-bf96-4456-be63-e74ff171f991"
+  "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
+  "public_title": "Datadog-Memcache Integration",
+  "categories":["web", "caching"],
+  "doc_link": "https://docs.datadoghq.com/integrations/mcache/",
+  "is_public": true,
+  "has_logo": true
 }

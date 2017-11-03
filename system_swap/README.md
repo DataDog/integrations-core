@@ -11,7 +11,7 @@ The system swap check is packaged with the Agent, so simply [install the Agent](
 
 ### Configuration
 
-Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory:
+Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory. See the [sample system_swap.yaml](https://github.com/DataDog/integrations-core/blob/master/system_swap/conf.yaml.example) for all available configuration options:
 
 ```
 # This check takes no initial configuration
@@ -24,7 +24,7 @@ Restart the Agent to start collecting swap metrics.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `system_swap` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `system_swap` under the Checks section:
 
 ```
   Checks

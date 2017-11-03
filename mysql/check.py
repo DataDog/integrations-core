@@ -744,7 +744,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
             pid = self._get_server_pid(db)
 
         if pid:
