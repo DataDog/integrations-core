@@ -39,7 +39,7 @@ db.createUser({
 
 #### Connect the Agent
 
-Create a file `mongodb.yaml` in the Agent's `conf.d` directory. See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongodb/conf.yaml.example) for all available configuration options:
+Create a file `mongodb.yaml` in the Agent's `conf.d` directory. See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

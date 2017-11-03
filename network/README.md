@@ -11,7 +11,7 @@ The network check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory. See the [sample network.yaml](https://github.com/DataDog/integrations-core/blob/master/network/conf.yaml.example) for all available configuration options:
+The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory. See the [sample network.yaml](https://github.com/DataDog/integrations-core/blob/master/network/conf.yaml.default) for all available configuration options:
 
 ```
 init_config:

@@ -105,7 +105,34 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kube
 
 ### Events
 
-As the 5.17.0 release, Datadog Agent now supports built in [leader election option](#gathering-kubernetes-events) for the Kubernetes event collector. Once enabled, you no longer need to deploy an additional event collection container to your cluster. Instead agents will coordinate to ensure only one agent instance is gathering events at a given time.
+As the 5.17.0 release, Datadog Agent now supports built in [leader election option](#gathering-kubernetes-events) for the Kubernetes event collector. Once enabled, you no longer need to deploy an additional event collection container to your cluster. Instead agents will coordinate to ensure only one agent instance is gathering events at a given time, events below will be available:
+
+* Backoff
+* Conflict
+* Delete
+* DeletingAllPods
+* Didn't have enough resource
+* Error
+* Failed
+* FailedCreate
+* FailedDelete
+* FailedMount
+* FailedSync
+* Failedvalidation
+* FreeDiskSpaceFailed
+* HostPortConflict
+* InsufficientFreeCPU
+* InsufficientFreeMemory
+* InvalidDiskCapacity
+* Killing
+* KubeletsetupFailed
+* NodeNotReady
+* NodeoutofDisk
+* OutofDisk
+* Rebooted
+* TerminatedAllPods
+* Unable
+* Unhealthy
 
 ### Service Checks
 The Kubernetes check does not include any service check at this time.
