@@ -58,7 +58,6 @@ class DNSCheck(NetworkCheck):
         # If a specific DNS server was defined use it, else use the system default
         nameservers = instance.get('nameserver')
         nameserver_port = instance.get('nameserver_port')
-        
         if nameservers is not None:
             resolver.nameservers = nameservers
         if nameserver_port is not None:
