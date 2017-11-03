@@ -94,7 +94,7 @@ class DNSCheck(NetworkCheck):
 
         except dns.exception.Timeout:
             tags = self._get_tags(instance)
-            self.log.exception('DNS resolution of {0} timed out'.format(hostname))
+            self.log.error('DNS resolution of {0} timed out'.format(hostname))
             return Status.CRITICAL, 'DNS resolution of {0} timed out'.format(hostname)
 
         except Exception:
