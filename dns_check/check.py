@@ -68,7 +68,7 @@ class DNSCheck(NetworkCheck):
         resolver.lifetime = timeout
         record_type = instance.get('record_type', 'A')
 
-        return hostname, timeout, nameservers, record_type, resolver
+        return hostname, timeout, nameserver, record_type, resolver
 
     def _check(self, instance):
         hostname, timeout, nameservers, record_type, resolver = self._load_conf(instance)
