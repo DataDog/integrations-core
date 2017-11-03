@@ -91,20 +91,18 @@ class DNSCheck(NetworkCheck):
         except dns.exception.Timeout:
             tags = self._get_tags(instance)
             self.log.exception('DNS resolution of {0} timed out'.format(hostname))
-            self.gauge('DNS Resolution', 0, tags=tags) # DNS Resolved
-            return Status.UP, 'DOWN'
+            return Status.CRITICAL, 'DNS resolution of {0} timed out'.format(hostname)
 
         except Exception:
             tags = self._get_tags(instance)
             self.log.exception('DNS resolution of {0} has failed.'.format(hostname))
-            self.gauge('DNS Resolution', 0, tags=tags) # DNS Not Resolving
-            return Status.UP, 'DOWN'
+            return Status.CRITICAL, 'DNS resolution of {0} has failed'.format(hostname)
 
         else:
             tags = self._get_tags(instance)
             if response_time > 0:
-                self.gauge('DNS Resolution', 1, tags=tags) # DNS Resolved
-                self.log.debug('Resolved hostname: {0}'.format(hostname))
+                self.gauge('dns.response_time', response_time, tags=tags)
+            self.log.debug('Resolved hostname: {0}'.format(hostname))
             return Status.UP, 'UP'
 
     def _get_tags(self, instance):
@@ -115,7 +113,7 @@ class DNSCheck(NetworkCheck):
         tags = []
 
         try:
-            nameserver = dns.resolver.Resolver().nameservers
+            nameservers = instance.get('nameserver') or dns.resolver.Resolver().nameservers
             tags.append('nameservers:{0}'.format(nameserver))
         except IndexError:
             self.log.error('No DNS server was found on this host.')
