@@ -363,6 +363,7 @@ class Network(AgentCheck):
                 'ListenOverflows': 'system.net.tcp.listen_overflows',
                 'ListenDrops': 'system.net.tcp.listen_drops',
                 'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
+                'TCPRetransFail': 'system.net.tcp.failed_retransmits',
             },
             'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
