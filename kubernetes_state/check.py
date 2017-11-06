@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import re
+import time
 from collections import defaultdict
 
 from checks import CheckException
@@ -92,18 +93,35 @@ class KubernetesState(PrometheusCheck):
         }
 
         self.ignore_metrics = [
-            # _info and _labels don't convey any metric
+            # _info, _labels and _created don't convey any metric
             'kube_cronjob_info',
+            'kube_cronjob_created',
+            'kube_daemonset_created',
+            'kube_deployment_created',
+            'kube_deployment_labels',
+            'kube_job_created',
             'kube_job_info',
+            'kube_limitrange_created',
+            'kube_namespace_created',
+            'kube_namespace_labels',
+            'kube_node_created',
             'kube_node_info',
             'kube_node_labels',
+            'kube_pod_created'
             'kube_pod_container_info',
             'kube_pod_info',
+            'kube_pod_owner',
+            'kube_pod_start_time',
             'kube_pod_labels',
+            'kube_replicaset_created',
+            'kube_replicationcontroller_created',
+            'kube_resourcequota_created',
+            'kube_service_created',
             'kube_service_info',
             'kube_service_labels',
+            'kube_statefulset_labels',
+            'kube_statefulset_created',
             # _generation metrics are more metadata than metrics, no real use case for now
-            'kube_daemonset_metadata_generation',
             'kube_daemonset_metadata_generation',
             'kube_deployment_metadata_generation',
             'kube_deployment_status_observed_generation',
@@ -113,11 +131,11 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_observed_generation',
             'kube_statefulset_metadata_generation',
             'kube_statefulset_status_observed_generation',
-            # kube_node_status_phase has no use case as a service check
+            # kube_node_status_phase and kube_namespace_status_phase have no use case as a service check
+            'kube_namespace_status_phase',
             'kube_node_status_phase',
             # These CronJob and Job metrics need use cases to determine how do implement
             'kube_cronjob_status_active',
-            'kube_cronjob_status_last_schedule_time',
             'kube_cronjob_spec_suspend',
             'kube_cronjob_spec_starting_deadline_seconds',
             'kube_job_spec_active_dealine_seconds',
@@ -276,6 +294,29 @@ class KubernetesState(PrometheusCheck):
             #TODO: add deployment/replicaset?
             status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
             self.service_check(check_basename + phase, status, tags=tags)
+
+    def kube_cronjob_status_last_schedule_time(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.cronjob.delay'
+        curr_time = time.time()
+        for metric in message.metric:
+            delay = curr_time - metric.gauge.value
+            if delay > 0:
+                tags = [self._format_tag(label.name, label.value) for label in metric.label]
+                self.gauge(metric_name, delay, tags)
+            else:
+                tags = [self._format_tag(label.name, label.value) for label in metric.label]
+                self.gauge(metric_name, 0, tags)
+
+    def kube_cronjob_next_schedule_time(self, message, **kwargs):
+        check_basename = self.NAMESPACE + '.cronjob.on_schedule_check'
+        curr_time = time.time()
+        for metric in message.metric:
+            on_schedule = metric.gauge.value - curr_time
+            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            if on_schedule < 0:
+                self.service_check(service_check_name, self.CRITICAL, tags=tags)
+            else:
+                self.service_check(service_check_name, self.OK, tags=tags)
 
     def kube_job_complete(self, message, **kwargs):
         service_check_name = self.NAMESPACE + '.job.complete'
