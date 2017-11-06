@@ -309,14 +309,14 @@ class KubernetesState(PrometheusCheck):
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         check_basename = self.NAMESPACE + '.cronjob.on_schedule_check'
-        curr_time = time.time()
+        curr_time = int(time.time())
         for metric in message.metric:
-            on_schedule = metric.gauge.value - curr_time
+            on_schedule = int(metric.gauge.value) - curr_time
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             if on_schedule < 0:
-                self.service_check(service_check_name, self.CRITICAL, tags=tags)
+                self.service_check(check_basename, self.CRITICAL, tags=tags)
             else:
-                self.service_check(service_check_name, self.OK, tags=tags)
+                self.service_check(check_basename, self.OK, tags=tags)
 
     def kube_job_complete(self, message, **kwargs):
         service_check_name = self.NAMESPACE + '.job.complete'
@@ -419,6 +419,18 @@ class KubernetesState(PrometheusCheck):
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
+
+    def kube_pod_container_status_waiting_reason(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.pod.status_waiting.reason'
+        for metric in message.metric:
+            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            self.gauge(metric_name, metric.gauge.value, tags)
+
+    def kube_pod_container_status_terminated_reason(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.pod.status_terminated.reason'
+        for metric in message.metric:
+            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            self.gauge(metric_name, metric.gauge.value, tags)
 
     def kube_resourcequota(self, message, **kwargs):
         """ Quota and current usage by resource type. """
