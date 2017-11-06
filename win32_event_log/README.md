@@ -47,7 +47,7 @@ The win32_event_log check is compatible with all Windows platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/win32_event_log/metadata.csv) for a list of metrics provided by this integration.
+The Win32 Event log check does not include any metric at this time.
 
 ### Events
 All Windows Event are forwarded to your Datadog application
