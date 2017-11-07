@@ -11,7 +11,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.7.0",
+  "version": "1.6.0",
   "public_title": "Datadog-Docker Integration",
   "categories":["containers"],
   "doc_link": "https://docs.datadoghq.com/integrations/docker_daemon/",
