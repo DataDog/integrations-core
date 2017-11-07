@@ -428,7 +428,7 @@ class KubernetesState(PrometheusCheck):
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         """ Reason a container is in a waiting state """
         # Capturing the pod name so the metric can be compared to kube_pod_container_status_waiting
-        metric_name = self.NAMESPACE + '.pod.status_waiting.reason'
+        metric_name = self.NAMESPACE + '.pod_container_status_waiting.reason'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.gauge(metric_name, metric.gauge.value, tags)
@@ -436,7 +436,7 @@ class KubernetesState(PrometheusCheck):
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
         """ Reason a container has terminated """
         # Capturing the pod name so the metric can be compared to kube_pod_container_status_terminated
-        metric_name = self.NAMESPACE + '.pod.status_terminated.reason'
+        metric_name = self.NAMESPACE + '.pod_container_status_terminated.reason'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.gauge(metric_name, metric.gauge.value, tags)

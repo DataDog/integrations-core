@@ -24,6 +24,8 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.node.cpu_allocatable',
         NAMESPACE + '.node.memory_allocatable',
         NAMESPACE + '.node.pods_allocatable',
+        NAMESPACE + 'node.gpu.cards_capacity',
+        NAMESPACE + 'node.gpu.cards_allocatable',
         # deployments
         NAMESPACE + '.deployment.replicas',
         NAMESPACE + '.deployment.replicas_available',
@@ -48,17 +50,25 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.ready',
         NAMESPACE + '.container.running',
         NAMESPACE + '.container.terminated',
+        NAMESPACE + '.container.terminated.reason',
         NAMESPACE + '.container.waiting',
+        NAMESPACE + '.container.waiting.reason',
         NAMESPACE + '.container.restarts',
         NAMESPACE + '.container.cpu_requested',
         NAMESPACE + '.container.memory_requested',
         NAMESPACE + '.container.cpu_limit',
         NAMESPACE + '.container.memory_limit',
+        NAMESPACE + 'container.gpu.resource_request',
+        NAMESPACE + 'container.gpu.resource_limit',
         # replicasets
         NAMESPACE + '.replicaset.replicas',
         NAMESPACE + '.replicaset.fully_labeled_replicas',
         NAMESPACE + '.replicaset.replicas_ready',
         NAMESPACE + '.replicaset.replicas_desired',
+        # cronjob
+        NAMESPACE + '.cronjob.delay',
+        # persistentvolume claim
+        NAMESPACE + 'persistentvolumeclaim.status',
     ]
 
     ZERO_METRICS = [
