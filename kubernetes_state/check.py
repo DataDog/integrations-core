@@ -66,6 +66,7 @@ class KubernetesState(PrometheusCheck):
             'kube_node_status_capacity_pods': 'node.pods_capacity',
             'kube_node_status_allocatable_nvidia_gpu_cards': 'node.gpu.cards_allocatable',
             'kube_node_status_capacity_nvidia_gpu_cards': 'node.gpu.cards_capacity',
+            'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
             'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
             'kube_pod_container_resource_limits_memory_bytes': 'container.memory_limit',
             'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
@@ -296,6 +297,8 @@ class KubernetesState(PrometheusCheck):
             self.service_check(check_basename + phase, status, tags=tags)
 
     def kube_cronjob_status_last_schedule_time(self, message, **kwargs):
+        """ Time since the last succesful schedule """
+        # Used as a metric so that one can compare the time since the last successful schedule and when the cronjob is supposed to be run
         metric_name = self.NAMESPACE + '.cronjob.delay'
         curr_time = time.time()
         for metric in message.metric:
@@ -308,6 +311,8 @@ class KubernetesState(PrometheusCheck):
                 self.gauge(metric_name, 0, tags)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
+        """ Time until the next schedule """
+        # Used as a service check so that one can be alerted if the cronjob's next schedule is in the past
         check_basename = self.NAMESPACE + '.cronjob.on_schedule_check'
         curr_time = int(time.time())
         for metric in message.metric:
@@ -421,12 +426,16 @@ class KubernetesState(PrometheusCheck):
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
+        """ Reason a container is in a waiting state """
+        # Capturing the pod name so the metric can be compared to kube_pod_container_status_waiting
         metric_name = self.NAMESPACE + '.pod.status_waiting.reason'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.gauge(metric_name, metric.gauge.value, tags)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
+        """ Reason a container has terminated """
+        # Capturing the pod name so the metric can be compared to kube_pod_container_status_terminated
         metric_name = self.NAMESPACE + '.pod.status_terminated.reason'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
