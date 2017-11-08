@@ -11,7 +11,7 @@ The Kyototycoon check is packaged with the Agent, so simply [install the Agent](
 
 ### Configuration
 
-Create a file `kyototycoon.yaml` in the Agent's `conf.d` directory. See the [sample kyototycoon.yaml](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/conf.yaml.default) for all available configuration options:
+Create a file `kyototycoon.yaml` in the Agent's `conf.d` directory. See the [sample kyototycoon.yaml](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:

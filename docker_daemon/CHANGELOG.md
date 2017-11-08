@@ -3,8 +3,15 @@
 1.6.0 / Unreleased
 ==================
 ### Changes
-* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
+
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
+* [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
+
+1.5.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
 
 1.5.0 / 2017-10-10
 ==================
@@ -109,4 +116,5 @@
 [#744]: https://github.com/DataDog/integrations-core/issues/744
 [#770]: https://github.com/DataDog/integrations-core/issues/770
 [#782]: https://github.com/DataDog/integrations-core/issues/782
+[#817]: https://github.com/DataDog/integrations-core/issues/817
 [@sophaskins]: https://github.com/sophaskins

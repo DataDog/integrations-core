@@ -142,6 +142,7 @@ class TestCouchdb2(AgentCheckTest):
         AgentCheckTest.__init__(self, *args, **kwargs)
         self.cluster_gauges = []
         self.by_db_gauges = []
+        self.erlang_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -151,6 +152,8 @@ class TestCouchdb2(AgentCheckTest):
                     continue
                 elif row[0].startswith("couchdb.by_db."):
                     self.by_db_gauges.append(row[0])
+                elif row[0].startswith("couchdb.erlang"):
+                    self.erlang_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -169,6 +172,9 @@ class TestCouchdb2(AgentCheckTest):
                 tags = [tag[0], "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
+
+            for gauge in self.erlang_gauges:
+                self.assertMetric(gauge)
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -262,6 +268,9 @@ class TestCouchdb2(AgentCheckTest):
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
 
+            for gauge in self.erlang_gauges:
+                self.assertMetric(gauge)
+
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
                                 tags=["instance:{0}".format(conf["server"])],
@@ -282,6 +291,9 @@ class TestCouchdb2(AgentCheckTest):
         conf['max_nodes_per_check'] = 2
 
         self.run_check({"instances": [conf]})
+
+        for gauge in self.erlang_gauges:
+            self.assertMetric(gauge)
 
         tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2])
         for tag in tags:

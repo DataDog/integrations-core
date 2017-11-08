@@ -1,5 +1,12 @@
 # CHANGELOG - network
 
+1.3.0 / 2017-09-01
+==================
+
+### Changes
+
+* [FEATURE] Collects TCPRetransFail metric from /proc/net/netstat, See [#697][]
+
 1.2.2 / 2017-08-28
 ==================
 
