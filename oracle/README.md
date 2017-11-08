@@ -7,33 +7,59 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 ## Setup
 ### Installation
 
-Install the `dd-check-oracle` package manually or with your favorite configuration manager
+Install the `dd-check-oracle` package manually or with your favorite configuration manager.
 
-In order to use the Oracle integration you must install Oracle's `instantclient` libraries by following the instructions below.  Due to licensing restrictions we are unable to include this library in our agent.
+In order to use the Oracle integration you must install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
 
-You may download `instantclient` directly from Oracle [here](https://www.oracle.com/technetwork/database/features/instant-client/index.html).
+You will need to install the Instant Client Basic and SDK packages (NEED VERIFICATION).
 
-The steps to set up `instantclient` to work with the integration would typically be:
+After you have installed the Instant Client libraries, ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
+
+```
+# Put the library location in an ld configuration file.
+sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+    /etc/ld.so.conf.d/oracle-instantclient.conf"
+
+# Update the bindings.
+sudo ldconfig
+```
+
+Alternately, you can update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries. For example:
 
 ```
 mkdir -p /opt/oracle/ && cd /opt/oracle/
-# Download Oracle Instant Client (example dir: /opt/oracle)
+
+# Download Oracle Instant Client (example dir: /opt/oracle).
 unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
 unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
-export ORACLE_HOME=/opt/oracle/instantclient/
+
+export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
-From this point we'll need to ensure that relevant Oracle libraries are in the `LD_LIBRARY_PATH`:
+Finally, you will need to create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
 ```
-if [ ! -e $ORACLE_HOME/libclntsh.so ]; then ln -s $ORACLE_HOME/libclntsh.so.12.1 $ORACLE_HOME/libclntsh.so; fi
-echo "$ORACLE_HOME" | sudo tee /etc/ld.so.conf.d/oracle_instantclient.conf
-sudo ldconfig
+-- Enable Oracle Script.
+ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+
+-- Create the datadog user. Replace the password placeholder with a secure password.
+create user datadog identified by <password>;
+
+-- Grant access to the datadog user.
+grant connect to datadog;
+grant select on gv_$sysmetric to datadog;
 ```
 
 ### Configuration
 
 Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example) for all available configuration options.
+
+Configuration Options:
+* **`server`** (Required) - The IP address or hostname of the Oracle Database server.
+* **`service_name`** (Required) - The Oracle Database service name. To view the services available on your server, run the following query: `select value from v$parameter where name='service_names'`.
+* **`user`** (Required) - If you followed [the instructions above](#installation), set this to the read-only user `datadog`. Otherwise set it to a user with sufficient privileges to connect to the database and read system metrics.
+* **`password`** (Required) - The password for the user account.
+* **`tags`** (Optional) - A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs.
 
 ### Validation
 
