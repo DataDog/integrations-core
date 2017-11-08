@@ -198,34 +198,25 @@ class KubernetesState(PrometheusCheck):
         """
         if bool(metric.gauge.value) is False:
             return  # Ignore if gauge is not 1
-        p = False
-        for label in metric.label:
-            if label.name == 'condition' and label.value == 'Ready':
-                service_check_name = base_sc_name + '.ready'
-                mapping = self.condition_to_status_positive
-                p = True
-            if label.name == 'condition' and label.value == 'OutOfDisk':
-                service_check_name = base_sc_name + '.out_of_disk'
-                mapping = self.condition_to_status_negative
-                p = True
-            if label.name == 'condition' and label.value == 'DiskPressure':
-                service_check_name = base_sc_name + '.disk_pressure'
-                mapping = self.condition_to_status_negative
-                p = True
-            if label.name == 'condition' and label.value == 'NetworkUnavailable':
-                service_check_name = base_sc_name + '.network_unavailable'
-                mapping = self.condition_to_status_negative
-                p = True
-            if label.name == 'condition' and label.value == 'MemoryPressure':
-                service_check_name = base_sc_name + '.memory_pressure'
-                mapping = self.condition_to_status_negative
-                p = True
-            if label.name == 'status' and p:
-                self.service_check(service_check_name, mapping[label.value], tags=tags)
-                self.log.debug("%s %s %s" % (service_check_name, mapping[label.value], tags))
-                p = False
-            else:
-                self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label.value))
+        label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
+        service_check_name = condition_map['service_check_name']
+        mapping = condition_map['mapping']
+        if condition_map['service_check_name'] is None:
+            self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
+        else:
+            self.service_check(service_check_name, mapping[label_value], tags=tags)
+            self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
+
+    def _get_metric_condition_map(self, base_sc_name, labels):
+        switch = {
+            'Ready': {'service_check_name': base_sc_name + '.ready', 'mapping': self.condition_to_status_positive},
+            'OutOfDisk': {'service_check_name': base_sc_name + '.out_of_disk', 'mapping': self.condition_to_status_negative},
+            'DiskPressure': {'service_check_name': base_sc_name + '.disk_pressure', 'mapping': self.condition_to_status_negative},
+            'NetworkUnavailable': {'service_check_name': base_sc_name + '.network_unavailable', 'mapping': self.condition_to_status_negative},
+            'MemoryPressure': {'service_check_name': base_sc_name + '.memory_pressure', 'mapping': self.condition_to_status_negative}
+        }
+        label_value = self._extract_label_value('status', labels)
+        return label_value, switch.get(self._extract_label_value('condition', labels), {'service_check_name': None, 'mapping': None})
 
     def _extract_label_value(self, name, labels):
         """

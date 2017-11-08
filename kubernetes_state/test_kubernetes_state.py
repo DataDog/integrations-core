@@ -69,18 +69,6 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.waiting',
     ]
 
-    ZERO_METRICS_V040 = [
-        NAMESPACE + '.deployment.replicas_unavailable',
-        NAMESPACE + '.deployment.paused',
-        NAMESPACE + '.daemonset.misscheduled',
-        NAMESPACE + '.container.terminated',
-        NAMESPACE + '.container.waiting',
-        NAMESPACE + '.hpa.min_replicas',
-        NAMESPACE + '.hpa.max_replicas',
-        NAMESPACE + '.hpa.desired_replicas',
-        NAMESPACE + '.hpa.current_replicas',
-    ]
-
     def assertMetricNotAllZeros(self, metric_name):
         for mname, ts, val, mdata in self.metrics:
             if mname == metric_name:
@@ -110,7 +98,6 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
-        # TODO: uncomment when any of these are in the test protobuf.bin
         self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
@@ -141,16 +128,11 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
-        # TODO: uncomment when any of these are in the test protobuf.bin
-        #self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
-        #self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
-        #self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
+
 
         for metric in self.METRICS:
             if not metric.startswith(NAMESPACE + '.hpa'):
                 self.assertMetric(metric)
-            if metric not in self.ZERO_METRICS_V040:
-                self.assertMetricNotAllZeros(metric)
 
         self.assert_resourcequota()
 
