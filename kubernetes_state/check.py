@@ -76,8 +76,8 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_status_running': 'container.running',
             'kube_pod_container_status_terminated': 'container.terminated',
             'kube_pod_container_status_waiting': 'container.waiting',
-            'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.resource_request',
-            'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.resource_limit',
+            'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
+            'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
             'kube_pod_status_ready': 'pod.ready',
             'kube_pod_status_scheduled': 'pod.scheduled',
             'kube_replicaset_spec_replicas': 'replicaset.replicas_desired',
@@ -137,6 +137,7 @@ class KubernetesState(PrometheusCheck):
             'kube_node_status_phase',
             # These CronJob and Job metrics need use cases to determine how do implement
             'kube_cronjob_status_active',
+            'kube_cronjob_status_last_schedule_time',
             'kube_cronjob_spec_suspend',
             'kube_cronjob_spec_starting_deadline_seconds',
             'kube_job_spec_active_dealine_seconds',
@@ -296,20 +297,6 @@ class KubernetesState(PrometheusCheck):
             status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
             self.service_check(check_basename + phase, status, tags=tags)
 
-    def kube_cronjob_status_last_schedule_time(self, message, **kwargs):
-        """ Time since the last succesful schedule """
-        # Used as a metric so that one can compare the time since the last successful schedule and when the cronjob is supposed to be run
-        metric_name = self.NAMESPACE + '.cronjob.delay'
-        curr_time = time.time()
-        for metric in message.metric:
-            delay = curr_time - metric.gauge.value
-            if delay > 0:
-                tags = [self._format_tag(label.name, label.value) for label in metric.label]
-                self.gauge(metric_name, delay, tags)
-            else:
-                tags = [self._format_tag(label.name, label.value) for label in metric.label]
-                self.gauge(metric_name, 0, tags)
-
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """
         # Used as a service check so that one can be alerted if the cronjob's next schedule is in the past
@@ -319,7 +306,8 @@ class KubernetesState(PrometheusCheck):
             on_schedule = int(metric.gauge.value) - curr_time
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             if on_schedule < 0:
-                self.service_check(check_basename, self.CRITICAL, tags=tags)
+                message = "The service check scheduled at %s is %s seconds late" % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(metric.gauge.value))), on_schedule)
+                self.service_check(check_basename, self.CRITICAL, tags=tags, message=message)
             else:
                 self.service_check(check_basename, self.OK, tags=tags)
 

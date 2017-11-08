@@ -57,15 +57,13 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.memory_requested',
         NAMESPACE + '.container.cpu_limit',
         NAMESPACE + '.container.memory_limit',
-        NAMESPACE + '.container.gpu.resource_request',
-        NAMESPACE + '.container.gpu.resource_limit',
+        NAMESPACE + '.container.gpu.request',
+        NAMESPACE + '.container.gpu.limit',
         # replicasets
         NAMESPACE + '.replicaset.replicas',
         NAMESPACE + '.replicaset.fully_labeled_replicas',
         NAMESPACE + '.replicaset.replicas_ready',
         NAMESPACE + '.replicaset.replicas_desired',
-        # cronjob
-        NAMESPACE + '.cronjob.delay',
         # persistentvolume claim
         NAMESPACE + '.persistentvolumeclaim.status',
     ]
