@@ -7,7 +7,7 @@
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 * [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
 
-1.5.1 / Unreleased
+1.5.1 / 2017-11-08
 ==================
 ### Changes
 
