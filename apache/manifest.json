@@ -1,5 +1,5 @@
 {
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "name": "Apache",
   "display_name": "Apache",
   "version": "1.0.0",
@@ -17,6 +17,7 @@
   "guid": "cb2b4a06-4ede-465e-9478-a45f8b32058a",
   "public_title": "Datadog-Apache Integration",
   "categories":["web"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/apache/",
   "is_public": true,
   "has_logo": true

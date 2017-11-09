@@ -1,5 +1,5 @@
 {
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "name": "couch",
   "display_name": "couch",
   "version": "2.1.0",
@@ -17,6 +17,7 @@
   "maintainer": "help@datadoghq.com",
   "public_title": "Datadog-CouchDB Integration",
   "categories":["data store"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/couch/",
   "is_public": true,
   "has_logo": true

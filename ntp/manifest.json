@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "ntp",
@@ -15,6 +15,7 @@
   "guid": "9d105f8c-7fd3-48d7-a5d1-1cc386ec0367",
   "public_title": "Datadog-NTP Integration",
   "categories":["web", "network"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/ntp/",
   "is_public": true,
   "has_logo": true

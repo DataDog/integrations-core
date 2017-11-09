@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "btrfs",
@@ -14,6 +14,7 @@
   "guid": "54f9329a-8270-4f5a-bd4b-cd169abfc791",
   "public_title": "Datadog-Btrfs Integration",
   "categories":["os & system"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/btrfs/",
   "is_public": true,
   "has_logo": true
