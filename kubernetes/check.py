@@ -18,7 +18,7 @@ from requests.exceptions import ConnectionError
 
 # project
 from checks import AgentCheck
-from config import _is_affirmative
+from config import _is_affirmative, get_histogram_submit_methods
 from utils.kubernetes import KubeUtil
 from utils.service_discovery.sd_backend import get_sd_backend
 
@@ -43,15 +43,6 @@ NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 DEFAULT_ENABLED_GAUGES = [
     'memory.usage',
     'filesystem.usage']
-
-GAUGE = AgentCheck.gauge
-RATE = AgentCheck.rate
-HISTORATE = AgentCheck.generate_historate_func(["container_name"])
-HISTO = AgentCheck.generate_histogram_func(["container_name"])
-FUNC_MAP = {
-    GAUGE: {True: HISTO, False: GAUGE},
-    RATE: {True: HISTORATE, False: RATE}
-}
 
 EVENT_TYPE = 'kubernetes'
 
@@ -110,6 +101,16 @@ class Kubernetes(AgentCheck):
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
+
+        # Handle use_histogram and compute submission methods
+        self.use_histogram = _is_affirmative(inst.get('use_histogram', False))
+
+        # To honor use_histogram option, _submit will contain relevant [RATE] and [GAUGE]
+        # methods to send container-cardinality metrics. Host-cardinality metrics must
+        # still be sent via self.gauge and self.rate
+        self._submit = get_histogram_submit_methods(
+            use_histogram=self.use_histogram,
+            tags_to_strip=agentConfig.get('docker_histo_striptags'))
 
         self.leader_candidate = inst.get(LEADER_CANDIDATE)
         if self.leader_candidate:
@@ -200,8 +201,8 @@ class Kubernetes(AgentCheck):
 
         self.publish_aliases = _is_affirmative(instance.get('publish_aliases', DEFAULT_PUBLISH_ALIASES))
         self.use_histogram = _is_affirmative(instance.get('use_histogram', DEFAULT_USE_HISTOGRAM))
-        self.publish_rate = FUNC_MAP[RATE][self.use_histogram]
-        self.publish_gauge = FUNC_MAP[GAUGE][self.use_histogram]
+        self.publish_gauge = self._submit[AgentCheck.gauge]
+        self.publish_rate = self._submit[AgentCheck.rate]
         # initialized by _filter_containers
         self._filtered_containers = set()
 
@@ -477,8 +478,8 @@ class Kubernetes(AgentCheck):
         memory_capacity = machine_info.get('memory_capacity', 0)
 
         tags = instance.get('tags', [])
-        self.publish_gauge(self, NAMESPACE + '.cpu.capacity', float(num_cores), tags)
-        self.publish_gauge(self, NAMESPACE + '.memory.capacity', float(memory_capacity), tags)
+        self.gauge(NAMESPACE + '.cpu.capacity', float(num_cores), tags)
+        self.gauge(NAMESPACE + '.memory.capacity', float(memory_capacity), tags)
         # TODO(markine): Report 'allocatable' which is capacity minus capacity
         # reserved for system/Kubernetes.
 
@@ -506,7 +507,7 @@ class Kubernetes(AgentCheck):
         for pod_tags, pod_count in tags_map.iteritems():
             tags = list(pod_tags)
             tags.extend(commmon_tags)
-            self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, tags)
+            self.gauge(NAMESPACE + '.pods.running', pod_count, tags)
 
     def _update_kube_events(self, instance, pods_list, event_items):
         """

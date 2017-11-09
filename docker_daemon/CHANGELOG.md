@@ -6,6 +6,7 @@
 
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 * [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
+* [IMPROVEMENT] Honor docker_histo_striptags option in datadog.conf for histograms [#725][]
 
 1.5.1 / 2017-11-08
 ==================
@@ -115,6 +116,9 @@
 [#722]: https://github.com/DataDog/integrations-core/issues/722
 [#744]: https://github.com/DataDog/integrations-core/issues/744
 [#770]: https://github.com/DataDog/integrations-core/issues/770
+<<<<<<< HEAD
 [#782]: https://github.com/DataDog/integrations-core/issues/782
 [#817]: https://github.com/DataDog/integrations-core/issues/817
+=======
+>>>>>>> make tags stripped by use_histogram configurable
 [@sophaskins]: https://github.com/sophaskins
