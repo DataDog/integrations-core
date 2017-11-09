@@ -17,5 +17,6 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/gearmand/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "aliases":["/integrations/gearman"]
 }

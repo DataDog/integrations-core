@@ -18,5 +18,6 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/supervisord/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "aliases":["/integrations/supervisor"]
 }

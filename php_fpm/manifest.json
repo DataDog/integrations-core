@@ -18,5 +18,6 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/php_fpm/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "aliaes":["/integrations/phpfpm"]
 }
