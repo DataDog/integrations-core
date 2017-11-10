@@ -2,16 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# project
-from checks import AgentCheck
-from utils.containers import hash_mutable
 # datadog
 try:
-    from checks.libs.win.winpdh import WinPDHCounter
+    from checks.libs.win.pdhbasecheck import PDHBaseCheck
 except ImportError:
-    def WinPDHCounter(*args, **kwargs):
+    def PDHBaseCheck(*args, **kwargs):
         return
-
 
 DEFAULT_COUNTERS = [
     # counterset, counter name, metric name
@@ -108,13 +104,10 @@ DEFAULT_COUNTERS = [
     ["MSExchange WorkloadManagement Workloads", None, "QueuedTasks", "exchange.workload_management.queued_tasks", "gauge"],
 
 ]
-class ExchangeServerCheck(AgentCheck):
-    """
-    WMI check.
 
-    Windows only.
-    """
+def ExchangeCheck(PDHBaseCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
+<<<<<<< Updated upstream
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self._countersettypes = {}
         self._counters = {}
@@ -158,3 +151,6 @@ class ExchangeServerCheck(AgentCheck):
                     tag = "instance=%s" % key
                     tags.append(tag)
                 metric_func(dd_name, val, tags)
+=======
+        AgentCheck.__init__(self, name, init_config, agentConfig, instances, counter_list=DEFAULT_COUNTERS)
+>>>>>>> Stashed changes

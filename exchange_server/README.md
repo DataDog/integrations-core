@@ -1,4 +1,4 @@
-# Wmi_check Integration
+# exchange_check Integration
 
 ## Overview
 
