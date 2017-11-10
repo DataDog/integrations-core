@@ -1,4 +1,6 @@
 init_config:
 
 instances:
-  
+  # at present, the exchange_server check is a single instance check with no configuration
+  # options.  
+  - name: none
