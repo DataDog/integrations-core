@@ -25,7 +25,7 @@ DEFAULT_COUNTERS = [
     ["System", None, "Processor Queue Length", "exchange.processor.queue_length", "gauge"],
     # Memory Counters
     ["Memory", None, "Available Mbytes", "exchange.memory.available", "gauge"],
-    ["Memory", None, "% Committed Bytes In Use", "exchange.memory.committed", "gauge"]
+    ["Memory", None, "% Committed Bytes In Use", "exchange.memory.committed", "gauge"],
     # .NET Framework counters
     [".NET CLR Memory", None, "% Time in GC", "exchange.dotnet_clr_mem.time_in_gc", "gauge"],
     [".NET CLR Exceptions", None, "# of Exceps Thrown / sec", "exchange.dotnet_clr_exceptions.thrown_persec", "gauge"],
@@ -107,50 +107,4 @@ DEFAULT_COUNTERS = [
 
 def ExchangeCheck(PDHBaseCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
-<<<<<<< Updated upstream
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self._countersettypes = {}
-        self._counters = {}
-        self._metrics = {}
-        self._tags = {}
-
-        try:
-            for instance in instances:
-                key = hash_mutable(instance)
-
-                cfg_tags = instance.get('tags')
-                if cfg_tags is not None:
-                    tags = cfg_tags.join(",")
-                    self._tags[key] = list(tags) if tags else []
-
-                # list of the metrics.  Each entry is itself an entry,
-                # which is the pdh name, datadog metric name, type, and the
-                # pdh counter object
-                self._metrics[key] = []
-                for counterset, inst_name, counter_name, dd_name, mtype in DEFAULT_COUNTERS:
-                    m = getattr(self, mtype.lower())
-                    obj = WinPDHCounter(counterset, counter_name, self.log)
-                    entry = [inst_name, dd_name, m, obj]
-                    self.log.debug("entry: %s" % str(entry))
-                    self._metrics[key].append(entry)
-
-        except Exception as e:
-            self.log.debug("Exception in PDH init: %s", str(e))
-            raise
-
-    def check(self, instance):
-        key = hash_mutable(instance)
-        for inst_name, dd_name, metric_func, counter in self._metrics[key]:
-            vals = counter.get_all_values()
-            for key, val in vals.iteritems():
-                tags = []
-                if key in self._tags:
-                    tags = self._tags[key]
-
-                if not counter.is_single_instance():
-                    tag = "instance=%s" % key
-                    tags.append(tag)
-                metric_func(dd_name, val, tags)
-=======
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances, counter_list=DEFAULT_COUNTERS)
->>>>>>> Stashed changes
+        PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
