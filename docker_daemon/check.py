@@ -411,14 +411,14 @@ class DockerDaemon(AgentCheck):
         for tags, count in running_containers_count.iteritems():
             total_count += count
             self.gauge("docker.containers.running", count, tags=list(tags))
-        self.gauge("docker.total-containers.running", total_count, tags=self.custom_tags)
+        self.gauge("docker.containers.running.total", total_count, tags=self.custom_tags)
 
         total_count = 0
         for tags, count in all_containers_count.iteritems():
             stopped_count = count - running_containers_count[tags]
             total_count += stopped_count
             self.gauge("docker.containers.stopped", stopped_count, tags=list(tags))
-        self.gauge("docker.total-containers.stopped", total_count, tags=self.custom_tags)
+        self.gauge("docker.containers.stopped.total", total_count, tags=self.custom_tags)
 
         return containers_by_id
 
