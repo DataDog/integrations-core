@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.0",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.20.0",
   "name": "mcache",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",
@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
   "public_title": "Datadog-Memcache Integration",
   "categories":["web", "caching"],
