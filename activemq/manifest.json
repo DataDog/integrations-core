@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
   "public_title": "Datadog-ActiveMQ Integration",
   "categories":["processing", "messaging"],

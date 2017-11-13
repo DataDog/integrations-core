@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "guid": "0235124a-0207-44dd-aede-f578a6d46b26",
   "public_title": "Datadog-Solr Integration",
   "categories":["data store", "search"],
