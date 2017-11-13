@@ -33,8 +33,8 @@ PLATFORMS
 
 DEPENDENCIES
   datadog-sdk-testing (~> 0.8.0)
-  rake (~> 12.0)
+  rake (~> 12.2.0)
   rubocop (~> 0.51.0)
 
 BUNDLED WITH
-   1.16.0.pre.2
+   1.16.0
