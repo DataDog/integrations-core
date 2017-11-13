@@ -13,7 +13,7 @@ If you need the newest version of the DNS check, install the `dd-check-dns` pack
 
 ### Configuration
 
-Create a file `dns_check.yaml` in the Agent's `conf.d` directory:
+Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -33,7 +33,7 @@ Restart the Agent to begin sending DNS service checks and response times to Data
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `dns_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `dns_check` under the Checks section:
 
 ```
   Checks

@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "f7629918-751c-4a05-87e7-0e3de34e51e7"
+  "guid": "f7629918-751c-4a05-87e7-0e3de34e51e7",
+  "public_title": "Datadog-Nagios Integration",
+  "categories":["monitoring", "notification"],
+  "doc_link": "https://docs.datadoghq.com/integrations/nagios/",
+  "is_public": true,
+  "has_logo": true
 }

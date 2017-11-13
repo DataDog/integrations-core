@@ -32,7 +32,7 @@ When it prompts for a password, enter the one used in the first command.
 
 ### Configuration
 
-Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor
+Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
 Configuration Options:
 
@@ -57,7 +57,7 @@ relations:
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `postgres` under the Checks section:
 
     Checks
     ======

@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "88620208-3919-457c-ba51-d844d09ac97f"
+  "guid": "88620208-3919-457c-ba51-d844d09ac97f",
+  "public_title": "Datadog-Nginx Integration",
+  "categories":["web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/nginx/",
+  "is_public": true,
+  "has_logo": true
 }

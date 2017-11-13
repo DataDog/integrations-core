@@ -14,7 +14,7 @@ Install the `dd-check-kubernetes` package manually or with your favorite configu
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example) for all available configuration options.
 
 ### Gathering kubernetes events
 
@@ -85,7 +85,7 @@ The longer it is, the less hard your agent hits the apiserver with requests, but
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kubernetes` under the Checks section:
 
     Checks
     ======
@@ -105,7 +105,34 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kube
 
 ### Events
 
-As the 5.17.0 release, Datadog Agent now supports built in [leader election option](#gathering-kubernetes-events) for the Kubernetes event collector. Once enabled, you no longer need to deploy an additional event collection container to your cluster. Instead agents will coordinate to ensure only one agent instance is gathering events at a given time.
+As the 5.17.0 release, Datadog Agent now supports built in [leader election option](#gathering-kubernetes-events) for the Kubernetes event collector. Once enabled, you no longer need to deploy an additional event collection container to your cluster. Instead agents will coordinate to ensure only one agent instance is gathering events at a given time, events below will be available:
+
+* Backoff
+* Conflict
+* Delete
+* DeletingAllPods
+* Didn't have enough resource
+* Error
+* Failed
+* FailedCreate
+* FailedDelete
+* FailedMount
+* FailedSync
+* Failedvalidation
+* FreeDiskSpaceFailed
+* HostPortConflict
+* InsufficientFreeCPU
+* InsufficientFreeMemory
+* InvalidDiskCapacity
+* Killing
+* KubeletsetupFailed
+* NodeNotReady
+* NodeoutofDisk
+* OutofDisk
+* Rebooted
+* TerminatedAllPods
+* Unable
+* Unhealthy
 
 ### Service Checks
 The Kubernetes check does not include any service check at this time.

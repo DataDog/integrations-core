@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "47f2c337-83ac-4767-b460-1927d8343764"
+  "guid": "47f2c337-83ac-4767-b460-1927d8343764",
+  "public_title": "Datadog-PHP FPM Integration",
+  "categories":["web"],
+  "doc_link": "https://docs.datadoghq.com/integrations/php_fpm/",
+  "is_public": true,
+  "has_logo": true
 }

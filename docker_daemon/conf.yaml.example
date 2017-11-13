@@ -54,7 +54,7 @@ instances:
     # collect_events: false
 
     # By default we do not collect events with a status ['top', 'exec_start', 'exec_create'].
-    # Here can be added additional statuses to be filtered. 
+    # Here can be added additional statuses to be filtered.
     # List of available statuses can be found here https://docs.docker.com/engine/reference/commandline/events/#object-types
     # filtered_event_types:
     #    - 'top'
@@ -137,7 +137,7 @@ instances:
     # If a tag matches an exclude rule, it won't be included unless it also matches an include rule.
     # Examples:
     # exclude all, except ubuntu and debian.
-    # exclude: [".*"]
+    # exclude: ["docker_image:.*"]
     # include: ["docker_image:ubuntu", "docker_image:debian"]
     #
     # include all, except ubuntu and Kubernetes pause containers.
