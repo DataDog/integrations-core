@@ -194,6 +194,26 @@ class CouchDB2:
         for key in ['purge_seq', 'doc_del_count', 'doc_count']:
             self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
 
+    def _build_system_metrics(self, data, tags, prefix = 'couchdb.erlang'):
+        for key, value in data.items():
+            if key == "message_queues":
+                for queue, val in value.items():
+                    queue_tags = list(tags)
+                    queue_tags.append("queue:{0}".format(queue))
+                    if type(val) is dict:
+                        self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
+                    else:
+                        self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
+            elif key == "distribution":
+                for node, metrics in value.items():
+                    dist_tags = list(tags)
+                    dist_tags.append("node:{0}".format(node))
+                    self._build_system_metrics(metrics, dist_tags, "{0}.{1}".format(prefix, key))
+            elif type(value) is dict:
+                self._build_system_metrics(value, tags, "{0}.{1}".format(prefix, key))
+            else:
+                self.gauge("{0}.{1}".format(prefix, key), value, tags)
+
     def _get_instance_names(self, server, instance):
         name = instance.get('name', None)
         if name is None:
@@ -210,6 +230,7 @@ class CouchDB2:
         for name in self._get_instance_names(server, instance):
             tags = ["instance:{0}".format(name)]
             self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
+            self._build_system_metrics(self._get_system_stats(server, name, instance, tags), tags)
 
             db_whitelist = instance.get('db_whitelist', None)
             db_blacklist = instance.get('db_blacklist', [])
@@ -223,7 +244,7 @@ class CouchDB2:
                         break
 
     def _get_node_stats(self, server, name, instance, tags):
-        url = urljoin(server, "/_node/{}/_stats".format(name))
+        url = urljoin(server, "/_node/{0}/_stats".format(name))
 
         # Fetch initial stats and capture a service check based on response.
         stats = self.agent_check.get(url, instance, tags, True)
@@ -233,3 +254,9 @@ class CouchDB2:
             raise Exception("No stats could be retrieved from %s" % url)
 
         return stats
+
+    def _get_system_stats(self, server, name, instance, tags):
+        url = urljoin(server, "/_node/{0}/_system".format(name))
+
+        # Fetch _system (Erlang) stats.
+        return self.agent_check.get(url, instance, tags)

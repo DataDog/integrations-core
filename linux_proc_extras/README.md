@@ -33,7 +33,7 @@ The linux_proc_extras check is compatible with all major platforms
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/metadata.csv) for a list of metrics provided by this integration.
+The Linux proc extras check does not include any metric at this time.
 
 ### Events
 The Linux proc extras check does not include any event at this time.

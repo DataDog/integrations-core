@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Support collection of consumer offsets from Kafka, in addition to ZK. See #654
+
 1.1.0 / 2017-10-10
 ==================
 

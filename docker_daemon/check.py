@@ -70,6 +70,13 @@ CGROUP_METRICS = [
         }
     },
     {
+        "cgroup": "memory",
+        "file": "memory.soft_limit_in_bytes",
+        "metrics": {
+            "softlimit": ("docker.mem.soft_limit", GAUGE),
+        },
+    },
+    {
         "cgroup": "cpuacct",
         "file": "cpuacct.stat",
         "metrics": {
@@ -399,13 +406,19 @@ class DockerDaemon(AgentCheck):
                 except Exception as e:
                     self.log.debug("Unable to inspect Docker container: %s", e)
 
+        total_count = 0
         # TODO: deprecate these 2, they should be replaced by _report_container_count
         for tags, count in running_containers_count.iteritems():
+            total_count += count
             self.gauge("docker.containers.running", count, tags=list(tags))
+        self.gauge("docker.containers.running.total", total_count, tags=self.custom_tags)
 
+        total_count = 0
         for tags, count in all_containers_count.iteritems():
             stopped_count = count - running_containers_count[tags]
+            total_count += stopped_count
             self.gauge("docker.containers.stopped", stopped_count, tags=list(tags))
+        self.gauge("docker.containers.stopped.total", total_count, tags=self.custom_tags)
 
         return containers_by_id
 
@@ -994,6 +1007,8 @@ class DockerDaemon(AgentCheck):
                     return self._parse_blkio_metrics(fp.read().splitlines())
                 elif 'cpuacct.usage' in stat_file:
                     return dict({'usage': str(int(fp.read())/10000000)})
+                elif 'memory.soft_limit_in_bytes' in stat_file:
+                    return dict({'softlimit': int(fp.read())})
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:
