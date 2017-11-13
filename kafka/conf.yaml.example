@@ -36,8 +36,10 @@ instances:
 
 init_config:
   is_jmx: true
+  collect_default_metrics: true
 
   # Metrics collected by this check. You should not have to modify this.
+  # In Agent 6, these are read from metrics.yaml: these are only present here for Agent 5
   conf:
     #
     # Producers (only v0.8.2.x)

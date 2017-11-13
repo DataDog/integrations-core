@@ -17,14 +17,18 @@ instances:
   #     newTag: test
 
 init_config:
+  is_jmx: true
+  collect_default_metrics: true
+
   # List of metrics to be collected by the integration
   # Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  # In Agent 6, these are read from metrics.yaml: these are only present here for Agent 5
   conf:
     - include:
         domain: org.apache.cassandra.metrics
         # If you are using cassandra 2, you should replace 'type: Table' by 'type: ColumnFamily'
         # type: ColumnFamily
-        type: Table 
+        type: Table
         bean_regex:
           - .*keyspace=.*
         name:
@@ -160,7 +164,7 @@ init_config:
           - TotalHints
     - include:
         domain: org.apache.cassandra.metrics
-        type: 
+        type:
           - ColumnFamily
         bean_regex:
           - .*keyspace=.*
