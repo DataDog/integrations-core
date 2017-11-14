@@ -11,7 +11,7 @@ Install the `dd-check-oracle` package manually or with your favorite configurati
 
 In order to use the Oracle integration you must install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
 
-You will need to install the Instant Client Basic and SDK packages (NEED VERIFICATION).
+You will need to install the Instant Client Basic and SDK packages.
 
 After you have installed the Instant Client libraries, ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
 
