@@ -86,3 +86,8 @@ tmp
 
 # Vi(m) stuff
 *.swp
+
+# Rbenv stuff
+.rbenv-gemsets
+.ruby-version
+
