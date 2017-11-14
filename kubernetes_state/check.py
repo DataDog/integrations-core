@@ -132,6 +132,7 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_observed_generation',
             'kube_statefulset_metadata_generation',
             'kube_statefulset_status_observed_generation',
+            'kube_hpa_metadata_generation',
             # kube_node_status_phase and kube_namespace_status_phase have no use case as a service check
             'kube_namespace_status_phase',
             'kube_node_status_phase',

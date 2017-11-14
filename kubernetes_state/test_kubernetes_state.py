@@ -10,7 +10,6 @@ import os
 from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
-
 class TestKubernetesState(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes_state'
@@ -118,9 +117,9 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics_v040(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
+            mock_poll.return_value = ('text/plain', f.read())
 
         config = {
             'instances': [{
