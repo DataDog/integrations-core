@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.20.0",
   "name": "kube_dns",
@@ -11,6 +11,7 @@
   "version": "1.1.0",
   "public_title": "Datadog-Kube DNS Integration",
   "categories":["web", "network"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/kube_dns/",
   "is_public": true,
   "has_logo": true

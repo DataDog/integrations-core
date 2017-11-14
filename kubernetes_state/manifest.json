@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.20.0",
   "name": "kubernetes_state",
@@ -15,6 +15,7 @@
   "use_omnibus_reqs": true,
   "public_title": "Datadog-Kubernetes State Integration",
   "categories":["orchestration", "containers"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/kubernetes_state/",
   "is_public": true,
   "has_logo": true
