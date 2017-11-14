@@ -45,7 +45,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Create a file `supervisord.yaml` in the Agent's `conf.d` directory:
+Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -63,13 +63,24 @@ instances:
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
+Configuration Options
+
+* `name` (Required) - An arbitrary name to identify the supervisord server.
+* `host` (Optional) - Defaults to localhost. The host where supervisord server is running.
+* `port` (Optional) - Defaults to 9001. The port number.
+* `user` (Optional) - Username
+* `pass` (Optional) - Password
+* `proc_names` (Optional) - Dictionary of process names to monitor
+* `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
+* `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
+
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
-Restart the Agent to start sending Supervisor metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Supervisor metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `supervisord` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `supervisord` under the Checks section:
 
 ```
   Checks
@@ -120,24 +131,8 @@ This table shows the `supervisord.process.status` that results from each supervi
 |UNKNOWN|UNKNOWN|
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-See our [blog post](https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/) about monitoring Supervisor with Datadog.
+
+* [Supervisor monitors your processes. Datadog monitors Supervisor.](https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/)

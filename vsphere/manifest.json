@@ -11,6 +11,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.3",
-  "guid": "930b1839-cc1f-4e7a-b706-0e8cf3218464"
+  "version": "1.0.4",
+  "guid": "930b1839-cc1f-4e7a-b706-0e8cf3218464",
+  "public_title": "Datadog-vSphere Integration",
+  "categories":["cloud"],
+  "doc_link": "https://docs.datadoghq.com/integrations/vsphere/",
+  "is_public": true,
+  "has_logo": true
 }

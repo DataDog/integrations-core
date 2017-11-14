@@ -11,7 +11,7 @@ The PHP-FPM check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
-Create a file `php_fpm.yaml` in the Agent's `conf.d` directory:
+Create a file `php_fpm.yaml` in the Agent's `conf.d` directory. See the [sample php_fpm.yaml](https://github.com/DataDog/integrations-core/blob/master/php_fpm/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -27,11 +27,19 @@ instances:
 #     - instance:foo
 ```
 
+Configuration Options:
+
+* `status_url` (Required) - URL for the PHP FPM status page defined in the fpm pool config file (pm.status_path)
+* `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
+* `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
+* `user` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `password` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 Restart the Agent to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `php_fpm` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `php_fpm` under the Checks section:
 
 ```
   Checks
@@ -65,24 +73,7 @@ The php-fpm check does not include any event at this time.
 Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

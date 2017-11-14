@@ -21,7 +21,7 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
+Create a file `go_expvar.yaml` in the Agent's `conf.d` directory. See the [sample go_expvar.yaml](https://github.com/DataDog/integrations-core/blob/master/go_expvar/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -46,7 +46,7 @@ Restart the Agent to begin sending memstat and expvar metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `go_expvar` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `go_expvar` under the Checks section:
 
 ```
   Checks
@@ -77,24 +77,8 @@ The Go-Expvar check does not include any event at this time.
 The Go-Expvar check does not include any service check at this time.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-To get a better idea of how (or why) to instrument your Go apps with Expvar and Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/) about it.
+
+* [Instrument your Go apps with Expvar and Datadog](https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/)

@@ -21,7 +21,7 @@ You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](h
 
 #### Connect the Agent
 
-Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory:
+Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory. See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -44,11 +44,21 @@ If you do set `vhosts`, the Agent sends this check and metric only for the vhost
 
 There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for details on these configuration options (and all others).
 
-Restart the Agent to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+Configuration Options
+
+* `rabbitmq_api_url` - **required** - Points to the api url of the [RabbitMQ Managment Plugin](http://www.rabbitmq.com/management.html)
+* `rabbitmq_user` - **optional** - Defaults to 'guest'
+* `rabbitmq_pass` - **optional** - Defaults to 'guest'
+* `tag_families` - **optional** - Defaults to false - Tag queue "families" based off of regex matching
+* `nodes` or `nodes_regexes` - **optional** - Use the `nodes` or `nodes_regexes` parameters to specify the nodes you'd like to collect metrics on (up to 100 nodes). If you have less than 100 nodes, you don't have to set this parameter, the metrics will be collected on all the nodes by default. See the link to the example YAML below for more.
+* `queues` or `queues_regexes` - **optional** - Use the `queues` or `queues_regexes` parameters to specify the queues you'd like to collect metrics on (up to 200 queues). If you have less than 200 queues, you don't have to set this parameter, the metrics will be collected on all the queues by. default. If you have set up vhosts, set the queue names as `vhost_name/queue_name`. If you have `tag_families` enabled, the first captured group in the regex will be used as the queue_family tag.  See the link to the example YAML below for more.
+* `vhosts` - **optional** - By default a list of all vhosts is fetched and each one will be checked using the aliveness API. If you prefer only certain vhosts to be monitored with service checks then you can list the vhosts you care about.
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `rabbitmq` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `rabbitmq` under the Checks section:
 
 ```
   Checks
@@ -91,24 +101,7 @@ The Agent submits this service check for all vhosts (if `vhosts` is not configur
 Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, otherwise OK.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 ### Datadog Blog
@@ -116,3 +109,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 ### Knowledge Base
 * [Tagging RabbitMQ queues by tag Family](https://help.datadoghq.com/hc/en-us/articles/211590103-Tagging-RabbitMQ-queues-by-tag-family)
+* By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here](https://app.datadoghq.com/account/settings#integrations/rabbitmq)

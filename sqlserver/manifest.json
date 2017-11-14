@@ -10,6 +10,11 @@
     "linux",
     "windows"
   ],
-  "version": "1.1.0",
-  "guid": "635cb962-ee9f-4788-aa55-a7ffb9661498"
+  "version": "1.2.0",
+  "guid": "635cb962-ee9f-4788-aa55-a7ffb9661498",
+  "public_title": "Datadog-SQL Server Integration",
+  "categories":["data store"],
+  "doc_link": "https://docs.datadoghq.com/integrations/sqlserver/",
+  "is_public": true,
+  "has_logo": true
 }

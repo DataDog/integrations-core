@@ -33,8 +33,8 @@ class CassandraNodetoolCheck(AgentCheck):
 
     datacenter_name_re = re.compile('^Datacenter: (.*)')
     node_status_re = re.compile('^(?P<status>[UD])[NLJM] +(?P<address>\d+\.\d+\.\d+\.\d+) +'
-                                '(?P<load>\d+\.\d*) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
-                                '(?P<owns>(\d+\.\d+)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
+                                '(?P<load>\d+(\.\d*)?) (?P<load_unit>(K|M|G|T)?i?B) +\d+ +'
+                                '(?P<owns>(\d+(\.\d+)?)|\?)%? +(?P<id>[a-fA-F0-9-]*) +(?P<rack>.*)')
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)

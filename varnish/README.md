@@ -20,7 +20,7 @@ The varnish check is packaged with the Agent, so simply [install the Agent](http
 
 If you're running Varnish 4.1+, add the dd-agent system user to the varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
 
-Then, create a file `varnish.yaml` in the Agent's `conf.d` directory:
+Then, create a file `varnish.yaml` in the Agent's `conf.d` directory. See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -43,7 +43,7 @@ Restart the Agent to start sending varnish metrics and service checks to Datadog
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `varnish` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `varnish` under the Checks section:
 
 ```
   Checks
@@ -74,24 +74,10 @@ The Varnish check does not include any event at this time.
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-See our [series of blog posts](https://www.datadoghq.com/blog/top-varnish-performance-metrics/) about monitoring varnish with Datadog.
+
+* [Top Varnish performance metrics](https://www.datadoghq.com/blog/top-varnish-performance-metrics/)
+* [How to collect Varnish metrics](https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/)
+* [Monitor Varnish using Datadog](https://www.datadoghq.com/blog/monitor-varnish-using-datadog/)

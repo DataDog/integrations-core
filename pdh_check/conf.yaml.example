@@ -1,0 +1,30 @@
+init_config:
+
+instances:
+  # Each PDH query has 3 required options:
+  # countersetname is the name of the performance counter
+  #
+  # `metrics` is a list of metrics you want to capture, with each item in the
+  # list being a set of [counter name, metric name, metric type].
+  #
+  # - The property (counter) name is something like `NumberOfUsers` or `ThreadCount`.
+  #   The standard properties are also available on the MSDN docs for each
+  #   class. We recommend to wrap the property in quotes to avoid YAML parsing
+  #   issues.
+  #
+  # - The metric name is the name you want to show up in Datadog.
+  #
+  # - The metric type is from the standard choices for all agent checks, such
+  #   as gauge, rate, histogram or counter.
+
+  # Fetch the number of processes and users.
+  - countersetname: System
+    metrics:
+      - ['File Read Operations/sec', pdh.system.file_read_per_sec, gauge]
+      - ['File Write Bytes/sec', pdh.system.file_write_bytes_sec, gauge]
+
+  # Fetch metrics for a single running application, called myapp, tagging with 'role:test'.
+  - countersetname: Processor
+    metrics:
+      - ['% Processor Time', pdh.processor.time, gauge]
+      - ['% User Time', pdh.processor.user.time, gauge]

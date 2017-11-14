@@ -11,6 +11,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.1",
-  "guid": "94588b23-111e-4ed2-a2af-fd6e4caeea04"
+  "version": "1.0.2",
+  "guid": "94588b23-111e-4ed2-a2af-fd6e4caeea04",
+  "public_title": "Datadog-Disk Integration",
+  "categories":["os & system"],
+  "doc_link": "https://docs.datadoghq.com/integrations/disk/",
+  "is_public": true,
+  "has_logo": true
 }

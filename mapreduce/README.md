@@ -14,11 +14,11 @@ Install the `dd-check-mapreduce` package manually or with your favorite configur
 
 ### Configuration
 
-Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor
+Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml](https://github.com/DataDog/integrations-core/blob/master/mapreduce/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mapreduce` under the Checks section:
 
     Checks
     ======
@@ -43,24 +43,11 @@ The Mapreduce check does not include any event at this time.
 The Mapreduce check does not include any service check at this time.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Hadoop health and performance with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about it.
+
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [How to monitor Hadoop metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)
+* [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)
+* [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)
