@@ -45,7 +45,8 @@ instances:
   #     - Default Web Site
   
 #Log section
-logs:
+
+#logs:
 
     # - type : (mandatory) type of log input source (tcp / udp / file)
     #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
@@ -54,8 +55,8 @@ logs:
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
     
-  - type: file
-    path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
-    service: iis
-    source: iis
-    sourcecategory: http_web_access
+    # - type: file
+    #   path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
+    #   service: iis
+    #   source: iis
+    #   sourcecategory: http_web_access
