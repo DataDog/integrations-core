@@ -1,4 +1,13 @@
 # CHANGELOG - kubernetes_state
+1.3.1 / 2017-10-12
+==================
+* [] Adding HPA metrics
+
+1.4.0 / Unreleased
+==================
+### Changes
+
+* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
 1.3.0 / 2017-08-28
 ==================

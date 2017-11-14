@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.20.0",
   "name": "consul",
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",
