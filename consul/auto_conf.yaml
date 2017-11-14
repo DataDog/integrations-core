@@ -1,4 +1,4 @@
-docker_images:
+ad_identifiers:
   - consul
 
 init_config:

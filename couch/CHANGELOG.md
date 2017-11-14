@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 * [FEATURE] collects CouchDB active tasks stats. See [#812][] (Thanks [@calonso][])
 * [FEATURE] collects Erlang VM stats from the `_system` endpoint. See [#793][] (Thanks [@calonso][])
 
