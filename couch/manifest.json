@@ -19,7 +19,7 @@
   "categories":["data store"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/couch/",
-  "aliases":["/integrations/couchdb"]
+  "aliases":["/integrations/couchdb"],
   "is_public": true,
   "has_logo": true
 }
