@@ -1,16 +1,11 @@
 # CHANGELOG - couch
 
-2.2.0 / Unreleased
-==================
-### Changes
-
-* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
-
-2.1.0 / 2017-10-5
+2.1.0 / Unreleased
 =================
 
 ### Changes
 
+* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 * [FEATURE] collects Erlang VM stats from the `_system` endpoint. See [#793][] (Thanks [@calonso][])
 
 2.0.0 / 2017-09-01
