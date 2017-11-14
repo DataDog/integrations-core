@@ -43,11 +43,11 @@ Finally, you will need to create a read-only datadog user with proper access to 
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 -- Create the datadog user. Replace the password placeholder with a secure password.
-create user datadog identified by <password>;
+CREATE USER datadog IDENTIFIED BY <password>;
 
 -- Grant access to the datadog user.
-grant connect to datadog;
-grant select on gv_$sysmetric to datadog;
+GRANT CONNECT TO datadog;
+GRANT SELECT ON gv_$sysmetric TO datadog;
 ```
 
 ### Configuration
@@ -56,7 +56,7 @@ Edit the `oracle.yaml` file to point to your server and port, set the masters to
 
 Configuration Options:
 * **`server`** (Required) - The IP address or hostname of the Oracle Database server.
-* **`service_name`** (Required) - The Oracle Database service name. To view the services available on your server, run the following query: `select value from v$parameter where name='service_names'`.
+* **`service_name`** (Required) - The Oracle Database service name. To view the services available on your server, run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`.
 * **`user`** (Required) - If you followed [the instructions above](#installation), set this to the read-only user `datadog`. Otherwise set it to a user with sufficient privileges to connect to the database and read system metrics.
 * **`password`** (Required) - The password for the user account.
 * **`tags`** (Optional) - A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs.
