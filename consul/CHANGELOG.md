@@ -4,6 +4,8 @@
 ==================
 
 * [FEATURE] Add service tags to metrics
+* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
+
 
 1.1.0 / 2017-07-18
 ==================

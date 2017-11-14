@@ -1,6 +1,12 @@
 # CHANGELOG - couch
 
-2.1.0 / Unreleased
+2.2.0 / Unreleased
+==================
+### Changes
+
+* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
+
+2.1.0 / 2017-10-5
 =================
 
 ### Changes
