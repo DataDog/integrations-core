@@ -171,6 +171,9 @@ class KubernetesState(PrometheusCheck):
         else:
             send_buckets = True
 
+        # This could be ported to kubernetes_state.yaml
+
+        self.enable_pre_processing = True
         # Job counters are monotonic: they increase at every run of the job
         # We want to send the delta via the `monotonic_count` method
         self.job_succeeded_count = defaultdict(int)
