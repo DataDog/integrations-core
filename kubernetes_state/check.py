@@ -298,13 +298,13 @@ class KubernetesState(PrometheusCheck):
             self.service_check(check_basename + phase, status, tags=tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.container.waiting.reason'
+        metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.count(metric_name, metric.gauge.value, tags)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.pod.status_terminated.reason'
+        metric_name = self.NAMESPACE + '.container.status_report.count.terminated'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.count(metric_name, metric.gauge.value, tags)
