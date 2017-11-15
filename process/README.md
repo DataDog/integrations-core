@@ -65,6 +65,12 @@ The process check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
+
+**Note**: Some metrics are not available on Linux or OSX:
+
+* Process I/O metrics aren't available on Linux or OSX since the files that the agent must read (/proc/<pid>/io) have permissions of 400 and are owned by the process's owner. Thus, the agent can only collect these metrics for processes run by the same user as the agent (unless the agent is root), [read more here](https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric)
+* `system.cpu.iowait` is not available on windows
+
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv) for a list of metrics provided by this check.
 
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
