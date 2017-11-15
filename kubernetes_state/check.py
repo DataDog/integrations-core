@@ -66,6 +66,8 @@ class KubernetesState(PrometheusCheck):
             'kube_node_status_capacity_pods': 'node.pods_capacity',
             'kube_node_status_allocatable_nvidia_gpu_cards': 'node.gpu.cards_allocatable',
             'kube_node_status_capacity_nvidia_gpu_cards': 'node.gpu.cards_capacity',
+            'kube_pod_container_status_terminated': 'container.terminated',
+            'kube_pod_container_status_waiting': 'container.waiting',
             'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
             'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
             'kube_pod_container_resource_limits_memory_bytes': 'container.memory_limit',
@@ -74,8 +76,6 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_status_ready': 'container.ready',
             'kube_pod_container_status_restarts': 'container.restarts',
             'kube_pod_container_status_running': 'container.running',
-            'kube_pod_container_status_terminated': 'container.terminated',
-            'kube_pod_container_status_waiting': 'container.waiting',
             'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
             'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
             'kube_pod_status_ready': 'pod.ready',
@@ -92,7 +92,10 @@ class KubernetesState(PrometheusCheck):
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
         }
-
+        self.meta_metrics_mapper = {
+            'kube_pod_container_status_terminated_reason': 'container.terminated',
+            'kube_pod_container_status_waiting_reason': 'container.waiting',
+        }
         self.ignore_metrics = [
             # _info, _labels and _created don't convey any metric
             'kube_cronjob_info',
@@ -413,22 +416,6 @@ class KubernetesState(PrometheusCheck):
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
-
-    def kube_pod_container_status_waiting_reason(self, message, **kwargs):
-        """ Reason a container is in a waiting state """
-        # Capturing the pod name so the metric can be compared to kube_pod_container_status_waiting
-        metric_name = self.NAMESPACE + '.pod_container_status_waiting.reason'
-        for metric in message.metric:
-            tags = [self._format_tag(label.name, label.value) for label in metric.label]
-            self.gauge(metric_name, metric.gauge.value, tags)
-
-    def kube_pod_container_status_terminated_reason(self, message, **kwargs):
-        """ Reason a container has terminated """
-        # Capturing the pod name so the metric can be compared to kube_pod_container_status_terminated
-        metric_name = self.NAMESPACE + '.pod_container_status_terminated.reason'
-        for metric in message.metric:
-            tags = [self._format_tag(label.name, label.value) for label in metric.label]
-            self.gauge(metric_name, metric.gauge.value, tags)
 
     def kube_resourcequota(self, message, **kwargs):
         """ Quota and current usage by resource type. """
