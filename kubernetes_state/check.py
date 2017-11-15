@@ -92,10 +92,7 @@ class KubernetesState(PrometheusCheck):
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
         }
-        self.meta_metrics_mapper = {
-            'kube_pod_container_status_terminated_reason': 'container.terminated',
-            'kube_pod_container_status_waiting_reason': 'container.waiting',
-        }
+
         self.ignore_metrics = [
             # _info, _labels and _created don't convey any metric
             'kube_cronjob_info',
@@ -303,6 +300,18 @@ class KubernetesState(PrometheusCheck):
             #TODO: add deployment/replicaset?
             status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
             self.service_check(check_basename + phase, status, tags=tags)
+
+    def kube_pod_container_status_waiting_reason(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.pod.status_waiting.reason'
+        for metric in message.metric:
+            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            self.count(metric_name, metric.gauge.value, tags)
+
+    def kube_pod_container_status_terminated_reason(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.pod.status_terminated.reason'
+        for metric in message.metric:
+            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            self.count(metric_name, metric.gauge.value, tags)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """
