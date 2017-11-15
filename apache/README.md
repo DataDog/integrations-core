@@ -22,13 +22,13 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
     init_config:
 
     instances:
-      + apache_status_url: http://example.com/server-status?auto
+      - apache_status_url: http://example.com/server-status?auto
     #   apache_user: example_user # if apache_status_url needs HTTP basic auth
     #   apache_password: example_password
     #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
     ```
-Change the `apache_status_url` paremeter value if necessary.
-See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
+    Change the `apache_status_url` paremeter value if necessary.
+    See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
 
 2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
@@ -52,8 +52,8 @@ See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/m
            sourcecategory: http_web_access
            service: apache
     ```
-Change the `path` and `service` parameter value if necessary.
-See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
+    Change the `path` and `service` parameter value if necessary.
+    See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
 2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
