@@ -298,7 +298,7 @@ class KubernetesState(PrometheusCheck):
             self.service_check(check_basename + phase, status, tags=tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
-        metric_name = self.NAMESPACE + '.pod.status_waiting.reason'
+        metric_name = self.NAMESPACE + '.container.waiting.reason'
         for metric in message.metric:
             tags = [self._format_tag(label.name, label.value) for label in metric.label]
             self.count(metric_name, metric.gauge.value, tags)
