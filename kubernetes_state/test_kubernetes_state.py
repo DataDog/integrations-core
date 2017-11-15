@@ -49,6 +49,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.running',
         NAMESPACE + '.container.terminated',
         NAMESPACE + '.container.waiting',
+        NAMESPACE + '.container.waiting.reason',
         NAMESPACE + '.container.restarts',
         NAMESPACE + '.container.cpu_requested',
         NAMESPACE + '.container.memory_requested',
