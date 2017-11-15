@@ -1,5 +1,5 @@
 # Agent Check: Windows Service
-
+{{< img src="integrations/winservices/windows-service.png" alt="Windows Service Event" responsive="true" >}}
 ## Overview
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.

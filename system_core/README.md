@@ -1,5 +1,5 @@
 # Agent Check: system cores
-
+{{< img src="integrations/systemcore/syscoredash.png" alt="System Core" responsive="true" >}}
 ## Overview
 
 This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).

@@ -1,5 +1,5 @@
 # Lighttpd Check
-
+{{< img src="integrations/lighttpd/lighttpddashboard.png" alt="Lighttpd Dashboard" responsive="true" >}}
 ## Overview
 
 The Agent's lighttpd check tracks uptime, bytes served, requests per second, response codes, and more.

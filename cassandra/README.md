@@ -1,5 +1,5 @@
 # Cassandra Integration
-
+{{< img src="integrations/cassandra/cassandra.png" alt="Cassandra default dashboard" responsive="true" >}}
 ## Overview
 
 Get metrics from cassandra service in real time to:

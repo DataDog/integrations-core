@@ -1,5 +1,5 @@
 # Ceph Integration
-
+{{< img src="integrations/ceph/ceph_graph.png" alt="Ceph Graph" responsive="true" >}}
 ## Overview
 
 Enable the Datadog-Ceph integration to:

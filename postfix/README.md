@@ -1,5 +1,5 @@
 # Postfix Check
-
+{{< img src="integrations/postfix/postfixgraph.png" alt="Postfix Graph" responsive="true" >}}
 ## Overview
 
 This check monitors the size of all your Postfix queues.

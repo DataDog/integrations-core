@@ -1,5 +1,5 @@
 # RabbitMQ Check
-
+{{< img src="integrations/rabbitmq/rabbitmqdashboard.png" alt="RabbitMQ Dashboard" responsive="true" >}}
 ## Overview
 
 The RabbitMQ check lets you:

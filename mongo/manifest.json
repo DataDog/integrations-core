@@ -13,7 +13,7 @@
   ],
   "version": "1.5.0",
   "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
-  "public_title": "Datadog-Mongo DB Integration",
+  "public_title": "Datadog-MongoDB Integration",
   "categories":["data store"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/mongo/",

@@ -1,5 +1,5 @@
 # Agent Check: Supervisor
-
+{{< img src="integrations/supervisor/supervisorevent.png" alt="Supervisor Event" responsive="true" >}}
 ## Overview
 
 This check monitors the uptime, status, and number of processes running under supervisord.

@@ -1,5 +1,5 @@
 # PHP-FPM Check
-
+{{< img src="integrations/phpfpm/phpfpmoverview.png" alt="PHP overview" responsive="true" >}}
 ## Overview
 
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.

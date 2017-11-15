@@ -1,5 +1,5 @@
 # IIS Integration
-
+{{< img src="integrations/iis/iisgraph.png" alt="IIS Graph" responsive="true" >}}
 ## Overview
 
 Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.

@@ -1,5 +1,5 @@
 # Docker_daemon Integration
-
+{{< img src="integrations/docker/docker.png" alt="Docker default dashboard" responsive="true" >}}
 ## Overview
 
 Get metrics from docker_daemon service in real time to:

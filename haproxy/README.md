@@ -1,5 +1,5 @@
 # Haproxy Integration
-
+{{< img src="integrations/haproxy/haproxydash.png" alt="HAProxy default dashboard" responsive="true" >}}
 ## Overview
 
 Capture HAProxy activity in Datadog to:

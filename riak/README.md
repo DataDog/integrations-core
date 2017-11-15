@@ -1,4 +1,5 @@
 # Riak Check
+{{< img src="integrations/riak/riak_graph.png" alt="Riak Graph" responsive="true" >}}
 
 ## Overview
 

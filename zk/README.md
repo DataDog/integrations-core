@@ -1,5 +1,5 @@
 # Agent Check: Zookeeper
-
+{{< img src="integrations/zookeeper/zookeepergraph.png" alt="Zookeeper Dashboard" responsive="true" >}}
 ## Overview
 
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.

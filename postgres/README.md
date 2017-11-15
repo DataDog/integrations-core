@@ -1,4 +1,5 @@
 # Postgres Integration
+{{< img src="integrations/postgresql/pggraph.png" alt="PostgreSQL Graph" responsive="true" >}}
 
 ## Overview
 

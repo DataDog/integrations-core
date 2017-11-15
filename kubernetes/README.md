@@ -1,5 +1,5 @@
 # Kubernetes Integration
-
+{{< img src="integrations/kubernetes/k8sdashboard.png" alt="Kubernetes Dashboard" responsive="true" >}}
 ## Overview
 
 Get metrics from kubernetes service in real time to:

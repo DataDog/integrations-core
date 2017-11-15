@@ -1,4 +1,5 @@
 # Elasticsearch Integration
+{{< img src="integrations/elasticsearch/elasticsearchgraph.png" alt="Elasticsearch" responsive="true" >}}
 
 ## Overview
 

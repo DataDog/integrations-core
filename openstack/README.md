@@ -1,5 +1,5 @@
 # Openstack Integration
-
+{{< img src="integrations/openstack/openstack.png" alt="OpenStack default dashboard" responsive="true" >}}
 ## Overview
 
 Get metrics from openstack service in real time to:

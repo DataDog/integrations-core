@@ -1,5 +1,5 @@
 # Fluentd Integration
-
+{{< img src="integrations/fluentd/snapshot-fluentd.png" alt="Fluentd Dashboard" responsive="true" >}}
 ## Overview
 
 Get metrics from Fluentd to:

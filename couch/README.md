@@ -1,5 +1,5 @@
 # CouchDB Integration
-
+{{< img src="integrations/couchdb/couchdb_graph.png" alt="CouchDb Graph" responsive="true" >}}
 ## Overview
 
 Capture CouchDB data in Datadog to:
