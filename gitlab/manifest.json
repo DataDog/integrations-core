@@ -1,0 +1,17 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.14.0",
+  "name": "gitlab",
+  "short_description": "Track all your Gitlab metrics with Datadog",
+  "guid": "1cab328c-5560-4737-ad06-92ebc54af901",
+  "support": "core",
+  "supported_os": ["linux","mac_os","windows"],
+  "version": "1.0.0",
+  "public_title": "Datadog-Gitlab Integration",
+  "categories":["web", "network"],
+  "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
+  "is_public": false,
+  "has_logo": false
+}
