@@ -372,11 +372,11 @@ kube_pod_container_status_terminated{container="kubernetes-dashboard",namespace=
 kube_pod_container_status_terminated{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml"} 0
 kube_pod_container_status_terminated{container="nxf-126",namespace="default",pod="nxf-126"} 1
 kube_pod_container_status_terminated{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249"} 0
-kube_pod_container_status_terminated{container="should-run-once",namespace="default",pod="should-run-once"} 1
+kube_pod_container_status_terminated{container="should-run-once",namespace="default",pod="should-run-once"} 0
 kube_pod_container_status_terminated{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx"} 0
 kube_pod_container_status_terminated{container="task-pv-container",namespace="default",pod="task-pv-pod"} 0
 kube_pod_container_status_terminated{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn"} 0
-kube_pod_container_status_terminated{container="container2",namespace="ns2",pod="pod2"} 1
+kube_pod_container_status_terminated{container="container2",namespace="ns2",pod="pod2"} 0
 # HELP kube_pod_container_status_terminated_reason Describes the reason the container is currently in terminated state.
 # TYPE kube_pod_container_status_terminated_reason gauge
 kube_pod_container_status_terminated_reason{container="container2",namespace="ns2",pod="pod2",reason="Completed"} 0
@@ -394,7 +394,7 @@ kube_pod_container_status_waiting{container="kube-addon-manager",namespace="kube
 kube_pod_container_status_waiting{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj"} 0
 kube_pod_container_status_waiting{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx"} 0
 kube_pod_container_status_waiting{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl"} 0
-kube_pod_container_status_waiting{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml"} 1
+kube_pod_container_status_waiting{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml"} 0
 kube_pod_container_status_waiting{container="nxf-126",namespace="default",pod="nxf-126"} 0
 kube_pod_container_status_waiting{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249"} 1
 kube_pod_container_status_waiting{container="should-run-once",namespace="default",pod="should-run-once"} 0
@@ -404,7 +404,7 @@ kube_pod_container_status_waiting{container="tiller",namespace="kube-system",pod
 # HELP kube_pod_container_status_waiting_reason Describes the reason the container is currently in waiting state.
 # TYPE kube_pod_container_status_waiting_reason gauge
 kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="ContainerCreating"} 0
-kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77",reason="ErrImagePull"} 1
 kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="dnsmasq",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998340-k4f8q",reason="ContainerCreating"} 0
@@ -422,7 +422,7 @@ kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-sys
 kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kubernetes-dashboard",namespace="kube-system",pod="kubernetes-dashboard-zhtjl",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="ContainerCreating"} 0
-kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="nginxbleww",namespace="default",pod="failingtest-f585bbd4-2fsml",reason="ErrImagePull"} 1
 kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="nxf-126",namespace="default",pod="nxf-126",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="registry-creds",namespace="kube-system",pod="registry-creds-hq249",reason="ContainerCreating"} 1

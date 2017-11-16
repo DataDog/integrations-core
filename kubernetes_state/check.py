@@ -91,6 +91,7 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
+
         }
 
         self.ignore_metrics = [
@@ -171,6 +172,8 @@ class KubernetesState(PrometheusCheck):
         # We want to send the delta via the `monotonic_count` method
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
+
+        self.whitelisted_reasons = {"waiting":["ErrImagePull"],"terminated":["OOMKilled","ContainerCannotRun","Error"]}
 
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
@@ -299,40 +302,38 @@ class KubernetesState(PrometheusCheck):
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
-        whitelisted_reasons = {"ErrImagePull"}
-        reason = True
-        tags = []
         for metric in message.metric:
+            tags = []
+            skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in whitelisted_reasons:
+                    if label.value in self.whitelisted_reasons['waiting']:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
-                        reason = False
+                        report = True
                 elif label.name == "container":
                     tags.append(self._format_tag("kube_container_name", label.value))
-                else label.name == "namespace":
+                elif label.name == "namespace":
                     tags.append(self._format_tag(label.name, label.value))
-            if reason:
+            if not skip_metric:
                 self.count(metric_name, metric.gauge.value, tags)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.terminated'
-        whitelisted_reasons = {"OOMKilled","ContainerCannotRun","Error"}
-        reason = True
-        tags = []
         for metric in message.metric:
+            tags = []
+            skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in whitelisted_reasons:
+                    if label.value in self.whitelisted_reasons['terminated']:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
-                        reason = False
+                        skip_metric = True
                 elif label.name == "container":
                     tags.append(self._format_tag("kube_container_name", label.value))
-                else label.name == "namespace":
+                elif label.name == "namespace":
                     tags.append(self._format_tag(label.name, label.value))
-            if reason:
+            if not skip_metric:
                 self.count(metric_name, metric.gauge.value, tags)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
