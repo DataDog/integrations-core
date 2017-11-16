@@ -1,16 +1,23 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.14.0",
   "name": "http_check",
-  "short_description": "http_check description.",
+  "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "version": "1.1.1",
-  "guid": "eb133a1f-697c-4143-bad3-10e72541fa9c"
+  "version": "1.2.0",
+  "guid": "eb133a1f-697c-4143-bad3-10e72541fa9c",
+  "public_title": "Datadog-HTTP Check Integration",
+  "categories":["web", "network"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/http_check/",
+  "is_public": true,
+  "has_logo": true,
+  "aliases":["/integrations/httpcheck"]
 }

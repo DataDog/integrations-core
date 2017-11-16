@@ -20,6 +20,9 @@ mesos.stats.uptime_secs,gauge,,,,Slave uptime,1,mesos,slave uptime
 mesos.slave.cpus_percent,gauge,,percent,,Percentage of allocated CPUs,0,mesos,cpus percent
 mesos.slave.cpus_used,gauge,,,,Number of allocated CPUs,0,mesos,cpus used
 mesos.slave.cpus_total,gauge,,,,Number of CPUs,1,mesos,cpus total
+mesos.slave.gpus_percent,gauge,,percent,,Percentage of allocated GPUs,0,mesos,gpus percent
+mesos.slave.gpus_used,gauge,,,,Number of allocated GPUs,0,mesos,gpus used
+mesos.slave.gpus_total,gauge,,,,Number of GPUs,1,mesos,gpus total
 mesos.slave.disk_percent,gauge,,percent,,Percentage of allocated disk space,-1,mesos,disk percent
 mesos.slave.disk_used,gauge,,mebibyte,,Allocated disk space,-1,mesos,disk used
 mesos.slave.disk_total,gauge,,mebibyte,,Disk space,1,mesos,disk total

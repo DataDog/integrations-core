@@ -1,29 +1,29 @@
 require 'ci/common'
 
-def docker_version
+def nfsstat_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def docker_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/docker_#{docker_version}"
+def nfsstat_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/nfsstat_#{nfsstat_version}"
 end
 
 namespace :ci do
-  namespace :docker do |flavor|
+  namespace :nfsstat do |flavor|
     task before_install: ['ci:common:before_install']
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('docker')
+      Rake::Task['ci:common:install'].invoke('nfsstat')
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name docker source/docker:docker_version)
-      # sh %(docker start docker)
+      # sh %(docker create -p XXX:YYY --name nfsstat source/nfsstat:nfsstat_version)
+      # sh %(docker start nfsstat)
     end
 
     task before_script: ['ci:common:before_script']
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'docker'
+        'nfsstat'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
@@ -33,14 +33,14 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop docker)
-    #   sh %(docker rm docker)
+    #   sh %(docker stop nfsstat)
+    #   sh %(docker rm nfsstat)
     # end
 
     task :execute do
       exception = nil
       begin
-        %w(before_install install before_script).each do |u|
+        %w[before_install install before_script].each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
         if !ENV['SKIP_TEST']

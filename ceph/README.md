@@ -1,6 +1,6 @@
 # Ceph Integration
 
-# Overview
+## Overview
 
 Enable the Datadog-Ceph integration to:
 
@@ -8,13 +8,14 @@ Enable the Datadog-Ceph integration to:
   * Receive service checks in case of issues
   * Monitor I/O performance metrics
 
-# Installation
+## Setup
+### Installation
 
 The Ceph check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Ceph servers.
 
-# Configuration
+### Configuration
 
-Create a file `ceph.yaml` in the Agent's `conf.d` directory:
+Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml](https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -30,9 +31,9 @@ If you enabled `use_sudo`, add a line like the following to your `sudoers` file:
 dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ```
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `ceph` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ceph` under the Checks section:
 
 ```
   Checks
@@ -47,16 +48,20 @@ Run the Agent's `info` subcommand and look for `ceph` under the Checks section:
     [...]
 ```
 
-# Troubleshooting
-
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+### Events
+The Ceph check does not include any event at this time.
 
-# Service Checks
+### Service Checks
+The Ceph check does not include any service check at this time.
 
-# Further Reading
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
-To get a better idea of how (or why) to integrate your Ceph cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitor-ceph-datadog/) about it.
+## Further Reading
+
+* [Monitor Ceph: From node status to cluster-wide performance](https://www.datadoghq.com/blog/monitor-ceph-datadog/)

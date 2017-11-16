@@ -1,6 +1,34 @@
 # CHANGELOG - mongo
 
-1.1.0 / Unreleased
+1.5.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Collect metrics about indexes usage. See [#823][]
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747][]
+
+
+1.4.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][] (Thanks [@dnavre][])
+
+1.3.0 / 2017-08-28
+==================
+### Changes
+
+* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][], thanks [@dtbartle][]
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][], thanks [@dtbartle][]
+
+1.2.0 / 2017-07-18
+==================
+### Changes
+
+* [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][]
+
+1.1.0 / 2017-06-05
 ==================
 ### Changes
 
@@ -12,7 +40,7 @@
 
 * [BUGFIX] Redact username/password in logs, etc. See [#326][] and [#347][]
 
-1.0.003-22-2017
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
@@ -23,3 +51,12 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#491]: https://github.com/DataDog/integrations-core/issues/491
+[#625]: https://github.com/DataDog/integrations-core/issues/625
+[#627]: https://github.com/DataDog/integrations-core/issues/627
+[#691]: https://github.com/DataDog/integrations-core/issues/691
+[#747]: https://github.com/DataDog/integrations-core/issues/747
+[#769]: https://github.com/DataDog/integrations-core/issues/769
+[#823]: https://github.com/DataDog/integrations-core/issues/823
+[@dnavre]: https://github.com/dnavre
+[@dtbartle]: https://github.com/dtbartle

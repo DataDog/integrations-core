@@ -379,7 +379,7 @@ class TokuMX(AgentCheck):
                 self.check_last_state(data['state'], server, self.agentConfig)
                 status['replSet'] = data
         except Exception as e:
-            if "OperationFailure" in repr(e) and "replSetGetStatus" in str(e):
+            if "OperationFailure" in repr(e) and ("replSetGetStatus" in str(e) or "not running with --replSet" in str(e)):
                 pass
             else:
                 raise e

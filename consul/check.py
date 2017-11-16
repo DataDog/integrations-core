@@ -84,14 +84,19 @@ class ConsulCheck(AgentCheck):
             clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
             privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
             cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
+            acl_token = instance.get('acl_token', None)
+
+            headers = {}
+            if acl_token:
+                headers['X-Consul-Token'] = acl_token
 
             if clientcertfile:
                 if privatekeyfile:
-                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile)
+                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile, headers=headers)
                 else:
-                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile)
+                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
             else:
-                resp = requests.get(url, verify=cabundlefile)
+                resp = requests.get(url, verify=cabundlefile, headers=headers)
 
         except requests.exceptions.Timeout:
             self.log.exception('Consul request to {0} timed out'.format(url))
@@ -219,6 +224,14 @@ class ConsulCheck(AgentCheck):
 
         return services
 
+    def _get_service_tags(self, service, tags):
+        service_tags = ['consul_service_id:{0}'.format(service)]
+
+        for tag in tags:
+            service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
+
+        return service_tags
+
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
         instance_state = self._instance_states[hash_mutable(instance)]
@@ -305,7 +318,7 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
-                service_tags = ['consul_service_id:{0}'.format(service)]
+                service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 

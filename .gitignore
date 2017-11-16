@@ -83,3 +83,11 @@ tmp
 # OS Specific
 *.DS_Store
 *.fuse_hidden*
+
+# Vi(m) stuff
+*.swp
+
+# Rbenv stuff
+.rbenv-gemsets
+.ruby-version
+

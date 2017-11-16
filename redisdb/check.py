@@ -73,6 +73,7 @@ class Redis(AgentCheck):
         'used_memory_lua':              'redis.mem.lua',
         'used_memory_peak':             'redis.mem.peak',
         'used_memory_rss':              'redis.mem.rss',
+        'maxmemory':                    'redis.mem.maxmemory',
 
         # replication
         'master_last_io_seconds_ago':   'redis.replication.last_io_seconds_ago',
@@ -175,6 +176,7 @@ class Redis(AgentCheck):
         info = None
         try:
             info = conn.info()
+            tags = sorted(tags + ["redis_role:%s" % info["role"]])
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
@@ -225,6 +227,9 @@ class Redis(AgentCheck):
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'],
                   tags=tags)
+        if 'instantaneous_ops_per_sec' in info:
+            self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'],
+                       tags=tags)
 
         # Check some key lengths if asked
         key_list = instance.get('keys')

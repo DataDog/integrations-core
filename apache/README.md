@@ -1,37 +1,35 @@
-# Overview
+# Agent Check: Apache Web Server
 
-Get metrics from Apache in real time; graph them and correlate them with other relevant system metrics and events.
+## Overview
 
-  * Visualize your web server performance
-  * Correlate the performance of Apache with the rest of your applications
+The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
 
-# Installation
+## Setup
+### Installation
 
 The Apache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
 
 Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
-# Configuration
+### Configuration
 
-Create a file `apache.yaml` in the Agent's `conf.d` directory:
+Create a file `apache.yaml` in the Agent's `conf.d` directory. See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options:
 
 ```
-        init_config:
+init_config:
 
-        instances:
-          - apache_status_url: http://example.com/server-status?auto
-            # apache_user: example_user
-            # apache_password: example_password
-            tags:
-              - instance:foo
-            disable_ssl_validation: true # if you want to disable SSL cert validation
+instances:
+  - apache_status_url: http://example.com/server-status?auto
+#   apache_user: example_user # if apache_status_url needs HTTP basic auth
+#   apache_password: example_password
+#   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
 ```
 
-Restart the Agent to begin sending Apache metrics to Datadog.
+Restart the Agent to start sending Apache metrics to Datadog.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `apache` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `apache` under the Checks section:
 
 ```
   Checks
@@ -46,16 +44,29 @@ Run the Agent's `info` subcommand and look for `apache` under the Checks section
     [...]
 ```
 
-# Troubleshooting
-
-# Compatibility
+## Compatibility
 
 The Apache check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this check.
 
-# Events
+### Events
+The Apache check does not include any event at this time.
 
-# Service Checks
+### Service Checks
+
+**apache.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+* [Monitoring Apache web server performance](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/)
+* [How to collect Apache performance metrics](https://www.datadoghq.com/blog/collect-apache-performance-metrics/)
+* [How to monitor Apache web server with Datadog](https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/)

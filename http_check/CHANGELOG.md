@@ -1,19 +1,37 @@
 # CHANGELOG - http_check
 
-## 1.1.1 / Unreleased
+1.2.0 / 2017-10-10
+==================
+
+### Changes
+
+* [FEATURE] Add support for client side certificate. See[#688][]. (Thanks [@xkrt][])
+* [IMPROVEMENT] Make tornado optional. See [#758][].
+
+1.1.2 / 2017-08-28
+==================
+
+### Changes
+
+* [IMPROVEMENT] Improved logging. See [#652][].
+
+1.1.1 / 2017-07-18
+==================
 
 ### Changes
 
 * [BUGFIX] Fix response tuple arity in SSL certificate check. See[#461][].
 
-## 1.1.0 / 06-05-2017
+1.1.0 / 2017-06-05
+==================
 
 ### Changes
 
 * [FEATURE] Add support for SOAP requests. See [#328][].
 * [FEATURE] Add gauge metric for ssl days left. See [#249][].
 
-## 1.0.0 / 03-22-2017
+1.0.0 / 2017-03-22
+==================
 
 ### Changes
 
@@ -23,3 +41,7 @@
 [#249]: https://github.com/DataDog/integrations-core/issues/249
 [#328]: https://github.com/DataDog/integrations-core/issues/328
 [#461]: https://github.com/DataDog/integrations-core/issues/461
+[#652]: https://github.com/DataDog/integrations-core/issues/652
+[#688]: https://github.com/DataDog/integrations-core/issues/688
+[#758]: https://github.com/DataDog/integrations-core/issues/758
+[@xkrt]: https://github.com/xkrt

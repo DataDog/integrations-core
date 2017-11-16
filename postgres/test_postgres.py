@@ -57,6 +57,11 @@ class TestPostgres(AgentCheckTest):
         'postgresql.bgwriter.buffers_alloc',
     ]
 
+    COMMON_ARCHIVER_METRICS = [
+        'postgresql.archiver.archived_count',
+        'postgresql.archiver.failed_count',
+    ]
+
     RELATION_METRICS = [
         'postgresql.seq_scans',
         'postgresql.seq_rows_read',
@@ -165,6 +170,10 @@ class TestPostgres(AgentCheckTest):
         if self.check._is_9_2_or_above(key, db):
             for mname in self.NEWER_92_BGW_METRICS:
                 self.assertMetric(mname, count=1)
+
+        # Testing ARCHIVER_METRICS scope
+        for mname in self.COMMON_ARCHIVER_METRICS:
+            self.assertMetric(mname, count=1)
 
         # FIXME: Test postgresql.locks
 
@@ -303,6 +312,10 @@ class TestPostgres(AgentCheckTest):
             for mname in self.NEWER_92_BGW_METRICS:
                 self.assertMetric(mname, count=1)
 
+        # Testing ARCHIVER_METRICS scope
+        for mname in self.COMMON_ARCHIVER_METRICS:
+            self.assertMetric(mname, count=1)
+
         # FIXME: Test postgresql.locks
 
         # Relation specific metrics
@@ -430,6 +443,10 @@ class TestPostgres(AgentCheckTest):
         if self.check._is_9_2_or_above(key, db):
             for mname in self.NEWER_92_BGW_METRICS:
                 self.assertMetric(mname, count=1)
+
+        # Testing ARCHIVER_METRICS scope
+        for mname in self.COMMON_ARCHIVER_METRICS:
+            self.assertMetric(mname, count=1)
 
         # FIXME: Test postgresql.locks
 
