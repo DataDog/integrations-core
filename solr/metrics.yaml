@@ -1,5 +1,4 @@
-# List of metrics to be collected by the integration
-# Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+# Default metrics collected by this check. You should not have to modify this.
 jmx_metrics:
   - include:
       type: searcher

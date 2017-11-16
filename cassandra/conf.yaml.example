@@ -30,7 +30,8 @@ init_config:
 
   # List of metrics to be collected by the integration
   # Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  # In Agent 6, these are read from metrics.yaml: these are only present here for Agent 5
+  # Agent 5: Customize all your metrics below
+  # Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
   conf:
     - include:
         domain: org.apache.cassandra.metrics
