@@ -38,8 +38,8 @@ kubernetes_state.limitrange.memory.max_limit_request_ratio,gauge,,,,Maximum memo
 kubernetes_state.node.cpu_capacity,gauge,,cpu,,The total CPU resources of the node,0,kubernetes,k8s_state.node.cpu_capacity
 kubernetes_state.node.memory_capacity,gauge,,byte,,The total memory resources of the node,0,kubernetes,k8s_state.node.memory_capacity
 kubernetes_state.node.pods_capacity,gauge,,,,The total pod resources of the node,0,kubernetes,k8s_state.node.pods_capacity
-kubernetes_state.node.gpu.cards_allocatable,gauge,,,The Nvidia GPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.gpu.cards_allocatable
-kubernetes_state.node.gpu.cards_capacity,gauge,,,The total Nvidia GPU resources of the node,0,kubernetes,k8s_state.node.gpu.cards_capacity
+kubernetes_state.node.gpu.cards_allocatable,gauge,,,The GPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.gpu.cards_allocatable
+kubernetes_state.node.gpu.cards_capacity,gauge,,,The total GPU resources of the node,0,kubernetes,k8s_state.node.gpu.cards_capacity
 kubernetes_state.persistentvolumeclaim.status,gauge,,,The phase the persistent volume claim is currently in,-1,kubernetes,k8s_state.persistentvolumeclaim.status
 kubernetes_state.node.cpu_allocatable,gauge,,cpu,,The CPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.cpu_allocatable
 kubernetes_state.node.memory_allocatable,gauge,,byte,,The memory resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.memory_allocatable

@@ -11,6 +11,8 @@ from checks.prometheus_check import PrometheusCheck
 
 
 METRIC_TYPES = ['counter', 'gauge']
+WHITELISTED_WAITING_REASONS = ['ErrImagePull']
+WHITELISTED_TERMINATED_REASONS = ['OOMKilled','ContainerCannotRun','Error']
 
 
 class KubernetesState(PrometheusCheck):
@@ -91,7 +93,6 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
-
         }
 
         self.ignore_metrics = [
@@ -148,7 +149,6 @@ class KubernetesState(PrometheusCheck):
             'kube_job_status_active',
             'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
             'kube_job_status_start_time',
-
         ]
 
     def check(self, instance):
@@ -172,8 +172,6 @@ class KubernetesState(PrometheusCheck):
         # We want to send the delta via the `monotonic_count` method
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
-
-        self.whitelisted_reasons = {"waiting":["ErrImagePull"],"terminated":["OOMKilled","ContainerCannotRun","Error"]}
 
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
@@ -307,7 +305,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in self.whitelisted_reasons['waiting']:
+                    if label.value in WHITELISTED_WAITING_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
@@ -325,7 +323,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in self.whitelisted_reasons['terminated']:
+                    if label.value in WHITELISTED_TERMINATED_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
