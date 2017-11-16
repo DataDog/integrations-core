@@ -310,7 +310,7 @@ class KubernetesState(PrometheusCheck):
                     if label.value in self.whitelisted_reasons['waiting']:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
-                        report = True
+                        skip_metric = True
                 elif label.name == "container":
                     tags.append(self._format_tag("kube_container_name", label.value))
                 elif label.name == "namespace":
