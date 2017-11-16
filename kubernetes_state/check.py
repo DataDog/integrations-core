@@ -299,15 +299,41 @@ class KubernetesState(PrometheusCheck):
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
+        whitelisted_reasons = {"ErrImagePull"}
+        reason = True
+        tags = []
         for metric in message.metric:
-            tags = [self._format_tag(label.name, label.value) for label in metric.label]
-            self.count(metric_name, metric.gauge.value, tags)
+            for label in metric.label:
+                if label.name == "reason":
+                    if label.value in whitelisted_reasons:
+                        tags.append(self._format_tag(label.name, label.value))
+                    else:
+                        reason = False
+                elif label.name == "container":
+                    tags.append(self._format_tag("kube_container_name", label.value))
+                else label.name == "namespace":
+                    tags.append(self._format_tag(label.name, label.value))
+            if reason:
+                self.count(metric_name, metric.gauge.value, tags)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.terminated'
+        whitelisted_reasons = {"OOMKilled","ContainerCannotRun","Error"}
+        reason = True
+        tags = []
         for metric in message.metric:
-            tags = [self._format_tag(label.name, label.value) for label in metric.label]
-            self.count(metric_name, metric.gauge.value, tags)
+            for label in metric.label:
+                if label.name == "reason":
+                    if label.value in whitelisted_reasons:
+                        tags.append(self._format_tag(label.name, label.value))
+                    else:
+                        reason = False
+                elif label.name == "container":
+                    tags.append(self._format_tag("kube_container_name", label.value))
+                else label.name == "namespace":
+                    tags.append(self._format_tag(label.name, label.value))
+            if reason:
+                self.count(metric_name, metric.gauge.value, tags)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """

@@ -376,6 +376,13 @@ kube_pod_container_status_terminated{container="should-run-once",namespace="defa
 kube_pod_container_status_terminated{container="sidecar",namespace="kube-system",pod="kube-dns-1326421443-hj4hx"} 0
 kube_pod_container_status_terminated{container="task-pv-container",namespace="default",pod="task-pv-pod"} 0
 kube_pod_container_status_terminated{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn"} 0
+kube_pod_container_status_terminated{container="container2",namespace="ns2",pod="pod2"} 1
+# HELP kube_pod_container_status_terminated_reason Describes the reason the container is currently in terminated state.
+# TYPE kube_pod_container_status_terminated_reason gauge
+kube_pod_container_status_terminated_reason{container="container2",namespace="ns2",pod="pod2",reason="Completed"} 0
+kube_pod_container_status_terminated_reason{container="container2",namespace="ns2",pod="pod2",reason="ContainerCannotRun"} 0
+kube_pod_container_status_terminated_reason{container="container2",namespace="ns2",pod="pod2",reason="Error"} 0
+kube_pod_container_status_terminated_reason{container="container2",namespace="ns2",pod="pod2",reason="OOMKilled"} 1
 # HELP kube_pod_container_status_waiting Describes whether the container is currently in waiting state.
 # TYPE kube_pod_container_status_waiting gauge
 kube_pod_container_status_waiting{container="dd-k8state",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77"} 0
@@ -427,7 +434,7 @@ kube_pod_container_status_waiting_reason{container="sidecar",namespace="kube-sys
 kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="task-pv-container",namespace="default",pod="task-pv-pod",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="ContainerCreating"} 0
-kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="tiller",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn",reason="ErrImagePull"} 1
 # HELP kube_pod_created Unix creation timestamp
 # TYPE kube_pod_created gauge
 kube_pod_created{namespace="default",pod="failingtest-f585bbd4-2fsml"} 1.510059371e+09
