@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]
 * [IMPROVEMENT] Adjustments to the default `cassandra.yaml`. See [#726][] (Thanks [@arodrime][])
 
 1.1.0 / 2017-08-28
@@ -26,3 +27,4 @@
 [#657]: https://github.com/DataDog/integrations-core/issues/657
 [#726]: https://github.com/DataDog/integrations-core/issues/726
 [@arodrime]: https://github.com/arodrime
+[#863]: https://github.com/DataDog/integrations-core/pull/863
