@@ -5,7 +5,7 @@ def consul_version
 end
 
 def consul_config
-  "server-#{ENV['FLAVOR_VERSION']}.json"
+  "server-#{consul_version}.json"
 end
 
 def consul_rootdir
