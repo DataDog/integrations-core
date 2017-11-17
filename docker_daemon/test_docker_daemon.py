@@ -23,11 +23,14 @@ CONTAINERS_TO_RUN = [
 
 ]
 
+DEFAULT_CUSTOM_TAGS = ["env:test", "docker:test"]
+
 MOCK_CONFIG = {
     "init_config": {},
     "instances": [{
         "url": "unix://var/run/w00t.sock",
         "collect_disk_stats": True,
+        "tags": DEFAULT_CUSTOM_TAGS
     }]
 }
 
@@ -52,7 +55,7 @@ class TestCheckDockerDaemonDown(AgentCheckTest):
         DockerUtil().left_init_retries = 10
         DockerUtil()._client = None
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=None, count=1)
+        self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=DEFAULT_CUSTOM_TAGS, count=1)
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
@@ -164,18 +167,25 @@ class TestCheckDockerDaemon(AgentCheckTest):
         }
 
     @mock.patch('docker.Client.info')
+    def test_main_service_check(self, mock_info):
+        mock_info.return_value = self.mock_normal_get_info()
+
+        self.run_check(MOCK_CONFIG, force_reload=True)
+        self.assertServiceCheck("docker.service_up", status=AgentCheck.OK, tags=DEFAULT_CUSTOM_TAGS, count=1)
+
+    @mock.patch('docker.Client.info')
     def test_devicemapper_disk_metrics(self, mock_info):
         mock_info.return_value = self.mock_normal_get_info()
 
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertMetric('docker.data.free', value=9e9)
-        self.assertMetric('docker.data.used', value=1e9)
-        self.assertMetric('docker.data.total', value=10e9)
-        self.assertMetric('docker.data.percent', value=10.0)
-        self.assertMetric('docker.metadata.free', value=9e6)
-        self.assertMetric('docker.metadata.used', value=1e6)
-        self.assertMetric('docker.metadata.total', value=10e6)
-        self.assertMetric('docker.metadata.percent', value=10.0)
+        self.assertMetric('docker.data.free', value=9e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.used', value=1e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.total', value=10e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.free', value=9e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.used', value=1e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.total', value=10e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
 
     @mock.patch('docker.Client.info')
     def test_devicemapper_no_used_info(self, mock_info):
@@ -183,12 +193,12 @@ class TestCheckDockerDaemon(AgentCheckTest):
         mock_info.return_value = self.mock_get_info_no_used()
 
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertMetric('docker.data.free', value=9e9)
-        self.assertMetric('docker.data.total', value=10e9)
-        self.assertMetric('docker.data.percent', value=10.0)
-        self.assertMetric('docker.metadata.free', value=9e6)
-        self.assertMetric('docker.metadata.total', value=10e6)
-        self.assertMetric('docker.metadata.percent', value=10.0)
+        self.assertMetric('docker.data.free', value=9e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.total', value=10e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.free', value=9e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.total', value=10e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
 
     @mock.patch('docker.Client.info')
     def test_devicemapper_no_data_info(self, mock_info):
@@ -196,9 +206,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
         mock_info.return_value = self.mock_get_info_no_data()
 
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertMetric('docker.metadata.free', value=9e6)
-        self.assertMetric('docker.metadata.total', value=10e6)
-        self.assertMetric('docker.metadata.percent', value=10.0)
+        self.assertMetric('docker.metadata.free', value=9e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.total', value=10e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
 
     @mock.patch('docker.Client.info')
     def test_devicemapper_invalid_values(self, mock_info):
@@ -206,10 +216,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
         mock_info.return_value = self.mock_get_info_invalid_values()
 
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertMetric('docker.metadata.free', value=9e6)
-        self.assertMetric('docker.metadata.used', value=11e6)
-        self.assertMetric('docker.metadata.total', value=10e6)
-        self.assertMetric('docker.metadata.percent', value=55)
+        self.assertMetric('docker.metadata.free', value=9e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.used', value=11e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.total', value=10e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.percent', value=55, tags=DEFAULT_CUSTOM_TAGS)
 
     @mock.patch('docker.Client.info')
     def test_devicemapper_all_zeros(self, mock_info):
@@ -218,9 +228,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
         self.run_check(MOCK_CONFIG, force_reload=True)
         metric_names = [metric[0] for metric in self.metrics]
-        self.assertMetric('docker.data.free', value=0)
-        self.assertMetric('docker.data.used', value=0)
-        self.assertMetric('docker.data.total', value=0)
+        self.assertMetric('docker.data.free', value=0, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.used', value=0, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.total', value=0, tags=DEFAULT_CUSTOM_TAGS)
         self.assertNotIn('docker.data.percent', metric_names)
 
     @mock.patch('docker.Client.info')
@@ -228,14 +238,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
         mock_info.return_value = self.mock_get_info_no_spaces()
 
         self.run_check(MOCK_CONFIG, force_reload=True)
-        self.assertMetric('docker.data.free', value=9e9)
-        self.assertMetric('docker.data.used', value=1e9)
-        self.assertMetric('docker.data.total', value=10e9)
-        self.assertMetric('docker.data.percent', value=10.0)
-        self.assertMetric('docker.metadata.free', value=9e6)
-        self.assertMetric('docker.metadata.used', value=1e6)
-        self.assertMetric('docker.metadata.total', value=10e6)
-        self.assertMetric('docker.metadata.percent', value=10.0)
+        self.assertMetric('docker.data.free', value=9e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.used', value=1e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.total', value=10e9, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.data.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.free', value=9e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.used', value=1e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.total', value=10e6, tags=DEFAULT_CUSTOM_TAGS)
+        self.assertMetric('docker.metadata.percent', value=10.0, tags=DEFAULT_CUSTOM_TAGS)
 
     # integration tests #
 
@@ -282,6 +292,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
@@ -315,6 +327,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
             ('docker.cpu.system', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
@@ -362,6 +376,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.cpu.user', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -417,6 +433,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.cpu.user', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -472,6 +490,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['container_command:docker-entrypoint.sh redis-server']),
             ('docker.containers.stopped', ["container_command:nginx -g 'daemon off;'"]),
             ('docker.containers.stopped', ['container_command:docker-entrypoint.sh redis-server']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.cpu.system', ["container_command:nginx -g 'daemon off;'"]),
             ('docker.cpu.system', ['container_command:docker-entrypoint.sh redis-server']),
             ('docker.cpu.user', ['container_command:docker-entrypoint.sh redis-server']),
@@ -542,6 +562,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:redis', 'image_tag:latest']),
@@ -587,6 +609,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
@@ -678,6 +702,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running.total', None),
+            ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:redis', 'image_tag:latest']),
@@ -826,6 +852,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             elif 'cpu' in stat_file:
                 return {'user': 1000 * self.run, 'system': 1000 * self.run}
                 self.run += 1
+            elif 'memory.soft_limit_in_bytes' in stat_file:
+                return dict({'softlimit': int(fp.read())})
             else:
                 return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
 

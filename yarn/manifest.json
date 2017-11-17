@@ -12,5 +12,10 @@
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "3223c2e3-29dd-4cfb-82a2-51b951c648eb"
+  "guid": "3223c2e3-29dd-4cfb-82a2-51b951c648eb",
+  "public_title": "Datadog-Yarn Integration",
+  "categories":["processing"],
+  "doc_link": "https://docs.datadoghq.com/integrations/yarn/",
+  "is_public": true,
+  "has_logo": true
 }

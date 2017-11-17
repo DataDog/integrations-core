@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-1.3.0 / Unreleased
+1.3.0 / 2017-10-10
 ==================
 
 ### Changes

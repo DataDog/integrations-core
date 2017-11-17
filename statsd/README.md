@@ -13,7 +13,7 @@ The StatsD check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `statsd.yaml` in the Agent's `conf.d` directory:
+Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml](https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -27,7 +27,7 @@ Restart the Agent to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `statsd` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `statsd` under the Checks section:
 
 ```
   Checks

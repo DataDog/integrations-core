@@ -73,7 +73,7 @@ class CheckSSH(AgentCheck):
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
 
-        exception_message = None
+        exception_message = "No errors occured"
         try:
             # Try to connect to check status of SSH
             try:

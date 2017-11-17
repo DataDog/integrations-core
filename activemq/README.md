@@ -14,7 +14,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 ### Configuration
 
 1. **Make sure that [JMX Remote is enabled](http://activemq.apache.org/jmx.html) on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`
+2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`. See the [sample activemq.yaml](https://github.com/DataDog/integrations-core/blob/master/activemq/conf.yaml.example) for all available configuration options.
 
 ```
 instances:
@@ -96,7 +96,7 @@ else echo -e "\e[031mAgent is not running\e[0m"; fi
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `activemq` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `activemq` under the Checks section:
 
 ```
   Checks

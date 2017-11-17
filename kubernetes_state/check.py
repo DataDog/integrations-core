@@ -53,6 +53,10 @@ class KubernetesState(PrometheusCheck):
             'kube_deployment_status_replicas_available': 'deployment.replicas_available',
             'kube_deployment_status_replicas_unavailable': 'deployment.replicas_unavailable',
             'kube_deployment_status_replicas_updated': 'deployment.replicas_updated',
+            'kube_hpa_spec_min_replicas': 'hpa.min_replicas',
+            'kube_hpa_spec_max_replicas': 'hpa.max_replicas',
+            'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
+            'kube_hpa_status_current_replicas': 'hpa.current_replicas',
             'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
             'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
             'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -176,6 +180,44 @@ class KubernetesState(PrometheusCheck):
                 else:
                     self.log.debug("Unable to handle %s - unknown condition %s" % (sc_name, label.value))
 
+    def _condition_to_tag_check(self, metric, base_sc_name, mapping, tags=None):
+        """
+        Metrics from kube-state-metrics have changed
+        For example:
+        kube_node_status_condition{condition="Ready",node="ip-172-33-39-189.eu-west-1.compute.internal",status="true"} 1
+        kube_node_status_condition{condition="OutOfDisk",node="ip-172-33-57-130.eu-west-1.compute.internal",status="false"} 1
+        metric {
+          label { name: "condition", value: "true"
+          }
+          # other labels here
+          gauge { value: 1.0 }
+        }
+
+        This function evaluates metrics containing conditions and sends a service check
+        based on a provided condition->check mapping dict
+        """
+        if bool(metric.gauge.value) is False:
+            return  # Ignore if gauge is not 1
+        label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
+        service_check_name = condition_map['service_check_name']
+        mapping = condition_map['mapping']
+        if condition_map['service_check_name'] is None:
+            self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
+        else:
+            self.service_check(service_check_name, mapping[label_value], tags=tags)
+            self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
+
+    def _get_metric_condition_map(self, base_sc_name, labels):
+        switch = {
+            'Ready': {'service_check_name': base_sc_name + '.ready', 'mapping': self.condition_to_status_positive},
+            'OutOfDisk': {'service_check_name': base_sc_name + '.out_of_disk', 'mapping': self.condition_to_status_negative},
+            'DiskPressure': {'service_check_name': base_sc_name + '.disk_pressure', 'mapping': self.condition_to_status_negative},
+            'NetworkUnavailable': {'service_check_name': base_sc_name + '.network_unavailable', 'mapping': self.condition_to_status_negative},
+            'MemoryPressure': {'service_check_name': base_sc_name + '.memory_pressure', 'mapping': self.condition_to_status_negative}
+        }
+        label_value = self._extract_label_value('status', labels)
+        return label_value, switch.get(self._extract_label_value('condition', labels), {'service_check_name': None, 'mapping': None})
+
     def _extract_label_value(self, name, labels):
         """
         Search for `name` in labels name and returns
@@ -278,8 +320,15 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, label.value))
             self.job_succeeded_count[frozenset(tags)] += metric.gauge.value
 
+    def kube_node_status_condition(self, message, **kwargs):
+        """ The ready status of a cluster node. >v1.0.0"""
+        base_check_name = self.NAMESPACE + '.node'
+        for metric in message.metric:
+            self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
+                                         tags=[self._label_to_tag("node", metric.label)])
+
     def kube_node_status_ready(self, message, **kwargs):
-        """ The ready status of a cluster node. """
+        """ The ready status of a cluster node."""
         service_check_name = self.NAMESPACE + '.node.ready'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_positive,
