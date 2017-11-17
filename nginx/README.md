@@ -57,7 +57,7 @@ server {
     # Choose your status module
 
     # freely available with open source NGINX
-    stub_status;
+    stub_status on;
 
     # available only with NGINX Plus
     # status;
