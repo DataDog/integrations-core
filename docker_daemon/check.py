@@ -66,7 +66,6 @@ CGROUP_METRICS = [
             "docker.mem.sw_limit": (["hierarchical_memsw_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
             "docker.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x)/float(y) if float(y) < 2 ** 60 else None, GAUGE),
             "docker.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y)/float(z) if float(z) < 2 ** 60 else None, GAUGE)
-
         }
     },
     {
@@ -1008,7 +1007,12 @@ class DockerDaemon(AgentCheck):
                 elif 'cpuacct.usage' in stat_file:
                     return dict({'usage': str(int(fp.read())/10000000)})
                 elif 'memory.soft_limit_in_bytes' in stat_file:
-                    return dict({'softlimit': int(fp.read())})
+                    value = int(fp.read())
+                    # do not report kernel max default value (uint64 * 4096)
+                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845
+                    # 2 ** 60 is kept for consistency of other cgroups metrics
+                    if value < 2 ** 60:
+                        return dict({'softlimit': value})
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:

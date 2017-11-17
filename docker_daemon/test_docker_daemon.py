@@ -853,7 +853,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 return {'user': 1000 * self.run, 'system': 1000 * self.run}
                 self.run += 1
             elif 'memory.soft_limit_in_bytes' in stat_file:
-                return dict({'softlimit': int(fp.read())})
+                    value = int(fp.read())
+                    if value < 2 ** 60:
+                        return dict({'softlimit': value})
             else:
                 return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
 
