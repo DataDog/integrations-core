@@ -582,7 +582,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
             "init_config": {},
             "instances": [{
                 "url": "unix://var/run/docker.sock",
-                "collect_labels_as_tags": ["label1"],
+                "collect_labels_as_tags": 'label1',
                 "collect_image_size": True,
                 "collect_images_stats": True,
                 "collect_container_count": True,

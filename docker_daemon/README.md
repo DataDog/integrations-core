@@ -53,6 +53,7 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | NON_LOCAL_TRAFFIC | Enabling this feature will allow statsd reporting from any external IP. For example, `-e NON_LOCAL_TRAFFIC=yes`. This can be used to report metrics from other containers or systems. See [network configuration](https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration) for more details.
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation](https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy) |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide](/guides/autodiscovery/). |
+| COLLECT_LABELS_AS_TAGS | Enables the collection of the listed labels as tags. Comma separated string, without spaces unless in quotes. Exemple: `-e COLLECT_LABELS_AS_TAGS='com.docker.label.foo, com.docker.label.bar'` or `-e COLLECT_LABELS_AS_TAGS=com.docker.label.foo,com.docker.label.bar`. |
 
 #### Running the agent container on Amazon Linux
 
