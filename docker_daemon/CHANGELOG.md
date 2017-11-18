@@ -7,6 +7,7 @@
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 * [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
 * [IMPROVEMENT] Add docker.containers.running.total & docker.containers.stopped.total metrics. See [#859][]
+* [FEATURE] Add COLLECT_LABELS_AS_TAGS as an environment variable. See [#881][]
 
 1.5.1 / 2017-11-08
 ==================
