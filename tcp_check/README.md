@@ -28,7 +28,7 @@ instances:
 
 Configuration Options
 
-* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`. Note: This tag will have any dashes and dashes converted to underscores.
+* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`. Note: This tag will have any spaces and dashes converted to underscores.
 * `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
