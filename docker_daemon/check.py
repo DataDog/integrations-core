@@ -125,9 +125,7 @@ DEFAULT_IMAGE_TAGS = [
     'image_tag'
 ]
 
-DEFAULT_LABELS_AS_TAGS = [
-    SWARM_SVC_LABEL
-]
+DEFAULT_LABELS_AS_TAGS = SWARM_SVC_LABEL
 
 
 TAG_EXTRACTORS = {
@@ -215,7 +213,7 @@ class DockerDaemon(AgentCheck):
             self._disable_net_metrics = False
 
             # Set tagging options
-            self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
+            self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS).split(',')
             self.kube_pod_tags = {}
 
             self.use_histogram = _is_affirmative(instance.get('use_histogram', False))

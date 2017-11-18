@@ -184,10 +184,10 @@ instances:
     #
     # container_tags: ["image_name", "image_tag", "docker_image"]
 
-    # List of container label names that should be collected and sent as tags.
+    # Container label names that should be collected and sent as tags.
     # Default to None
     # Example:
-    # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
+    # collect_labels_as_tags: com.docker.compose.service, com.docker.compose.project
     # List of docker event attributes to add as tags of the datadog events
     # Defaults to None.
     #
