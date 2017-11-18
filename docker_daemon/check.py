@@ -179,10 +179,15 @@ class DockerDaemon(AgentCheck):
             raise Exception("Docker check only supports one configured instance.")
         AgentCheck.__init__(self, name, init_config,
                             agentConfig, instances=instances)
-
         self.init_success = False
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
+
+        global_labels_as_tags = agentConfig.get('docker_labels_as_tags')
+        if global_labels_as_tags:
+            self.collect_labels_as_tags = [label.strip() for label in global_labels_as_tags.split(',')]
+        else:
+            self.collect_labels_as_tags = DEFAULT_LABELS_AS_TAGS
         self.init()
 
     def init(self):
@@ -215,7 +220,12 @@ class DockerDaemon(AgentCheck):
             self._disable_net_metrics = False
 
             # Set tagging options
-            self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
+            # The collect_labels_as_tags is legacy, only tagging docker metrics.
+            # It is replaced by docker_labels_as_tags in datadog.conf.
+            # We keep this line for backward compatibility.
+            if "collect_labels_as_tags" in instance:
+                self.collect_labels_as_tags = instance.get("collect_labels_as_tags")
+
             self.kube_pod_tags = {}
 
             self.use_histogram = _is_affirmative(instance.get('use_histogram', False))

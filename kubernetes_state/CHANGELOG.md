@@ -7,6 +7,7 @@
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 * [FEATURE] Adding HPA metrics. See [#801][]
 * [FEATURE] Add metrics for GPU, PVC, CronJobs and other added in kubernetes_state 1.1.0. See [#853][]
+* [IMPROVEMENT] Merge kubernetes-state pod.phase.[running|succeeded|pending|failed|unknown] checks into one actionnable check [#874][]
 
 1.3.0 / 2017-08-28
 ==================
