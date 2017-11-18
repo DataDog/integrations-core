@@ -120,7 +120,7 @@ class Disk(AgentCheck):
                 device_name = device_name.strip('\\').lower()
             for metric_name, metric_value in self._collect_part_metrics(part, disk_usage).iteritems():
                 self.gauge(metric_name, metric_value,
-                           tags=tags, device_name=device_name)
+                           tags=tags, device_name=self._normalize_device_name_tag(device_name))
         # And finally, latency metrics, a legacy gift from the old Windows Check
         if Platform.is_win32():
             self.collect_latency_metrics()
@@ -212,9 +212,9 @@ class Disk(AgentCheck):
             read_time_pct = disk.read_time * 100.0 / 1000.0
             write_time_pct = disk.write_time * 100.0 / 1000.0
             self.rate(self.METRIC_DISK.format('read_time_pct'),
-                      read_time_pct, device_name=disk_name)
+                      read_time_pct, device_name=self._normalize_device_name_tag(disk_name))
             self.rate(self.METRIC_DISK.format('write_time_pct'),
-                      write_time_pct, device_name=disk_name)
+                      write_time_pct, device_name=self._normalize_device_name_tag(disk_name))
 
     # no psutil, let's use df
     def collect_metrics_manually(self):
@@ -226,7 +226,7 @@ class Disk(AgentCheck):
             device_name = device[-1] if self._use_mount else device[0]
             for metric_name, value in self._collect_metrics_manually(device).iteritems():
                 self.gauge(metric_name, value, tags=tags,
-                           device_name=device_name)
+                           device_name=self._normalize_device_name_tag(device_name))
 
     def _collect_metrics_manually(self, device):
         result = {}
@@ -289,3 +289,6 @@ class Disk(AgentCheck):
 
         # Filter fake or unwanteddisks.
         return [d for d in flattened_devices if self._keep_device(d)]
+
+    def _normalize_device_name_tag(self, device_name):
+        return device_name.strip().lower().replace(' ', '_').replace('@', '_')
