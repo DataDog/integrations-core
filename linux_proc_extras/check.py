@@ -1,5 +1,5 @@
 # (C) Cory Watson <cory@stripe.com> 2016
-# (C) Datadog, Inc. 2016
+# (C) Datadog, Inc. 2016-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
