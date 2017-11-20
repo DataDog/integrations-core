@@ -186,7 +186,7 @@ instances:
 
     # Option to tag docker metrics with container label names listed.
     # Takes precedence over docker_labels_as_tags for docker metrics.
-    # Only use docker_labels_as_tags in datadog.conf to tag metrics from the autodiscovery and docker with labels listed.
+    # Only use if you want different labels tagged for autodiscovery and docker_daemon metrics.
     # Default to None
     # Example:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]

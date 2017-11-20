@@ -183,9 +183,9 @@ class DockerDaemon(AgentCheck):
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
 
-        self.global_labels_as_tags = agentConfig.get('docker_labels_as_tags')
-        if self.global_labels_as_tags:
-            self.collect_labels_as_tags = [label.strip() for label in self.global_labels_as_tags.split(',')]
+        global_labels_as_tags = agentConfig.get('docker_labels_as_tags')
+        if global_labels_as_tags:
+            self.collect_labels_as_tags = [label.strip() for label in global_labels_as_tags.split(',')]
         else:
             self.collect_labels_as_tags = DEFAULT_LABELS_AS_TAGS
         self.init()
