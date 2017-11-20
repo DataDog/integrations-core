@@ -325,14 +325,7 @@ class ProcessCheck(AgentCheck):
     def check(self, instance):
         name = instance.get('name', None)
         tags = instance.get('tags', [])
-        exact_match = None
-
-        if instance.get('match_on_process_name', None) is not None:
-            exact_match = instance.get('match_on_process_name', True)
-
-        if instance.get('exact_match', None) is not None:
-            exact_match = instance.get('exact_match', True)
-
+        exact_match = _is_affirmative(instance.get('exact_match', True))
         search_string = instance.get('search_string', None)
         ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
         pid = instance.get('pid')
