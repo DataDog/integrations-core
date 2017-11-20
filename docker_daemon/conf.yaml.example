@@ -184,10 +184,11 @@ instances:
     #
     # container_tags: ["image_name", "image_tag", "docker_image"]
 
-    # Container label names that should be collected and sent as tags.
+    # Legacy option for container label names that should be collected and sent as tags.
+    # Only affects docker metrics. Please use docker_labels_as_tags in datadog.conf for # AD metrics tagging as well.
     # Default to None
     # Example:
-    # collect_labels_as_tags: com.docker.compose.service, com.docker.compose.project
+    # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
     # List of docker event attributes to add as tags of the datadog events
     # Defaults to None.
     #
