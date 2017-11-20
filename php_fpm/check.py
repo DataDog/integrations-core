@@ -9,6 +9,8 @@ import requests
 from checks import AgentCheck
 from util import headers
 
+DEFAULT_TIMEOUT=20
+
 
 class PHPFPMCheck(AgentCheck):
     """
@@ -44,9 +46,7 @@ class PHPFPMCheck(AgentCheck):
         tags = instance.get('tags', [])
         http_host = instance.get('http_host')
 
-        timeout = instance.get('timeout')
-        if timeout is None:
-            timeout = 20
+        timeout = instance.get('timeout', DEFAULT_TIMEOUT)
 
         if user and password:
             auth = (user, password)
