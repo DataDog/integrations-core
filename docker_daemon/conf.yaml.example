@@ -184,8 +184,9 @@ instances:
     #
     # container_tags: ["image_name", "image_tag", "docker_image"]
 
-    # Legacy option for container label names that should be collected and sent as tags.
-    # Only affects docker metrics. Please use docker_labels_as_tags in datadog.conf for # AD metrics tagging as well.
+    # Option to tag docker metrics with container label names listed.
+    # Takes precedence over docker_labels_as_tags for docker metrics.
+    # Only use docker_labels_as_tags in datadog.conf to tag metrics from the autodiscovery and docker with labels listed.
     # Default to None
     # Example:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]

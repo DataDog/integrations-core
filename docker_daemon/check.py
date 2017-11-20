@@ -183,11 +183,11 @@ class DockerDaemon(AgentCheck):
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
 
-        self.collect_labels_as_tags = agentConfig.get('docker_labels_as_tags', ','.join(DEFAULT_LABELS_AS_TAGS))
-        if self.collect_labels_as_tags:
-            self.collect_labels_as_tags = [label.strip() for label in self.collect_labels_as_tags.split(',')]
+        self.global_labels_as_tags = agentConfig.get('docker_labels_as_tags')
+        if self.global_labels_as_tags:
+            self.collect_labels_as_tags = [label.strip() for label in self.global_labels_as_tags.split(',')]
         else:
-            self.collect_labels_as_tags = []
+            self.collect_labels_as_tags = DEFAULT_LABELS_AS_TAGS
         self.init()
 
     def init(self):
@@ -224,7 +224,7 @@ class DockerDaemon(AgentCheck):
             # It is replaced by docker_labels_as_tags in datadog.conf.
             # We keep this line for backward compatibility.
             if "collect_labels_as_tags" in instance:
-                self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
+                self.collect_labels_as_tags = instance.get("collect_labels_as_tags")
 
             self.kube_pod_tags = {}
 
