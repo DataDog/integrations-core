@@ -221,23 +221,23 @@ class KubernetesState(PrometheusCheck):
         This function evaluates metrics containing conditions and sends a service check
         based on a provided condition->check mapping dict
         """
-        if bool(metric.gauge.value) is True:
-            label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
-            service_check_name = condition_map['service_check_name']
-            mapping = condition_map['mapping']
-
-            if base_sc_name == 'kubernetes_state.pod.phase':
-                message = "%s is currently reporting %s" % (self._label_to_tag('pod', metric.label), self._label_to_tag('phase', metric.label))
-            else:
-                message = "%s is currently reporting %s" % (self._label_to_tag('node', metric.label), self._label_to_tag('condition', metric.label))
-
-            if condition_map['service_check_name'] is None:
-                self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
-            else:
-                self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
-                self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
-        else:
+        if bool(metric.gauge.value) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
+        
+        label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
+        service_check_name = condition_map['service_check_name']
+        mapping = condition_map['mapping']
+
+        if base_sc_name == 'kubernetes_state.pod.phase':
+            message = "%s is currently reporting %s" % (self._label_to_tag('pod', metric.label), self._label_to_tag('phase', metric.label))
+        else:
+            message = "%s is currently reporting %s" % (self._label_to_tag('node', metric.label), self._label_to_tag('condition', metric.label))
+
+        if condition_map['service_check_name'] is None:
+            self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
+        else:
+            self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
+            self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':
