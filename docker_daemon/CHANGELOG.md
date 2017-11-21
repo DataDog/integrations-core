@@ -1,5 +1,11 @@
 # CHANGELOG - docker_daemon
 
+1.7.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881][]
+
 1.6.0 / Unreleased
 ==================
 ### Changes

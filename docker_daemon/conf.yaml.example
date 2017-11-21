@@ -184,7 +184,9 @@ instances:
     #
     # container_tags: ["image_name", "image_tag", "docker_image"]
 
-    # List of container label names that should be collected and sent as tags.
+    # Option to tag docker metrics with container label names listed.
+    # Takes precedence over docker_labels_as_tags for docker metrics.
+    # Only use if you want different labels tagged for autodiscovery and docker_daemon metrics.
     # Default to None
     # Example:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
