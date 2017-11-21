@@ -63,7 +63,9 @@ The Apache check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [Issues with Apache Integration](https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration)
+* [Apache SSL certificate issues](https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues)
 
 ## Further Reading
 

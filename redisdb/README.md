@@ -74,6 +74,9 @@ The RedisDB check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
 
 ## Troubleshooting
+
+* [Redis Integration Error: "unknown command 'CONFIG'"](https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config)
+
 ### Agent cannot connect
 ```
     redisdb

@@ -60,7 +60,8 @@ The Network check does not include any event at this time.
 The Network check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [How to send TCP/UDP host metrics via the Datadog API ?](https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api)
 
 ## Further Reading
 ### Datadog Blog

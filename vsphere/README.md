@@ -91,7 +91,8 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [Can I limit the number of VMs that are pulled in via the VMWare integration?](https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration)
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

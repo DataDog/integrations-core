@@ -101,12 +101,12 @@ The Agent submits this service check for all vhosts (if `vhosts` is not configur
 Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [Tagging RabbitMQ queues by tag family](https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family)
 
 ## Further Reading
 ### Datadog Blog
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
 ### Knowledge Base
-* [Tagging RabbitMQ queues by tag Family](https://help.datadoghq.com/hc/en-us/articles/211590103-Tagging-RabbitMQ-queues-by-tag-family)
 * By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here](https://app.datadoghq.com/account/settings#integrations/rabbitmq)
