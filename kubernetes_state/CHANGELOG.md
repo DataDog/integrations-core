@@ -6,7 +6,7 @@
 
 * [IMPROVEMENT] Merge kubernetes-state pod.phase.[running|succeeded|pending|failed|unknown] service checks into one actionnable service check. Will be introduced in 5.20 and will change the behavior of the service check. [#874][]
 
-1.4.0 / Unreleased
+1.4.0 / 2017-11-21
 ==================
 ### Changes
 
@@ -50,3 +50,6 @@
 [#651]: https://github.com/DataDog/integrations-core/issues/651
 [#686]: https://github.com/DataDog/integrations-core/issues/686
 [#696]: https://github.com/DataDog/integrations-core/issues/696
+[#801]: https://github.com/DataDog/integrations-core/issues/801
+[#853]: https://github.com/DataDog/integrations-core/issues/853
+[#860]: https://github.com/DataDog/integrations-core/issues/860

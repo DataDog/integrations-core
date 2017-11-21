@@ -1,12 +1,12 @@
 # CHANGELOG - elastic
 
-1.2.0 / Unreleased
+1.2.0 / 2017-11-21
 ==================
 ### Changes
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.1.0 / Unreleased
+1.1.0 / 2017-11-21
 ==================
 
 ### Changes
@@ -34,3 +34,4 @@
 [#695]: https://github.com/DataDog/integrations-core/issues/695
 [#806]: https://github.com/DataDog/integrations-core/issues/806
 [#820]: https://github.com/DataDog/integrations-core/issues/820
+[#860]: https://github.com/DataDog/integrations-core/issues/860

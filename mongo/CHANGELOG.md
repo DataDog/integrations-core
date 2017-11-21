@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-1.5.0 / Unreleased
+1.5.0 / 2017-11-21
 ==================
 ### Changes
 
@@ -52,6 +52,7 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#406]: https://github.com/DataDog/integrations-core/issues/406
 [#491]: https://github.com/DataDog/integrations-core/issues/491
 [#625]: https://github.com/DataDog/integrations-core/issues/625
 [#627]: https://github.com/DataDog/integrations-core/issues/627
@@ -59,7 +60,6 @@
 [#747]: https://github.com/DataDog/integrations-core/issues/747
 [#769]: https://github.com/DataDog/integrations-core/issues/769
 [#823]: https://github.com/DataDog/integrations-core/issues/823
-[#406]: https://github.com/DataDog/integrations-core/pull/406
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
 [@hindmanj]: https://github.com/hindmanj
