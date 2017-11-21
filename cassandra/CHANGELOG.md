@@ -1,6 +1,6 @@
 # CHANGELOG - cassandra
 
-1.2.0 / Unreleased
+1.2.0 / 2017-11-21
 ==================
 
 ### Changes
@@ -26,5 +26,5 @@
 [#615]: https://github.com/DataDog/integrations-core/issues/615
 [#657]: https://github.com/DataDog/integrations-core/issues/657
 [#726]: https://github.com/DataDog/integrations-core/issues/726
+[#863]: https://github.com/DataDog/integrations-core/issues/863
 [@arodrime]: https://github.com/arodrime
-[#863]: https://github.com/DataDog/integrations-core/pull/863
