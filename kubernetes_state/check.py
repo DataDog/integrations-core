@@ -223,7 +223,7 @@ class KubernetesState(PrometheusCheck):
         """
         if bool(metric.gauge.value) is False:
             return  # Ignore if gauge is not 1 and we are not processing the pod phase check
-        
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
