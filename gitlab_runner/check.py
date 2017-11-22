@@ -39,11 +39,7 @@ class GitlabRunnerCheck(PrometheusCheck):
             raise CheckException("Unable to find prometheus_endpoint in config file.")
 
         # By default we send the buckets
-        send_buckets = instance.get('send_histograms_buckets', True)
-        if send_buckets is not None and str(send_buckets).lower() == 'false':
-            send_buckets = False
-        else:
-            send_buckets = True
+        send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
 
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
