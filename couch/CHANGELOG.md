@@ -1,6 +1,6 @@
 # CHANGELOG - couch
 
-2.1.0 / UNRELEASED
+2.2.0 / UNRELEASED
 =================
 
 ### Changes
