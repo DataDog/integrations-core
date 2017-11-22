@@ -456,7 +456,7 @@ class ProcessCheck(AgentCheck):
             message=message_str % (status_str[status], nb_procs, name)
         )
 
-    def _filter_by_user(user, pids):
+    def _filter_by_user(self, user, pids):
         """
         Filter pids by it's username.
         :param user: string with name of system user
@@ -468,6 +468,7 @@ class ProcessCheck(AgentCheck):
             try:
                 proc = psutil.Process(pid)
                 if proc.username() == user:
+                    self.log.debug("Collecting pid %s belonging to %s", pid, user)
                     filtered_pids.add(pid)
             except psutil.NoSuchProcess:
                 pass
