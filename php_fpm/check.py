@@ -9,7 +9,7 @@ import requests
 from checks import AgentCheck
 from util import headers
 
-DEFAULT_TIMEOUT=20
+DEFAULT_TIMEOUT = 20
 
 
 class PHPFPMCheck(AgentCheck):
