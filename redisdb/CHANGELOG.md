@@ -1,5 +1,11 @@
 # CHANGELOG - redisdb
 
+1.4.0 / Unreleased
+
+### Changes
+
+* [IMPROVEMENT] keys can be expressed as patterns, see [#300][]. Thanks [@aliva][].
+
 1.3.0 / 2017-11-21
 ==================
 ### Changes
@@ -33,4 +39,6 @@
 [#672]: https://github.com/DataDog/integrations-core/issues/672
 [#673]: https://github.com/DataDog/integrations-core/issues/673
 [#860]: https://github.com/DataDog/integrations-core/issues/860
+[#300]: https://github.com/DataDog/integrations-core/pull/300
 [@endzyme]: https://github.com/endzyme
+[@aliva]: https://github.com/aliva
