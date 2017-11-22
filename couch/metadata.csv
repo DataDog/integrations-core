@@ -238,3 +238,20 @@ couchdb.erlang.io_output,gauge,,,,,0,couchdb2,
 couchdb.erlang.os_proc_count,gauge,,,,,0,couchdb2,
 couchdb.erlang.garbage_collection_count,gauge,,,,,0,couchdb2,
 couchdb.erlang.process_count,gauge,,,,,0,couchdb2,
+couchdb.active_tasks.replication.doc_write_failures,gauge,,error,,,-1,couchdb2,failed docs written while replicating
+couchdb.active_tasks.replication.docs_read,gauge,,document,,,0,couchdb2, docs read while replicating
+couchdb.active_tasks.replication.docs_written,gauge,,document,,,0,couchdb2, docs written while replicating
+couchdb.active_tasks.replication.missing_revisions_found,gauge,,,,,0,couchdb2, missing revisions
+couchdb.active_tasks.replication.revisions_checked,gauge,,,,,1,couchdb2, successfully checked revisions
+couchdb.active_tasks.replication.changes_pending,gauge,,document,,,-1,couchdb2, changes yet to be processed
+couchdb.active_tasks.replication.count,gauge,,resource,,,0,couchdb2,number of replications
+couchdb.active_tasks.db_compaction.changes_done,gauge,,document,,,0,couchdb2, changes currently compacted
+couchdb.active_tasks.db_compaction.progress,gauge,,percent,,,0,couchdb2, progress of the compaction process
+couchdb.active_tasks.db_compaction.total_changes,gauge,,document,,,0,couchdb2,number of changes this compaction will process
+couchdb.active_tasks.db_compaction.count,gauge,,resource,,,0,couchdb2,number of running compactions
+couchdb.active_tasks.indexer.total_changes,gauge,,document,,,0,couchdb2,number of changes to be indexed
+couchdb.active_tasks.indexer.changes_done,gauge,,document,,,0,couchdb2,number of already indexed changes
+couchdb.active_tasks.indexer.progress,gauge,,percent,,,0,couchdb2,progress of the indexing process
+couchdb.active_tasks.indexer.count,gauge,,resource,,,0,couchdb2,number of indexing processes
+couchdb.active_tasks.view_compaction.progress,gauge,,percent,,,0,couchdb2,progress of the view compaction
+couchdb.active_tasks.view_compaction.count,gauge,,resource,,,0,couchdb2,number of running view compactions

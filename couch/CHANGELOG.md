@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+2.2.0 / UNRELEASED
+=================
+
+### Changes
+
+* [FEATURE] collects CouchDB active tasks stats. See [#812][] (Thanks [@calonso][])
+
 2.1.0 / 2017-11-21
 =================
 
@@ -34,4 +41,5 @@
 [#793]: https://github.com/DataDog/integrations-core/issues/793
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [@bernharduw]: https://github.com/bernharduw
+[#812]: https://github.com/DataDog/integrations-core/pull/812
 [@calonso]: https://github.com/calonso
