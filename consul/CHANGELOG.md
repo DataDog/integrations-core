@@ -1,5 +1,11 @@
 # CHANGELOG - consul
 
+1.3.0 / Unreleased
+==================
+
+* [IMPROVEMENT] Add support for Consul 1.0. See [#876][], thanks [@byronwolfman][]
+
+
 1.2.0 2017-11-21
 ==================
 
@@ -24,3 +30,5 @@
 [#460]: https://github.com/DataDog/integrations-core/issues/460
 [#521]: https://github.com/DataDog/integrations-core/issues/521
 [#860]: https://github.com/DataDog/integrations-core/issues/860
+[#876]: https://github.com/DataDog/integrations-core/pull/876
+[@byronwolfman]: https://github.com/byronwolfman
