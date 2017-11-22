@@ -249,7 +249,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -265,12 +265,12 @@ class SNMPTestCase(AgentCheckTest):
         config = {
             'instances': [self.generate_instance_config(self.PLAY_WITH_GET_NEXT_METRICS)]
         }
-        self.run_check_twice(config)
+        self.run_check_n(config, repeat=3)
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.run_check(config)
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
@@ -302,8 +302,7 @@ class SNMPTestCase(AgentCheckTest):
             self.assertMetric(metric_name, tags=self.CHECK_TAGS, count=1)
 
         # Test service check
-        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK, tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -329,7 +328,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -374,7 +373,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -419,7 +418,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -464,7 +463,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -509,7 +508,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
@@ -555,7 +554,7 @@ class SNMPTestCase(AgentCheckTest):
 
         # # Test service check
         self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+                                tags=self.CHECK_TAGS, at_least=1)
         self.coverage_report()
 
     def test_invalid_forcedtype_metric(self):
@@ -594,8 +593,7 @@ class SNMPTestCase(AgentCheckTest):
             tags = self.CHECK_TAGS + metric.get('metric_tags')
             self.assertMetric(metric_name, tags=tags, count=1)
         # Test service check
-        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK,
-                                tags=self.CHECK_TAGS, count=1)
+        self.assertServiceCheck("snmp.can_check", status=AgentCheck.OK, tags=self.CHECK_TAGS, at_least=1)
 
         self.coverage_report()
 
