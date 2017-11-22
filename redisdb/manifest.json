@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "min_agent_version": "5.20.0",
   "name": "redisdb",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
@@ -15,6 +15,7 @@
   "max_agent_version": "6.0.0",
   "public_title": "Datadog-RedisDB Integration",
   "categories":["data store", "caching"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/redisdb/",
   "is_public": true,
   "has_logo": true

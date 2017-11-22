@@ -85,6 +85,10 @@ PROJECT_METRICS = dict([
     ("totalRAMUsed", "total_ram_used"),
 ])
 
+DIAGNOSTICABLE_STATES = [
+    'ACTIVE'
+]
+
 class OpenStackAuthFailure(Exception):
     pass
 
@@ -655,16 +659,24 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
-        url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
+        url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
-        server_stats = {}
-
+        state = None
         try:
-            server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:
-            self.warning("Server %s is powered off and cannot be monitored" % server_id)
+            server_details = self._make_request_with_auth_fallback(url, headers)
+            state = server_details['server'].get('status')
         except Exception as e:
-            self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
+            self.warning("Unable to collect details for server %s : %s" % (server_id, e))
+
+        server_stats = {}
+        if state and state.upper() in DIAGNOSTICABLE_STATES:
+            url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
+            try:
+                server_stats = self._make_request_with_auth_fallback(url, headers)
+            except InstancePowerOffFailure:
+                self.warning("Server %s is powered off and cannot be monitored" % server_id)
+            except Exception as e:
+                self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
 
         if server_stats:
             tags = tags or []

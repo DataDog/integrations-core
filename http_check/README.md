@@ -39,6 +39,7 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 
 | Setting | Description |
 |---|---|
+| `name` | The name associated with this instance/URL. This will be presented as a tag on the Service Checks and Metrics. Note: This name tag will have any spaces or dashes converted to underscores. |
 | `url` | The URL to test. |
 | `timeout` | The time in seconds to allow for a response. |
 | `method` | The HTTP method. This setting defaults to GET, though many other HTTP methods are supported, including POST and PUT. |

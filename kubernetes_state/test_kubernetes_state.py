@@ -11,7 +11,6 @@ from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
 
-
 class TestKubernetesState(AgentCheckTest):
 
     CHECK_NAME = 'kubernetes_state'
@@ -24,6 +23,8 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.node.cpu_allocatable',
         NAMESPACE + '.node.memory_allocatable',
         NAMESPACE + '.node.pods_allocatable',
+        NAMESPACE + '.node.gpu.cards_capacity',
+        NAMESPACE + '.node.gpu.cards_allocatable',
         # deployments
         NAMESPACE + '.deployment.replicas',
         NAMESPACE + '.deployment.replicas_available',
@@ -48,17 +49,23 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.container.ready',
         NAMESPACE + '.container.running',
         NAMESPACE + '.container.terminated',
+        NAMESPACE + '.container.status_report.count.terminated',
         NAMESPACE + '.container.waiting',
+        NAMESPACE + '.container.status_report.count.waiting',
         NAMESPACE + '.container.restarts',
         NAMESPACE + '.container.cpu_requested',
         NAMESPACE + '.container.memory_requested',
         NAMESPACE + '.container.cpu_limit',
         NAMESPACE + '.container.memory_limit',
+        NAMESPACE + '.container.gpu.request',
+        NAMESPACE + '.container.gpu.limit',
         # replicasets
         NAMESPACE + '.replicaset.replicas',
         NAMESPACE + '.replicaset.fully_labeled_replicas',
         NAMESPACE + '.replicaset.replicas_ready',
         NAMESPACE + '.replicaset.replicas_desired',
+        # persistentvolume claim
+        NAMESPACE + '.persistentvolumeclaim.status',
     ]
 
     ZERO_METRICS = [
@@ -78,9 +85,9 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf1.x.x.bin')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
+            mock_poll.return_value = ('text/plain', f.read())
 
         config = {
             'instances': [{
@@ -96,11 +103,11 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.memory_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.succeeded', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.failed', self.check.CRITICAL)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.unknown', self.check.UNKNOWN)
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:task-pv-pod']) # Running
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,tags=['namespace:default','pod:failingtest-f585bbd4-2fsml']) # Pending
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:hello-1509998340-k4f8q']) # Succeeded
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,tags=['namespace:default','pod:should-run-once']) # Failed
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,tags=['namespace:default','pod:hello-1509998460-tzh8k']) # Unknown
 
         for metric in self.METRICS:
             self.assertMetric(metric)
@@ -111,9 +118,9 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics_v040(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('application/vnd.google.protobuf', f.read())
+            mock_poll.return_value = ('text/plain', f.read())
 
         config = {
             'instances': [{
@@ -126,8 +133,6 @@ class TestKubernetesState(AgentCheckTest):
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.running', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase.pending', self.check.WARNING)
 
 
         for metric in self.METRICS:

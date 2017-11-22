@@ -13,6 +13,7 @@ from nose.plugins.attrib import attr
 # project
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
+from tests.checks.common import load_check
 from utils.dockerutil import DockerUtil
 
 log = logging.getLogger('tests')
@@ -600,6 +601,43 @@ class TestCheckDockerDaemon(AgentCheckTest):
         for mname, tags in expected_metrics:
             self.assertMetric(mname, tags=tags, count=1, at_least=1)
 
+    def test_collect_labels_as_tags(self):
+        expected_metrics = [
+            ('docker.containers.stopped.total', None),
+            ('docker.containers.running.total', None),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.limit', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.in_use', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+        ]
+
+        config = {
+            "init_config": {},
+            "instances": [{
+                "url": "unix://var/run/docker.sock",
+            },
+            ],
+        }
+
+        DockerUtil._drop()
+        DockerUtil(init_config=config['init_config'], instance=config['instances'][0])
+
+        self.agentConfig = {
+            'docker_labels_as_tags': 'label1'
+        }
+        self.check = load_check('docker_daemon', config, self.agentConfig)
+
+        self.check.check(config)
+        self.metrics = self.check.get_metrics()
+        for mname, tags in expected_metrics:
+            self.assertMetric(mname, tags=tags, count=1, at_least=1)
+
     def test_histogram(self):
 
         metric_suffix = ["count", "avg", "median", "max", "95percentile"]
@@ -853,7 +891,9 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 return {'user': 1000 * self.run, 'system': 1000 * self.run}
                 self.run += 1
             elif 'memory.soft_limit_in_bytes' in stat_file:
-                return dict({'softlimit': int(fp.read())})
+                    value = int(fp.read())
+                    if value < 2 ** 60:
+                        return dict({'softlimit': value})
             else:
                 return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
 

@@ -18,8 +18,9 @@ instances:
 #                   return the counter of all the processes that contain the string
 #    pid: STRING. A Process id.
 #    pid_file: STRING. A Pid file.
-#    exact_match: (optional) Boolean. Default to True, if you want to look for an arbitrary
-#                 string only use search_string, use exact_match: False
+#    exact_match: (optional) Boolean. Default value of True matches your search_string on proc.name().
+#                 If you want to match on a substring within proc.cmdline(), set this to False
+#                 https://help.datadoghq.com/hc/en-us/articles/204116909-I-have-issues-with-my-process-check-it-doesn-t-find-my-processes-
 #    ignore_denied_access: (optional) Boolean. Default to True, when getting the number of files descriptors, dd-agent user might
 #    get a denied access. Set this to true to not issue a warning if that happens.
 #    thresholds: (optional) Two ranges: critical and warning
@@ -29,7 +30,7 @@ instances:
 #                   above the second one, the process check will return CRITICAL.
 #     In this example, process check will return OK for 3 to 5 process. WARNING for 1, 2, 6, 7 processes and Critical below 1 or above 7.
 #     CRITICAL is always dominant in case of overlapping.
-#    collect_children: BOOLEAN. If true, the check will also collect metrics from all child processes of a matched process. Default to false. 
+#    collect_children: BOOLEAN. If true, the check will also collect metrics from all child processes of a matched process. Default to false.
 #                      Please be aware that the collection is recursive, and might take some time depending on the use case.
 #
 # Examples:
