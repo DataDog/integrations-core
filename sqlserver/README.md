@@ -1,5 +1,5 @@
 # Microsoft SQL Server Check
-{{< img src="integrations/sql_server/sql_server_graph.png" alt="sql server graph" responsive="true" >}}
+{{< img src="integrations/sql_server/sql_server_graph.png" alt="sql server graph" responsive="true" popup="true">}}
 ## Overview
 
 This check lets you track the performance of your SQL Server instances. It collects metrics for number of user connections, rate of SQL compilations, and more.

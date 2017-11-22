@@ -1,5 +1,5 @@
 # Agent Check: Hadoop YARN
-{{< img src="integrations/yarn/yarndashboard.png" alt="Hadoop Yarn" responsive="true" >}}
+{{< img src="integrations/yarn/yarndashboard.png" alt="Hadoop Yarn" responsive="true" popup="true">}}
 ## Overview
 
 This check collects metrics from your YARN ResourceManager, including:

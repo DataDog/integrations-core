@@ -1,5 +1,5 @@
 # Btrfs Integration
-{{< img src="integrations/btrfs/btrfs_metric.png" alt="btrfs metric" responsive="true" >}}
+{{< img src="integrations/btrfs/btrfs_metric.png" alt="btrfs metric" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from btrfs service in real time to:

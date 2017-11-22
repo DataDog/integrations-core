@@ -1,5 +1,5 @@
 # Go Expvar Integration
-{{< img src="integrations/goexpvar/go_graph.png" alt="Go Graph" responsive="true" >}}
+{{< img src="integrations/goexpvar/go_graph.png" alt="Go Graph" responsive="true" popup="true">}}
 ## Overview
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.

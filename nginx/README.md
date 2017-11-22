@@ -1,5 +1,5 @@
 # NGINX check
-{{< img src="integrations/nginx/nginx.jpg" alt="NGINX default dashboard" responsive="true" >}}
+{{< img src="integrations/nginx/nginx.jpg" alt="NGINX default dashboard" responsive="true" popup="true">}}
 
 ## Overview
 

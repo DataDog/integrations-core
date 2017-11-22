@@ -1,5 +1,5 @@
 # Agent Check: VMWare vSphere
-{{< img src="integrations/vmware/vsphere_graph.png" alt="vsphere graph" responsive="true" >}}
+{{< img src="integrations/vmware/vsphere_graph.png" alt="vsphere graph" responsive="true" popup="true">}}
 ## Overview
 
 This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.

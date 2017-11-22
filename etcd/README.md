@@ -1,5 +1,5 @@
 # Etcd Integration
-{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" >}}
+{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" popup="true">}}
 ## Overview
 
 Collect etcd metrics to:

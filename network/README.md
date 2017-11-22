@@ -1,5 +1,5 @@
 # Network check
-{{< img src="integrations/network/netdashboard.png" alt="Network Dashboard" responsive="true" >}}
+{{< img src="integrations/network/netdashboard.png" alt="Network Dashboard" responsive="true" popup="true">}}
 ## Overview
 
 The network check collects TCP/IP stats from the host operating system.

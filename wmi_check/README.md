@@ -1,5 +1,5 @@
 # Wmi_check Integration
-{{< img src="integrations/wmi/wmimetric.png" alt="WMI Metric" responsive="true" >}}
+{{< img src="integrations/wmi/wmimetric.png" alt="WMI Metric" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from your Windows applications/servers with Windows Management Instrumentation (WMI) in real time to

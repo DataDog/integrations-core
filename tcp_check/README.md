@@ -1,5 +1,5 @@
 # Agent Check: TCP connectivity
-{{< img src="integrations/tcpcheck/netgraphs.png" alt="Network Graphs" responsive="true" >}}
+{{< img src="integrations/tcpcheck/netgraphs.png" alt="Network Graphs" responsive="true" popup="true">}}
 ## Overview
 
 Monitor TCP connectivity and response time for any host and port.

@@ -1,5 +1,5 @@
 # Spark Check
-{{< img src="integrations/spark/sparkgraph.png" alt="spark graph" responsive="true" >}}
+{{< img src="integrations/spark/sparkgraph.png" alt="spark graph" responsive="true" popup="true">}}
 ## Overview
 
 The Spark check collects metrics for:

@@ -1,5 +1,5 @@
 # Couchbase Integration
-{{< img src="integrations/couchbase/couchbase_graph.png" alt="couchbase graph" responsive="true" >}}
+{{< img src="integrations/couchbase/couchbase_graph.png" alt="couchbase graph" responsive="true" popup="true">}}
 ## Overview
 
 Identify busy buckets, track cache miss ratios, and more. This Agent check collects metrics like:

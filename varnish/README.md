@@ -1,5 +1,5 @@
 # Agent Check: Varnish
-{{< img src="integrations/varnish/varnish.png" alt="Varnish default dashboard" responsive="true" >}}
+{{< img src="integrations/varnish/varnish.png" alt="Varnish default dashboard" responsive="true" popup="true">}}
 ## Overview
 
 This check collects varnish metrics regarding:
