@@ -470,6 +470,8 @@ class ProcessCheck(AgentCheck):
                 if proc.username() == user:
                     self.log.debug("Collecting pid %s belonging to %s", pid, user)
                     filtered_pids.add(pid)
+                else:
+                    self.log.debug("Discarding pid %s not belonging to %s", pid, user)
             except psutil.NoSuchProcess:
                 pass
 
