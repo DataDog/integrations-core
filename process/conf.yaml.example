@@ -32,6 +32,7 @@ instances:
 #     CRITICAL is always dominant in case of overlapping.
 #    collect_children: BOOLEAN. If true, the check will also collect metrics from all child processes of a matched process. Default to false.
 #                      Please be aware that the collection is recursive, and might take some time depending on the use case.
+#    user: STRING. Only report processes belonging to a specific user.
 #
 # Examples:
 #
