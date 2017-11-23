@@ -62,6 +62,7 @@ QUEUE_ATTRIBUTES = [
 
 NODE_ATTRIBUTES = [
     ('fd_used', 'fd_used', float),
+    ('disk_free', 'disk_free', float),
     ('mem_used', 'mem_used', float),
     ('run_queue', 'run_queue', float),
     ('sockets_used', 'sockets_used', float),
