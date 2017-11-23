@@ -1,5 +1,12 @@
 # CHANGELOG - elastic
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] get rid of pretty json. See [#893][].
+
 1.2.0 / 2017-11-21
 ==================
 ### Changes
@@ -35,3 +42,4 @@
 [#806]: https://github.com/DataDog/integrations-core/issues/806
 [#820]: https://github.com/DataDog/integrations-core/issues/820
 [#860]: https://github.com/DataDog/integrations-core/issues/860
+[#893]: https://github.com/DataDog/integrations-core/pull/893
