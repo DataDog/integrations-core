@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.1 / Unelreased 
+==================
+
+### Changes
+
+* [BUGFIX] Use instance key to retrieve cached kafka_client, See #900
+
 1.2.0 / 2017-11-21
 ==================
 
