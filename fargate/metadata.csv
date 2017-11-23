@@ -1,0 +1,24 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+fargate.io.ops.write,rate,,,,# write operations to the disk,0,fargate,io write count
+fargate.io.bytes.write,rate,,byte,,# bytes written to the disk,0,fargate,io write
+fargate.io.ops.read,rate,,,,# read operation on the disk,0,fargate,io read count
+fargate.io.bytes.read,rate,,byte,,# bytes read on the disk,0,fargate,io read
+fargate.cpu.user,rate,,nanosecond,,cpu time spent in ns,-1,fargate,cpu user
+fargate.cpu.system,rate,,nanosecond,,cpu system time in ns,0,fargate,cpu system
+fargate.cpu.limit,gauge,,percent,,Limit in percent of the CPU usage,0,fargate,cpu limit
+fargate.cpu.percent,gauge,,percent,,Percentage of CPU used,-1,fargate,cpu percent
+fargate.mem.cache,gauge,,byte,,# of bytes of page cache memory,0,fargate,mem cache
+fargate.mem.active_file,gauge,,byte,,# of bytes of file-backed memory on active LRU list,0,fargate,mem active file
+fargate.mem.inactive_file,gauge,,byte,,# of bytes of file-backed memory on inactive LRU list,0,fargate,mem inactive file
+fargate.mem.limit,gauge,,byte,,# of bytes memory limit,0,fargate,mem limit
+fargate.mem.active_anon,gauge,,byte,,# of bytes of anonymous and swap cache memory on active LRU list,0,fargate,mem active anon
+fargate.mem.usage,gauge,,byte,,# of bytes of memory used,-1,fargate,mem usage
+fargate.mem.rss,gauge,,byte,,# of bytes of anonymous and swap cache memory (includes transparent hugepages),0,fargate,mem rss
+fargate.mem.pgpgout,rate,,,second,# of uncharging events to the memory cgroup. The uncharging event happens each time a page is unaccounted from the cgroup,0,fargate,mem pgpgout
+fargate.mem.pgpgin,rate,,,second,# of charging events to the memory cgroup. The charging event happens each time a page is accounted as either mapped anon page(RSS) or cache page(Page Cache) to the cgroup.,0,fargate,mem pgpgin
+fargate.mem.pgfault,rate,,,second,# of page faults per second,0,fargate,mem pgfault
+fargate.mem.pgmajfault,rate,,,second,# of major page faults per second,0,fargate,mem pgmajfault
+fargate.mem.mapped_file,gauge,,byte,,# of bytes of mapped file (includes tmpfs/shmem),0,fargate,mem mapped file
+fargate.mem.max_usage,gauge,,byte,,show max memory usage recorded,0,fargate,mem max usage
+fargate.mem.hierarchical_memory_limit,gauge,,byte,,# of bytes of memory limit with regard to hierarchy under which the memory cgroup is,0,fargate,mem hierarchical limit
+fargate.mem.hierarchical_memsw_limit,gauge,,byte,,# of bytes of memory+swap limit with regard to hierarchy under which memory cgroup is,0,fargate,mem hierarchical mem swap limit
