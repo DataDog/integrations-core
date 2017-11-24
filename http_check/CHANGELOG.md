@@ -1,5 +1,12 @@
 # CHANGELOG - http_check
 
+1.3.0 / UNRELEASED
+==================
+
+### Changes
+
+* [FEATURE] Add configurable ssl_hostaname. See[#905][].
+
 1.2.0 / 2017-10-10
 ==================
 
@@ -45,3 +52,4 @@
 [#688]: https://github.com/DataDog/integrations-core/issues/688
 [#758]: https://github.com/DataDog/integrations-core/issues/758
 [@xkrt]: https://github.com/xkrt
+[#905]:https://github.com/DataDog/integrations-core/pull/905
