@@ -44,11 +44,25 @@ namespace :ci do
         raise 'RabbitMQ failed to come up'
       end
 
+      %w(myvhost myothervhost).each do |vhost|
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare vhost name=#{vhost})
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare permission vhost=#{vhost} user=guest write=.* read=.* configure=.*)
+      end
+
       %w(test1 test5 tralala).each do |q|
         sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare queue name=#{q})
         sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=amq.default routing_key=#{q} payload="hello, world")
       end
+
+      %w(test1 test5 tralala testaaaaa bbbbbb).each do |q|
+        %w(myvhost myothervhost).each do |vhost|
+          sh %(curl localhost:15672/cli/rabbitmqadmin | python - --vhost=#{vhost} declare queue name=#{q})
+          sh %(curl localhost:15672/cli/rabbitmqadmin | python - --vhost=#{vhost} publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        end
+      end
+
       sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
+      sh %(curl localhost:15672/cli/rabbitmqadmin | python - list vhosts)
 
       # leave time for rabbitmq to update the management information
       sleep_for 2
@@ -71,8 +85,10 @@ namespace :ci do
     task :execute do
       exception = nil
       begin
-        %w(before_install install before_script).each do |u|
-          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+        if !ENV['SKIP_SETUP']
+          %w(before_install install before_script).each do |u|
+            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
+          end
         end
         if !ENV['SKIP_TEST']
           Rake::Task["#{flavor.scope.path}:script"].invoke

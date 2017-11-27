@@ -174,14 +174,15 @@ class RabbitMQ(AgentCheck):
     def check(self, instance):
         base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
-            # Generate metrics from the status API.
-            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], custom_tags,
-                           auth=auth, ssl_verify=ssl_verify)
-            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], custom_tags,
-                           auth=auth, ssl_verify=ssl_verify)
-
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
             self.cached_vhosts[base_url] = vhosts
+
+            # Generate metrics from the status API.
+            self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], vhosts,
+                           custom_tags, auth=auth, ssl_verify=ssl_verify)
+            self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], vhosts,
+                           custom_tags, auth=auth, ssl_verify=ssl_verify)
+
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
 
@@ -267,7 +268,7 @@ class RabbitMQ(AgentCheck):
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -276,13 +277,24 @@ class RabbitMQ(AgentCheck):
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
         instance_proxy = self.get_instance_proxy(instance, base_url)
-        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
-                              ssl_verify=ssl_verify, proxies=instance_proxy)
-
         # Make a copy of this list as we will remove items from it at each
         # iteration
         explicit_filters = list(filters['explicit'])
         regex_filters = filters['regexes']
+
+        data = []
+
+        if len(limit_vhosts) and object_type == QUEUE_TYPE:
+            for vhost in limit_vhosts:
+                url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
+                try:
+                    data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                    ssl_verify=ssl_verify, proxies=instance_proxy)
+                except Exception as e:
+                    self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
+        else:
+            data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+                              ssl_verify=ssl_verify, proxies=instance_proxy)
 
         """ data is a list of nodes or queues:
         data = [
@@ -353,8 +365,25 @@ class RabbitMQ(AgentCheck):
         Collect metrics on currently open connection per vhost.
         """
         instance_proxy = self.get_instance_proxy(instance, base_url)
-        data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
-                              ssl_verify=ssl_verify, proxies=instance_proxy)
+
+        grab_all_data = True
+
+        if len(vhosts):
+            grab_all_data = False
+            data = []
+            for vhost in vhosts:
+                url = "vhosts/{}/{}".format(urllib.quote_plus(vhost), object_type)
+                try:
+                    data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                                          ssl_verify=ssl_verify, proxies=instance_proxy)
+                except Exception as e:
+                    # This will happen if there is no connection data to grab
+                    self.log.debug("Couldn't grab connection data from vhost, {}: {}".format(vhost, e))
+
+        # sometimes it seems to need to fall back to this
+        if grab_all_data or not len(data):
+            data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
+                                  ssl_verify=ssl_verify, proxies=instance_proxy)
 
         stats = {vhost: 0 for vhost in vhosts}
         connection_states = defaultdict(int)
