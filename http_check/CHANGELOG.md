@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] Add configurable ssl_hostaname. See[#905][].
+* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
 
 1.2.0 / 2017-10-10
 ==================

@@ -96,9 +96,9 @@ instances:
     # warning if the certificate is y days from the expiration date.
     # The SSL certificate will always be validated for this additional
     # service check regardless of the value of disable_ssl_validation.
-    # The Agent uses hostname by default to validate the SSL cert, but if
-    # necessary this can be overridden.
-    #
+    # By default, for the expiration check, the Agent validates the SSL certificate
+    # hostname against the host of the provided url. If necessary, you can override
+    # that hostname with ssl_server_name.
     # check_certificate_expiration: true
     # days_warning: 14
     # days_critical: 7
