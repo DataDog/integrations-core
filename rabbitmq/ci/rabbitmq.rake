@@ -8,6 +8,14 @@ def rabbitmq_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/rabbitmq_#{rabbitmq_version}"
 end
 
+def rabbitmq_tempdir
+  File.join(__dir__, 'tmp')
+end
+
+def rabbitmq_admin_script
+  File.join(rabbitmq_tempdir, 'rabbitmqadmin')
+end
+
 container_name = 'dd-test-rabbitmq'
 container_port1 = 5672
 container_port2 = 15_672
@@ -44,25 +52,28 @@ namespace :ci do
         raise 'RabbitMQ failed to come up'
       end
 
+      mkdir_p rabbitmq_tempdir
+      sh %(curl localhost:15672/cli/rabbitmqadmin > #{rabbitmq_admin_script})
+
       %w(myvhost myothervhost).each do |vhost|
-        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare vhost name=#{vhost})
-        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare permission vhost=#{vhost} user=guest write=.* read=.* configure=.*)
+        sh %(python #{rabbitmq_admin_script} declare vhost name=#{vhost})
+        sh %(python #{rabbitmq_admin_script} declare permission vhost=#{vhost} user=guest write=.* read=.* configure=.*)
       end
 
       %w(test1 test5 tralala).each do |q|
-        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare queue name=#{q})
-        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        sh %(python #{rabbitmq_admin_script} declare queue name=#{q})
+        sh %(python #{rabbitmq_admin_script} publish exchange=amq.default routing_key=#{q} payload="hello, world")
       end
 
       %w(test1 test5 tralala testaaaaa bbbbbb).each do |q|
         %w(myvhost myothervhost).each do |vhost|
-          sh %(curl localhost:15672/cli/rabbitmqadmin | python - --vhost=#{vhost} declare queue name=#{q})
-          sh %(curl localhost:15672/cli/rabbitmqadmin | python - --vhost=#{vhost} publish exchange=amq.default routing_key=#{q} payload="hello, world")
+          sh %(python #{rabbitmq_admin_script} --vhost=#{vhost} declare queue name=#{q})
+          sh %(python #{rabbitmq_admin_script} --vhost=#{vhost} publish exchange=amq.default routing_key=#{q} payload="hello, world")
         end
       end
 
-      sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
-      sh %(curl localhost:15672/cli/rabbitmqadmin | python - list vhosts)
+      sh %(python #{rabbitmq_admin_script} list queues)
+      sh %(python #{rabbitmq_admin_script} list vhosts)
 
       # leave time for rabbitmq to update the management information
       sleep_for 2
@@ -80,15 +91,14 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup'] do
       sh %(docker kill #{container_name} 2>/dev/null || true)
       sh %(docker rm #{container_name} 2>/dev/null || true)
+      FileUtils.rm_rf rabbitmq_tempdir
     end
 
     task :execute do
       exception = nil
       begin
-        if !ENV['SKIP_SETUP']
-          %w(before_install install before_script).each do |u|
-            Rake::Task["#{flavor.scope.path}:#{u}"].invoke
-          end
+        %w(before_install install before_script).each do |u|
+          Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
         if !ENV['SKIP_TEST']
           Rake::Task["#{flavor.scope.path}:script"].invoke
