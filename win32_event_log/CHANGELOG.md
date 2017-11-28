@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds win32_event_log integration.
+

@@ -13,3 +13,4 @@
 ### Changes
 
 * [FEATURE] adds mesos_slave integration.
+

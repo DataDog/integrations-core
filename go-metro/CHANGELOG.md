@@ -6,3 +6,4 @@
 ### Changes
 
 * [BUGFIX] Restore example configurations for go-metro
+

@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds windows_service integration.
+

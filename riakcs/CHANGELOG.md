@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds riakcs integration.
+

@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds activemq_xml integration.
+
