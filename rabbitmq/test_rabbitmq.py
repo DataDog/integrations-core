@@ -252,7 +252,7 @@ class RabbitMQCheckTest(AgentCheckTest):
             self.assertMetric('rabbitmq.connections', count=2)
             self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
         except Exception as e:
-            raise
+            raise e
         finally:
             # if these are not closed it makes all the other tests fail, too
             connection1.close()
