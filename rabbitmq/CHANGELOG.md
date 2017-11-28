@@ -1,6 +1,13 @@
 # CHANGELOG - rabbitmq
 
 
+1.3.2 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
+
 1.3.1 / 2017-10-10
 ==================
 
