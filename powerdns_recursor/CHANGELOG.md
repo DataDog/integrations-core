@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds powerdns_recursor integration.
+

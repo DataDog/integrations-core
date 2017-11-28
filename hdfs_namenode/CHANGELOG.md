@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds hdfs_namenode integration.
+

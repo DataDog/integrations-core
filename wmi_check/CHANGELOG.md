@@ -6,3 +6,4 @@
 ### Changes
 
 * [FEATURE] adds wmi_check integration.
+
