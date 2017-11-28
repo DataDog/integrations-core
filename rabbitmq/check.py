@@ -268,7 +268,7 @@ class RabbitMQ(AgentCheck):
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -284,8 +284,10 @@ class RabbitMQ(AgentCheck):
 
         data = []
 
-        if len(limit_vhosts) and object_type == QUEUE_TYPE:
-            for vhost in limit_vhosts:
+        # only do this if vhosts were specified,
+        # otherwise it'll just be making more queries for the same data
+        if self._limit_vhosts(instance) and object_type == QUEUE_TYPE:
+            for vhost in vhosts:
                 url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
                 try:
                     data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
@@ -368,7 +370,7 @@ class RabbitMQ(AgentCheck):
 
         grab_all_data = True
 
-        if len(vhosts):
+        if self._limit_vhosts(instance):
             grab_all_data = False
             data = []
             for vhost in vhosts:
@@ -425,6 +427,15 @@ class RabbitMQ(AgentCheck):
         }
 
         self.event(event)
+
+    def _limit_vhosts(self, instance):
+        """
+        Check to see if vhosts were specified in the instance
+        it will return a boolean, True if they were.
+        This allows the check to only query the wanted vhosts.
+        """
+        vhosts = instance.get('vhosts', [])
+        return len(vhosts) > 0
 
     def _check_aliveness(self, instance, base_url, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
