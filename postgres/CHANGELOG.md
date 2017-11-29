@@ -7,6 +7,7 @@
 
 * [IMPROVEMENT] Adding an option to include the default 'postgres' database when gathering stats [#740][]
 * [BUGFIX] Allows `schema` as tag for custom metrics when no schema relations have been defined See[#776][]
+* [IMPROVEMENT] Supports new function names for Postgres 10.0 to continue collecting replication metrics [#883][]
 
 1.1.0 / 2017-08-28
 ==================
@@ -53,5 +54,6 @@
 [#699]: https://github.com/DataDog/integrations-core/issues/699
 [#740]: https://github.com/DataDog/integrations-core/issues/740
 [#776]: https://github.com/DataDog/integrations-core/issues/776
+[#883]: https://github.com/DataDog/integrations-core/issues/883
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill

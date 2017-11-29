@@ -257,6 +257,12 @@ SELECT schemaname, count(*) FROM
         'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) AS replication_delay_bytes': ('postgresql.replication_delay_bytes', GAUGE),
     }
 
+    REPLICATION_METRICS_10_0 = {
+        # admin function in PG10 were renamed to use "wal" and "lsn": https://wiki.postgresql.org/wiki/New_in_postgres_10
+        'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn())) AS replication_delay_bytes': ('postgresql.replication_delay_bytes', GAUGE),
+        'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST (0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END': ('postgresql.replication_delay', GAUGE)
+    }
+
     REPLICATION_METRICS = {
         'descriptors': [],
         'metrics': {},
@@ -388,10 +394,13 @@ SELECT s.schemaname,
     def _is_9_4_or_above(self, key, db):
         return self._is_above(key, db, [9,4,0])
 
+    def _is_10_0_or_above(self, key, db):
+        return self._is_above(key, db, [10,0,0])
+
     def _get_instance_metrics(self, key, db, database_size_metrics):
         """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
         depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         # Extended 9.2+ metrics if needed
         metrics = self.instance_metrics.get(key)
@@ -423,7 +432,7 @@ SELECT s.schemaname,
     def _get_bgw_metrics(self, key, db):
         """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
         depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         # Extended 9.2+ metrics if needed
         metrics = self.bgw_metrics.get(key)
@@ -474,16 +483,21 @@ SELECT s.schemaname,
         return metrics
 
     def _get_replication_metrics(self, key, db):
-        """ Use either REPLICATION_METRICS_9_1 or REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2
+        """ Use REPLICATION_METRICS_9_1, REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, or REPLICATION_METRICS_10_0
         depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
-        """
+        Uses a dictionary to save the result for each instance"""
         metrics = self.replication_metrics.get(key)
-        if self._is_9_1_or_above(key, db) and metrics is None:
+
+        if self._is_10_0_or_above(key, db) and metrics is None:
+            self.replication_metrics[key] = dict(self.REPLICATION_METRICS_10_0)
+            metrics = self.replication_metrics.get(key)
+
+        elif self._is_9_1_or_above(key, db) and metrics is None:
             self.replication_metrics[key] = dict(self.REPLICATION_METRICS_9_1)
             if self._is_9_2_or_above(key, db):
                 self.replication_metrics[key].update(self.REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics.get(key)
+
         return metrics
 
     def _build_relations_config(self, yamlconfig):
