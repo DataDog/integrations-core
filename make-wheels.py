@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 
 '''
@@ -8,15 +8,18 @@ Description: A simple Python script to build and test wheels.
 '''
 
 
+from __future__ import print_function
+
+
+import glob
 import os
+import shlex
 import subprocess
 
 
 def main():
-    # Get non-hidden directories.
-    dirs = sorted(name for name in os.listdir('.') \
-                  if os.path.isdir(name) \
-                  and not name.startswith('.'))
+    # Get only directories for which there is a "setup.py."
+    dirs = sorted(os.path.dirname(d) for d in glob.glob('./**/setup.py'))
     # Get the current working directory.
     pwd = os.getcwd()
 
@@ -26,26 +29,21 @@ def main():
         nwd = os.path.join(pwd, name)
         # Change to the next working directory.
         os.chdir(nwd)
+        print('Trying to build {}...'.format(name))
+        # https://packaging.python.org/tutorials/distributing-packages/#wheels
+        cmd = shlex.split('python setup.py bdist_wheel')
 
-        # If the next working directory has 'setup.py', then we can build.
-        if os.path.isfile('setup.py'):
-            print('Trying to build {}...'.format(name), end='')
-            # https://packaging.python.org/tutorials/distributing-packages/#wheels
-            cmd = 'python setup.py bdist_wheel'.split()
-
-            # Try building.
-            try:
-                proc = subprocess.run(cmd, check=True, stdout=subprocess.PIPE,
-                                      universal_newlines=True)
-            # If something went wrong, raise an exception.
-            except:
-                print(proc.stderr)
-                raise
-            # Otherwise, check that all went well, and print output.
-            else:
-                proc.check_returncode()
-                print(proc.stdout)
-                print()
+        # Try building.
+        try:
+            stdout = subprocess.check_output(cmd, stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
+        # If something went wrong, reraise the exception.
+        except:
+            raise
+        # In any case, print stdout+stderr.
+        else:
+            print(stdout)
+            print()
 
 
 if __name__ == '__main__':
