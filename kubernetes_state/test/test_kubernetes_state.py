@@ -107,7 +107,7 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
         with open(f_name, 'rb') as f:
             mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
@@ -145,7 +145,7 @@ class TestKubernetesState(AgentCheckTest):
 
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__update_kube_state_metrics_v040(self, mock_poll):
-        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'protobuf.bin')
         with open(f_name, 'rb') as f:
             mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
