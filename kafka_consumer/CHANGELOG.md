@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.1 / Unreleased 
+==================
+
+### Changes
+
+* [BUGFIX] Use instance key to retrieve cached kafka_client, See [#904][]
+
 1.2.0 / 2017-11-21
 ==================
 
@@ -49,4 +56,5 @@
 [#684]: https://github.com/DataDog/integrations-core/issues/684
 [#733]: https://github.com/DataDog/integrations-core/issues/733
 [#753]: https://github.com/DataDog/integrations-core/issues/753
+[#904]: https://github.com/DataDog/integrations-core/issues/904
 [@jeffwidman]: https://github.com/jeffwidman

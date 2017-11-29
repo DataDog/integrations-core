@@ -139,6 +139,27 @@ CONFIG_EXPIRED_SSL = {
     ]
 }
 
+CONFIG_CUSTOM_NAME = {
+    'instances': [{
+        'name': 'cert_validation_fails',
+        'url': 'https://github.com:443',
+        'timeout': 1,
+        'check_certificate_expiration': True,
+        'days_warning': 14,
+        'days_critical': 7,
+        'ssl_server_name': 'incorrect_name'
+    }, {
+        'name': 'cert_validation_passes',
+        'url': 'https://github.com:443',
+        'timeout': 1,
+        'check_certificate_expiration': True,
+        'days_warning': 14,
+        'days_critical': 7,
+        'ssl_server_name': 'github.com'
+    }
+    ],
+}
+
 CONFIG_UNORMALIZED_INSTANCE_NAME = {
     'instances': [{
         'name': '_need-to__be_normalized-',
@@ -301,6 +322,21 @@ class HTTPCheckTest(AgentCheckTest):
         tags = ['url:https://github.com', 'instance:expired_cert']
         self.assertServiceCheckOK("http.can_connect", tags=tags)
         self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
+
+        self.coverage_report()
+
+    def test_check_hostname_override(self):
+        self.run_check(CONFIG_CUSTOM_NAME)
+
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 4, RESULTS_TIMEOUT)
+
+        tags = ['url:https://github.com:443', 'instance:cert_validation_fails']
+        self.assertServiceCheckOK("http.can_connect", tags=tags)
+        self.assertServiceCheckCritical("http.ssl_cert", tags=tags)
+
+        tags = ['url:https://github.com:443', 'instance:cert_validation_passes']
+        self.assertServiceCheckOK("http.can_connect", tags=tags)
+        self.assertServiceCheckOK("http.ssl_cert", tags=tags)
 
         self.coverage_report()
 
