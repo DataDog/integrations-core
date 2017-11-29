@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
 
-'''
-Author: Trishank Karthik Kuppusamy <trishank.kuppusamy@datadoghq.com>
-Date: Nov 27 2017
-Description: A simple Python script to build and test wheels.
-'''
+# (C) Datadog, Inc. 2017
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
 
 
 from __future__ import print_function
