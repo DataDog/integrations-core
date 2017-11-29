@@ -547,7 +547,7 @@ kube_pod_status_phase{namespace="default",phase="Running",pod="task-pv-pod"} 1
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="failingtest-f585bbd4-2fsml"} 0
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="hello-1509998340-k4f8q"} 1
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="hello-1509998400-rb8bs"} 1
-kube_pod_status_phase{namespace="default",phase="Succeeded",pod="hello-1509998460-tzh8k"} 1
+kube_pod_status_phase{namespace="default",phase="Succeeded",pod="hello-1509998460-tzh8k"} 0
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="jaundiced-numbat-dd-k8state-b6s77"} 0
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj"} 0
 kube_pod_status_phase{namespace="default",phase="Succeeded",pod="nxf-126"} 0
@@ -556,7 +556,7 @@ kube_pod_status_phase{namespace="default",phase="Succeeded",pod="task-pv-pod"} 0
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="failingtest-f585bbd4-2fsml"} 0
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="hello-1509998340-k4f8q"} 0
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="hello-1509998400-rb8bs"} 0
-kube_pod_status_phase{namespace="default",phase="Unknown",pod="hello-1509998460-tzh8k"} 0
+kube_pod_status_phase{namespace="default",phase="Unknown",pod="hello-1509998460-tzh8k"} 1
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="jaundiced-numbat-dd-k8state-b6s77"} 0
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj"} 0
 kube_pod_status_phase{namespace="default",phase="Unknown",pod="nxf-126"} 0

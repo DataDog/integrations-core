@@ -155,7 +155,17 @@ class KafkaCheck(AgentCheck):
             cli.close()
 
     def _get_instance_key(self, instance):
-        return self._read_config(instance, 'kafka_connect_str')
+        servers = self._read_config(instance, 'kafka_connect_str')
+        key = None
+        if isinstance(servers, basestring):
+            key = servers
+        elif isinstance(servers, list):
+            key = ",".join(servers)
+        else:
+            raise BadKafkaConsumerConfiguration('kafka_connect_str should be string or list of strings')
+
+        return key
+
 
     def _get_kafka_client(self, instance):
         kafka_conn_str = self._read_config(instance, 'kafka_connect_str')
@@ -163,7 +173,7 @@ class KafkaCheck(AgentCheck):
             raise BadKafkaConsumerConfiguration('Bad instance configuration')
 
         instance_key = self._get_instance_key(instance)
-        if kafka_conn_str not in self.kafka_clients:
+        if instance_key not in self.kafka_clients:
             cli = KafkaClient(bootstrap_servers=kafka_conn_str, client_id='dd-agent')
             self.kafka_clients[instance_key] = cli
 

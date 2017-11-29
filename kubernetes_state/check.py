@@ -25,11 +25,11 @@ class KubernetesState(PrometheusCheck):
         self.NAMESPACE = 'kubernetes_state'
 
         self.pod_phase_to_status = {
-            'pending':   self.WARNING,
-            'running':   self.OK,
-            'succeeded': self.OK,
-            'failed':    self.CRITICAL,
-            'unknown':   self.UNKNOWN
+            'Pending':   self.WARNING,
+            'Running':   self.OK,
+            'Succeeded': self.OK,
+            'Failed':    self.CRITICAL,
+            'Unknown':   self.UNKNOWN
         }
 
         self.condition_to_status_positive = {
@@ -222,26 +222,38 @@ class KubernetesState(PrometheusCheck):
         based on a provided condition->check mapping dict
         """
         if bool(metric.gauge.value) is False:
-            return  # Ignore if gauge is not 1
+            return  # Ignore if gauge is not 1 and we are not processing the pod phase check
+
         label_value, condition_map = self._get_metric_condition_map(base_sc_name, metric.label)
         service_check_name = condition_map['service_check_name']
         mapping = condition_map['mapping']
+
+        if base_sc_name == 'kubernetes_state.pod.phase':
+            message = "%s is currently reporting %s" % (self._label_to_tag('pod', metric.label), self._label_to_tag('phase', metric.label))
+        else:
+            message = "%s is currently reporting %s" % (self._label_to_tag('node', metric.label), self._label_to_tag('condition', metric.label))
+
         if condition_map['service_check_name'] is None:
             self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
         else:
-            self.service_check(service_check_name, mapping[label_value], tags=tags)
+            self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
             self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
 
     def _get_metric_condition_map(self, base_sc_name, labels):
-        switch = {
-            'Ready': {'service_check_name': base_sc_name + '.ready', 'mapping': self.condition_to_status_positive},
-            'OutOfDisk': {'service_check_name': base_sc_name + '.out_of_disk', 'mapping': self.condition_to_status_negative},
-            'DiskPressure': {'service_check_name': base_sc_name + '.disk_pressure', 'mapping': self.condition_to_status_negative},
-            'NetworkUnavailable': {'service_check_name': base_sc_name + '.network_unavailable', 'mapping': self.condition_to_status_negative},
-            'MemoryPressure': {'service_check_name': base_sc_name + '.memory_pressure', 'mapping': self.condition_to_status_negative}
-        }
-        label_value = self._extract_label_value('status', labels)
-        return label_value, switch.get(self._extract_label_value('condition', labels), {'service_check_name': None, 'mapping': None})
+        if base_sc_name == 'kubernetes_state.node':
+            switch = {
+                'Ready': {'service_check_name': base_sc_name + '.ready', 'mapping': self.condition_to_status_positive},
+                'OutOfDisk': {'service_check_name': base_sc_name + '.out_of_disk', 'mapping': self.condition_to_status_negative},
+                'DiskPressure': {'service_check_name': base_sc_name + '.disk_pressure', 'mapping': self.condition_to_status_negative},
+                'NetworkUnavailable': {'service_check_name': base_sc_name + '.network_unavailable', 'mapping': self.condition_to_status_negative},
+                'MemoryPressure': {'service_check_name': base_sc_name + '.memory_pressure', 'mapping': self.condition_to_status_negative}
+            }
+            label_value = self._extract_label_value('status', labels)
+            return label_value, switch.get(self._extract_label_value('condition', labels), {'service_check_name': None, 'mapping': None})
+
+        elif base_sc_name == 'kubernetes_state.pod.phase':
+            label_value = self._extract_label_value('phase', labels)
+            return label_value, {'service_check_name': base_sc_name, 'mapping': self.pod_phase_to_status}
 
     def _extract_label_value(self, name, labels):
         """
@@ -280,23 +292,17 @@ class KubernetesState(PrometheusCheck):
         pattern = "(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
-    # Labels attached: namespace, pod, phase=Pending|Running|Succeeded|Failed|Unknown
-    # The phase gets not passed through; rather, it becomes the service check suffix.
+    # Labels attached: namespace, pod
+    # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
+    # From the phase the check will update its status
     def kube_pod_status_phase(self, message, **kwargs):
         """ Phase a pod is in. """
-        check_basename = self.NAMESPACE + '.pod.phase.'
+        # Will submit a service check which status is given by its phase.
+        # More details about the phase in the message of the check.
+        check_basename = self.NAMESPACE + '.pod.phase'
         for metric in message.metric:
-            # The gauge value is always 1, no point in fetching it.
-            phase = ''
-            tags = []
-            for label in metric.label:
-                if label.name == 'phase':
-                    phase = label.value.lower()
-                else:
-                    tags.append(self._format_tag(label.name, label.value))
-            #TODO: add deployment/replicaset?
-            status = self.pod_phase_to_status.get(phase, self.UNKNOWN)
-            self.service_check(check_basename + phase, status, tags=tags)
+            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
+                                         tags=[self._label_to_tag("pod", metric.label),self._label_to_tag("namespace", metric.label)])
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'

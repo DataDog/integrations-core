@@ -1,6 +1,6 @@
 # CHANGELOG - ssh_check
 
-Unreleased
+2017-11-21
 ==========
 
 * If `ssh_check` passes and uses `None` as `exception_message`, downstream aggregator rejects it with a type error. 

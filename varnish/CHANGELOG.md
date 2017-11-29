@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-1.0.6 Unreleased
+1.0.6 2017-11-21
 ==================
 
 ### Changes
@@ -58,6 +58,6 @@ and varnishadm in order to better support service discovery. See [#498][], thank
 [#582]: https://github.com/DataDog/integrations-core/issues/582
 [#739]: https://github.com/DataDog/integrations-core/issues/739
 [#795]: https://github.com/DataDog/integrations-core/issues/795
+[#805]: https://github.com/DataDog/integrations-core/issues/805
 [@adongy]: https://github.com/adongy
 [@philipseidel]: https://github.com/philipseidel
-[#805]: https://github.com/DataDog/integrations-core/issues/805
