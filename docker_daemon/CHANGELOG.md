@@ -1,6 +1,12 @@
 # CHANGELOG - docker_daemon
 
-1.6.0 / Unreleased
+1.7.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Improve logging when cgroup metrics can't be retrieved. See [#914][]
+
+1.6.0 / 2017-11-21
 ==================
 ### Changes
 
