@@ -66,7 +66,7 @@
 [#747]: https://github.com/DataDog/integrations-core/issues/747
 [#769]: https://github.com/DataDog/integrations-core/issues/769
 [#823]: https://github.com/DataDog/integrations-core/issues/823
-[#915]: https://github.com/DataDog/integrations-core/issue/915
+[#915]: https://github.com/DataDog/integrations-core/issues/915
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
 [@hindmanj]: https://github.com/hindmanj
