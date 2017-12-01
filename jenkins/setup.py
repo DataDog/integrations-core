@@ -4,7 +4,7 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import simplejson as json
+import json
 
 here = path.abspath(path.dirname(__file__))
 
