@@ -859,10 +859,9 @@ class MySql(AgentCheck):
                         # MySQL <5.7 does not have Channel_Name
                         channel = slave_result.get('Channel_Name', 'default')
                         for key in slave_result:
-                            if key not in replica_results:
-                                replica_results[key] = {}
-
                             if slave_result[key] is not None:
+                                if key not in replica_results:
+                                    replica_results[key] = {}
                                 replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
 
                 cursor.execute("SHOW MASTER STATUS;")
