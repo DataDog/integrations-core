@@ -1,12 +1,3 @@
-# CHANGELOG - mysql
-
-1.0.1
-==================
-
-### Changes
-
-* [FEATURE] tag `mysql.replication.*` metrics with the replication channel name
-
 # CHANGELOG - activemq
 
 1.0.1 / 2017-11-21
