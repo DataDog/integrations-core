@@ -67,6 +67,8 @@ class IIS(WinWMICheck):
         instance_tags = instance.get('tags', [])
         sites = instance.get('sites', ['_Total'])
         is_2008 = _is_affirmative(instance.get('is_2008', False))
+        count_metrics = _is_affirmative(instance.get('count_metrics', False))
+        rate_metrics = _is_affirmative(instance.get('rate_metrics', True))
 
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.CLASS, instance_hash)
@@ -111,7 +113,7 @@ class IIS(WinWMICheck):
             raise e
         else:
             self._submit_events(wmi_sampler, sites)
-            self._submit_metrics(metrics, metrics_by_property)
+            self._submit_metrics(metrics, metrics_by_property, count_metrics, rate_metrics)
 
     def _extract_metrics(self, wmi_sampler, sites, instance_tags):
         """
@@ -172,7 +174,7 @@ class IIS(WinWMICheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL,
                                tags=['site:{0}'.format(self.normalize(site))])
 
-    def _submit_metrics(self, wmi_metrics, metrics_by_property):
+    def _submit_metrics(self, wmi_metrics, metrics_by_property, count_metrics, rate_metrics):
         for m in wmi_metrics:
             metric_name = m.name
             # Windows 2008 sp2 reports it as TotalbytesTransfered
@@ -183,5 +185,9 @@ class IIS(WinWMICheck):
                 continue
 
             metric, mtype = metrics_by_property[metric_name]
-            submittor = getattr(self, mtype)
-            submittor(metric, m.value, m.tags)
+            if mtype != 'rate' or rate_metrics:
+                submittor = getattr(self, mtype)
+                submittor(metric, m.value, m.tags)
+            if mtype == 'rate' and count_metrics:
+                submittor = getattr(self, 'monotonic_count')
+                submittor(metric + '_count', m.value, m.tags)
