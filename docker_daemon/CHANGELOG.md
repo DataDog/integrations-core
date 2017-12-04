@@ -5,6 +5,7 @@
 ### Changes
 
 * [FEATURE] Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881][]
+* [IMPROVEMENT] Improve logging when cgroup metrics can't be retrieved. See [#914][]
 
 1.6.0 / 2017-11-21
 ==================
