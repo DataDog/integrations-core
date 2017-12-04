@@ -186,13 +186,26 @@ class CouchDB2:
             elif type(value) is dict:
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
-
     def _build_db_metrics(self, data, tags):
         for key, value in data['sizes'].items():
             self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
 
         for key in ['purge_seq', 'doc_del_count', 'doc_count']:
             self.gauge("couchdb.by_db.{0}".format(key), data[key], tags)
+
+    def _build_dd_metrics(self, info, tags):
+        data = info['view_index']
+        ddtags = list(tags)
+        ddtags.append("design_document:{0}".format(info['name']))
+        ddtags.append("language:{0}".format(data['language']))
+
+        for key, value in data['sizes'].items():
+            self.gauge("couchdb.by_ddoc.{0}_size".format(key), value, ddtags)
+
+        for key, value in data['updates_pending'].items():
+            self.gauge("couchdb.by_ddoc.{0}_updates_pending".format(key), value, ddtags)
+
+        self.gauge("couchdb.by_ddoc.waiting_clients", data['waiting_clients'], ddtags)
 
     def _build_system_metrics(self, data, tags, prefix = 'couchdb.erlang'):
         for key, value in data.items():
@@ -280,7 +293,10 @@ class CouchDB2:
             for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
                     tags = ["instance:{0}".format(name), "db:{0}".format(db)]
-                    self._build_db_metrics(self.agent_check.get(urljoin(server, db), instance, tags), tags)
+                    db_url = urljoin(server, db)
+                    self._build_db_metrics(self.agent_check.get(db_url, instance, tags), tags)
+                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, tags)['rows']:
+                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, tags), tags)
                     scanned_dbs += 1
                     if scanned_dbs >= max_dbs_per_check:
                         break
