@@ -1,6 +1,6 @@
 # CHANGELOG - mongo
 
-1.5.0 / Unreleased
+1.5.1 / Unreleased
 ==================
 ### Changes
 
