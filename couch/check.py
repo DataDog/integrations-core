@@ -196,16 +196,16 @@ class CouchDB2:
     def _build_dd_metrics(self, info, tags):
         data = info['view_index']
         ddtags = list(tags)
-        ddtags.append("dd:{0}".format(info['name']))
+        ddtags.append("design_document:{0}".format(info['name']))
         ddtags.append("language:{0}".format(data['language']))
 
         for key, value in data['sizes'].items():
-            self.gauge("couchdb.by_dd.{0}_size".format(key), value, ddtags)
+            self.gauge("couchdb.by_ddoc.{0}_size".format(key), value, ddtags)
 
         for key, value in data['updates_pending'].items():
-            self.gauge("couchdb.by_dd.{0}_updates_pending".format(key), value, ddtags)
+            self.gauge("couchdb.by_ddoc.{0}_updates_pending".format(key), value, ddtags)
 
-        self.gauge("couchdb.by_dd.waiting_clients", data['waiting_clients'], ddtags)
+        self.gauge("couchdb.by_ddoc.waiting_clients", data['waiting_clients'], ddtags)
 
     def _build_system_metrics(self, data, tags, prefix = 'couchdb.erlang'):
         for key, value in data.items():
