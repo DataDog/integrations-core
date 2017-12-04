@@ -66,8 +66,14 @@ CGROUP_METRICS = [
             "docker.mem.sw_limit": (["hierarchical_memsw_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
             "docker.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x)/float(y) if float(y) < 2 ** 60 else None, GAUGE),
             "docker.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y)/float(z) if float(z) < 2 ** 60 else None, GAUGE)
-
         }
+    },
+    {
+        "cgroup": "memory",
+        "file": "memory.soft_limit_in_bytes",
+        "metrics": {
+            "softlimit": ("docker.mem.soft_limit", GAUGE),
+        },
     },
     {
         "cgroup": "cpuacct",
@@ -173,15 +179,23 @@ class DockerDaemon(AgentCheck):
             raise Exception("Docker check only supports one configured instance.")
         AgentCheck.__init__(self, name, init_config,
                             agentConfig, instances=instances)
-
         self.init_success = False
         self._service_discovery = agentConfig.get('service_discovery') and \
             agentConfig.get('service_discovery_backend') == 'docker'
+
+        global_labels_as_tags = agentConfig.get('docker_labels_as_tags')
+        if global_labels_as_tags:
+            self.collect_labels_as_tags = [label.strip() for label in global_labels_as_tags.split(',')]
+        else:
+            self.collect_labels_as_tags = DEFAULT_LABELS_AS_TAGS
         self.init()
 
     def init(self):
         try:
             instance = self.instances[0]
+
+            # Getting custom tags for service checks when docker is down
+            self.custom_tags = instance.get("tags", [])
 
             self.docker_util = DockerUtil()
             if not self.docker_util.client:
@@ -206,8 +220,12 @@ class DockerDaemon(AgentCheck):
             self._disable_net_metrics = False
 
             # Set tagging options
-            self.custom_tags = instance.get("tags", [])
-            self.collect_labels_as_tags = instance.get("collect_labels_as_tags", DEFAULT_LABELS_AS_TAGS)
+            # The collect_labels_as_tags is legacy, only tagging docker metrics.
+            # It is replaced by docker_labels_as_tags in datadog.conf.
+            # We keep this line for backward compatibility.
+            if "collect_labels_as_tags" in instance:
+                self.collect_labels_as_tags = instance.get("collect_labels_as_tags")
+
             self.kube_pod_tags = {}
 
             self.use_histogram = _is_affirmative(instance.get('use_histogram', False))
@@ -267,11 +285,11 @@ class DockerDaemon(AgentCheck):
                 if self.docker_util.client is None:
                     message = "Unable to connect to Docker daemon"
                     self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                       message=message)
+                                       message=message, tags=self.custom_tags)
                     return
             except Exception as ex:
                 self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   message=str(ex))
+                                   message=str(ex), tags=self.custom_tags)
                 return
 
             if not self.init_success:
@@ -359,11 +377,11 @@ class DockerDaemon(AgentCheck):
         except Exception as e:
             message = "Unable to list Docker containers: {0}".format(e)
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message=message)
+                               message=message, tags=self.custom_tags)
             raise Exception(message)
 
         else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.custom_tags)
 
         # Create a set of filtered containers based on the exclude/include rules
         # and cache these rules in docker_util
@@ -397,13 +415,19 @@ class DockerDaemon(AgentCheck):
                 except Exception as e:
                     self.log.debug("Unable to inspect Docker container: %s", e)
 
+        total_count = 0
         # TODO: deprecate these 2, they should be replaced by _report_container_count
         for tags, count in running_containers_count.iteritems():
+            total_count += count
             self.gauge("docker.containers.running", count, tags=list(tags))
+        self.gauge("docker.containers.running.total", total_count, tags=self.custom_tags)
 
+        total_count = 0
         for tags, count in all_containers_count.iteritems():
             stopped_count = count - running_containers_count[tags]
+            total_count += stopped_count
             self.gauge("docker.containers.stopped", stopped_count, tags=list(tags))
+        self.gauge("docker.containers.stopped.total", total_count, tags=self.custom_tags)
 
         return containers_by_id
 
@@ -436,6 +460,7 @@ class DockerDaemon(AgentCheck):
 
         if entity is not None:
             pod_name = None
+            namespace = None
             # Get labels as tags
             labels = entity.get("Labels")
             if labels is not None:
@@ -492,8 +517,8 @@ class DockerDaemon(AgentCheck):
                             tags.append('%s:%s' % (tag_name, str(t).strip()))
 
             # Add kube labels and creator/service tags
-            if Platform.is_k8s():
-                kube_tags = self.kube_pod_tags.get(pod_name)
+            if Platform.is_k8s() and namespace and pod_name:
+                kube_tags = self.kube_pod_tags.get("{0}/{1}".format(namespace, pod_name))
                 if kube_tags:
                     tags.extend(list(kube_tags))
 
@@ -991,6 +1016,13 @@ class DockerDaemon(AgentCheck):
                     return self._parse_blkio_metrics(fp.read().splitlines())
                 elif 'cpuacct.usage' in stat_file:
                     return dict({'usage': str(int(fp.read())/10000000)})
+                elif 'memory.soft_limit_in_bytes' in stat_file:
+                    value = int(fp.read())
+                    # do not report kernel max default value (uint64 * 4096)
+                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845
+                    # 2 ** 60 is kept for consistency of other cgroups metrics
+                    if value < 2 ** 60:
+                        return dict({'softlimit': value})
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:

@@ -16,8 +16,10 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('sqlserver')
 
-      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
-           --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
+      unless Gem.win_platform?
+        sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
+             --name #{container_name} -d #{container_repo})
+      end
     end
 
     task before_script: ['ci:common:before_script']

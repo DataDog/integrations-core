@@ -12,6 +12,7 @@ mongodb.connections.available,gauge,,connection,,Number of unused available inco
 mongodb.connections.current,gauge,,connection,,Number of connections to the database server from clients.,0,mongodb,connections current
 mongodb.cursors.timedout,gauge,,cursor,,Total number of cursors that have timed out since the server process started.,0,mongodb,cursors timed out
 mongodb.cursors.totalopen,gauge,,cursor,,Number of cursors that MongoDB is maintaining for clients,0,mongodb,cursors open
+mongodb.dbs,gauge,,item,,Total number of existing databases,0,mongodb,databases
 mongodb.dur.commits,gauge,,transaction,,Number of transactions written to the journal during the last journal group commit interval.,0,mongodb,dur commits
 mongodb.dur.commitsinwritelock,gauge,,commit,,Count of the commits that occurred while a write lock was held.,0,mongodb,dur commits in write lock
 mongodb.dur.compression,gauge,,fraction,,Compression ratio of the data written to the journal.,1,mongodb,dur compression
@@ -90,6 +91,20 @@ mongodb.mem.mapped,gauge,,mebibyte,,Amount of mapped memory by the database.,0,m
 mongodb.mem.mappedwithjournal,gauge,,mebibyte,,"The amount of mapped memory, including the memory used for journaling.",0,mongodb,memory mapped with journal
 mongodb.mem.resident,gauge,,mebibyte,,Amount of memory currently used by the database process.,0,mongodb,mem resident
 mongodb.mem.virtual,gauge,,mebibyte,,Amount of virtual memory used by the mongod process.,0,mongodb,mem virtual
+mongodb.metrics.commands.count.failed,rate,,commands,,Number of times "count" failed,-1,mongodb,cmd count failed
+mongodb.metrics.commands.count.total,gauge,,commands,,Number of times "count" executed,0,mongodb,cmd count executed
+mongodb.metrics.commands.createIndexes.failed,rate,,commands,,Number of times "createIndexes" failed,-1,mongodb,cmd createIndexes failed
+mongodb.metrics.commands.createIndexes.total,gauge,,commands,,Number of times "createIndexes" executed,0,mongodb,cmd createIndexes executed
+mongodb.metrics.commands.delete.failed,rate,,commands,,Number of times "delete" failed,-1,mongodb,cmd delete failed
+mongodb.metrics.commands.delete.total,gauge,,commands,,Number of times "delete" executed,0,mongodb,cmd delete executed
+mongodb.metrics.commands.eval.failed,rate,,commands,,Number of times "eval" failed,-1,mongodb,cmd eval failed
+mongodb.metrics.commands.eval.total,gauge,,commands,,Number of times "eval" executed,0,mongodb,cmd eval executed
+mongodb.metrics.commands.findAndModify.failed,rate,,commands,,Number of times "findAndModify" failed,-1,mongodb,cmd findAndModify failed
+mongodb.metrics.commands.findAndModify.total,gauge,,commands,,Number of times "findAndModify" executed,0,mongodb,cmd findAndModify executed
+mongodb.metrics.commands.insert.failed,rate,,commands,,Number of times "insert" failed,-1,mongodb,cmd insert failed
+mongodb.metrics.commands.insert.total,gauge,,commands,,Number of times "insert" executed,0,mongodb,cmd insert executed
+mongodb.metrics.commands.update.failed,rate,,commands,,Number of times "update" failed,-1,mongodb,cmd update failed
+mongodb.metrics.commands.update.total,gauge,,commands,,Number of times "update" executed,0,mongodb,cmd update executed
 mongodb.metrics.cursor.open.notimeout,gauge,,cursor,,Number of open cursors with the option `DBQuery.Option.noTimeout` set to prevent timeout after a period of inactivity.,-1,mongodb,cursors open no timeout
 mongodb.metrics.cursor.open.pinned,gauge,,cursor,,Number of “pinned” open cursors.,0,mongodb,cursors open pinned
 mongodb.metrics.cursor.open.total,gauge,,cursor,,Number of cursors that MongoDB is maintaining for clients.,-1,mongodb,open cursors
@@ -168,3 +183,4 @@ mongodb.collection.maxSize,gauge,,byte,,Maximum size of a capped collection in b
 mongodb.collection.storageSize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
 mongodb.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,mongodb,number of indices on collection
 mongodb.collection.indexSizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
+mongodb.collection.indexes.accesses.ops,gauge,,access,,Number of time the index was used.,0,mongodb,index usage

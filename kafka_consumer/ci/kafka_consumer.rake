@@ -4,29 +4,48 @@ def kafka_consumer_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
+def kafka_consumer_options
+  ENV['FLAVOR_OPTIONS'] || 'zookeeper'
+end
+
+def kafka_topics
+  ENV['KAFKA_TOPICS'] || 'marvel:2:1,dc:2:1'
+end
+
+def zookeeper_version
+  ENV['ZOOKEEPER_VERSION'] || '3.4.9'
+end
+
+kafka_legacy = '0.8.2.0'
+
 namespace :ci do
   namespace :kafka_consumer do |flavor|
     task before_install: ['ci:common:before_install']
 
     task :install do
       Rake::Task['ci:common:install'].invoke('kafka_consumer')
-      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml up -d)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 KAFKA_OFFSETS_STORAGE=#{kafka_consumer_options} KAFKA_CREATE_TOPICS=#{kafka_topics} \
+           ZOOKEEPER_VERSION=#{zookeeper_version} JMX_PORT=9999 KAFKA_HEAP_OPTS="-Xmx256M -Xms128M" \
+           KAFKA_ADVERTISED_HOST_NAME="172.17.0.1" KAFKA_ZOOKEEPER_CONNECT="zookeeper:2181" \
+           docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml up -d)
       Wait.for 2181
       Wait.for 9092
-      wait_on_docker_logs('resources_kafka_1', 5, '[Kafka Server 1001], started')
-      sh %(docker run -d --name kafka_consumer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c '$KAFKA_HOME/bin/kafka-console-consumer.sh \
-           --topic=test --zookeeper=$ZK --consumer-property group.id=my_consumer ')
-      wait_on_docker_logs('resources_kafka_1', 30, 'Created log for partition [test,0]')
-      sh %(docker run -d --name kafka_producer -v /var/run/docker.sock:/var/run/docker.sock -e HOST_IP=172.17.0.1 \
-           -e ZK=172.17.0.1:2181 -i -t wurstmeister/kafka:#{kafka_version} /bin/bash -c '$KAFKA_HOME/bin/kafka-console-producer.sh \
-           --topic=test --broker-list=`broker-list.sh` <<< "boomshakalaka"')
+      wait_on_docker_logs('resources_kafka_1', 20, ' started (kafka.server.KafkaServer)')
+      wait_on_docker_logs('resources_zookeeper_1', 20, 'NoNode for /brokers')
+      if Gem::Version.new(kafka_consumer_version) > Gem::Version.new(kafka_legacy)
+        wait_on_docker_logs('resources_kafka_1', 20, 'Created topic "marvel"')
+        wait_on_docker_logs('resources_kafka_1', 20, 'Created topic "dc"')
+      end
+
+      sh %(EXTERNAL_PORT=9091 EXTERNAL_JMX_PORT=9998 CONSUMER_OFFSET_STORAGE=#{kafka_consumer_options} KAFKA_TOPICS=#{kafka_topics} \
+           ZOOKEEPER_VERSION=#{zookeeper_version} \
+           docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka/ci/resources/docker-compose-single-broker.yml scale kafka=2)
+      wait_on_docker_logs('resources_kafka_2', 20, ' started (kafka.server.KafkaServer)')
     end
 
     task before_script: ['ci:common:before_script'] do
-      wait_on_docker_logs('kafka_consumer', 25, 'boomshakalaka')
-      wait_on_docker_logs('resources_kafka_1', 15, 'Partition [test,0] on broker 1001')
-      wait_on_docker_logs('resources_zookeeper_1', 60, 'Error Path:/consumers/my_consumer/offsets')
+      # wait_on_docker_logs('resources_kafka_1', 15, 'Partition [test,0] on broker 1001')
+      # wait_on_docker_logs('resources_zookeeper_1', 90, 'Error Path:/consumers/my_consumer/offsets')
     end
 
     task script: ['ci:common:script'] do
@@ -39,10 +58,10 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker rm -f kafka_consumer)
-      sh %(docker rm -f kafka_producer)
-      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml stop)
-      sh %(docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml rm -f)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f \
+           #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml stop)
+      sh %(EXTERNAL_PORT=9092 EXTERNAL_JMX_PORT=9999 docker-compose -f \
+           #{ENV['TRAVIS_BUILD_DIR']}/kafka_consumer/ci/resources/docker-compose-single-broker.yml rm -f)
     end
 
     task :execute do

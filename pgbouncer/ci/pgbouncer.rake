@@ -31,7 +31,8 @@ namespace :ci do
         count += 1
       end
       puts 'Postgres is running, installing PgBouncer'
-      sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p 16432:6432 kotaimen/pgbouncer)
+      sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p \
+        16432:6432 kotaimen/pgbouncer:#{pgbouncer_version})
       sleep_for 10
     end
 

@@ -42,7 +42,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 ### Configuration
 #### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`):
+On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`). See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options:
 
 ```
 server {
@@ -58,6 +58,9 @@ server {
 
     # freely available with open source NGINX
     stub_status;
+
+    # for open source NGINX < version 1.7.5
+    # stub_status on;
 
     # available only with NGINX Plus
     # status;
@@ -89,7 +92,7 @@ Restart the Agent to start sending NGINX metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `nginx` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nginx` under the Checks section:
 
 ```
   Checks
@@ -155,7 +158,7 @@ You may observe one of these common problems in the output of the Datadog Agent'
 ```
   Checks
   ======
-  
+
     nginx
     -----
       - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
@@ -168,7 +171,7 @@ Check that the main `nginx.conf` includes a line like the following:
 
 ```
 http{
-  
+
   ...
 
   include <directory_that_contains_status.conf>/*.conf;

@@ -7,7 +7,7 @@ Connect Kafka to Datadog in order to:
 * Visualize the performance of your cluster in real time
 * Correlate the performance of Kafka with the rest of your applications
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](/integrations/java) for more detailed instructions.
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](https://docs.datadoghq.com/integrations/java/) for more detailed instructions.
 
 To collect Kafka consumer metrics, see the [kafka_consumer check](https://docs.datadoghq.com/integrations/kafka_consumer/).
 
@@ -28,7 +28,7 @@ After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka m
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `kafka` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kafka` under the Checks section:
 
 ```
   Checks

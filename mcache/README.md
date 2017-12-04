@@ -11,7 +11,7 @@ The memcache check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `mcache.yaml` in the Agent's `conf.d` directory:
+Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml](https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -31,7 +31,7 @@ instances:
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `mcache` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mcache` under the Checks section:
 
 ```
   Checks

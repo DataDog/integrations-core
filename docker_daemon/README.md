@@ -95,7 +95,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `docker_daemon` under the Checks section:
 
     Checks
     ======
@@ -114,30 +114,24 @@ The docker_daemon check is compatible with all major platforms
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
-The Docker Daemon check does not include any event at this time.
+The events below will be available:
+
+* Delete Image
+* Die
+* Error
+* Fail
+* Kill
+* Out of memory (oom)
+* Pause
+* Restart container
+* Restart Daemon
+* Update
 
 ### Service Checks
 The Docker Daemon check does not include any service check at this time.
 
 ## Troubleshooting
-
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 ### Knowledge Base
@@ -145,7 +139,7 @@ Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.c
 
 [Compose](https://docs.docker.com/compose/overview/) is a Docker tool that simplifies building applications on Docker by allowing you to define, build and run multiple containers as a single application.
 
-While the [Single Container Installation](#single-container-installation) instructions above will get the stock Datadog Agent container running, you will most likely want to enable integrations for other containerized services that are part of your Compose application. To do this, you'll need to combine integration YAML files with the base Datadog Agent image to create your Datadog Agent container. Then you'll need to add your container to the Compose YAML.
+While the Single Container Installation instructions above will get the stock Datadog Agent container running, you will most likely want to enable integrations for other containerized services that are part of your Compose application. To do this, you'll need to combine integration YAML files with the base Datadog Agent image to create your Datadog Agent container. Then you'll need to add your container to the Compose YAML.
 
 ##### Example: Monitoring Redis
 

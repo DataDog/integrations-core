@@ -16,7 +16,7 @@ The process check is packaged with the Agent, so simply [install the Agent](http
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.
 
-While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes:
+While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes. See the [sample process.yaml](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -41,14 +41,14 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `process` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `process` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    mcache
+    process
     -------
       - instance #0 [OK]
       - instance #1 [OK]

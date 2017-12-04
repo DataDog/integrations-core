@@ -119,8 +119,13 @@ class ConsulCheck(AgentCheck):
     def _get_agent_url(self, instance, instance_state):
         self.log.debug("Starting _get_agent_url")
         local_config = self._get_local_config(instance, instance_state)
-        agent_addr = local_config.get('Config', {}).get('AdvertiseAddr')
-        agent_port = local_config.get('Config', {}).get('Ports', {}).get('Server')
+
+        # Member key for consul 0.7.x and up; Config key for older versions
+        agent_addr = local_config.get('Member', {}).get('Addr') or \
+            local_config.get('Config', {}).get('AdvertiseAddr')
+        agent_port = local_config.get('Member', {}).get('Tags', {}).get('port') or \
+            local_config.get('Config', {}).get('Ports', {}).get('Server')
+
         agent_url = "{0}:{1}".format(agent_addr, agent_port)
         self.log.debug("Agent url is %s" % agent_url)
         return agent_url
@@ -224,6 +229,14 @@ class ConsulCheck(AgentCheck):
 
         return services
 
+    def _get_service_tags(self, service, tags):
+        service_tags = ['consul_service_id:{0}'.format(service)]
+
+        for tag in tags:
+            service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
+
+        return service_tags
+
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
         instance_state = self._instance_states[hash_mutable(instance)]
@@ -310,7 +323,7 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
-                service_tags = ['consul_service_id:{0}'.format(service)]
+                service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 

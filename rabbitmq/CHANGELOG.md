@@ -1,13 +1,20 @@
 # CHANGELOG - rabbitmq
 
 
-1.3.1 / Unreleased
+1.4.0 / Unreleased
 ==================
 
 ### Changes
 
-* [BUGFIX] Add a key check before updating connection state metric. See [#729][]
+* [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
+* [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
 
+1.3.1 / 2017-10-10
+==================
+
+### Changes
+
+* [BUGFIX] Add a key check before updating connection state metric. See [#729][]. (Thanks [@ian28223][])
 
 1.3.0 / 2017-08-28
 ==================
@@ -47,5 +54,6 @@
 [#514]: https://github.com/DataDog/integrations-core/issues/514
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
-[#729]: https://github.com/DataDog/integrations-core/pull/729
+[#729]: https://github.com/DataDog/integrations-core/issues/729
+[@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr

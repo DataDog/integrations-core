@@ -21,7 +21,7 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-Create a file `go_expvar.yaml` in the Agent's `conf.d` directory:
+Create a file `go_expvar.yaml` in the Agent's `conf.d` directory. See the [sample go_expvar.yaml](https://github.com/DataDog/integrations-core/blob/master/go_expvar/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -46,7 +46,7 @@ Restart the Agent to begin sending memstat and expvar metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `go_expvar` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `go_expvar` under the Checks section:
 
 ```
   Checks

@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "mesos_master",
@@ -11,5 +11,12 @@
     "mac_os"
   ],
   "version": "1.1.0",
-  "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc"
+  "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc",
+  "public_title": "Datadog-Mesos Master Integration",
+  "categories":["configuration & deployment", "containers", "orchestration"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/mesos_master/",
+  "is_public": true,
+  "has_logo": true,
+  "aliases":["/integrations/mesos/"]
 }

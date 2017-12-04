@@ -446,6 +446,7 @@ class HTTPCheck(NetworkCheck):
 
         o = urlparse(url)
         host = o.hostname
+        server_name = instance.get('ssl_server_name', o.hostname)
 
         port = o.port or 443
 
@@ -457,7 +458,7 @@ class HTTPCheck(NetworkCheck):
             context.verify_mode = ssl.CERT_REQUIRED
             context.check_hostname = True
             context.load_verify_locations(instance_ca_certs)
-            ssl_sock = context.wrap_socket(sock, server_hostname=host)
+            ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
