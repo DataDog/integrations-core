@@ -18,6 +18,7 @@ class Etcd(AgentCheck):
 
     SERVICE_CHECK_NAME = 'etcd.can_connect'
     HEALTH_SERVICE_CHECK_NAME = 'etcd.healthy'
+    HEALTH_KEY = 'health'
 
     STORE_RATES = {
         'getsSuccess': 'etcd.store.gets.success',
@@ -97,13 +98,12 @@ class Etcd(AgentCheck):
         health_state = AgentCheck.UNKNOWN
         self_response = self._get_self_health(url, ssl_params, timeout)
         if self_response is not None:
-            if 'health' in self_response:
-                state = AgentCheck.OK if self_response[key] == 'true' else AgentCheck.CRITICAL
+            if self.HEALTH_KEY in self_response:
+                health_state = AgentCheck.OK if self_response[self.HEALTH_KEY] == 'true' else AgentCheck.CRITICAL
             else:
-                self.log.debug("Missing 'health' key in stats, can't determine health status.")
+                self.log.debug("Missing '{}' key in stats, can't determine health status.".format(self.HEALTH_KEY))
 
-        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, state, tags=instance_tags+["url:{0}".format(url)])
-
+        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, health_state, tags=instance_tags)
 
         # Gather self metrics
         self_response = self._get_self_metrics(url, ssl_params, timeout)
