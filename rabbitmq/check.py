@@ -291,7 +291,7 @@ class RabbitMQ(AgentCheck):
                 url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
                 try:
                     data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
-                    ssl_verify=ssl_verify, proxies=instance_proxy)
+                                            ssl_verify=ssl_verify, proxies=instance_proxy)
                 except Exception as e:
                     self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
         else:
