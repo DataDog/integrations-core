@@ -1,1 +1,2 @@
 # integration pip requirements
+psycopg2==2.7.1

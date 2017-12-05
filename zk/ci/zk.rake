@@ -12,11 +12,8 @@ namespace :ci do
   namespace :zk do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('zk/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('zk')
       tag = zk_version
       sh %(docker run -d -p 12181:2181 -e "ZOO_TICK_TIME=2000" --name dd-test-zk zookeeper:#{tag})
       sleep_for 10
@@ -43,7 +40,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

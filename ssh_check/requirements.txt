@@ -1,2 +1,3 @@
 # integration pip requirements
-paramiko==1.15.2
+paramiko==2.1.2
+cryptography==1.7.1

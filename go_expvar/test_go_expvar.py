@@ -7,6 +7,7 @@ from collections import defaultdict
 import copy
 import time
 from nose.plugins.attrib import attr
+import os
 
 # 3p
 import simplejson as json
@@ -14,8 +15,10 @@ import simplejson as json
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+GO_EXPVAR_URL_PATH = "/debug/vars"
 
-def _get_data_mock(url):
+def _get_data_mock(url, instance):
     with open(url, 'r') as go_output:
         return json.loads(go_output.read())
 
@@ -62,7 +65,7 @@ class TestMockGoExpVar(AgentCheckTest):
 
     def __init__(self, *args, **kwargs):
         AgentCheckTest.__init__(self, *args, **kwargs)
-        self._expvar_url = Fixtures.file('expvar_output')
+        self._expvar_url = Fixtures.file('expvar_output', sdk_dir=FIXTURE_DIR)
         self.mock_config = {
             "instances": [{
                 "expvar_url": self._expvar_url,
@@ -246,6 +249,26 @@ class TestMockGoExpVar(AgentCheckTest):
         results = self.check.deep_get(content, ['list', '.*', 'value'], [])
         self.assertEqual(sorted(results), sorted(expected))
 
+    # Test that the path tags get correctly added when metric has alias
+    def test_alias_tag_path(self):
+        mock_config = {
+            "instances": [{
+                "expvar_url": self._expvar_url,
+                "metrics": [
+                    {
+                        "path": "array/\d+/key",
+                        "alias": "array.dict.key",
+                        "type": "gauge",
+                    }
+                ]
+            }]
+        }
+        self.run_check(mock_config, mocks=self.mocks)
+
+        shared_tags = ['expvar_url:{0}'.format(self._expvar_url)]
+        self.assertMetric("array.dict.key", count=1, tags=shared_tags + ["path:array.0.key"])
+        self.assertMetric("array.dict.key", count=1, tags=shared_tags + ["path:array.1.key"])
+
 @attr(requires='go_expvar')
 class TestGoExpVar(AgentCheckTest):
 
@@ -284,7 +307,7 @@ class TestGoExpVar(AgentCheckTest):
         AgentCheckTest.__init__(self, *args, **kwargs)
         self.config = {
             "instances": [{
-                "expvar_url": 'http://localhost:8079/debug/vars',
+                "expvar_url": 'http://localhost:8079',
                 'tags': ['my_tag'],
                 'metrics': [
                     {
@@ -299,7 +322,7 @@ class TestGoExpVar(AgentCheckTest):
         # To avoid the disparition of some gauges during the second check
         mocks = {}
         config = self.config
-        expvar_url = self.config['instances'][0]['expvar_url']
+        expvar_url = self.config['instances'][0]['expvar_url'] + GO_EXPVAR_URL_PATH
 
         fake_last_gc_count = defaultdict(int)
         mocks['_last_gc_count'] = fake_last_gc_count
@@ -318,7 +341,7 @@ class TestGoExpVar(AgentCheckTest):
 
         shared_tags = [
             'my_tag',
-            'expvar_url:{0}'.format(self.config['instances'][0]['expvar_url'])
+            'expvar_url:{0}{1}'.format(self.config['instances'][0]['expvar_url'], GO_EXPVAR_URL_PATH)
         ]
 
         for gauge in self.CHECK_GAUGES + self.CHECK_GAUGES_DEFAULT:

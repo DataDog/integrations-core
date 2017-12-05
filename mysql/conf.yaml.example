@@ -1,6 +1,8 @@
 init_config:
 
 instances:
+    # NOTE: Even if the server name is "localhost", the agent will connect to MySQL using TCP/IP, unless you also
+    # provide a value for the sock key (below).
   - server: localhost
     # user: my_username
     # pass: my_password
@@ -13,6 +15,7 @@ instances:
     #   - optional_tag2
     # options:               # Optional
     #   replication: false
+    #   replication_non_blocking_status: false  # grab slave count in non-blocking manner (req. performance_schema)
     #   galera_cluster: false
     #   extra_status_metrics: true
     #   extra_innodb_metrics: true

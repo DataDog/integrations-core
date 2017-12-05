@@ -19,11 +19,8 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>&1 >/dev/null || true 2>&1 >/dev/null)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('nginx/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('nginx')
       if nginx_version == '1.6.2'
         repo = 'centos/nginx-16-centos7'
         sh %(docker create -p #{container_port1}:#{container_port1} -p #{container_port2}:#{container_port2} --name #{container_name} #{repo})
@@ -63,7 +60,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

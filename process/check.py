@@ -6,7 +6,7 @@
 # stdlib
 from collections import defaultdict
 import time
-
+import os
 # 3p
 import psutil
 
@@ -126,12 +126,22 @@ class ProcessCheck(AgentCheck):
                     if string == 'All':
                         found = True
                     if exact_match:
-                        if proc.name() == string:
-                            found = True
+                        if os.name == 'nt':
+                            if proc.name().lower() == string.lower():
+                                found = True
+                        else:
+                            if proc.name() == string:
+                                found = True
+
                     else:
                         cmdline = proc.cmdline()
-                        if string in ' '.join(cmdline):
-                            found = True
+                        if os.name == 'nt':
+                            lstring = string.lower()
+                            if lstring in ' '.join(cmdline).lower():
+                                found = True
+                        else:
+                            if string in ' '.join(cmdline):
+                                found = True
                 except psutil.NoSuchProcess:
                     self.log.warning('Process disappeared while scanning')
                 except psutil.AccessDenied as e:
@@ -300,6 +310,19 @@ class ProcessCheck(AgentCheck):
 
         return map(lambda i: int(i), data.split()[9:13])
 
+    def _get_child_processes(self, pids):
+        children_pids = set()
+        for pid in pids:
+            try:
+                children = psutil.Process(pid).children(recursive=True)
+                self.log.debug('%s children were collected for process %s', len(children), pid)
+                for child in children:
+                    children_pids.add(child.pid)
+            except psutil.NoSuchProcess:
+                pass
+
+        return children_pids
+
     def check(self, instance):
         name = instance.get('name', None)
         tags = instance.get('tags', [])
@@ -308,6 +331,8 @@ class ProcessCheck(AgentCheck):
         ignore_ad = _is_affirmative(instance.get('ignore_denied_access', True))
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
+        collect_children = _is_affirmative(instance.get('collect_children', False))
+        user = instance.get('user', False)
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -342,11 +367,22 @@ class ProcessCheck(AgentCheck):
             # psutil.NoSuchProcess is raised.
             pids = self._get_pid_set(pid)
         elif pid_file is not None:
-            with open(pid_file, 'r') as file_pid:
-                pid_line = file_pid.readline().strip()
-                pids = self._get_pid_set(int(pid_line))
+            try:
+                with open(pid_file, 'r') as file_pid:
+                    pid_line = file_pid.readline().strip()
+                    pids = self._get_pid_set(int(pid_line))
+            except IOError as e:
+                # pid file doesn't exist, assuming the process is not running
+                self.log.debug('Unable to find pid file: %s', e)
+                pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
+
+        if collect_children:
+            pids.update(self._get_child_processes(pids))
+
+        if user:
+            pids = self._filter_by_user(user, pids)
 
         proc_state = self.get_process_state(name, pids)
 
@@ -355,6 +391,9 @@ class ProcessCheck(AgentCheck):
 
         self.log.debug('ProcessCheck: process %s analysed', name)
         self.gauge('system.processes.number', len(pids), tags=tags)
+
+        if len(pids) == 0:
+            self.warning("No matching process '%s' was found" % name)
 
         for attr, mname in ATTR_TO_METRIC.iteritems():
             vals = [x for x in proc_state[attr] if x is not None]
@@ -416,3 +455,24 @@ class ProcessCheck(AgentCheck):
             tags=service_check_tags,
             message=message_str % (status_str[status], nb_procs, name)
         )
+
+    def _filter_by_user(self, user, pids):
+        """
+        Filter pids by it's username.
+        :param user: string with name of system user
+        :param pids: set of pids to filter
+        :return: set of filtered pids
+        """
+        filtered_pids = set()
+        for pid in pids:
+            try:
+                proc = psutil.Process(pid)
+                if proc.username() == user:
+                    self.log.debug("Collecting pid %s belonging to %s", pid, user)
+                    filtered_pids.add(pid)
+                else:
+                    self.log.debug("Discarding pid %s not belonging to %s", pid, user)
+            except psutil.NoSuchProcess:
+                pass
+
+        return filtered_pids

@@ -40,6 +40,8 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
     def test_check(self):
 
         self.load_check({'instances': []})
+        self.check.tags = []
+        self.check.set_paths()
 
         ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
         m = mock_open(read_data=Fixtures.read_file('entropy_avail', sdk_dir=ci_dir))
@@ -64,8 +66,6 @@ class TestCheckLinuxProcExtras(AgentCheckTest):
         self.service_checks = self.check.get_service_checks()
         self.service_metadata = []
         self.warnings = self.check.get_warnings()
-
-        self.check.log.info(self.metrics)
 
         # Assert metrics
         for metric in self.PROC_COUNTS + self.INODE_GAUGES + self.ENTROPY_GAUGES + self.PROCESS_STATS_GAUGES:

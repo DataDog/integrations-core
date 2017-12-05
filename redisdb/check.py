@@ -53,6 +53,10 @@ class Redis(AgentCheck):
 
         # stats
         'latest_fork_usec':             'redis.perf.latest_fork_usec',
+        'bytes_received_per_sec':       'redis.bytes_received_per_sec',
+        'bytes_sent_per_sec':           'redis.bytes_sent_per_sec',
+        # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
+        # available on Azure Redis
 
         # pubsub
         'pubsub_channels':              'redis.pubsub.channels',
@@ -69,6 +73,7 @@ class Redis(AgentCheck):
         'used_memory_lua':              'redis.mem.lua',
         'used_memory_peak':             'redis.mem.peak',
         'used_memory_rss':              'redis.mem.rss',
+        'maxmemory':                    'redis.mem.maxmemory',
 
         # replication
         'master_last_io_seconds_ago':   'redis.replication.last_io_seconds_ago',
@@ -171,6 +176,7 @@ class Redis(AgentCheck):
         info = None
         try:
             info = conn.info()
+            tags = sorted(tags + ["redis_role:%s" % info["role"]])
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
@@ -221,6 +227,9 @@ class Redis(AgentCheck):
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'],
                   tags=tags)
+        if 'instantaneous_ops_per_sec' in info:
+            self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'],
+                       tags=tags)
 
         # Check some key lengths if asked
         key_list = instance.get('keys')
@@ -229,24 +238,30 @@ class Redis(AgentCheck):
                 self.warning("keys in redis configuration is either not a list or empty")
             else:
                 l_tags = list(tags)
-                for key in key_list:
-                    key_type = conn.type(key)
-                    key_tags = l_tags + ['key:' + key]
-
-                    if key_type == 'list':
-                        self.gauge('redis.key.length', conn.llen(key), tags=key_tags)
-                    elif key_type == 'set':
-                        self.gauge('redis.key.length', conn.scard(key), tags=key_tags)
-                    elif key_type == 'zset':
-                        self.gauge('redis.key.length', conn.zcard(key), tags=key_tags)
-                    elif key_type == 'hash':
-                        self.gauge('redis.key.length', conn.hlen(key), tags=key_tags)
+                for key_pattern in key_list:
+                    if re.search(r"(?<!\\)[*?[]", key_pattern):
+                        keys = conn.scan_iter(match=key_pattern)
                     else:
-                        # If the type is unknown, it might be because the key doesn't exist,
-                        # which can be because the list is empty. So always send 0 in that case.
-                        if instance.get("warn_on_missing_keys", True):
-                            self.warning("{0} key not found in redis".format(key))
-                        self.gauge('redis.key.length', 0, tags=key_tags)
+                        keys = [key_pattern, ]
+
+                    for key in keys:
+                        key_type = conn.type(key)
+                        key_tags = l_tags + ['key:' + key]
+
+                        if key_type == 'list':
+                            self.gauge('redis.key.length', conn.llen(key), tags=key_tags)
+                        elif key_type == 'set':
+                            self.gauge('redis.key.length', conn.scard(key), tags=key_tags)
+                        elif key_type == 'zset':
+                            self.gauge('redis.key.length', conn.zcard(key), tags=key_tags)
+                        elif key_type == 'hash':
+                            self.gauge('redis.key.length', conn.hlen(key), tags=key_tags)
+                        else:
+                            # If the type is unknown, it might be because the key doesn't exist,
+                            # which can be because the list is empty. So always send 0 in that case.
+                            if instance.get("warn_on_missing_keys", True):
+                                self.warning("{0} key not found in redis".format(key))
+                            self.gauge('redis.key.length', 0, tags=key_tags)
 
         self._check_replication(info, tags)
         if instance.get("command_stats", False):

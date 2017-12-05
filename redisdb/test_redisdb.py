@@ -153,6 +153,12 @@ class TestRedis(AgentCheckTest):
         keys = [m[0] for m in metrics]
         assert 'redis.net.commands' in keys
 
+        # instantaneous_ops_per_sec info is only available on redis>=2.6
+        version = db.info().get('redis_version')
+        if StrictVersion(version) >= StrictVersion('2.6.0'):
+            assert 'redis.net.instantaneous_ops_per_sec' in keys
+
+
         # Service metadata
         service_metadata = r.get_service_metadata()
         service_metadata_count = len(service_metadata)
@@ -341,7 +347,7 @@ class TestRedis(AgentCheckTest):
             assert isinstance(m[1], int)    # timestamp
             assert isinstance(m[2], (int, float, long))  # value
             tags = m[3]["tags"]
-            expected_tags = ["redis_host:localhost", "redis_port:%s" % port]
+            expected_tags = ["redis_host:localhost", "redis_port:%s" % port, "redis_role:master"]
             for e in expected_tags:
                 assert e in tags
 

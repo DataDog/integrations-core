@@ -5,6 +5,7 @@
 # stdlib
 from collections import namedtuple
 import socket
+import os
 
 # 3p
 import mock
@@ -13,18 +14,24 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+
 def ss_subprocess_mock(*args, **kwargs):
-    if args[0][-1] == '-4':
-        return (Fixtures.read_file('ss_ipv4'), "", 0)
-    elif args[0][-1] == '-6':
-        return (Fixtures.read_file('ss_ipv6'), "", 0)
+    if args[0][-1] == '-4' and args[0][-3] == '-u':
+        return (Fixtures.read_file('ss_ipv4_udp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-4' and args[0][-3] == '-t':
+        return (Fixtures.read_file('ss_ipv4_tcp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-6' and args[0][-3] == '-u':
+        return (Fixtures.read_file('ss_ipv6_udp', sdk_dir=FIXTURE_DIR), "", 0)
+    elif args[0][-1] == '-6' and args[0][-3] == '-t':
+        return (Fixtures.read_file('ss_ipv6_tcp', sdk_dir=FIXTURE_DIR), "", 0)
 
 
 def netstat_subprocess_mock(*args, **kwargs):
     if args[0][0] == 'ss':
         raise OSError
     elif args[0][0] == 'netstat':
-        return (Fixtures.read_file('netstat'), "", 0)
+        return (Fixtures.read_file('netstat', sdk_dir=FIXTURE_DIR), "", 0)
 
 class TestCheckNetwork(AgentCheckTest):
     CHECK_NAME = 'network'
@@ -38,6 +45,7 @@ class TestCheckNetwork(AgentCheckTest):
             ]
         }
         self.load_check(self.config)
+        self.check._setup_metrics(self.config["instances"][0])
 
     CX_STATE_GAUGES_VALUES = {
         'system.net.udp4.connections': 2,

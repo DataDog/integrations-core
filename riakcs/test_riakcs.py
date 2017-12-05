@@ -5,6 +5,7 @@
 # stdlib
 from socket import error
 import unittest
+import os
 
 # 3p
 from mock import Mock
@@ -12,6 +13,8 @@ from mock import Mock
 # project
 from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, Fixtures, load_check
+
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 class RiakCSTest(AgentCheckTest):
 
@@ -25,16 +28,16 @@ class RiakCSTest(AgentCheckTest):
             self.check = load_check(self.CHECK_NAME, self.config, {})
             self.check._connect = Mock(return_value=(None, None, ["aggregation_key:localhost:8080"], []))
             self.check._get_stats = Mock(return_value=self.check.load_json(
-                Fixtures.read_file('riakcs_in.json')))
+                Fixtures.read_file('riakcs_in.json', sdk_dir=FIXTURE_DIR)))
 
         def test_parser(self):
-            input_json = Fixtures.read_file('riakcs_in.json')
-            output_python = Fixtures.read_file('riakcs_out.python')
+            input_json = Fixtures.read_file('riakcs_in.json', sdk_dir=FIXTURE_DIR)
+            output_python = Fixtures.read_file('riakcs_out.python', sdk_dir=FIXTURE_DIR)
             self.assertEquals(self.check.load_json(input_json), eval(output_python))
 
         def test_metrics(self):
             self.run_check(self.config)
-            expected = eval(Fixtures.read_file('riakcs_metrics.python'))
+            expected = eval(Fixtures.read_file('riakcs_metrics.python', sdk_dir=FIXTURE_DIR))
             for m in expected:
                 self.assertMetric(m[0], m[2], m[3].get('tags', []))
 
@@ -46,6 +49,7 @@ class RiakCSTest(AgentCheckTest):
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.CRITICAL,
                                     tags=['aggregation_key:localhost:8080'])
+
 
 class Riak21CSTest(AgentCheckTest):
 
@@ -72,16 +76,16 @@ class Riak21CSTest(AgentCheckTest):
                 self.config["instances"][0]["metrics"],
             ))
             self.check._get_stats = Mock(return_value=self.check.load_json(
-                Fixtures.read_file('riakcs21_in.json')))
+                Fixtures.read_file('riakcs21_in.json', sdk_dir=FIXTURE_DIR)))
 
         def test_21_parser(self):
-            input_json = Fixtures.read_file('riakcs21_in.json')
-            output_python = Fixtures.read_file('riakcs21_out.python')
+            input_json = Fixtures.read_file('riakcs21_in.json', sdk_dir=FIXTURE_DIR)
+            output_python = Fixtures.read_file('riakcs21_out.python', sdk_dir=FIXTURE_DIR)
             self.assertEquals(self.check.load_json(input_json), eval(output_python))
 
         def test_21_metrics(self):
             self.run_check(self.config)
-            expected = eval(Fixtures.read_file('riakcs21_metrics.python'))
+            expected = eval(Fixtures.read_file('riakcs21_metrics.python', sdk_dir=FIXTURE_DIR))
             for m in expected:
                 self.assertMetric(m[0], m[2], m[3].get('tags', []),
                                   metric_type=m[3]["type"])

@@ -12,16 +12,6 @@ import simplejson as json
 from tests.checks.common import AgentCheckTest, Fixtures
 from checks import AgentCheck
 
-
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
-}
-
-
-# NOTE: Feel free to declare multiple test classes if needed
-
 class TestCeph(AgentCheckTest):
     """Basic Test for ceph integration."""
     CHECK_NAME = 'ceph'
@@ -29,7 +19,7 @@ class TestCeph(AgentCheckTest):
 
     def test_simple_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(Fixtures.read_file('raw.json')),
+            '_collect_raw': lambda x,y,z: json.loads(Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
             'instances': [{'host': 'foo'}]
@@ -47,7 +37,7 @@ class TestCeph(AgentCheckTest):
 
     def test_warn_health(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('warn.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -66,7 +56,7 @@ class TestCeph(AgentCheckTest):
 
     def test_tagged_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -91,7 +81,7 @@ class TestCeph(AgentCheckTest):
 
     def test_osd_status_metrics(self):
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('ceph_10.2.2.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
@@ -125,7 +115,7 @@ class TestCeph(AgentCheckTest):
         shouldn't make the check fail
         """
         mocks = {
-            '_collect_raw': lambda x,y: json.loads(
+            '_collect_raw': lambda x,y,z: json.loads(
                 Fixtures.read_file('ceph_10.2.2_mon_health.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {

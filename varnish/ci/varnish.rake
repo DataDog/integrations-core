@@ -1,14 +1,14 @@
 require 'ci/common'
 
 def varnish_version
-  ENV['FLAVOR_VERSION'] || '4.1.4'
+  ENV['FLAVOR_VERSION'] || '4.1.7'
 end
 
 namespace :ci do
   namespace :varnish do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
+    task :install do
       target = varnish_version.split('.')[0]
       sh %(docker-compose -f varnish/ci/docker-compose.yml up -d varnish#{target})
     end
@@ -31,7 +31,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

@@ -6,6 +6,7 @@ from nose.plugins.attrib import attr
 
 from tests.checks.common import AgentCheckTest
 
+
 @attr(requires='fluentd')
 class TestFluentd(AgentCheckTest):
     CHECK_NAME = 'fluentd'
@@ -37,10 +38,12 @@ class TestFluentd(AgentCheckTest):
     def test_fluentd_exception(self):
         self.assertRaises(Exception, lambda: self.run_check({"instances": [{
             "monitor_agent_url": "http://localhost:24222/api/plugins.json",
-            "plugin_ids": ["plg2"]}]}))
+            "plugin_ids": ["plg2"],
+            "tags": ["test"]
+        }]}))
 
         self.assertServiceCheckCritical(self.check.SERVICE_CHECK_NAME,
-                                        tags=['fluentd_host:localhost', 'fluentd_port:24222'])
+                                        tags=['fluentd_host:localhost', 'fluentd_port:24222', 'test'])
         self.coverage_report()
 
     def test_fluentd_with_tag_by_type(self):
@@ -81,4 +84,24 @@ class TestFluentd(AgentCheckTest):
             self.assertMetric('{0}.{1}'.format(self.CHECK_NAME, m), tags=['plugin_id:plg2'])
         self.assertServiceCheckOK(
             self.check.SERVICE_CHECK_NAME, tags=['fluentd_host:localhost', 'fluentd_port:24220'])
+        self.coverage_report()
+
+    def test_fluentd_with_custom_tags(self):
+        config = {
+            "init_config": {
+            },
+            "instances": [
+                {
+                    "monitor_agent_url": "http://localhost:24220/api/plugins.json",
+                    "tags": ["test", "tast:tast"]
+                }
+            ]
+        }
+        custom_tags = ['test', 'tast:tast']
+        self.run_check(config)
+        for m in self.CHECK_GAUGES:
+            self.assertMetric('{0}.{1}'.format(self.CHECK_NAME, m), tags=['plugin_id:plg1'] + custom_tags)
+            self.assertMetric('{0}.{1}'.format(self.CHECK_NAME, m), tags=['plugin_id:plg2'] + custom_tags)
+        self.assertServiceCheckOK(
+            self.check.SERVICE_CHECK_NAME, tags=['fluentd_host:localhost', 'fluentd_port:24220'] + custom_tags)
         self.coverage_report()

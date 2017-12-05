@@ -19,11 +19,8 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('elastic/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('elastic')
       docker_cmd = 'elasticsearch -Des.node.name="batman" '
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = 'datadog/docker-library:elasticsearch_' + elastic_version.split('.')[0..1].join('_')
@@ -67,7 +64,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

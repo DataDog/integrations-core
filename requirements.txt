@@ -1,6 +1,0 @@
-ntplib
-simplejson
-tornado
-pyyaml
-docker-py==1.10.6
-kazoo==2.2.1

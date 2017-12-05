@@ -1,9 +1,14 @@
+# stdlib
+import os
+
 # Project
 from tests.checks.common import AgentCheckTest, Fixtures
 
 # 3rd Party
 import mock
 import json
+
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def requests_get_mock(*args, **kwargs):
     class MockResponse:
@@ -19,7 +24,7 @@ def requests_get_mock(*args, **kwargs):
             return True
 
 
-    with open(Fixtures.file('hdfs_datanode_jmx'), 'r') as f:
+    with open(Fixtures.file('hdfs_datanode_jmx', sdk_dir=FIXTURE_DIR), 'r') as f:
         body = f.read()
         return MockResponse(body, 200)
 

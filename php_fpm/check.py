@@ -9,6 +9,8 @@ import requests
 from checks import AgentCheck
 from util import headers
 
+DEFAULT_TIMEOUT = 20
+
 
 class PHPFPMCheck(AgentCheck):
     """
@@ -44,6 +46,8 @@ class PHPFPMCheck(AgentCheck):
         tags = instance.get('tags', [])
         http_host = instance.get('http_host')
 
+        timeout = instance.get('timeout', DEFAULT_TIMEOUT)
+
         if user and password:
             auth = (user, password)
 
@@ -54,24 +58,24 @@ class PHPFPMCheck(AgentCheck):
         status_exception = None
         if status_url is not None:
             try:
-                pool = self._process_status(status_url, auth, tags, http_host)
+                pool = self._process_status(status_url, auth, tags, http_host, timeout)
             except Exception as e:
                 status_exception = e
                 pass
 
         if ping_url is not None:
-            self._process_ping(ping_url, ping_reply, auth, tags, pool, http_host)
+            self._process_ping(ping_url, ping_reply, auth, tags, pool, http_host, timeout)
 
         # pylint doesn't understand that we are raising this only if it's here
         if status_exception is not None:
             raise status_exception  # pylint: disable=E0702
 
-    def _process_status(self, status_url, auth, tags, http_host):
+    def _process_status(self, status_url, auth, tags, http_host, timeout):
         data = {}
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(status_url, auth=auth,
+            resp = requests.get(status_url, auth=auth, timeout=timeout,
                                 headers=headers(self.agentConfig, http_host=http_host),
                                 params={'json': True})
             resp.raise_for_status()
@@ -83,6 +87,8 @@ class PHPFPMCheck(AgentCheck):
 
         pool_name = data.get('pool', 'default')
         metric_tags = tags + ["pool:{0}".format(pool_name)]
+        if http_host is not None:
+            metric_tags += ["http_host:{0}".format(http_host)]
 
         for key, mname in self.GAUGES.iteritems():
             if key not in data:
@@ -99,16 +105,18 @@ class PHPFPMCheck(AgentCheck):
         # return pool, to tag the service check with it if we have one
         return pool_name
 
-    def _process_ping(self, ping_url, ping_reply, auth, tags, pool_name, http_host):
+    def _process_ping(self, ping_url, ping_reply, auth, tags, pool_name, http_host, timeout):
         if ping_reply is None:
             ping_reply = 'pong'
 
-        sc_tags = ["ping_url:{0}".format(ping_url)]
+        sc_tags = ["ping_url:{0}".format(ping_url)] + tags
+        if http_host is not None:
+            sc_tags += ["http_host:{0}".format(http_host)]
 
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(ping_url, auth=auth,
+            resp = requests.get(ping_url, auth=auth, timeout=timeout,
                                 headers=headers(self.agentConfig, http_host=http_host))
             resp.raise_for_status()
 

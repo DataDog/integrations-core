@@ -1,0 +1,27 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+oracle.buffer_cachehit_ratio,gauge,,fraction,,Ratio of buffer cache hits,1,oracle,buff cache hit ratio
+oracle.cursor_cachehit_ratio,gauge,,fraction,,Ratio of cursor cache hits,1,oracle,cursor cache hit ratio
+oracle.library_cachehit_ratio,gauge,,fraction,,Ratio of library cache hits,1,oracle,lib cache hit ratio
+oracle.shared_pool_free,gauge,,percent,,shared pool free memory %,0,oracle,shared pool free
+oracle.physical_reads,gauge,,reads,sec,physical reads per sec,0,oracle,phys reads
+oracle.physical_writes,gauge,,writes,sec,physical writes per sec,0,oracle,phys reads
+oracle.enqueue_timeouts,gauge,,timeouts,sec,enqueue timeouts per sec,0,oracle,enqueue timeouts
+oracle.gc_cr_receive_time,gauge,,blocks,sec,GC CR receive time,0,oracle,gc cr receive time
+oracle.cache_blocks_corrupt,gauge,,blocks,,corrupt cache blocks,0,oracle,corrupt cache blocks
+oracle.cache_blocks_lost,gauge,,blocks,,lost cache blocks,0,oracle,lost cache blocks
+oracle.logons,gauge,,attempts,,number of logon attempts,0,oracle,logons
+oracle.active_sessions,gauge,,sessions,,number of active sessions,0,oracle,active sessions
+oracle.long_table_scans,gauge,,scans,sec,number of long table scans per sec,0,oracle,long tbl scans
+oracle.service_response_time,gauge,,secs,,service response time,0,oracle,svc resp time
+oracle.user_rollbacks,gauge,,operations,,number of user rollbacks,0,oracle,user rollbacks
+oracle.sorts_per_user_call,gauge,,sorts,attempt,sorts per user call,0,oracle,sorts per user call
+oracle.rows_per_sort,gauge,,rows,operation,rows per sort,0,oracle,rows per sort
+oracle.disk_sorts,gauge,,operations,sec,disk sorts per second,0,oracle,disk sorts
+oracle.memory_sorts_ratio,gauge,,fraction,,memory sorts ratio,0,oracle,memory sort ratio
+oracle.database_wait_time_ratio,gauge,,fraction,,memory sorts per second,0,oracle,db wait-time ratio
+oracle.session_limit_usage,gauge,,percent,,session limit usage,0,oracle,session lim usage %
+oracle.session_count,gauge,,session,,session count,0,oracle,session count
+oracle.temp_space_used,gauge,,bytes,,temp space used,0,oracle,temp space used
+oracle.tablespace.used,gauge,,bytes,,tablespace used,0,oracle,tablespace used
+oracle.tablespace.size,gauge,,bytes,,tablespace size,0,oracle,tablespace size
+oracle.tablespace.in_use,gauge,,fraction,,tablespace in-use,0,oracle,tablespace in-use

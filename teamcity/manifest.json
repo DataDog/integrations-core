@@ -1,16 +1,22 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "teamcity",
-  "short_description": "Teamcity is a build management and continuous integration tool.",
+  "short_description": "Track builds and understand the performance impact of every deploy.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "version": "0.1.0",
-  "guid": "b390dd3f-47d5-4555-976a-36722833f000"
+  "version": "1.0.0",
+  "guid": "b390dd3f-47d5-4555-976a-36722833f000",
+  "public_title": "Datadog-Teamcity Integration",
+  "categories":["configuration & deployment"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/teamcity/",
+  "is_public": true,
+  "has_logo": true
 }

@@ -8,10 +8,13 @@ import os
 import shutil
 import tempfile
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
-
+@attr(requires="directory")
 class DirectoryTestCase(AgentCheckTest):
     CHECK_NAME = 'directory'
 
@@ -62,8 +65,13 @@ class DirectoryTestCase(AgentCheckTest):
                 'filegauges': filegauges
             }, {
                 'directory': dir_name,
-                'dirtagname': "pattern_check",
+                'dirtagname': "glob_pattern_check",
                 'pattern': "*.log",
+                'filegauges': filegauges
+            }, {
+                'directory': dir_name,
+                'dirtagname': "relative_pattern_check",
+                'pattern': "file_*",
                 'filegauges': filegauges
             }
         ]
@@ -119,9 +127,12 @@ class DirectoryTestCase(AgentCheckTest):
                 self.assertMetric(mname, tags=dir_tags, count=1)
 
             # 'recursive' and 'pattern' parameters
-            if config.get('pattern'):
+            if config.get('pattern') == "*.log":
                 # 2 '*.log' files in 'temp_dir'
                 self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=2)
+            elif config.get('pattern') == "file_*":
+                # 10 'file_*' files in 'temp_dir'
+                self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=10)
             elif config.get('recursive'):
                 # 12 files in 'temp_dir' + 5 files in 'tempdir/subfolder'
                 self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=17)
@@ -152,17 +163,19 @@ class DirectoryTestCase(AgentCheckTest):
 
             # File metrics
             for mname in self.FILE_METRICS:
-                # 2 '*.log' files in 'temp_dir'
-                for i in xrange(1, 3):
-                    file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/log_" + str(i) + ".log")]
-                    self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
+                if config.get('pattern') != "file_*":
+                    # 2 '*.log' files in 'temp_dir'
+                    for i in xrange(1, 3):
+                        file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/log_" + str(i) + ".log")]
+                        self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
 
-                if not config.get('pattern'):
+                if config.get('pattern') != "*.log":
                     # Files in 'temp_dir'
                     for i in xrange(0, 10):
                         file_tag = [filetagname + ":%s" % os.path.normpath(self.temp_dir + "/file_" + str(i))]
                         self.assertMetric(mname, tags=dir_tags + file_tag, count=1)
 
+                if not config.get('pattern'):
                     # Files in 'temp_dir/subfolder'
                     if config.get('recursive'):
                         for i in xrange(0, 5):

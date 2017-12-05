@@ -20,11 +20,8 @@ namespace :ci do
   namespace :tomcat do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('tomcat/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('tomcat')
       sh %(docker run -d -p #{container_port}:8090 --name #{container_name} -e JAVA_OPTS='#{java_opts}' tomcat:6.0.43)
     end
 
@@ -64,7 +61,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

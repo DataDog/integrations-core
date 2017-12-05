@@ -12,11 +12,8 @@ namespace :ci do
   namespace :tcp_check do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('tcp_check/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('tcp_check')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name tcp_check source/tcp_check:tcp_check_version)
       # sh %(docker start tcp_check)
@@ -46,7 +43,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

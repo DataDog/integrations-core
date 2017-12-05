@@ -12,6 +12,7 @@ import bson
 from pymongo import (
     MongoClient,
     ReadPreference,
+    errors,
     uri_parser,
     version as py_version,
 )
@@ -352,7 +353,7 @@ class TokuMX(AgentCheck):
                 if current is not None and primary is not None:
                     lag = primary['optimeDate'] - current['optimeDate']
                     # Python 2.7 has this built in, python < 2.7 don't...
-                    if hasattr(lag, 'total_seconds'):
+                    if hasattr(lag,'total_seconds'):
                         data['replicationLag'] = lag.total_seconds()
                     else:
                         data['replicationLag'] = (
@@ -378,9 +379,6 @@ class TokuMX(AgentCheck):
                 self.check_last_state(data['state'], server, self.agentConfig)
                 status['replSet'] = data
         except Exception as e:
-            self.log.exception(e)
-            self.log.info(repr(e))
-            self.log.info(str(e))
             if "OperationFailure" in repr(e) and ("replSetGetStatus" in str(e) or "not running with --replSet" in str(e)):
                 pass
             else:
@@ -427,7 +425,11 @@ class TokuMX(AgentCheck):
                 db_tags = list(tags)
                 db_tags.append('db:%s' % dbname)
                 db = conn[dbname]
-                stats = db.command('dbstats')
+                try:
+                    stats = db.command('dbstats')
+                except errors.OperationFailure:
+                    self.log.warning("Cannot access dbstats on database %s" % dbname)
+                    continue
                 for m, v in stats.items():
                     if m in ['db', 'ok']:
                         continue
