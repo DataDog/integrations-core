@@ -87,7 +87,10 @@ COMMON_METRICS = [
     'rabbitmq.node.mem_used',
     'rabbitmq.node.run_queue',
     'rabbitmq.node.sockets_used',
-    'rabbitmq.node.partitions'
+    'rabbitmq.node.partitions',
+    'rabbitmq.node.running',
+    'rabbitmq.node.disk_alarm',
+    'rabbitmq.node.mem_alarm',
 ]
 
 E_METRICS = [

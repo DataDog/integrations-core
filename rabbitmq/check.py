@@ -94,7 +94,10 @@ NODE_ATTRIBUTES = [
     ('mem_used', 'mem_used', float),
     ('run_queue', 'run_queue', float),
     ('sockets_used', 'sockets_used', float),
-    ('partitions', 'partitions', len)
+    ('partitions', 'partitions', len),
+    ('running', 'running', float),
+    ('mem_alarm', 'mem_alarm', float),
+    ('disk_free_alarm', 'disk_alarm', float),
 ]
 
 ATTRIBUTES = {
@@ -361,6 +364,7 @@ class RabbitMQ(AgentCheck):
         for data_line in data[:max_detailed]:
             # We truncate the list if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
+
 
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
