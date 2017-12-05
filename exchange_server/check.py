@@ -6,7 +6,7 @@
 try:
     from checks.libs.win.pdhbasecheck import PDHBaseCheck
 except ImportError:
-    class PDHBaseCheck(*args, **kwargs):
+    def PDHBaseCheck(*args, **kwargs):
         return
 
 DEFAULT_COUNTERS = [
