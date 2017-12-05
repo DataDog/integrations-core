@@ -51,6 +51,8 @@ namespace :ci do
             destination=#{q} routing_key=#{q})
         sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=#{q} routing_key=#{q} \
             payload="hello, world")
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=#{q} routing_key=bad_key \
+            payload="unroutable")
       end
       sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
 

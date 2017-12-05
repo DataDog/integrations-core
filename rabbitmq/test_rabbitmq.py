@@ -97,17 +97,17 @@ E_METRICS = [
     'messages.publish_in.rate',
     'messages.publish_out.count',
     'messages.publish_out.rate',
-    # TODO: get missing metrics:
+    'messages.return_unroutable.count',
+    'messages.return_unroutable.rate',
+    # TODO: create a 'fake consumer' and get missing metrics
     #'messages.ack.count',
     #'messages.ack.rate',
     #'messages.deliver_get.count',
     #'messages.deliver_get.rate',
-    #'messages.publish.count',
-    #'messages.publish.rate',
-    #'messages.return_unroutable.count',
-    #'messages.return_unroutable.rate',
     #'messages.redeliver.count',
     #'messages.redeliver.rate',
+    #'messages.publish.count',
+    #'messages.publish.rate',
 ]
 
 Q_METRICS = [
@@ -122,6 +122,8 @@ Q_METRICS = [
     'messages_unacknowledged.rate',
     'messages.publish.count',
     'messages.publish.rate'
+    # TODO: create a 'fake consumer' and get missing metrics
+    # active_consumers, acks, delivers, redelivers
 ]
 
 @attr(requires='rabbitmq')
@@ -139,8 +141,6 @@ class RabbitMQCheckTest(AgentCheckTest):
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
 
         # Queue attributes, should be only one queue fetched
-        # TODO: create a 'fake consumer' and get missing metrics
-        # active_consumers, acks, delivers, redelivers
         for mname in Q_METRICS:
             self.assertMetricTag('rabbitmq.queue.%s' %
                                  mname, 'rabbitmq_queue:test1', count=1)
