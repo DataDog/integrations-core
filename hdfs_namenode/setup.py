@@ -76,7 +76,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.hdfs_namenode': ['hdfs_namenode.yaml.example']},
+    package_data={'datadog.hdfs_namenode': ['hdfs_namenode.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
