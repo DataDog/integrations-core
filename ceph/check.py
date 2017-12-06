@@ -5,7 +5,6 @@
 """ceph check
 Collects metrics from ceph clusters
 """
-
 # stdlib
 import os
 import re
@@ -26,7 +25,7 @@ class Ceph(AgentCheck):
     DEFAULT_CEPH_CLUSTER = 'ceph'
     NAMESPACE = 'ceph'
 
-    def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
+    def _get_ceph_args(self, ceph_cmd, ceph_cluster, instance):
         use_sudo = _is_affirmative(instance.get('use_sudo', False))
         ceph_args = []
         if use_sudo:
@@ -45,6 +44,9 @@ class Ceph(AgentCheck):
         except Exception as e:
             raise Exception('Unable to run cmd=%s: %s' % (' '.join(args), str(e)))
 
+        return ceph_args
+
+    def _collect_raw(self, ceph_args):
         raw = {}
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
             try:
@@ -211,9 +213,35 @@ class Ceph(AgentCheck):
             else:
                 return None, None
 
-    def _perform_service_checks(self, raw, tags):
+    def _get_version(self, ceph_args):
+
+        args = ceph_args + ['version', '-fjson']
+
+        output,_,_ = get_subprocess_output(args, self.log)
+        output = json.loads(output)
+
+        full_version = output['version']
+        version_str = full_version.split()
+        version = map(int, version_str[2].split('.'))
+        self.service_metadata('version', version)
+        self.log.debug("Running check against version %s" % version)
+        return version
+
+    def _is_above(self, version, version_to_compare):
+        if type(version) == list:
+            return version >= version_to_compare
+        return False
+
+    def _is_above_12_2(self, version):
+        return self._is_above(version, [12, 2, 0])
+
+    def _perform_service_checks(self, raw, version, tags):
         if 'status' in raw:
-            s_status = raw['status']['health']['overall_status']
+            if self._is_above_12_2(version):
+            # CEPH > 12.2.0 reports cluster health under 'status'
+                s_status = raw['status']['health']['status']
+            else:
+                s_status = raw['status']['health']['overall_status']
             if s_status.find('_OK') != -1:
                 status = AgentCheck.OK
             elif s_status.find('_WARN') != -1:
@@ -225,7 +253,9 @@ class Ceph(AgentCheck):
     def check(self, instance):
         ceph_cmd = instance.get('ceph_cmd') or self.DEFAULT_CEPH_CMD
         ceph_cluster = instance.get('ceph_cluster') or self.DEFAULT_CEPH_CLUSTER
-        raw = self._collect_raw(ceph_cmd, ceph_cluster, instance)
+        ceph_args = self._get_ceph_args(ceph_cmd, ceph_cluster, instance)
+        raw = self._collect_raw(ceph_args)
         tags = self._extract_tags(raw, instance)
         self._extract_metrics(raw, tags)
-        self._perform_service_checks(raw, tags)
+        version = self._get_version(ceph_args)
+        self._perform_service_checks(raw, version, tags)
