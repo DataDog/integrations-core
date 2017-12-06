@@ -6,6 +6,7 @@
 
 ### Changes
 
+* [FEATURE] Add data collection for exchanges. See [#176][]. (Thanks [@wholroyd][])
 * [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
 * [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
 
