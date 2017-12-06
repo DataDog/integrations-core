@@ -359,7 +359,7 @@ class RabbitMQ(AgentCheck):
                 "Too many items to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
 
         for data_line in data[:max_detailed]:
-            # We truncate the list of nodes/queues/exchanges if it's above the limit
+            # We truncate the list if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
 
         # get a list of the number of bindings on a given queue
