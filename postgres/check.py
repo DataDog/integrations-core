@@ -6,7 +6,6 @@
 
 Collects database-wide metrics and optionally per-relation metrics, custom metrics.
 """
-
 # stdlib
 import socket
 
@@ -22,20 +21,23 @@ import pg8000
 from checks import AgentCheck, CheckException
 from config import _is_affirmative
 
-EVENT_TYPE = SOURCE_TYPE_NAME = 'postgres'
-
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
 
 def psycopg2_connect(*args, **kwargs):
-    del kwargs['ssl']
+    if 'ssl' in kwargs:
+        del kwargs['ssl']
+    if 'unix_sock' in kwargs:
+        kwargs['host'] = kwargs['unix_sock']
+        del kwargs['unix_sock']
     return psycopg2.connect(*args, **kwargs)
 
 
 class ShouldRestartException(Exception):
     pass
 
-class PostgresCheck(AgentCheck):
+
+class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics
     """
     SOURCE_TYPE_NAME = 'postgresql'
@@ -45,6 +47,7 @@ class PostgresCheck(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
 
     # turning columns into tags
+
     DB_METRICS = {
         'descriptors': [
             ('datname', 'db')
@@ -55,7 +58,23 @@ SELECT datname,
        %s
   FROM pg_stat_database
  WHERE datname not ilike 'template%%'
+   AND datname not ilike 'rdsadmin'
    AND datname not ilike 'postgres'
+""",
+        'relation': False,
+    }
+
+    # Copy of the previous DB_METRICS, _including_ the default 'postgres' database
+    DB_METRICS_WITH_DEFAULT = {
+        'descriptors': [
+            ('datname', 'db')
+        ],
+        'metrics': {},
+        'query': """
+SELECT datname,
+       %s
+  FROM pg_stat_database
+ WHERE datname not ilike 'template%%'
    AND datname not ilike 'rdsadmin'
 """,
         'relation': False,
@@ -72,6 +91,9 @@ SELECT datname,
         'tup_inserted'      : ('postgresql.rows_inserted', RATE),
         'tup_updated'       : ('postgresql.rows_updated', RATE),
         'tup_deleted'       : ('postgresql.rows_deleted', RATE),
+    }
+
+    DATABASE_SIZE_METRICS = {
         'pg_database_size(datname) as pg_database_size' : ('postgresql.database_size', GAUGE),
     }
 
@@ -105,6 +127,18 @@ SELECT datname,
     NEWER_92_BGW_METRICS = {
         'checkpoint_write_time': ('postgresql.bgwriter.write_time', MONOTONIC),
         'checkpoint_sync_time' : ('postgresql.bgwriter.sync_time', MONOTONIC),
+    }
+
+    ARCHIVER_METRICS = {
+        'descriptors': [],
+        'metrics': {},
+        'query': "select %s FROM pg_stat_archiver",
+        'relation': False,
+    }
+
+    COMMON_ARCHIVER_METRICS = {
+        'archived_count'        : ('postgresql.archiver.archived_count', MONOTONIC),
+        'failed_count'          : ('postgresql.archiver.failed_count', MONOTONIC),
     }
 
     LOCK_METRICS = {
@@ -218,7 +252,9 @@ SELECT schemaname, count(*) FROM
     }
 
     REPLICATION_METRICS_9_2 = {
-        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) AS replication_delay_bytes': ('postgres.replication_delay_bytes', GAUGE)
+        # postgres.replication_delay_bytes is deprecated and will be removed in a future version. Please use postgresql.replication_delay_bytes instead.
+        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) AS replication_delay_bytes_dup': ('postgres.replication_delay_bytes', GAUGE),
+        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) AS replication_delay_bytes': ('postgresql.replication_delay_bytes', GAUGE),
     }
 
     REPLICATION_METRICS = {
@@ -305,8 +341,10 @@ SELECT s.schemaname,
         self.versions = {}
         self.instance_metrics = {}
         self.bgw_metrics = {}
+        self.archiver_metrics = {}
         self.db_instance_metrics = []
         self.db_bgw_metrics = []
+        self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
 
@@ -347,7 +385,10 @@ SELECT s.schemaname,
     def _is_9_2_or_above(self, key, db):
         return self._is_above(key, db, [9,2,0])
 
-    def _get_instance_metrics(self, key, db):
+    def _is_9_4_or_above(self, key, db):
+        return self._is_above(key, db, [9,4,0])
+
+    def _get_instance_metrics(self, key, db, database_size_metrics):
         """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
         depending on the postgres version.
         Uses a dictionnary to save the result for each instance
@@ -372,6 +413,10 @@ SELECT s.schemaname,
                 self.instance_metrics[key] = dict(self.COMMON_METRICS, **self.NEWER_92_METRICS)
             else:
                 self.instance_metrics[key] = dict(self.COMMON_METRICS)
+
+            if database_size_metrics:
+                self.instance_metrics[key] = dict(self.instance_metrics[key], **self.DATABASE_SIZE_METRICS)
+
             metrics = self.instance_metrics.get(key)
         return metrics
 
@@ -402,6 +447,30 @@ SELECT s.schemaname,
             if self._is_9_2_or_above(key, db):
                 self.bgw_metrics[key].update(self.NEWER_92_BGW_METRICS)
             metrics = self.bgw_metrics.get(key)
+        return metrics
+
+    def _get_archiver_metrics(self, key, db):
+        """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
+        defined in 9.4 (first version to have this table).
+        Uses a dictionary to save the result for each instance
+        """
+        # While there's only one set for now, prepare for future additions to
+        # the table, mirroring _get_bgw_metrics()
+        metrics = self.archiver_metrics.get(key)
+
+        if self._is_9_4_or_above(key, db) and metrics is None:
+            # Collect from only one instance. See _get_bgw_metrics() for details on why.
+            sub_key = key[:2]
+            if sub_key in self.db_archiver_metrics:
+                self.archiver_metrics[key] = None
+                self.log.debug("Not collecting archiver metrics for key: {0} as"
+                    " they are already collected by another instance".format(key))
+                return None
+
+            self.db_archiver_metrics.append(sub_key)
+
+            self.archiver_metrics[key] = dict(self.COMMON_ARCHIVER_METRICS)
+            metrics = self.archiver_metrics.get(key)
         return metrics
 
     def _get_replication_metrics(self, key, db):
@@ -436,7 +505,7 @@ SELECT s.schemaname,
                 self.log.warn('Failed to parse config element=%s, check syntax' % str(element))
         return config
 
-    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics, interface_error, programming_error):
+    def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
@@ -455,18 +524,29 @@ SELECT s.schemaname,
             metric_scope.append(self.COUNT_METRICS)
 
         # These are added only once per PG server, thus the test
-        db_instance_metrics = self._get_instance_metrics(key, db)
+        db_instance_metrics = self._get_instance_metrics(key, db, database_size_metrics)
         bgw_instance_metrics = self._get_bgw_metrics(key, db)
+        archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
         if db_instance_metrics is not None:
             # FIXME: constants shouldn't be modified
             self.DB_METRICS['metrics'] = db_instance_metrics
-            metric_scope.append(self.DB_METRICS)
+            self.DB_METRICS_WITH_DEFAULT['metrics'] = db_instance_metrics
+            # DB_METRICS query is chosen according to collect_default_db parameter
+            if not(collect_default_db):
+                metric_scope.append(self.DB_METRICS)
+            else:
+                metric_scope.append(self.DB_METRICS_WITH_DEFAULT)
 
         if bgw_instance_metrics is not None:
             # FIXME: constants shouldn't be modified
             self.BGW_METRICS['metrics'] = bgw_instance_metrics
             metric_scope.append(self.BGW_METRICS)
+
+        if archiver_instance_metrics is not None:
+            # FIXME: constants shouldn't be modified
+            self.ARCHIVER_METRICS['metrics'] = archiver_instance_metrics
+            metric_scope.append(self.ARCHIVER_METRICS)
 
         # Do we need relation-specific metrics?
         if relations:
@@ -542,13 +622,13 @@ SELECT s.schemaname,
 
                     # build a map of descriptors and their values
                     desc_map = dict(zip([x[1] for x in desc], row[0:len(desc)]))
-                    if 'schema' in desc_map:
+                    if 'schema' in desc_map and relations:
                         try:
                             relname = desc_map['table']
                             config_schemas = relations_config[relname]['schemas']
                             if config_schemas and desc_map['schema'] not in config_schemas:
                                 continue
-                        except KeyError:
+                        except (KeyError):
                             pass
 
                     # Build tags
@@ -604,6 +684,11 @@ SELECT s.schemaname,
                 elif port != '':
                     connection = connect_fct(host=host, port=port, user=user,
                         password=password, database=dbname, ssl=ssl)
+                elif host.startswith('/'):
+                    # If the hostname starts with /, it's probably a path
+                    # to a UNIX socket. This is similar behaviour to psql
+                    connection = connect_fct(unix_sock=host, user=user,
+                        password=password, database=dbname)
                 else:
                     connection = connect_fct(host=host, user=user, password=password,
                         database=dbname, ssl=ssl)
@@ -637,14 +722,17 @@ SELECT s.schemaname,
 
             self.log.debug("Metric: {0}".format(m))
 
-            for ref, (_, mtype) in m['metrics'].iteritems():
-                cap_mtype = mtype.upper()
-                if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                    raise CheckException("Collector method {0} is not known."
-                        " Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
+            try:
+                for ref, (_, mtype) in m['metrics'].iteritems():
+                    cap_mtype = mtype.upper()
+                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
+                        raise CheckException("Collector method {0} is not known."
+                            " Known methods are RATE, GAUGE, MONOTONIC".format(cap_mtype))
 
-                m['metrics'][ref][1] = getattr(PostgresCheck, cap_mtype)
-                self.log.debug("Method: %s" % (str(mtype)))
+                    m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
+                    self.log.debug("Method: %s" % (str(mtype)))
+            except Exception as e:
+                raise CheckException("Error processing custom metric '{}': {}".format(m, e))
 
         self.custom_metrics[key] = custom_metrics
         return custom_metrics
@@ -652,6 +740,8 @@ SELECT s.schemaname,
     def check(self, instance):
         host = instance.get('host', '')
         port = instance.get('port', '')
+        if port != '':
+            port = int(port)
         user = instance.get('username', '')
         password = instance.get('password', '')
         tags = instance.get('tags', [])
@@ -661,6 +751,8 @@ SELECT s.schemaname,
         function_metrics = _is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         count_metrics = _is_affirmative(instance.get('collect_count_metrics', True))
+        database_size_metrics = _is_affirmative(instance.get('collect_database_size_metrics', True))
+        collect_default_db = _is_affirmative(instance.get('collect_default_database', False))
 
         if relations and not dbname:
             self.warning('"dbname" parameter must be set when using the "relations" parameter.')
@@ -695,11 +787,11 @@ SELECT s.schemaname,
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, use_cached=False)
-            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, interface_error, programming_error)
+            self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error)
 
         if db is not None:
             service_check_tags = self._get_service_check_tags(host, port, dbname)

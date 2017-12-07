@@ -1,7 +1,7 @@
-import mock
+from mock import patch, MagicMock
 import psutil
 
-from tests.checks.common import AgentCheckTest
+from tests.checks.common import AgentCheckTest, load_check
 from utils.platform import Platform
 
 if Platform.is_mac():
@@ -44,16 +44,40 @@ elif Platform.is_unix():
                                   iowait=2.43, irq=0.0, softirq=3.8, steal=0.0,
                                   guest=0.0, guest_nice=0.0)
     ]
-else:
-    MOCK_PSUTIL_CPU_TIMES = []
+else:  # windows
+    CHECK_RATES = [
+        'system.core.user',
+        'system.core.system',
+        'system.core.idle',
+        'system.core.interrupt',
+        'system.core.dpc',
+    ]
+    MOCK_PSUTIL_CPU_TIMES = [
+        psutil._pswindows.scputimes(user=7877.29, system=7469.72, idle=38164.81,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=3826.74, system=2701.61, idle=46981.39,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=7486.51, system=5991.36, idle=40031.88,
+                                    interrupt=0.05, dpc=0.0),
+        psutil._pswindows.scputimes(user=3964.85, system=2862.37, idle=46682.50,
+                                    interrupt=0.05, dpc=0.0)
+    ]
 
 class SystemCoreTestCase(AgentCheckTest):
 
     CHECK_NAME = 'system_core'
 
-    @mock.patch('psutil.cpu_times', return_value=MOCK_PSUTIL_CPU_TIMES)
-    def test_system_core(self, mock_cpu_times):
-        self.run_check_twice({"instances": [{}]})
+    def __init__(self, *args, **kwargs):
+        super(SystemCoreTestCase, self).__init__(*args, **kwargs)
+
+        self.config = {"instances": [{}]}
+        self.check = load_check(self.CHECK_NAME, self.config, {})
+
+    def test_system_core(self):
+        psutil_mock = MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
+        with patch('_system_core.psutil.cpu_times', psutil_mock):
+            self.run_check_twice(self.config)
+
         self.assertMetric('system.core.count', value=4, count=1)
 
         for i in range(4):

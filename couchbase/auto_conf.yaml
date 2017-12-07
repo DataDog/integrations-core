@@ -1,0 +1,9 @@
+ad_identifiers:
+  - couchbase
+
+init_config:
+
+instances:
+  - server: http://%%host%%:%%port%%
+    user: Administrator
+    password: password

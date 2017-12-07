@@ -4,7 +4,12 @@ init_config:
 instances:
     - name: example
       hostname: www.example.org
+      # please notice: nameserver must be a valid IP address
       nameserver: 127.0.0.1
+      
+      # Optionally specify your nameserver's port
+      # nameserver_port: 53
+      
       timeout: 8
 
       # Specify an (optional) `record_type` to customize the record type
@@ -17,3 +22,16 @@ instances:
       # tags:
       #   - tag:one
       #   - tag:two
+
+    # If you use NXDOMAIN as the `record_type`, an NXDOMAIN result is expected from the query,
+    # and the check instance will report response time data.
+    # In many DNS systems, NXDOMAIN results are uncached. Further a query for a unqualified domain
+    # name that one expects to return an NXDOMAIN result can result in many dns queries, depending
+    # on the resolver's configured search domain.
+    # For these reasons, these queries are good candidates to monitor the worst-case performance of a DNS lookup.
+    # See https://github.com/DataDog/dd-agent/pull/2849 for more details.
+
+    # - name: nxdomain_example
+    #   hostname: nxdomain.example.org
+    #   nameserver: 127.0.0.1
+    #   record_type: NXDOMAIN

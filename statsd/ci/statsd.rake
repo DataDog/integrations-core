@@ -15,11 +15,8 @@ namespace :ci do
       sh %(docker rm dd-test-statsd || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('statsd/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('statsd')
       sh %(docker run -p 8125:8125/udp -p 8126:8126 -d --name dd-test-statsd jolexa/docker-statsd)
       sleep 5
     end
@@ -50,7 +47,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

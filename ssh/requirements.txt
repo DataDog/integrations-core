@@ -1,2 +1,0 @@
-# integration pip requirements
-paramiko==1.15.2

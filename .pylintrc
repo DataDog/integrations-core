@@ -5,11 +5,11 @@
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-init-hook='import sys; sys.path.append("."); sys.path.append("embedded/dd-agent")'
+init-hook='import sys; sys.path.append("."); sys.path.append(os.path.abspath("embedded/dd-agent"))'
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS,.git,embedded,venv
+ignore=CVS,.git,embedded,venv,.ropeproject
 
 # Pickle collected data for later comparisons.
 persistent=yes

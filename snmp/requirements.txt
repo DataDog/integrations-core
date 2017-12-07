@@ -1,3 +1,4 @@
 # integration pip requirements
 pysnmp-mibs==0.1.4
-pysnmp==4.2.5
+pyasn1==0.2.3
+pysnmp==4.3.5

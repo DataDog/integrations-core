@@ -9,7 +9,7 @@ def tomcat_rootdir
 end
 
 container_name = 'dd-test-tomcat'
-container_port = 8090 
+container_port = 8090
 java_opts = "-Dcom.sun.management.jmxremote
   -Dcom.sun.management.jmxremote.port=#{container_port}
   -Dcom.sun.management.jmxremote.rmi.port=#{container_port}
@@ -20,25 +20,22 @@ namespace :ci do
   namespace :tomcat do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('tomcat/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('tomcat')
       sh %(docker run -d -p #{container_port}:8090 --name #{container_name} -e JAVA_OPTS='#{java_opts}' tomcat:6.0.43)
     end
 
     task before_script: ['ci:common:before_script'] do
       count = 0
       logs = `docker logs #{container_name} 2>&1`
-      puts "Waiting for Tomcat to come up"
-      until count == 20 or logs.include? "INFO: Server startup"
+      puts 'Waiting for Tomcat to come up'
+      until count == 20 || logs.include?('INFO: Server startup')
         sleep_for 2
         logs = `docker logs #{container_name} 2>&1`
         count += 1
       end
-      if logs.include? "INFO: Server startup"
-        puts "Tomcat is up!"
+      if logs.include? 'INFO: Server startup'
+        puts 'Tomcat is up!'
       else
         sh %(docker logs #{container_name} 2>&1)
         raise
@@ -64,7 +61,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

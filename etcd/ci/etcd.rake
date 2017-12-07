@@ -15,11 +15,8 @@ namespace :ci do
       sh %(docker rm dd-test-etcd || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('etcd/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('etcd')
       sh %(docker create --expose 2379 -p 2379:2379 --name dd-test-etcd quay.io/coreos/etcd:v2.0.5 -listen-client-urls http://0.0.0.0:2379)
       sh %(docker start dd-test-etcd)
     end
@@ -55,7 +52,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

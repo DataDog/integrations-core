@@ -10,13 +10,11 @@ import socket
 import time
 import xmlrpclib
 
-# 3rd party
+# 3p
 import supervisor.xmlrpc
 
 # project
 from checks import AgentCheck
-
-EVENT_TYPE = SOURCE_TYPE_NAME = 'supervisord'
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
@@ -50,9 +48,6 @@ PROCESS_SERVICE_CHECK = 'supervisord.process.status'
 
 
 class SupervisordCheck(AgentCheck):
-
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
     def check(self, instance):
         server_name = instance.get('name')

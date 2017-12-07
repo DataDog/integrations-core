@@ -4,12 +4,13 @@
 
 # stdlib
 from urlparse import urljoin
+import os
 
 # 3rd party
 import mock
 import json
 
-from shared.test.common import AgentCheckTest, Fixtures
+from tests.checks.common import AgentCheckTest, Fixtures
 
 # ID
 APP_ID = 'application_1453738555560_0001'
@@ -62,23 +63,24 @@ def requests_get_mock(*args, **kwargs):
         def raise_for_status(self):
             return True
 
+    ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
     if args[0] == YARN_APPS_URL:
-        with open(Fixtures.file('apps_metrics'), 'r') as f:
+        with open(Fixtures.file('apps_metrics', sdk_dir=ci_dir), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == MR_JOBS_URL:
-        with open(Fixtures.file('job_metrics'), 'r') as f:
+        with open(Fixtures.file('job_metrics', sdk_dir=ci_dir), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == MR_JOB_COUNTERS_URL:
-        with open(Fixtures.file('job_counter_metrics'), 'r') as f:
+        with open(Fixtures.file('job_counter_metrics', sdk_dir=ci_dir), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif args[0] == MR_TASKS_URL:
-        with open(Fixtures.file('task_metrics'), 'r') as f:
+        with open(Fixtures.file('task_metrics', sdk_dir=ci_dir), 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 

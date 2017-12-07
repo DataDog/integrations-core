@@ -74,6 +74,11 @@ STANDALONE_SPARK_STAGE_URL = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_
 STANDALONE_SPARK_EXECUTOR_URL = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors')
 STANDALONE_SPARK_RDD_URL = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd')
 
+STANDALONE_SPARK_JOB_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'jobs')
+STANDALONE_SPARK_STAGE_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'stages')
+STANDALONE_SPARK_EXECUTOR_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'executors')
+STANDALONE_SPARK_RDD_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'storage/rdd')
+
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 def yarn_requests_get_mock(*args, **kwargs):
@@ -213,8 +218,70 @@ def standalone_requests_get_mock(*args, **kwargs):
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
+def standalone_requests_pre20_get_mock(*args, **kwargs):
 
-class TestSpark(AgentCheckTest):
+    class MockStandaloneResponse:
+        text = ''
+
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = json_data
+
+        def json(self):
+            return json.loads(self.json_data)
+
+        def raise_for_status(self):
+            return True
+
+    if args[0] == STANDALONE_APP_URL:
+        with open(Fixtures.file('spark_standalone_apps', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_APP_HTML_URL:
+        with open(Fixtures.file('spark_standalone_app', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_SPARK_APP_URL:
+        with open(Fixtures.file('spark_apps_pre20', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_SPARK_JOB_URL:
+        return MockStandaloneResponse("{}", 404)
+
+    elif args[0] == STANDALONE_SPARK_STAGE_URL:
+        return MockStandaloneResponse("{}", 404)
+
+    elif args[0] == STANDALONE_SPARK_EXECUTOR_URL:
+        return MockStandaloneResponse("{}", 404)
+
+    elif args[0] == STANDALONE_SPARK_RDD_URL:
+        return MockStandaloneResponse("{}", 404)
+
+    elif args[0] == STANDALONE_SPARK_JOB_URL_PRE20:
+        with open(Fixtures.file('job_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_SPARK_STAGE_URL_PRE20:
+        with open(Fixtures.file('stage_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_SPARK_EXECUTOR_URL_PRE20:
+        with open(Fixtures.file('executor_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif args[0] == STANDALONE_SPARK_RDD_URL_PRE20:
+        with open(Fixtures.file('rdd_metrics', sdk_dir=FIXTURE_DIR), 'r') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+class SparkCheck(AgentCheckTest):
     CHECK_NAME = 'spark'
 
     YARN_CONFIG = {
@@ -233,6 +300,12 @@ class TestSpark(AgentCheckTest):
         'spark_url': 'http://localhost:8080',
         'cluster_name': CLUSTER_NAME,
         'spark_cluster_mode': 'spark_standalone_mode'
+    }
+    STANDALONE_CONFIG_PRE_20 = {
+        'spark_url': 'http://localhost:8080',
+        'cluster_name': CLUSTER_NAME,
+        'spark_cluster_mode': 'spark_standalone_mode',
+        'spark_pre_20_mode': 'true'
     }
 
     SPARK_JOB_RUNNING_METRIC_VALUES = {
@@ -365,6 +438,7 @@ class TestSpark(AgentCheckTest):
         'app_name:' + APP_NAME
     ]
 
+
     @mock.patch('requests.get', side_effect=yarn_requests_get_mock)
     def test_yarn(self, mock_requests):
         config = {
@@ -489,6 +563,68 @@ class TestSpark(AgentCheckTest):
     def test_standalone(self, mock_requests):
         config = {
             'instances': [self.STANDALONE_CONFIG]
+        }
+
+        self.run_check(config)
+
+        # Check the running job metrics
+        for metric, value in self.SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
+
+        # Check the running job metrics
+        for metric, value in self.SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
+
+        # Check the succeeded job metrics
+        for metric, value in self.SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_JOB_SUCCEEDED_METRIC_TAGS)
+
+        # Check the running stage metrics
+        for metric, value in self.SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_STAGE_RUNNING_METRIC_TAGS)
+
+        # Check the complete stage metrics
+        for metric, value in self.SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_STAGE_COMPLETE_METRIC_TAGS)
+
+        # Check the driver metrics
+        for metric, value in self.SPARK_DRIVER_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_METRIC_TAGS)
+
+        # Check the executor metrics
+        for metric, value in self.SPARK_EXECUTOR_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_METRIC_TAGS)
+
+        # Check the RDD metrics
+        for metric, value in self.SPARK_RDD_METRIC_VALUES.iteritems():
+            self.assertMetric(metric,
+                value=value,
+                tags=self.SPARK_METRIC_TAGS)
+
+        # Check the service tests
+        self.assertServiceCheckOK(STANDALONE_SERVICE_CHECK,
+            tags=['url:http://localhost:8080'])
+        self.assertServiceCheckOK(SPARK_SERVICE_CHECK,
+            tags=['url:http://localhost:4040'])
+
+    @mock.patch('requests.get', side_effect=standalone_requests_pre20_get_mock)
+    def test_standalone_pre20(self, mock_requests):
+        config = {
+            'instances': [self.STANDALONE_CONFIG_PRE_20],
         }
 
         self.run_check(config)

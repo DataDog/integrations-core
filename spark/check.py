@@ -74,8 +74,7 @@ spark.rdd.disk_used
 '''
 
 # stdlib
-import time
-from urlparse import urljoin, urlsplit, urlunsplit
+from urlparse import urljoin, urlsplit, urlunsplit, urlparse
 
 # 3rd party
 import requests
@@ -85,6 +84,7 @@ from bs4 import BeautifulSoup
 
 # Project
 from checks import AgentCheck
+from config import _is_affirmative
 
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'
@@ -96,6 +96,9 @@ SPARK_CLUSTER_MODE = 'spark_cluster_mode'
 SPARK_YARN_MODE = 'spark_yarn_mode'
 SPARK_STANDALONE_MODE = 'spark_standalone_mode'
 SPARK_MESOS_MODE = 'spark_mesos_mode'
+
+# option enabling compatibility mode for Spark ver < 2
+SPARK_PRE_20_MODE = 'spark_pre_20_mode'
 
 # Service Checks
 SPARK_STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
@@ -123,7 +126,7 @@ ERROR_STATUS = 'FAILED'
 SUCCESS_STATUS = ['SUCCEEDED', 'COMPLETE']
 
 # Event source type
-SOURCE_TYPE_NAME = 'spark.application.server'
+SOURCE_TYPE_NAME = 'spark'
 
 # Metric types
 INCREMENT = 'increment'
@@ -198,11 +201,6 @@ SPARK_RDD_METRICS = {
 
 class SparkCheck(AgentCheck):
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.previous_jobs = {}
-        self.previous_stages = {}
-
     def check(self, instance):
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
@@ -214,33 +212,33 @@ class SparkCheck(AgentCheck):
         spark_apps = self._get_running_apps(instance, tags)
 
         # Get the job metrics
-        self._spark_job_metrics(spark_apps, tags)
+        self._spark_job_metrics(instance, spark_apps, tags)
 
         # Get the stage metrics
-        self._spark_stage_metrics(spark_apps, tags)
+        self._spark_stage_metrics(instance, spark_apps, tags)
 
         # Get the executor metrics
-        self._spark_executor_metrics(spark_apps, tags)
+        self._spark_executor_metrics(instance, spark_apps, tags)
 
         # Get the rdd metrics
-        self._spark_rdd_metrics(spark_apps, tags)
+        self._spark_rdd_metrics(instance, spark_apps, tags)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
             app_id, (app_name, tracking_url) = spark_apps.items()[0]
-            am_address = self._get_url_base(tracking_url)
+            base_url = self._get_request_url(instance, tracking_url)
+            am_address = self._get_url_base(base_url)
 
             self.service_check(SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address],
                 message='Connection to ApplicationMaster "%s" was successful' % am_address)
 
-    def _get_running_apps(self, instance, tags):
+    def _get_master_address(self, instance):
         '''
-        Determine what mode was specified
+        Get the master address from the instance configuration
         '''
 
-        # Get the master address from the instance configuration
         master_address = instance.get(MASTER_ADDRESS)
         if master_address is None:
             master_address = instance.get(DEPRECATED_MASTER_ADDRESS)
@@ -251,6 +249,30 @@ class SparkCheck(AgentCheck):
             else:
                 raise Exception('A URL for `%s` must be specified in the instance '
                     'configuration' % MASTER_ADDRESS)
+
+        return master_address
+
+    def _get_request_url(self, instance, url):
+        '''
+        Get the request address, build with proxy if necessary
+        '''
+        parsed = urlparse(url)
+
+        _url = url
+        if not (parsed.netloc and parsed.scheme) and \
+                _is_affirmative(instance.get('spark_proxy_enabled', False)):
+            master_address = self._get_master_address(instance)
+            _url = urljoin(master_address, parsed.path)
+
+        self.log.debug('Request URL returned: %s', _url)
+        return _url
+
+    def _get_running_apps(self, instance, tags):
+        '''
+        Determine what mode was specified
+        '''
+
+        master_address = self._get_master_address(instance)
 
         # Get the cluster name from the instance configuration
         cluster_name = instance.get('cluster_name')
@@ -267,7 +289,9 @@ class SparkCheck(AgentCheck):
             cluster_mode = SPARK_YARN_MODE
 
         if cluster_mode == SPARK_STANDALONE_MODE:
-            return self._standalone_init(master_address)
+            # check for PRE-20
+            pre20 = _is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
+            return self._standalone_init(master_address, pre20)
 
         elif cluster_mode == SPARK_MESOS_MODE:
             running_apps = self._mesos_init(master_address)
@@ -282,7 +306,7 @@ class SparkCheck(AgentCheck):
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE,
                 cluster_mode))
 
-    def _standalone_init(self, spark_master_address):
+    def _standalone_init(self, spark_master_address, pre_20_mode):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         '''
@@ -298,17 +322,32 @@ class SparkCheck(AgentCheck):
                 app_name = app.get('name')
 
                 # Parse through the HTML to grab the application driver's link
-                app_url = self._get_standalone_app_url(app_id, spark_master_address)
+                try:
+                    app_url = self._get_standalone_app_url(app_id, spark_master_address)
 
-                if app_id and app_name and app_url:
-                    running_apps[app_id] = (app_name, app_url)
+                    if app_id and app_name and app_url:
+                        if pre_20_mode:
+                            self.log.debug('Getting application list in pre-20 mode')
+                            applist = self._rest_request_to_json(app_url,
+                                SPARK_APPS_PATH,
+                                SPARK_STANDALONE_SERVICE_CHECK)
+                            for appl in applist:
+                                aid = appl.get('id')
+                                aname = appl.get('name')
+                                running_apps[aid] = (aname, app_url)
+                        else:
+                            running_apps[app_id] = (app_name, app_url)
+                except:
+                    # it's possible for the requests to fail if the job
+                    # completed since we got the list of apps.  Just continue
+                    pass
 
         # Report success after gathering metrics from Spark master
         self.service_check(SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % spark_master_address],
             message='Connection to Spark master "%s" was successful' % spark_master_address)
-
+        self.log.info("Returning running apps %s" % running_apps)
         return running_apps
 
     def _mesos_init(self, master_address):
@@ -419,15 +458,14 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
-    def _spark_job_metrics(self, running_apps, addl_tags):
+    def _spark_job_metrics(self, instance, running_apps, addl_tags):
         '''
         Get metrics for each Spark job.
         '''
-        new_jobs = {}
-
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
-            response = self._rest_request_to_json(tracking_url,
+            base_url = self._get_request_url(instance, tracking_url)
+            response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, app_id, 'jobs')
 
@@ -442,26 +480,14 @@ class SparkCheck(AgentCheck):
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', INCREMENT, 1, tags)
 
-                job_id = job.get('jobId')
-                previous_status = None
-                if app_id in self.previous_jobs and job_id in self.previous_jobs[app_id]:
-                    previous_status = self.previous_jobs[app_id][job_id].get('status')
-
-                self._event_for_job_status_change(job, tags, previous_status)
-
-            # Map application IDs to {job ID: job}
-            new_jobs[app_id] = dict((job['jobId'], job) for job in response)
-
-        self.previous_jobs = new_jobs
-
-    def _spark_stage_metrics(self, running_apps, addl_tags):
+    def _spark_stage_metrics(self, instance, running_apps, addl_tags):
         '''
         Get metrics for each Spark stage.
         '''
-        new_stages = {}
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
-            response = self._rest_request_to_json(tracking_url,
+            base_url = self._get_request_url(instance, tracking_url)
+            response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, app_id, 'stages')
 
@@ -476,25 +502,14 @@ class SparkCheck(AgentCheck):
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', INCREMENT, 1, tags)
 
-                stage_id = stage.get('stageId')
-                previous_status = None
-                if app_id in self.previous_stages and stage_id in self.previous_stages[app_id]:
-                    previous_status = self.previous_stages[app_id][stage_id].get('status')
-
-                self._event_for_stage_status_change(stage, tags, previous_status)
-
-            # Map application IDs to {stage ID: stage}
-            new_stages[app_id] = dict((stage['stageId'], stage) for stage in response)
-
-        self.previous_stages = new_stages
-
-    def _spark_executor_metrics(self, running_apps, addl_tags):
+    def _spark_executor_metrics(self, instance, running_apps, addl_tags):
         '''
         Get metrics for each Spark executor.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
-            response = self._rest_request_to_json(tracking_url,
+            base_url = self._get_request_url(instance, tracking_url)
+            response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, app_id, 'executors')
 
@@ -510,13 +525,14 @@ class SparkCheck(AgentCheck):
             if len(response):
                 self._set_metric('spark.executor.count', INCREMENT, len(response), tags)
 
-    def _spark_rdd_metrics(self, running_apps, addl_tags):
+    def _spark_rdd_metrics(self, instance, running_apps, addl_tags):
         '''
         Get metrics for each Spark RDD.
         '''
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
-            response = self._rest_request_to_json(tracking_url,
+            base_url = self._get_request_url(instance, tracking_url)
+            response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, app_id, 'storage/rdd')
 
@@ -551,60 +567,6 @@ class SparkCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _event_for_job_status_change(self, current_job, tags, previous_status):
-        '''
-        Create an event for a job changing status
-        '''
-        job_name = current_job.get('name')
-        job_id = current_job.get('jobId')
-        current_status = current_job.get('status')
-
-        self._set_event(current_status, previous_status, tags, JOB_EVENT, job_name, job_id)
-
-    def _event_for_stage_status_change(self, current_stage, tags, previous_status):
-        '''
-        Create an event for a stage changing status
-        '''
-        stage_name = current_stage.get('name')
-        stage_id = current_stage.get('stageId')
-        current_status = current_stage.get('status')
-
-        self._set_event(current_status, previous_status, tags, STAGE_EVENT, stage_name, stage_id)
-
-    def _set_event(self, current_status, previous_status, tags, event_type, state_name, state_id):
-        '''
-        Create an event
-        '''
-        if previous_status is None:
-            msg = 'New Spark {type} `{name}` (ID {id}) has status {curr}.'.format(type=event_type,
-                name=state_name, id=state_id, curr=current_status)
-
-        elif previous_status != current_status:
-            msg = 'Spark {type} `{name}` (ID {id}) status changed from {prev} to {curr}.'.format(
-                type=event_type, name=state_name, id=state_id, prev=previous_status,
-                curr=current_status)
-
-        else:
-            return
-
-        msg_title = 'Spark {type} `{stage}` has status {status}'.format(type=event_type,
-            stage=state_name, status=current_status)
-
-        alert_type = None
-        if current_status == ERROR_STATUS:
-            alert_type = 'error'
-        elif current_status in SUCCESS_STATUS:
-            alert_type = 'success'
-
-        self.event({
-            'timestamp': int(time.time()),
-            'source_type_name': SOURCE_TYPE_NAME,
-            'msg_title': msg_title,
-            'msg_text': msg,
-            'tags': tags,
-            'alert_type': alert_type
-        })
-
     def _rest_request(self, address, object_path, service_name, *args, **kwargs):
         '''
         Query the given URL and return the response
@@ -628,6 +590,7 @@ class SparkCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
+            self.log.debug('Spark check URL: %s' % url)
             response = requests.get(url)
             response.raise_for_status()
 

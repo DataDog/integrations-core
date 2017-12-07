@@ -19,12 +19,10 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('lighttpd/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
-      sh %(docker run -d --name #{container_name} -v #{__dir__}/lighttpd.conf:/etc/lighttpd/lighttpd.conf -p #{container_port}:#{container_port} #{lighttpd_image})
+    task :install do
+      Rake::Task['ci:common:install'].invoke('lighttpd')
+      sh %(docker run -d --name #{container_name} -v #{__dir__}/lighttpd.conf:/etc/lighttpd/lighttpd.conf \
+           -p #{container_port}:#{container_port} #{lighttpd_image})
     end
 
     task before_script: ['ci:common:before_script']
@@ -49,7 +47,11 @@ namespace :ci do
         %w(before_install install before_script).each do |u|
           Rake::Task["#{flavor.scope.path}:#{u}"].invoke
         end
-        Rake::Task["#{flavor.scope.path}:script"].invoke
+        if !ENV['SKIP_TEST']
+          Rake::Task["#{flavor.scope.path}:script"].invoke
+        else
+          puts 'Skipping tests'.yellow
+        end
         Rake::Task["#{flavor.scope.path}:before_cache"].invoke
       rescue => e
         exception = e

@@ -7,7 +7,7 @@
 # stdlib
 from fnmatch import fnmatch
 from os import stat
-from os.path import abspath, exists, join
+from os.path import abspath, exists, join, relpath
 import time
 
 # 3p
@@ -24,17 +24,13 @@ class DirectoryCheck(AgentCheck):
     WARNING: the user/group that dd-agent runs as must have access to stat the files in the desired directory
 
     Config options:
-        - "directory": string, the directory to gather stats for. required
-        - "name": string, the name to use when tagging the metrics. defaults to the "directory"
-        - "dirtagname": string, the name of the tag used for the directory. defaults to "name"
-        - "filetagname: string, the name of the tag used for each file. defaults to "filename"
-        - "filegauges": boolean, when true stats will be an individual gauge per
-                        file (max. 20 files!) and not a histogram of the whole directory.
-                        default False
-        - "pattern": string, the `fnmatch` pattern to use when reading the
-                     "directory"'s files. default "*"
-        - "recursive": boolean, when true the stats will recurse into
-                       directories. default False
+        "directory" - string, the directory to gather stats for. required
+        "name" - string, the name to use when tagging the metrics. defaults to the "directory"
+        "dirtagname" - string, the name of the tag used for the directory. defaults to "name"
+        "filetagname" - string, the name of the tag used for each file. defaults to "filename"
+        "filegauges" - boolean, when true stats will be an individual gauge per file (max. 20 files!) and not a histogram of the whole directory. default False
+        "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. default "*"
+        "recursive" - boolean, when true the stats will recurse into directories. default False
     """
 
     SOURCE_TYPE_NAME = 'system'
@@ -65,8 +61,12 @@ class DirectoryCheck(AgentCheck):
         for root, dirs, files in walk(directory):
             for filename in files:
                 filename = join(root, filename)
-                # check if it passes our filter
-                if not fnmatch(filename, pattern):
+                rel_filename = relpath(filename, directory)
+                # Check if the path of the file relative to the directory
+                # matches the pattern. Also check if the absolute path of the
+                # filename matches the pattern, for compatibility with previous
+                # agent verions.
+                if not (fnmatch(filename, pattern) or fnmatch(rel_filename, pattern)):
                     continue
 
                 directory_files += 1

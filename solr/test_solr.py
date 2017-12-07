@@ -7,18 +7,39 @@ import threading
 import time
 from types import ListType
 import unittest
+import mock
+import os
 
 # 3p
 from nose.plugins.attrib import attr
+import logging
 
 # project
 from aggregator import MetricsAggregator
-from dogstatsd import Server
-from jmxfetch import JMXFetch
-from shared.test.common import Fixtures
+from tests.checks.common import Fixtures
+
+
+LOG_INFO = {
+    'log_level': None,
+    'log_to_event_viewer': False,
+    'log_to_syslog': False,
+    'syslog_host': None,
+    'syslog_port': None,
+    'log_level': logging.INFO,
+    'disable_file_logging': True,
+    'collector_log_file': '/var/log/datadog/collector.log',
+    'forwarder_log_file': '/var/log/datadog/forwarder.log',
+    'dogstatsd_log_file': '/var/log/datadog/dogstatsd.log',
+    'jmxfetch_log_file': '/var/log/datadog/jmxfetch.log',
+    'go-metro_log_file': '/var/log/datadog/go-metro.log',
+}
+
+with mock.patch('config.get_logging_config', return_value=LOG_INFO):
+    from dogstatsd import Server
+    from jmxfetch import JMXFetch
+
 
 STATSD_PORT = 8127
-
 
 class DummyReporter(threading.Thread):
     def __init__(self, metrics_aggregator):
@@ -51,7 +72,8 @@ class JMXTestCase(unittest.TestCase):
         self.t1 = threading.Thread(target=self.server.start)
         self.t1.start()
 
-        confd_path = Fixtures.directory()
+        fixture_dir = os.path.join(os.path.dirname(__file__), 'ci')
+        confd_path = Fixtures.directory(sdk_dir=fixture_dir)
         self.jmx_daemon = JMXFetch(confd_path, {'dogstatsd_port': STATSD_PORT})
         self.t2 = threading.Thread(target=self.jmx_daemon.run)
         self.t2.start()

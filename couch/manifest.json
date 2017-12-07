@@ -1,13 +1,25 @@
 {
-  "manifest_version": 1,
+  "manifest_version": "0.1.1",
   "name": "couch",
   "display_name": "couch",
-  "version": "0.1",
+  "version": "2.2.0",
   "support": "core",
-  "manifest_version": "0.1.0",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
-
-  "short_description": "Apache CouchDB is a document-oriented database that can be queried and indexed using JavaScript in a MapReduce fashion.",
+  "min_agent_version": "5.20.0",
+  "short_description": "Track and graph your CouchDB activity and performance metrics.",
   "description": "Apache CouchDB is a document-oriented database that can be queried and indexed using JavaScript in a MapReduce fashion.",
+  "guid": "9e7ed68c-669a-40f0-8564-548d49aa8098",
+  "maintainer": "help@datadoghq.com",
+  "public_title": "Datadog-CouchDB Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/couch/",
+  "aliases":["/integrations/couchdb"],
+  "is_public": true,
+  "has_logo": true
 }

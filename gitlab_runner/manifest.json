@@ -1,0 +1,17 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.14.0",
+  "name": "gitlab_runner",
+  "short_description": "Track all the metrics from your Gitlab runners with Datadog",
+  "guid": "08318775-7b40-4bc5-bb3d-36ad9111db37",
+  "support": "core",
+  "supported_os": ["linux","mac_os","windows"],
+  "version": "1.0.0",
+  "public_title": "Datadog-Gitlab Runners Integration",
+  "categories":["web", "network"],
+  "doc_link": "https://docs.datadoghq.com/integrations/gitlab_runner/",
+  "is_public": false,
+  "has_logo": false
+}

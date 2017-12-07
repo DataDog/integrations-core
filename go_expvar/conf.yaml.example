@@ -8,7 +8,7 @@ instances:
   #  * gauge (the default)
   #  * rate (note that this will show up as a gauge in Datadog that is meant to be seen as a "per second rate")
 
-  - expvar_url: http://localhost:8080/debug/vars
+  - expvar_url: http://localhost:8080
     # namespace: examplenamespace         # The default metric namespace is 'go_expvar', define your own
     # tags:
     #   - "application_name:myapp"

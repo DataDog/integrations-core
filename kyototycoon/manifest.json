@@ -1,10 +1,22 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "min_agent_version": "5.20.0",
   "name": "kyototycoon",
-  "short_description": "Kyoto Tycoon is a lightweight database server with automatic expiration mechanism.",
+  "short_description": "Track get, set, and delete operations; monitor replication lag.",
   "support": "core",
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "1.1.0",
+  "guid": "2661668b-d804-4c8d-96a7-8019525add8c",
+  "public_title": "Datadog-Kyoto Tycoon Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/kyototycoon/",
+  "is_public": true,
+  "has_logo": true
 }

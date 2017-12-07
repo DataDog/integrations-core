@@ -5,6 +5,7 @@ instances:
 #    - name:mars_cluster
 #
 #    ceph_cmd: /usr/bin/ceph
+#    ceph_cluster: ceph
 #
 # If your environment requires sudo, please add a line like:
 #          dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph

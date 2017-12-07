@@ -94,6 +94,7 @@ class HAProxy(AgentCheck):
         "ctime": ("gauge", "connect.time"),  # HA Proxy 1.5 and higher
         "rtime": ("gauge", "response.time"),  # HA Proxy 1.5 and higher
         "ttime": ("gauge", "session.time"),  # HA Proxy 1.5 and higher
+        "lastchg": ("gauge", "uptime")
     }
 
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
@@ -206,6 +207,9 @@ class HAProxy(AgentCheck):
 
         back_or_front = None
 
+        # Sanitize CSV, handle line breaks
+        data = self._sanitize_lines(data)
+
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
             if not line.strip():
@@ -267,9 +271,39 @@ class HAProxy(AgentCheck):
 
         return data
 
+
+    def _sanitize_lines(self, data):
+        sanitized = []
+
+        def char_count(line, char):
+            count = 0
+
+            for c in line:
+                if c is char:
+                    count += 1
+
+            return count
+
+        clean = ''
+        double_quotes = 0
+        for line in data:
+            double_quotes += char_count(line, '"')
+            clean += line
+
+            if double_quotes % 2 == 0:
+                sanitized.append(clean.replace('\n', '').replace('\r', ''))
+                double_quotes = 0
+                clean = ''
+
+        return sanitized
+
+
     def _line_to_dict(self, fields, line):
         data_dict = {}
-        for i, val in enumerate(line.split(',')[:]):
+        values = line.split(',')
+        if len(values) > len(fields):
+            values = self._gather_quoted_values(values)
+        for i, val in enumerate(values):
             if val:
                 try:
                     # Try converting to a long, if failure, just leave it
@@ -282,6 +316,22 @@ class HAProxy(AgentCheck):
             data_dict['status'] = self._normalize_status(data_dict['status'])
 
         return data_dict
+
+    def _gather_quoted_values(self, values):
+        gathered_values = []
+        previous = ''
+        for val in values:
+            if val.startswith('"') and not val.endswith('"'):
+                previous = val
+            elif previous:
+                if val.endswith('"'):
+                    gathered_values.append(previous + val)
+                    previous = ''
+                else:
+                    previous += val
+            else:
+                gathered_values.append(val)
+        return gathered_values
 
     def _update_data_dict(self, data_dict, back_or_front):
         """
@@ -495,11 +545,12 @@ class HAProxy(AgentCheck):
                                           services_excl_filter):
             return
 
+        data_status = data['status']
         if status is None:
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
             return
 
-        if status != data['status'] and data['status'] in ('up', 'down'):
+        if status != data_status and data_status in ('up', 'down'):
             # If the status of a host has changed, we trigger an event
             try:
                 lastchg = int(data['lastchg'])
@@ -508,13 +559,13 @@ class HAProxy(AgentCheck):
 
             # Create the event object
             ev = self._create_event(
-                data['status'], hostname, lastchg, service_name,
+                data_status, hostname, lastchg, service_name,
                 data['back_or_front'], custom_tags=custom_tags
             )
             self.event(ev)
 
             # Store this host status so we can check against it later
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front,
                       custom_tags=[]):

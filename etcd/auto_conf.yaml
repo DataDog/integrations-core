@@ -1,0 +1,7 @@
+ad_identifiers:
+  - etcd
+
+init_config:
+
+instances:
+  - url: "http://%%host%%:%%port_0%%"

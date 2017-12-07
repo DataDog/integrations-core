@@ -12,18 +12,20 @@ redis.cpu.user,gauge,,second,,User CPU consumed by the Redis server.,-1,redis,cp
 redis.cpu.user_children,gauge,,second,,User CPU consumed by the background processes.,-1,redis,cpu user children
 redis.expires,gauge,,key,,The number of keys that have expired.,0,redis,expires
 redis.expires.percent,gauge,,percent,,Percentage of total keys that have been expired.,0,redis,expires pct
-redis.info.latency_ms,gauge,,millisecond,,The latency of the redis info command.,0,redis,info latency
-redis.key.length,gauge,,,,The number of elements in the given key.,0,redis,key length
+redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
+redis.key.length,gauge,,,,"The number of elements in a given key, tagged by key, e.g. 'key:mykeyname'. Enable in Agent's redisdb.yaml with the keys option.",0,redis,key length
 redis.keys,gauge,,key,,The total number of keys.,0,redis,keys
 redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxmemory limit.,0,redis,keys evicted
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired
 redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua
+redis.mem.maxmemory,,byte,,Maximum amount of memory alloted to the Redisdb system.,-1,redis,mem maxmemory
 redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,mem peak
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands
+redis.net.commands.instantaneous_ops_per_sec,gauge,command,second,The number of commands processed by the server per second.,0,redis,net commands
 redis.net.rejected,gauge,,connection,,The number of rejected connections.,-1,redis,net rejected
 redis.net.slaves,gauge,,connection,,The number of connected slaves.,0,redis,slaves
 redis.perf.latest_fork_usec,gauge,,microsecond,,The duration of the latest fork.,-1,redis,latest fork usec
@@ -49,3 +51,5 @@ redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries rep
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median
 redis.stats.keyspace_hits,gauge,,key,,The total number of successful lookups in the db.,0,redis,keyspace hits
 redis.stats.keyspace_misses,gauge,,key,,The total number of missed lookups in the db.,0,redis,keyspace misses
+redis.command.calls,gauge,,,,"The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,cmd calls
+redis.command.usec_per_call,gauge,,,,"The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,usec per cmd

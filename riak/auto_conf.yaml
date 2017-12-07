@@ -1,0 +1,7 @@
+ad_identifiers:
+  - riak
+
+init_config:
+
+instances:
+  - url: http://%%host%%:%%port%%/stats

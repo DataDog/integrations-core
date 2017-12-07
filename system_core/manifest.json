@@ -1,10 +1,23 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "system_core",
-  "short_description": "system_core description.",
-  "support": "contrib",
-  "version": "0.1.0"
+  "short_description": "Collect the number of CPU cores and CPU times on a host",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "1.0.0",
+  "guid": "e123ef26-81bb-4c1b-b079-4dd4cc7d7ae7",
+  "public_title": "Datadog-System Core Integration",
+  "categories":["os & system"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/system_core/",
+  "is_public": true,
+  "has_logo": true,
+  "aliases":["/integrations/systemcore"]
 }

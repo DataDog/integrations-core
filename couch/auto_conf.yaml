@@ -1,0 +1,7 @@
+ad_identifiers:
+  - couchdb
+
+init_config:
+
+instances:
+  - server: http://%%host%%:%%port%%

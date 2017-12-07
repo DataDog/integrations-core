@@ -1,12 +1,14 @@
 # stdlib
+import os
 import json
 
 # project
-from shared.test.common import AgentCheckTest, Fixtures, get_check_class
+from tests.checks.common import AgentCheckTest, Fixtures, get_check_class
 
 
 class TestMesosMaster(AgentCheckTest):
     CHECK_NAME = 'mesos_master'
+    FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
     def test_checks(self):
         config = {
@@ -19,9 +21,12 @@ class TestMesosMaster(AgentCheckTest):
         }
 
         mocks = {
-            '_get_master_roles': lambda x, y, z: json.loads(Fixtures.read_file('roles.json')),
-            '_get_master_stats': lambda x, y, z: json.loads(Fixtures.read_file('stats.json')),
-            '_get_master_state': lambda x, y, z: json.loads(Fixtures.read_file('state.json')),
+            '_get_master_roles': lambda x, y, z: json.loads(
+                Fixtures.read_file('roles.json', sdk_dir=self.FIXTURE_DIR)),
+            '_get_master_stats': lambda x, y, z: json.loads(
+                Fixtures.read_file('stats.json', sdk_dir=self.FIXTURE_DIR)),
+            '_get_master_state': lambda x, y, z: json.loads(
+                Fixtures.read_file('state.json', sdk_dir=self.FIXTURE_DIR)),
         }
 
         klass = get_check_class('mesos_master')

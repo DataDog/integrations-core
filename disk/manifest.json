@@ -1,10 +1,22 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "disk",
   "short_description": "The disk check gathers metrics on mounted disks.",
   "support": "core",
-  "version": "0.1.0"
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "1.0.2",
+  "guid": "94588b23-111e-4ed2-a2af-fd6e4caeea04",
+  "public_title": "Datadog-Disk Integration",
+  "categories":["os & system"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/disk/",
+  "is_public": true,
+  "has_logo": true
 }
