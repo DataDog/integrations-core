@@ -94,3 +94,6 @@ tmp
 # Common IDEs & editors
 .idea/
 .vscode/
+
+# wheels
+wheelhouse/
