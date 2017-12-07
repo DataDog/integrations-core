@@ -37,6 +37,26 @@ In other words: on the day of a new `datadog-agent` release, you'll likely get t
 
 For a check with underscores in its name, its package name replaces underscores with dashes. For example, the `powerdns_recursor` check is packaged as `dd-check-powerdns-recursor`.
 
+# Building the integrations as Python wheels (work in progress)
+
+First, build our custom manylinux Docker image:
+
+```
+git clone git@github.com:trishankatdatadog/manylinux.git
+cd manylinux/docker
+git checkout trishank_kuppusamy/develop
+time sudo docker build -t pypa/manylinux:trishankatdatadog -f Dockerfile-x86_64 .
+```
+
+Second, build the wheels using this Docker image:
+
+```
+git clone git@github.com:trishankatdatadog/integrations-core.git
+cd integrations-core
+git checkout trishank_kuppusamy/dockerize-build
+time sudo docker run --rm -v `pwd`:/shared pypa/manylinux:trishankatdatadog /shared/build-wheels.sh && ls wheelhouse
+```
+
 # Reporting Issues
 
 For more information on integrations, please reference our [documentation](http://docs.datadoghq.com) and [knowledge base](https://help.datadoghq.com/hc/en-us). You can also visit our [help page](http://docs.datadoghq.com/help/) to connect with us.
