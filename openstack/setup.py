@@ -16,7 +16,7 @@ runtime_reqs = ['datadog-base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = line.rpartition('#')
-        if req[2]:
+        if not len(req[1]):
             runtime_reqs.append(req[2])
 
 version = None
