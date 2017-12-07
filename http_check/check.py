@@ -281,6 +281,8 @@ class HTTPCheck(NetworkCheck):
             running_time = time.time() - start
             # Store tags in a temporary list so that we don't modify the global tags data structure
             tags_list = list(tags)
+
+            # Only add the URL tag if it's not already present
             if not filter(re.compile('^url:').match, tags_list):
                 tags_list.append('url:%s' % addr)
 
@@ -355,6 +357,8 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         tags_list = []
         tags_list.extend(tags)
+
+        # Only add the URL tag if it's not already present
         if not filter(re.compile('^url:').match, tags_list):
             tags_list.append('url:%s' % url)
 
@@ -421,10 +425,11 @@ class HTTPCheck(NetworkCheck):
         instance_name = self.normalize(instance['name'])
         url = instance.get('url', None)
         tags = instance.get('tags', [])
+        tags.append("instance:{0}".format(instance_name))
+
+        # Only add the URL tag if it's not already present
         if not filter(re.compile('^url:').match, tags):
             tags.append('url:{0}'.format(url))
-
-        tags.append("instance:{0}".format(instance_name))
 
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
