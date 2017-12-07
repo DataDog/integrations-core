@@ -42,9 +42,10 @@ mkdir -p /shared/wheelhouse/
 rm /shared/wheelhouse/*
 # Copy PURE wheels over.
 # FIXME: ensure no filename clashes.
-cp -r temphouse/*-none-any.whl /shared/wheelhouse/
+cp temphouse/*-none-any.whl     /shared/wheelhouse/
 # NOTE: temporarily, copying dogehouse last prevents temphouse from overriding.
-cp -r dogehouse/*-none-any.whl /shared/wheelhouse/
+cp dogehouse/*-none-any.whl     /shared/wheelhouse/
+cp dogehouse/*-manylinux1_*.whl /shared/wheelhouse/
 
 # Bundle external shared libraries into the wheels
 # auditwheel does not ignore pure Python wheels.
