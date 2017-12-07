@@ -43,12 +43,12 @@ class FargateCheck(AgentCheck):
         except requests.exceptions.Timeout as e:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(metadata_endpoint, timeout)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
-            self.log.error(msg)
+            self.log.exception(msg)
             return
-        except Exception as e:
+        except request.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
-            self.log.error(msg)
+            self.log.exception(msg)
             return
 
         if request.status_code != 200:
@@ -60,10 +60,10 @@ class FargateCheck(AgentCheck):
         metadata = {}
         try:
             metadata = request.json()
-        except:
+        except ValueError:
             msg = 'Cannot decode Fargate {} endpoint response'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
-            self.log.warning(msg)
+            self.log.warning(msg, exc_info=True)
             return
 
         if not all (k in metadata for k in ("Cluster","Containers")):
@@ -96,15 +96,15 @@ class FargateCheck(AgentCheck):
 
         try:
             request = requests.get(stats_endpoint, timeout=timeout)
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, timeout)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
-            self.log.warning(msg)
+            self.log.warning(msg, exc_info=True)
             return
-        except Exception as e:
+        except request.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(stats_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
-            self.log.warning(msg)
+            self.log.warning(msg, exc_info=True)
             return
 
         if request.status_code != 200:
@@ -116,10 +116,10 @@ class FargateCheck(AgentCheck):
         stats = {}
         try:
             stats = request.json()
-        except:
+        except ValueError:
             msg = 'Cannot decode Fargate {} endpoint response'.format(stats_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
-            self.log.warning(msg)
+            self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
             # CPU metrics
