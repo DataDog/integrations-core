@@ -1,7 +1,7 @@
 require 'ci/common'
 
 def sqlserver_version
-  ENV['FLAVOR_VERSION'] || 'latest'
+  ENV['FLAVOR_VERSION'] || '2017-latest'
 end
 
 container_repo = "microsoft/mssql-server-linux:#{sqlserver_version}"
@@ -13,14 +13,13 @@ namespace :ci do
   namespace :sqlserver do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('sqlserver/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('sqlserver')
 
-      sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
-           --name #{container_name} -d #{container_repo}) unless Gem.win_platform?
+      unless Gem.win_platform?
+        sh %(docker run -e 'ACCEPT_EULA=Y' -e '#{sqlserver_sa_pass}' -p #{container_port}:#{container_port} \
+             --name #{container_name} -d #{container_repo})
+      end
     end
 
     task before_script: ['ci:common:before_script']

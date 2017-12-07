@@ -11,9 +11,17 @@ system.net.tcp.rcv_packs,gauge,,packet,second,The number of TCP packets received
 system.net.tcp.retrans_packs,gauge,,packet,second,The number of TCP packets retransmitted.,0,system,pkts retrans
 system.net.tcp.retrans_segs,gauge,,segment,second,The number of TCP segments retransmitted.,0,system,segs retrans
 system.net.tcp.sent_packs,gauge,,packet,second,The number of TCP packets transmitted.,0,system,pkts sent
-system.net.tcp.rtt,gauge,10,millisecond,,The TCP round trip time.,-1,system,tcp rtt
-system.net.tcp.rtt.avg,gauge,10,millisecond,,The average TCP round trip time as typically computed by the TCP stack.,-1,system,tcp rtt avg
-system.net.tcp.rtt.jitter,gauge,10,millisecond,,The TCP round trip time jitter.,-1,system,tcp rtt jitter
+system.net.tcp.listen_overflows,gauge,,,,The number of times connections have overflowed the accept buffer. Available since Agent v5.14.0.,-1,system,tcp listen overflows
+system.net.tcp.listen_drops,gauge,,,,The number of times connections have dropped out of listen. Available since Agent v5.14.0.,-1,system,tcp listen drops
+system.net.tcp.backlog_drops,gauge,,packet,,The number of packets dropped because there wasn't room in the TCP backlog. Available since Agent v5.14.0.,-1,system,tcp backlog drops
+system.net.tcp4.closing,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 closing
+system.net.tcp4.established,gauge,,connection,second,The number of TCP IPv4 closing connections. ,0,system,tcp4 established
+system.net.tcp4.listening,gauge,,connection,second,The number of TCP IPv4 listening connections. ,0,system,tcp4 listening
+system.net.tcp4.opening,gauge,,connection,second,The number of TCP IPv4 opening connections. ,0,system,tcp4 opening
+system.net.tcp6.closing,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 closing
+system.net.tcp6.established,gauge,,connection,second,The number of TCP IPv6 closing connections. ,0,system,tcp6 established
+system.net.tcp6.listening,gauge,,connection,second,The number of TCP IPv6 listening connections. ,0,system,tcp6 listening
+system.net.tcp6.opening,gauge,,connection,second,The number of TCP IPv6 opening connections. ,0,system,tcp6 opening
 system.net.udp.in_datagrams,gauge,,datagram,second,"The rate of UDP datagrams delivered to UDP users.",0,system,udp in datagrams
 system.net.udp.in_errors,gauge,,datagram,second,"The rate of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.",-1,system,udp in errors
 system.net.udp.no_ports,gauge,,datagram,second,"The rate of received UDP datagrams for which there was no application at the destination port.",-1,system,udp no_ports

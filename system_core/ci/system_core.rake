@@ -12,11 +12,8 @@ namespace :ci do
   namespace :system_core do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('system_core/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('system_core')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name system_core source/system_core:system_core_version)
       # sh %(docker start system_core)

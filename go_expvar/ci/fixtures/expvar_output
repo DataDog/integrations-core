@@ -4,5 +4,6 @@
 "random_walk": 0.2813217443279966,
 "steps": 5,
 "public": {"bla": 1},
-"random_value": 0.6868230728671094
+"random_value": 0.6868230728671094,
+"array": [{"key":10},{"key":15}]
 }

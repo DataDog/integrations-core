@@ -19,11 +19,8 @@ namespace :ci do
       sh %(docker rm -f #{pgname} #{pgbname} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('pgbouncer/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('pgbouncer')
       puts 'Installing Postgres'
       sh %(docker run --name #{pgname} -v #{pg_resources_path}:/docker-entrypoint-initdb.d -e POSTGRES_PASSWORD=datadog -d postgres:latest)
       count = 0
@@ -34,7 +31,8 @@ namespace :ci do
         count += 1
       end
       puts 'Postgres is running, installing PgBouncer'
-      sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p 16432:6432 kotaimen/pgbouncer)
+      sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p \
+        16432:6432 kotaimen/pgbouncer:#{pgbouncer_version})
       sleep_for 10
     end
 

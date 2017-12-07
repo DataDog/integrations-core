@@ -11,10 +11,10 @@ init_config:
       # nova_api_version: 'v2.1'
 
       # IDs of Nova Hypervisors to monitor
-      # This is only required when nova_api_version is set to `v2` since
-      # indexing hypervsiors is restricted to `admin`s in Compute API v2
-      # With v2.1, the check will intelligently discover the locally running
-      # hypervisor, based on the hypervisor_hostname
+      # Required for OpenStack Kilo or `nova_api_version` v2 -indexing hypervisors is restricted
+      # to `admin`s in Compute API v2-.
+      # On more recent versions, the check automatically discovers the locally running hypervisor,
+      # based on the `hypervisor_hostname`.
 
       # hypervisor_ids:
       #    - 1

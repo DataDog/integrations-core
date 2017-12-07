@@ -12,11 +12,8 @@ namespace :ci do
   namespace :wmi_check do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('wmi_check/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('wmi_check')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name wmi_check source/wmi_check:wmi_check_version)
       # sh %(docker start wmi_check)

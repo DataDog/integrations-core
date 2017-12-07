@@ -3,6 +3,8 @@ init_config:
   # zk_timeout: 5
   # Customize the Kafka connection timeout here
   # kafka_timeout: 5
+  # Customize max number of retries per failed query to Kafka
+  # kafka_retries: 3
   # Customize the number of seconds that must elapse between running this check.
   # When checking Kafka offsets stored in Zookeeper, a single run of this check
   # must stat zookeeper more than the number of consumers * topic_partitions
@@ -10,23 +12,50 @@ init_config:
   # to increase this value to avoid hitting zookeeper too hard.
   # https://help.datadoghq.com/hc/en-us/articles/203557899-How-do-I-change-the-frequency-of-an-agent-check-
   # min_collection_interval: 600
+  #
+  # Please note that to avoid blindly collecting offsets and lag for an
+  # unbounded number of partitions (as could be the case after introducing
+  # the self discovery of consumer groups, topics and partitions) the check
+  # will collect at metrics for at most 100 partitions.
+
 
 instances:
-  # - kafka_connect_str: localhost:9092
-  #   zk_connect_str: localhost:2181
-  #   zk_prefix: /0.8
-  #   consumer_groups:
-  #     my_consumer:
-  #       my_topic: [0, 1, 4, 12]
-
-  # Production example with redundant hosts:
   # In a production environment, it's often useful to specify multiple
   # Kafka / Zookeper nodes for a single check instance. This way you
   # only generate a single check process, but if one host goes down,
   # KafkaClient / KazooClient will try contacting the next host.
   # Details: https://github.com/DataDog/dd-agent/issues/2943
   #
-  # - kafka_connect_str:
-  #   - <kafka_host1:port>
-  #   - <kafka_host2:port>
-  #   zk_connect_str: <zk_host1:port>,<zk_host2:port>
+  # If you wish to only collect consumer offsets from kafka, because
+  # you're using the new style consumers, you can comment out all
+  # zk_* configuration elements below.
+  # Please note that unlisted consumer groups are not supported at
+  # the moment when zookeeper consumer offset collection is disabled.
+  - kafka_connect_str:
+      - localhost:9092
+      - another_kafka_broker:9092
+    zk_connect_str:
+      - localhost:2181
+      - another_zookeeper:2181
+    # zk_iteration_ival: 1  # how many seconds between ZK consumer offset
+                            # collections. If kafka consumer offsets disabled
+                            # this has no effect.
+    # zk_prefix: /0.8
+    # kafka_consumer_offsets: false
+    consumer_groups:
+      my_consumer:  # consumer group name
+        my_topic: [0, 1, 4, 12]  # topic_name: list of partitions
+      # Note that each level of values is optional. Any omitted values will be
+      # fetched from Zookeeper. You can omit partitions (example: myconsumer2),
+      # topics (example: myconsumer3), and even consumer_groups. If you omit
+      # consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
+      # If a value is omitted, the parent value must still be it's expected type,
+      # which is typically a dict.
+      myconsumer2:
+        mytopic0:
+      myconsumer3:
+    # Setting monitor_unlisted_consumer_groups to True will tell the check to
+    # discover and fetch all offsets for all consumer groups stored in zookeeper.
+    # While this is convenient, it can also put a lot of load on zookeeper, so
+    # use judiciously.
+    monitor_unlisted_consumer_groups: False

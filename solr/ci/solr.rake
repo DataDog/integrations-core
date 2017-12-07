@@ -28,11 +28,8 @@ namespace :ci do
       sh %(docker rm #{container_name} 2>/dev/null || true)
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('solr/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('solr')
       # docker_image = "harisekhon/solr:#{solr_version} java -jar /solr/server/solr/start.jar"
       docker_image = "solr:#{solr_version}"
       sh %(docker run -d -e ENABLE_REMOTE_JMX_OPTS=true -e RMI_PORT=18983 \

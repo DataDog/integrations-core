@@ -156,18 +156,18 @@ class Network(AgentCheck):
                 ('tcp4', 'listen') : 'system.net.tcp4.listen',
                 ('tcp4', 'last_ack') : 'system.net.tcp4.time_wait',
 
-                ('tcp6', 'estab') : 'system.net.tcp4.estab',
-                ('tcp6', 'syn_sent') : 'system.net.tcp4.syn_sent',
-                ('tcp6', 'syn_recv') : 'system.net.tcp4.syn_recv',
-                ('tcp6', 'fin_wait_1') : 'system.net.tcp4.fin_wait_1',
-                ('tcp6', 'fin_wait_2') : 'system.net.tcp4.fin_wait_2',
-                ('tcp6', 'time_wait') : 'system.net.tcp4.time_wait',
-                ('tcp6', 'unconn') : 'system.net.tcp4.unconn',
-                ('tcp6', 'close') : 'system.net.tcp4.close',
-                ('tcp6', 'close_wait') : 'system.net.tcp4.close_wait',
-                ('tcp6', 'closing') : 'system.net.tcp4.closing',
-                ('tcp6', 'listen') : 'system.net.tcp4.listen',
-                ('tcp6', 'last_ack') : 'system.net.tcp4.time_wait',
+                ('tcp6', 'estab') : 'system.net.tcp6.estab',
+                ('tcp6', 'syn_sent') : 'system.net.tcp6.syn_sent',
+                ('tcp6', 'syn_recv') : 'system.net.tcp6.syn_recv',
+                ('tcp6', 'fin_wait_1') : 'system.net.tcp6.fin_wait_1',
+                ('tcp6', 'fin_wait_2') : 'system.net.tcp6.fin_wait_2',
+                ('tcp6', 'time_wait') : 'system.net.tcp6.time_wait',
+                ('tcp6', 'unconn') : 'system.net.tcp6.unconn',
+                ('tcp6', 'close') : 'system.net.tcp6.close',
+                ('tcp6', 'close_wait') : 'system.net.tcp6.close_wait',
+                ('tcp6', 'closing') : 'system.net.tcp6.closing',
+                ('tcp6', 'listen') : 'system.net.tcp6.listen',
+                ('tcp6', 'last_ack') : 'system.net.tcp6.time_wait',
             }
 
             self.tcp_states = {
@@ -260,23 +260,27 @@ class Network(AgentCheck):
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
                 for ip_version in ['4', '6']:
-                    # Call `ss` for each IP version because there's no built-in way of distinguishing
-                    # between the IP versions in the output
-                    output, _, _ = get_subprocess_output(["ss", "-n", "-u", "-t", "-a", "-{0}".format(ip_version)], self.log)
-                    lines = output.splitlines()
-                    # Netid  State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
-                    # udp    UNCONN     0      0              127.0.0.1:8125                  *:*
-                    # udp    ESTAB      0      0              127.0.0.1:37036         127.0.0.1:8125
-                    # udp    UNCONN     0      0        fe80::a00:27ff:fe1c:3c4:123          :::*
-                    # tcp    TIME-WAIT  0      0          90.56.111.177:56867        46.105.75.4:143
-                    # tcp    LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
-                    # tcp    ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
+                    for protocol in ['tcp', 'udp']:
+                        # Call `ss` for each IP version because there's no built-in way of distinguishing
+                        # between the IP versions in the output
+                        # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
+                        # bug that print `tcp` even if it's `udp`
+                        output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log)
+                        lines = output.splitlines()
 
-                    metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 1, ip_version=ip_version)
-                    # Only send the metrics which match the loop iteration's ip version
-                    for stat, metric in self.cx_state_gauge.iteritems():
-                        if stat[0].endswith(ip_version):
-                            self.gauge(metric, metrics.get(metric))
+                        # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
+                        # UNCONN     0      0              127.0.0.1:8125                  *:*
+                        # ESTAB      0      0              127.0.0.1:37036         127.0.0.1:8125
+                        # UNCONN     0      0        fe80::a00:27ff:fe1c:3c4:123          :::*
+                        # TIME-WAIT  0      0          90.56.111.177:56867        46.105.75.4:143
+                        # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
+                        # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
+
+                        metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version)
+                        # Only send the metrics which match the loop iteration's ip version
+                        for stat, metric in self.cx_state_gauge.iteritems():
+                            if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
+                                self.gauge(metric, metrics.get(metric))
 
             except OSError:
                 self.log.info("`ss` not found: using `netstat` as a fallback")
@@ -325,53 +329,43 @@ class Network(AgentCheck):
                 }
                 self._submit_devicemetrics(iface, metrics)
 
-        try:
-            proc_snmp_path = "{}/net/snmp".format(proc_location)
-            proc = open(proc_snmp_path, 'r')
 
-            # IP:      Forwarding   DefaultTTL InReceives     InHdrErrors  ...
-            # IP:      2            64         377145470      0            ...
-            # Icmp:    InMsgs       InErrors   InDestUnreachs InTimeExcds  ...
-            # Icmp:    1644495      1238       1643257        0            ...
-            # IcmpMsg: InType3      OutType3
-            # IcmpMsg: 1643257      1643257
-            # Tcp:     RtoAlgorithm RtoMin     RtoMax         MaxConn      ...
-            # Tcp:     1            200        120000         -1           ...
-            # Udp:     InDatagrams  NoPorts    InErrors       OutDatagrams ...
-            # Udp:     24249494     1643257    0              25892947     ...
-            # UdpLite: InDatagrams  Noports    InErrors       OutDatagrams ...
-            # UdpLite: 0            0          0              0            ...
+
+        netstat_data = {}
+        for f in ['netstat', 'snmp']:
+            proc_data_path = "{}/net/{}".format(proc_location, f)
             try:
-                lines = proc.readlines()
-            finally:
-                proc.close()
+                with open(proc_data_path, 'r') as netstat:
+                    while True:
+                        n_header = netstat.readline()
+                        if not n_header:
+                            break # No more? Abort!
+                        n_data = netstat.readline()
 
-            tcp_lines = [line for line in lines if line.startswith('Tcp:')]
-            udp_lines = [line for line in lines if line.startswith('Udp:')]
+                        h_parts = n_header.strip().split(' ')
+                        h_values = n_data.strip().split(' ')
+                        ns_category = h_parts[0][:-1]
+                        netstat_data[ns_category] = {}
+                        # Turn the data into a dictionary
+                        for idx, hpart in enumerate(h_parts[1:]):
+                            netstat_data[ns_category][hpart] = h_values[idx + 1]
+            except IOError:
+                # On Openshift, /proc/net/snmp is only readable by root
+                self.log.debug("Unable to read %s.", proc_data_path)
 
-            tcp_column_names = tcp_lines[0].strip().split()
-            tcp_values = tcp_lines[1].strip().split()
-            tcp_metrics = dict(zip(tcp_column_names, tcp_values))
-
-            udp_column_names = udp_lines[0].strip().split()
-            udp_values = udp_lines[1].strip().split()
-            udp_metrics = dict(zip(udp_column_names, udp_values))
-
-            # line start indicating what kind of metrics we're looking at
-            assert(tcp_metrics['Tcp:'] == 'Tcp:')
-
-            tcp_metrics_name = {
+        nstat_metrics_names = {
+            'Tcp': {
                 'RetransSegs': 'system.net.tcp.retrans_segs',
-                'InSegs'     : 'system.net.tcp.in_segs',
-                'OutSegs'    : 'system.net.tcp.out_segs'
-            }
-
-            for key, metric in tcp_metrics_name.iteritems():
-                self.rate(metric, self._parse_value(tcp_metrics[key]))
-
-            assert(udp_metrics['Udp:'] == 'Udp:')
-
-            udp_metrics_name = {
+                'InSegs': 'system.net.tcp.in_segs',
+                'OutSegs': 'system.net.tcp.out_segs',
+            },
+            'TcpExt': {
+                'ListenOverflows': 'system.net.tcp.listen_overflows',
+                'ListenDrops': 'system.net.tcp.listen_drops',
+                'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
+                'TCPRetransFail': 'system.net.tcp.failed_retransmits',
+            },
+            'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
                 'NoPorts': 'system.net.udp.no_ports',
                 'InErrors': 'system.net.udp.in_errors',
@@ -380,28 +374,28 @@ class Network(AgentCheck):
                 'SndbufErrors': 'system.net.udp.snd_buf_errors',
                 'InCsumErrors': 'system.net.udp.in_csum_errors'
             }
-            for key, metric in udp_metrics_name.iteritems():
-                if key in udp_metrics:
-                    self.rate(metric, self._parse_value(udp_metrics[key]))
+        }
 
-        except IOError:
-            # On Openshift, /proc/net/snmp is only readable by root
-            self.log.debug("Unable to read %s.", proc_snmp_path)
+        # Skip the first line, as it's junk
+        for k in nstat_metrics_names:
+            for met in nstat_metrics_names[k]:
+                if met in netstat_data.get(k, {}):
+                    self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]))
 
     # Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
     # Returns a dict metric_name -> value
-    def _parse_linux_cx_state(self, lines, tcp_states, state_col, ip_version=None):
+    def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         metrics = dict.fromkeys(self.cx_state_gauge.values(), 0)
         for l in lines:
             cols = l.split()
-            if cols[0].startswith('tcp'):
-                protocol = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
+            if cols[0].startswith('tcp') or protocol == 'tcp':
+                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
                 if cols[state_col] in tcp_states:
-                    metric = self.cx_state_gauge[protocol, tcp_states[cols[state_col]]]
+                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
                     metrics[metric] += 1
-            elif cols[0].startswith('udp'):
-                protocol = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
-                metric = self.cx_state_gauge[protocol, 'connections']
+            elif cols[0].startswith('udp') or protocol == 'udp':
+                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
+                metric = self.cx_state_gauge[proto, 'connections']
                 metrics[metric] += 1
 
         return metrics
@@ -442,7 +436,7 @@ class Network(AgentCheck):
             #          -7       -6       -5        -4       -3       -2        -1
             for h in ("Ipkts", "Ierrs", "Ibytes", "Opkts", "Oerrs", "Obytes", "Coll"):
                 if h not in headers:
-                    self.logger.error("%s not found in %s; cannot parse" % (h, headers))
+                    self.log.error("%s not found in %s; cannot parse" % (h, headers))
                     return False
 
             current = None

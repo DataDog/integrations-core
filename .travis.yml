@@ -1,28 +1,22 @@
 sudo: required
-
 language: python
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $HOME/dd-agent
+    - "$HOME/.cache/pip"
+    - "$HOME/.cache/oracle"
+    - "$HOME/dd-agent"
     - vendor/cache
-
 python:
-  - "2.7"
-
+  - '2.7'
 git:
   depth: 3
-
 branches:
   only:
     - master
-
 services:
   - docker
-
 matrix:
   fast_finish: true
-
 env:
   global:
     - NOSE_FILTER="not windows and not fixme"
@@ -34,16 +28,27 @@ env:
     - BUNDLE_PATH=$TRAVIS_BUILD_DIR/vendor/cache
     - DD_AGENT_BRANCH=master
     - EXTRAS_BRANCH=master
+    - JMXFETCH_URL="https://dd-jmxfetch.s3.amazonaws.com"
     - REQ_LOCALS="$TRAVIS_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
+    - ORACLE_DIR="$HOME/.cache/oracle"
+    - ORACLE_HOME="$ORACLE_DIR/instantclient"
+    - secure: svCN72hRYTTBqLTeiH8wJgzQ4hdf3wKYy5ZpOSbKwmU5MXDK2T/UMsemHF4hNqiinGpFEQWJ2BFlXc4CHNXrePeJFlQOyKuVcvD8Wx0awKEbZNwIRrCwlF8n+yQL3EsgLeGPnrQWovZ4N+9cJlEGBsardlqAUopM7sSXul/eidyomcHaVCYa9t60ZF+eApVViPEBaqMn7x1X8NnCcibbNcxCuoKQ5eAg3FGBSa4gvR2BxgSGEKSK7EYfjhQ4rrBHHEtvn9Mr4lm6KGD6+RVbNkFfI16v+OZ3kYJSxRz6HJbmkMRzrk/5Nx1kYTKQ6euZGxg7U1u9/dEjFClhrGp8SgtGvOCVzN6Zbi5fbo9r3YerjIrQWy2EHBk0gKnuNzj49VKCSK+PkO9P08OcyrbuADWkdf3ndBRacVwAz0VcWyzYhOco9psrTDQkzJA6O4D6mTw5nRk2JCEePlMm3+O9BWfYMx2w40cm3FlFspjtkQLQGg/sofyUdWw7afg1y6UcpgGE8P6uR1PK/Up1OjmCFnonlmeE3+vYJ8E5qlwrJEVGGACJhjYKCD24z5V+qlONHgBD2ZwZv7WEYatP0TPx7p+F/xKWCQ58QtXXC6KvCkzMqQG2rqspihxc/gEUmYpVIlrH9Ur5Bj3d9EST+3ID7Q44uzFVC+aUZVi7BsNFCV0=
+    - secure: iP9zysxEVrD+uDlKh4dGDYhr/IHOd0W9GqEy9EedwnJIXT5eGOwJpBpIwctL2kHxX/SWhHZhiGZy1Yw3OhfhsQHQet0dvUO673OjgCr8tf43WsUKIOPPtMX1MlweEjDkNDMv9IwDk3TRk1/aAsFGz7ARP1zN/GmRQg5PEdWNZ6uMpFn82/5VTkfsyaD5AcDLXzaM/A9OqSKGDvASooK0Z0oIYxJ0dXPfIlzR0hzO+76jm7TEvKfmcPH++N8YqnRDJYKrG2RLRZlhEBlbDH75GoYGB47VUyWuCqiqLfMpj30o7riYeYe3yJtZy39n8gvUFF7NJjNL8hUkxeQA5HN1JdiIft/IAqpMgUH3qttPtXYjvDS83PcE+bUahQ4ZOmUSMmoYBVfIO8/ZgebUR6kygt0tpld14+j4byUcStgm82GiePG/8qRhc2fWrbwI68ET6ur+WWrcklk1Ql9rq8cFPyNxL32WJevJg1fs4TRe18KjIqANYeISp1FXjgkjck6cf11v0yGhkPDQOx/eiLqWF16DQ5+P3EJjLAaNxK+SjOtfKmk4Sib4OCUI7HP6BCcD3FN/w/PAWeTj5tXBLm8yomObaAPyxl49VGPZSFRs7zKnV6pbEyx9IwwcW1n0U7I8wtuFGFp6SUJyPYpmJo6a0yY0F4kdwXcRmu+6aZ71R40=
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
     - TRAVIS_FLAVOR=apache FLAVOR_VERSION=2.4.12
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.1.14
+    - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.2.10
+    - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.0.17
+    - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.1.14
+    - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
     - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
+    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
     - TRAVIS_FLAVOR=consul FLAVOR_VERSION=v0.6.4
     - TRAVIS_FLAVOR=consul FLAVOR_VERSION=0.7.2
+    - TRAVIS_FLAVOR=consul FLAVOR_VERSION=1.0.0
     - TRAVIS_FLAVOR=docker_daemon
     - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=0.90.13
     - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.0.3
@@ -59,33 +64,50 @@ env:
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
     - TRAVIS_FLAVOR=gearmand FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=gitlab FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=gitlab_runner MASTER_FLAVOR_VERSION=latest RUNNER_FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=gunicorn FLAVOR_VERSION=19.6.0
     - TRAVIS_FLAVOR=go_expvar FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.4.26
     - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.5.11
     - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.6.9
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.1.0-1
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.8.1.1-1 FLAVOR_OPTIONS='zookeeper'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='zookeeper'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='kafka'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.2.1 FLAVOR_OPTIONS='zookeeper'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.2.1 FLAVOR_OPTIONS='kafka'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.11.0.1 FLAVOR_OPTIONS='zookeeper'
+    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.11.0.1 FLAVOR_OPTIONS='kafka'
     - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=0.10.1.0-1
-    - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.8.1
+    - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.9.0
+    - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
+    - TRAVIS_FLAVOR=kubernetes
     - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
     - TRAVIS_FLAVOR=lighttpd
     - TRAVIS_FLAVOR=mcache FLAVOR_VERSION=1.4.22
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=2.6.9
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.0.1
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
-    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.4
+    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.5
+    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.6
+    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.7
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.6.2
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.7.11
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.9.15
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.11.8
     - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.10.2
     - TRAVIS_FLAVOR=openstack
-    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=latest
+    # - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=debian-jessie  # pgbouncer-1.5.4
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=debian-stretch # pgbouncer-1.7.2
+    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=ubuntu-xenial  # pgbouncer-1.7
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
-    - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=9.6
     - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=3.7.3
     - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=4.0.3
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.5.0
+    - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.6.0
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.4.18
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.6.17
     - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.8.19
@@ -93,38 +115,29 @@ env:
     - TRAVIS_FLAVOR=ssh_check
     - TRAVIS_FLAVOR=snmp
     - TRAVIS_FLAVOR=solr FLAVOR_VERSION=6.2
-    - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=latest
+    - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=2017-GA
     - TRAVIS_FLAVOR=statsd
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
+    - TRAVIS_FLAVOR=tcp_check
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.4
+    - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.7
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
-    - TRAVIS_FLAVOR=win32_event_log
     # END OF TRAVIS MATRIX
-
-before_install:
-  - sudo apt-get update ; sudo apt-get install -y curl apt-transport-https git netcat net-tools libpq-dev
-
 install:
   - bundle install
   - bundle package
   - git -C $HOME/dd-agent pull || git clone -b $DD_AGENT_BRANCH --depth 1 https://github.com/DataDog/dd-agent.git $HOME/dd-agent
   - git -C $HOME/integrations-extras pull || git clone -b $EXTRAS_BRANCH --depth 1 https://github.com/DataDog/integrations-extras.git $HOME/integrations-extras
   - echo "$HOME/dd-agent/" > $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/datadog-agent.pth
-  - pip install 'docker-compose==1.9.0'
-  - pip install pylint
-  - if [ -e $TRAVIS_BUILD_DIR/requirements.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements.txt; fi
-  - if [ -e $TRAVIS_BUILD_DIR/requirements-test.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-test.txt; fi
-  - if [ -e $TRAVIS_BUILD_DIR/requirements-opt.txt ]; then pip install -r $TRAVIS_BUILD_DIR/requirements-opt.txt; fi
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
-
+  - pip install -r requirements-test.txt
+  - bundle exec rake setup_agent_libs
 script:
   - bundle exec rake prep_travis_ci
   - bundle exec rake ci:run
   - bundle exec rake requirements
-
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files
 # Since clobber only cleans the project directory,
@@ -132,6 +145,5 @@ script:
 before_cache:
   - rake clobber
   - find $HOME/.cache/pip $HOME/dd-agent -name *.pyc -delete
-
 after_script:
   - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

@@ -12,11 +12,8 @@ namespace :ci do
   namespace :teamcity do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('teamcity/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('teamcity')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name teamcity source/teamcity:teamcity_version)
       # sh %(docker start teamcity)

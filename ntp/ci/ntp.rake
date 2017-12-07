@@ -12,11 +12,8 @@ namespace :ci do
   namespace :ntp do |flavor|
     task before_install: ['ci:common:before_install']
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('ntp/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('ntp')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name ntp source/ntp:ntp_version)
       # sh %(docker start ntp)

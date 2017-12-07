@@ -22,11 +22,8 @@ namespace :ci do
       end
     end
 
-    task install: ['ci:common:install'] do
-      use_venv = in_venv
-      install_requirements('redisdb/requirements.txt',
-                           "--cache-dir #{ENV['PIP_CACHE']}",
-                           "#{ENV['VOLATILE_DIR']}/ci.log", use_venv)
+    task :install do
+      Rake::Task['ci:common:install'].invoke('redisdb')
 
       redis_image = if redisdb_version == '2.4.18'
                       'mtirsel/redis-2.4'

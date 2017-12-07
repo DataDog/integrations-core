@@ -38,6 +38,9 @@ class MockProcess(object):
     def is_running(self):
         return True
 
+    def children(self, recursive=False):
+        return []
+
 def noop_get_pagefault_stats(pid):
     return None
 
@@ -355,6 +358,52 @@ class ProcessCheckTest(AgentCheckTest):
                 continue
 
             self.assertMetric('system.processes.cpu.pct', count=1, tags=expected_tags)
+
+    def mock_get_child_processes(self, pids):
+        return [2, 3, 4]
+
+    @patch('psutil.Process', return_value=MockProcess())
+    def test_check_collect_children(self, mock_process):
+
+
+        config = {
+            'instances': [{
+                'name': 'foo',
+                'pid': 1,
+                'collect_children': True
+            }]
+        }
+
+        self.run_check(config, mocks={'_get_child_processes': self.mock_get_child_processes})
+
+        self.assertMetric('system.processes.number', 4, tags=self.generate_expected_tags(config['instances'][0]))
+
+    @patch('psutil.Process', return_value=MockProcess())
+    def test_check_filter_user(self, mock_process):
+        config = {
+            'instances': [{
+                'name': 'foo',
+                'pid': 1,
+                'user': 'Bob',
+            }]
+        }
+
+        def _filter_by_user(user, pids):
+            return {1, 2}
+
+        self.run_check(config, mocks={'_filter_by_user': _filter_by_user})
+        self.assertMetric('system.processes.number', 2, tags=self.generate_expected_tags(config['instances'][0]))
+
+    def test_check_missing_pid(self):
+        config = {
+            'instances': [{
+                'name': 'foo',
+                'pid_file': '/foo/bar/baz',
+            }]
+        }
+
+        self.run_check(config, mocks={'get_pagefault_stats': noop_get_pagefault_stats})
+        self.assertServiceCheckCritical('process.up', count=1)
 
     def test_check_real_process(self):
         "Check that we detect python running (at least this process)"
