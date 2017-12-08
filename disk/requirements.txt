@@ -1,2 +1,2 @@
 # integration pip requirements
-psutil==4.4.1
+psutil==4.4.1 --hash=sha256:9da43dbf7c08f5c2a8e5e2c8792f5c438f52435677b1334e9653d23ea028f4f7

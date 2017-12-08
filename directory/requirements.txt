@@ -1,2 +1,2 @@
 # integration pip requirements
-scandir==1.5
+scandir==1.5 --hash=sha256:c2612d1a487d80fb4701b4a91ca1b8f8a695b1ae820570815e85e8c8b23f1283

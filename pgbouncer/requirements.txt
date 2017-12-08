@@ -1,2 +1,3 @@
 # integration pip requirements
-psycopg2==2.7.1
+psycopg2==2.7.1 --hash=sha256:bf48be2d01f6e34e5fbd8976f7b66158a83a33b92739acd13fc1934c60b71cfb \
+								--hash=sha256:f1f6d1b0ab40e8d43e294c7a1cc6fe6d47a88225583e581c15e8bfcff04b3863
