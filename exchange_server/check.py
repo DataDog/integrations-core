@@ -26,10 +26,6 @@ DEFAULT_COUNTERS = [
     # Memory Counters
     ["Memory", None, "Available MBytes",         "exchange.memory.available", "gauge"],
     ["Memory", None, "% Committed Bytes In Use", "exchange.memory.committed", "gauge"],
-    # .NET Framework counters
-    [".NET CLR Memory",     None, "% Time in GC",             "exchange.dotnet_clr_mem.time_in_gc",           "gauge"],
-    [".NET CLR Exceptions", None, "# of Exceps Thrown / sec", "exchange.dotnet_clr_exceptions.thrown_persec", "gauge"],
-    [".NET CLR Memory",     None, "# Bytes in all Heaps",     "exchange.dotnet_clr_memory.heap_bytes",        "gauge"],
     # Network Counters
     ["Network Interface", None, "Packets Outbound Errors", "exchange.network.outbound_errors",           "gauge"],
     ["TCPv6",             None, "Connection Failures",     "exchange.network.tcpv6.connection_failures", "gauge"],
@@ -52,14 +48,6 @@ DEFAULT_COUNTERS = [
     ["MSExchange Database ==> Instances", None,     "I/O Database Writes (Attached)/sec",             "exchange.database.io_db_writes_attached_persec",      "gauge"],
     ["MSExchange Database ==> Instances", None,     "I/O Log Writes/sec",                             "exchange.database.io_log_writes_persec",              "gauge"],
     ["MSExchange Active Manager",         "_total", "Database Mounted",                               "exchange.activemanager.database_mounted",             "gauge"],
-
-    # ASP.Net
-    ["ASP.NET",              None, "Application Restarts",          "exchange.asp_net.application_restarts",    "gauge"],
-    ["ASP.NET",              None, "Worker Process Restarts",       "exchange.asp_net.worker_process_restarts", "gauge"],
-    ["ASP.NET",              None, "Request Wait Time",             "exchange.asp_net.request_wait_time",       "gauge"],
-    ["ASP.NET Applications", None, "Requests In Application Queue", "exchange.asp_net.requests_in_queue",       "gauge"],
-    ["ASP.NET Applications", None, "Requests Executing",            "exchange.asp_net.requests_executing",      "gauge"],
-    ["ASP.NET Applications", None, "Requests/Sec",                  "exchange.asp_net.requests_persec",         "gauge"],
 
     # RPC Client Access Counters
     ["MSExchange RpcClientAccess", None, "RPC Averaged Latency", "exchange.rpc.averaged_latency",  "gauge"],

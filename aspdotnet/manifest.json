@@ -1,0 +1,12 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.20.0",
+  "name": "aspdotnet",
+  "short_description": "aspdotnet description.",
+  "guid": "475b0c6c-02e5-49ef-806b-9fab377f0839",
+  "support": "contrib",
+  "supported_os": ["windows"],
+  "version": "0.1.0"
+}
