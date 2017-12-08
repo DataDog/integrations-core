@@ -1,2 +1,3 @@
 # integration pip requirements
-supervisor==3.3.3
+supervisor==3.3.3 --hash=sha256:96287ebfabf9a6923f74123b056c4da39c617fef367980f007cac02fba6527ad
+meld3==1.0.2 --hash=sha256:b28a9bfac342aadb4557aa144bea9f8e6208bfb0596190570d10a892d35ff7dc

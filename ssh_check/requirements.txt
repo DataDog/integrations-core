@@ -1,3 +1,13 @@
 # integration pip requirements
-paramiko==2.1.2
-cryptography==2.1.4
+paramiko==2.1.2 --hash=sha256:bdf239647e18b9b9ddbc2894fd1de9786b7a9144b1d19e32a5be3bb4bb63ae5d
+cryptography==2.1.4 --hash=sha256:fc2208d95d9ecc8032f5e38330d5ace2e3b0b998e42b08c30c35b2ab3a4a3bc8 \
+										--hash=sha256:4f385ee7d39ee1ed74f1d6b1da03d0734ea82855a7b28a9e6e88c4091bc58664
+pyasn1==0.4.2 --hash=sha256:d5cd6ed995dba16fad0c521cfe31cd2d68400b53fcc2bce93326829be73ab6d1
+cffi==1.11.2 --hash=sha256:d7461ef8671ae40f991384bbc4a6b1b79f4e7175d8052584be44041996f46517 \
+						 --hash=sha256:401ba2f6c1f1672b6c38670e1c00fa5f84f841edd30c32742dab5c7151cd89bf
+pycparser==2.18 --hash=sha256:99a8ca03e29851d96616ad0404b4aad7d9ee16f25c9f9708a11faf2810f7b226
+enum34==1.1.6 --hash=sha256:6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79
+idna==2.6 --hash=sha256:8c7309c718f94b3a625cb648ace320157ad16ff131ae0af362c9f21b80ef6ec4
+six==1.11.0 --hash=sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb
+asn1crypto==0.23.0 --hash=sha256:654b7db3b120e23474e9a1e5e38d268c77e58a9e17d2cb595456c37309846494
+ipaddress==1.0.18 --hash=sha256:d34cf15d95ce9a734560f7400a8bd2ac2606f378e2a1d0eadbf1c98707e7c74a

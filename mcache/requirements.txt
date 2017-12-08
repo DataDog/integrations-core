@@ -1,2 +1,2 @@
 # integration pip requirements
-python-memcached==1.53
+python-memcached==1.53 --hash=sha256:bcf71371d997bb46a3168a7b63aae66b56cccacc025af9310db4315681ef8868

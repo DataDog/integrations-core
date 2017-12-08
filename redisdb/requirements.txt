@@ -1,2 +1,2 @@
 # integration pip requirements
-redis==2.10.5
+redis==2.10.5 --hash=sha256:97156b37d7cda4e7d8658be1148c983984e1a975090ba458cc7e244025191dbd
