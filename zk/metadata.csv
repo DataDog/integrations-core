@@ -3,6 +3,8 @@ zookeeper.bytes_received,gauge,,,,,0,zookeeper,
 zookeeper.bytes_sent,gauge,,,,,0,zookeeper,
 zookeeper.packets_received,gauge,,packet,second,The number of packets received.,0,zookeeper,packets received per second
 zookeeper.packets_sent,gauge,,packet,second,The number of packets sent.,0,zookeeper,packets sent per second
+zookeeper.packets.received,gauge,,packet,second,The number of packets received.,0,zookeeper,packets received per second
+zookeeper.packets.sent,gauge,,packet,second,The number of packets sent.,0,zookeeper,packets sent per second
 zookeeper.connections,gauge,,connection,,The total count of client connections.,0,zookeeper,conns
 zookeeper.datadog_client_exception,rate,,error,,The exception rate seen by the Datadog Agent when trying to collect stats.,-1,zookeeper,exceptions
 zookeeper.latency.avg,gauge,,millisecond,,The amount of time it takes for the server to respond to a client request.,0,zookeeper,avg latency
