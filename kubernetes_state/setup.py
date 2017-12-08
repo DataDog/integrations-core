@@ -19,7 +19,10 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = line.rpartition('#')
         if not len(req[1]):
-            runtime_reqs.append(req[2])
+            if '--hash=' in req[2]:
+                tokens=req[2].split()
+                if len(tokens)>1: runtime_reqs.append(tokens[0])
+            elif ';' in req[2]: runtime_reqs.append(req[2])
 
 version = __version__
 manifest_version = None

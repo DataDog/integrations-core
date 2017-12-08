@@ -1,4 +1,7 @@
 # integration pip requirements
-pysnmp-mibs==0.1.4
-pyasn1==0.2.3
-pysnmp==4.3.5
+pysnmp-mibs==0.1.4 --hash=sha256:a499ef45d942f42ab9e922c7da93efa084a7ec490ba6cad576b64a7d573ec043
+pyasn1==0.2.3 --hash=sha256:0439b9bd518418260c2641a571f0e07fce4370cab13b68f19b5e023306c03cad
+pysnmp==4.3.5 --hash=sha256:ad19c56e71ce3e83c238c6ee5bd3c58b78684fbf3b6b8bdd096508587b93faa0
+pycryptodome==3.4.7 --hash=sha256:18d8dfe31bf0cb53d58694903e526be68f3cf48e6e3c6dfbbc1e7042b1693af7
+pysmi==0.2.2 --hash=sha256:50270b5edd26fb9315ac70938da77f4d759fff27810d84bfafe439265d9f80e2
+ply==3.10 --hash=sha256:96e94af7dd7031d8d6dd6e2a8e0de593b511c211a86e28a9c9621c275ac8bacb
