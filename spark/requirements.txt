@@ -1,4 +1,4 @@
 # integration pip requirements
+simplejson==3.6.5 --hash=sha256:2a3189f79d1c7b8a2149a0e783c0b4217fad9b30a6e7d60450f2553dc2c0e57e
+beautifulsoup4==4.5.1 --hash=sha256:bb3dba571c2f7ddcaf3e70ad8b67878a85ac41889dcba75a30b8f7b0b5960b6d
 requests==2.11.1
-simplejson==3.6.5
-beautifulsoup4==4.5.1

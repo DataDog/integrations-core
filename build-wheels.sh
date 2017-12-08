@@ -21,8 +21,10 @@ for PYBIN in /opt/python/cp27-cp27m*/bin; do
 
   # Build wheels for external dependencies.
   # https://stackoverflow.com/a/2087038
-  find /shared/ -name 'requirements.txt' -print0 | xargs -0 wc -l | sort -r | head -n-2 | awk '$1 > 1 {print $2}' | while read line; do
-    "${PYBIN}/pip" wheel -r $(dirname ${line})/requirements.txt -w dogehouse/
+  wc -l /shared/*/requirements.txt | head -n-1 | sort -nr | awk '$1 > 1 {print $2}' | sort | while read line; do
+		# Fix external dependencies to known hashes.
+    # https://pip.pypa.io/en/stable/reference/pip_install/#hash-checking-mode
+    "${PYBIN}/pip" wheel --require-hashes -r $(dirname ${line})/requirements.txt -w dogehouse/
   done
 done
 

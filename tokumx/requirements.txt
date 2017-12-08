@@ -1,2 +1,3 @@
 # integration pip requirements
-pymongo==3.5
+pymongo==3.5 --hash=sha256:a1236be77f8b09c207d53a3b6710fe941b46e1133d701470f224b9b1714e392d \
+             --hash=sha256:894c9af85090d12189d10e193c839819de80201b4746c294e01b07e5919a59ad

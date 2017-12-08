@@ -1,2 +1,2 @@
 # integration pip requirements
-gearman==2.0.2
+gearman==2.0.2 --hash=sha256:2b1876a60e32e24bed4c6d187898274de6409bbfa942bcbe3512efdf2aed0ec9
