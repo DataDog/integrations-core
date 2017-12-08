@@ -61,29 +61,68 @@ class IIS(PDHBaseCheck):
 
     def check(self, instance):
 
-        sites = instance.get('sites', ['_Total'])
+        sites = instance.get('sites')
+        if sites is None:
+            expected_sites = set()
+        else:
+            expected_sites = set(sites)
+        # _Total should always be in the list of expected sites; we always
+        # report _Total
+        if "_Total" not in expected_sites:
+            expected_sites.add("_Total")
+
+        self.log.debug("expected sites is %s" % str(expected_sites))
         key = hash_mutable(instance)
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
-                vals = counter.get_all_values()
+                try:
+                    vals = counter.get_all_values()
+                except Exception as e:
+                    self.log.error("Failed to get_all_values %s %s" % (inst_name, dd_name))
+                    continue
+
                 for sitename, val in vals.iteritems():
                     tags = []
                     if key in self._tags:
                         tags = self._tags[key]
 
-                    if not counter.is_single_instance():
-                        # Skip any sites we don't specifically want.
-                        if sitename not in sites:
-                            continue
-                        elif sitename != "_Total":
-                            tags.append("site:{0}".format(self.normalize(sitename)))
-                    metric_func(dd_name, val, tags)
-                    if dd_name == "iis_uptime":
+                    try:
+                        if not counter.is_single_instance():
+                            # Skip any sites we don't specifically want.
+                            if not sites:
+                                tags.append("site:{0}".format(self.normalize(sitename)))
+                            # always report total
+                            elif sitename == "_Total":
+                                tags.append("site:{0}".format(self.normalize(sitename)))
+                            elif sitename not in sites:
+                                continue
+                            else:
+                                tags.append("site:{0}".format(self.normalize(sitename)))
+                    except Exception as e:
+                        self.log.error("Caught exception %s setting tags" % str(e))
+
+                    try:
+                        metric_func(dd_name, val, tags)
+                    except Exception as e:
+                        self.log.error("metric_func: %s %s %s" % (dd_name, str(val), str(e)))
+                        pass
+
+                    if dd_name == "iis.uptime":
                         uptime = int(val)
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
                         self.service_check(self.SERVICE_CHECK, status, tags=['site:{0}'.format(self.normalize(sitename))])
-                        
+                        if sitename in expected_sites:
+                            self.log.debug("Removing %s from expected sites" % sitename)
+                            expected_sites.remove(sitename)
+                        else:
+                            self.log.warning("site not in expected_sites %s" % sitename)
+
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
+                self.log.error("IIS Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
                 pass
+        self.log.debug("expected sites is now %s" % str(expected_sites))
+        for site in expected_sites:
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL,
+                            tags=['site:{0}'.format(self.normalize(site))])
+
