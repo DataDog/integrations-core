@@ -49,7 +49,7 @@ done
 # Make a place, if it doesn't already exist, to copy wheels over to host.
 mkdir -p /shared/wheelhouse/
 # Remove all previous wheels.
-rm /shared/wheelhouse/*
+rm -f /shared/wheelhouse/*
 # Copy PURE wheels over.
 # FIXME: ensure no filename clashes.
 cp temphouse/*-none-any.whl     /shared/wheelhouse/
