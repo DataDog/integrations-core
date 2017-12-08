@@ -36,13 +36,13 @@ instances:
     #   tags: (optional) add tags to each logs collected
     
   # - type: file
-  #   path: /var/log/access.log
+  #   path: /var/log/nginx/access.log
   #   service: nginx
   #   source: nginx
   #   sourcecategory: http_web_access
     
   # - type: file
-  #   path: /var/log/error.log
+  #   path: /var/log/nginx/error.log
   #   service: nginx
   #   source: nginx
   #   sourcecategory: http_web_access
