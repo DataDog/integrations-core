@@ -7,13 +7,18 @@
 # Inspired by: https://github.com/pypa/python-manylinux-demo/blob/a615d78e5042c01a03e1bbb1ca78603c90dbce1f/travis/build-wheels.sh
 # NOTE: Although this Docker image has Python 3, we build wheels for only
 # Python 2 at the moment.
-# TODO: Install any system package required by any integration
 # FIXME: Take care of name clashes between wheels.
 
 set -e -x
 # Do not iterate unless there is something.
 # https://unix.stackexchange.com/a/240004
 shopt -s nullglob
+
+# Install any system package required by any integration.
+# Update pip.
+for PYBIN in /opt/python/cp27-cp27m*/bin; do
+  "${PYBIN}/pip" install -U pip
+done
 
 # Build and test datadog-base, upon which all other integrations depend on.
 # Also build external dependencies from PyPI.
