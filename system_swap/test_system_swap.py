@@ -12,6 +12,7 @@ class _PSUtilSwapStatsMock(object):
         self.sin = sin
         self.sout = sout
 
+
 ORIG_SWAP_IN = 115332743168
 ORIG_SWAP_OUT = 22920884224
 
