@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][]. (Thanks [@colinmollenhour][])
 * [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
 
 1.2.0 / 2017-10-10

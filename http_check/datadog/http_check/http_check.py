@@ -281,7 +281,11 @@ class HTTPCheck(NetworkCheck):
             running_time = time.time() - start
             # Store tags in a temporary list so that we don't modify the global tags data structure
             tags_list = list(tags)
-            tags_list.append('url:%s' % addr)
+
+            # Only add the URL tag if it's not already present
+            if not filter(re.compile('^url:').match, tags_list):
+                tags_list.append('url:%s' % addr)
+
             self.gauge('network.http.response_time', running_time, tags=tags_list)
 
         # Check HTTP response status code
@@ -353,7 +357,10 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         tags_list = []
         tags_list.extend(tags)
-        tags_list.append('url:%s' % url)
+
+        # Only add the URL tag if it's not already present
+        if not filter(re.compile('^url:').match, tags_list):
+            tags_list.append('url:%s' % url)
 
         # Get a custom message that will be displayed in the event
         custom_message = instance.get('message', "")
@@ -417,9 +424,12 @@ class HTTPCheck(NetworkCheck):
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
         url = instance.get('url', None)
-        sc_tags = ['url:{0}'.format(url), "instance:{0}".format(instance_name)]
-        custom_tags = instance.get('tags', [])
-        tags = sc_tags + custom_tags
+        tags = instance.get('tags', [])
+        tags.append("instance:{0}".format(instance_name))
+
+        # Only add the URL tag if it's not already present
+        if not filter(re.compile('^url:').match, tags):
+            tags.append('url:{0}'.format(url))
 
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event

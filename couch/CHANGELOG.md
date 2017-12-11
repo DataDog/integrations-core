@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [FEATURE] collects and submits CouchDB design docs metrics. See [#813][] (Thanks [@calonso][])
 * [FEATURE] collects CouchDB active tasks stats. See [#812][] (Thanks [@calonso][])
 
 2.1.0 / 2017-11-21
