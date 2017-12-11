@@ -17,7 +17,10 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = line.rpartition('#')
         if not len(req[1]):
-            runtime_reqs.append(req[2])
+            if '--hash=' in req[2]:
+                tokens=req[2].split()
+                if len(tokens)>1: runtime_reqs.append(tokens[0])
+            elif ';' in req[2]: runtime_reqs.append(req[2])
 
 version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
@@ -76,7 +79,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.zk': ['varnish.yaml.example']},
+    package_data={'datadog.zk': ['varnish.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent

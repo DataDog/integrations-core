@@ -91,3 +91,5 @@ tmp
 .rbenv-gemsets
 .ruby-version
 
+# wheels
+wheelhouse/

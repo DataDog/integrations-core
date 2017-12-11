@@ -1,2 +1,2 @@
 # integration pip requirements
-dnspython==1.12.0
+dnspython==1.12.0 --hash=sha256:63bd1fae61809eedb91f84b2185816fac1270ae51494fbdd36ea25f904a8502f
