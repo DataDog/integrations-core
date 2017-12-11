@@ -23,7 +23,6 @@ log = logging.getLogger('kafka_test')
 STATSD_PORT = 8121
 
 LOG_INFO = {
-    'log_level': None,
     'log_to_event_viewer': False,
     'log_to_syslog': False,
     'syslog_host': None,

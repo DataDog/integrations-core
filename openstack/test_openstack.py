@@ -33,6 +33,7 @@ class MockHTTPResponse(object):
     def json(self):
         return self.response_dict
 
+
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {
         u'methods': [
