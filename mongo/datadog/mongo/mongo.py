@@ -847,7 +847,7 @@ class MongoDb(AgentCheck):
                 )
 
         except Exception as e:
-            if "OperationFailure" in repr(e) and "replSetGetStatus" in str(e):
+            if "OperationFailure" in repr(e) and "not running with --replSet" in str(e):
                 pass
             else:
                 raise e

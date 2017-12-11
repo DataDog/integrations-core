@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] tag `mysql.replication.*` metrics with the replication channel name
+
+
 1.0.5 / 2017-11-21
 ==================
 
