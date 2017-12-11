@@ -8,5 +8,11 @@
   "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "support": "contrib",
   "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "public_title": "Datadog-Fargate Integration",
+  "category": ["aws","containers","orchestration"],
+  "type": "check",
+  "doc_link": "https://docs.datadoghq.com/integrations/fargate/",
+  "is_public": true,
+  "has_logo": true
 }
