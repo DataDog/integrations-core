@@ -6,8 +6,10 @@
 
 ### Changes
 
+* [FEATURE] Add data collection for exchanges. See [#176][]. (Thanks [@wholroyd][])
 * [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
 * [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
+* [FEATURE] Add metrics to monitor a cluster. See [#924][]
 
 1.3.1 / 2017-10-10
 ==================
@@ -55,5 +57,9 @@
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
 [#729]: https://github.com/DataDog/integrations-core/issues/729
+[#902]: https://github.com/DataDog/integrations-core/issues/902
+[#909]: https://github.com/DataDog/integrations-core/issues/909
+[#924]: https://github.com/DataDog/integrations-core/issues/924
+[@dnavre]: https://github.com/dnavre
 [@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr
