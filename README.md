@@ -54,7 +54,8 @@ Second, build the wheels using this Docker image:
 git clone git@github.com:trishankatdatadog/integrations-core.git
 cd integrations-core
 git checkout trishank_kuppusamy/dockerize-build
-time sudo docker run --rm -v `pwd`:/shared pypa/manylinux:trishankatdatadog /shared/build-wheels.sh && ls wheelhouse
+# https://stackoverflow.com/a/31334443
+time sudo docker run --rm -v `pwd`:/shared:Z pypa/manylinux:trishankatdatadog /shared/build-wheels.sh && ls wheelhouse
 ```
 
 # Reporting Issues
