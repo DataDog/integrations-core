@@ -76,7 +76,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.win32_event_log': ['win32_event_log.yaml.example']},
+    package_data={'datadog.win32_event_log': ['win32_event_log.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
