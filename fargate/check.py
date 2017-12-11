@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
-import time
-
 # 3rd party
 import requests
 
@@ -40,7 +37,7 @@ class FargateCheck(AgentCheck):
 
         try:
             request = requests.get(metadata_endpoint, timeout=timeout)
-        except requests.exceptions.Timeout as e:
+        except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(metadata_endpoint, timeout)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
             self.log.exception(msg)
@@ -66,7 +63,7 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
             return
 
-        if not all (k in metadata for k in ("Cluster","Containers")):
+        if not all(k in metadata for k in ["Cluster","Containers"]):
             msg = 'Missing critical metadata in {} endpoint response'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
             self.log.warning(msg)

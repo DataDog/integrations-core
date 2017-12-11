@@ -4,12 +4,10 @@
 
 # stdlib
 import mock
-import unittest
 import os
 from nose.plugins.attrib import attr
 
 # 3p
-import requests
 import simplejson as json
 
 # project
