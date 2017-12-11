@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "fargate",
-  "short_description": "fargate description.",
+  "short_description": "Track metrics for containers running with Fargate",
   "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "support": "contrib",
   "supported_os": ["linux","mac_os","windows"],
