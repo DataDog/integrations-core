@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-1.2.1 / Unreleased 
+1.2.1 / 2017-11-29
 ==================
 
 ### Changes
