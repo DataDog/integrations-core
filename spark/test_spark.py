@@ -49,6 +49,7 @@ def join_url_dir(url, *args):
 
     return url
 
+
 # YARN Service URLs
 YARN_APP_URL = urljoin(SPARK_YARN_URL, YARN_APPS_PATH) + '?states=RUNNING&applicationTypes=SPARK'
 YARN_SPARK_APP_URL = join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH)

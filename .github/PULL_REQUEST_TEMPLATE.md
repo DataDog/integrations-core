@@ -1,5 +1,5 @@
-*Note: Please remember to review the Datadog [Contribution Guidelines](https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md)
-if you have not yet done so.*
+<!-- *Note: Please remember to review the Datadog [Contribution Guidelines](https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md)
+if you have not yet done so.* -->
 
 ### What does this PR do?
 
@@ -13,6 +13,12 @@ What inspired you to submit this pull request?
 
 An overview on [testing](https://github.com/DataDog/dd-agent/blob/master/tests/README.md)
 is available in our contribution guidelines.
+
+### Versioning
+
+- [ ] Bumped the version check in `manifest.json`
+- [ ] Updated `CHANGELOG.md`. Please use `Unreleased` as the date in the title
+  for the new section.
 
 ### Additional Notes
 

@@ -20,6 +20,22 @@ init_config:
   # tls_cacert: /path/to/ca.pem
   # tls_verify: True
 
+  # Initialization retries
+  #
+  # if the agent is expected to start before Docker,
+  # use these settings to configure the retry policy.
+  #
+  # init_retry_interval defines how long (in seconds) the docker client
+  # will wait before retrying initialization.
+  # Defaults to 0.
+  #
+  # init_retry_interval: 20
+  #
+  # init_retries configures how many retries are made before failing permanently.
+  # Defaults to 0.
+  #
+  # init_retries: 5
+
 instances:
   - ## Daemon and system configuration
     ##
@@ -36,6 +52,14 @@ instances:
     # Defaults to true.
     #
     # collect_events: false
+
+    # By default we do not collect events with a status ['top', 'exec_start', 'exec_create'].
+    # Here can be added additional statuses to be filtered.
+    # List of available statuses can be found here https://docs.docker.com/engine/reference/commandline/events/#object-types
+    # filtered_event_types:
+    #    - 'top'
+    #    - 'exec_start'
+    #    - 'exec_create'
 
     # Collect disk usage per container with docker.container.size_rw and
     # docker.container.size_rootfs metrics.
@@ -113,11 +137,11 @@ instances:
     # If a tag matches an exclude rule, it won't be included unless it also matches an include rule.
     # Examples:
     # exclude all, except ubuntu and debian.
-    # exclude: [".*"]
+    # exclude: ["docker_image:.*"]
     # include: ["docker_image:ubuntu", "docker_image:debian"]
     #
     # include all, except ubuntu and Kubernetes pause containers.
-    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*"]
+    # exclude: ["docker_image:ubuntu", "image_name:gcr.io/google_containers/pause.*", "image_name:openshift/origin-pod"]
     # include: []
     #
     # Default: include all containers except for Kubernetes pause containers.
@@ -130,7 +154,7 @@ instances:
     ## Tagging
     ##
 
-    # You can add extra tags to your Docker metrics with the tags list option.
+    # You can add extra tags to your Docker metrics and ServiceCheck with the tags list option.
     # Example: ["extra_tag", "env:testing"]
     #
     # tags: []
@@ -160,7 +184,22 @@ instances:
     #
     # container_tags: ["image_name", "image_tag", "docker_image"]
 
-    # List of container label names that should be collected and sent as tags.
+    # Option to tag docker metrics with container label names listed.
+    # Takes precedence over docker_labels_as_tags for docker metrics.
+    # Only use if you want different labels tagged for autodiscovery and docker_daemon metrics.
     # Default to None
     # Example:
     # collect_labels_as_tags: ["com.docker.compose.service", "com.docker.compose.project"]
+    # List of docker event attributes to add as tags of the datadog events
+    # Defaults to None.
+    #
+    # event_attributes_as_tags: ["signal"]
+
+    ## Rate Filtering
+    ##
+
+    # Allows ad-hoc spike filtering if the system reports incorrect metrics.
+    # This will drop points if the computed rate is higher than the cap value
+    # capped_metrics:
+    #   docker.cpu.user: 1000
+    #   docker.cpu.system: 1000

@@ -46,9 +46,18 @@ namespace :ci do
 
       %w(test1 test5 tralala).each do |q|
         sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare queue name=#{q})
-        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare exchange name=#{q} type=topic)
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - declare binding source=#{q} destination_type=queue \
+            destination=#{q} routing_key=#{q})
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=#{q} routing_key=#{q} \
+            payload="hello, world")
+        sh %(curl localhost:15672/cli/rabbitmqadmin | python - publish exchange=#{q} routing_key=bad_key \
+            payload="unroutable")
       end
       sh %(curl localhost:15672/cli/rabbitmqadmin | python - list queues)
+
+      # leave time for rabbitmq to update the management information
+      sleep_for 2
     end
 
     task script: ['ci:common:script'] do

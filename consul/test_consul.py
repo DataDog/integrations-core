@@ -6,9 +6,13 @@ import random
 
 # 3p
 from nose.plugins.attrib import attr
+from requests import HTTPError
 
 from tests.checks.common import AgentCheckTest, load_check
 from utils.containers import hash_mutable
+
+# project
+from checks import AgentCheck
 
 MOCK_CONFIG = {
     'init_config': {},
@@ -366,6 +370,80 @@ class TestCheckConsul(AgentCheckTest):
             }
         }]
 
+    def mock_get_health_check(self, instance, endpoint):
+        return [{
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-loadbalancer",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "critical",
+            "Notes": "",
+            "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-2",
+            "CheckID": "server-loadbalancer",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "",
+            "ServiceName": "server-loadbalancer",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-api",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "passing",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-loadbalancer",
+            "ServiceName": "",
+        },
+            {
+            "ModifyIndex": 75214492,
+            "CreateIndex": 75214492,
+            "Node": "node-1",
+            "CheckID": "server-status-empty",
+            "Name": "Service 'server-loadbalancer' check",
+            "Status": "",
+            "Notes": "",
+            "Output": "OK",
+            "ServiceID": "server-empty",
+            "ServiceName": "server-empty",
+        }]
+
     def mock_get_cluster_leader_A(self, instance):
         return '10.0.2.15:8300'
 
@@ -385,10 +463,10 @@ class TestCheckConsul(AgentCheckTest):
 
     def test_get_nodes_with_service(self):
         self.run_check(MOCK_CONFIG, mocks=self._get_consul_mocks())
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
@@ -399,10 +477,10 @@ class TestCheckConsul(AgentCheckTest):
         my_mocks['get_nodes_with_service'] = self.mock_get_nodes_with_service_warning
 
         self.run_check(MOCK_CONFIG, mocks=my_mocks)
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
@@ -413,14 +491,26 @@ class TestCheckConsul(AgentCheckTest):
         my_mocks['get_nodes_with_service'] = self.mock_get_nodes_with_service_critical
 
         self.run_check(MOCK_CONFIG, mocks=my_mocks)
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_critical', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+
+    def test_service_checks(self):
+        my_mocks = self._get_consul_mocks()
+        my_mocks['consul_request'] = self.mock_get_health_check
+
+        self.run_check(MOCK_CONFIG, mocks=my_mocks)
+        self.assertServiceCheckCritical('consul.check', tags=["consul_datacenter:dc1", "check:server-loadbalancer", "consul_service_id:server-loadbalancer","service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer","service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "service:server-loadbalancer"], count=1)
+        self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"], count=1)
+        self.assertServiceCheck('consul.check', status=AgentCheck.UNKNOWN, tags=["consul_datacenter:dc1", "check:server-status-empty", "consul_service_id:server-empty", "service:server-empty"], count=1)
+        self.assertServiceCheck('consul.check', count=5)
 
     def test_get_peers_in_cluster(self):
         mocks = self._get_consul_mocks()
@@ -614,7 +704,8 @@ class TestIntegrationConsul(AgentCheckTest):
                 'network_latency_checks': True,
                 'new_leader_checks': True,
                 'catalog_checks': True,
-                'self_leader_check': True
+                'self_leader_check': True,
+                'acl_token': 'token'
             }]
         }
 
@@ -631,3 +722,28 @@ class TestIntegrationConsul(AgentCheckTest):
         self.assertServiceCheck('consul.up')
 
         self.coverage_report()
+
+    def test_acl_forbidden(self):
+        """
+        Testing Consul Integration
+        """
+
+        config = {
+            "instances": [{
+                'url': 'http://localhost:8500',
+                'catalog_checks': True,
+                'network_latency_checks': True,
+                'new_leader_checks': True,
+                'catalog_checks': True,
+                'self_leader_check': True,
+                'acl_token': 'wrong_token'
+            }]
+        }
+        got_error_403 = False
+        try:
+            self.run_check(config)
+        except HTTPError as e:
+            if e.response.status_code == 403:
+                got_error_403 = True
+
+        self.assertTrue(got_error_403)

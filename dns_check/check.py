@@ -9,7 +9,7 @@ import time
 import dns.resolver
 
 # project
-from util import Platform
+from utils.platform import Platform
 from checks.network_checks import NetworkCheck, Status
 
 # These imports are necessary because otherwise dynamic type
@@ -57,8 +57,11 @@ class DNSCheck(NetworkCheck):
 
         # If a specific DNS server was defined use it, else use the system default
         nameserver = instance.get('nameserver')
+        nameserver_port = instance.get('nameserver_port')
         if nameserver is not None:
             resolver.nameservers = [nameserver]
+        if nameserver_port is not None:
+            resolver.port = nameserver_port
 
         timeout = float(instance.get('timeout', self.default_timeout))
         resolver.lifetime = timeout

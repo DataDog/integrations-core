@@ -1,10 +1,10 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "mapreduce",
-  "short_description": "mapreduce description.",
+  "short_description": "Monitor the status and duration of map and reduce tasks.",
   "support": "core",
   "supported_os": [
     "linux",
@@ -12,5 +12,11 @@
     "windows"
   ],
   "version": "1.0.0",
-  "guid": "1c143492-84ac-42d2-89d5-a45c718092b0"
+  "guid": "1c143492-84ac-42d2-89d5-a45c718092b0",
+  "public_title": "Datadog-Map Reduce Integration",
+  "categories":["processing"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/mapreduce/",
+  "is_public": true,
+  "has_logo": true
 }

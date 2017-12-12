@@ -13,17 +13,19 @@ import re
 import time
 import calendar
 
-# 3rd party
-import simplejson as json
+# 3p
+from requests.exceptions import ConnectionError
 
 # project
 from checks import AgentCheck
 from config import _is_affirmative
 from utils.kubernetes import KubeUtil
+from utils.service_discovery.sd_backend import get_sd_backend
 
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
+LEADER_CANDIDATE = 'leader_candidate'
 
 DEFAULT_USE_HISTOGRAM = False
 DEFAULT_PUBLISH_ALIASES = False
@@ -33,6 +35,8 @@ DEFAULT_ENABLED_RATES = [
     'cpu.*.total']
 DEFAULT_COLLECT_EVENTS = False
 DEFAULT_NAMESPACES = ['default']
+
+DEFAULT_SERVICE_EVENT_FREQ = 5 * 60  # seconds
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
 
@@ -50,6 +54,13 @@ FUNC_MAP = {
 }
 
 EVENT_TYPE = 'kubernetes'
+
+# Mapping between k8s events and ddog alert types per
+# https://github.com/kubernetes/kubernetes/blob/adb75e1fd17b11e6a0256a4984ef9b18957d94ce/staging/src/k8s.io/client-go/1.4/tools/record/event.go#L59
+K8S_ALERT_MAP = {
+    'Warning': 'warning',
+    'Normal': 'info'
+}
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
@@ -86,9 +97,23 @@ class Kubernetes(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         inst = instances[0] if instances is not None else None
-        self.kubeutil = KubeUtil(instance=inst)
-        if not self.kubeutil.kubelet_api_url:
-            raise Exception('Unable to reach kubelet. Try setting the host parameter.')
+        self.kubeutil = KubeUtil(init_config=init_config, instance=inst)
+
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.log.warning("Kubelet client failed to initialized for now, pausing the Kubernetes check.")
+            else:
+                raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
+
+        if agentConfig.get('service_discovery') and \
+           agentConfig.get('service_discovery_backend') == 'docker':
+            self._sd_backend = get_sd_backend(agentConfig)
+        else:
+            self._sd_backend = None
+
+        self.leader_candidate = inst.get(LEADER_CANDIDATE)
+        if self.leader_candidate:
+            self.kubeutil.refresh_leader()
 
         self.k8s_namespace_regexp = None
         if inst:
@@ -99,7 +124,10 @@ class Kubernetes(AgentCheck):
                 except re.error as e:
                     self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
 
-    def _perform_kubelet_checks(self, url):
+            self.event_retriever = None
+            self._configure_event_collection(inst)
+
+    def _perform_kubelet_checks(self, url, instance):
         service_check_base = NAMESPACE + '.kubelet.check'
         is_ok = True
         try:
@@ -117,23 +145,53 @@ class Kubernetes(AgentCheck):
                 service_check_name = service_check_base + '.' + matches.group(2)
                 status = matches.group(1)
                 if status == '+':
-                    self.service_check(service_check_name, AgentCheck.OK)
+                    self.service_check(service_check_name, AgentCheck.OK, tags=instance.get('tags', []))
                 else:
-                    self.service_check(service_check_name, AgentCheck.CRITICAL)
+                    self.service_check(service_check_name, AgentCheck.CRITICAL, tags=instance.get('tags', []))
                     is_ok = False
 
         except Exception as e:
             self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
             self.service_check(service_check_base, AgentCheck.CRITICAL,
-                               message='Kubelet check %s failed: %s' % (url, str(e)))
-
+                               message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance.get('tags', []))
         else:
             if is_ok:
-                self.service_check(service_check_base, AgentCheck.OK)
+                self.service_check(service_check_base, AgentCheck.OK, tags=instance.get('tags', []))
             else:
-                self.service_check(service_check_base, AgentCheck.CRITICAL)
+                self.service_check(service_check_base, AgentCheck.CRITICAL, tags=instance.get('tags', []))
+
+    def _configure_event_collection(self, instance):
+        self._collect_events = self.kubeutil.is_leader or _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS))
+        if self._collect_events:
+            if self.event_retriever:
+                self.event_retriever.set_kinds(None)
+                self.event_retriever.set_delay(None)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever()
+        elif self.kubeutil.collect_service_tag:
+            # Only fetch service and pod events for service mapping
+            event_delay = instance.get('service_tag_update_freq', DEFAULT_SERVICE_EVENT_FREQ)
+            if self.event_retriever:
+                self.event_retriever.set_kinds(['Service', 'Pod'])
+                self.event_retriever.set_delay(event_delay)
+            else:
+                self.event_retriever = self.kubeutil.get_event_retriever(kinds=['Service', 'Pod'],
+                                                                         delay=event_delay)
+        else:
+            self.event_retriever = None
 
     def check(self, instance):
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.kubeutil.init_kubelet(instance)
+                self.log.warning("Kubelet client is not initialized, Kubernetes check is paused.")
+                return
+            else:
+                raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
+
+        # Leader election
+        self.refresh_leader_status(instance)
+
         self.max_depth = instance.get('max_depth', DEFAULT_MAX_DEPTH)
         enabled_gauges = instance.get('enabled_gauges', DEFAULT_ENABLED_GAUGES)
         self.enabled_gauges = ["{0}.{1}".format(NAMESPACE, x) for x in enabled_gauges]
@@ -153,18 +211,34 @@ class Kubernetes(AgentCheck):
             pods_list = None
 
         # kubelet health checks
-        self._perform_kubelet_checks(self.kubeutil.kube_health_url)
+        self._perform_kubelet_checks(self.kubeutil.kube_health_url, instance)
 
         if pods_list is not None:
-            # kubelet metrics
-            self._update_metrics(instance, pods_list)
+            # Will not fail if cAdvisor is not available
+            self._update_pods_metrics(instance, pods_list)
+            # cAdvisor & kubelet metrics, will fail if port 4194 is not open
+            try:
+                if int(instance.get('port', KubeUtil.DEFAULT_CADVISOR_PORT)) > 0:
+                    self._update_metrics(instance, pods_list)
+            except ConnectionError:
+                self.warning('''Can't access the cAdvisor metrics, performance metrics and'''
+                             ''' limits/requests will not be collected. Please setup'''
+                             ''' your kubelet with the --cadvisor-port=4194 option, or set port to 0'''
+                             ''' in this check's configuration to disable cAdvisor lookup.''')
+            except Exception as err:
+                self.log.warning("Error while getting performance metrics: %s" % str(err))
 
-            # kubelet events
-            if _is_affirmative(instance.get('collect_events', DEFAULT_COLLECT_EVENTS)):
-                try:
-                    self._process_events(instance, pods_list)
-                except Exception as ex:
-                    self.log.error("Event collection failed: %s" % str(ex))
+        # kubelet events
+        if self.event_retriever is not None:
+            try:
+                events = self.event_retriever.get_event_array()
+                changed_cids = self.kubeutil.process_events(events, podlist=pods_list)
+                if (changed_cids and self._sd_backend):
+                    self._sd_backend.update_checks(changed_cids)
+                if events and self._collect_events:
+                    self._update_kube_events(instance, pods_list, events)
+            except Exception as ex:
+                self.log.error("Event collection failed: %s" % str(ex))
 
     def _publish_raw_metrics(self, metric, dat, tags, depth=0):
         if depth >= self.max_depth:
@@ -194,8 +268,12 @@ class Kubernetes(AgentCheck):
 
         pod_name = cont_labels[KubeUtil.POD_NAME_LABEL]
         pod_namespace = cont_labels[KubeUtil.NAMESPACE_LABEL]
-        tags.append(u"pod_name:{0}/{1}".format(pod_namespace, pod_name))
+        # kube_container_name is the name of the Kubernetes container resource,
+        # not the name of the docker container (that's tagged as container_name)
+        kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
+        tags.append(u"pod_name:{0}".format(pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
+        tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
         kube_labels_key = "{0}/{1}".format(pod_namespace, pod_name)
 
@@ -248,12 +326,12 @@ class Kubernetes(AgentCheck):
             # The first alias seems to always match the docker container name
             container_name = subcontainer['aliases'][0]
         else:
-            # We default to the container id
-            container_name = subcontainer['name']
+            self.log.debug("Subcontainer doesn't have a name, skipping.")
+            return
 
         tags.append('container_name:%s' % container_name)
 
-        container_image = subcontainer['spec'].get('image')
+        container_image = self.kubeutil.image_name_resolver(subcontainer['spec'].get('image'))
         if container_image:
             tags.append('container_image:%s' % container_image)
 
@@ -296,7 +374,7 @@ class Kubernetes(AgentCheck):
         stats = subcontainer['stats'][-1]  # take the latest
         self._publish_raw_metrics(NAMESPACE, stats, tags)
 
-        if subcontainer.get("spec", {}).get("has_filesystem"):
+        if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
             fs_utilization = float(fs['usage'])/float(fs['capacity'])
             self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
@@ -323,7 +401,7 @@ class Kubernetes(AgentCheck):
         metrics = self.kubeutil.retrieve_metrics()
 
         excluded_labels = instance.get('excluded_labels')
-        kube_labels = self.kubeutil.extract_kube_labels(pods_list, excluded_keys=excluded_labels)
+        kube_labels = self.kubeutil.extract_kube_pod_tags(pods_list, excluded_keys=excluded_labels)
 
         if not metrics:
             raise Exception('No metrics retrieved cmd=%s' % self.metrics_cmd)
@@ -332,6 +410,9 @@ class Kubernetes(AgentCheck):
         container_tags = {}
         for subcontainer in metrics:
             c_id = subcontainer.get('id')
+            if 'aliases' not in subcontainer:
+                # it means the subcontainer is about a higher-level entity than a container
+                continue
             try:
                 tags = self._update_container_metrics(instance, subcontainer, kube_labels)
                 if c_id:
@@ -339,8 +420,8 @@ class Kubernetes(AgentCheck):
                 # also store tags for aliases
                 for alias in subcontainer.get('aliases', []):
                     container_tags[alias] = tags
-            except Exception, e:
-                self.log.error("Unable to collect metrics for container: {0} ({1}".format(c_id, e))
+            except Exception as e:
+                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
 
         # container metrics from kubernetes API: limits and requests
         for pod in pods_list['items']:
@@ -388,7 +469,6 @@ class Kubernetes(AgentCheck):
                 except (KeyError, AttributeError) as e:
                     self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
-        self._update_pods_metrics(instance, pods_list)
         self._update_node(instance)
 
     def _update_node(self, instance):
@@ -403,46 +483,36 @@ class Kubernetes(AgentCheck):
         # reserved for system/Kubernetes.
 
     def _update_pods_metrics(self, instance, pods):
-        supported_kinds = [
-            "DaemonSet",
-            "Deployment",
-            "Job",
-            "ReplicationController",
-            "ReplicaSet",
-        ]
-
-        # (create-by, namespace): count
-        controllers_map = defaultdict(int)
-        for pod in pods['items']:
-            try:
-                created_by = json.loads(pod['metadata']['annotations']['kubernetes.io/created-by'])
-                kind = created_by['reference']['kind']
-                if kind in supported_kinds:
-                    namespace = created_by['reference']['namespace']
-                    controllers_map[(created_by['reference']['name'], namespace)] += 1
-            except (KeyError, ValueError) as e:
-                self.log.debug("Unable to retrieve pod kind for pod %s: %s", pod, e)
-                continue
-
-        tags = instance.get('tags', [])
-        for (ctrl, namespace), pod_count in controllers_map.iteritems():
-            _tags = tags[:]  # copy base tags
-            _tags.append('kube_replication_controller:{0}'.format(ctrl))
-            _tags.append('kube_namespace:{0}'.format(namespace))
-            self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, _tags)
-
-    def _process_events(self, instance, pods_list):
         """
-        Retrieve a list of events from the kubernetes API.
+        Reports the number of running pods, tagged by service and creator
 
-        At the moment (k8s v1.3) there is no support to select events based on a timestamp query, so we
-        go through the whole list every time. This should be fine for now as events
-        have a TTL of one hour[1] but logic needs to improve as soon as they provide
-        query capabilities or at least pagination, see [2][3].
+        We go though all the pods, extract tags then count them by tag list, sorted and
+        serialized in a pipe-separated string (it is an illegar character for tags)
+        """
+        tags_map = defaultdict(int)
+        for pod in pods['items']:
+            pod_meta = pod.get('metadata', {})
+            pod_tags = self.kubeutil.get_pod_creator_tags(pod_meta, legacy_rep_controller_tag=True)
+            services = self.kubeutil.match_services_for_pod(pod_meta)
+            if isinstance(services, list):
+                for service in services:
+                    pod_tags.append('kube_service:%s' % service)
+            if 'namespace' in pod_meta:
+                pod_tags.append('kube_namespace:%s' % pod_meta['namespace'])
 
-        [1] https://github.com/kubernetes/kubernetes/blob/release-1.3.0/cmd/kube-apiserver/app/options/options.go#L51
-        [2] https://github.com/kubernetes/kubernetes/issues/4432
-        [3] https://github.com/kubernetes/kubernetes/issues/1362
+            tags_map[frozenset(pod_tags)] += 1
+
+        commmon_tags = instance.get('tags', [])
+        for pod_tags, pod_count in tags_map.iteritems():
+            tags = list(pod_tags)
+            tags.extend(commmon_tags)
+            self.publish_gauge(self, NAMESPACE + '.pods.running', pod_count, tags)
+
+    def _update_kube_events(self, instance, pods_list, event_items):
+        """
+        Process kube events and send ddog events
+        The namespace filtering is done here instead of KubeEventRetriever
+        to avoid interfering with service discovery
         """
         node_ip, node_name = self.kubeutil.get_node_info()
         self.log.debug('Processing events on {} [{}]'.format(node_name, node_ip))
@@ -462,7 +532,7 @@ class Kubernetes(AgentCheck):
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
             self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
 
-            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint)
+            namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint).json()
             for namespace in namespaces.get('items', []):
                 name = namespace.get('metadata', {}).get('name', None)
                 if name and self.k8s_namespace_regexp.match(name):
@@ -470,22 +540,8 @@ class Kubernetes(AgentCheck):
 
         k8s_namespaces = set(k8s_namespaces)
 
-        events_endpoint = '{}/events'.format(self.kubeutil.kubernetes_api_url)
-        self.log.debug('Kubernetes API endpoint to query events: %s' % events_endpoint)
-
-        events = self.kubeutil.retrieve_json_auth(events_endpoint)
-        event_items = events.get('items') or []
-        last_read = self.kubeutil.last_event_collection_ts
-        most_recent_read = 0
-
-        self.log.debug('Found {} events, filtering out using timestamp: {} and namespaces: {}'.format(len(event_items), last_read, k8s_namespaces))
-
         for event in event_items:
-            # skip if the event is too old
             event_ts = calendar.timegm(time.strptime(event.get('lastTimestamp'), '%Y-%m-%dT%H:%M:%SZ'))
-            if event_ts <= last_read:
-                continue
-
             involved_obj = event.get('involvedObject', {})
 
             # filter events by white listed namespaces (empty namespace belong to the 'default' one)
@@ -493,14 +549,14 @@ class Kubernetes(AgentCheck):
                 continue
 
             tags = self.kubeutil.extract_event_tags(event)
-
-            # compute the most recently seen event, without relying on items order
-            if event_ts > most_recent_read:
-                most_recent_read = event_ts
+            tags.extend(instance.get('tags', []))
 
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
             source = event.get('source')
+            k8s_event_type = event.get('type')
+            alert_type = K8S_ALERT_MAP.get(k8s_event_type, 'info')
+
             if source:
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
@@ -511,11 +567,28 @@ class Kubernetes(AgentCheck):
                 'msg_title': title,
                 'msg_text': msg_body,
                 'source_type_name': EVENT_TYPE,
+                'alert_type': alert_type,
                 'event_object': 'kubernetes:{}'.format(involved_obj.get('name')),
                 'tags': tags,
             }
             self.event(dd_event)
 
-        if most_recent_read > 0:
-            self.kubeutil.last_event_collection_ts = most_recent_read
-            self.log.debug('last_event_collection_ts is now {}'.format(most_recent_read))
+    def refresh_leader_status(self, instance):
+        """
+        calls kubeutil.refresh_leader and compares the resulting
+        leader status with the previous one.
+        If it changed, update the event collection logic
+        """
+        if not self.leader_candidate:
+            return
+
+        leader_status = self.kubeutil.is_leader
+        self.kubeutil.refresh_leader()
+
+        # nothing changed, no-op
+        if leader_status == self.kubeutil.is_leader:
+            return
+        # else, reset the event collection config
+        else:
+            self.log.info("Leader status changed, updating event collection config...")
+            self._configure_event_collection(instance)
