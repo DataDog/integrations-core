@@ -19,7 +19,6 @@ from aggregator import MetricsAggregator
 import logging
 
 LOG_INFO = {
-    'log_level': None,
     'log_to_event_viewer': False,
     'log_to_syslog': False,
     'syslog_host': None,

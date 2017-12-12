@@ -1,32 +1,76 @@
-# Yarn Integration
+# Agent Check: Hadoop YARN
 
 ## Overview
 
-Get metrics from yarn service in real time to:
+This check collects metrics from your YARN ResourceManager, including:
 
-* Visualize and monitor yarn states
-* Be notified about yarn failovers and events.
+* Cluster-wide metrics: number of running apps, running containers, unhealthy nodes, etc
+* Per-application metrics: app progress, elapsed running time, running containers, memory use, etc
+* Node metrics: available vCores, time of last health update, etc
 
-## Installation
+And more.
+## Setup
+### Installation
 
-Install the `dd-check-yarn` package manually or with your favorite configuration manager
+The YARN check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your YARN ResourceManager. If you need the newest version of the check, install the `dd-check-yarn` package.
 
-## Configuration
+### Configuration
 
-Edit the `yarn.yaml` file to point to your server and port, set the masters to monitor
+Create a file `yarn.yaml` in the Agent's `conf.d` directory. See the [sample yarn.yaml](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for all available configuration options.:
 
-## Validation
+```
+init_config:
 
-When you run `datadog-agent info` you should see something like the following:
+instances:
+  - resourcemanager_uri: http://localhost:8088 # or whatever your resource manager listens
+    cluster_name: MyCluster # used to tag metrics, i.e. 'cluster_name:MyCluster'; default is 'default_cluster'
+    collect_app_metrics: true
+```
 
-    Checks
-    ======
+See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for a comprehensive list and description of all check options.
 
-        yarn
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Restart the Agent to start sending YARN metrics to Datadog.
+
+### Validation
+
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `yarn` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    yarn
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
 
 ## Compatibility
 
-The yarn check is compatible with all major platforms
+The yarn check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The Yarn check does not include any event at this time.
+
+### Service Checks
+**yarn.can_connect**:
+
+Returns CRITICAL if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [How to monitor Hadoop metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)
+* [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)
+* [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)

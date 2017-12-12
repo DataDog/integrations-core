@@ -16,7 +16,7 @@ memcache.delete_hits_rate,gauge,,hit,second,Rate at which delete commands result
 memcache.delete_misses_rate,gauge,,miss,second,Rate at which delete commands result in no items being removed.,0,memcached,del miss rate
 memcache.evictions_rate,gauge,,eviction,second,Rate at which valid items are removed from cache to free memory for new items.,-1,memcached,evict rate
 memcache.fill_percent,gauge,,percent,,Amount of memory being used by the server for storing items as a percentage of the max allowed.,0,memcached,fill percent
-memcache.get_hit_percent,gauge,,percent,,Percentage of requested keys that are found present.,0,memcached,get hit percent
+memcache.get_hit_percent,gauge,,percent,,Percentage of requested keys that are found present since the start of the memcache server.,0,memcached,get hit percent
 memcache.get_hits_rate,gauge,,hit,second,Rate at which keys are requested and found present.,0,memcached,get hit rate
 memcache.get_misses_rate,gauge,,miss,second,Rate at which keys are requested and not found.,-1,memcached,get miss rate
 memcache.limit_maxbytes,gauge,,byte,,Number of bytes this server is allowed to use for storage.,0,memcached,maxbytes

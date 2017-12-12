@@ -4,6 +4,7 @@ from nose.plugins.attrib import attr
 # 3p
 
 # project
+from checks import AgentCheck
 from tests.checks.common import AgentCheckTest
 
 
@@ -48,6 +49,7 @@ SERVER_STATS = set([
 class TestTwemproxy(AgentCheckTest):
     """Basic Test for twemproxy integration."""
     CHECK_NAME = 'twemproxy'
+    SC_TAGS = ['host:127.0.0.1', 'port:6222']
 
     def test_check(self):
         """
@@ -68,6 +70,10 @@ class TestTwemproxy(AgentCheckTest):
             self.assertMetric("twemproxy.{}".format(stat), at_least=1, count=1)
         for stat in SERVER_STATS:
             self.assertMetric("twemproxy.{}".format(stat), at_least=1, count=2)
+
+        # Test service check
+        self.assertServiceCheck('twemproxy.can_connect', status=AgentCheck.OK,
+                                tags=self.SC_TAGS, count=1)
 
         # Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()

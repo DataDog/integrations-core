@@ -176,7 +176,7 @@ class TestMongoUnit(AgentCheckTest):
         )
 
         for server, expected_clean_name in server_names:
-            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=False)
+            _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=False)
             self.assertEquals(expected_clean_name, clean_name)
 
         # Batch with `sanitize_username` set to True
@@ -190,7 +190,7 @@ class TestMongoUnit(AgentCheckTest):
         )
 
         for server, expected_clean_name in server_names:
-            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=True)
+            _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=True)
             self.assertEquals(expected_clean_name, clean_name)
 
 @attr(requires='mongo')
@@ -235,9 +235,9 @@ class TestMongo(unittest.TestCase):
         }
         self.config = {
             'instances': [{
-                'server': "mongodb://localhost:%s/test" % PORT1
+                'server': "mongodb://testUser:testPass@localhost:%s/test?authSource=authDB" % PORT1
             }, {
-                'server': "mongodb://localhost:%s/test" % PORT2
+                'server': "mongodb://testUser2:testPass2@localhost:%s/test" % PORT2
             }]
         }
 
@@ -260,18 +260,42 @@ class TestMongo(unittest.TestCase):
         self.assertTrue(len(metrics) > 0)
 
         metric_val_checks = {
+            'mongodb.asserts.msgps': lambda x: x >= 0,
+            'mongodb.fsynclocked': lambda x: x >= 0,
+            'mongodb.globallock.activeclients.readers': lambda x: x >= 0,
+            'mongodb.metrics.cursor.open.notimeout': lambda x: x >= 0,
+            'mongodb.metrics.document.deletedps': lambda x: x >= 0,
+            'mongodb.metrics.getlasterror.wtime.numps': lambda x: x >= 0,
+            'mongodb.metrics.repl.apply.batches.numps': lambda x: x >= 0,
+            'mongodb.metrics.ttl.deleteddocumentsps': lambda x: x >= 0,
+            'mongodb.network.bytesinps': lambda x: x >= 1,
+            'mongodb.network.numrequestsps': lambda x: x >= 1,
+            'mongodb.opcounters.commandps': lambda x: x >= 1,
+            'mongodb.opcountersrepl.commandps': lambda x: x >= 0,
+            'mongodb.oplog.logsizemb': lambda x: x >= 1,
+            'mongodb.oplog.timediff': lambda x: x >= 1,
+            'mongodb.oplog.usedsizemb': lambda x: x >= 0,
+            'mongodb.replset.health': lambda x: x >= 1,
+            'mongodb.replset.state': lambda x: x >= 1,
+            'mongodb.stats.avgobjsize': lambda x: x >= 0,
+            'mongodb.stats.storagesize': lambda x: x >= 0,
             'mongodb.connections.current': lambda x: x >= 1,
             'mongodb.connections.available': lambda x: x >= 1,
             'mongodb.uptime': lambda x: x >= 0,
             'mongodb.mem.resident': lambda x: x > 0,
             'mongodb.mem.virtual': lambda x: x > 0,
-            'mongodb.collections.size': lambda x: x > 0
         }
 
+        tested_metrics = set()
         for m in metrics:
             metric_name = m[0]
             if metric_name in metric_val_checks:
                 self.assertTrue(metric_val_checks[metric_name](m[2]))
+                tested_metrics.add(metric_name)
+
+        if len(metric_val_checks) - len(tested_metrics) != 0:
+            print "missing metrics: %s" % (set(metric_val_checks.keys()) - tested_metrics)
+        self.assertTrue(len(metric_val_checks) - len(tested_metrics) == 0)
 
         # Run the check against our running server
         self.check.check(self.config['instances'][1])

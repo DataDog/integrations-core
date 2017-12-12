@@ -31,8 +31,8 @@ class TestGunicorn(AgentCheckTest):
         """
         self.run_check({'instances': [{'proc_name': 'dd-test-gunicorn'}]})
 
-        self.assertMetric("gunicorn.workers", tags=['state:idle'], at_least=0)
-        self.assertMetric("gunicorn.workers", tags=['state:working'], at_least=0)
+        self.assertMetric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:idle'], at_least=0)
+        self.assertMetric("gunicorn.workers", tags=['app:dd-test-gunicorn', 'state:working'], at_least=0)
 
         self.assertServiceCheck("gunicorn.is_running", count=1)
 

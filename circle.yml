@@ -14,6 +14,7 @@ machine:
         SDK_TESTING: "true"
         DD_AGENT_BRANCH: "master"
         EXTRAS_BRANCH: "master"
+        JMXFETCH_URL: "https://dd-jmxfetch.s3.amazonaws.com"
         REQ_LOCALS: "$CI_BUILD_DIR,$HOME/dd-agent,$HOME/integrations-extras"
 
 dependencies:
@@ -31,6 +32,7 @@ dependencies:
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt ]; then pip install -r ~/$CIRCLE_PROJECT_REPONAME/requirements-opt.txt; fi
         - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
         - if [ -e ~/$CIRCLE_PROJECT_REPONAME/Gemfile ]; then cd ~/$CIRCLE_PROJECT_REPONAME ; bundle install; cd - ; fi
+        - if [ -e ~/$CIRCLE_PROJECT_REPONAME/Gemfile ]; then cd ~/$CIRCLE_PROJECT_REPONAME ; bundle exec rake setup_agent_libs; cd - ; fi
 
 test:
     override:
@@ -77,6 +79,8 @@ test:
         - rake ci:run[kafka_consumer]
         - rake ci:run[kafka]
         - rake ci:run[docker_daemon]
+        - rake ci:run[kubernetes]
+        - rake ci:run[cassandra_nodetool]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

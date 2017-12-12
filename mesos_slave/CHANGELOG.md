@@ -1,6 +1,13 @@
 # CHANGELOG - mesos_slave
 
-1.0.003-22-2017
+1.1.0 / 2017-08-21
+==================
+
+### Changes
+
+* [FEATURE] adds gpu metrics.
+
+1.0.0 / 2017-03-22
 ==================
 
 ### Changes
