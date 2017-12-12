@@ -5,8 +5,6 @@
 '''
 Check the performance counters from IIS
 '''
-# 3p
-import pythoncom
 
 # project
 from checks import AgentCheck
@@ -16,9 +14,7 @@ except ImportError:
     def PDHBaseCheck(*args, **kwargs):
         return
 
-from config import _is_affirmative
 from utils.containers import hash_mutable
-from utils.timeout import TimeoutException
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -119,10 +115,9 @@ class IIS(PDHBaseCheck):
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
-                self.log.error("IIS Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
+                self.log.error("IIS Failed to get metric data for %s %s: %s" % (inst_name, dd_name, str(e)))
                 pass
-        self.log.debug("expected sites is now %s" % str(expected_sites))
+
         for site in expected_sites:
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL,
                             tags=['site:{0}'.format(self.normalize(site))])
-
