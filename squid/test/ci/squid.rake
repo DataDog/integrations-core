@@ -15,11 +15,14 @@ namespace :ci do
     task :install do
       Rake::Task['ci:common:install'].invoke('squid')
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name squid source/squid:squid_version)
-      # sh %(docker start squid)
+      sh %(docker run -d -p 3128:3128 --name squid datadog/squid:#{squid_version})
+      sh %(docker exec squid sed -i -e s/http_access\\ deny\\ manager/\\ #http_access\\ deny\\ manager/ /etc/squid/squid.conf)
+      sh %(docker restart squid)
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      wait_on_docker_logs('squid', 10, 'Accepting HTTP Socket connections')
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
@@ -30,12 +33,10 @@ namespace :ci do
 
     task before_cache: ['ci:common:before_cache']
 
-    task cleanup: ['ci:common:cleanup']
-    # sample cleanup task
-    # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop squid)
-    #   sh %(docker rm squid)
-    # end
+    task cleanup: ['ci:common:cleanup'] do
+      sh %(docker stop squid)
+      sh %(docker rm squid)
+    end
 
     task :execute do
       exception = nil

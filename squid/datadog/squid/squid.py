@@ -73,13 +73,7 @@ class SquidCheck(AgentCheck):
 
     def check(self, instance):
 
-        name = instance.get("name")
-        if not name:
-            raise Exception("Each instance in squid.yaml must have a name")
-        host = instance.get("host", "localhost")
-        port = instance.get("port", 3128)
-        cachemgr_passwd = instance.get("cachemgr_password", "")
-        custom_tags = instance.get("tags", [])
+        name, host, port, cachemgr_passwd, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
 
         # Get the squid counters values
@@ -105,8 +99,32 @@ class SquidCheck(AgentCheck):
         raw_counters = res.text.split("\n")
         counters = {}
         for line in raw_counters:
-            counter = line.strip().split(" = ")
-            if counter[0] in SQUID_COUNTERS:
-                counters["%s.%s" % (METRIC_PREFIX, counter[0])] = float(counter[1])
-
+            counter, value = self.parse_counter(line)
+            if counter in SQUID_COUNTERS:
+                counters["%s.%s" % (METRIC_PREFIX, counter)] = float(value)
         return counters
+
+    def parse_instance(self, instance):
+        name = instance.get("name")
+        if not name:
+            raise Exception("Each instance in squid.yaml must have a name")
+        host = instance.get("host", "localhost")
+        port = instance.get("port", 3128)
+        cachemgr_passwd = instance.get("cachemgr_password", "")
+        custom_tags = instance.get("tags", [])
+        return name, host, port, cachemgr_passwd, custom_tags
+
+    def parse_counter(self, line):
+        # Squid returns a plain text page with one counter per line:
+        # ...
+        # client_http.errors = 0
+        # client_http.kbytes_in = 0
+        # client_http.kbytes_out = 2
+        # ...
+        try:
+            counter, value = line.strip().split(" = ")
+        except ValueError as e:
+            self.log.error('Error parsing counter with line %s: %s', line, e)
+            return None, None
+
+        return counter, value
