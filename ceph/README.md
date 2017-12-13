@@ -40,9 +40,9 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
   ======
     [...]
 
-   ceph (5.19.0) 
-   ------------- 
-   - instance #0 [OK] 
+   ceph (5.19.0)
+   -------------
+   - instance #0 [OK]
    - Collected 24 metrics, 0 events & 1 service check
 
     [...]
@@ -52,6 +52,8 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv) for a list of metrics provided by this integration.
+
+Note: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
 
 ### Events
 The Ceph check does not include any event at this time.
