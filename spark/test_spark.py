@@ -510,12 +510,6 @@ class SparkCheck(AgentCheckTest):
                 value=value,
                 tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
 
-        # Check the running job metrics
-        for metric, value in self.SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
-            self.assertMetric(metric,
-                value=value,
-                tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
-
         # Check the succeeded job metrics
         for metric, value in self.SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
             self.assertMetric(metric,
@@ -557,6 +551,8 @@ class SparkCheck(AgentCheckTest):
             tags=['url:http://localhost:5050'])
         self.assertServiceCheckOK(SPARK_SERVICE_CHECK,
             tags=['url:http://localhost:4040'])
+
+    # TODO add test for filtering out by port
 
 
     @mock.patch('requests.get', side_effect=standalone_requests_get_mock)

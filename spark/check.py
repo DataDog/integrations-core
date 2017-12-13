@@ -367,22 +367,16 @@ class SparkCheck(AgentCheck):
                 app_name = app_json.get('name')
 
                 if app_id and tracking_url and app_name:
-                    tracking_url_port = urlparse(tracking_url).port
-
-                    spark_port = instance.get('spark_port')
-                    spark_port_list = []
-
-                    if isinstance(spark_port, int):
-                        spark_port_list = [spark_port]
-                    elif isinstance(spark_port, tuple):
-                        spark_port_list = list(spark_port)
-                    elif isinstance(spark_port, str):
-                        spark_port_list = spark_port.split(',')
-                        spark_port_list = list(map(int, spark_port_list))
-
-                    # Only collect info on frameworks running on the specified Spark port.
-                    if tracking_url_port in spark_port_list:
+                    spark_ports = instance.get('spark_ui_ports')
+                    if spark_ports is None:
+                        # No filtering by port, just return all the frameworks
                         running_apps[app_id] = (app_name, tracking_url)
+                    else:
+                        # Only return the frameworks running on the correct port
+                        spark_ports = list(set(spark_ports))
+                        tracking_url_port = urlparse(tracking_url).port
+                        if tracking_url_port in spark_ports:
+                            running_apps[app_id] = (app_name, tracking_url)
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(MESOS_SERVICE_CHECK,
