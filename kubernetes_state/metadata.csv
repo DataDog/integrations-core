@@ -82,3 +82,6 @@ kubernetes_state.resourcequota.limits.cpu.limit,gauge,,cpu,,Hard limit on the su
 kubernetes_state.resourcequota.limits.memory.limit,gauge,,byte,,Hard limit on the sum of memory bytes limits for a resource quota,0,kubernetes,k8s_state.resourcequota.limits.mem.limit
 kubernetes_state.statefulset.replicas,gauge,,,,The number of replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas
 kubernetes_state.statefulset.replicas_desired,gauge,,,,The number of desired replicas per statefulset,0,kubernetes,k8s_state.statefulset.replicas_desired
+kubernetes_state.statefulset.replicas_current,gauge,,,,The number of current replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_current
+kubernetes_state.statefulset.replicas_ready,gauge,,,,The number of ready replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_ready
+kubernetes_state.statefulset.replicas_updated,gauge,,,,The number of updated replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_updated
