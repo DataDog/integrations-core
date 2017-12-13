@@ -1,5 +1,12 @@
 # CHANGELOG - varnish
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Use JSON with varnishstat starting varnish 5.0.0. See [#939][].
+
 1.0.6 2017-11-21
 ==================
 
@@ -59,5 +66,6 @@ and varnishadm in order to better support service discovery. See [#498][], thank
 [#739]: https://github.com/DataDog/integrations-core/issues/739
 [#795]: https://github.com/DataDog/integrations-core/issues/795
 [#805]: https://github.com/DataDog/integrations-core/issues/805
+[#805]: https://github.com/DataDog/integrations-core/issues/939
 [@adongy]: https://github.com/adongy
 [@philipseidel]: https://github.com/philipseidel
