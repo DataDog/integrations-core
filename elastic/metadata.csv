@@ -47,6 +47,7 @@ elasticsearch.indexing.delete.total,gauge,,document,,The total number of documen
 elasticsearch.indexing.index.current,gauge,,document,,The number of documents currently being indexed to an index.,0,elasticsearch,current indexing
 elasticsearch.indexing.index.time,gauge,,second,,The total time spent indexing documents to an index.,0,elasticsearch,total indexing time
 elasticsearch.indexing.index.total,gauge,,document,,The total number of documents indexed to an index.,0,elasticsearch,total indexed
+elasticsearch.indices.count,gauge,,index,,The number of indices in the cluster.,0,elasticsearch,number of indices
 elasticsearch.indices.indexing.index_failed,gauge,,,,The number of failed indexing operations.,-1,elasticsearch,index fails
 elasticsearch.indices.indexing.throttle_time,gauge,,millisecond,,The total time indexing waited due to throttling.,-1,elasticsearch,index fails
 elasticsearch.indices.query_cache.evictions,gauge,,eviction,,The number of query cache evictions.,0,elasticsearch,query cache evictions
@@ -85,6 +86,7 @@ elasticsearch.number_of_data_nodes,gauge,,node,,The number of data nodes in the 
 elasticsearch.number_of_nodes,gauge,,node,,The total number of nodes in the cluster.,0,elasticsearch,number of nodes
 elasticsearch.pending_tasks_priority_high,gauge,,task,,The number of high priority pending tasks.,0,elasticsearch,pending high priority tasks
 elasticsearch.pending_tasks_priority_urgent,gauge,,task,,The number of urgent priority pending tasks.,0,elasticsearch,pending urgent tasks
+elasticsearch.pending_tasks_time_in_queue,gauge,,ms,,The average time spent by tasks in the queue.,0,elasticsearch,tasks time in queue
 elasticsearch.pending_tasks_total,gauge,,task,,The total number of pending tasks.,0,elasticsearch,pending tasks
 elasticsearch.primaries.docs.count,gauge,,document,,The total number of documents in the primary shards.,0,elasticsearch,primary docs count
 elasticsearch.primaries.docs.deleted,gauge,,document,,The total number of documents deleted from the primary shards.,0,elasticsearch,primary docs deleted
@@ -213,5 +215,11 @@ jvm.mem.heap_max,gauge,,byte,,The maximum amount of memory that can be used by t
 jvm.mem.heap_used,gauge,,byte,,The amount of memory in bytes currently used by the JVM heap.,0,elasticsearch,jvm heap used
 jvm.mem.non_heap_committed,gauge,,byte,,The amount of memory guaranteed to be available to JVM non-heap.,0,elasticsearch,jvm non-heap committed
 jvm.mem.non_heap_used,gauge,,byte,,The amount of memory in bytes currently used by the JVM non-heap.,0,elasticsearch,jvm non-heap used
+jvm.mem.pools.young.used,gauge,,byte,,The amount of memory in bytes currently used by the Young Generation heap reagion.,0,elasticsearch,jvm young used
+jvm.mem.pools.young.max,gauge,,byte,,The maximum amount of memory that can be used by the Young Generation heap reagion.,0,elasticsearch,jvm young max
+jvm.mem.pools.old.used,gauge,,byte,,The amount of memory in bytes currently used by the Old Generation heap reagion.,0,elasticsearch,jvm old used
+jvm.mem.pools.old.max,gauge,,byte,,The maximum amount of memory that can be used by the Old Generation heap reagion.,0,elasticsearch,jvm old max
+jvm.mem.pools.survivor.used,gauge,,byte,,The amount of memory in bytes currently used by the Survivor Space.,0,elasticsearch,jvm survivor used
+jvm.mem.pools.survivor.max,gauge,,byte,,The maximum amount of memory that can be used by the Survivor Space.,0,elasticsearch,jvm survivor max
 jvm.threads.count,gauge,,thread,,The number of active threads in the JVM.,0,elasticsearch,jvm threads
 jvm.threads.peak_count,gauge,,thread,,The peak number of threads used by the JVM.,0,elasticsearch,jvm peak threads

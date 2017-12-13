@@ -15,7 +15,6 @@ from urlparse import urlparse
 
 # 3rd party
 import requests
-import tornado
 
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
@@ -132,13 +131,19 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    CA_CERTS = [
-        '/opt/datadog-agent/embedded/ssl/certs/cacert.pem',
-        os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'),
-        '/etc/ssl/certs/ca-certificates.crt',
-    ]
+    ca_certs = ['/opt/datadog-agent/embedded/ssl/certs/cacert.pem']
 
-    for f in CA_CERTS:
+    try:
+        import tornado
+    except ImportError:
+        # if `tornado` is not present, simply ignore its certificates
+        pass
+    else:
+        ca_certs.append(os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'))
+
+    ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
+
+    for f in ca_certs:
         if os.path.exists(f):
             return f
     return None
@@ -162,6 +167,8 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         username = instance.get('username')
         password = instance.get('password')
+        client_cert = instance.get('client_cert')
+        client_key = instance.get('client_key')
         http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
         timeout = int(instance.get('timeout', 10))
         config_headers = instance.get('headers', {})
@@ -186,12 +193,12 @@ class HTTPCheck(NetworkCheck):
         skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
-        return url, username, password, method, data, http_response_status_code, timeout, include_content,\
+        return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
             headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
             weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
-        addr, username, password, method, data, http_response_status_code, timeout, include_content, headers,\
+        addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
             ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
@@ -239,7 +246,8 @@ class HTTPCheck(NetworkCheck):
                              proxies = instance_proxy, allow_redirects=allow_redirects,
                              verify=False if disable_ssl_validation else instance_ca_certs,
                              json = data if method == 'post' and isinstance(data, dict) else None,
-                             data = data if method == 'post' and isinstance(data, basestring) else None)
+                             data = data if method == 'post' and isinstance(data, basestring) else None,
+                             cert = (client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
@@ -438,6 +446,7 @@ class HTTPCheck(NetworkCheck):
 
         o = urlparse(url)
         host = o.hostname
+        server_name = instance.get('ssl_server_name', o.hostname)
 
         port = o.port or 443
 
@@ -449,14 +458,18 @@ class HTTPCheck(NetworkCheck):
             context.verify_mode = ssl.CERT_REQUIRED
             context.check_hostname = True
             context.load_verify_locations(instance_ca_certs)
-            ssl_sock = context.wrap_socket(sock, server_hostname=host)
+            ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
         except Exception as e:
+            self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
             return Status.DOWN, 0, "%s" % (str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()
+
+        self.log.debug("Exp_date: %s", exp_date)
+        self.log.debug("days_left: %s", days_left)
 
         if days_left.days < 0:
             return Status.DOWN, days_left.days,"Expired by {0} days".format(days_left.days)

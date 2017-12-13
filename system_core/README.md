@@ -1,16 +1,17 @@
 # Agent Check: system cores
 
-# Overview
+## Overview
 
 This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).
 
-# Installation
+## Setup
+### Installation
 
 The system_core check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host.
 
-# Configuration
+### Configuration
 
-Create a file `system_core.yaml` in the Agent's `conf.d` directory:
+Create a file `system_core.yaml` in the Agent's `conf.d` directory. See the [sample system_core.yaml](https://github.com/DataDog/integrations-core/blob/master/system_core/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -23,9 +24,9 @@ The Agent just needs one item in `instances` in order to enable the check. The c
 
 Restart the Agent to enable the check.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `system_core` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `system_core` under the Checks section:
 
 ```
   Checks
@@ -40,12 +41,25 @@ Run the Agent's `info` subcommand and look for `system_core` under the Checks se
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The system_core check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv) for a list of metrics provided by this check.
 
 Depending on the platform, the check may collect other CPU time metrics, e.g. `system.core.interrupt` on Windows, `system.core.iowait` on Linux, etc.
+
+### Events
+The System Core check does not include any event at this time.
+
+### Service Checks
+The System Core check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

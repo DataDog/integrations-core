@@ -1,1 +1,4 @@
 # integration pip requirements
+# note: requests is also used in many checks
+# upgrade with caution
+requests==2.11.1

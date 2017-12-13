@@ -2,7 +2,6 @@
 import re
 import time
 import urllib
-from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 # 3p
 import pymongo
@@ -10,6 +9,8 @@ import pymongo
 # project
 from checks import AgentCheck
 from urlparse import urlsplit
+from config import _is_affirmative
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 DEFAULT_TIMEOUT = 30
 GAUGE = AgentCheck.gauge
@@ -301,6 +302,8 @@ class MongoDb(AgentCheck):
         "wiredTiger.cache.maximum bytes configured": GAUGE,
         "wiredTiger.cache.maximum page size at eviction": GAUGE,
         "wiredTiger.cache.modified pages evicted": GAUGE,
+        "wiredTiger.cache.pages read into cache": GAUGE, # noqa
+        "wiredTiger.cache.pages written from cache": GAUGE, # noqa
         "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),  # noqa
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (RATE, "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum"),  # noqa
         "wiredTiger.cache.pages evicted by application threads": RATE,
@@ -557,7 +560,7 @@ class MongoDb(AgentCheck):
             metric_prefix=metric_prefix, metric_suffix=metric_suffix
         )
 
-    def _authenticate(self, database, username, password, use_x509):
+    def _authenticate(self, database, username, password, use_x509, server_name, service_check_tags):
         """
         Authenticate to the database.
 
@@ -587,6 +590,15 @@ class MongoDb(AgentCheck):
                 u"Authentication failed due to invalid credentials or configuration issues. %s", e
             )
 
+        if not authenticated:
+            message = ("Mongo: cannot connect with config %s" % server_name)
+            self.service_check(
+                self.SERVICE_CHECK_NAME,
+                AgentCheck.CRITICAL,
+                tags=service_check_tags,
+                message=message)
+            raise Exception(message)
+
         return authenticated
 
     def _parse_uri(self, server, sanitize_username=False):
@@ -600,6 +612,7 @@ class MongoDb(AgentCheck):
         password = parsed.get('password')
         db_name = parsed.get('database')
         nodelist = parsed.get('nodelist')
+        auth_source = parsed.get('options', {}).get('authsource')
 
         # Remove password (and optionally username) from sanitized server URI.
         # To ensure that the `replace` works well, we first need to url-decode the raw server string
@@ -611,7 +624,23 @@ class MongoDb(AgentCheck):
             username_pattern = u"{}[@:]".format(re.escape(username))
             clean_server_name = re.sub(username_pattern, "", clean_server_name)
 
-        return username, password, db_name, nodelist, clean_server_name
+        return username, password, db_name, nodelist, clean_server_name, auth_source
+
+    def _collect_indexes_stats(self, instance, db, tags):
+        """
+        Collect indexes statistics for all collections in the configuration.
+        This use the "$indexStats" command.
+        """
+        for coll_name in instance.get('collections', []):
+            try:
+                for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
+                    idx_tags = tags + [
+                        "name:{0}".format(stats.get('name', 'unknown')),
+                        "collection:{0}".format(coll_name),
+                    ]
+                    self.gauge('mongodb.collection.indexes.accesses.ops', int(stats.get('accesses', {}).get('ops', 0)), idx_tags)
+            except Exception as e:
+                self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
 
     def check(self, instance):
         """
@@ -649,7 +678,7 @@ class MongoDb(AgentCheck):
                 del ssl_params[key]
 
         server = instance['server']
-        username, password, db_name, nodelist, clean_server_name = self._parse_uri(server, sanitize_username=bool(ssl_params))
+        username, password, db_name, nodelist, clean_server_name, auth_source = self._parse_uri(server, sanitize_username=bool(ssl_params))
         additional_metrics = instance.get('additional_metrics', [])
 
         # Get the list of metrics to collect
@@ -714,14 +743,12 @@ class MongoDb(AgentCheck):
             )
             do_auth = False
 
-        if do_auth and not self._authenticate(db, username, password, use_x509):
-            message = u"Mongo: cannot connect with config `%s`" % clean_server_name
-            self.service_check(
-                self.SERVICE_CHECK_NAME,
-                AgentCheck.CRITICAL,
-                tags=service_check_tags,
-                message=message)
-            raise Exception(message)
+        if do_auth:
+            if auth_source:
+                self.log.info("authSource was specified in the the server URL: using '%s' as the authentication database", auth_source)
+                self._authenticate(cli[auth_source], username, password, use_x509, clean_server_name, service_check_tags)
+            else:
+                self._authenticate(db, username, password, use_x509, clean_server_name, service_check_tags)
 
         try:
             status = db.command('serverStatus', tcmalloc=collect_tcmalloc_metrics)
@@ -761,7 +788,7 @@ class MongoDb(AgentCheck):
 
                 # need a new connection to deal with replica sets
                 setname = replSet.get('set')
-                cli = pymongo.mongo_client.MongoClient(
+                cli_rs = pymongo.mongo_client.MongoClient(
                     server,
                     socketTimeoutMS=timeout,
                     connectTimeoutMS=timeout,
@@ -769,16 +796,12 @@ class MongoDb(AgentCheck):
                     replicaset=setname,
                     read_preference=pymongo.ReadPreference.NEAREST,
                     **ssl_params)
-                db = cli[db_name]
 
-                if do_auth and not self._authenticate(db, username, password, use_x509):
-                    message = ("Mongo: cannot connect with config %s" % server)
-                    self.service_check(
-                        self.SERVICE_CHECK_NAME,
-                        AgentCheck.CRITICAL,
-                        tags=service_check_tags,
-                        message=message)
-                    raise Exception(message)
+                if do_auth:
+                    if auth_source:
+                        self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
+                    else:
+                        self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
 
                 # Replication set information
                 replset_name = replSet['set']
@@ -809,7 +832,7 @@ class MongoDb(AgentCheck):
 
                 if current is not None:
                     total = 0.0
-                    cfg = cli['local']['system.replset'].find_one()
+                    cfg = cli_rs['local']['system.replset'].find_one()
                     for member in cfg.get('members'):
                         total += member.get('votes', 1)
                         if member['_id'] == current['_id']:
@@ -824,7 +847,7 @@ class MongoDb(AgentCheck):
                 )
 
         except Exception as e:
-            if "OperationFailure" in repr(e) and "replSetGetStatus" in str(e):
+            if "OperationFailure" in repr(e) and "not running with --replSet" in str(e):
                 pass
             else:
                 raise e
@@ -901,6 +924,13 @@ class MongoDb(AgentCheck):
                     self._resolve_metric(metric_name, metrics_to_collect)
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
+        if _is_affirmative(instance.get('collections_indexes_stats')):
+            mongo_version = cli.server_info().get('version', '0.0')
+            if LooseVersion(mongo_version) >= LooseVersion("3.2"):
+                self._collect_indexes_stats(instance, db, tags)
+            else:
+                self.log.error("'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s", mongo_version)
+
         # Report the usage metrics for dbs/collections
         if 'top' in additional_metrics:
             try:
@@ -945,25 +975,15 @@ class MongoDb(AgentCheck):
 
             oplog_data = {}
 
-            db_version = cli.server_info()['version']
-            oplog_names = ("oplog.rs", "oplog.$main")
-            if LooseVersion(db_version) < LooseVersion("3.0.0"):
-                for ol_collection_name in oplog_names:
-                    ol_metadata = localdb.system.namespaces.find_one({"name": "local.%s" % ol_collection_name})
-                    if ol_metadata:
-                        break
-            else:
-                res = localdb.command("listCollections", filter={"name": {"$in": oplog_names}})
-                if res['cursor']['firstBatch']:
-                    ol_metadata = res['cursor']['firstBatch'][0]
-                    ol_collection_name = ol_metadata['name']
-                else:
-                    ol_metadata = None
+            for ol_collection_name in ("oplog.rs", "oplog.$main"):
+                ol_options = localdb[ol_collection_name].options()
+                if ol_options:
+                    break
 
-            if ol_metadata:
+            if ol_options:
                 try:
                     oplog_data['logSizeMB'] = round(
-                        ol_metadata['options']['size'] / 2.0 ** 20, 2
+                        ol_options['size'] / 2.0 ** 20, 2
                     )
 
                     oplog = localdb[ol_collection_name]
@@ -972,8 +992,8 @@ class MongoDb(AgentCheck):
                         localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
                     )
 
-                    op_asc_cursor = oplog.find().sort("$natural", pymongo.ASCENDING).limit(1)
-                    op_dsc_cursor = oplog.find().sort("$natural", pymongo.DESCENDING).limit(1)
+                    op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
+                    op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
 
                     try:
                         first_timestamp = op_asc_cursor[0]['ts'].as_datetime()

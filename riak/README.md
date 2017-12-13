@@ -1,16 +1,17 @@
 # Riak Check
 
-# Overview
+## Overview
 
 This check lets you track node, vnode and ring performance metrics from RiakKV or RiakTS.
 
-# Installation
+## Setup
+### Installation
 
 The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers. If you need the newest version of the check, install the `dd-check-riak` package.
 
-# Configuration
+### Configuration
 
-Create a file `riak.yaml` in the Agent's `conf.d` directory:
+Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -19,11 +20,11 @@ instances:
   - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
 ```
 
-Restart the Agent to start sending Riak metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Riak metrics to Datadog.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `riak` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `riak` under the Checks section:
 
 ```
   Checks
@@ -38,16 +39,26 @@ Run the Agent's `info` subcommand and look for `riak` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The riak check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+### Events
+The Riak check does not include any event at this time.
+
+### Service Checks
 
 **riak.can_connect**:
 
 Returns CRITICAL if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

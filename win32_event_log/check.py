@@ -10,7 +10,7 @@ import calendar
 from datetime import datetime, timedelta
 
 # project
-from checks.wmi_check import WinWMICheck, to_time, from_time
+from checks.winwmi_check import WinWMICheck, to_time, from_time
 from utils.containers import hash_mutable
 from utils.timeout import TimeoutException
 

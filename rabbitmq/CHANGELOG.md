@@ -1,5 +1,30 @@
 # CHANGELOG - rabbitmq
 
+
+1.4.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add data collection for exchanges. See [#176][]. (Thanks [@wholroyd][])
+* [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
+* [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
+
+1.3.1 / 2017-10-10
+==================
+
+### Changes
+
+* [BUGFIX] Add a key check before updating connection state metric. See [#729][]. (Thanks [@ian28223][])
+
+1.3.0 / 2017-08-28
+==================
+
+### Changes
+
+* [FEATURE] Add a metric to get the number of bindings for a queue. See [#674][]
+* [BUGFIX] Set aliveness service to CRITICAL if the rabbitmq server is down. See[#635][]
+
 1.2.0 / 2017-07-18
 ==================
 
@@ -28,4 +53,8 @@
 [#504]: https://github.com/DataDog/integrations-core/issues/504
 [#506]: https://github.com/DataDog/integrations-core/issues/506
 [#514]: https://github.com/DataDog/integrations-core/issues/514
+[#635]: https://github.com/DataDog/integrations-core/issues/635
+[#674]: https://github.com/DataDog/integrations-core/issues/674
+[#729]: https://github.com/DataDog/integrations-core/issues/729
+[@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr

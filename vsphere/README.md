@@ -1,18 +1,19 @@
 # Agent Check: VMWare vSphere
 
-# Overview
+## Overview
 
 This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
-# Installation
+## Setup
+### Installation
 
 The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server. If you need the newest version of the check, install the `dd-check-mcache` package.
 
-# Configuration
+### Configuration
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
-Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory:
+Then, create a file `vsphere.yaml` in the Datadog Agent's `conf.d` directory. See the [sample vsphere.yaml](https://github.com/DataDog/integrations-core/blob/master/vsphere/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -26,7 +27,7 @@ instances:
 
 Restart the Agent to start sending vSphere metrics and events to Datadog.
 
-## Configuration Options
+#### Configuration Options
 
 * `ssl_verify` (Optional) - Set to false to disable SSL verification, when connecting to vCenter
 * `ssl_capath` (Optional) - Set to the absolute file path of a directory containing CA certificates in PEM format
@@ -36,9 +37,9 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 * `all_metrics` (Optional) - When set to true, this will collect EVERY metric from vCenter, which means a LOT of metrics you probably do not care about. We have selected a set of metrics that are interesting to monitor for you if false.
 * `event_config` (Optional) - Event config is a dictionary. For now the only switch you can flip is collect_vcenter_alarms which will send as events the alarms set in vCenter.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `vsphere` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `vsphere` under the Checks section:
 
 ```
   Checks
@@ -53,41 +54,44 @@ Run the Agent's `info` subcommand and look for `vsphere` under the Checks sectio
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The vsphere check is compatible with all Windows platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv) for a list of metrics provided by this check.
 
-# Events
+### Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It does NOT emit the following event types:
 
-AlarmStatusChangedEvent:Gray
-VmBeingHotMigratedEvent
-VmResumedEvent
-VmReconfiguredEvent
-VmPoweredOnEvent
-VmMigratedEvent
-TaskEvent:Initialize powering On
-TaskEvent:Power Off virtual machine
-TaskEvent:Power On virtual machine
-TaskEvent:Reconfigure virtual machine
-TaskEvent:Relocate virtual machine
-TaskEvent:Suspend virtual machine
-TaskEvent:Migrate virtual machine
-VmMessageEvent
-VmSuspendedEvent
-VmPoweredOffEvent
+* AlarmStatusChangedEvent:Gray
+* VmBeingHotMigratedEvent
+* VmResumedEvent
+* VmReconfiguredEvent
+* VmPoweredOnEvent
+* VmMigratedEvent
+* TaskEvent:Initialize powering On
+* TaskEvent:Power Off virtual machine
+* TaskEvent:Power On virtual machine
+* TaskEvent:Reconfigure virtual machine
+* TaskEvent:Relocate virtual machine
+* TaskEvent:Suspend virtual machine
+* TaskEvent:Migrate virtual machine
+* VmMessageEvent
+* VmSuspendedEvent
+* VmPoweredOffEvent
 
-# Service Checks
+### Service Checks
 
 `vcenter.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
-# Further Reading
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
+## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

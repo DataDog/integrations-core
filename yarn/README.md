@@ -1,6 +1,6 @@
 # Agent Check: Hadoop YARN
 
-# Overview
+## Overview
 
 This check collects metrics from your YARN ResourceManager, including:
 
@@ -9,14 +9,14 @@ This check collects metrics from your YARN ResourceManager, including:
 * Node metrics: available vCores, time of last health update, etc
 
 And more.
-
-# Installation
+## Setup
+### Installation
 
 The YARN check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your YARN ResourceManager. If you need the newest version of the check, install the `dd-check-yarn` package.
 
-# Configuration
+### Configuration
 
-Create a file `yarn.yaml` in the Agent's `conf.d` directory:
+Create a file `yarn.yaml` in the Agent's `conf.d` directory. See the [sample yarn.yaml](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for all available configuration options.:
 
 ```
 init_config:
@@ -31,9 +31,9 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 Restart the Agent to start sending YARN metrics to Datadog.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `yarn` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `yarn` under the Checks section:
 
 ```
   Checks
@@ -48,17 +48,29 @@ Run the Agent's `info` subcommand and look for `yarn` under the Checks section:
     [...]
 ```
 
-# Compatibility
+## Compatibility
 
 The yarn check is compatible with all major platforms.
 
-# Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv) for a list of metrics provided by this check.
 
-# Service Checks
+### Events
+The Yarn check does not include any event at this time.
 
+### Service Checks
 **yarn.can_connect**:
 
 Returns CRITICAL if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise OK.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [How to monitor Hadoop metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)
+* [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)
+* [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)

@@ -1,32 +1,61 @@
-# System_swap Integration
+# Agent Check: swap
 
 ## Overview
 
-Get metrics from system_swap service in real time to:
+This check monitors the number of bytes a host has swapped in and swapped out.
 
-* Visualize and monitor system_swap states
-* Be notified about system_swap failovers and events.
+## Setup
+### Installation
 
-## Installation
+The system swap check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host.
 
-Install the `dd-check-system_swap` package manually or with your favorite configuration manager
+### Configuration
 
-## Configuration
+Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory. See the [sample system_swap.yaml](https://github.com/DataDog/integrations-core/blob/master/system_swap/conf.yaml.example) for all available configuration options:
 
-Edit the `system_swap.yaml` file to point to your server and port, set the masters to monitor
+```
+# This check takes no initial configuration
+init_config:
 
-## Validation
+instances: [{}]
+```
 
-When you run `datadog-agent info` you should see something like the following:
+Restart the Agent to start collecting swap metrics.
 
-    Checks
-    ======
+### Validation
 
-        system_swap
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `system_swap` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    system_swap
+    -------
+      - instance #0 [OK]
+      - Collected 2 metrics, 0 events & 0 service checks
+
+    [...]
+```
 
 ## Compatibility
 
-The system_swap check is compatible with all major platforms
+The system_swap check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/system_swap/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The System Swap check does not include any event at this time.
+
+### Service Checks
+The System Swap check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

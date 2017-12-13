@@ -1,2 +1,2 @@
 # integration pip requirements
-pymongo==3.2
+pymongo==3.5

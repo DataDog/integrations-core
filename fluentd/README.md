@@ -1,19 +1,19 @@
 # Fluentd Integration
 
-# Overview
+## Overview
 
 Get metrics from Fluentd to:
 
 * Visualize Fluentd performance.
 * Correlate the performance of Fluentd with the rest of your applications.
 
-# Installation
+## Setup
+### Installation
 
 The Fluentd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Fluentd servers.
 
-# Configuration
-
-## Prepare Fluentd
+### Configuration
+#### Prepare Fluentd
 
 In your fluentd configuration, add a `monitor_agent` source:
 
@@ -25,9 +25,9 @@ In your fluentd configuration, add a `monitor_agent` source:
 </source>
 ```
 
-## Connect the Datadog Agent
+#### Connect the Datadog Agent
 
-Create a file `fluentd.yaml` in the Agent's `conf.d` directory:
+Create a file `fluentd.yaml` in the Agent's `conf.d` directory. See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -42,9 +42,9 @@ instances:
 
 Restart the Agent to begin sending Fluentd metrics to Datadog.
 
-# Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `fluentd` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `fluentd` under the Checks section:
 
 ```
   Checks
@@ -59,18 +59,24 @@ Run the Agent's `info` subcommand and look for `fluentd` under the Checks sectio
     [...]
 ```
 
-# Metrics
+
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv) for a list of metrics provided by this integration.
 
-# Events
+### Events
+The FluentD check does not include any event at this time.
 
-# Service Checks
+### Service Checks
 
 `fluentd.is_ok`:
 
 Returns 'Critical' if the Agent cannot connect to Fluentd to collect metrics. This is the check which most other integrations would call `can_connect`.
 
-# Further Reading
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
-To get a better idea of how (or why) to integrate your Fluentd servers with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-fluentd-datadog/) about it.
+## Further Reading
+
+* [How to monitor Fluentd with Datadog](https://www.datadoghq.com/blog/monitor-fluentd-datadog/)

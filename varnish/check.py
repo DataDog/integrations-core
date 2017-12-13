@@ -8,6 +8,7 @@ from os import geteuid
 from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 import re
 import xml.parsers.expat # python 2.4 compatible
+import shlex
 
 # project
 from checks import AgentCheck
@@ -81,7 +82,15 @@ class Varnish(AgentCheck):
             tags = []
         else:
             tags = list(set(tags))
-        varnishstat_path = instance.get("varnishstat")
+        # Split the varnishstat command so that additional arguments can be passed in
+        # In order to support monitoring a Varnish instance which is running as a Docker
+        # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+        # perform a docker exec on the running container. This works fine when running a
+        # single container on the host but breaks down when attempting to use the auto
+        # discovery feature. This change allows for passing in additional parameters to
+        # the script (i.e. %%host%%) so that the command is properly formatted and the
+        # desired container is queried.
+        varnishstat_path = shlex.split(instance.get("varnishstat"))
         name = instance.get('name')
         metrics_filter = instance.get("metrics_filter", [])
         if not isinstance(metrics_filter, list):
@@ -92,7 +101,7 @@ class Varnish(AgentCheck):
 
         # Parse metrics from varnishstat.
         arg = '-x' if use_xml else '-1'
-        cmd = [varnishstat_path, arg]
+        cmd = varnishstat_path + [arg]
         for metric in metrics_filter:
             cmd.extend(["-f", metric])
 
@@ -107,8 +116,16 @@ class Varnish(AgentCheck):
         self._parse_varnishstat(output, use_xml, tags)
 
         # Parse service checks from varnishadm.
-        varnishadm_path = instance.get('varnishadm')
-        if varnishadm_path:
+        if instance.get("varnishadm", None):
+            # Split the varnishadm command so that additional arguments can be passed in
+            # In order to support monitoring a Varnish instance which is running as a Docker
+            # container we need to wrap commands (varnishstat, varnishadm) with scripts which
+            # perform a docker exec on the running container. This works fine when running a
+            # single container on the host but breaks down when attempting to use the auto
+            # discovery feature. This change allows for passing in additional parameters to
+            # the script (i.e. %%host%%) so that the command is properly formatted and the
+            # desired container is queried.
+            varnishadm_path = shlex.split(instance.get('varnishadm'))
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
             cmd = []
@@ -116,9 +133,9 @@ class Varnish(AgentCheck):
                 cmd.append('sudo')
 
             if version < LooseVersion('4.1.0'):
-                cmd.extend([varnishadm_path, '-S', secretfile_path, 'debug.health'])
+                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend([varnishadm_path, '-S', secretfile_path, 'backend.list', '-p'])
+                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'backend.list', '-p'])
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
@@ -133,7 +150,7 @@ class Varnish(AgentCheck):
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output([varnishstat_path, "-V"], self.log,
+        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log,
             raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
@@ -247,23 +264,56 @@ class Varnish(AgentCheck):
             ================================================================
             ----------------------------------------------------------HHH--- Happy
 
+        Example output (new output format):
+
+            Backend name                   Admin      Probe
+            boot.default                   probe      Healthy (no probe)
+            boot.backend2                  probe      Healthy 4/4
+              Current states  good:  4 threshold:  3 window:  4
+              Average response time of good probes: 0.002504
+              Oldest ================================================== Newest
+              --------------------------------------------------------------44 Good IPv4
+              --------------------------------------------------------------XX Good Xmit
+              --------------------------------------------------------------RR Good Recv
+              ------------------------------------------------------------HHHH Happy
+
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
-        backend, status, message = None, None, None
         for line in output.split("\n"):
-            tokens = line.strip().split(' ')
+            backend, status, message = None, None, None
+            # split string and remove all empty fields
+            tokens = filter(None, line.strip().split(' '))
+
             if len(tokens) > 0:
-                if tokens[0] == 'Backend':
+                if tokens == ['Backend', 'name', 'Admin', 'Probe']:
+                    # skip the column headers that exist in new output format
+                    continue
+                # parse new output format
+                # the backend name will include the vcl name
+                # so split on first . to remove prefix
+                elif len(tokens) >= 4 and tokens[1] in ['healthy', 'sick']:
+                    # If the backend health was overriden, lets grab the
+                    # overriden value instead of the probed health
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[1].lower()
+                elif len(tokens) >= 4 and tokens[1] == 'probe':
+                    backend = tokens[0].split('.', 1)[-1]
+                    status = tokens[2].lower()
+                # Parse older Varnish backend output
+                elif tokens[0] == 'Backend':
                     backend = tokens[1]
                     status = tokens[-1].lower()
-                elif tokens[0] == 'Current' and backend is not None:
+
+                if tokens[0] == 'Current' and backend is not None:
                     try:
                         message = ' '.join(tokens[2:]).strip()
                     except Exception:
                         # If we can't parse a message still send a status.
                         self.log.exception('Error when parsing message from varnishadm')
                         message = ''
+
+                if backend is not None:
                     backends_by_status[status].append((backend, message))
 
         for status, backends in backends_by_status.iteritems():

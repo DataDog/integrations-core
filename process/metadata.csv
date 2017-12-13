@@ -18,3 +18,6 @@ system.processes.open_file_descriptors,gauge,,,,The number of file descriptors u
 system.processes.open_handles,gauge,,,,The number of handles used by this process.,0,system,processes open handles
 system.processes.threads,gauge,,thread,,The number of threads used by this process.,0,system,processes threads
 system.processes.voluntary_ctx_switches,gauge,,event,,The number of voluntary context switches performed by this process.,0,system,processes vol ctx switches
+system.processes.run_time.avg,gauge,,second,,The average running time of all instances of this process,0,system,avg run time
+system.processes.run_time.max,gauge,,second,,The longest running time of all instances of this process,0,system,max run time
+system.processes.run_time.min,gauge,,second,,The shortest running time of all instances of this process,0,system,min run time

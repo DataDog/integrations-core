@@ -1,5 +1,28 @@
 # CHANGELOG - kubernetes
 
+1.5.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] remove namespace from pod_name tag. See [#770][]
+* [BUGFIX] stop reporting cAdvisor metrics about non-container objects. See [#770][]
+
+1.4.0 / 2017-09-12
+==================
+### Changes
+
+* [FEATURE] Add an option to retry kubelet connection if it's not up at start time. See [#722][]
+* [BUGFIX] fix container_image names reported as sha checksums [#731][]
+
+1.3.0 / 2017-08-28
+==================
+### Changes
+
+* [FEATURE] add an option to collect node labels as host tags. See [#614][]
+* [IMPROVEMENT] add custom tags to service checks [#642][]
+* [FEATURE] skip cAdvisor metrics if port is set to 0. See [#655][]
+* [FEATURE] enable event collection according to agent leader status. See [#687][]
+
 1.2.0 / 2017-07-18
 ==================
 ### Changes
@@ -38,3 +61,10 @@
 [#494]: https://github.com/DataDog/integrations-core/issues/494
 [#508]: https://github.com/DataDog/integrations-core/issues/508
 [#538]: https://github.com/DataDog/integrations-core/issues/538
+[#614]: https://github.com/DataDog/integrations-core/issues/614
+[#642]: https://github.com/DataDog/integrations-core/issues/642
+[#655]: https://github.com/DataDog/integrations-core/issues/655
+[#687]: https://github.com/DataDog/integrations-core/issues/687
+[#722]: https://github.com/DataDog/integrations-core/issues/722
+[#731]: https://github.com/DataDog/integrations-core/issues/731
+[#770]: https://github.com/DataDog/integrations-core/issues/770

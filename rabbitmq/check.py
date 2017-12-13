@@ -19,14 +19,42 @@ from checks import AgentCheck
 from config import _is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
+EXCHANGE_TYPE = 'exchanges'
 QUEUE_TYPE = 'queues'
 NODE_TYPE = 'nodes'
 CONNECTION_TYPE = 'connections'
+MAX_DETAILED_EXCHANGES = 50
 MAX_DETAILED_QUEUES = 200
 MAX_DETAILED_NODES = 100
 # Post an event in the stream when the number of queues or nodes to
 # collect is above 90% of the limit:
 ALERT_THRESHOLD = 0.9
+EXCHANGE_ATTRIBUTES = [
+    # Path, Name, Operation
+    ('message_stats/ack', 'messages.ack.count', float),
+    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
+
+    ('message_stats/confirm', 'messages.confirm.count', float),
+    ('message_stats/confirm_details/rate', 'messages.confirm.rate', float),
+
+    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
+    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
+
+    ('message_stats/publish', 'messages.publish.count', float),
+    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
+
+    ('message_stats/publish_in', 'messages.publish_in.count', float),
+    ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
+
+    ('message_stats/publish_out', 'messages.publish_out.count', float),
+    ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
+
+    ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
+    ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
+
+    ('message_stats/redeliver', 'messages.redeliver.count', float),
+    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
+]
 QUEUE_ATTRIBUTES = [
     # Path, Name, Operation
     ('active_consumers', 'active_consumers', float),
@@ -62,6 +90,7 @@ QUEUE_ATTRIBUTES = [
 
 NODE_ATTRIBUTES = [
     ('fd_used', 'fd_used', float),
+    ('disk_free', 'disk_free', float),
     ('mem_used', 'mem_used', float),
     ('run_queue', 'run_queue', float),
     ('sockets_used', 'sockets_used', float),
@@ -69,18 +98,24 @@ NODE_ATTRIBUTES = [
 ]
 
 ATTRIBUTES = {
+    EXCHANGE_TYPE: EXCHANGE_ATTRIBUTES,
     QUEUE_TYPE: QUEUE_ATTRIBUTES,
     NODE_TYPE: NODE_ATTRIBUTES,
 }
 
 TAG_PREFIX = 'rabbitmq'
 TAGS_MAP = {
+    EXCHANGE_TYPE: {
+        'name': 'exchange',
+        'vhost': 'vhost',
+        'exchange_family': 'exchange_family',
+    },
     QUEUE_TYPE: {
         'node': 'node',
-                'name': 'queue',
-                'vhost': 'vhost',
-                'policy': 'policy',
-                'queue_family': 'queue_family',
+        'name': 'queue',
+        'vhost': 'vhost',
+        'policy': 'policy',
+        'queue_family': 'queue_family',
     },
     NODE_TYPE: {
         'name': 'node',
@@ -88,6 +123,7 @@ TAGS_MAP = {
 }
 
 METRIC_SUFFIX = {
+    EXCHANGE_TYPE: "exchange",
     QUEUE_TYPE: "queue",
     NODE_TYPE: "node",
 }
@@ -106,6 +142,7 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
+        self.cached_vhosts = {} # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -118,18 +155,31 @@ class RabbitMQ(AgentCheck):
         password = instance.get('rabbitmq_pass', 'guest')
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse.urlparse(base_url)
+        if not parsed_url.scheme:
+            self.log.warning('The rabbit url did not include a protocol, assuming http')
+            # urlparse.urljoin cannot add a protocol to the rest of the url for some reason.
+            # This still leaves the potential for errors, but such urls would never have been valid, either
+            # and it's not likely to be useful to attempt to catch all possible mistakes people could make
+            base_url = 'http://' + base_url
+            parsed_url = urlparse.urlparse(base_url)
+
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
+            EXCHANGE_TYPE: int(instance.get('max_detailed_exchanges', MAX_DETAILED_EXCHANGES)),
             QUEUE_TYPE: int(instance.get('max_detailed_queues', MAX_DETAILED_QUEUES)),
             NODE_TYPE: int(instance.get('max_detailed_nodes', MAX_DETAILED_NODES)),
         }
 
         # List of queues/nodes to collect metrics from
         specified = {
+            EXCHANGE_TYPE: {
+                'explicit': instance.get('exchanges', []),
+                'regexes': instance.get('exchanges_regexes', []),
+            },
             QUEUE_TYPE: {
                 'explicit': instance.get('queues', []),
                 'regexes': instance.get('queues_regexes', []),
@@ -166,12 +216,15 @@ class RabbitMQ(AgentCheck):
         base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
             # Generate metrics from the status API.
+            self.get_stats(instance, base_url, EXCHANGE_TYPE, max_detailed[EXCHANGE_TYPE], specified[EXCHANGE_TYPE], custom_tags,
+                           auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
 
             vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+            self.cached_vhosts[base_url] = vhosts
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
 
@@ -187,6 +240,11 @@ class RabbitMQ(AgentCheck):
             self.service_check('rabbitmq.status', AgentCheck.CRITICAL, custom_tags, message=msg)
             self.log.error(msg)
 
+            # tag every vhost as CRITICAL or they would keep the latest value, OK, in case the RabbitMQ server goes down
+            self.log.error("error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s" % (base_url, self.cached_vhosts))
+            for vhost in self.cached_vhosts.get(base_url, []):
+                self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
+
     def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
         try:
             r = requests.get(url, auth=auth, proxies=proxies, timeout=self.default_integration_http_timeout, verify=ssl_verify)
@@ -197,11 +255,72 @@ class RabbitMQ(AgentCheck):
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
 
+    def _filter_list(self, data, explicit_filters, regex_filters, object_type, tag_families):
+        if explicit_filters or regex_filters:
+            matching_lines = []
+            for data_line in data:
+                name = data_line.get("name")
+                if name in explicit_filters:
+                    matching_lines.append(data_line)
+                    explicit_filters.remove(name)
+                    continue
+
+                match_found = False
+                for p in regex_filters:
+                    match = re.search(p, name)
+                    if match:
+                        if _is_affirmative(tag_families) and match.groups():
+                            if object_type == QUEUE_TYPE:
+                                data_line["queue_family"] = match.groups()[0]
+                            if object_type == EXCHANGE_TYPE:
+                                data_line["exchange_family"] = match.groups()[0]
+                        matching_lines.append(data_line)
+                        match_found = True
+                        break
+
+                if match_found:
+                    continue
+
+                # Absolute names work only for queues and exchanges
+                if object_type != QUEUE_TYPE and object_type != EXCHANGE_TYPE:
+                    continue
+                absolute_name = '%s/%s' % (data_line.get("vhost"), name)
+                if absolute_name in explicit_filters:
+                    matching_lines.append(data_line)
+                    explicit_filters.remove(absolute_name)
+                    continue
+
+                for p in regex_filters:
+                    match = re.search(p, absolute_name)
+                    if match:
+                        if _is_affirmative(tag_families) and match.groups():
+                            if object_type == QUEUE_TYPE:
+                                data_line["queue_family"] = match.groups()[0]
+                            if object_type == EXCHANGE_TYPE:
+                                data_line["exchange_family"] = match.groups()[0]
+                        matching_lines.append(data_line)
+                        match_found = True
+                        break
+                if match_found:
+                    continue
+            return matching_lines
+        return data
+
+    def _get_tags(self, data, object_type, custom_tags):
+        tags = []
+        tag_list = TAGS_MAP[object_type]
+        for t in tag_list:
+            tag = data.get(t)
+            if tag:
+                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
+                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
+        return tags + custom_tags
+
     def get_stats(self, instance, base_url, object_type, max_detailed, filters, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
-        object_type: either QUEUE_TYPE or NODE_TYPE
+        object_type: either QUEUE_TYPE or NODE_TYPE or EXCHANGE_TYPE
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
@@ -227,50 +346,7 @@ class RabbitMQ(AgentCheck):
                 "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
 
         # a list of queues/nodes is specified. We process only those
-        if explicit_filters or regex_filters:
-            matching_lines = []
-            for data_line in data:
-                name = data_line.get("name")
-                if name in explicit_filters:
-                    matching_lines.append(data_line)
-                    explicit_filters.remove(name)
-                    continue
-
-                match_found = False
-                for p in regex_filters:
-                    match = re.search(p, name)
-                    if match:
-                        if _is_affirmative(instance.get("tag_families", False)) and match.groups():
-                            data_line["queue_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
-
-                if match_found:
-                    continue
-
-                # Absolute names work only for queues
-                if object_type != QUEUE_TYPE:
-                    continue
-                absolute_name = '%s/%s' % (data_line.get("vhost"), name)
-                if absolute_name in explicit_filters:
-                    matching_lines.append(data_line)
-                    explicit_filters.remove(absolute_name)
-                    continue
-
-                for p in regex_filters:
-                    match = re.search(p, absolute_name)
-                    if match:
-                        if _is_affirmative(instance.get("tag_families", False)) and match.groups():
-                            data_line["queue_family"] = match.groups()[0]
-                        matching_lines.append(data_line)
-                        match_found = True
-                        break
-
-                if match_found:
-                    continue
-
-            data = matching_lines
+        data = self._filter_list(data, explicit_filters, regex_filters, object_type, instance.get("tag_families", False))
 
         # if no filters are specified, check everything according to the limits
         if len(data) > ALERT_THRESHOLD * max_detailed:
@@ -280,22 +356,20 @@ class RabbitMQ(AgentCheck):
         if len(data) > max_detailed:
             # Display a warning in the info page
             self.warning(
-                "Too many queues to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
+                "Too many items to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
 
         for data_line in data[:max_detailed]:
-            # We truncate the list of nodes/queues if it's above the limit
+            # We truncate the list if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
 
-    def _get_metrics(self, data, object_type, custom_tags):
-        tags = []
-        tag_list = TAGS_MAP[object_type]
-        for t in tag_list:
-            tag = data.get(t)
-            if tag:
-                # FIXME 6.x: remove this suffix or unify (sc doesn't have it)
-                tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
-        tags.extend(custom_tags)
+        # get a list of the number of bindings on a given queue
+        # /api/queues/vhost/name/bindings
+        if object_type is QUEUE_TYPE:
+            self._get_queue_bindings_metrics(base_url, custom_tags, data, instance_proxy,
+                                            instance, object_type, auth, ssl_verify)
 
+    def _get_metrics(self, data, object_type, custom_tags):
+        tags = self._get_tags(data, object_type, custom_tags)
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
@@ -312,6 +386,17 @@ class RabbitMQ(AgentCheck):
                     self.log.debug("Caught ValueError for %s %s = %s  with tags: %s" % (
                         METRIC_SUFFIX[object_type], attribute, value, tags))
 
+    def _get_queue_bindings_metrics(self, base_url, custom_tags, data, instance_proxy,
+                                    instance, object_type, auth=None, ssl_verify=True):
+        for item in data:
+            vhost = item['vhost']
+            tags = self._get_tags(item, object_type, custom_tags)
+            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), item['name'])
+            bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
+                    ssl_verify=ssl_verify, proxies=instance_proxy))
+
+            self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
+
     def get_connections_stat(self, instance, base_url, object_type, vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         Collect metrics on currently open connection per vhost.
@@ -325,7 +410,8 @@ class RabbitMQ(AgentCheck):
         for conn in data:
             if conn['vhost'] in vhosts:
                 stats[conn['vhost']] += 1
-                connection_states[conn['state']] += 1
+                # 'state' does not exist for direct type connections.
+                connection_states[conn.get('state', 'direct')] += 1
 
         for vhost, nb_conn in stats.iteritems():
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)

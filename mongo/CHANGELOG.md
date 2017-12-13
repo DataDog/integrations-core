@@ -1,5 +1,34 @@
 # CHANGELOG - mongo
 
+1.5.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception See [#915][]
+
+1.5.0 / 2017-11-21
+==================
+### Changes
+
+* [FEATURE] Collect metrics about indexes usage. See [#823][]
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747][]
+* [IMPROVEMENT] Filter out oplog entries without a timestamp. See [#406][], thanks [@hindmanj][]
+
+
+1.4.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][] (Thanks [@dnavre][])
+
+1.3.0 / 2017-08-28
+==================
+### Changes
+
+* [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
+* [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][], thanks [@dtbartle][]
+* [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][], thanks [@dtbartle][]
+
 1.2.0 / 2017-07-18
 ==================
 ### Changes
@@ -29,4 +58,15 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#406]: https://github.com/DataDog/integrations-core/issues/406
 [#491]: https://github.com/DataDog/integrations-core/issues/491
+[#625]: https://github.com/DataDog/integrations-core/issues/625
+[#627]: https://github.com/DataDog/integrations-core/issues/627
+[#691]: https://github.com/DataDog/integrations-core/issues/691
+[#747]: https://github.com/DataDog/integrations-core/issues/747
+[#769]: https://github.com/DataDog/integrations-core/issues/769
+[#823]: https://github.com/DataDog/integrations-core/issues/823
+[#915]: https://github.com/DataDog/integrations-core/issues/915
+[@dnavre]: https://github.com/dnavre
+[@dtbartle]: https://github.com/dtbartle
+[@hindmanj]: https://github.com/hindmanj

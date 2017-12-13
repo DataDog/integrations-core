@@ -68,3 +68,7 @@ instances:
 #    Collect database size metrics. Default value is True but they might be slow with large databases
 #    collect_database_size_metrics: False
 #
+
+#    Include statistics from the default database 'postgres' in the check metrics, default to false
+#    collect_default_database: False
+#
