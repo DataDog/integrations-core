@@ -9,6 +9,7 @@ from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 import re
 import xml.parsers.expat # python 2.4 compatible
 import shlex
+import simplejson as json
 
 # project
 from checks import AgentCheck
@@ -30,6 +31,11 @@ class BackendStatus(object):
 
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
+    # Parse metrics from varnishstat.
+    VARNISHSTAT_FORMAT_OPTION = {"text": "-1", # version < 3.0.0
+                                 "xml":  "-x", # version >= 3.0.0 < 5.0.0
+                                 "json": "-j", # version >=5.0.0
+                                 }
 
     # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
@@ -97,11 +103,9 @@ class Varnish(AgentCheck):
             raise Exception("The parameter 'metrics_filter' must be a list")
 
         # Get version and version-specific args from varnishstat -V.
-        version, use_xml = self._get_version_info(varnishstat_path)
+        version, varnishstat_format = self._get_version_info(varnishstat_path)
 
-        # Parse metrics from varnishstat.
-        arg = '-x' if use_xml else '-1'
-        cmd = varnishstat_path + [arg]
+        cmd = varnishstat_path + [self.VARNISHSTAT_FORMAT_OPTION[varnishstat_format]]
         for metric in metrics_filter:
             cmd.extend(["-f", metric])
 
@@ -113,7 +117,7 @@ class Varnish(AgentCheck):
 
         output, _, _ = get_subprocess_output(cmd, self.log)
 
-        self._parse_varnishstat(output, use_xml, tags)
+        self._parse_varnishstat(output, varnishstat_format, tags)
 
         # Parse service checks from varnishadm.
         if instance.get("varnishadm", None):
@@ -154,7 +158,7 @@ class Varnish(AgentCheck):
             raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
-        use_xml = True
+        varnishstat_format = "json"
         version = LooseVersion('3.0.0')
 
         m1 = self.version_pattern.search(output, re.MULTILINE)
@@ -174,13 +178,14 @@ class Varnish(AgentCheck):
 
         # Location of varnishstat
         if version < LooseVersion('3.0.0'):
-            use_xml = False
+            varnishstat_format = "text"
+        elif version < LooseVersion('5.0.0'): # we default to json starting version 5.0.0
+            varnishstat_format = "xml"
 
-        return version, use_xml
+        return version, varnishstat_format
 
-    def _parse_varnishstat(self, output, use_xml, tags=None):
-        """Extract stats from varnishstat -x
-
+    def _parse_varnishstat(self, output, varnishstat_format, tags=None):
+        """
         The text option (-1) is not reliable enough when counters get large.
         VBE.media_video_prd_services_01(10.93.67.16,,8080).happy18446744073709551615
 
@@ -188,35 +193,12 @@ class Varnish(AgentCheck):
         https://github.com/varnish/Varnish-Cache/blob/master/include/tbl/vsc_fields.h
 
         Bitmaps are not supported.
-
-        Example XML output (with `use_xml=True`)
-        <varnishstat>
-            <stat>
-                <name>fetch_304</name>
-                <value>0</value>
-                <flag>a</flag>
-                <description>Fetch no body (304)</description>
-            </stat>
-            <stat>
-                <name>n_sess_mem</name>
-                <value>334</value>
-                <flag>i</flag>
-                <description>N struct sess_mem</description>
-            </stat>
-            <stat>
-                <type>LCK</type>
-                <ident>vcl</ident>
-                <name>creat</name>
-                <value>1</value>
-                <flag>a</flag>
-                <description>Created locks</description>
-            </stat>
-        </varnishstat>
         """
+
         tags = tags or []
         # FIXME: this check is processing an unbounded amount of data
         # we should explicitly list the metrics we want to get from the check
-        if use_xml:
+        if varnishstat_format == "xml":
             p = xml.parsers.expat.ParserCreate()
             p.StartElementHandler = self._start_element
             end_handler = lambda name: self._end_element(name, tags)
@@ -224,7 +206,21 @@ class Varnish(AgentCheck):
             p.CharacterDataHandler = self._char_data
             self._reset()
             p.Parse(output, True)
-        else:
+        elif varnishstat_format == "json":
+            json_output = json.loads(output)
+            for name, metric in json_output.iteritems():
+                if not isinstance(metric, dict): # skip 'timestamp' field
+                    continue
+
+                if name.startswith("MAIN."):
+                    name = name.split('.', 1)[1]
+                value = metric.get("value", 0)
+
+                if metric["flag"] in ("a", "c"):
+                    self.rate(self.normalize(name, prefix="varnish"), long(value), tags=tags)
+                elif metric["flag"] in ("g", "i"):
+                    self.gauge(self.normalize(name, prefix="varnish"), long(value), tags=tags)
+        elif varnishstat_format == "text":
             for line in output.split("\n"):
                 self.log.debug("Parsing varnish results: %s" % line)
                 fields = line.split()
