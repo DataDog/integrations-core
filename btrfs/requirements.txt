@@ -1,2 +1,7 @@
-# integration pip requirements
-psutil==4.4.1 --hash=sha256:9da43dbf7c08f5c2a8e5e2c8792f5c438f52435677b1334e9653d23ea028f4f7
+# integration pip requirements#
+psutil==4.4.1 \
+    --hash=sha256:7e77ec1a9c75a858781c1fb46fe81c999e1ae0e711198b4aaf59e5f5bd373b11 \
+    --hash=sha256:0f7f830db35c1baeb0131b2bba458b77f7db98944b2fedafc34922168e467d09 \
+    --hash=sha256:9da43dbf7c08f5c2a8e5e2c8792f5c438f52435677b1334e9653d23ea028f4f7 \
+    --hash=sha256:23ac3e7b6784751ceeb4338d54b0e683c955cd22b86acbc089696aeb0717ab75 \
+    --hash=sha256:392877b5f86977b4a747fb61968e3b44df62c1d6d87536f021c4979b601c68f5
