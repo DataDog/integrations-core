@@ -66,6 +66,11 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.replicaset.replicas_desired',
         # persistentvolume claim
         NAMESPACE + '.persistentvolumeclaim.status',
+        # statefulset
+        NAMESPACE + '.statefulset.replicas',
+        NAMESPACE + '.statefulset.replicas.current',
+        NAMESPACE + '.statefulset.replicas.ready',
+        NAMESPACE + '.statefulset.replicas.updated',
     ]
 
     ZERO_METRICS = [
