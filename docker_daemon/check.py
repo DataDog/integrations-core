@@ -3,9 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import json
 import os
 import re
+import requests
 import socket
+import time
 import urllib2
 from collections import defaultdict, Counter, deque
 from math import ceil
@@ -274,8 +277,52 @@ class DockerDaemon(AgentCheck):
         else:
             self.init_success = True
 
+    def get_meta(self):
+        meta = requests.get('http://169.254.170.2/metadata/v1')
+        if not meta.ok:
+            meta = meta.reason
+        else:
+            try:
+                meta = json.dumps(meta.json())
+            except Exception as ex:
+                meta = "Failed to get meta: %s" % str(ex)
+        stats = requests.get('http://169.254.170.2/metadata/v1/stats')
+        if not stats.ok:
+            stats = stats.reason
+        else:
+            try:
+                stats = json.dumps(stats.json())
+            except Exception as ex:
+                stats = "Failed to get stats: %s" % str(ex)
+        meta_ev = {
+            'timestamp': int(time.time()),
+            'event_type': 'fargate',
+            'host': 'fargate_test',
+            'msg_text': meta,
+            'msg_title': 'fargate test meta',
+            'alert_type': 'error',
+            'source_type_name': "fargate",
+            'event_object': 'fargate_test',
+            'tags': []
+            }
+
+        stats_ev = {
+            'timestamp': int(time.time()),
+            'event_type': 'fargate',
+            'host': 'fargate_test',
+            'msg_text': stats,
+            'msg_title': 'fargate test stats',
+            'alert_type': 'error',
+            'source_type_name': "fargate",
+            'event_object': 'fargate_test',
+            'tags': []
+        }
+        self.event(meta_ev)
+        self.event(stats_ev)
+
     def check(self, instance):
         """Run the Docker check for one instance."""
+        self.get_meta()
         if not self.init_success:
             # Initialization can fail if cgroups are not ready or docker daemon is down. So we retry if needed
             # https://github.com/DataDog/dd-agent/issues/1896
