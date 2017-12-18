@@ -16,7 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-import checks
+from check import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
@@ -404,9 +404,9 @@ Log file: /var/log/mysql/mysql.log
 State: RUNNING
 Start time: {time_start}
 Stop time: {time_stop}\nExit Status: 0""".format(
-            time_now=checks.FORMAT_TIME(time_now),
-            time_start=checks.FORMAT_TIME(time_start),
-            time_stop='' if time_stop == 0 else checks.FORMAT_TIME(time_stop)
+            time_now=FORMAT_TIME(time_now),
+            time_start=FORMAT_TIME(time_start),
+            time_stop='' if time_stop == 0 else FORMAT_TIME(time_stop)
         )
 
         agentConfig = {
