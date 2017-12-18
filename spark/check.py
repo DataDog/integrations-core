@@ -373,7 +373,6 @@ class SparkCheck(AgentCheck):
                         running_apps[app_id] = (app_name, tracking_url)
                     else:
                         # Only return the frameworks running on the correct port
-                        spark_ports = list(set(spark_ports))
                         tracking_url_port = urlparse(tracking_url).port
                         if tracking_url_port in spark_ports:
                             running_apps[app_id] = (app_name, tracking_url)
