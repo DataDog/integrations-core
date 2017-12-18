@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.network'],
+    packages=['dd_integrations.network'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.network': ['network.yaml.default']},
+    package_data={b'dd_integrations.network': ['network.yaml.default']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'network=datadog.network:main',
+            'network=dd_integrations.network:main',
         ],
     },
 )

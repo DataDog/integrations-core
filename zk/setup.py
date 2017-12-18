@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.zk'],
+    packages=['dd_integrations.zk'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.zk': ['varnish.yaml.example']},
+    package_data={b'dd_integrations.zk': ['varnish.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'zk=datadog.zk:main',
+            'zk=dd_integrations.zk:main',
         ],
     },
 )

@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.linux_proc_extras'],
+    packages=['dd_integrations.linux_proc_extras'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.linux_proc_extras': ['linux_proc_extras.yaml.example']},
+    package_data={b'dd_integrations.linux_proc_extras': ['linux_proc_extras.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'linux_proc_extras=datadog.linux_proc_extras:main',
+            'linux_proc_extras=dd_integrations.linux_proc_extras:main',
         ],
     },
 )

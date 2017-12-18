@@ -58,7 +58,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.haproxy'],
+    packages=['dd_integrations.haproxy'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -81,13 +81,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.haproxy': ['haproxy.yaml.example']},
+    package_data={b'dd_integrations.haproxy': ['haproxy.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'haproxy=datadog.haproxy:main',
+            'haproxy=dd_integrations.haproxy:main',
         ],
     },
 )

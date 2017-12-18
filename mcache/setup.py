@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.mcache'],
+    packages=['dd_integrations.mcache'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.mcache': ['mcache.yaml.example']},
+    package_data={b'dd_integrations.mcache': ['mcache.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'mcache=datadog.mcache:main',
+            'mcache=dd_integrations.mcache:main',
         ],
     },
 )

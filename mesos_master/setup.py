@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.mesos_master'],
+    packages=['dd_integrations.mesos_master'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.mesos_master': ['mesos_master.yaml.example']},
+    package_data={b'dd_integrations.mesos_master': ['mesos_master.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'mesos_master=datadog.mesos_master:main',
+            'mesos_master=dd_integrations.mesos_master:main',
         ],
     },
 )
