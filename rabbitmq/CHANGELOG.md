@@ -6,8 +6,11 @@
 
 ### Changes
 
+* [FEATURE] Add data collection for exchanges. See [#176][]. (Thanks [@wholroyd][])
+* [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
 * [BUGFIX] Assume a protocol if there isn't one, fixing a bug if you don't use a protocol. See [#909][].
 * [IMPROVEMENT] If vhosts are listed in the config, the check will only query for those specific vhosts, rather than querying for all of them. See [#910][].
+* [FEATURE] Add metrics to monitor a cluster. See [#924][]
 
 1.3.1 / 2017-10-10
 ==================
@@ -15,7 +18,6 @@
 ### Changes
 
 * [BUGFIX] Add a key check before updating connection state metric. See [#729][]. (Thanks [@ian28223][])
-
 
 1.3.0 / 2017-08-28
 ==================
@@ -56,7 +58,14 @@
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
 [#729]: https://github.com/DataDog/integrations-core/issues/729
+<<<<<<< HEAD
 [#909]: https://github.com/DataDog/integrations-core/issues/909
 [#910]: https://github.com/DataDog/integrations-core/issues/910
+=======
+[#902]: https://github.com/DataDog/integrations-core/issues/902
+[#909]: https://github.com/DataDog/integrations-core/issues/909
+[#924]: https://github.com/DataDog/integrations-core/issues/924
+[@dnavre]: https://github.com/dnavre
+>>>>>>> master
 [@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr

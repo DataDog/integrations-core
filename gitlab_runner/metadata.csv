@@ -17,12 +17,12 @@ go_memstats_alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use,
 go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,gitlab_runner,bytes allocated
 go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab_runner,bytes profiling bucket
 go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab_runner,number of frees
-go_memstats_gc_sys_bytes,gauge,,byte,Number of bytes used for garbage collection system metadata,0,gitlab_runner,bytes garbage collection
-go_memstats_heap_alloc_bytes,gauge,,byte,Number of heap bytes allocated and still in use,0,gitlab_runner,heap bytes allocated and in use
-go_memstats_heap_idle_bytes,gauge,,byte,Number of heap bytes waiting to be used,0,gitlab_runner,heap bytes unused
-go_memstats_heap_inuse_bytes,gauge,,byte,Number of heap bytes that are in use,0,gitlab_runner,heap bytes in use
+go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab_runner,bytes garbage collection
+go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab_runner,heap bytes allocated and in use
+go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab_runner,heap bytes unused
+go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab_runner,heap bytes in use
 go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab_runner,allocated objects
-go_memstats_heap_released_bytes_total,counter,,byte,Total number of heap bytes released to OS,0,gitlab_runner,heap bytes released
+go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab_runner,heap bytes released
 go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab_runner,heap bytes obtained
 go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab_runner,epoch since last gc
 go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab_runner,pointer lookups

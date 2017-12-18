@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.5.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception See [#915][]
+
 1.5.0 / 2017-11-21
 ==================
 ### Changes
@@ -60,6 +66,7 @@
 [#747]: https://github.com/DataDog/integrations-core/issues/747
 [#769]: https://github.com/DataDog/integrations-core/issues/769
 [#823]: https://github.com/DataDog/integrations-core/issues/823
+[#915]: https://github.com/DataDog/integrations-core/issues/915
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
 [@hindmanj]: https://github.com/hindmanj

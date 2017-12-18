@@ -62,7 +62,13 @@ namespace :ci do
 
       %w(test1 test5 tralala).each do |q|
         sh %(python #{rabbitmq_admin_script} declare queue name=#{q})
-        sh %(python #{rabbitmq_admin_script} publish exchange=amq.default routing_key=#{q} payload="hello, world")
+        sh %(python #{rabbitmq_admin_script} declare exchange name=#{q} type=topic)
+        sh %(python #{rabbitmq_admin_script} declare binding source=#{q} destination_type=queue \
+            destination=#{q} routing_key=#{q})
+        sh %(python #{rabbitmq_admin_script} publish exchange=#{q} routing_key=#{q} \
+            payload="hello, world")
+        sh %(python #{rabbitmq_admin_script} publish exchange=#{q} routing_key=bad_key \
+            payload="unroutable")
       end
 
       %w(test1 test5 tralala testaaaaa bbbbbb).each do |q|

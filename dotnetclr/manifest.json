@@ -1,0 +1,12 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.20.0",
+  "name": "dotnetclr",
+  "short_description": "dotnetclr description.",
+  "guid": "3d21557e-65bd-4b66-99b9-5521f32b5957",
+  "support": "contrib",
+  "supported_os": ["windows"],
+  "version": "0.1.0"
+}

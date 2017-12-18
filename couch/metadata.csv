@@ -238,20 +238,27 @@ couchdb.erlang.io_output,gauge,,,,,0,couchdb2,
 couchdb.erlang.os_proc_count,gauge,,,,,0,couchdb2,
 couchdb.erlang.garbage_collection_count,gauge,,,,,0,couchdb2,
 couchdb.erlang.process_count,gauge,,,,,0,couchdb2,
-couchdb.active_tasks.replication.doc_write_failures,gauge,,error,,,-1,couchdb2,failed docs written while replicating
-couchdb.active_tasks.replication.docs_read,gauge,,document,,,0,couchdb2, docs read while replicating
-couchdb.active_tasks.replication.docs_written,gauge,,document,,,0,couchdb2, docs written while replicating
-couchdb.active_tasks.replication.missing_revisions_found,gauge,,,,,0,couchdb2, missing revisions
-couchdb.active_tasks.replication.revisions_checked,gauge,,,,,1,couchdb2, successfully checked revisions
-couchdb.active_tasks.replication.changes_pending,gauge,,document,,,-1,couchdb2, changes yet to be processed
-couchdb.active_tasks.replication.count,gauge,,resource,,,0,couchdb2,number of replications
-couchdb.active_tasks.db_compaction.changes_done,gauge,,document,,,0,couchdb2, changes currently compacted
-couchdb.active_tasks.db_compaction.progress,gauge,,percent,,,0,couchdb2, progress of the compaction process
-couchdb.active_tasks.db_compaction.total_changes,gauge,,document,,,0,couchdb2,number of changes this compaction will process
-couchdb.active_tasks.db_compaction.count,gauge,,resource,,,0,couchdb2,number of running compactions
-couchdb.active_tasks.indexer.total_changes,gauge,,document,,,0,couchdb2,number of changes to be indexed
-couchdb.active_tasks.indexer.changes_done,gauge,,document,,,0,couchdb2,number of already indexed changes
-couchdb.active_tasks.indexer.progress,gauge,,percent,,,0,couchdb2,progress of the indexing process
-couchdb.active_tasks.indexer.count,gauge,,resource,,,0,couchdb2,number of indexing processes
-couchdb.active_tasks.view_compaction.progress,gauge,,percent,,,0,couchdb2,progress of the view compaction
-couchdb.active_tasks.view_compaction.count,gauge,,resource,,,0,couchdb2,number of running view compactions
+couchdb.active_tasks.replication.doc_write_failures,gauge,,error,,Failed docs written while replicating,-1,couchdb2,
+couchdb.active_tasks.replication.docs_read,gauge,,document,,Docs read while replicating,0,couchdb2,
+couchdb.active_tasks.replication.docs_written,gauge,,document,,Docs written while replicating,0,couchdb2,
+couchdb.active_tasks.replication.missing_revisions_found,gauge,,,,Missing revisions,0,couchdb2,
+couchdb.active_tasks.replication.revisions_checked,gauge,,operation,,Successfully checked revisions,1,couchdb2,
+couchdb.active_tasks.replication.changes_pending,gauge,,document,,Changes yet to be processed,-1,couchdb2,
+couchdb.active_tasks.replication.count,gauge,,resource,,Number of replications,0,couchdb2,
+couchdb.active_tasks.db_compaction.changes_done,gauge,,document,,Changes currently compacted,0,couchdb2,
+couchdb.active_tasks.db_compaction.progress,gauge,,percent,,Progress of the compaction process,0,couchdb2,
+couchdb.active_tasks.db_compaction.total_changes,gauge,,document,,Number of changes this compaction will process,0,couchdb2,
+couchdb.active_tasks.db_compaction.count,gauge,,resource,,Number of running compactions,0,couchdb2,
+couchdb.active_tasks.indexer.total_changes,gauge,,document,,Number of changes to be indexed,0,couchdb2,
+couchdb.active_tasks.indexer.changes_done,gauge,,document,,Number of already indexed changes,0,couchdb2,
+couchdb.active_tasks.indexer.progress,gauge,,percent,,Progress of the indexing process,0,couchdb2,
+couchdb.active_tasks.indexer.count,gauge,,resource,,Number of indexing processes,0,couchdb2,
+couchdb.active_tasks.view_compaction.progress,gauge,,percent,,Progress of the view compaction,0,couchdb2,
+couchdb.active_tasks.view_compaction.count,gauge,,resource,,Number of running view compactions,0,couchdb2,
+couchdb.by_ddoc.active_size,gauge,,byte,,Actual size in bytes of the view,0,couchdb2,
+couchdb.by_ddoc.file_size,gauge,,byte,,Size in bytes as stored on disk,0,couchdb2,
+couchdb.by_ddoc.external_size,gauge,,byte,,Size in bytes of the view uncompressed,0,couchdb2,
+couchdb.by_ddoc.minimum_updates_pending,gauge,,update,,,-1,couchdb2,
+couchdb.by_ddoc.preferred_updates_pending,gauge,,update,,,-1,couchdb2,
+couchdb.by_ddoc.total_updates_pending,gauge,,update,,,-1,couchdb2,
+couchdb.by_ddoc.waiting_clients,gauge,,resource,,Number of clients waiting on views from this Design Doc,-1,couchdb2,

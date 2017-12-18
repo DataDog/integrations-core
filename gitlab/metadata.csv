@@ -8,12 +8,12 @@ go_memstats_alloc_bytes_total,counter,,byte,,Total number of bytes allocated,0,g
 go_memstats_buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table,0,gitlab,bytes profiling bucket
 go_memstats_frees_total,counter,,request,,Total number of frees,0,gitlab,number of frees
 go_memstats_gc_cpu_fraction,gauge,,request,second,The fraction of this program's available CPU time used by the GC since the program started,0,gitlab,GC cpu fraction
-go_memstats_gc_sys_bytes,gauge,,byte,Number of bytes used for garbage collection system metadata,0,gitlab,bytes garbage collection
-go_memstats_heap_alloc_bytes,gauge,,byte,Number of heap bytes allocated and still in use,0,gitlab,heap bytes allocated and in use
-go_memstats_heap_idle_bytes,gauge,,byte,Number of heap bytes waiting to be used,0,gitlab,heap bytes unused
-go_memstats_heap_inuse_bytes,gauge,,byte,Number of heap bytes that are in use,0,gitlab,heap bytes in use
+go_memstats_gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata,0,gitlab,bytes garbage collection
+go_memstats_heap_alloc_bytes,gauge,,byte,,Number of heap bytes allocated and still in use,0,gitlab,heap bytes allocated and in use
+go_memstats_heap_idle_bytes,gauge,,byte,,Number of heap bytes waiting to be used,0,gitlab,heap bytes unused
+go_memstats_heap_inuse_bytes,gauge,,byte,,Number of heap bytes that are in use,0,gitlab,heap bytes in use
 go_memstats_heap_objects,gauge,,request,,Number of allocated objects,0,gitlab,allocated objects
-go_memstats_heap_released_bytes_total,counter,,byte,Total number of heap bytes released to OS,0,gitlab,heap bytes released
+go_memstats_heap_released_bytes_total,counter,,byte,,Total number of heap bytes released to OS,0,gitlab,heap bytes released
 go_memstats_heap_sys_bytes,gauge,,byte,,Number of heap bytes obtained from system,0,gitlab,heap bytes obtained
 go_memstats_last_gc_time_seconds,gauge,,request,,Number of seconds since 1970 of last garbage collection,0,gitlab,epoch since last gc
 go_memstats_lookups_total,counter,,request,,Total number of pointer lookups,0,gitlab,pointer lookups
@@ -38,7 +38,7 @@ process_open_fds,gauge,,request,,Number of open file descriptors,0,gitlab,open f
 process_resident_memory_bytes,gauge,,byte,,Resident memory size in bytes,0,gitlab,rss bytes
 process_start_time_seconds,gauge,,request,second,Start time of the process since unix epoch in seconds,0,gitlab,epoch time since start
 process_virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes,0,gitlab,virtual memory bytes
-prometheus_build_info,gauge,,request,second,A metric with a constant '1' value labeled by version, revision, branch, and goversion from which prometheus was built,0,gitlab,build info
+prometheus_build_info,gauge,,request,second,A metric with a constant '1' value labeled by version revision branch and goversion from which prometheus was built,0,gitlab,build info
 prometheus_config_last_reload_success_timestamp_seconds,gauge,,request,second,Timestamp of the last successful configuration reload,0,gitlab,Timestamp successful config reload
 prometheus_config_last_reload_successful,gauge,,request,second,Whether the last configuration reload attempt was successful,0,gitlab,flag successful config reload
 prometheus_engine_queries,gauge,,request,second,The current number of queries being executed or waiting,0,gitlab,current queries
@@ -47,16 +47,16 @@ prometheus_engine_query_duration_seconds,gauge,,request,second,Query timing,0,gi
 prometheus_evaluator_duration_seconds,gauge,,request,second,The duration of rule group evaluations,0,gitlab,duration evaluator
 prometheus_evaluator_iterations_missed_total,counter,,request,second,The total number of rule group evaluations missed due to slow rule group evaluation,0,gitlab,total evaluations missed
 prometheus_evaluator_iterations_skipped_total,counter,,request,second,The total number of rule group evaluations skipped due to throttled metric storage,0,gitlab,total evaluations skipped
-prometheus_evaluator_iterations_total,counter,,request,second,The total number of scheduled rule group evaluations, whether executed, missed or skipped,0,gitlab,total evaluations scheduled
+prometheus_evaluator_iterations_total,counter,,request,second,The total number of scheduled rule group evaluations whether executed missed or skipped,0,gitlab,total evaluations scheduled
 prometheus_local_storage_checkpoint_duration_seconds,gauge,,request,second,The duration in seconds taken for checkpointing open chunks and chunks yet to be persisted,0,gitlab,duration checkpointing open chunks
 prometheus_local_storage_checkpoint_last_duration_seconds,gauge,,request,second,The duration in seconds it took to last checkpoint open chunks and chunks yet to be persisted,0,gitlab,duration last checkpoint open chunks
 prometheus_local_storage_checkpoint_last_size_bytes,gauge,,byte,,The size of the last checkpoint of open chunks and chunks yet to be persisted,0,gitlab,size last checkpoint open chunks
 prometheus_local_storage_checkpoint_series_chunks_written,gauge,,request,second,The number of chunk written per series while checkpointing open chunks and chunks yet to be persisted,0,gitlab,checkpoint series chunks written
-prometheus_local_storage_checkpointing,gauge,,request,second,1 if the storage is checkpointing, 0 otherwise,0,gitlab,storage checkpointing flag
+prometheus_local_storage_checkpointing,gauge,,request,second,1 if the storage is checkpointing and 0 otherwise,0,gitlab,storage checkpointing flag
 prometheus_local_storage_chunk_ops_total,counter,,request,second,The total number of chunk operations by their type,0,gitlab,chunk ops by type
 prometheus_local_storage_chunks_to_persist,counter,,request,second,The current number of chunks waiting for persistence,0,gitlab,chunks to be persisted
 prometheus_local_storage_fingerprint_mappings_total,counter,,request,second,The total number of fingerprints being mapped to avoid collisions,0,gitlab,fingerprints mapped
-prometheus_local_storage_inconsistencies_total,counter,,request,second,A counter incremented each time an inconsistency in the local storage is detected. If this is greater zero, restart the,gauge,,request,second,server as soon as possible,0,gitlab,total storage inconsistencies
+prometheus_local_storage_inconsistencies_total,counter,,request,second,A counter incremented each time an inconsistency in the local storage is detected. If this is greater zero then restart the server as soon as possible,0,gitlab,total storage inconsistencies
 prometheus_local_storage_indexing_batch_duration_seconds,gauge,,request,second,Quantiles for batch indexing duration in seconds,0,gitlab,batch indexing duration quantiles
 prometheus_local_storage_indexing_batch_sizes,gauge,,request,second,Quantiles for indexing batch sizes (number of metrics per batch),0,gitlab,indexing batch sizes quantiles
 prometheus_local_storage_indexing_queue_capacity,gauge,,request,second,The capacity of the indexing queue,0,gitlab,indexing queue capacity
@@ -67,13 +67,13 @@ prometheus_local_storage_memory_chunkdescs,gauge,,request,second,The current num
 prometheus_local_storage_memory_chunks,gauge,,request,second,The current number of chunks in memory. The number does not include cloned chunks (i.e. chunks without a descriptor),0,gitlab,chunks in memory
 prometheus_local_storage_memory_dirty_series,gauge,,request,second,The current number of series that would require a disk seek during crash recovery,0,gitlab,memory dirty series
 prometheus_local_storage_memory_series,gauge,,request,second,The current number of series in memory,0,gitlab,series in memory
-prometheus_local_storage_non_existent_series_matches_total,counter,,request,second,How often a non-existent series was referred to during label matching or chunk preloading. This is an indication,gauge,,request,second,of outdated label indexes,0,gitlab,total non-existent series matches
+prometheus_local_storage_non_existent_series_matches_total,counter,,request,second,How often a non-existent series was referred to during label matching or chunk preloading. This is an indication of outdated label indexes,0,gitlab,total non-existent series matches
 prometheus_local_storage_open_head_chunks,gauge,,request,second,The current number of open head chunks,0,gitlab,open head chunks
-prometheus_local_storage_out_of_order_samples_total,counter,,request,second,The total number of samples that were discarded because their timestamps were at or before the last received sample,gauge,,request,second,for a series,0,gitlab,samples out of order
+prometheus_local_storage_out_of_order_samples_total,counter,,request,second,The total number of samples that were discarded because their timestamps were at or before the last received sample for a series,0,gitlab,samples out of order
 prometheus_local_storage_persist_errors_total,counter,,request,second,The total number of errors while writing to the persistence layer,0,gitlab,persistence write errors
-prometheus_local_storage_persistence_urgency_score,gauge,,request,second,A score of urgency to persist chunks, 0 is least urgent, 1 most,0,gitlab,chunk persistence urgency score
+prometheus_local_storage_persistence_urgency_score,gauge,,request,second,A score of urgency to persist chunks. 0 is least urgent and 1 most,0,gitlab,chunk persistence urgency score
 prometheus_local_storage_queued_chunks_to_persist_total,counter,,request,second,The total number of chunks queued for persistence,0,gitlab,chunks queued for persistence
-prometheus_local_storage_rushed_mode,gauge,,request,second,1 if the storage is in rushed mode, 0 otherwise,0,gitlab,flag storage in rushed mode
+prometheus_local_storage_rushed_mode,gauge,,request,second,1 if the storage is in rushed mode and 0 otherwise,0,gitlab,flag storage in rushed mode
 prometheus_local_storage_series_chunks_persisted,gauge,,request,second,The number of chunks persisted per series,0,gitlab,chunks persisted per series
 prometheus_local_storage_series_ops_total,counter,,request,second,The total number of series operations by their type,0,gitlab,series ops by type
 prometheus_local_storage_started_dirty,gauge,,request,second,Whether the local storage was found to be dirty (and crash recovery occurred) during Prometheus startup,0,gitlab,local storage started dirty

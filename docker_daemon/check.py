@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -650,7 +650,7 @@ class DockerDaemon(AgentCheck):
     def _report_performance_metrics(self, containers_by_id):
 
         containers_without_proc_root = []
-        for container in containers_by_id.itervalues():
+        for container_id, container in containers_by_id.iteritems():
             if self._is_container_excluded(container) or not self._is_container_running(container):
                 continue
 
@@ -663,7 +663,7 @@ class DockerDaemon(AgentCheck):
                     continue
                 self._report_net_metrics(container, tags)
             except BogusPIDException as e:
-                self.log.warning('Unable to report cgroup metrics: %s', e)
+                self.log.warning('Unable to report cgroup metrics for container %s: %s', container_id[:12], e)
 
         if containers_without_proc_root:
             message = "Couldn't find pid directory for containers: {0}. They'll be missing network metrics".format(

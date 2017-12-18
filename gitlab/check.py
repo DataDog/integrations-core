@@ -13,9 +13,11 @@ class GitlabCheck(PrometheusCheck):
 
     # Readiness signals ability to serve traffic, liveness that Gitlab is healthy overall
     ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness']
-    EVENT_TYPE = SOURCE_TYPE_NAME = NAMESPACE = 'gitlab'
+    EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab'
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
+
+    PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab.prometheus_endpoint_up'
 
     """
     Collect Gitlab metrics from Prometheus and validates that the connectivity with Gitlab
@@ -31,6 +33,7 @@ class GitlabCheck(PrometheusCheck):
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
         self.metrics_mapper = dict(zip(allowed_metrics, allowed_metrics))
+        self.NAMESPACE = 'gitlab'
 
     def check(self, instance):
         #### Metrics collection
@@ -41,7 +44,13 @@ class GitlabCheck(PrometheusCheck):
         # By default we send the buckets
         send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
 
-        self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+        try:
+            self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK)
+        except requests.exceptions.ConnectionError as e:
+            # Unable to connect to the metrics endpoint
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message))
 
         #### Service check to check Gitlab's health endpoints
         for check_type in self.ALLOWED_SERVICE_CHECKS:

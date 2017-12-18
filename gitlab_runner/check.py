@@ -11,8 +11,9 @@ from util import headers
 
 class GitlabRunnerCheck(PrometheusCheck):
 
-    EVENT_TYPE = SOURCE_TYPE_NAME = NAMESPACE = 'gitlab_runner'
-    SERVICE_CHECK_NAME = 'gitlab_runner.can_connect'
+    EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab_runner'
+    MASTER_SERVICE_CHECK_NAME = 'gitlab_runner.can_connect'
+    PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab_runner.prometheus_endpoint_up'
 
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
@@ -31,6 +32,7 @@ class GitlabRunnerCheck(PrometheusCheck):
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
         self.metrics_mapper = dict(zip(allowed_metrics, allowed_metrics))
+        self.NAMESPACE = 'gitlab_runner'
 
     def check(self, instance):
         #### Metrics collection
@@ -41,7 +43,14 @@ class GitlabRunnerCheck(PrometheusCheck):
         # By default we send the buckets
         send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
 
-        self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+        try:
+            self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK)
+        except requests.exceptions.ConnectionError as e:
+            # Unable to connect to the metrics endpoint
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message))
+
 
         #### Service check to check whether the Runner can talk to the Gitlab master
         self._check_connectivity_to_master(instance)
@@ -89,7 +98,7 @@ class GitlabRunnerCheck(PrometheusCheck):
             r = requests.get(url, auth=auth, verify=verify_ssl, timeout=timeouts,
                              headers=headers(self.agentConfig))
             if r.status_code != 200:
-                self.service_check(self.SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+                self.service_check(self.MASTER_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
                                    message="Got %s when hitting %s" % (r.status_code, url),
                                    tags=service_check_tags)
                 raise Exception("Http status code {0} on url {1}".format(r.status_code, url))
@@ -98,15 +107,15 @@ class GitlabRunnerCheck(PrometheusCheck):
 
         except requests.exceptions.Timeout:
             # If there's a timeout
-            self.service_check(self.SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+            self.service_check(self.MASTER_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
                                message="Timeout when hitting %s" % url,
                                tags=service_check_tags)
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+            self.service_check(self.MASTER_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
                                message="Error hitting %s. Error: %s" % (url, e.message),
                                tags=service_check_tags)
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, PrometheusCheck.OK, tags=service_check_tags)
+            self.service_check(self.MASTER_SERVICE_CHECK_NAME, PrometheusCheck.OK, tags=service_check_tags)
         self.log.debug("gitlab check succeeded")
