@@ -238,6 +238,7 @@ class Redis(AgentCheck):
                 self.warning("keys in redis configuration is either not a list or empty")
             else:
                 l_tags = list(tags)
+
                 for key_pattern in key_list:
                     if re.search(r"(?<!\\)[*?[]", key_pattern):
                         keys = conn.scan_iter(match=key_pattern)
@@ -245,7 +246,11 @@ class Redis(AgentCheck):
                         keys = [key_pattern, ]
 
                     for key in keys:
-                        key_type = conn.type(key)
+                        try:
+                            key_type = conn.type(key)
+                        except redis.ResponseError:
+                            self.log.info("key {} on remote server; skipping".format(key))
+                            continue
                         key_tags = l_tags + ['key:' + key]
 
                         if key_type == 'list':
