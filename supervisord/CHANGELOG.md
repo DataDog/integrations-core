@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [FEATURE] add support for tags per instance.
+* [FEATURE] add support for tags per instance. See [#411][]. Thanks [@frederikhappel][].
 
 
 1.1.0 / 2017-09-18
