@@ -37,7 +37,7 @@ The `allowed_metrics` item in the `init_config` section allows to specify the me
         gitlab_runner
         -----------
           - instance #0 [OK]
-          - Collected 10 metrics, 0 events & 1 service checks
+          - Collected 10 metrics, 0 events & 2 service checks
 
 ## Compatibility
 
@@ -51,7 +51,8 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gitl
 The Gitlab Runner check does not include any event at this time.
 
 ### Service Checks
-The Gitlab Runner check currently provides a service check to ensure that the Runner can talk to the Gitlab master.
+The Gitlab Runner check currently provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the
+local Prometheus endpoint is available.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
