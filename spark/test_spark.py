@@ -297,6 +297,13 @@ class SparkCheck(AgentCheckTest):
         'spark_cluster_mode': 'spark_mesos_mode'
     }
 
+    MESOS_FILTERED_CONFIG = {
+        'spark_url': 'http://localhost:5050',
+        'cluster_name': CLUSTER_NAME,
+        'spark_cluster_mode': 'spark_mesos_mode',
+        'spark_ui_ports': [1234]
+    }
+
     STANDALONE_CONFIG = {
         'spark_url': 'http://localhost:8080',
         'cluster_name': CLUSTER_NAME,
@@ -511,12 +518,6 @@ class SparkCheck(AgentCheckTest):
                 value=value,
                 tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
 
-        # Check the running job metrics
-        for metric, value in self.SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
-            self.assertMetric(metric,
-                value=value,
-                tags=self.SPARK_JOB_RUNNING_METRIC_TAGS)
-
         # Check the succeeded job metrics
         for metric, value in self.SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
             self.assertMetric(metric,
@@ -559,6 +560,20 @@ class SparkCheck(AgentCheckTest):
         self.assertServiceCheckOK(SPARK_SERVICE_CHECK,
             tags=['url:http://localhost:4040'])
 
+        self.coverage_report()
+
+
+    @mock.patch('requests.get', side_effect=mesos_requests_get_mock)
+    def test_mesos_filter(self, mock_requests):
+        config = {
+            'instances': [self.MESOS_FILTERED_CONFIG]
+        }
+
+        self.run_check(config)
+        self.assertServiceCheckOK(MESOS_SERVICE_CHECK,
+            tags=['url:http://localhost:5050'])
+
+        self.coverage_report()
 
     @mock.patch('requests.get', side_effect=standalone_requests_get_mock)
     def test_standalone(self, mock_requests):
