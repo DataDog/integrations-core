@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.etcd'],
+    packages=['datadog_checks.etcd'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.etcd': ['etcd.yaml.example']},
+    package_data={b'datadog_checks.etcd': ['etcd.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'etcd=dd_integrations.etcd:main',
+            'etcd=datadog_checks.etcd:main',
         ],
     },
 )

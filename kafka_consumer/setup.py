@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.kafka_consumer'],
+    packages=['datadog_checks.kafka_consumer'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -77,13 +77,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.kafka_consumer': ['kafka_consumer.yaml.example']},
+    package_data={b'datadog_checks.kafka_consumer': ['kafka_consumer.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'kafka_consumer=dd_integrations.kafka_consumer:main',
+            'kafka_consumer=datadog_checks.kafka_consumer:main',
         ],
     },
 )

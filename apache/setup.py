@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.apache'],
+    packages=['datadog_checks.apache'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.apache': ['apache.yaml.example']},
+    package_data={b'datadog_checks.apache': ['apache.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'apache=dd_integrations.apache:main',
+            'apache=datadog_checks.apache:main',
         ],
     },
 )

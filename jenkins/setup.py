@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.jenkins'],
+    packages=['datadog_checks.jenkins'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.jenkins': ['jenkins.yaml.example']},
+    package_data={b'datadog_checks.jenkins': ['jenkins.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'jenkins=dd_integrations.jenkins:main',
+            'jenkins=datadog_checks.jenkins:main',
         ],
     },
 )

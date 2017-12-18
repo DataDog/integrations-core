@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.kong'],
+    packages=['datadog_checks.kong'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.kong': ['kong.yaml.example']},
+    package_data={b'datadog_checks.kong': ['kong.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'kong=dd_integrations.kong:main',
+            'kong=datadog_checks.kong:main',
         ],
     },
 )
