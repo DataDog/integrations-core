@@ -11,7 +11,7 @@ from util import headers
 
 class GitlabRunnerCheck(PrometheusCheck):
 
-    EVENT_TYPE = SOURCE_TYPE_NAME = NAMESPACE = 'gitlab_runner'
+    EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab_runner'
     MASTER_SERVICE_CHECK_NAME = 'gitlab_runner.can_connect'
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab_runner.prometheus_endpoint_up'
 
@@ -32,6 +32,7 @@ class GitlabRunnerCheck(PrometheusCheck):
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
         self.metrics_mapper = dict(zip(allowed_metrics, allowed_metrics))
+        self.NAMESPACE = 'gitlab_runner'
 
     def check(self, instance):
         #### Metrics collection

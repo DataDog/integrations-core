@@ -13,7 +13,7 @@ class GitlabCheck(PrometheusCheck):
 
     # Readiness signals ability to serve traffic, liveness that Gitlab is healthy overall
     ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness']
-    EVENT_TYPE = SOURCE_TYPE_NAME = NAMESPACE = 'gitlab'
+    EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab'
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
 
@@ -33,6 +33,7 @@ class GitlabCheck(PrometheusCheck):
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
         self.metrics_mapper = dict(zip(allowed_metrics, allowed_metrics))
+        self.NAMESPACE = 'gitlab'
 
     def check(self, instance):
         #### Metrics collection

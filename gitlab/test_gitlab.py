@@ -44,7 +44,7 @@ class TestGitlab(AgentCheckTest):
         """
         self.run_check(self.BASE_CONFIG)
         for metric in self.ALLOWED_METRICS:
-            self.assertMetric(".%s" % metric)
+            self.assertMetric("gitlab.%s" % metric)
 
     def test_service_checks_success(self):
         self.run_check(self.BASE_CONFIG)
