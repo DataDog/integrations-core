@@ -11,11 +11,11 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dd-integrations-base',
+    name='datadog-checks-base',
     version='0.1.0',
-    description='The Datadog Integrations Base package',
+    description='The Datadog Checks Base package',
     long_description=long_description,
-    keywords='datadog integrations base',
+    keywords='datadog checks base',
 
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
