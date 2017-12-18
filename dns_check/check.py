@@ -56,6 +56,7 @@ class DNSCheck(NetworkCheck):
         resolver = dns.resolver.Resolver()
 
         # If a specific DNS server was defined use it, else use the system default
+
         nameserver = instance.get('nameserver')
         nameserver_port = instance.get('nameserver_port')
         if nameserver is not None:
@@ -70,7 +71,7 @@ class DNSCheck(NetworkCheck):
         return hostname, timeout, nameserver, record_type, resolver
 
     def _check(self, instance):
-        hostname, timeout, nameserver, record_type, resolver = self._load_conf(instance)
+        hostname, timeout, nameservers, record_type, resolver = self._load_conf(instance)
 
         # Perform the DNS query, and report its duration as a gauge
         response_time = 0
@@ -92,10 +93,12 @@ class DNSCheck(NetworkCheck):
             response_time = time_func() - t0
 
         except dns.exception.Timeout:
+            tags = self._get_tags(instance)
             self.log.error('DNS resolution of {0} timed out'.format(hostname))
             return Status.CRITICAL, 'DNS resolution of {0} timed out'.format(hostname)
 
         except Exception:
+            tags = self._get_tags(instance)
             self.log.exception('DNS resolution of {0} has failed.'.format(hostname))
             return Status.CRITICAL, 'DNS resolution of {0} has failed'.format(hostname)
 
@@ -114,12 +117,12 @@ class DNSCheck(NetworkCheck):
         tags = []
 
         try:
-            nameserver = instance.get('nameserver') or dns.resolver.Resolver().nameservers[0]
-            tags.append('nameserver:{0}'.format(nameserver))
+            nameservers = instance.get('nameserver') or dns.resolver.Resolver().nameservers
+            tags.append('nameservers:{0}'.format(nameservers))
         except IndexError:
             self.log.error('No DNS server was found on this host.')
 
-        tags = custom_tags + ['nameserver:{0}'.format(nameserver),
+        tags = custom_tags + ['nameservers:{0}'.format(nameservers),
                               'resolved_hostname:{0}'.format(hostname),
                               'instance:{0}'.format(instance_name),
                               'record_type:{0}'.format(record_type)]
