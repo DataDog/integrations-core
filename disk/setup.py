@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.disk'],
+    packages=['datadog_checks.disk'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.disk': ['disk.yaml.default']},
+    package_data={b'datadog_checks.disk': ['disk.yaml.default']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'disk=dd_integrations.disk:main',
+            'disk=datadog_checks.disk:main',
         ],
     },
 )

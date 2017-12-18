@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.system_core'],
+    packages=['datadog_checks.system_core'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.system_core': ['system_core.yaml.example']},
+    package_data={b'datadog_checks.system_core': ['system_core.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'system_core=dd_integrations.system_core:main',
+            'system_core=datadog_checks.system_core:main',
         ],
     },
 )
