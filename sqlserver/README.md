@@ -25,7 +25,7 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 ```
 
-2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory:
+2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory. See the [sample sqlserver.yaml](https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -44,7 +44,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `sqlserver` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `sqlserver` under the Checks section:
 
 ```
   Checks

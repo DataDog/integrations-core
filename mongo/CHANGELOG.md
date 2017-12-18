@@ -1,5 +1,20 @@
 # CHANGELOG - mongo
 
+1.5.1 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception See [#915][]
+
+1.5.0 / 2017-11-21
+==================
+### Changes
+
+* [FEATURE] Collect metrics about indexes usage. See [#823][]
+* [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747][]
+* [IMPROVEMENT] Filter out oplog entries without a timestamp. See [#406][], thanks [@hindmanj][]
+
+
 1.4.0 / 2017-10-10
 ==================
 ### Changes
@@ -43,10 +58,15 @@
 [#326]: https://github.com/DataDog/integrations-core/issues/326
 [#347]: https://github.com/DataDog/integrations-core/issues/347
 [#352]: https://github.com/DataDog/integrations-core/issues/352
+[#406]: https://github.com/DataDog/integrations-core/issues/406
 [#491]: https://github.com/DataDog/integrations-core/issues/491
 [#625]: https://github.com/DataDog/integrations-core/issues/625
 [#627]: https://github.com/DataDog/integrations-core/issues/627
 [#691]: https://github.com/DataDog/integrations-core/issues/691
+[#747]: https://github.com/DataDog/integrations-core/issues/747
 [#769]: https://github.com/DataDog/integrations-core/issues/769
+[#823]: https://github.com/DataDog/integrations-core/issues/823
+[#915]: https://github.com/DataDog/integrations-core/issues/915
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
+[@hindmanj]: https://github.com/hindmanj

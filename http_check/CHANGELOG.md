@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+1.3.0 / UNRELEASED
+==================
+
+### Changes
+
+* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][]. (Thanks [@colinmollenhour][])
+* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
+
 1.2.0 / 2017-10-10
 ==================
 
@@ -45,3 +53,4 @@
 [#688]: https://github.com/DataDog/integrations-core/issues/688
 [#758]: https://github.com/DataDog/integrations-core/issues/758
 [@xkrt]: https://github.com/xkrt
+[#905]:https://github.com/DataDog/integrations-core/pull/905

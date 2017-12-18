@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -622,13 +622,13 @@ SELECT s.schemaname,
 
                     # build a map of descriptors and their values
                     desc_map = dict(zip([x[1] for x in desc], row[0:len(desc)]))
-                    if 'schema' in desc_map:
+                    if 'schema' in desc_map and relations:
                         try:
                             relname = desc_map['table']
                             config_schemas = relations_config[relname]['schemas']
                             if config_schemas and desc_map['schema'] not in config_schemas:
                                 continue
-                        except KeyError:
+                        except (KeyError):
                             pass
 
                     # Build tags

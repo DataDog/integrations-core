@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.15.0",
   "name": "docker_daemon",
@@ -11,5 +11,12 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.6.0"
+  "version": "1.7.0",
+  "public_title": "Datadog-Docker Integration",
+  "categories":["containers"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/docker_daemon/",
+  "is_public": true,
+  "has_logo": true,
+  "aliases":["/integrations/docker"]
 }

@@ -14,11 +14,11 @@ Install the `dd-check-agent_metrics` package manually or with your favorite conf
 
 ### Configuration
 
-Edit the `agent_metrics.yaml` file to point to your server and port, set the masters to monitor
+Edit the `agent_metrics.yaml` file to point to your server and port, set the masters to monitor. See the [sample agent_metrics.yaml](https://github.com/DataDog/integrations-core/blob/master/agent_metrics/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `agent_metrics` under the Checks section:
 
     Checks
     ======

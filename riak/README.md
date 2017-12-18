@@ -11,7 +11,7 @@ The Riak check is packaged with the Agent, so simply [install the Agent](https:/
 
 ### Configuration
 
-Create a file `riak.yaml` in the Agent's `conf.d` directory:
+Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -24,7 +24,7 @@ instances:
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `riak` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `riak` under the Checks section:
 
 ```
   Checks

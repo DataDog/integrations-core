@@ -1,14 +1,21 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.18.0",
   "name": "windows_service",
-  "short_description": "windows_service description.",
+  "short_description": "Monitor the state of your Windows services.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
   "version": "1.1.0",
-  "guid": "2289acf0-e413-4384-83f7-88157b430805"
+  "guid": "2289acf0-e413-4384-83f7-88157b430805",
+  "public_title": "Datadog-Windows Services Integration",
+  "categories":["os & system"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/windows_service/",
+  "is_public": true,
+  "has_logo": true,
+  "aliases": ["/integrations/winservices"]
 }

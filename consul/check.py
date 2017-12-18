@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -119,8 +119,13 @@ class ConsulCheck(AgentCheck):
     def _get_agent_url(self, instance, instance_state):
         self.log.debug("Starting _get_agent_url")
         local_config = self._get_local_config(instance, instance_state)
-        agent_addr = local_config.get('Config', {}).get('AdvertiseAddr')
-        agent_port = local_config.get('Config', {}).get('Ports', {}).get('Server')
+
+        # Member key for consul 0.7.x and up; Config key for older versions
+        agent_addr = local_config.get('Member', {}).get('Addr') or \
+            local_config.get('Config', {}).get('AdvertiseAddr')
+        agent_port = local_config.get('Member', {}).get('Tags', {}).get('port') or \
+            local_config.get('Config', {}).get('Ports', {}).get('Server')
+
         agent_url = "{0}:{1}".format(agent_addr, agent_port)
         self.log.debug("Agent url is %s" % agent_url)
         return agent_url

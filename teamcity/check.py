@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2016
+# (C) Datadog, Inc. 2015-2017
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)

@@ -1,5 +1,19 @@
 # CHANGELOG - kafka_consumer
 
+1.2.1 / 2017-11-29
+==================
+
+### Changes
+
+* [BUGFIX] Use instance key to retrieve cached kafka_client, See [#904][]
+
+1.2.0 / 2017-11-21
+==================
+
+### Changes
+
+* [FEATURE] Support collection of consumer offsets from Kafka, in addition to ZK. See [#654][]
+
 1.1.0 / 2017-10-10
 ==================
 
@@ -38,7 +52,9 @@
 [#623]: https://github.com/DataDog/integrations-core/issues/623
 [#624]: https://github.com/DataDog/integrations-core/issues/624
 [#633]: https://github.com/DataDog/integrations-core/issues/633
+[#654]: https://github.com/DataDog/integrations-core/issues/654
 [#684]: https://github.com/DataDog/integrations-core/issues/684
 [#733]: https://github.com/DataDog/integrations-core/issues/733
 [#753]: https://github.com/DataDog/integrations-core/issues/753
+[#904]: https://github.com/DataDog/integrations-core/issues/904
 [@jeffwidman]: https://github.com/jeffwidman

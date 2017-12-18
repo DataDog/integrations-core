@@ -13,7 +13,7 @@ If you need the newest version of the HTTP check, install the `dd-check-http` pa
 
 ### Configuration
 
-Create a file `http_check.yaml` in the Agent's `conf.d` directory:
+Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -39,6 +39,7 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 
 | Setting | Description |
 |---|---|
+| `name` | The name associated with this instance/URL. This will be presented as a tag on the Service Checks and Metrics. Note: This name tag will have any spaces or dashes converted to underscores. |
 | `url` | The URL to test. |
 | `timeout` | The time in seconds to allow for a response. |
 | `method` | The HTTP method. This setting defaults to GET, though many other HTTP methods are supported, including POST and PUT. |
@@ -65,7 +66,7 @@ When you have finished configuring `http_check.yaml`, restart the Agent to begin
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `http_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `http_check` under the Checks section:
 
 ```
   Checks

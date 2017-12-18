@@ -739,13 +739,13 @@ class TestKubeutil(unittest.TestCase):
         Test with both 1.1 and 1.2 version payloads
         """
         with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
-            self.kubeutil.host_name = 'dd-agent-1rxlh'
+            self.kubeutil.pod_name = 'dd-agent-1rxlh'
             mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
             self.assertEqual(self.kubeutil._node_name, 'kubernetes-massi-minion-k23m')
 
-            self.kubeutil.host_name = 'heapster-v11-l8sh1'
+            self.kubeutil.pod_name = 'heapster-v11-l8sh1'
             mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')

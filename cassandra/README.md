@@ -18,12 +18,12 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 ### Configuration
 
-1. Configure the Agent to connect to Cassandra, just edit `conf.d/cassandra.yaml`
+1. Configure the Agent to connect to Cassandra, just edit `conf.d/cassandra.yaml`. See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
 2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent)
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `cassandra` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `cassandra` under the Checks section:
 
 ```
   Checks

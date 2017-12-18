@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -19,7 +19,6 @@ from aggregator import MetricsAggregator
 import logging
 
 LOG_INFO = {
-    'log_level': None,
     'log_to_event_viewer': False,
     'log_to_syslog': False,
     'syslog_host': None,

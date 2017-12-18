@@ -20,7 +20,7 @@ The varnish check is packaged with the Agent, so simply [install the Agent](http
 
 If you're running Varnish 4.1+, add the dd-agent system user to the varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
 
-Then, create a file `varnish.yaml` in the Agent's `conf.d` directory:
+Then, create a file `varnish.yaml` in the Agent's `conf.d` directory. See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -43,7 +43,7 @@ Restart the Agent to start sending varnish metrics and service checks to Datadog
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `varnish` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `varnish` under the Checks section:
 
 ```
   Checks
