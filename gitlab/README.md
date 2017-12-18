@@ -31,7 +31,7 @@ The `allowed_metrics` item in the `init_config` section allows to specify the me
         gitlab
         -----------
           - instance #0 [OK]
-          - Collected 8 metrics, 0 events & 2 service checks
+          - Collected 8 metrics, 0 events & 3 service checks
 
 ## Compatibility
 
@@ -46,6 +46,7 @@ The Gitlab check does not include any event at this time.
 
 ### Service Checks
 The Gitlab check includes a readiness and a liveness service check.
+Moreover, it provides a service check to ensure that the local Prometheus endpoint is available.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
