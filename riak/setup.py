@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.riak'],
+    packages=['dd_integrations.riak'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.riak': ['riak.yaml.example']},
+    package_data={b'dd_integrations.riak': ['riak.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'riak=datadog.riak:main',
+            'riak=dd_integrations.riak:main',
         ],
     },
 )

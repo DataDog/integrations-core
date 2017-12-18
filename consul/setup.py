@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.consul'],
+    packages=['dd_integrations.consul'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.consul': ['consul.yaml.example']},
+    package_data={b'dd_integrations.consul': ['consul.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'consul=datadog.consul:main',
+            'consul=dd_integrations.consul:main',
         ],
     },
 )

@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.ssh_check'],
+    packages=['dd_integrations.ssh_check'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.ssh_check': ['ssh_datadog.yaml.example']},
+    package_data={b'dd_integrations.ssh_check': ['ssh_dd_integrations.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'ssh_check=datadog.ssh_check:main',
+            'ssh_check=dd_integrations.ssh_check:main',
         ],
     },
 )

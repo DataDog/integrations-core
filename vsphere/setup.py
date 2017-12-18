@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.vsphere'],
+    packages=['dd_integrations.vsphere'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.vsphere': ['vsphere.yaml.example']},
+    package_data={b'dd_integrations.vsphere': ['vsphere.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'vsphere=datadog.vsphere:main',
+            'vsphere=dd_integrations.vsphere:main',
         ],
     },
 )
