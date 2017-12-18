@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [FEATURE] Add support for multi-source replication in both MariaDB and MySQL
 * [FEATURE] tag `mysql.replication.*` metrics with the replication channel name
 
 
@@ -14,6 +15,7 @@
 ### Changes
 
 * [BUGFIX] Fixes https://github.com/DataDog/integrations-core/issues/783
+
 
 1.0.4 / 2017-08-28
 ==================

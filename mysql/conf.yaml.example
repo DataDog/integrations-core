@@ -15,6 +15,7 @@ instances:
     #   - optional_tag2
     # options:               # Optional
     #   replication: false
+    #   replication_channel: channel_1  # If using multiple sources, the channel name to monitor
     #   replication_non_blocking_status: false  # grab slave count in non-blocking manner (req. performance_schema)
     #   galera_cluster: false
     #   extra_status_metrics: true
