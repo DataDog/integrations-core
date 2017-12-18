@@ -869,12 +869,12 @@ class MySql(AgentCheck):
                     cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
                 else:
                     cursor.execute("SHOW SLAVE STATUS;")
-                
+
                 if replication_channel:
                     slave_results = cursor.fetchone()
                 else:
                     slave_results = cursor.fetchall()
-                    
+
                 if slave_results:
                     if replication_channel:
                         replica_results.update(slave_results)
