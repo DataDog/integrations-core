@@ -13,7 +13,7 @@ Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
 ### Configuration
 
-Create a file `apache.yaml` in the Agent's `conf.d` directory:
+Create a file `apache.yaml` in the Agent's `conf.d` directory. See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -29,7 +29,7 @@ Restart the Agent to start sending Apache metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `apache` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `apache` under the Checks section:
 
 ```
   Checks

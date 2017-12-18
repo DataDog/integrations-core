@@ -1,0 +1,5 @@
+{
+	"acl_datacenter": "dc1",
+	"acl_default_policy": "deny",
+	"acl_master_token": "token"
+}

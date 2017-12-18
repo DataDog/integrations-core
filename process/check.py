@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # (C) Luca Cipriani <luca@c9.io> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -113,6 +113,7 @@ class ProcessCheck(AgentCheck):
         refresh_ad_cache = self.should_refresh_ad_cache(name)
 
         matching_pids = set()
+
         for proc in psutil.process_iter():
             # Skip access denied processes
             if not refresh_ad_cache and proc.pid in self.ad_cache:
@@ -331,6 +332,7 @@ class ProcessCheck(AgentCheck):
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
         collect_children = _is_affirmative(instance.get('collect_children', False))
+        user = instance.get('user', False)
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -378,6 +380,10 @@ class ProcessCheck(AgentCheck):
 
         if collect_children:
             pids.update(self._get_child_processes(pids))
+
+        if user:
+            pids = self._filter_by_user(user, pids)
+
         proc_state = self.get_process_state(name, pids)
 
         # FIXME 6.x remove the `name` tag
@@ -449,3 +455,24 @@ class ProcessCheck(AgentCheck):
             tags=service_check_tags,
             message=message_str % (status_str[status], nb_procs, name)
         )
+
+    def _filter_by_user(self, user, pids):
+        """
+        Filter pids by it's username.
+        :param user: string with name of system user
+        :param pids: set of pids to filter
+        :return: set of filtered pids
+        """
+        filtered_pids = set()
+        for pid in pids:
+            try:
+                proc = psutil.Process(pid)
+                if proc.username() == user:
+                    self.log.debug("Collecting pid %s belonging to %s", pid, user)
+                    filtered_pids.add(pid)
+                else:
+                    self.log.debug("Discarding pid %s not belonging to %s", pid, user)
+            except psutil.NoSuchProcess:
+                pass
+
+        return filtered_pids

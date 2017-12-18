@@ -13,7 +13,7 @@ If you need the newest version of the TCP check, install the `dd-check-tcp` pack
 
 ### Configuration
 
-Create a file `tcp_check.yaml` in the Agent's `conf.d` directory:
+Create a file `tcp_check.yaml` in the Agent's `conf.d` directory. See the [sample tcp_check.yaml](https://github.com/DataDog/integrations-core/blob/master/tcp_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -28,7 +28,7 @@ instances:
 
 Configuration Options
 
-* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`.
+* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`. Note: This tag will have any spaces and dashes converted to underscores.
 * `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
@@ -40,7 +40,7 @@ Configuration Options
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `tcp_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `tcp_check` under the Checks section:
 
 ```
   Checks

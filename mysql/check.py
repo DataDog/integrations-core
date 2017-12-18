@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -543,12 +543,12 @@ class MySql(AgentCheck):
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
             if self._version_compatible(db, host, (5, 7, 0)):
-                slave_io_running = self._collect_string('Slave_IO_Running', results)
-                slave_sql_running = self._collect_string('Slave_SQL_Running', results)
+                slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
+                slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
                 if slave_io_running:
-                    slave_io_running = (slave_io_running.lower().strip() == "yes")
+                    slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
                 if slave_sql_running:
-                    slave_sql_running = (slave_sql_running.lower().strip() == "yes")
+                    slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
 
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
@@ -744,7 +744,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
             pid = self._get_server_pid(db)
 
         if pid:
@@ -851,10 +851,20 @@ class MySql(AgentCheck):
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 replica_results = {}
+
                 cursor.execute("SHOW SLAVE STATUS;")
-                slave_results = cursor.fetchone()
-                if slave_results:
-                    replica_results.update(slave_results)
+                slave_results = cursor.fetchall()
+                if len(slave_results) > 0:
+                    for slave_result in slave_results:
+                        # MySQL <5.7 does not have Channel_Name.
+                        # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                        channel = slave_result.get('Channel_Name') or 'default'
+                        for key in slave_result:
+                            if slave_result[key] is not None:
+                                if key not in replica_results:
+                                    replica_results[key] = {}
+                                replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
+
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
                 if binlog_results:

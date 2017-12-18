@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -48,6 +48,7 @@ def join_url_dir(url, *args):
         url = urljoin(url, path.lstrip('/'))
 
     return url
+
 
 # YARN Service URLs
 YARN_APP_URL = urljoin(SPARK_YARN_URL, YARN_APPS_PATH) + '?states=RUNNING&applicationTypes=SPARK'

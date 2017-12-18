@@ -1,5 +1,20 @@
 # CHANGELOG - mysql
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] tag `mysql.replication.*` metrics with the replication channel name
+
+
+1.0.5 / 2017-11-21
+==================
+
+### Changes
+
+* [BUGFIX] Fixes https://github.com/DataDog/integrations-core/issues/783
+
 1.0.4 / 2017-08-28
 ==================
 

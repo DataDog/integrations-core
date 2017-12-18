@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2016-2017
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
 # stdlib
 from nose.plugins.attrib import attr
 

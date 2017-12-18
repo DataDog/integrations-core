@@ -1,11 +1,19 @@
 # CHANGELOG - http_check
 
-1.2.0 / Unreleased
+1.3.0 / UNRELEASED
 ==================
 
 ### Changes
 
-* [FEATURE] Add support for client side certificate. See[#688][].
+* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][]. (Thanks [@colinmollenhour][])
+* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
+
+1.2.0 / 2017-10-10
+==================
+
+### Changes
+
+* [FEATURE] Add support for client side certificate. See[#688][]. (Thanks [@xkrt][])
 * [IMPROVEMENT] Make tornado optional. See [#758][].
 
 1.1.2 / 2017-08-28
@@ -44,3 +52,5 @@
 [#652]: https://github.com/DataDog/integrations-core/issues/652
 [#688]: https://github.com/DataDog/integrations-core/issues/688
 [#758]: https://github.com/DataDog/integrations-core/issues/758
+[@xkrt]: https://github.com/xkrt
+[#905]:https://github.com/DataDog/integrations-core/pull/905
