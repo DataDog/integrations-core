@@ -39,7 +39,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog'],
+    packages=['datadog_checks'],
 
     # Run-time dependencies
     install_requires=[],
