@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.riakcs'],
+    packages=['dd_integrations.riakcs'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.riakcs': ['riakcs.yaml.example']},
+    package_data={b'dd_integrations.riakcs': ['riakcs.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'riakcs=datadog.riakcs:main',
+            'riakcs=dd_integrations.riakcs:main',
         ],
     },
 )

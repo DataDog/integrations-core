@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.agent_metrics'],
+    packages=['dd_integrations.agent_metrics'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.agent_metrics': ['agent_metrics.yaml.default']},
+    package_data={b'dd_integrations.agent_metrics': ['agent_metrics.yaml.default']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'agent_metrics=datadog.agent_metrics:main',
+            'agent_metrics=dd_integrations.agent_metrics:main',
         ],
     },
 )
