@@ -21,6 +21,7 @@ namespace :ci do
       Rake::Task['ci:common:install'].invoke('gitlab')
       sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f gitlab/ci/docker-compose.yml up -d)
       Wait.for "http://localhost:#{GITLAB_LOCAL_PORT}", 900
+      Wait.for "http://localhost:#{GITLAB_LOCAL_PROMETHEUS_PORT}", 900
     end
 
     task before_script: ['ci:common:before_script'] do
