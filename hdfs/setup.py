@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.hdfs'],
+    packages=['datadog_checks.hdfs'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.hdfs': ['hdfs.yaml.example']},
+    package_data={b'datadog_checks.hdfs': ['hdfs.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'hdfs=dd_integrations.hdfs:main',
+            'hdfs=datadog_checks.hdfs:main',
         ],
     },
 )

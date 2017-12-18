@@ -53,7 +53,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['dd_integrations.redisdb'],
+    packages=['datadog_checks.redisdb'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +76,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'dd_integrations.redisdb': ['redisdb.yaml.example']},
+    package_data={b'datadog_checks.redisdb': ['redisdb.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'redisdb=dd_integrations.redisdb:main',
+            'redisdb=datadog_checks.redisdb:main',
         ],
     },
 )
