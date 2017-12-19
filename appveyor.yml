@@ -24,6 +24,8 @@ services:
   # - mssql2008r2sp2 # FIXME: re-enable when we can launch multiple mssql instances at once
   - mssql2012sp1
   # - mssql2014 # FIXME: re-enable when we can launch multiple mssql instances at once
+init:
+ - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
   - set PATH=C:\Ruby22-x64\bin;%PATH%
@@ -94,3 +96,5 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
