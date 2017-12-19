@@ -24,8 +24,6 @@ services:
   # - mssql2008r2sp2 # FIXME: re-enable when we can launch multiple mssql instances at once
   - mssql2012sp1
   # - mssql2014 # FIXME: re-enable when we can launch multiple mssql instances at once
-init:
- - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
   - set PATH=C:\Ruby22-x64\bin;%PATH%
@@ -41,50 +39,50 @@ install:
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: pip install wheel
-  - ps: pip install simplejson
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
   - cd datadog-checks-base
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - ps: python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd iis
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd windows_service
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd pdh_check
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd aspdotnet 
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd dotnetclr 
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd exchange_server 
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
 build: off
@@ -96,5 +94,3 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
