@@ -73,7 +73,7 @@ class GitlabCheck(PrometheusCheck):
     def _service_check_tags(self, url):
         parsed_url = urlparse.urlparse(url)
         gitlab_host = parsed_url.hostname
-        gitlab_port = parsed_url.port or 80
+        gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:%s' % gitlab_host, 'gitlab_port:%s' % gitlab_port]
 
     # Validates an health endpoint

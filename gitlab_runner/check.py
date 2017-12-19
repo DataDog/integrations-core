@@ -69,7 +69,7 @@ class GitlabRunnerCheck(PrometheusCheck):
 
         parsed_url = urlparse.urlparse(url)
         gitlab_host = parsed_url.hostname
-        gitlab_port = parsed_url.port or 80
+        gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         service_check_tags = ['gitlab_host:%s' % gitlab_host, 'gitlab_port:%s' % gitlab_port]
 
         ## Load the ssl configuration
