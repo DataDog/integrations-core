@@ -6,8 +6,8 @@
 try:
     from checks.libs.win.pdhbasecheck import PDHBaseCheck
 except ImportError:
-    def PDHBaseCheck(*args, **kwargs):
-        return
+    class PDHBaseCheck:
+        pass
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
