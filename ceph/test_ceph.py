@@ -54,6 +54,53 @@ class TestCeph(AgentCheckTest):
 
         self.assertServiceCheck('ceph.overall_status', status=AgentCheck.WARNING)
 
+    def test_luminous_warn_health(self):
+        mocks = {
+            '_collect_raw': lambda x,y,z: json.loads(
+                Fixtures.read_file('ceph_luminous_warn.json', sdk_dir=self.FIXTURE_DIR)),
+        }
+        config = {
+            'instances': [{
+                'host': 'foo',
+                'collect_service_check_for': ['OSD_NEARFULL', 'OSD_FULL'],
+            }]
+        }
+
+        self.run_check(config, mocks=mocks, force_reload=True)
+        self.assertServiceCheck('ceph.overall_status', status=AgentCheck.CRITICAL)
+        self.assertServiceCheck('ceph.osd_nearfull', status=AgentCheck.WARNING)
+        self.assertServiceCheck('ceph.osd_full', status=AgentCheck.CRITICAL)
+
+    def test_luminous_ok_health(self):
+        mocks = {
+            '_collect_raw': lambda x,y,z: json.loads(
+                Fixtures.read_file('ceph_luminous_ok.json', sdk_dir=self.FIXTURE_DIR)),
+        }
+        config = {
+            'instances': [{
+                'host': 'foo',
+                'collect_service_check_for': ['OSD_NEARFULL'],
+            }]
+        }
+
+        self.run_check(config, mocks=mocks, force_reload=True)
+        self.assertServiceCheck('ceph.overall_status', status=AgentCheck.OK)
+        self.assertServiceCheck('ceph.osd_nearfull', status=AgentCheck.OK)
+        self.assertServiceCheck('ceph.pool_app_not_enabled', count=0)
+
+    def test_luminous_osd_full_metrics(self):
+        mocks = {
+            '_collect_raw': lambda x,y,z: json.loads(
+                Fixtures.read_file('ceph_luminous_warn.json', sdk_dir=self.FIXTURE_DIR)),
+        }
+        config = {
+            'instances': [{'host': 'foo'}]
+        }
+
+        self.run_check(config, mocks=mocks, force_reload=True)
+        self.assertMetric('ceph.num_full_osds', value=1)
+        self.assertMetric('ceph.num_near_full_osds', value=1)
+
     def test_tagged_metrics(self):
         mocks = {
             '_collect_raw': lambda x,y,z: json.loads(
