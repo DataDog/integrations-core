@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -32,6 +32,7 @@ class MockHTTPResponse(object):
 
     def json(self):
         return self.response_dict
+
 
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {

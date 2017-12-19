@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -310,11 +310,17 @@ class ZookeeperCheck(AgentCheck):
 
         # Received: 101032173
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_received', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.received', long(value.strip()), "rate"))
 
         # Sent: 1324
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_sent', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.sent', long(value.strip()), "rate"))
 
         if has_connections_val:
             # Connections: 1

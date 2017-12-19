@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -476,8 +476,8 @@ class ESCheck(AgentCheck):
 
         if version >= [0, 90, 10]:
             # ES versions 0.90.10 and above
-            health_url = "/_cluster/health?pretty=true"
-            pending_tasks_url = "/_cluster/pending_tasks?pretty=true"
+            health_url = "/_cluster/health"
+            pending_tasks_url = "/_cluster/pending_tasks"
 
             # For "external" clusters, we want to collect from all nodes.
             if cluster_stats:
@@ -491,7 +491,7 @@ class ESCheck(AgentCheck):
 
             additional_metrics = self.JVM_METRICS_POST_0_90_10
         else:
-            health_url = "/_cluster/health?pretty=true"
+            health_url = "/_cluster/health"
             pending_tasks_url = None
             if cluster_stats:
                 stats_url = "/_cluster/nodes/stats?all=true"

@@ -63,6 +63,11 @@ The Etcd check does not include any event at this time.
 
 Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoint.
 
+`etcd.healthy`:
+
+Returns 'Critical' if a member node is not healthy. Returns 'Unknown' if the Agent
+can't reach the `/health` endpoint, or if the health status is missing.
+
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 

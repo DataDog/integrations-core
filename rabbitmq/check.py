@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-2017
 # (C) Brett Langdon <brett@blangdon.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -19,14 +19,42 @@ from checks import AgentCheck
 from config import _is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
+EXCHANGE_TYPE = 'exchanges'
 QUEUE_TYPE = 'queues'
 NODE_TYPE = 'nodes'
 CONNECTION_TYPE = 'connections'
+MAX_DETAILED_EXCHANGES = 50
 MAX_DETAILED_QUEUES = 200
 MAX_DETAILED_NODES = 100
 # Post an event in the stream when the number of queues or nodes to
 # collect is above 90% of the limit:
 ALERT_THRESHOLD = 0.9
+EXCHANGE_ATTRIBUTES = [
+    # Path, Name, Operation
+    ('message_stats/ack', 'messages.ack.count', float),
+    ('message_stats/ack_details/rate', 'messages.ack.rate', float),
+
+    ('message_stats/confirm', 'messages.confirm.count', float),
+    ('message_stats/confirm_details/rate', 'messages.confirm.rate', float),
+
+    ('message_stats/deliver_get', 'messages.deliver_get.count', float),
+    ('message_stats/deliver_get_details/rate', 'messages.deliver_get.rate', float),
+
+    ('message_stats/publish', 'messages.publish.count', float),
+    ('message_stats/publish_details/rate', 'messages.publish.rate', float),
+
+    ('message_stats/publish_in', 'messages.publish_in.count', float),
+    ('message_stats/publish_in_details/rate', 'messages.publish_in.rate', float),
+
+    ('message_stats/publish_out', 'messages.publish_out.count', float),
+    ('message_stats/publish_out_details/rate', 'messages.publish_out.rate', float),
+
+    ('message_stats/return_unroutable', 'messages.return_unroutable.count', float),
+    ('message_stats/return_unroutable_details/rate', 'messages.return_unroutable.rate', float),
+
+    ('message_stats/redeliver', 'messages.redeliver.count', float),
+    ('message_stats/redeliver_details/rate', 'messages.redeliver.rate', float),
+]
 QUEUE_ATTRIBUTES = [
     # Path, Name, Operation
     ('active_consumers', 'active_consumers', float),
@@ -62,25 +90,35 @@ QUEUE_ATTRIBUTES = [
 
 NODE_ATTRIBUTES = [
     ('fd_used', 'fd_used', float),
+    ('disk_free', 'disk_free', float),
     ('mem_used', 'mem_used', float),
     ('run_queue', 'run_queue', float),
     ('sockets_used', 'sockets_used', float),
-    ('partitions', 'partitions', len)
+    ('partitions', 'partitions', len),
+    ('running', 'running', float),
+    ('mem_alarm', 'mem_alarm', float),
+    ('disk_free_alarm', 'disk_alarm', float),
 ]
 
 ATTRIBUTES = {
+    EXCHANGE_TYPE: EXCHANGE_ATTRIBUTES,
     QUEUE_TYPE: QUEUE_ATTRIBUTES,
     NODE_TYPE: NODE_ATTRIBUTES,
 }
 
 TAG_PREFIX = 'rabbitmq'
 TAGS_MAP = {
+    EXCHANGE_TYPE: {
+        'name': 'exchange',
+        'vhost': 'vhost',
+        'exchange_family': 'exchange_family',
+    },
     QUEUE_TYPE: {
         'node': 'node',
-                'name': 'queue',
-                'vhost': 'vhost',
-                'policy': 'policy',
-                'queue_family': 'queue_family',
+        'name': 'queue',
+        'vhost': 'vhost',
+        'policy': 'policy',
+        'queue_family': 'queue_family',
     },
     NODE_TYPE: {
         'name': 'node',
@@ -88,6 +126,7 @@ TAGS_MAP = {
 }
 
 METRIC_SUFFIX = {
+    EXCHANGE_TYPE: "exchange",
     QUEUE_TYPE: "queue",
     NODE_TYPE: "node",
 }
@@ -119,18 +158,31 @@ class RabbitMQ(AgentCheck):
         password = instance.get('rabbitmq_pass', 'guest')
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse.urlparse(base_url)
+        if not parsed_url.scheme:
+            self.log.warning('The rabbit url did not include a protocol, assuming http')
+            # urlparse.urljoin cannot add a protocol to the rest of the url for some reason.
+            # This still leaves the potential for errors, but such urls would never have been valid, either
+            # and it's not likely to be useful to attempt to catch all possible mistakes people could make
+            base_url = 'http://' + base_url
+            parsed_url = urlparse.urlparse(base_url)
+
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
         if not ssl_verify and parsed_url.scheme == 'https':
             self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
 
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
+            EXCHANGE_TYPE: int(instance.get('max_detailed_exchanges', MAX_DETAILED_EXCHANGES)),
             QUEUE_TYPE: int(instance.get('max_detailed_queues', MAX_DETAILED_QUEUES)),
             NODE_TYPE: int(instance.get('max_detailed_nodes', MAX_DETAILED_NODES)),
         }
 
         # List of queues/nodes to collect metrics from
         specified = {
+            EXCHANGE_TYPE: {
+                'explicit': instance.get('exchanges', []),
+                'regexes': instance.get('exchanges_regexes', []),
+            },
             QUEUE_TYPE: {
                 'explicit': instance.get('queues', []),
                 'regexes': instance.get('queues_regexes', []),
@@ -167,6 +219,8 @@ class RabbitMQ(AgentCheck):
         base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
             # Generate metrics from the status API.
+            self.get_stats(instance, base_url, EXCHANGE_TYPE, max_detailed[EXCHANGE_TYPE], specified[EXCHANGE_TYPE], custom_tags,
+                           auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, QUEUE_TYPE, max_detailed[QUEUE_TYPE], specified[QUEUE_TYPE], custom_tags,
                            auth=auth, ssl_verify=ssl_verify)
             self.get_stats(instance, base_url, NODE_TYPE, max_detailed[NODE_TYPE], specified[NODE_TYPE], custom_tags,
@@ -219,7 +273,10 @@ class RabbitMQ(AgentCheck):
                     match = re.search(p, name)
                     if match:
                         if _is_affirmative(tag_families) and match.groups():
-                            data_line["queue_family"] = match.groups()[0]
+                            if object_type == QUEUE_TYPE:
+                                data_line["queue_family"] = match.groups()[0]
+                            if object_type == EXCHANGE_TYPE:
+                                data_line["exchange_family"] = match.groups()[0]
                         matching_lines.append(data_line)
                         match_found = True
                         break
@@ -227,8 +284,8 @@ class RabbitMQ(AgentCheck):
                 if match_found:
                     continue
 
-                # Absolute names work only for queues
-                if object_type != QUEUE_TYPE:
+                # Absolute names work only for queues and exchanges
+                if object_type != QUEUE_TYPE and object_type != EXCHANGE_TYPE:
                     continue
                 absolute_name = '%s/%s' % (data_line.get("vhost"), name)
                 if absolute_name in explicit_filters:
@@ -240,7 +297,10 @@ class RabbitMQ(AgentCheck):
                     match = re.search(p, absolute_name)
                     if match:
                         if _is_affirmative(tag_families) and match.groups():
-                            data_line["queue_family"] = match.groups()[0]
+                            if object_type == QUEUE_TYPE:
+                                data_line["queue_family"] = match.groups()[0]
+                            if object_type == EXCHANGE_TYPE:
+                                data_line["exchange_family"] = match.groups()[0]
                         matching_lines.append(data_line)
                         match_found = True
                         break
@@ -263,7 +323,7 @@ class RabbitMQ(AgentCheck):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
-        object_type: either QUEUE_TYPE or NODE_TYPE
+        object_type: either QUEUE_TYPE or NODE_TYPE or EXCHANGE_TYPE
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
@@ -299,11 +359,12 @@ class RabbitMQ(AgentCheck):
         if len(data) > max_detailed:
             # Display a warning in the info page
             self.warning(
-                "Too many queues to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
+                "Too many items to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
 
         for data_line in data[:max_detailed]:
-            # We truncate the list of nodes/queues if it's above the limit
+            # We truncate the list if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
+
 
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings

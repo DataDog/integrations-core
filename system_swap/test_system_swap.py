@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -11,6 +11,7 @@ class _PSUtilSwapStatsMock(object):
     def __init__(self, sin, sout):
         self.sin = sin
         self.sout = sout
+
 
 ORIG_SWAP_IN = 115332743168
 ORIG_SWAP_OUT = 22920884224

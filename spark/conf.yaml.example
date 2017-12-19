@@ -28,6 +28,14 @@ instances:
     # spark_cluster_mode: spark_standalone_mode
     # spark_cluster_mode: spark_mesos_mode
 
+    # If you're using multiple frameworks with Mesos, you can specify which
+    # port(s) the Spark Web UI runs on and the check will filter out the frameworks
+    # whose port don't match. If the check attempts to connect to a framework that
+    # requires authentication it will fail; this is to prevent that.
+    # spark_ui_ports:
+    #   - 4040
+    #   - 4041
+
     # To use an older (versions prior to 2.0) Standalone Spark cluster,
     # the 'spark_pre_20_mode' must be set
     # spark_pre_20_mode: true

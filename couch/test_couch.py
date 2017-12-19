@@ -1,11 +1,19 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+from urlparse import urljoin
 import csv
+import time
+import threading
+import random
+import string
+import re
 
 # 3rd party
+import requests
+import json
 from nose.plugins.attrib import attr
 
 # project
@@ -143,6 +151,11 @@ class TestCouchdb2(AgentCheckTest):
         self.cluster_gauges = []
         self.by_db_gauges = []
         self.erlang_gauges = []
+        self.replication_tasks_gauges = []
+        self.compaction_tasks_gauges = []
+        self.indexing_tasks_gauges = []
+        self.view_compaction_tasks_gauges = []
+        self.by_dd_gauges = []
         with open('couch/metadata.csv', 'rb') as csvfile:
             reader = csv.reader(csvfile)
             reader.next() # This one skips the headers
@@ -154,6 +167,18 @@ class TestCouchdb2(AgentCheckTest):
                     self.by_db_gauges.append(row[0])
                 elif row[0].startswith("couchdb.erlang"):
                     self.erlang_gauges.append(row[0])
+                elif row[0] in ['couchdb.active_tasks.replication.count', 'couchdb.active_tasks.db_compaction.count', 'couchdb.active_tasks.indexer.count', 'couchdb.active_tasks.view_compaction.count']:
+                    self.cluster_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.replication"):
+                    self.replication_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.db_compaction"):
+                    self.compaction_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.indexer"):
+                    self.indexing_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.active_tasks.view_compaction"):
+                    self.view_compaction_tasks_gauges.append(row[0])
+                elif row[0].startswith("couchdb.by_ddoc."):
+                    self.by_dd_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
 
@@ -163,18 +188,21 @@ class TestCouchdb2(AgentCheckTest):
         """
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2, self.NODE3])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
-                    self.assertMetric(gauge, tags=tags)
+                    self.assertMetric(gauge, tags=[tag, "db:{0}".format(db)])
 
             for gauge in self.erlang_gauges:
                 self.assertMetric(gauge)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -187,7 +215,7 @@ class TestCouchdb2(AgentCheckTest):
                                     tags=["instance:{0}".format(node["name"])],
                                     count=1) # One for the server stats, the version is already loaded
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_bad_config(self):
@@ -258,18 +286,22 @@ class TestCouchdb2(AgentCheckTest):
 
         self.run_check({"instances": [conf]})
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2, self.NODE3])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2, self.NODE3])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
+                tags = [tag, "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
 
             for gauge in self.erlang_gauges:
                 self.assertMetric(gauge)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -282,7 +314,7 @@ class TestCouchdb2(AgentCheckTest):
                                     tags=["instance:{0}".format(node["name"])],
                                     count=1) # One for the server stats, the version is already loaded
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_only_max_nodes_are_scanned(self):
@@ -295,15 +327,19 @@ class TestCouchdb2(AgentCheckTest):
         for gauge in self.erlang_gauges:
             self.assertMetric(gauge)
 
-        tags = map(lambda n: ["instance:{0}".format(n['name'])], [self.NODE1, self.NODE2])
+        tags = map(lambda n: "instance:{0}".format(n['name']), [self.NODE1, self.NODE2])
         for tag in tags:
             for gauge in self.cluster_gauges:
-                self.assertMetric(gauge, tags=tag)
+                self.assertMetric(gauge, tags=[tag])
 
             for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
-                tags = [tag[0], "db:{0}".format(db)]
+                tags = [tag, "db:{0}".format(db)]
                 for gauge in self.by_db_gauges:
                     self.assertMetric(gauge, tags=tags)
+
+            for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+                for gauge in self.by_dd_gauges:
+                    self.assertMetric(gauge, tags=[tag, "design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -330,7 +366,7 @@ class TestCouchdb2(AgentCheckTest):
                                 tags=tags,
                                 count=0)
 
-        # Raises when COVERAGE=true and coverage < 100%
+        #  Raises when COVERAGE=true and coverage < 100%
         self.coverage_report()
 
     def test_only_max_dbs_are_scanned(self):
@@ -352,3 +388,184 @@ class TestCouchdb2(AgentCheckTest):
             tags = ["instance:{0}".format(n['name']), 'db:_global_changes']
             for gauge in self.by_db_gauges:
                 self.assertMetric(gauge, tags=tags, count=1)
+
+    def test_replication_metrics(self):
+        url = self.NODE1['server'] + '/_replicator'
+        replication_body = {
+            '_id': 'my_replication_id',
+            'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
+            'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
+            'create_target': True,
+            'continuous': True
+        }
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(replication_body))
+        r.raise_for_status()
+
+        count = 0
+        attempts = 0
+        while count != 1 and attempts < 20:
+            attempts += 1
+            time.sleep(1)
+            r = requests.get(self.NODE1['server'] + '/_active_tasks', auth=(self.NODE1['user'], self.NODE1['password']))
+            r.raise_for_status()
+            count = len(r.json())
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for gauge in self.replication_tasks_gauges:
+            self.assertMetric(gauge)
+
+    def test_compaction_metrics(self):
+        url = urljoin(self.NODE1['server'], 'kennel')
+        body = {
+            '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
+            'data': str(time.time())
+        }
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(body))
+        r.raise_for_status()
+
+        update_url = urljoin(self.NODE1['server'], 'kennel/{0}'.format(body['_id']))
+
+        for _ in xrange(50):
+            rev = r.json()['rev']
+            body['data'] = str(time.time())
+            body['_rev'] = rev
+            r = requests.put(update_url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps(body))
+            r.raise_for_status()
+
+            r2 = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps({"_id": str(time.time())}))
+            r2.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel/_compact')
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'})
+        r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], '_global_changes/_compact')
+        r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'})
+        r.raise_for_status()
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for gauge in self.compaction_tasks_gauges:
+            self.assertMetric(gauge)
+
+    def test_indexing_metrics(self):
+        url = urljoin(self.NODE1['server'], 'kennel')
+        for _ in xrange(50):
+            r = requests.post(url, auth=(self.NODE1['user'], self.NODE1['password']), headers={'Content-Type': 'application/json'}, data=json.dumps({"_id": str(time.time())}))
+            r.raise_for_status()
+
+        class AsyncReq(threading.Thread):
+            def __init__(self, url, auth):
+                self._url = url
+                self._auth = auth
+                threading.Thread.__init__(self)
+
+            def run(self):
+                r = requests.get(self._url, auth=self._auth)
+                r.raise_for_status()
+
+        url = urljoin(self.NODE1['server'], 'kennel/_design/dummy/_view/all')
+        t = AsyncReq(url, (self.NODE1['user'], self.NODE1['password']))
+        t.start()
+
+        self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+        for node in [self.NODE1, self.NODE2, self.NODE3]:
+            for gauge in self.indexing_tasks_gauges:
+                self.assertMetric(gauge, tags=['database:kennel', 'design_document:dummy', 'instance:{0}'.format(node['name'])])
+
+        t.join()
+
+    def test_view_compaction_metrics(self):
+        class LoadGenerator(threading.Thread):
+            STOP = 0
+            RUN = 1
+
+            def __init__(self, server, auth):
+                self._server = server
+                self._auth = auth
+                self._status = self.RUN
+                threading.Thread.__init__(self)
+
+            def run(self):
+                docs = []
+                count = 0
+                while self._status == self.RUN:
+                    count += 1
+                    if count % 5 == 0:
+                        self.compact_views()
+                    theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+                    docs.append(self.post_doc(theid))
+                    docs = map(lambda x: self.update_doc(x), docs)
+                    self.generate_views()
+
+            def generate_views(self):
+                url = urljoin(self._server, 'kennel/_design/dummy/_view/all')
+                try:
+                    r = requests.get(url, auth=self._auth, timeout=1)
+                    r.raise_for_status()
+                except requests.exceptions.Timeout:
+                    None
+                url = urljoin(self._server, 'kennel/_design/dummy/_view/by_data')
+                try:
+                    r = requests.get(url, auth=self._auth, timeout=1)
+                    r.raise_for_status()
+                except requests.exceptions.Timeout:
+                    None
+
+            def update_doc(self, doc):
+                body = {
+                    'data': str(random.randint(0, 1000000000)),
+                    '_rev': doc['rev']
+                }
+
+                r = requests.put(urljoin(self._server, 'kennel/{0}'.format(doc['id'])), auth=self._auth, headers={'Content-Type': 'application/json'}, data=json.dumps(body))
+                r.raise_for_status()
+                return r.json()
+
+            def post_doc(self, doc_id):
+                body = {
+                    "_id": doc_id,
+                    "data": str(time.time())
+                }
+                r = requests.post(urljoin(self._server, 'kennel'), auth=self._auth, headers={'Content-Type': 'application/json'}, data=json.dumps(body))
+                r.raise_for_status()
+                return r.json()
+
+            def compact_views(self):
+                url = urljoin(self._server, 'kennel/_compact/dummy')
+                r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
+                r.raise_for_status()
+
+            def stop(self):
+                self._status = self.STOP
+
+        threads = []
+        for _ in range(40):
+            t = LoadGenerator(self.NODE1['server'], (self.NODE1['user'], self.NODE1['password']))
+            t.start()
+            threads.append(t)
+
+        tries = 0
+        try:
+            metric_found = False
+            while not metric_found and tries < 20:
+                tries += 1
+                self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
+
+                for m_name, ts, val, mdata in self.metrics:
+                    if re.search('view_compaction\.progress', m_name) is not None:
+                        metric_found = True
+                        for gauge in self.view_compaction_tasks_gauges:
+                            self.assertMetric(gauge)
+                        break
+        finally:
+            for t in threads:
+                t.stop()
+
+            for t in threads:
+                t.join()
+
+        if tries >= 20:
+            self.fail("Could not find the view_compaction happening")

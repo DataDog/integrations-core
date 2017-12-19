@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -48,14 +48,14 @@ PROCESS_SERVICE_CHECK = 'supervisord.process.status'
 
 
 class SupervisordCheck(AgentCheck):
-
     def check(self, instance):
         server_name = instance.get('name')
 
         if not server_name or not server_name.strip():
             raise Exception("Supervisor server name not specified in yaml configuration.")
 
-        server_service_check_tags = ['%s:%s' % (SERVER_TAG, server_name)]
+        instance_tags = instance.get('tags', [])
+        instance_tags.append('%s:%s' % (SERVER_TAG, server_name))
         supe = self._connect(instance)
         count_by_status = defaultdict(int)
 
@@ -81,8 +81,7 @@ class SupervisordCheck(AgentCheck):
                       ' has the right permissions.' % sock
 
             self.service_check(SERVER_SERVICE_CHECK, AgentCheck.CRITICAL,
-                               tags=server_service_check_tags,
-                               message=msg)
+                               tags=instance_tags, message=msg)
 
             raise Exception(msg)
 
@@ -90,17 +89,15 @@ class SupervisordCheck(AgentCheck):
             if e.errcode == 401:  # authorization error
                 msg = 'Username or password to %s are incorrect.' % server_name
             else:
-                msg = "An error occurred while connecting to %s: "\
-                    "%s %s " % (server_name, e.errcode, e.errmsg)
+                msg = "An error occurred while connecting to %s: " \
+                      "%s %s " % (server_name, e.errcode, e.errmsg)
 
             self.service_check(SERVER_SERVICE_CHECK, AgentCheck.CRITICAL,
-                               tags=server_service_check_tags,
-                               message=msg)
+                               tags=instance_tags, message=msg)
             raise Exception(msg)
 
         # If we're here, we were able to connect to the server
-        self.service_check(SERVER_SERVICE_CHECK, AgentCheck.OK,
-                           tags=server_service_check_tags)
+        self.service_check(SERVER_SERVICE_CHECK, AgentCheck.OK, tags=instance_tags)
 
         # Filter monitored processes on configuration directives
         proc_regex = instance.get('proc_regex', [])
@@ -129,24 +126,21 @@ class SupervisordCheck(AgentCheck):
         # Report service checks and uptime for each process
         for proc in monitored_processes:
             proc_name = proc['name']
-            tags = ['%s:%s' % (SERVER_TAG, server_name),
-                    '%s:%s' % (PROCESS_TAG, proc_name)]
+            tags = instance_tags + ['%s:%s' % (PROCESS_TAG, proc_name)]
 
             # Report Service Check
             status = DD_STATUS[proc['statename']]
             msg = self._build_message(proc)
             count_by_status[status] += 1
-            self.service_check(PROCESS_SERVICE_CHECK,
-                               status, tags=tags, message=msg)
+            self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
             # Report Uptime
             uptime = self._extract_uptime(proc)
             self.gauge('supervisord.process.uptime', uptime, tags=tags)
 
         # Report counts by status
-        tags = ['%s:%s' % (SERVER_TAG, server_name)]
         for status in PROCESS_STATUS:
             self.gauge('supervisord.process.count', count_by_status[status],
-                       tags=tags + ['status:%s' % PROCESS_STATUS[status]])
+                       tags=instance_tags + ['status:%s' % PROCESS_STATUS[status]])
 
     @staticmethod
     def _connect(instance):
