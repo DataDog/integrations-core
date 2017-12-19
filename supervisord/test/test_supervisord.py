@@ -16,7 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-from check import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
+from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
