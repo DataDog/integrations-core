@@ -322,9 +322,9 @@ class TestRabbitMQ(AgentCheckTest):
         sys.path.pop()
 
     def test__get_data(self):
-        with mock.patch('datadog.rabbitmq.rabbitmq.requests') as r:
-            from datadog.rabbitmq import RabbitMQ  # pylint: disable=import-error,no-name-in-module
-            from datadog.rabbitmq.rabbitmq import RabbitMQException  # pylint: disable=import-error,no-name-in-module
+        with mock.patch('datadog_checks.rabbitmq.rabbitmq.requests') as r:
+            from datadog_checks.rabbitmq import RabbitMQ  # pylint: disable=import-error,no-name-in-module
+            from datadog_checks.rabbitmq.rabbitmq import RabbitMQException  # pylint: disable=import-error,no-name-in-module
             check = RabbitMQ('rabbitmq', {}, {"instances": [{"rabbitmq_api_url": "http://example.com"}]})
             r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
             self.assertRaises(RabbitMQException, check._get_data, '')
@@ -380,6 +380,6 @@ class TestRabbitMQ(AgentCheckTest):
         self.assertEqual(sc[1]['status'], AgentCheck.CRITICAL)
 
         # in case of connection errors, this check should stay silent
-        from datadog.rabbitmq.rabbitmq import RabbitMQException  # pylint: disable=import-error,no-name-in-module
+        from datadog_checks.rabbitmq.rabbitmq import RabbitMQException  # pylint: disable=import-error,no-name-in-module
         self.check._get_data.side_effect = RabbitMQException
         self.assertRaises(RabbitMQException, self.check._get_vhosts, instances['instances'][0], '')
