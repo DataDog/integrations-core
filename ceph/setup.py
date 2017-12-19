@@ -3,6 +3,8 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+# module version
+from datadog_checks.ceph import __version__
 
 import json
 
@@ -19,10 +21,14 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
         if not len(req[1]):
             runtime_reqs.append(req[2])
 
-version = None
+version = __version__
+manifest_version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     manifest = json.load(f)
-    version = manifest.get('version')
+    manifest_version = manifest.get('version')
+
+if version != manifest_version:
+    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-ceph',
