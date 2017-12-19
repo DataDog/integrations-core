@@ -6,8 +6,8 @@
 try:
     from checks.libs.win.pdhbasecheck import PDHBaseCheck
 except ImportError:
-    def PDHBaseCheck(*args, **kwargs):
-        return
+    class PDHBaseCheck:
+        pass
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'dotnetclr'
 
