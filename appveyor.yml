@@ -47,7 +47,7 @@ install:
   - cd ..
   - cd sqlserver
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - python.exe setup.py bdist_wheel
+  - ps: python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd iis
