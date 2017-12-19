@@ -486,6 +486,7 @@ class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
         self.kubeutil = KubeUtil()
+        self.kubeutil.__init__()  # It's a singleton, force re-init
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list', side_effect=['foo'])
     @mock.patch('utils.kubernetes.KubeUtil.extract_kube_pod_tags')
@@ -734,9 +735,20 @@ class TestKubeutil(unittest.TestCase):
             self.assertEqual(name, 'bar')
             f.assert_not_called()
 
-    def test__fetch_host_data(self):
+    def test__fetch_host_data_1_1(self):
         """
-        Test with both 1.1 and 1.2 version payloads
+        Test with 1.1 version payload
+        """
+        with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
+            self.kubeutil.pod_name = 'heapster-v11-l8sh1'
+            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
+            self.kubeutil._fetch_host_data()
+            self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
+            self.assertEqual(self.kubeutil._node_name, 'gke-cluster-1-8046fdfa-node-ld35')
+
+    def test__fetch_host_data_1_2(self):
+        """
+        Test with 1.2 version payload
         """
         with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
             self.kubeutil.pod_name = 'dd-agent-1rxlh'
@@ -744,12 +756,6 @@ class TestKubeutil(unittest.TestCase):
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
             self.assertEqual(self.kubeutil._node_name, 'kubernetes-massi-minion-k23m')
-
-            self.kubeutil.pod_name = 'heapster-v11-l8sh1'
-            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
-            self.kubeutil._fetch_host_data()
-            self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
-            self.assertEqual(self.kubeutil._node_name, 'gke-cluster-1-8046fdfa-node-ld35')
 
     def test_get_auth_token(self):
         KubeUtil.AUTH_TOKEN_PATH = '/foo/bar'
