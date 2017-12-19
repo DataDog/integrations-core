@@ -134,7 +134,7 @@ install:
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - pip install -r requirements-test.txt
   - bundle exec rake setup_agent_libs
-  - cd $TRAVIS_BUILD_DIR/datadog-base && python setup.py bdist_wheel && pip install . && cd -
+  - cd $TRAVIS_BUILD_DIR/datadog-checks-base && python setup.py bdist_wheel && pip install . && cd -
   - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
