@@ -486,6 +486,7 @@ class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
         self.kubeutil = KubeUtil()
+        self.kubeutil.__init__()  # It's a singleton, force re-init
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list', side_effect=['foo'])
     @mock.patch('utils.kubernetes.KubeUtil.extract_kube_pod_tags')
