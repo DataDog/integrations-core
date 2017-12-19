@@ -73,21 +73,21 @@ class SquidCheck(AgentCheck):
 
     def check(self, instance):
 
-        name, host, port, cachemgr_passwd, custom_tags = self.parse_instance(instance)
+        name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
 
         # Get the squid counters values
-        counters = self.get_counters(host, port, cachemgr_passwd, tags + custom_tags)
+        counters = self.get_counters(host, port, cachemgr_user, cachemgr_passwd, tags + custom_tags)
 
         # Send these values as rate
         for counter, value in counters.iteritems():
             self.rate(counter, value, tags=tags + custom_tags)
 
-    def get_counters(self, host, port, pwd, tags):
+    def get_counters(self, host, port, user, pwd, tags):
 
         url = "http://%s:%s/squid-internal-mgr/counters" % (host, port)
         try:
-            res = requests.get(url, auth=('datadog', pwd))
+            res = requests.get(url, auth=(user, pwd))
             res.raise_for_status()
             self.service_check(SERVICE_CHECK, AgentCheck.OK, tags=tags)
         except requests.exceptions.RequestException as e:
@@ -110,9 +110,10 @@ class SquidCheck(AgentCheck):
             raise Exception("Each instance in squid.yaml must have a name")
         host = instance.get("host", "localhost")
         port = instance.get("port", 3128)
+        cachemgr_user = instance.get("cachemgr_username", "")
         cachemgr_passwd = instance.get("cachemgr_password", "")
         custom_tags = instance.get("tags", [])
-        return name, host, port, cachemgr_passwd, custom_tags
+        return name, host, port, cachemgr_user, cachemgr_passwd, custom_tags
 
     def parse_counter(self, line):
         # Squid returns a plain text page with one counter per line:
@@ -122,7 +123,9 @@ class SquidCheck(AgentCheck):
         # client_http.kbytes_out = 2
         # ...
         try:
-            counter, value = line.strip().split(" = ")
+            counter, value = line.strip().split("=")
+            counter = counter.strip()
+            value = value.strip()
         except ValueError as e:
             self.log.error('Error parsing counter with line %s: %s', line, e)
             return None, None

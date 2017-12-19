@@ -109,7 +109,7 @@ class TestSquidUnit(AgentCheckTest):
         self.assertEquals(value, "0")
 
         # Bad format
-        line = "counter=0\n"
+        line = "counter: value\n"
         counter, value = self.check.parse_counter(line)
         self.assertEquals(counter, None)
         self.assertEquals(value, None)
@@ -121,11 +121,12 @@ class TestSquidUnit(AgentCheckTest):
         instance = {
             "name": "ok_instance"
         }
-        name, host, port, cachemgr_passwd, custom_tags = self.check.parse_instance(instance)
+        name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = self.check.parse_instance(instance)
         self.assertEquals(name, "ok_instance")
         self.assertEquals(host, "localhost")
         self.assertEquals(port, 3128)
         self.assertEquals(cachemgr_passwd, "")
+        self.assertEquals(cachemgr_user, "")
         self.assertEquals(custom_tags, [])
 
         # instance no defaults
@@ -133,13 +134,15 @@ class TestSquidUnit(AgentCheckTest):
             "name": "ok_instance",
             "host": "host",
             "port": 1234,
+            "cachemgr_username": "datadog",
             "cachemgr_password": "pass",
             "tags": ["foo:bar"],
         }
-        name, host, port, cachemgr_passwd, custom_tags = self.check.parse_instance(instance)
+        name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = self.check.parse_instance(instance)
         self.assertEquals(name, "ok_instance")
         self.assertEquals(host, "host")
         self.assertEquals(port, 1234)
+        self.assertEquals(cachemgr_user, "datadog")
         self.assertEquals(cachemgr_passwd, "pass")
         self.assertEquals(custom_tags, ["foo:bar"])
 
