@@ -78,8 +78,8 @@ class TestCacti(AgentCheckTest):
         self.assertMetric('system.mem.buffered.max', value=2)
         self.assertMetric('system.mem.buffered', value=2)
 
-    @mock.patch('datadog.cacti.cacti.pymysql')
-    @mock.patch('datadog.cacti.cacti.rrdtool')
+    @mock.patch('datadog_checks.cacti.cacti.pymysql')
+    @mock.patch('datadog_checks.cacti.cacti.rrdtool')
     def testCactiMetrics(self, mock_pymysql, mock_rrdtool):
         config = {
             'instances': [self.CACTI_CONFIG]
