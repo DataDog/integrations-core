@@ -8,7 +8,7 @@ environment:
   NOSE_FILTER: not unix and not fixme and not winfixme
   PYWIN_PATH: C:\projects\integrations-core\.cache\pywin32-py2.7.exe
   SKIP_LINT: true
-  DD_AGENT_BRANCH: jaime/wheels
+  DD_AGENT_BRANCH: master
   SDK_TESTING: true
   PYTHON: C:\\Python27-x64
   PYTHON_VERSION: 2.7.13
