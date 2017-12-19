@@ -51,6 +51,8 @@ class ZooKeeperTestCase(AgentCheckTest):
         'zookeeper.zxid.count',
         'zookeeper.nodes',
         'zookeeper.instances',
+        'zookeeper.packets.received',
+        'zookeeper.packets.sent'
     ]
 
     MNTR_METRICS = [
