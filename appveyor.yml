@@ -41,7 +41,7 @@ install:
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
   - ps: pip install wheel
   - ps: pip install simplejson
-  - cd datadog-base
+  - cd datadog-checks-base
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
