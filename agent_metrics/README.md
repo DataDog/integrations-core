@@ -18,7 +18,7 @@ Edit the `agent_metrics.yaml` file to point to your server and port, set the mas
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `agent_metrics` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `agent_metrics` under the Checks section:
 
     Checks
     ======

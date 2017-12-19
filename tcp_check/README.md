@@ -36,11 +36,11 @@ Configuration Options
 * `skip_event` (Optional) - Defaults to false. Set to true to skip creating an event. This option will be removed in a future version and will default to true.
 * `tags` (Optional) - Tags to be assigned to the metric.
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending TCP service checks and response times to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending TCP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `tcp_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `tcp_check` under the Checks section:
 
 ```
   Checks

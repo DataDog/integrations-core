@@ -27,11 +27,11 @@ instances:
 #   add_missing_keys: True    # default is False
 ```
 
-Restart the Agent to start sending SSH/SFTP metrics and service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending SSH/SFTP metrics and service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ssh_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ssh_check` under the Checks section:
 
 ```
   Checks

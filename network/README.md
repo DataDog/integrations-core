@@ -26,11 +26,11 @@ instances:
 #   excluded_interface_re: eth1.*
 ```
 
-Restart the Agent to effect any configuration changes.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to effect any configuration changes.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `network` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `network` under the Checks section:
 
 ```
   Checks

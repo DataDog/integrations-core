@@ -15,7 +15,7 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nfsstat` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nfsstat` under the Checks section:
 
     Checks
     ======

@@ -85,7 +85,7 @@ The longer it is, the less hard your agent hits the apiserver with requests, but
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kubernetes` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kubernetes` under the Checks section:
 
     Checks
     ======
