@@ -3,6 +3,8 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+# module version
+from datadog_checks.datadog-checks-base import __version__
 
 here = path.abspath(path.dirname(__file__))
 
