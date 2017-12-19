@@ -3,8 +3,10 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+# module version
+from datadog_checks.squid import __version__
 
-import simplejson as json
+import json
 
 here = path.abspath(path.dirname(__file__))
 
@@ -12,17 +14,26 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-runtime_reqs = ['datadog-base']
+runtime_reqs = ['datadog-checks-base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = line.rpartition('#')
-        if req[0]:
-            runtime_reqs.append(req[0])
+        if not len(req[1]):
+            if '--hash=' in req[2]:
+                tokens = req[2].split()
+                if len(tokens) > 1:
+                    runtime_reqs.append(tokens[0])
+            elif ';' in req[2]:
+                runtime_reqs.append(req[2])
 
-version = None
+version = __version__
+manifest_version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     manifest = json.load(f)
-    version = manifest.get('version')
+    manifest_version = manifest.get('version')
+
+if version != manifest_version:
+    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-squid',
@@ -53,7 +64,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog.squid'],
+    packages=['datadog_checks.squid'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -76,13 +87,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog.squid': ['squid.yaml.example']},
+    package_data={b'datadog_checks.squid': ['squid.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'squid=datadog.squid:main',
+            'squid=datadog_checks.squid:main',
         ],
     },
 )
