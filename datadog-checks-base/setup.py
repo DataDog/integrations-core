@@ -4,7 +4,7 @@ from setuptools import setup
 from codecs import open
 from os import path
 # module version
-from datadog_checks.datadog-checks-base import __version__
+from datadog_checks import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -14,7 +14,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='datadog-checks-base',
-    version='0.1.0',
+    version=__version__,
     description='The Datadog Checks Base package',
     long_description=long_description,
     keywords='datadog checks base',
