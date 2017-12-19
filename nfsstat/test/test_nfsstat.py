@@ -53,7 +53,7 @@ class TestNfsstat(AgentCheckTest):
         """
         self.load_check(self.CONFIG)
 
-    @mock.patch('datadog.nfsstat.nfsstat.get_subprocess_output',
+    @mock.patch('datadog_checks.nfsstat.nfsstat.get_subprocess_output',
                 return_value=(Fixtures.read_file('nfsiostat', sdk_dir=FIXTURE_DIR), "", 0))
     def test_check(self, nfsiostat_mocks):
         """
