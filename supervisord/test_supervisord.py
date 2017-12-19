@@ -16,6 +16,7 @@ from mock import patch
 
 # project
 from checks import AgentCheck
+from check import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
@@ -373,15 +374,18 @@ instances:
 
     def test_build_message(self):
         """Unit test supervisord build service check message."""
+        time_stop = 0
+        time_start = 1414815388
+        time_now = 1414815513
         process = {
-            'now': 1414815513,
+            'now': time_now,
             'group': 'mysql',
             'description': 'pid 787, uptime 0:02:05',
             'pid': 787,
             'stderr_logfile': '/var/log/supervisor/mysql-stderr---supervisor-3ATI82.log',
-            'stop': 0,
+            'stop': time_stop,
             'statename': 'RUNNING',
-            'start': 1414815388,
+            'start': time_start,
             'state': 20,
             'stdout_logfile': '/var/log/mysql/mysql.log',
             'logfile': '/var/log/mysql/mysql.log',
@@ -390,7 +394,7 @@ instances:
             'name': 'mysql'
         }
 
-        expected_message = """Current time: 2014-11-01 04:18:33
+        expected_message = """Current time: {time_now}
 Process name: mysql
 Process group: mysql
 Description: pid 787, uptime 0:02:05
@@ -398,8 +402,12 @@ Error log file: /var/log/supervisor/mysql-stderr---supervisor-3ATI82.log
 Stdout log file: /var/log/mysql/mysql.log
 Log file: /var/log/mysql/mysql.log
 State: RUNNING
-Start time: 2014-11-01 04:16:28
-Stop time: \nExit Status: 0"""
+Start time: {time_start}
+Stop time: {time_stop}\nExit Status: 0""".format(
+            time_now=FORMAT_TIME(time_now),
+            time_start=FORMAT_TIME(time_start),
+            time_stop='' if time_stop == 0 else FORMAT_TIME(time_stop)
+        )
 
         agentConfig = {
             'version': '0.1',
