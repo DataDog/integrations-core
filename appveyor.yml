@@ -46,42 +46,42 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd iis
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd windows_service
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd pdh_check
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd aspdotnet 
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd dotnetclr 
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd exchange_server 
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install ./requirements.txt)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
   - python.exe setup.py bdist_wheel
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
