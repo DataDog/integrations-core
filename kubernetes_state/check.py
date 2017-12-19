@@ -93,6 +93,9 @@ class KubernetesState(PrometheusCheck):
             'kube_replicationcontroller_status_replicas': 'replicationcontroller.replicas',
             'kube_statefulset_replicas': 'statefulset.replicas_desired',
             'kube_statefulset_status_replicas': 'statefulset.replicas',
+            'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
+            'kube_statefulset_status_replicas_ready': 'statefulset.replicas_ready',
+            'kube_statefulset_status_replicas_updated': 'statefulset.replicas_updated',
         }
 
         self.ignore_metrics = [

@@ -31,6 +31,18 @@ kube_cronjob_status_active{cronjob="hello",namespace="default"} 0
 # HELP kube_cronjob_status_last_schedule_time LastScheduleTime keeps information of when was the last time the job was successfully scheduled.
 # TYPE kube_cronjob_status_last_schedule_time gauge
 kube_cronjob_status_last_schedule_time{cronjob="hello",namespace="default"} 1.50999846e+09
+# HELP kube_statefulset_status_replicas The number of replicas per StatefulSet.
+# TYPE kube_statefulset_status_replicas gauge
+kube_statefulset_status_replicas{namespace="ns3",statefulset="statefulset3"} 7
+# HELP kube_statefulset_status_replicas_current The number of current replicas per StatefulSet.
+# TYPE kube_statefulset_status_replicas_current gauge
+kube_statefulset_status_replicas_current{namespace="ns2",statefulset="statefulset2"} 2
+# HELP kube_statefulset_status_replicas_ready The number of ready replicas per StatefulSet.
+# TYPE kube_statefulset_status_replicas_ready gauge
+kube_statefulset_status_replicas_ready{namespace="ns2",statefulset="statefulset2"} 5
+# HELP kube_statefulset_status_replicas_updated The number of updated replicas per StatefulSet.
+# TYPE kube_statefulset_status_replicas_updated gauge
+kube_statefulset_status_replicas_updated{namespace="ns2",statefulset="statefulset2"} 3
 # HELP kube_daemonset_created Unix creation timestamp
 # TYPE kube_daemonset_created gauge
 kube_daemonset_created{daemonset="jaundiced-numbat-dd-k8state",namespace="default"} 1.509985033e+09
