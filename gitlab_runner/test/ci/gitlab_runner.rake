@@ -19,13 +19,13 @@ COMPOSE_ARGS = "GITLAB_VERSION=#{gitlab_master_version} GITLAB_RUNNER_VERSION=#{
 namespace :ci do
   namespace :gitlab_runner do |flavor|
     task before_install: ['ci:common:before_install'] do
-      sh %(#{COMPOSE_ARGS} docker-compose -f gitlab_runner/ci/docker-compose.yml down)
+      sh %(#{COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab_runner/test/ci/resources/docker-compose.yml down)
     end
 
     task :install do
       Rake::Task['ci:common:install'].invoke('gitlab_runner')
       # Gitlab master, to have a proper runner registration
-      sh %(#{COMPOSE_ARGS} docker-compose -f gitlab_runner/ci/docker-compose.yml up -d)
+      sh %(#{COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab_runner/test/ci/resources/docker-compose.yml up -d)
 
       # The runner already waits for the master to be up before registering
       # Here we make sure that the runner itself is actually up and running
@@ -50,7 +50,7 @@ namespace :ci do
 
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      sh %(#{COMPOSE_ARGS} docker-compose -f gitlab_runner/ci/docker-compose.yml down)
+      sh %(#{COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab_runner/test/ci/resources/docker-compose.yml down)
     end
 
     task :execute do
