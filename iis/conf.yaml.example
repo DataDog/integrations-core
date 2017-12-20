@@ -38,6 +38,10 @@ instances:
                       # where perfmon reports TotalBytesTransferred as
                       # TotalBytesTransfered, you may have to enable this
                       # to grab the IIS metrics in that environment.
+      count_metrics: false # Send the raw deltas of the WMI performance
+                           # counters.
+      rate_metrics: true # Send the deltas of the WMI performance counters
+                         # normalized to per-second rates.
   #   tags:
   #     - myapp2
   #     - east
