@@ -14,12 +14,12 @@ GITLAB_COMPOSE_ARGS = "GITLAB_ROOT_PASSWORD=#{GITLAB_TEST_PASSWORD} GITLAB_VERSI
 namespace :ci do
   namespace :gitlab do |flavor|
     task before_install: ['ci:common:before_install'] do
-      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f gitlab/ci/docker-compose.yml down)
+      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab/test/ci/resources/docker-compose.yml down)
     end
 
     task :install do
       Rake::Task['ci:common:install'].invoke('gitlab')
-      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f gitlab/ci/docker-compose.yml up -d)
+      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab/test/ci/resources/docker-compose.yml up -d)
       Wait.for "http://localhost:#{GITLAB_LOCAL_PORT}", 900
       Wait.for "http://localhost:#{GITLAB_LOCAL_PROMETHEUS_PORT}", 900
     end
@@ -40,7 +40,7 @@ namespace :ci do
 
     # sample cleanup task
     task cleanup: ['ci:common:cleanup'] do
-      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f gitlab/ci/docker-compose.yml down)
+      sh %(#{GITLAB_COMPOSE_ARGS} docker-compose -f #{ENV['TRAVIS_BUILD_DIR']}/gitlab/test/ci/resources/docker-compose.yml down)
     end
 
     task :execute do
