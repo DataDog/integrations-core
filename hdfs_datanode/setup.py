@@ -4,7 +4,7 @@ from setuptools import setup
 from codecs import open
 from os import path
 # module version
-from datadog_checks.hdfs_datanode import __version__
+from datadog_checks.hdfs_datanode import __version__  # pylint: disable=import-error,no-name-in-module
 
 import json
 

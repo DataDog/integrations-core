@@ -4,7 +4,7 @@ from setuptools import setup
 from codecs import open
 from os import path
 # module version
-from datadog_checks import __version__
+from datadog_checks import __version__  # pylint: disable=import-error,no-name-in-module
 
 here = path.abspath(path.dirname(__file__))
 
