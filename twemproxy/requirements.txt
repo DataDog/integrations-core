@@ -1,0 +1,2 @@
+# integration pip requirements
+simplejson==3.6.5

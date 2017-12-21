@@ -1,2 +1,3 @@
 # integration pip requirements
+requests==2.11.1
 protobuf==3.5.1
