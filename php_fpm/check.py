@@ -61,7 +61,7 @@ class PHPFPMCheck(AgentCheck):
         status_exception = None
         if status_url is not None:
             try:
-                pool = self._process_status(status_url, auth, tags, http_host, disable_ssl_validation)
+                pool = self._process_status(status_url, auth, tags, http_host, timeout, disable_ssl_validation)
             except Exception as e:
                 status_exception = e
                 pass
@@ -121,9 +121,9 @@ class PHPFPMCheck(AgentCheck):
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
             resp = requests.get(ping_url, auth=auth, timeout=timeout,
-                                headers=headers(self.agentConfig, 
+                                headers=headers(self.agentConfig,
                                 http_host=http_host,
-                                verify=not disable_ssl_validation ))
+                                verify=not disable_ssl_validation))
             resp.raise_for_status()
 
             if ping_reply not in resp.text:

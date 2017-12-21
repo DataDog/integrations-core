@@ -31,7 +31,7 @@ instances:
     # to skip the validation of the SSL certificate of the URL being tested.
     # Defaults to false, set to true if you want to disable SSL certificate validation.
     #
-    # disable_ssl_validation: true
+    # disable_ssl_validation: false
     #
     # Array of custom tags
     # By default metrics and service check will be tagged by pool and host
