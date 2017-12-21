@@ -26,7 +26,7 @@ LABEL_BLACKLIST = ["com.amazonaws.ecs.cluster", "com.amazonaws.ecs.container-nam
 MEMORY_GAUGE_METRICS = ['cache','mapped_file','rss','hierarchical_memory_limit','active_anon',
                         'active_file','inactive_file','hierarchical_memsw_limit']
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault','pgfault']
-IO_METRICS = {'io_service_bytes_recursive':'fargate.io.bytes.', 'io_serviced_recursive':'fargate.io.ops.'}
+IO_METRICS = {'io_service_bytes_recursive':'ecs.fargate.io.bytes.', 'io_serviced_recursive':'ecs.fargate.io.ops.'}
 
 class FargateCheck(AgentCheck):
 
@@ -89,7 +89,7 @@ class FargateCheck(AgentCheck):
                     container_tags[c_id].append(label + ':' + value)
 
             if container['Limits']['CPU'] > 0:
-                self.gauge('fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
+                self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
         try:
             request = requests.get(stats_endpoint, timeout=timeout)
@@ -121,26 +121,26 @@ class FargateCheck(AgentCheck):
         for container_id, container_stats in stats.iteritems():
             # CPU metrics
             tags = container_tags[container_id]
-            self.rate('fargate.cpu.system', container_stats['cpu_stats']['system_cpu_usage'], tags)
-            self.rate('fargate.cpu.user', container_stats['cpu_stats']['cpu_usage']['total_usage'], tags)
+            self.rate('ecs.fargate.cpu.system', container_stats['cpu_stats']['system_cpu_usage'], tags)
+            self.rate('ecs.fargate.cpu.user', container_stats['cpu_stats']['cpu_usage']['total_usage'], tags)
             cpu_percent = 0.0
             cpu_delta = container_stats['cpu_stats']['cpu_usage']['total_usage'] - container_stats['precpu_stats']['cpu_usage']['total_usage']
             system_delta = container_stats['cpu_stats']['system_cpu_usage'] - container_stats['precpu_stats']['system_cpu_usage']
             if system_delta > 0 and cpu_delta > 0:
                 cpu_percent = (float(cpu_delta) / float(system_delta)) * len(container_stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100.0
                 cpu_percent = round(cpu_percent, 2)
-            self.gauge('fargate.cpu.percent', cpu_percent, tags)
+            self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
             # Memory metrics
             for metric in MEMORY_GAUGE_METRICS:
                 value = container_stats['memory_stats']['stats'][metric]
                 if value < CGROUP_NO_VALUE:
-                    self.gauge('fargate.mem.' + metric, value, tags)
+                    self.gauge('ecs.fargate.mem.' + metric, value, tags)
             for metric in MEMORY_RATE_METRICS:
                 value = container_stats['memory_stats']['stats'][metric]
-                self.rate('fargate.mem.' + metric, value, tags)
-            self.gauge('fargate.mem.max_usage', container_stats['memory_stats']['max_usage'], tags)
-            self.gauge('fargate.mem.usage', container_stats['memory_stats']['usage'], tags)
-            self.gauge('fargate.mem.limit', container_stats['memory_stats']['limit'], tags)
+                self.rate('ecs.fargate.mem.' + metric, value, tags)
+            self.gauge('ecs.fargate.mem.max_usage', container_stats['memory_stats']['max_usage'], tags)
+            self.gauge('ecs.fargate.mem.usage', container_stats['memory_stats']['usage'], tags)
+            self.gauge('ecs.fargate.mem.limit', container_stats['memory_stats']['limit'], tags)
             # I/O metrics
             for blkio_cat, metric_name in IO_METRICS.iteritems():
                 read_counter = write_counter = 0

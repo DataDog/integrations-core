@@ -81,15 +81,15 @@ class TestFargate(AgentCheckTest):
             ['docker_image:redis:latest','image_name:redis','image_tag:latest','com.amazonaws.ecs.container-name:redis'],
             ['docker_image:amazon/amazon-ecs-pause:0.1.0','image_name:amazon/amazon-ecs-pause','image_tag:0.1.0','com.amazonaws.ecs.container-name:~internal~ecs~pause']
         ]
-        expected_container_metrics = ['fargate.io.ops.write','fargate.io.bytes.write','fargate.io.ops.read','fargate.io.bytes.read',
-                                      'fargate.cpu.user','fargate.cpu.system','fargate.cpu.percent','fargate.mem.cache','fargate.mem.active_file',
-                                      'fargate.mem.inactive_file','fargate.mem.pgpgout','fargate.mem.limit','fargate.mem.pgfault',
-                                      'fargate.mem.active_anon','fargate.mem.usage','fargate.mem.rss','fargate.mem.pgpgin',
-                                      'fargate.mem.pgmajfault','fargate.mem.mapped_file','fargate.mem.max_usage']
+        expected_container_metrics = ['ecs.fargate.io.ops.write','ecs.fargate.io.bytes.write','ecs.fargate.io.ops.read','ecs.fargate.io.bytes.read',
+                                      'ecs.fargate.cpu.user','ecs.fargate.cpu.system','ecs.fargate.cpu.percent','ecs.fargate.mem.cache','ecs.fargate.mem.active_file',
+                                      'ecs.fargate.mem.inactive_file','ecs.fargate.mem.pgpgout','ecs.fargate.mem.limit','ecs.fargate.mem.pgfault',
+                                      'ecs.fargate.mem.active_anon','ecs.fargate.mem.usage','ecs.fargate.mem.rss','ecs.fargate.mem.pgpgin',
+                                      'ecs.fargate.mem.pgmajfault','ecs.fargate.mem.mapped_file','ecs.fargate.mem.max_usage']
 
         extra_expected_metrics_for_container = [
-            ['fargate.cpu.limit','fargate.mem.hierarchical_memory_limit','fargate.mem.hierarchical_memsw_limit'],
-            ['fargate.cpu.limit','fargate.mem.hierarchical_memory_limit','fargate.mem.hierarchical_memsw_limit'],
+            ['ecs.fargate.cpu.limit','ecs.fargate.mem.hierarchical_memory_limit','ecs.fargate.mem.hierarchical_memsw_limit'],
+            ['ecs.fargate.cpu.limit','ecs.fargate.mem.hierarchical_memory_limit','ecs.fargate.mem.hierarchical_memsw_limit'],
             [] # pause container get fewer metrics
         ]
 
