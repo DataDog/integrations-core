@@ -1,6 +1,6 @@
 # CHANGELOG - haproxy
 
-Unreleased
+1.1.0 / Unreleased
 ==================
 
 ### Changes
