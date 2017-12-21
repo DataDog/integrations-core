@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -321,7 +321,7 @@ class MySql(AgentCheck):
         user = instance.get('user', '')
         password = str(instance.get('pass', ''))
         tags = instance.get('tags', [])
-        options = instance.get('options', {})
+        options = instance.get('options', {}) or {} # options could be None if empty in the YAML
         queries = instance.get('queries', [])
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', None)
@@ -528,7 +528,11 @@ class MySql(AgentCheck):
 
         if _is_affirmative(options.get('replication', False)):
             # Get replica stats
-            results.update(self._get_replica_stats(db))
+            is_mariadb = self._get_is_mariadb(db, host)
+            replication_channel = options.get('replication_channel')
+            if replication_channel:
+                self.service_check_tags.append("channel:{0}".format(replication_channel))
+            results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
             nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
             results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
@@ -543,12 +547,12 @@ class MySql(AgentCheck):
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
             if self._version_compatible(db, host, (5, 7, 0)):
-                slave_io_running = self._collect_string('Slave_IO_Running', results)
-                slave_sql_running = self._collect_string('Slave_SQL_Running', results)
+                slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
+                slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
                 if slave_io_running:
-                    slave_io_running = (slave_io_running.lower().strip() == "yes")
+                    slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
                 if slave_sql_running:
-                    slave_sql_running = (slave_sql_running.lower().strip() == "yes")
+                    slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
 
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
@@ -561,7 +565,7 @@ class MySql(AgentCheck):
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
-                if self._is_master(slaves, binlog_running):  # master
+                if self._is_master(slaves, results):  # master
                     if slaves > 0 and binlog_running:
                         slave_running_status = AgentCheck.OK
                     else:
@@ -606,8 +610,10 @@ class MySql(AgentCheck):
                              % self.MAX_CUSTOM_QUERIES)
 
 
-    def _is_master(self, slaves, binlog):
-        if slaves > 0 or binlog:
+    def _is_master(self, slaves, results):
+        # master uuid only collected in slaves
+        master_host = self._collect_string('Master_Host', results)
+        if slaves > 0 or not master_host:
             return True
 
         return False
@@ -649,7 +655,7 @@ class MySql(AgentCheck):
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
-        return version > compat_version
+        return version >= compat_version
 
     def _get_version(self, db, host):
         hostkey = self._get_host_key()
@@ -669,6 +675,13 @@ class MySql(AgentCheck):
             version = version[0].split('.')
             self.mysql_version[hostkey] = version
             return version
+
+    def _get_is_mariadb(self, db, host):
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
+            result = cursor.fetchone()
+
+            return result[0] == 1
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
@@ -742,7 +755,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
             pid = self._get_server_pid(db)
 
         if pid:
@@ -845,24 +858,57 @@ class MySql(AgentCheck):
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s" % str(e))
             return False
 
-    def _get_replica_stats(self, db):
+    def _get_replica_stats(self, db, is_mariadb, replication_channel):
+        replica_results = {}
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-                replica_results = {}
-                cursor.execute("SHOW SLAVE STATUS;")
-                slave_results = cursor.fetchone()
+                if is_mariadb and replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
+                    cursor.execute("SHOW SLAVE STATUS;")
+                elif replication_channel:
+                    cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
+                else:
+                    cursor.execute("SHOW SLAVE STATUS;")
+
+                if replication_channel:
+                    slave_results = cursor.fetchone()
+                else:
+                    slave_results = cursor.fetchall()
+
                 if slave_results:
-                    replica_results.update(slave_results)
+                    if replication_channel:
+                        replica_results.update(slave_results)
+                    elif len(slave_results) > 0:
+                        for slave_result in slave_results:
+                            # MySQL <5.7 does not have Channel_Name.
+                            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                            channel = slave_result.get('Channel_Name') or 'default'
+                            for key in slave_result:
+                                if slave_result[key] is not None:
+                                    if key not in replica_results:
+                                        replica_results[key] = {}
+                                    replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            errno, msg = e.args
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+                # MariaDB complains when you try to get slave status with a
+                # connection name on the master, without connection name it
+                # responds an empty string as expected.
+                # Mysql behaves the same with or without connection name.
+                pass
+            else:
+                self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
+
+        try:
+            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
-
-                return replica_results
-
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
-            return {}
+            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s" % str(e))
+
+        return replica_results
 
     def _get_slave_status(self, db, above_560, nonblocking):
         """
@@ -888,6 +934,9 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error accessing the process tables (must grant PROCESS): %s" % str(e))
             return {}
+
+    def _are_values_numeric(self, array):
+        return all([v.isdigit() for v in array])
 
     def _get_stats_from_innodb_status(self, db):
         # There are a number of important InnoDB metrics that are reported in
@@ -1006,24 +1055,39 @@ class MySql(AgentCheck):
                 results['Innodb_os_file_writes'] = long(row[4])
                 results['Innodb_os_file_fsyncs'] = long(row[8])
             elif line.find('Pending normal aio reads:') == 0:
-                # Pending normal aio reads: 0, aio writes: 0,
-                # or Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
-                # or Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
-                # or Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
-                if len(row) == 14:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[10])
-                elif len(row) == 16:
-                    results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
-                                                                  long(row[6]) + long(row[7]))
-                    results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
-                                                                   long(row[13]) + long(row[14]))
-                elif len(row) == 18:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[12])
-                else:
-                    results['Innodb_pending_normal_aio_reads'] = long(row[4])
-                    results['Innodb_pending_normal_aio_writes'] = long(row[7])
+                try:
+                    if len(row) == 8:
+                        # (len(row) == 8)  Pending normal aio reads: 0, aio writes: 0,
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[7])
+                    elif len(row) == 14:
+                        # (len(row) == 14) Pending normal aio reads: 0 [0, 0] , aio writes: 0 [0, 0] ,
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[10])
+                    elif len(row) == 16:
+                        # (len(row) == 16) Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+                        if self._are_values_numeric(row[4:8]) and self._are_values_numeric(row[11:15]):
+                            results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
+                                                                      long(row[6]) + long(row[7]))
+                            results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
+                                                                       long(row[13]) + long(row[14]))
+
+                        # (len(row) == 16) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
+                        elif self._are_values_numeric(row[4:9]) and self._are_values_numeric(row[12:15]):
+                            results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                            results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                        else:
+                            self.log.warning("Can't parse result line %s" % line)
+                    elif len(row) == 18:
+                        # (len(row) == 18) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[12])
+                    elif len(row) == 22:
+                        # (len(row) == 22) Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                        results['Innodb_pending_normal_aio_reads'] = long(row[4])
+                        results['Innodb_pending_normal_aio_writes'] = long(row[16])
+                except ValueError as e:
+                    self.log.warning("Can't parse result line %s: %s", line, e)
             elif line.find('ibuf aio reads') == 0:
                 #  ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
                 #  or ibuf aio reads:, log i/o's:, sync i/o's:
@@ -1190,19 +1254,13 @@ class MySql(AgentCheck):
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
-
-        sql_95th_percentile = """SELECT s2.avg_us avg_us,
-                IFNULL(SUM(s1.cnt)/NULLIF((SELECT COUNT(*) FROM performance_schema.events_statements_summary_by_digest), 0), 0) percentile
-            FROM (SELECT COUNT(*) cnt, ROUND(avg_timer_wait/1000000) AS avg_us
-                    FROM performance_schema.events_statements_summary_by_digest
-                    GROUP BY avg_us) AS s1
-            JOIN (SELECT COUNT(*) cnt, ROUND(avg_timer_wait/1000000) AS avg_us
-                    FROM performance_schema.events_statements_summary_by_digest
-                    GROUP BY avg_us) AS s2
-            ON s1.avg_us <= s2.avg_us
-            GROUP BY s2.avg_us
-            HAVING percentile > 0.95
-            ORDER BY percentile
+        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM
+            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
+                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us` FROM performance_schema.events_statements_summary_by_digest
+                    ORDER BY `avg_us` ASC) p,
+                (SELECT @rownum := 0) r) q
+            WHERE q.`ro` > ROUND(.95*@rownum)
+            ORDER BY `percentile` ASC
             LIMIT 1"""
 
         try:

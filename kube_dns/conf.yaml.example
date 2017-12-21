@@ -1,0 +1,16 @@
+init_config:
+
+instances:
+    # url of the metrics endpoint of prometheus
+  - prometheus_endpoint: http://localhost:10055/metrics
+    # The histogram buckets can be noisy and generate a lot of tags.
+    # send_histograms_buckets controls whether or not you want to pull them.
+    #
+    # send_histograms_buckets: True
+    #
+    # Note that like all checks based on the PrometheusCheck class, you can add
+    # tags to the instance that will be added to all the metrics of this check
+    # instance.
+    #
+    # tags:
+    #   - 'mytag1:myValue1'

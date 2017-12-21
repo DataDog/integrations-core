@@ -1,16 +1,17 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-docker.cpu.system,gauge,,fraction,,The fraction of time the CPU is executing system calls on behalf of processes of this container,0,docker,cpu system
-docker.cpu.system.95percentile,gauge,,fraction,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
-docker.cpu.system.avg,gauge,,fraction,,Average value of docker.cpu.system,0,docker,cpu system avg
+docker.cpu.system,gauge,,percent,,The percent of time the CPU is executing system calls on behalf of processes of this container,0,docker,cpu system
+docker.cpu.system.95percentile,gauge,,percent,,95th percentile of docker.cpu.system,0,docker,cpu system 95%
+docker.cpu.system.avg,gauge,,percent,,Average value of docker.cpu.system,0,docker,cpu system avg
 docker.cpu.system.count,rate,,sample,second,The rate that the value of docker.cpu.system was sampled,0,docker,cpu system count
-docker.cpu.system.max,gauge,,fraction,,Max value of docker.cpu.system,0,docker,cpu system max
-docker.cpu.system.median,gauge,,fraction,,Median value of docker.cpu.system,0,docker,cpu system median
-docker.cpu.user,gauge,,fraction,,The fraction of time the CPU is under direct control of processes of this container,0,docker,cpu user
-docker.cpu.user.95percentile,gauge,,fraction,,95th percentile of docker.cpu.user,0,docker,cpu user 95%
-docker.cpu.user.avg,gauge,,fraction,,Average value of docker.cpu.user,0,docker,cpu user avg
+docker.cpu.system.max,gauge,,percent,,Max value of docker.cpu.system,0,docker,cpu system max
+docker.cpu.system.median,gauge,,percent,,Median value of docker.cpu.system,0,docker,cpu system median
+docker.cpu.user,gauge,,percent,,The percent of time the CPU is under direct control of processes of this container,0,docker,cpu user
+docker.cpu.user.95percentile,gauge,,percent,,95th percentile of docker.cpu.user,0,docker,cpu user 95%
+docker.cpu.user.avg,gauge,,percent,,Average value of docker.cpu.user,0,docker,cpu user avg
 docker.cpu.user.count,rate,,sample,second,The rate that the value of docker.cpu.user was sampled,0,docker,cpu user count
-docker.cpu.user.max,gauge,,fraction,,Max value of docker.cpu.user,0,docker,cpu user max
-docker.cpu.user.median,gauge,,fraction,,Median value of docker.cpu.user,0,docker,cpu user median
+docker.cpu.user.max,gauge,,percent,,Max value of docker.cpu.user,0,docker,cpu user max
+docker.cpu.user.median,gauge,,percent,,Median value of docker.cpu.user,0,docker,cpu user median
+docker.cpu.usage,gauge,,percent,,The percent of CPU time obtained by this container,0,docker,docker.cpu.usage
 docker.cpu.throttled,gauge,,,,Number of times the cgroup has been throttled,-1,docker,cpu throttled
 docker.mem.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),0,docker,mem cache
 docker.mem.cache.95percentile,gauge,,byte,,95th percentile value of docker.mem.cache,0,docker,mem cache 95%
@@ -30,16 +31,6 @@ docker.mem.swap.avg,gauge,,byte,,Average value of docker.mem.swap,0,docker,mem s
 docker.mem.swap.count,rate,,sample,second,The rate that the value of docker.mem.swap was sampled,0,docker,mem swap count
 docker.mem.swap.max,gauge,,byte,,Max value of docker.mem.swap,0,docker,mem swap max
 docker.mem.swap.median,gauge,,byte,,Median value of docker.mem.swap,0,docker,mem swap median
-docker.mem.active_anon,gauge,,byte,,"The amount of ""active"" RSS memory. Active memory is not swapped to disk",0,docker,mem active rss
-docker.mem.inactive_anon,gauge,,byte,,"The amount of ""inactive"" RSS memory. Inactive memory is swapped to disk when necessary",0,docker,mem inactive rss
-docker.mem.active_file,gauge,,byte,,"The amount of ""active"" cache memory. Active memory is reclaimed by the system only after ""inactive"" has been reclaimed",0,docker,mem active cache
-docker.mem.inactive_file,gauge,,byte,,"The amount of ""inactive"" cache memory. Inactive memory may be reclaimed first when the system needs memory",0,docker,mem inactive cache
-docker.mem.mapped_file,gauge,,byte,,The amount of memory mapped by the processes in the control group,0,docker,mem mapped
-docker.mem.pgfault,gauge,,,,The rate that processes in the container trigger page faults by accessing a nonexistent or protected part of its virtual address space. Usually a page fault of this type results in a segmentation fault,-1,docker,pgfault
-docker.mem.pgmajfault,gauge,,,,The rate that processes in the container trigger page faults by accessing a part virtual address space that was swapped out or corresponded to a mapped file. Usually a page fault of type results in fetching data from disk instead of from memory,-1,docker,maj pgfault
-docker.mem.pgpgin,gauge,,page,second,"The rate at which pages are ""charged"" (added to the accounting) of a cgroup",0,docker,mem pgpgin
-docker.mem.pgpgout,gauge,,page,second,"The rate at which pages are ""uncharged"" (removed from the accounting) of a cgroup",0,docker,mem pgpgout
-docker.mem.unevictable,gauge,,byte,,The amount of memory that cannot be reclaimed. Usually this memory contains sensitive data and has been locked to ensure that it never swaps to disk,0,docker,mem unevictable
 docker.container.size_rw,gauge,,byte,,Total size of all the files in the container which have been created or changed by processes running in the container,0,docker,changed files size
 docker.container.size_rw.95percentile,gauge,,byte,,95th percentile of docker.container.size_rw,0,docker,changed files size 95%
 docker.container.size_rw.avg,gauge,,byte,,Average value of docker.container.size_rw,0,docker,changed files size avg
@@ -52,8 +43,10 @@ docker.container.size_rootfs.avg,gauge,,byte,,Average value of docker.container.
 docker.container.size_rootfs.count,rate,,sample,second,The rate that the value of docker.container.size_rw was sampled,0,docker,filesystem size count
 docker.container.size_rootfs.max,gauge,,byte,,Max value of docker.container.size_rootfs,0,docker,filesystem size max
 docker.container.size_rootfs.median,gauge,,byte,,Median value of docker.container.size_rootfs,0,docker,filesystem size median
-docker.containers.running,gauge,,,,The number of containers running on this host,0,docker,containers running
-docker.containers.stopped,gauge,,,,The number of containers stopped on this host,0,docker,containers stopped
+docker.containers.running,gauge,,,,The number of containers running on this host tagged by image,0,docker,containers running
+docker.containers.stopped,gauge,,,,The number of containers stopped on this host tagged by image,0,docker,containers stopped
+docker.containers.running.total,gauge,,,,The total number of containers running on this host,0,docker,total containers running
+docker.containers.stopped.total,gauge,,,,The total number of containers stopped on this host,0,docker,total containers stopped
 docker.images.available,gauge,,,,The number of top-level images,0,docker,images avail
 docker.images.intermediate,gauge,,,,"The number of intermediate images, which are intermediate layers that make up other images",0,docker,images intermediate
 docker.mem.limit,gauge,,byte,,"The memory limit for the container, if set",0,docker,mem limit
@@ -68,7 +61,13 @@ docker.mem.sw_limit.avg,gauge,,byte,,Average value of docker.mem.sw_limit. Ordin
 docker.mem.sw_limit.count,rate,,sample,second,The rate that the value of docker.mem.sw_limit was sampled,0,docker,mem + sw limit count
 docker.mem.sw_limit.max,gauge,,byte,,Max value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit max
 docker.mem.sw_limit.median,gauge,,byte,,Median value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit median
-docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, if the limit is set",0,docker,mem in use
+docker.mem.soft_limit,gauge,,byte,,"The memory reservation limit for the container, if set",0,docker,mem soft limit
+docker.mem.soft_limit.95percentile,gauge,,byte,,95th percentile of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit 95%
+docker.mem.soft_limit.avg,gauge,,byte,,Average value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit avg
+docker.mem.soft_limit.count,rate,,sample,second,The rate that the value of docker.mem.soft_limit was sampled,0,docker,soft limit count
+docker.mem.soft_limit.max,gauge,,byte,,Max value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit max
+docker.mem.soft_limit.median,gauge,,byte,,Median value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit median
+docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, IF THE LIMIT IS SET",0,docker,mem in use
 docker.mem.in_use.95percentile,gauge,,fraction,,95th percentile of docker.mem.in_use,0,docker,mem in use 95%
 docker.mem.in_use.avg,gauge,,fraction,,Average value of docker.mem.in_use,0,docker,mem in use avg
 docker.mem.in_use.count,rate,,sample,second,The rate that the value of docker.mem.in_use was sampled,0,docker,mem in use count
@@ -106,6 +105,11 @@ docker.net.bytes_sent_bytes.avg,gauge,,byte,second,Average value of docker.net.b
 docker.net.bytes_sent_bytes.count,rate,,sample,second,The rate that the value of docker.net.bytes_sent_bytes was sampled,0,docker,net sent count
 docker.net.bytes_sent_bytes.max,gauge,,byte,second,Max value of docker.container.net.bytes_sent_bytes,0,docker,net sent max
 docker.net.bytes_sent_bytes.median,gauge,,byte,second,Median value of docker.container.net.bytes_sent_bytes,0,docker,net sent median
-docker.disk.used,gauge,,byte,,Average number of bytes the container's disk uses,0,docker,used disk space
-docker.disk.free,gauge,,byte,,Average number of bytes the container's disk has free,0,docker,free disk space
-docker.disk.total,gauge,,byte,,Average number of total bytes in the container's disk,0,docker,total disk space
+docker.data.used,gauge,,byte,,Storage pool disk space used,0,docker,used disk space
+docker.data.free,gauge,,byte,,Storage pool disk space free,0,docker,free disk space
+docker.data.total,gauge,,byte,,Storage pool disk space total,0,docker,total disk space
+docker.data.percent,gauge,,percent,,The percent of storage pool used,0,docker,percent of used disk space
+docker.metadata.used,gauge,,byte,,Storage pool metadata space used,0,docker,metadata space used
+docker.metadata.free,gauge,,byte,,Storage pool metadata space free,0,docker,metadata space free
+docker.metadata.total,gauge,,byte,,Storage pool metadata space total,0,docker,metadata space total
+docker.metadata.percent,gauge,,percent,,The percent of storage pool metadata used,0,docker,percent of metadata space total

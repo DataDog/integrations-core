@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -38,7 +38,8 @@ PRIMARY_SHARD_METRICS = {
     "elasticsearch.primaries.search.query.current": ("gauge", "_all.primaries.search.query_current"),
     "elasticsearch.primaries.search.fetch.total": ("gauge", "_all.primaries.search.fetch_total"),
     "elasticsearch.primaries.search.fetch.time": ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
-    "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current")
+    "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current"),
+    "elasticsearch.indices.count": ("gauge", "indices", lambda indices: len(indices))
 }
 
 PRIMARY_SHARD_METRICS_POST_1_0 = {
@@ -153,6 +154,12 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "jvm.mem.heap_max": ("gauge", "jvm.mem.heap_max_in_bytes"),
     "jvm.mem.non_heap_committed": ("gauge", "jvm.mem.non_heap_committed_in_bytes"),
     "jvm.mem.non_heap_used": ("gauge", "jvm.mem.non_heap_used_in_bytes"),
+    "jvm.mem.pools.young.used": ("gauge", "jvm.mem.pools.young.used_in_bytes"),
+    "jvm.mem.pools.young.max": ("gauge", "jvm.mem.pools.young.max_in_bytes"),
+    "jvm.mem.pools.old.used": ("gauge", "jvm.mem.pools.old.used_in_bytes"),
+    "jvm.mem.pools.old.max": ("gauge", "jvm.mem.pools.old.max_in_bytes"),
+    "jvm.mem.pools.survivor.used": ("gauge", "jvm.mem.pools.survivor.used_in_bytes"),
+    "jvm.mem.pools.survivor.max": ("gauge", "jvm.mem.pools.survivor.max_in_bytes"),
     "jvm.threads.count": ("gauge", "jvm.threads.count"),
     "jvm.threads.peak_count": ("gauge", "jvm.threads.peak_count"),
     "elasticsearch.fs.total.total_in_bytes": ("gauge", "fs.total.total_in_bytes"),
@@ -300,7 +307,8 @@ CLUSTER_HEALTH_METRICS = {
 CLUSTER_PENDING_TASKS = {
     "elasticsearch.pending_tasks_total": ("gauge", "pending_task_total"),
     "elasticsearch.pending_tasks_priority_high": ("gauge", "pending_tasks_priority_high"),
-    "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent")
+    "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent"),
+    "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
 }
 
 

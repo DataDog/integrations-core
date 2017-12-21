@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -66,24 +66,29 @@ class IISTest(AgentCheckTest):
     def test_basic_check(self):
         self.run_check_twice({'instances': [MINIMAL_INSTANCE]})
 
+        site_tags = ['Default_Web_Site', 'Test_Website_1', 'Total']
         for metric in self.IIS_METRICS:
-            self.assertMetric(metric, tags=[], count=1)
+            for site_tag in site_tags:
+                self.assertMetric(metric, tags=["site:{0}".format(site_tag)], count=1)
 
-        self.assertServiceCheckOK('iis.site_up', tags=["site:{0}".format('Total')], count=1)
+        for site_tag in site_tags:
+            self.assertServiceCheckOK('iis.site_up',
+                                      tags=["site:{0}".format(site_tag)], count=1)
+
         self.coverage_report()
 
     def test_check_on_specific_websites(self):
         self.run_check_twice({'instances': [INSTANCE]})
 
-        site_tags = ['Default_Web_Site', 'Test_Website_1']
+        site_tags = ['Default_Web_Site', 'Test_Website_1', 'Total']
         for metric in self.IIS_METRICS:
             for site_tag in site_tags:
                 self.assertMetric(metric, tags=["site:{0}".format(site_tag)], count=1)
 
-        self.assertServiceCheckOK('iis.site_up',
-                                  tags=["site:{0}".format('Default_Web_Site')], count=1)
-        self.assertServiceCheckOK('iis.site_up',
-                                  tags=["site:{0}".format('Test_Website_1')], count=1)
+        for site_tag in site_tags:
+            self.assertServiceCheckOK('iis.site_up',
+                                      tags=["site:{0}".format(site_tag)], count=1)
+
         self.assertServiceCheckCritical('iis.site_up',
                                         tags=["site:{0}".format('Non_Existing_Website')], count=1)
 

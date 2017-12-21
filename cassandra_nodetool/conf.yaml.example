@@ -1,0 +1,23 @@
+init_config:
+  # command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
+  # can be overwritten on an instance
+  # nodetool: /usr/bin/nodetool
+
+instances:
+
+  # the list of keyspaces to monitor, an empty list will result in no metrics being sent
+  - keyspaces: []
+
+    # host that nodetool will connect to.
+    # host: localhost
+
+    # the port JMX is listening to for connections.
+    # port: 7199
+
+    # a set of credentials to connect to the host. These are the credentials for the JMX server.
+    # For the check to work, this user must have a read/write access so that nodetool can execute the `status` command
+    # username:
+    # password:
+
+    # a list of additionnal tags to be sent with the metrics
+    # tags: []

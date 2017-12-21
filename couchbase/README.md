@@ -2,31 +2,74 @@
 
 ## Overview
 
-Get metrics from couchbase service in real time to:
+Identify busy buckets, track cache miss ratios, and more. This Agent check collects metrics like:
 
-* Visualize and monitor couchbase states
-* Be notified about couchbase failovers and events.
+* Hard disk and memory used by data
+* Current connections
+* Total objects
+* Operations per second
+* Disk write queue size
 
-## Installation
+And many more.
 
-Install the `dd-check-couchbase` package manually or with your favorite configuration manager
+## Setup
+### Installation
 
-## Configuration
+The Couchbase check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Couchbase nodes.
 
-Edit the `couchbase.yaml` file to point to your server and port, set the masters to monitor
+### Configuration
 
-## Validation
+Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml](https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example) for all available configuration options:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+init_config:
 
-    Checks
-    ======
+instances:
+  - server: http://localhost:8091 # or wherever your Couchbase is listening
+    #user: <your_username>
+    #password: <your_password>
+```
 
-        couchbase
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+Restart the Agent to begin sending Couchbase metrics to Datadog.
+
+### Validation
+
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `couchbase` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    couchbase
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
 
 ## Compatibility
 
-The couchbase check is compatible with all major platforms
+The couchbase check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Couchbase check does not include any event at this time.
+
+### Service Checks
+
+`couchbase.can_connect`:
+
+Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+
+* [Monitor key Couchbase metrics](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/).

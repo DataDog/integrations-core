@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -13,8 +13,10 @@ except ImportError:
 
 # project
 from checks import AgentCheck
-from checks.metric_types import MetricTypes
 from config import _is_affirmative
+
+GAUGE = "gauge"
+RATE = "rate"
 
 MAX_THREADS_COUNT = 50
 MAX_COLLECTION_TIME = 30
@@ -55,7 +57,7 @@ class AgentMetrics(AgentCheck):
             return {}
 
         methods, metric_types = zip(
-            *[(p['name'], p.get('type', MetricTypes.GAUGE))
+            *[(p['name'], p.get('type', GAUGE))
                 for p in process_metrics if _is_affirmative(p.get('active'))]
         )
 
@@ -67,9 +69,9 @@ class AgentMetrics(AgentCheck):
         return stats, names_to_metric_types
 
     def _send_single_metric(self, metric_name, metric_value, metric_type):
-        if metric_type == MetricTypes.GAUGE:
+        if metric_type == GAUGE:
             self.gauge(metric_name, metric_value)
-        elif metric_type == MetricTypes.RATE:
+        elif metric_type == RATE:
             self.rate(metric_name, metric_value)
         else:
             raise UnsupportedMetricType(metric_name, metric_type)

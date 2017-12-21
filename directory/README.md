@@ -1,30 +1,72 @@
-# Directory Integration
+# Directory Check
 
 ## Overview
 
-This check monitor and report metrics on files for a set of directories.
+Capture metrics from directories and files of your choosing. The Agent will collect:
 
-## Installation
+  * number of files
+  * file size
+  * age of the last modification
+  * age of the creation
 
-Ensure that the user account running the Agent (typically dd-agent) has read
-access to the monitored directories and files.
+## Setup
+### Installation
 
-## Configuration
+The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
 
-Edit the `conf.d/directory.yaml` file.
+### Configuration
 
-## Validation
+1. Edit your `directory.yaml` file in the Agent's `conf.d` directory. See the [sample directory.yaml](https://github.com/DataDog/integrations-core/blob/master/directory/conf.yaml.example) for all available configuration options:
 
-When you run `datadog-agent info` you should see something like the following:
+```
+init_config:
 
-    Checks
-    ======
+instances:
+  - directory: "/path/to/directory" # the only required option
+    name: "my_monitored_dir"        # What the Agent will tag this directory's metrics with. Defaults to "directory"
+    pattern: "*.log"                # defaults to "*" (all files)
+    recursive: True                 # default False
+    countonly: False                # set to True to only collect the number of files matching 'pattern'. Useful for very large directories.
+```
 
-        directory
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics & 0 events
+Ensure that the user running the Agent process (usually `dd-agent`) has read access to the directories, subdirectories, and files you configure.
+
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent).
+
+### Validation
+
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `directory` under the Checks section:
+
+```
+  Checks
+  ======
+    [...]
+
+    directory
+    -------
+      - instance #0 [OK]
+      - Collected 26 metrics, 0 events & 1 service check
+
+    [...]
+```
 
 ## Compatibility
 
-The Directory check is compatible with all major platforms
+The directory check is compatible with all major platforms.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Directory check does not include any event at this time.
+
+### Service Checks
+The Directory check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

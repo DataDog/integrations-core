@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2016-2017
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
 # stdlib
 import socket
 
@@ -88,6 +92,9 @@ class Twemproxy(AgentCheck):
     }
 
     """
+
+    SERVICE_CHECK_NAME = 'twemproxy.can_connect'
+
     def check(self, instance):
         if 'host' not in instance:
             raise Exception('Twemproxy instance missing "host" value.')
@@ -118,10 +125,14 @@ class Twemproxy(AgentCheck):
         host = instance.get('host')
         port = int(instance.get('port', 2222)) # 2222 is default
 
+        service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
+
         try:
             addrs = socket.getaddrinfo(host, port, 0, 0, socket.IPPROTO_TCP)
         except socket.gaierror as e:
             self.log.warning("unable to retrieve address info for %s:%s - %s", host, port, e)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                               tags=service_check_tags)
             return None
 
         response = ""
@@ -142,6 +153,9 @@ class Twemproxy(AgentCheck):
                 break
             except socket.error as e:
                 self.log.warning("unable to connect to %s - %s", addr[-1], e)
+
+        status = AgentCheck.OK if response else AgentCheck.CRITICAL
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags)
 
         return response
 

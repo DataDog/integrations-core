@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -21,7 +21,7 @@ from checks import AgentCheck
 from checks.libs.thread_pool import Pool
 from checks.libs.vmware.basic_metrics import BASIC_METRICS
 from checks.libs.vmware.all_metrics import ALL_METRICS
-from util import Timer
+from utils.timer import Timer
 
 SOURCE_TYPE = 'vsphere'
 REAL_TIME_INTERVAL = 20  # Default vCenter sampling interval
@@ -532,8 +532,8 @@ class VSphereCheck(AgentCheck):
 
             if not mor_by_mor_name:
                 self.log.warning(
-                    u"Unable to extract hosts' tags for `%s` vSphere instance."
-                    u"Is the check failing on this instance?", instance
+                    u"Unable to extract hosts' tags for vSphere instance named %s"
+                    u"Is the check failing on this instance?", i_key
                 )
                 continue
 
@@ -867,15 +867,23 @@ class VSphereCheck(AgentCheck):
                 if result.id.counterId not in self.metrics_metadata[i_key]:
                     self.log.debug("Skipping this metric value, because there is no metadata about it")
                     continue
-                instance_name = result.id.instance or "none"
-                value = self._transform_value(instance, result.id.counterId, result.value[0])
 
                 # Metric types are absolute, delta, and rate
-                metric_name = self.metrics_metadata[i_key][result.id.counterId]['name']
+                try:
+                    metric_name = self.metrics_metadata[i_key][result.id.counterId]['name']
+                except KeyError:
+                    metric_name = None
 
                 if metric_name not in ALL_METRICS:
                     self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
                     continue
+
+                if not result.value:
+                    self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
+                    continue
+
+                instance_name = result.id.instance or "none"
+                value = self._transform_value(instance, result.id.counterId, result.value[0])
 
                 tags = ['instance:%s' % instance_name]
                 if not mor['hostname']: # no host tags available
@@ -956,19 +964,3 @@ class VSphereCheck(AgentCheck):
         ### <TEST-INSTRUMENTATION>
         self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'])
         ### </TEST-INSTRUMENTATION>
-
-if __name__ == '__main__':
-    check, _instances = VSphereCheck.from_yaml('conf.d/vsphere.yaml')
-    try:
-        for i in xrange(200):
-            print "Loop %d" % i
-            for instance in check.instances:
-                check.check(instance)
-                if check.has_events():
-                    print 'Events: %s' % (check.get_events())
-                print 'Metrics: %d' % (len(check.get_metrics()))
-            time.sleep(10)
-    except Exception as e:
-        print "Whoops something happened {0}".format(traceback.format_exc())
-    finally:
-        check.stop()

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -31,8 +31,14 @@ DEFAULT_CONFIG = {
     ]
 }
 
-def getMetricNames(metrics):
-    return [metric[0] for metric in metrics]
+Q_METRICS = [
+    'marathon.queue.count',
+    'marathon.queue.delay',
+    'marathon.queue.offers.processed',
+    'marathon.queue.offers.unused',
+    'marathon.queue.offers.reject.last',
+    'marathon.queue.offers.reject.launch',
+]
 
 class MarathonCheckTest(AgentCheckTest):
     CHECK_NAME = 'marathon'
@@ -45,12 +51,16 @@ class MarathonCheckTest(AgentCheckTest):
                 return Fixtures.read_json_file("apps.json", sdk_dir=ci_dir)
             elif "v2/deployments" in url:
                 return Fixtures.read_json_file("deployments.json", sdk_dir=ci_dir)
+            elif "v2/queue" in url:
+                return Fixtures.read_json_file("queue.json", sdk_dir=ci_dir)
             else:
                 raise Exception("unknown url:" + url)
 
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=1)
         self.assertMetric('marathon.deployments', value=1)
+        for metric in Q_METRICS:
+            self.assertMetric(metric, at_least=1)
 
 
     def test_empty_responses(self):
@@ -59,6 +69,8 @@ class MarathonCheckTest(AgentCheckTest):
                 return {"apps": []}
             elif "v2/deployments" in url:
                 return {"deployments": []}
+            elif "v2/queue" in url:
+                return {"queue": []}
             else:
                 raise Exception("unknown url:" + url)
 

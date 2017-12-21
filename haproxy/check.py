@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2012-2016
+# (C) Datadog, Inc. 2012-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -141,6 +141,7 @@ class HAProxy(AgentCheck):
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
 
+        tags_regex = instance.get('tags_regex', None)
         custom_tags = instance.get('tags', [])
 
         process_events = instance.get('status_check', self.init_config.get('status_check', False))
@@ -155,6 +156,7 @@ class HAProxy(AgentCheck):
             collate_status_tags_per_host=collate_status_tags_per_host,
             count_status_by_service=count_status_by_service,
             custom_tags=custom_tags,
+            tags_regex=tags_regex,
         )
 
     def _fetch_url_data(self, url, username, password, verify):
@@ -194,7 +196,7 @@ class HAProxy(AgentCheck):
                       collect_status_metrics=False, collect_status_metrics_by_host=False,
                       tag_service_check_by_host=False, services_incl_filter=None,
                       services_excl_filter=None, collate_status_tags_per_host=False,
-                      count_status_by_service=True, custom_tags=[]):
+                      count_status_by_service=True, custom_tags=[], tags_regex=None):
         ''' Main data-processing loop. For each piece of useful data, we'll
         either save a metric, save an event or both. '''
 
@@ -206,6 +208,9 @@ class HAProxy(AgentCheck):
         self.hosts_statuses = defaultdict(int)
 
         back_or_front = None
+
+        # Sanitize CSV, handle line breaks
+        data = self._sanitize_lines(data)
 
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
@@ -225,6 +230,14 @@ class HAProxy(AgentCheck):
                 data_dict, self.hosts_statuses
             )
 
+            # Clone the list to avoid extending the original
+            # which would carry over previous iteration tags
+            line_tags = list(custom_tags)
+
+            regex_tags = self._tag_from_regex(tags_regex, data_dict['pxname'])
+            if regex_tags:
+                line_tags.extend(regex_tags)
+
             if self._should_process(data_dict, collect_aggregates_only):
                 # update status
                 # Send the list of data to the metric and event callbacks
@@ -232,21 +245,21 @@ class HAProxy(AgentCheck):
                     data_dict, url,
                     services_incl_filter=services_incl_filter,
                     services_excl_filter=services_excl_filter,
-                    custom_tags=custom_tags
+                    custom_tags=line_tags
                 )
             if process_events:
                 self._process_event(
                     data_dict, url,
                     services_incl_filter=services_incl_filter,
                     services_excl_filter=services_excl_filter,
-                    custom_tags=custom_tags
+                    custom_tags=line_tags
                 )
             self._process_service_check(
                 data_dict, url,
                 tag_by_host=tag_service_check_by_host,
                 services_incl_filter=services_incl_filter,
                 services_excl_filter=services_excl_filter,
-                custom_tags=custom_tags
+                custom_tags=line_tags
             )
 
         if collect_status_metrics:
@@ -256,17 +269,44 @@ class HAProxy(AgentCheck):
                 services_excl_filter=services_excl_filter,
                 collate_status_tags_per_host=collate_status_tags_per_host,
                 count_status_by_service=count_status_by_service,
-                custom_tags=custom_tags
+                custom_tags=line_tags
             )
 
             self._process_backend_hosts_metric(
                 self.hosts_statuses,
                 services_incl_filter=services_incl_filter,
                 services_excl_filter=services_excl_filter,
-                custom_tags=custom_tags
+                custom_tags=line_tags
             )
 
         return data
+
+
+    def _sanitize_lines(self, data):
+        sanitized = []
+
+        def char_count(line, char):
+            count = 0
+
+            for c in line:
+                if c is char:
+                    count += 1
+
+            return count
+
+        clean = ''
+        double_quotes = 0
+        for line in data:
+            double_quotes += char_count(line, '"')
+            clean += line
+
+            if double_quotes % 2 == 0:
+                sanitized.append(clean.replace('\n', '').replace('\r', ''))
+                double_quotes = 0
+                clean = ''
+
+        return sanitized
+
 
     def _line_to_dict(self, fields, line):
         data_dict = {}
@@ -358,6 +398,25 @@ class HAProxy(AgentCheck):
             if re.search(rule, tag):
                 return True
         return False
+
+    def _tag_from_regex(self, tags_regex, service_name):
+        """
+        Use a named regexp on the current service_name to create extra tags
+        Example HAProxy service name: be_edge_http_sre-prod_elk
+        Example named regexp: be_edge_http_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)
+        Resulting tags: ['team:sre','env:prod','app:elk']
+        """
+        if not tags_regex or not service_name:
+            return []
+
+        match = re.compile(tags_regex).match(service_name)
+
+        if not match:
+            return []
+
+        # match.groupdict() returns tags dictionary in the form of {'name': 'value'}
+        # convert it to Datadog tag LIST: ['name:value']
+        return ["%s:%s" % (name, value) for name, value in match.groupdict().iteritems()]
 
     @staticmethod
     def _normalize_status(status):
@@ -515,11 +574,12 @@ class HAProxy(AgentCheck):
                                           services_excl_filter):
             return
 
+        data_status = data['status']
         if status is None:
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
             return
 
-        if status != data['status'] and data['status'] in ('up', 'down'):
+        if status != data_status and data_status in ('up', 'down'):
             # If the status of a host has changed, we trigger an event
             try:
                 lastchg = int(data['lastchg'])
@@ -528,13 +588,13 @@ class HAProxy(AgentCheck):
 
             # Create the event object
             ev = self._create_event(
-                data['status'], hostname, lastchg, service_name,
+                data_status, hostname, lastchg, service_name,
                 data['back_or_front'], custom_tags=custom_tags
             )
             self.event(ev)
 
             # Store this host status so we can check against it later
-            self.host_status[url][key] = data['status']
+            self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front,
                       custom_tags=[]):

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-2017
 # (C) Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -14,14 +14,17 @@ MAX_NUM_TASKS = 200
 
 class Gearman(AgentCheck):
     SERVICE_CHECK_NAME = 'gearman.can_connect'
+    gearman_clients = {}
 
     def get_library_versions(self):
         return {"gearman": gearman.__version__}
 
     def _get_client(self,host,port):
-        self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
-        return gearman.GearmanAdminClient(["%s:%s" %
-            (host, port)])
+        if not (host, port) in self.gearman_clients:
+            self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
+            self.gearman_clients[(host, port)] = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
+
+        return self.gearman_clients[(host, port)]
 
     def _get_aggregate_metrics(self, tasks, tags):
         running = 0

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -14,6 +14,14 @@ import simplejson as json
 from checks import AgentCheck
 from util import headers
 
+
+UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
+    'nginx.upstream.peers.responses.1xx',
+    'nginx.upstream.peers.responses.2xx',
+    'nginx.upstream.peers.responses.3xx',
+    'nginx.upstream.peers.responses.4xx',
+    'nginx.upstream.peers.responses.5xx'
+]
 
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
@@ -46,11 +54,15 @@ class Nginx(AgentCheck):
 
         funcs = {
             'gauge': self.gauge,
-            'rate': self.rate
+            'rate': self.rate,
+            'count': self.count
         }
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
+                if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
+                    func_count = funcs['count']
+                    func_count(name+"_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
             except Exception as e:

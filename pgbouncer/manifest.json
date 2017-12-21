@@ -1,15 +1,22 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "pgbouncer",
-  "short_description": "PGBouncer is an open-source, lightweight connection pooler for PostgreSQL.",
+  "short_description": "Track connection pool metrics and monitor traffic to and from your application.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0",
-  "guid": "51386802-4502-4991-b592-27eff1ca111c"
+  "package_deps": false,
+  "version": "1.0.2",
+  "guid": "51386802-4502-4991-b592-27eff1ca111c",
+  "public_title": "Datadog-PGbouncer Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/pgbouncer/",
+  "is_public": true,
+  "has_logo": true
 }

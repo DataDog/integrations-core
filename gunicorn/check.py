@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -52,13 +52,14 @@ class GUnicornCheck(AgentCheck):
         # if no workers are running, alert CRITICAL, otherwise OK
         msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
         status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
+        tags = ['app:' + proc_name]
 
-        self.service_check(self.SVC_NAME, status, tags=['app:' + proc_name], message=msg)
+        self.service_check(self.SVC_NAME, status, tags=tags, message=msg)
 
         # Submit the data.
         self.log.debug("instance %s procs - working:%s idle:%s" % (proc_name, working, idle))
-        self.gauge("gunicorn.workers", working, self.WORKING_TAGS)
-        self.gauge("gunicorn.workers", idle, self.IDLE_TAGS)
+        self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
+        self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
 
     def _count_workers(self, worker_procs):
         working = 0

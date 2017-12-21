@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -12,6 +12,7 @@ import pysnmp.proto.rfc1902 as snmp_type
 from pysnmp.smi import builder
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from pysnmp.error import PySnmpError
+from pyasn1.type.univ import OctetString
 
 # project
 from checks.network_checks import NetworkCheck, Status
@@ -184,6 +185,28 @@ class SnmpCheck(NetworkCheck):
         else:
             raise Exception("An authentication method needs to be provided")
 
+
+    @classmethod
+    def get_context_data(cls, instance):
+        '''
+        Generate a Context Parameters object based on the instance's
+        configuration.
+        We do not use the hlapi currently, but the rfc3413.oneliner.cmdgen
+        accepts Context Engine Id (always None for now) and Context Name parameters.
+        '''
+
+        context_engine_id = None
+        context_name = ''
+
+        if "user" in instance:
+            if 'context_engine_id' in instance:
+                context_engine_id = OctetString(instance['context_engine_id'])
+            if 'context_name' in instance:
+                context_name = instance['context_name']
+
+        return context_engine_id, context_name
+
+
     @classmethod
     def get_transport_target(cls, instance, timeout, retries):
         '''
@@ -226,6 +249,7 @@ class SnmpCheck(NetworkCheck):
         snmpgetnext = self.snmp_logger(cmd_generator.nextCmd)
         transport_target = self.get_transport_target(instance, timeout, retries)
         auth_data = self.get_auth_data(instance)
+        context_engine_id, context_name = self.get_context_data(instance)
 
         first_oid = 0
         all_binds = []
@@ -239,7 +263,10 @@ class SnmpCheck(NetworkCheck):
                     transport_target,
                     *(oids[first_oid:first_oid + self.oid_batch_size]),
                     lookupValues=enforce_constraints,
-                    lookupNames=lookup_names)
+                    lookupNames=lookup_names,
+                    contextEngineId=context_engine_id,
+                    contextName=context_name
+                )
 
                 # Raise on error_indication
                 self.raise_on_error_indication(error_indication, instance)
@@ -263,7 +290,10 @@ class SnmpCheck(NetworkCheck):
                         transport_target,
                         *missing_results,
                         lookupValues=enforce_constraints,
-                        lookupNames=lookup_names)
+                        lookupNames=lookup_names,
+                        contextEngineId=context_engine_id,
+                        contextName=context_name
+                    )
 
                     # Raise on error_indication
                     self.raise_on_error_indication(error_indication, instance)
@@ -520,4 +550,4 @@ class SnmpCheck(NetworkCheck):
             self.gauge(metric_name, value, tags)
             return
 
-        self.log.warning("Unsupported metric type %s", snmp_class)
+        self.log.warning("Unsupported metric type %s for %s", snmp_class, metric_name)

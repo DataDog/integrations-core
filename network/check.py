@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -156,18 +156,18 @@ class Network(AgentCheck):
                 ('tcp4', 'listen') : 'system.net.tcp4.listen',
                 ('tcp4', 'last_ack') : 'system.net.tcp4.time_wait',
 
-                ('tcp6', 'estab') : 'system.net.tcp4.estab',
-                ('tcp6', 'syn_sent') : 'system.net.tcp4.syn_sent',
-                ('tcp6', 'syn_recv') : 'system.net.tcp4.syn_recv',
-                ('tcp6', 'fin_wait_1') : 'system.net.tcp4.fin_wait_1',
-                ('tcp6', 'fin_wait_2') : 'system.net.tcp4.fin_wait_2',
-                ('tcp6', 'time_wait') : 'system.net.tcp4.time_wait',
-                ('tcp6', 'unconn') : 'system.net.tcp4.unconn',
-                ('tcp6', 'close') : 'system.net.tcp4.close',
-                ('tcp6', 'close_wait') : 'system.net.tcp4.close_wait',
-                ('tcp6', 'closing') : 'system.net.tcp4.closing',
-                ('tcp6', 'listen') : 'system.net.tcp4.listen',
-                ('tcp6', 'last_ack') : 'system.net.tcp4.time_wait',
+                ('tcp6', 'estab') : 'system.net.tcp6.estab',
+                ('tcp6', 'syn_sent') : 'system.net.tcp6.syn_sent',
+                ('tcp6', 'syn_recv') : 'system.net.tcp6.syn_recv',
+                ('tcp6', 'fin_wait_1') : 'system.net.tcp6.fin_wait_1',
+                ('tcp6', 'fin_wait_2') : 'system.net.tcp6.fin_wait_2',
+                ('tcp6', 'time_wait') : 'system.net.tcp6.time_wait',
+                ('tcp6', 'unconn') : 'system.net.tcp6.unconn',
+                ('tcp6', 'close') : 'system.net.tcp6.close',
+                ('tcp6', 'close_wait') : 'system.net.tcp6.close_wait',
+                ('tcp6', 'closing') : 'system.net.tcp6.closing',
+                ('tcp6', 'listen') : 'system.net.tcp6.listen',
+                ('tcp6', 'last_ack') : 'system.net.tcp6.time_wait',
             }
 
             self.tcp_states = {
@@ -329,53 +329,43 @@ class Network(AgentCheck):
                 }
                 self._submit_devicemetrics(iface, metrics)
 
-        try:
-            proc_snmp_path = "{}/net/snmp".format(proc_location)
-            proc = open(proc_snmp_path, 'r')
 
-            # IP:      Forwarding   DefaultTTL InReceives     InHdrErrors  ...
-            # IP:      2            64         377145470      0            ...
-            # Icmp:    InMsgs       InErrors   InDestUnreachs InTimeExcds  ...
-            # Icmp:    1644495      1238       1643257        0            ...
-            # IcmpMsg: InType3      OutType3
-            # IcmpMsg: 1643257      1643257
-            # Tcp:     RtoAlgorithm RtoMin     RtoMax         MaxConn      ...
-            # Tcp:     1            200        120000         -1           ...
-            # Udp:     InDatagrams  NoPorts    InErrors       OutDatagrams ...
-            # Udp:     24249494     1643257    0              25892947     ...
-            # UdpLite: InDatagrams  Noports    InErrors       OutDatagrams ...
-            # UdpLite: 0            0          0              0            ...
+
+        netstat_data = {}
+        for f in ['netstat', 'snmp']:
+            proc_data_path = "{}/net/{}".format(proc_location, f)
             try:
-                lines = proc.readlines()
-            finally:
-                proc.close()
+                with open(proc_data_path, 'r') as netstat:
+                    while True:
+                        n_header = netstat.readline()
+                        if not n_header:
+                            break # No more? Abort!
+                        n_data = netstat.readline()
 
-            tcp_lines = [line for line in lines if line.startswith('Tcp:')]
-            udp_lines = [line for line in lines if line.startswith('Udp:')]
+                        h_parts = n_header.strip().split(' ')
+                        h_values = n_data.strip().split(' ')
+                        ns_category = h_parts[0][:-1]
+                        netstat_data[ns_category] = {}
+                        # Turn the data into a dictionary
+                        for idx, hpart in enumerate(h_parts[1:]):
+                            netstat_data[ns_category][hpart] = h_values[idx + 1]
+            except IOError:
+                # On Openshift, /proc/net/snmp is only readable by root
+                self.log.debug("Unable to read %s.", proc_data_path)
 
-            tcp_column_names = tcp_lines[0].strip().split()
-            tcp_values = tcp_lines[1].strip().split()
-            tcp_metrics = dict(zip(tcp_column_names, tcp_values))
-
-            udp_column_names = udp_lines[0].strip().split()
-            udp_values = udp_lines[1].strip().split()
-            udp_metrics = dict(zip(udp_column_names, udp_values))
-
-            # line start indicating what kind of metrics we're looking at
-            assert(tcp_metrics['Tcp:'] == 'Tcp:')
-
-            tcp_metrics_name = {
+        nstat_metrics_names = {
+            'Tcp': {
                 'RetransSegs': 'system.net.tcp.retrans_segs',
-                'InSegs'     : 'system.net.tcp.in_segs',
-                'OutSegs'    : 'system.net.tcp.out_segs'
-            }
-
-            for key, metric in tcp_metrics_name.iteritems():
-                self.rate(metric, self._parse_value(tcp_metrics[key]))
-
-            assert(udp_metrics['Udp:'] == 'Udp:')
-
-            udp_metrics_name = {
+                'InSegs': 'system.net.tcp.in_segs',
+                'OutSegs': 'system.net.tcp.out_segs',
+            },
+            'TcpExt': {
+                'ListenOverflows': 'system.net.tcp.listen_overflows',
+                'ListenDrops': 'system.net.tcp.listen_drops',
+                'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
+                'TCPRetransFail': 'system.net.tcp.failed_retransmits',
+            },
+            'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
                 'NoPorts': 'system.net.udp.no_ports',
                 'InErrors': 'system.net.udp.in_errors',
@@ -384,13 +374,13 @@ class Network(AgentCheck):
                 'SndbufErrors': 'system.net.udp.snd_buf_errors',
                 'InCsumErrors': 'system.net.udp.in_csum_errors'
             }
-            for key, metric in udp_metrics_name.iteritems():
-                if key in udp_metrics:
-                    self.rate(metric, self._parse_value(udp_metrics[key]))
+        }
 
-        except IOError:
-            # On Openshift, /proc/net/snmp is only readable by root
-            self.log.debug("Unable to read %s.", proc_snmp_path)
+        # Skip the first line, as it's junk
+        for k in nstat_metrics_names:
+            for met in nstat_metrics_names[k]:
+                if met in netstat_data.get(k, {}):
+                    self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]))
 
     # Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
     # Returns a dict metric_name -> value
@@ -446,7 +436,7 @@ class Network(AgentCheck):
             #          -7       -6       -5        -4       -3       -2        -1
             for h in ("Ipkts", "Ierrs", "Ibytes", "Opkts", "Oerrs", "Obytes", "Coll"):
                 if h not in headers:
-                    self.logger.error("%s not found in %s; cannot parse" % (h, headers))
+                    self.log.error("%s not found in %s; cannot parse" % (h, headers))
                     return False
 
             current = None

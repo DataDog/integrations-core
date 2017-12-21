@@ -1,12 +1,9 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
 from mock import patch
-
-# 3p
-from nose.plugins.attrib import attr
 
 # project
 from tests.core.test_wmi import TestCommonWMI
@@ -17,12 +14,13 @@ def to_time(wmi_ts):
     "Just return any time struct"
     return (2100, 12, 24, 11, 30, 47, 0, 0)
 
+
 def from_time(year=0, month=0, day=0, hours=0, minutes=0,
             seconds=0, microseconds=0, timezone=0):
     "Just return any WMI date"
     return "20151224113047.000000-480"
 
-@attr(requires='win32_event_log')
+
 class TestWin32_event_log(AgentCheckTest, TestCommonWMI):
     """Basic Test for win32_event_log integration."""
     CHECK_NAME = 'win32_event_log'
@@ -36,8 +34,8 @@ class TestWin32_event_log(AgentCheckTest, TestCommonWMI):
         'source_name': ["MSSQLSERVER"]
     }
 
-    @patch('checks.wmi_check.to_time', side_effect=to_time)
-    @patch('checks.wmi_check.from_time', side_effect=from_time)
+    @patch('checks.winwmi_check.to_time', side_effect=to_time)
+    @patch('checks.winwmi_check.from_time', side_effect=from_time)
     def test_check(self, from_time, to_time):
         """
         Returns the right metrics and service checks

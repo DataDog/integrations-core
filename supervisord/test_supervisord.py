@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -16,7 +16,8 @@ from mock import patch
 
 # project
 from checks import AgentCheck
-from tests.checks.common import AgentCheckTest, get_check_class
+from check import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
+from tests.checks.common import AgentCheckTest, load_check
 
 PROCESSES = ["program_0", "program_1", "program_2"]
 STATUSES = ["down", "up", "unknown"]
@@ -119,7 +120,7 @@ instances:
     - name: server1
       host: localhost
       port: 9001""",
-        'expected_instances': [{
+        'instances': [{
             'host': 'localhost',
             'name': 'server1',
             'port': 9001
@@ -168,7 +169,7 @@ instances:
       - webapp
   - name: server1
     host: 10.60.130.82""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9001,
@@ -226,7 +227,7 @@ instances:
   - name: server0
     host: invalid_host
     port: 9009""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'invalid_host',
             'port': 9009
@@ -242,7 +243,7 @@ instances:
     port: 9010
     user: invalid_user
     pass: invalid_pass""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9010,
@@ -261,7 +262,7 @@ instances:
     proc_names:
       - mysql
       - invalid_process""",
-        'expected_instances': [{
+        'instances': [{
             'name': 'server0',
             'host': 'localhost',
             'port': 9001,
@@ -297,12 +298,12 @@ instances:
     proc_regex:
       - '^mysq.$'
       - invalid_process""",
-        'expected_instances': [{
-                               'name': 'server0',
-                               'host': 'localhost',
-                               'port': 9001,
-                               'proc_regex': ['^mysq.$', 'invalid_process']
-                               }],
+        'instances': [{
+            'name': 'server0',
+            'host': 'localhost',
+            'port': 9001,
+            'proc_regex': ['^mysq.$', 'invalid_process']
+        }],
         'expected_metrics': {
             'server0': [
                 ('supervisord.process.count', 1,
@@ -340,20 +341,15 @@ instances:
 
     def test_check(self):
         """Integration test for supervisord check. Using a mocked supervisord."""
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
         }
 
         for tc in self.TEST_CASES:
-            check, instances = check_class.from_yaml(yaml_text=tc['yaml'],
-                                                     check_name='supervisord',
-                                                     agentConfig=agentConfig)
-
+            check = load_check('supervisord', {'init_config': {}, 'instances': tc['instances']}, agentConfig)
             self.assertTrue(check is not None, msg=check)
-            self.assertEquals(tc['expected_instances'], instances)
-            for instance in instances:
+            for instance in tc['instances']:
                 name = instance['name']
 
                 try:
@@ -378,15 +374,18 @@ instances:
 
     def test_build_message(self):
         """Unit test supervisord build service check message."""
+        time_stop = 0
+        time_start = 1414815388
+        time_now = 1414815513
         process = {
-            'now': 1414815513,
+            'now': time_now,
             'group': 'mysql',
             'description': 'pid 787, uptime 0:02:05',
             'pid': 787,
             'stderr_logfile': '/var/log/supervisor/mysql-stderr---supervisor-3ATI82.log',
-            'stop': 0,
+            'stop': time_stop,
             'statename': 'RUNNING',
-            'start': 1414815388,
+            'start': time_start,
             'state': 20,
             'stdout_logfile': '/var/log/mysql/mysql.log',
             'logfile': '/var/log/mysql/mysql.log',
@@ -395,7 +394,7 @@ instances:
             'name': 'mysql'
         }
 
-        expected_message = """Current time: 2014-11-01 04:18:33
+        expected_message = """Current time: {time_now}
 Process name: mysql
 Process group: mysql
 Description: pid 787, uptime 0:02:05
@@ -403,17 +402,18 @@ Error log file: /var/log/supervisor/mysql-stderr---supervisor-3ATI82.log
 Stdout log file: /var/log/mysql/mysql.log
 Log file: /var/log/mysql/mysql.log
 State: RUNNING
-Start time: 2014-11-01 04:16:28
-Stop time: \nExit Status: 0"""
+Start time: {time_start}
+Stop time: {time_stop}\nExit Status: 0""".format(
+            time_now=FORMAT_TIME(time_now),
+            time_start=FORMAT_TIME(time_start),
+            time_stop='' if time_stop == 0 else FORMAT_TIME(time_stop)
+        )
 
-        check_class = get_check_class('supervisord')
         agentConfig = {
             'version': '0.1',
             'api_key': 'tota'
         }
-        check, _ = check_class.from_yaml(yaml_text=self.TEST_CASES[0]['yaml'],
-                                         check_name='supervisord',
-                                         agentConfig=agentConfig)
+        check = load_check('supervisord', {'init_config': {}, 'instances': self.TEST_CASES[0]['instances']}, agentConfig)
         self.assertEquals(expected_message, check._build_message(process))
 
     # Helper Methods #######################################################
@@ -454,7 +454,7 @@ Stop time: \nExit Status: 0"""
     def norm_service_check(service_check):
         '''Removes timestamp, host_name, message and id'''
         for field in ['timestamp', 'host_name', 'message', 'id']:
-            service_check.pop(field)
+            service_check.pop(field, None)
         return service_check
 
 

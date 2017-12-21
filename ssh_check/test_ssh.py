@@ -1,8 +1,9 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import threading
 import unittest
 
 # 3p
@@ -47,7 +48,9 @@ class SshTestCase(unittest.TestCase):
         }
 
         agentConfig = {}
-        self.check = load_check('ssh', config, agentConfig)
+        self.check = load_check('ssh_check', config, agentConfig)
+
+        nb_threads = threading.active_count()
 
         # Testing that connection will work
         self.check.check(config['instances'][0])
@@ -64,3 +67,5 @@ class SshTestCase(unittest.TestCase):
         service_fail = self.check.get_service_checks()
         # Check failure status
         self.assertEqual(service_fail[0].get('status'), AgentCheck.CRITICAL)
+        # Check that we've closed all connections, if not we're leaking threads
+        self.assertEqual(nb_threads, threading.active_count())

@@ -1,0 +1,22 @@
+version: '2'
+services:
+  gitlab_runner:
+    image: gitlab/gitlab-runner:${GITLAB_RUNNER_VERSION}
+    container_name: gitlab-runner
+    depends_on:
+      - gitlab
+    volumes:
+      - ./support:/support
+    ports:
+      - "${LOCAL_RUNNER_PORT}:9292"
+    environment:
+      - GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN=${TEST_TOKEN}
+    entrypoint:
+      - /support/wait_for_master.sh
+  gitlab:
+    image: gitlab/gitlab-ce:${GITLAB_VERSION}
+    container_name: gitlab
+    ports:
+      - "${LOCAL_MASTER_PORT}:80"
+    environment:
+      - GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN=${TEST_TOKEN}

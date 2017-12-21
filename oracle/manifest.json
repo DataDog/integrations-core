@@ -1,0 +1,22 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.1",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.6.3",
+  "name": "Oracle",
+  "display_name": "Oracle Database",
+  "short_description": "Oracle relational database system designed for enterprise grid computing",
+  "metric_prefix": "oracle.",
+  "metric_to_check": "oracle.session_count",
+  "creates_events": false,
+  "support": "contrib",
+  "supported_os": ["linux","mac_os"],
+  "version": "1.0.0",
+  "guid": "6c4ddc46-2763-4c56-8b71-c838b7f82d7b",
+  "public_title": "Datadog-Oracle Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/oracle/",
+  "is_public": true,
+  "has_logo": true
+}

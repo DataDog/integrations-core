@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -65,6 +65,13 @@ class ConsulCheck(AgentCheck):
         'critical': AgentCheck.CRITICAL,
     }
 
+    STATUS_SEVERITY = {
+        AgentCheck.UNKNOWN: 0,
+        AgentCheck.OK: 1,
+        AgentCheck.WARNING: 2,
+        AgentCheck.CRITICAL: 3,
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -77,14 +84,19 @@ class ConsulCheck(AgentCheck):
             clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
             privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
             cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
+            acl_token = instance.get('acl_token', None)
+
+            headers = {}
+            if acl_token:
+                headers['X-Consul-Token'] = acl_token
 
             if clientcertfile:
                 if privatekeyfile:
-                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile)
+                    resp = requests.get(url, cert=(clientcertfile,privatekeyfile), verify=cabundlefile, headers=headers)
                 else:
-                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile)
+                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
             else:
-                resp = requests.get(url, verify=cabundlefile)
+                resp = requests.get(url, verify=cabundlefile, headers=headers)
 
         except requests.exceptions.Timeout:
             self.log.exception('Consul request to {0} timed out'.format(url))
@@ -107,8 +119,13 @@ class ConsulCheck(AgentCheck):
     def _get_agent_url(self, instance, instance_state):
         self.log.debug("Starting _get_agent_url")
         local_config = self._get_local_config(instance, instance_state)
-        agent_addr = local_config.get('Config', {}).get('AdvertiseAddr')
-        agent_port = local_config.get('Config', {}).get('Ports', {}).get('Server')
+
+        # Member key for consul 0.7.x and up; Config key for older versions
+        agent_addr = local_config.get('Member', {}).get('Addr') or \
+            local_config.get('Config', {}).get('AdvertiseAddr')
+        agent_port = local_config.get('Member', {}).get('Tags', {}).get('port') or \
+            local_config.get('Config', {}).get('Ports', {}).get('Server')
+
         agent_url = "{0}:{1}".format(agent_addr, agent_port)
         self.log.debug("Agent url is %s" % agent_url)
         return agent_url
@@ -212,6 +229,14 @@ class ConsulCheck(AgentCheck):
 
         return services
 
+    def _get_service_tags(self, service, tags):
+        service_tags = ['consul_service_id:{0}'.format(service)]
+
+        for tag in tags:
+            service_tags.append('consul_{0}_service_tag:{1}'.format(service, tag))
+
+        return service_tags
+
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
         instance_state = self._instance_states[hash_mutable(instance)]
@@ -246,18 +271,27 @@ class ConsulCheck(AgentCheck):
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
 
+            sc = {}
+            # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
+                sc_id = '{0}/{1}/{2}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = self.STATUS_SC.get(check['Status'])
                 if status is None:
-                    continue
+                    status = AgentCheck.UNKNOWN
 
-                tags = ["check:{0}".format(check["CheckID"])]
-                if check["ServiceName"]:
-                    tags.append("service:{0}".format(check["ServiceName"]))
-                if check["ServiceID"]:
-                    tags.append("consul_service_id:{0}".format(check["ServiceID"]))
+                if sc_id not in sc:
+                    tags = ["check:{0}".format(check["CheckID"])]
+                    if check["ServiceName"]:
+                        tags.append("service:{0}".format(check["ServiceName"]))
+                    if check["ServiceID"]:
+                        tags.append("consul_service_id:{0}".format(check["ServiceID"]))
+                    sc[sc_id] = {'status': status, 'tags': tags}
 
-                self.service_check(self.HEALTH_CHECK, status, tags=main_tags+tags)
+                elif self.STATUS_SEVERITY[status] > self.STATUS_SEVERITY[sc[sc_id]['status']]:
+                    sc[sc_id]['status'] = status
+
+            for s in sc.values():
+                self.service_check(self.HEALTH_CHECK, s['status'], tags=main_tags+s['tags'])
 
         except Exception as e:
             self.log.error(e)
@@ -289,7 +323,7 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
-                service_tags = ['consul_service_id:{0}'.format(service)]
+                service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 

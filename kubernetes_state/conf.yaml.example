@@ -1,4 +1,5 @@
 init_config:
+  # Custom tags can be added to all metrics reported by this integration
   #    tags:
   #      - optional_tag1
   #      - optional_tag2
@@ -10,3 +11,7 @@ instances:
   # the CPP extension to process Protocol buffer messages coming from the api. Depending
   # on the metrics volume, the check may run very slowly.
   - kube_state_url: http://example.com:8080/metrics
+    # Tags are reported as set by kube-state-metrics. If you want to translate
+    # them to other tags, you can use the labels_mapper dictionary
+    # labels_mapper:
+    #   namespace: kube_namespace
