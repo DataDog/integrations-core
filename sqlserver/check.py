@@ -685,7 +685,8 @@ class SqlSimpleMetric(SqlServerMetric):
                         metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
                     self.report_function(self.datadog_name, cntr_value,
                                         tags=metric_tags)
-                    break
+                    if self.instance != ALL_INSTANCES:
+                        break
 
 
 class SqlFractionMetric(SqlServerMetric):
