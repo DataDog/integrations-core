@@ -78,7 +78,9 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(status_url, auth=auth, timeout=timeout,
+            resp = requests.get(status_url,
+                                auth=auth,
+                                timeout=timeout,
                                 headers=headers(self.agentConfig, http_host=http_host),
                                 verify=not disable_ssl_validation,
                                 params={'json': True})
@@ -120,10 +122,11 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(ping_url, auth=auth, timeout=timeout,
-                                headers=headers(self.agentConfig,
-                                http_host=http_host,
-                                verify=not disable_ssl_validation))
+            resp = requests.get(ping_url,
+                                auth=auth,
+                                timeout=timeout,
+                                headers=headers(self.agentConfig, http_host=http_host),
+                                verify=not disable_ssl_validation)
             resp.raise_for_status()
 
             if ping_reply not in resp.text:
