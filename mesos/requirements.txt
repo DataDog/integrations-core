@@ -1,1 +1,2 @@
 # integration pip requirements
+requests==2.11.1
