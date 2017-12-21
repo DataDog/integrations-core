@@ -1,8 +1,8 @@
 {
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "name": "MySQL",
   "display_name": "MySQL",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "support": "core",
   "supported_os": [
     "linux",
@@ -20,5 +20,11 @@
     "monitor_editor": "resources/monitor_mysql.png",
     "my_image": "resources/mysql.png"
   },
-  "guid": "056bfc7f-4775-4581-9442-502078593d10"
+  "guid": "056bfc7f-4775-4581-9442-502078593d10",
+  "public_title": "Datadog-MySQL Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/mysql/",
+  "is_public": true,
+  "has_logo": true
 }

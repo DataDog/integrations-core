@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-2017
 # (C) Justin Slattery <Justin.Slattery@fzysqr.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -261,7 +261,7 @@ class Couchbase(AgentCheck):
         for metric_name, val in data['query'].items():
             if val is not None:
                 # for query times, the unit is part of the value, we need to extract it
-                if type(val) == basestring:
+                if isinstance(val, basestring):
                     val = self.extract_seconds_value(val)
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:

@@ -34,10 +34,12 @@ instances:
 
     # Collect the lengths of the following keys.
     # Length is zero for keys that have a type other than list, set, hash, or sorted set.
+    # Keys can be expressed as patterns, see https://redis.io/commands/keys
     #
     # keys:
     #   - key1
     #   - key2
+    #   - key* (matches key, key1 and key2)
 
     # If you provide a list of 'keys', have the Agent log a warning when keys are missing.
     # (default: True)

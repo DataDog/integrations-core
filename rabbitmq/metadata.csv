@@ -1,10 +1,31 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 rabbitmq.node.fd_used,gauge,,,,Used file descriptors,0,rabbitmq,fd used
+rabbitmq.node.disk_free,gauge,,byte,,Current free disk space,0,rabbitmq,disk free
 rabbitmq.node.mem_used,gauge,,byte,,Memory used in bytes,0,rabbitmq,mem used
 rabbitmq.node.run_queue,gauge,,process,,Average number of Erlang processes waiting to run,0,rabbitmq,run queue
 rabbitmq.node.sockets_used,gauge,,,,Number of file descriptors used as sockets,0,rabbitmq,skts used
 rabbitmq.node.partitions,gauge,,,,Number of network partitions this node is seeing,0,rabbitmq,partitions
+rabbitmq.node.running,gauge,,,,Is the node running or not,0,rabbitmq,running
+rabbitmq.node.mem_alarm,gauge,,,,Does the host has memory alarm,0,rabbitmq,mem_alarm
+rabbitmq.node.disk_alarm,gauge,,,,Does the node have disk alarm,0,rabbitmq,disk_alarm
+rabbitmq.exchange.messages.ack.count,gauge,,message,,Number of messages delivered to clients and acknowledged,0,rabbitmq,xchng msgs ack
+rabbitmq.exchange.messages.ack.rate,gauge,,message,,Rate of messages delivered to clients and acknowledged per second ,0,rabbitmq,xchng msgs ack rate
+rabbitmq.exchange.messages.confirm.count,gauge,,message,,Count of messages confirmed,0,rabbitmq,xchng msgs cnfrm
+rabbitmq.exchange.messages.confirm.rate,gauge,,message,,Rate of messages confirmed per second,0,rabbitmq,xchng msgs cnfrm rate
+rabbitmq.exchange.messages.deliver_get.count,gauge,,message,,Sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get,0,rabbitmq,xchng msgs dlv get
+rabbitmq.exchange.messages.deliver_get.rate,gauge,,message,,Rate per second of the sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get,0,rabbitmq,xchng msgs dlv get rate
+rabbitmq.exchange.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,xchng msgs redlv
+rabbitmq.exchange.messages.redeliver.rate,gauge,,message,,Rate of subset of messages in deliver_get which had the redelivered flag set per second ,0,rabbitmq,xchng msgs redlv rate
+rabbitmq.exchange.messages.return_unroutable.count,gauge,,message,,Count of messages returned to publisher as unroutable,0,rabbitmq,xchng msgs unroutable
+rabbitmq.exchange.messages.return_unroutable.rate,gauge,,message,,Rate of messages returned to publisher as unroutable per second,0,rabbitmq,xchng msgs unroutable rate
+rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages published,0,rabbitmq,xchng msgs pub
+rabbitmq.exchange.messages.publish.rate,gauge,,message,,Rate of messages published per second,0,rabbitmq,xchng msgs pub rate
+rabbitmq.exchange.messages.publish_in.count,gauge,,message,,Count of messages published from channels into this exchange,0,rabbitmq,xchng msgs pub in
+rabbitmq.exchange.messages.publish_in.rate,gauge,,message,,Rate of messages published from channels into this exchange per sec,0,rabbitmq,xchng msgs pub in rate
+rabbitmq.exchange.messages.publish_out.count,gauge,,message,,Count of messages published from this exchange into queues,0,rabbitmq,xchng msgs pub out
+rabbitmq.exchange.messages.publish_out.rate,gauge,,message,,Rate of messages published from this exchange into queues per second,rabbitmq,xchng msgs pub out rate
 rabbitmq.queue.active_consumers,gauge,,,,"Number of active consumers, consumers that can immediately receive any messages sent to the queue",0,rabbitmq,act cons
+rabbitmq.queue.bindings.count,gauge,,,,"Number of bindings for a specific queue",0,rabbitmq,queue bind
 rabbitmq.queue.consumers,gauge,,,,Number of consumers,0,rabbitmq,cons
 rabbitmq.queue.consumer_utilisation,gauge,,fraction,,The ratio of time that a queue's consumers can take new messages,0,rabbitmq,cons util
 rabbitmq.queue.memory,gauge,,byte,,"Bytes of memory consumed by the Erlang process associated with the queue, including stack, heap and internal structures",0,rabbitmq,mem

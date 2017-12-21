@@ -1,7 +1,12 @@
-docker_images:
+ad_identifiers:
   - kube-state-metrics
 
 init_config:
+
 instances:
   # To enable Kube State metrics you must specify the url exposing the API
   - kube_state_url: http://%%host%%:%%port%%/metrics
+    # Tags are reported as set by kube-state-metrics. If you want to translate
+    # them to other tags, you can use the labels_mapper dictionary
+    # labels_mapper:
+    #   namespace: kube_namespace

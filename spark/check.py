@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 '''
@@ -294,7 +294,7 @@ class SparkCheck(AgentCheck):
             return self._standalone_init(master_address, pre20)
 
         elif cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(master_address)
+            running_apps = self._mesos_init(instance, master_address)
             return self._get_spark_app_ids(running_apps)
 
 
@@ -350,7 +350,7 @@ class SparkCheck(AgentCheck):
         self.log.info("Returning running apps %s" % running_apps)
         return running_apps
 
-    def _mesos_init(self, master_address):
+    def _mesos_init(self, instance, master_address):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
@@ -367,7 +367,15 @@ class SparkCheck(AgentCheck):
                 app_name = app_json.get('name')
 
                 if app_id and tracking_url and app_name:
-                    running_apps[app_id] = (app_name, tracking_url)
+                    spark_ports = instance.get('spark_ui_ports')
+                    if spark_ports is None:
+                        # No filtering by port, just return all the frameworks
+                        running_apps[app_id] = (app_name, tracking_url)
+                    else:
+                        # Only return the frameworks running on the correct port
+                        tracking_url_port = urlparse(tracking_url).port
+                        if tracking_url_port in spark_ports:
+                            running_apps[app_id] = (app_name, tracking_url)
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(MESOS_SERVICE_CHECK,

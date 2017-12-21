@@ -41,6 +41,13 @@ instances:
     # username: user
     # password: pass
 
+    # If your service uses client side certificates, you can optionally
+    # specify a client certificate and key files that will be used in the check.
+    # The private key to your local certificate must be unencrypted.
+    #
+    # client_cert: /opt/client.crt
+    # client_key: /opt/client.key
+
     # The (optional) http_response_status_code parameter will instruct the check
     # to look for a particular HTTP response status code or a Regex identifying
     # a set of possible status codes.
@@ -88,11 +95,14 @@ instances:
     # left in the certificate, and alternatively raise a critical
     # warning if the certificate is y days from the expiration date.
     # The SSL certificate will always be validated for this additional
-    # service check regardless of the value of disable_ssl_validation
-    #
+    # service check regardless of the value of disable_ssl_validation.
+    # By default, for the expiration check, the Agent validates the SSL certificate
+    # hostname against the host of the provided url. If necessary, you can override
+    # that hostname with ssl_server_name.
     # check_certificate_expiration: true
     # days_warning: 14
     # days_critical: 7
+    # ssl_server_name: hostname
 
     # The (optional) headers parameter allows you to send extra headers
     # with the request. This is useful for explicitly specifying the host

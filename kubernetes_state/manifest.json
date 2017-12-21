@@ -1,16 +1,22 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.15.0",
+  "min_agent_version": "5.20.0",
   "name": "kubernetes_state",
-  "short_description": "kubernetes_state description.",
+  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
   "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
   "support": "contrib",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "version": "1.3.0",
-  "use_omnibus_reqs": true
+  "version": "2.0.0",
+  "use_omnibus_reqs": true,
+  "public_title": "Datadog-Kubernetes State Integration",
+  "categories":["orchestration", "containers"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/kubernetes_state/",
+  "is_public": true,
+  "has_logo": true
 }

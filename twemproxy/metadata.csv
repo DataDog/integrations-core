@@ -1,21 +1,21 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 twemproxy.curr_connections,gauge,,connection,,number of current connections,0,twemproxy,conn curr
-twemproxy.total_connections,rate,,connection,,number of total connections,0,twemproxy,conn total
-twemproxy.client_eof,gauge,,error,,number of eof on client connections,-1,twemproxy,client eof err
-twemproxy.client_err,gauge,,error,,number of errors on client connections,-1,twemproxy,client err
+twemproxy.total_connections,gauge,,connection,second,rate of new connections,0,twemproxy,conn total
+twemproxy.client_eof,gauge,,error,second,number of eof on client connections,-1,twemproxy,client eof err
+twemproxy.client_err,gauge,,error,second,number of errors on client connections,-1,twemproxy,client err
 twemproxy.client_connections,gauge,,connection,,number of active client connections,0,twemproxy,client conns
 twemproxy.server_ejects,gauge,,event,,number of times backend server was ejected,-1,twemproxy,server ejects
-twemproxy.forward_error,gauge,,error,,number of times we encountered a forwarding error,-1,twemproxy,fwd err
-twemproxy.fragments,gauge,,request,,number of fragments created from a multi-vector request,twemproxy,frags
-twemproxy.in_queue,gauge,,request,,number of requests in incoming queue,0,twemproxy,in queue reqs
-twemproxy.out_queue,gauge,,request,,number of requests in outgoing queue,0,twemproxy,out queue reqs
-twemproxy.in_queue_bytes,gauge,,byte,,current request bytes in incoming queue,0,twemproxy,in queue bytes
-twemproxy.out_queue_bytes,gauge,,byte,,current request bytes in outgoing queue,0,twemproxy,out queue bytes
+twemproxy.forward_error,gauge,,error,second,number of times we encountered a forwarding error,-1,twemproxy,fwd err
+twemproxy.fragments,gauge,,request,second,number of fragments created from a multi-vector request,0,twemproxy,frags
+twemproxy.in_queue,gauge,,request,second,number of requests in incoming queue,0,twemproxy,in queue reqs
+twemproxy.out_queue,gauge,,request,second,number of requests in outgoing queue,0,twemproxy,out queue reqs
+twemproxy.in_queue_bytes,gauge,,byte,second,current request bytes in incoming queue,0,twemproxy,in queue bytes
+twemproxy.out_queue_bytes,gauge,,byte,second,current request bytes in outgoing queue,0,twemproxy,out queue bytes
 twemproxy.server_connections,gauge,,connection,,number of active server connections,0,twemproxy,server conns
-twemproxy.server_err,gauge,,error,,number of errors on server connections,-1,twemproxy,server err
+twemproxy.server_err,gauge,,error,second,number of errors on server connections,-1,twemproxy,server err
 twemproxy.server_timedout,gauge,,timeout,,number of timeouts on server connections,-1,twemproxy,server to err
-twemproxy.server_eof,gauge,,error,,number of eof on server connections,-1,twemproxy,server eof err
-twemproxy.responses,rate,,response,,number of responses,0,twemproxy,resps
-twemproxy.requests,rate,,request,,number of requests,0,twemproxy,reqs
-twemproxy.response_bytes,rate,,byte,,number of responses,0,twemproxy,resp bytes
-twemproxy.request_bytes,rate,,byte,,number of requests,0,twemproxy,req bytes
+twemproxy.server_eof,gauge,,error,second,number of eof on server connections,-1,twemproxy,server eof err
+twemproxy.responses,gauge,,response,second,number of responses,0,twemproxy,resps
+twemproxy.requests,gauge,,request,second,number of requests,0,twemproxy,reqs
+twemproxy.response_bytes,gauge,,byte,second,number of responses,0,twemproxy,resp bytes
+twemproxy.request_bytes,gauge,,byte,second,number of requests,0,twemproxy,req bytes

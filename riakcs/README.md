@@ -7,13 +7,14 @@ Capture RiakCS metrics in Datadog to:
 * Visualize key RiakCS metrics.
 * Correlate RiakCS performance with the rest of your applications.
 
-## Installation
+## Setup
+### Installation
 
 The RiakCS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RiakCS nodes. If you need the newest version of the check, install the `dd-check-riakcs` package.
 
-## Configuration
+### Configuration
 
-Create a file `riakcs.yaml` in the Agent's `conf.d` directory:
+Create a file `riakcs.yaml` in the Agent's `conf.d` directory. See the [sample riakcs.yaml](https://github.com/DataDog/integrations-core/blob/master/riakcs/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -27,11 +28,11 @@ instances:
 #   s3_root: s3.amazonaws.com # 
 ```
 
-Restart the Agent to start sending RiakCS metrics to Datadog.
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending RiakCS metrics to Datadog.
 
-## Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `riakcs` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `riakcs` under the Checks section:
 
 ```
   Checks
@@ -50,16 +51,22 @@ Run the Agent's `info` subcommand and look for `riakcs` under the Checks section
 
 The riakcs check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv) for a list of metrics provided by this check.
 
-## Service Checks
+### Events
+The RiackCS check does not include any event at this time.
+
+### Service Checks
 
 **riakcs.can_connect**:
 
 Returns CRITICAL if the Agent cannot connect to the RiakCS endpoint to collect metrics, otherwise OK.
 
-## Further Reading
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
+## Further Reading
 To get a better idea of how (or why) to monitor Riak CS performance and availability with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability/) about it.

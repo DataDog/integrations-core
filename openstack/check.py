@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -84,6 +84,10 @@ PROJECT_METRICS = dict([
     ("totalKeypairsUsed", "total_keypairs_used"),
     ("totalRAMUsed", "total_ram_used"),
 ])
+
+DIAGNOSTICABLE_STATES = [
+    'ACTIVE'
+]
 
 class OpenStackAuthFailure(Exception):
     pass
@@ -655,16 +659,24 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
-        url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
+        url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
-        server_stats = {}
-
+        state = None
         try:
-            server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:
-            self.warning("Server %s is powered off and cannot be monitored" % server_id)
+            server_details = self._make_request_with_auth_fallback(url, headers)
+            state = server_details['server'].get('status')
         except Exception as e:
-            self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
+            self.warning("Unable to collect details for server %s : %s" % (server_id, e))
+
+        server_stats = {}
+        if state and state.upper() in DIAGNOSTICABLE_STATES:
+            url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
+            try:
+                server_stats = self._make_request_with_auth_fallback(url, headers)
+            except InstancePowerOffFailure:
+                self.warning("Server %s is powered off and cannot be monitored" % server_id)
+            except Exception as e:
+                self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
 
         if server_stats:
             tags = tags or []
@@ -802,6 +814,8 @@ class OpenStackCheck(AgentCheck):
                 server_tags = ["nova_managed_server"]
                 if instance_scope.tenant_id:
                     server_tags.append("tenant_id:%s" % instance_scope.tenant_id)
+                if project and 'name' in project:
+                    server_tags.append('project_name:{0}'.format(project['name']))
 
                 self.external_host_tags[sid] = host_tags
                 self.get_stats_for_single_server(sid, tags=server_tags)
@@ -849,27 +863,38 @@ class OpenStackCheck(AgentCheck):
         Returns the project that this instance of the check is scoped to
         """
         project_auth_scope = self.get_scope_for_instance(instance)
-        if project_auth_scope.tenant_id:
-            return {"id": project_auth_scope.tenant_id}
-
-        filter_params = {
-            "name": project_auth_scope.project_name,
-            "domain_id": project_auth_scope.domain_id
-        }
-
+        filter_params = {}
         url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        if project_auth_scope.tenant_id:
+            if project_auth_scope.project_name:
+                return {
+                    "id": project_auth_scope.tenant_id,
+                    "name": project_auth_scope.project_name
+                }
+
+            url = "{}/{}".format(url, project_auth_scope.tenant_id)
+        else:
+            filter_params = {
+                "name": project_auth_scope.project_name,
+                "domain_id": project_auth_scope.domain_id
+            }
+
         headers = {'X-Auth-Token': self.get_auth_token(instance)}
 
         try:
             project_details = self._make_request_with_auth_fallback(url, headers, params=filter_params)
-            assert len(project_details["projects"]) == 1, "Non-unique project credentials"
+            if filter_params:
+                assert len(project_details["projects"]) == 1, "Non-unique project credentials"
 
-            # Set the tenant_id so we won't have to fetch it next time
-            project_auth_scope.tenant_id = project_details["projects"][0].get("id")
+                # Set the tenant_id so we won't have to fetch it next time
+                project_auth_scope.tenant_id = project_details["projects"][0].get("id")
+                return project_details["projects"][0]
+            else:
+                project_auth_scope.project_name = project_details["project"]["name"]
+                return project_details["project"]
 
-            return project_details["projects"][0]
         except Exception as e:
-            self.warning('Unable to get the list of all project ids: {0}'.format(str(e)))
+            self.warning('Unable to get the project details: {0}'.format(str(e)))
 
         return None
 

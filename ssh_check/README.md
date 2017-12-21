@@ -4,13 +4,14 @@
 
 This check lets you monitor SSH connectivity to remote hosts and SFTP response times.
 
-## Installation
+## Setup
+### Installation
 
 The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere from which you'd like to test SSH connectivity. If you need the newest version of the check, install the `dd-check-ssh-check` package.
 
-## Configuration
+### Configuration
 
-Create a file `ssh_check.yaml` in the Agent's `conf.d` directory:
+Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -28,9 +29,9 @@ instances:
 
 Restart the Agent to start sending SSH/SFTP metrics and service checks to Datadog.
 
-## Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `ssh_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ssh_check` under the Checks section:
 
 ```
   Checks
@@ -49,11 +50,15 @@ Run the Agent's `info` subcommand and look for `ssh_check` under the Checks sect
 
 The ssh check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv) for a list of metrics provided by this check.
 
-## Service Checks
+### Events
+The SSH Check check does not include any event at this time.
+
+### Service Checks
 
 **ssh.can_connect**:
 
@@ -62,3 +67,9 @@ Returns CRITICAL if the Agent cannot open an SSH session, otherwise OK.
 **sftp.can_connect**:
 
 Returns CRITICAL if the Agent cannot open an SFTP session, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

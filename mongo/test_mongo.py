@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -176,7 +176,7 @@ class TestMongoUnit(AgentCheckTest):
         )
 
         for server, expected_clean_name in server_names:
-            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=False)
+            _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=False)
             self.assertEquals(expected_clean_name, clean_name)
 
         # Batch with `sanitize_username` set to True
@@ -190,7 +190,7 @@ class TestMongoUnit(AgentCheckTest):
         )
 
         for server, expected_clean_name in server_names:
-            _, _, _, _, clean_name = _parse_uri(server, sanitize_username=True)
+            _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=True)
             self.assertEquals(expected_clean_name, clean_name)
 
 @attr(requires='mongo')
@@ -235,9 +235,9 @@ class TestMongo(unittest.TestCase):
         }
         self.config = {
             'instances': [{
-                'server': "mongodb://localhost:%s/test" % PORT1
+                'server': "mongodb://testUser:testPass@localhost:%s/test?authSource=authDB" % PORT1
             }, {
-                'server': "mongodb://localhost:%s/test" % PORT2
+                'server': "mongodb://testUser2:testPass2@localhost:%s/test" % PORT2
             }]
         }
 

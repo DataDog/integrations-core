@@ -4,13 +4,14 @@
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
-## Installation
+## Setup
+### Installation
 
 The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
-## Configuration
+### Configuration
 
-Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
+Create a file `windows_service.yaml` in the Agent's `conf.d` directory. See the [sample windwos_service.yaml](https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -29,9 +30,9 @@ You must provide service names as they appear in services.msc's properties field
 
 Restart the Agent to start monitoring the services and sending service checks to Datadog.
 
-## Validation
+### Validation
 
-See the info page in the Agent Manager and look for `windows_service` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `windows_service` under the Checks section:
 
 ```
   Checks
@@ -50,8 +51,15 @@ See the info page in the Agent Manager and look for `windows_service` under the 
 
 The Windows Service check is compatible with all Windows platforms.
 
-## Service Checks
+## Data Collected
+### Metrics
 
+The Windows Service check does not include any metrics at this time.
+
+### Events
+The Windows Service check does not include any event at this time.
+
+### Service Checks
 **windows_service.state**:
 
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
@@ -67,6 +75,11 @@ The Agent submits this service check for each Windows service configured in `ser
 |Paused|WARNING|
 |Unknown|UNKNOWN|
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
 
-See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.
+* [Monitoring Windows Server 2012](https://www.datadoghq.com/blog/monitoring-windows-server-2012/)
+* [How to collect Windows Server 2012 metrics](https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/)
+* [Monitoring Windows Server 2012 with Datadog](https://www.datadoghq.com/blog/windows-server-monitoring/)

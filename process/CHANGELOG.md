@@ -1,6 +1,11 @@
 # CHANGELOG - process
 
-1.1.2 / Unreleased
+1.2.0 / Unreleased
+==================
+
+* [IMPROVEMENT] Filter processes by user. See [#337][]
+
+1.1.2 / 2017-08-28
 ==================
 
  * [IMPROVEMENT] Better logging when a process was not found. See [#609][]
@@ -38,3 +43,4 @@
 [#349]: https://github.com/DataDog/integrations-core/issues/349
 [#425]: https://github.com/DataDog/integrations-core/issues/425
 [#479]: https://github.com/DataDog/integrations-core/pull/479
+[#337]: https://github.com/DataDog/integrations-core/pull/337

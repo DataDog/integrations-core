@@ -1,9 +1,8 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-import time
 import mock
 
 # 3p
@@ -126,29 +125,12 @@ class DNSCheckTest(AgentCheckTest):
     def tearDown(self):
         self.check.stop()
 
-    def wait_for_async(self, method, attribute, count):
-        """
-        Loop on `self.check.method` until `self.check.attribute >= count`.
-
-        Raise after
-        """
-        i = 0
-        while i < RESULTS_TIMEOUT:
-            self.check._process_results()
-            if len(getattr(self.check, attribute)) >= count:
-                return getattr(self.check, method)()
-            time.sleep(1)
-            i += 1
-        raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
-                        .format(len(getattr(self.check, attribute)), count, i,
-                                getattr(self.check, attribute)))
-
     @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
     @mock.patch('time.time', side_effect=MockTime.time)
     def test_success(self, mocked_query, mocked_time):
         self.run_check(CONFIG_SUCCESS)
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 2, RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         tags = ['instance:success', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -165,7 +147,7 @@ class DNSCheckTest(AgentCheckTest):
     def test_success_nxdomain(self, mocked_query, mocked_time):
         self.run_check(CONFIG_SUCCESS_NXDOMAIN)
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         tags = ['instance:nxdomain', 'nameserver:127.0.0.1', 'resolved_hostname:www.example.org', 'record_type:NXDOMAIN']
@@ -179,7 +161,7 @@ class DNSCheckTest(AgentCheckTest):
     def test_default_timeout(self, mocked_query, mocked_time):
         self.run_check(CONFIG_DEFAULT_TIMEOUT)
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         tags = ['instance:default_timeout', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -192,7 +174,7 @@ class DNSCheckTest(AgentCheckTest):
     def test_instance_timeout(self, mocked_query, mocked_time):
         self.run_check(CONFIG_INSTANCE_TIMEOUT)
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         tags = ['instance:instance_timeout', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -204,7 +186,7 @@ class DNSCheckTest(AgentCheckTest):
         for config, exception_class in CONFIG_INVALID:
             self.run_check(config)
             # Overrides self.service_checks attribute when values are available
-            self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1)
+            self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', 1, RESULTS_TIMEOUT)
             self.metrics = self.check.get_metrics()
 
             self.assertRaises(exception_class)

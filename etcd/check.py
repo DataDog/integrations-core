@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2016
+# (C) Datadog, Inc. 2015-2017
 # (C) Cory G Watson <gphat@keen.io> 2014-2015
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -17,6 +17,8 @@ class Etcd(AgentCheck):
     DEFAULT_TIMEOUT = 5
 
     SERVICE_CHECK_NAME = 'etcd.can_connect'
+    HEALTH_SERVICE_CHECK_NAME = 'etcd.healthy'
+    HEALTH_KEY = 'health'
 
     STORE_RATES = {
         'getsSuccess': 'etcd.store.gets.success',
@@ -92,6 +94,17 @@ class Etcd(AgentCheck):
         timeout = float(instance.get('timeout', self.DEFAULT_TIMEOUT))
         is_leader = False
 
+        # Gather self health status
+        health_state = AgentCheck.UNKNOWN
+        self_response = self._get_self_health(url, ssl_params, timeout)
+        if self_response is not None:
+            if self.HEALTH_KEY in self_response:
+                health_state = AgentCheck.OK if self_response[self.HEALTH_KEY] == 'true' else AgentCheck.CRITICAL
+            else:
+                self.log.debug("Missing '{}' key in stats, can't determine health status.".format(self.HEALTH_KEY))
+
+        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, health_state, tags=instance_tags)
+
         # Gather self metrics
         self_response = self._get_self_metrics(url, ssl_params, timeout)
         if self_response is not None:
@@ -151,22 +164,25 @@ class Etcd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=["url:{0}".format(url)])
 
+    def _get_self_health(self, url, ssl_params, timeout):
+        return self._get_json(url, "/health",  ssl_params, timeout)
+
     def _get_self_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/self",  ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout)
 
     def _get_store_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/store",  ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout)
 
     def _get_leader_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url + "/v2/stats/leader", ssl_params, timeout)
+        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout)
 
-    def _get_json(self, url, ssl_params, timeout):
+    def _get_json(self, url, path, ssl_params, timeout):
         try:
             certificate = None
             if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
                 certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
             verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-            r = requests.get(url, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+            r = requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,

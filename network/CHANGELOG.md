@@ -1,5 +1,19 @@
 # CHANGELOG - network
 
+1.3.0 / 2017-09-01
+==================
+
+### Changes
+
+* [FEATURE] Collects TCPRetransFail metric from /proc/net/netstat, See [#697][]
+
+1.2.2 / 2017-08-28
+==================
+
+### Changes
+
+* [BUGFIX] Fix incorrect `log.error` call in BSD check. See [#698][]
+
 1.2.1 / 2017-07-18
 ==================
 
@@ -33,4 +47,5 @@
 [#299]: https://github.com/DataDog/integrations-core/issues/299
 [#452]: https://github.com/DataDog/integrations-core/issues/452
 [#501]: https://github.com/DataDog/integrations-core/issues/501
+[#698]: https://github.com/DataDog/integrations-core/issues/698
 [@cory-stripe]: https://github.com/cory-stripe

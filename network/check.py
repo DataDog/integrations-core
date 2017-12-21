@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -363,6 +363,7 @@ class Network(AgentCheck):
                 'ListenOverflows': 'system.net.tcp.listen_overflows',
                 'ListenDrops': 'system.net.tcp.listen_drops',
                 'TCPBacklogDrop': 'system.net.tcp.backlog_drops',
+                'TCPRetransFail': 'system.net.tcp.failed_retransmits',
             },
             'Udp': {
                 'InDatagrams': 'system.net.udp.in_datagrams',
@@ -435,7 +436,7 @@ class Network(AgentCheck):
             #          -7       -6       -5        -4       -3       -2        -1
             for h in ("Ipkts", "Ierrs", "Ibytes", "Opkts", "Oerrs", "Obytes", "Coll"):
                 if h not in headers:
-                    self.logger.error("%s not found in %s; cannot parse" % (h, headers))
+                    self.log.error("%s not found in %s; cannot parse" % (h, headers))
                     return False
 
             current = None

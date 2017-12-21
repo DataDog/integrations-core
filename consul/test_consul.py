@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -463,10 +463,10 @@ class TestCheckConsul(AgentCheckTest):
 
     def test_get_nodes_with_service(self):
         self.run_check(MOCK_CONFIG, mocks=self._get_consul_mocks())
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
@@ -477,10 +477,10 @@ class TestCheckConsul(AgentCheckTest):
         my_mocks['get_nodes_with_service'] = self.mock_get_nodes_with_service_warning
 
         self.run_check(MOCK_CONFIG, mocks=my_mocks)
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
@@ -491,10 +491,10 @@ class TestCheckConsul(AgentCheckTest):
         my_mocks['get_nodes_with_service'] = self.mock_get_nodes_with_service_critical
 
         self.run_check(MOCK_CONFIG, mocks=my_mocks)
-        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
-        self.assertMetric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1'])
+        self.assertMetric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+        self.assertMetric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
         self.assertMetric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])

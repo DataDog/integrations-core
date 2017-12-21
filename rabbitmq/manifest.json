@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.14.0",
   "name": "rabbitmq",
@@ -11,6 +11,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.1",
-  "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b"
+  "version": "1.4.0",
+  "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b",
+  "public_title": "Datadog-RabbitMQ Integration",
+  "categories":["processing"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/rabbitmq/",
+  "is_public": true,
+  "has_logo": true
 }

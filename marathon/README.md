@@ -7,13 +7,14 @@ The Agent's Marathon check lets you:
 * Track the state and health of every application: see configured memory, disk, cpu, and instances; monitor the number of healthy and unhealthy tasks
 * Monitor the number of queued applications and the number of deployments
 
-## Installation
+## Setup
+### Installation
 
 The Marathon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Marathon master. If you need the newest version of the check, install the `dd-check-marathon` package.
 
-## Configuration
+### Configuration
 
-Create a file `marathon.yaml` in the Agent's `conf.d` directory:
+Create a file `marathon.yaml` in the Agent's `conf.d` directory. See the [sample marathon.yaml](https://github.com/DataDog/integrations-core/blob/master/marathon/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -30,9 +31,9 @@ The function of `user` and `password` depends on whether or not you configure `a
 
 Restart the Agent to begin sending Marathon metrics to Datadog.
 
-## Validation
+### Validation
 
-Run the Agent's `info` subcommand and look for `marathon` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `marathon` under the Checks section:
 
 ```
   Checks
@@ -51,12 +52,21 @@ Run the Agent's `info` subcommand and look for `marathon` under the Checks secti
 
 The marathon check is compatible with all major platforms.
 
-## Metrics
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this integration.
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this check.
+### Events
+The Marathon check does not include any event at this time.
 
-## Service Checks
+### Service Checks
 
 `marathon.can_connect`:
 
 Returns CRITICAL if the Agent cannot connect to the Marathon API to collect metrics, otherwise OK.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

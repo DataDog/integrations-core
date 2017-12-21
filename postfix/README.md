@@ -4,17 +4,24 @@
 
 This check monitors the size of all your Postfix queues.
 
-## Installation
+## Setup
+### Installation
 
 The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers. If you need the newest version of the check, install the `dd-check-postfix` package.
 
 ## Configuration
+This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
 
-Create a file `postfix.yaml` in the Agent's `conf.d` directory:
+Optionally, you can configure the agent to use a built in `postqueue -p` command to get a count of messages in the `active`, `hold`, and `deferred` mail queues. `postqueue` is exectued with set-group ID privileges without the need for sudo.
+
+**WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
+
+### Using sudo
+Create a file `postfix.yaml` in the Agent's `conf.d` directory. See the [sample postfix.yaml](https://github.com/DataDog/integrations-core/blob/master/postfix/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
-  - postfix_user: postfix
+  postfix_user: postfix
 
 instances:
   # add one instance for each postfix service you want to track
@@ -29,20 +36,51 @@ instances:
 ```
 
 For each mail queue in `queues`, the Agent forks a `find` on its directory.
-It uses `sudo` to do this with the privileges of the postfix user, so you must
+It uses `sudo` to do this with the privileges of the Postfix user, so you must
 add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`,
-assuming postfix runs as `postfix`:
+assuming Postfix runs as `postfix`:
 ```
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
+### Using postqueue
+Create a file `postfix.yaml` in the Agent's `conf.d` directory:
 
-Restart the Agent to start sending Postfix metrics to Datadog.
+```
+init_config:
+  postqueue: true
 
-## Validation
+instances:
+  # The config_directory option only applies when `postqueue: true`.
+  # The config_directory is the location of the Postfix configuration directory
+  # where main.cf lives.
+  - config_directory: /etc/postfix
+#   tags:
+#     - optional_tag
+#     - optional_tag0
+```
+For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for
+the Postfix configuration directory.
 
-Run the Agent's `info` subcommand and look for postfix` under the Checks section:
+Postfix has internal access controls that limit activities on the mail queue. By default,
+Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
+may be configured with stricter access controls, you may need to grant the dd-agent user access to view
+the mail queue.
+
+    postconf -e "authorized_mailq_users = dd-agent"        
+
+http://www.postfix.org/postqueue.1.html
+
+            authorized_mailq_users (static:anyone)
+                List of users who are authorized to view the queue.
+
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Postfix metrics to Datadog.
+
+### Validation
+
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `postfix` under the Checks section:
 
 ```
   Checks
@@ -61,10 +99,19 @@ Run the Agent's `info` subcommand and look for postfix` under the Checks section
 
 The postfix check is compatible with all major platforms.
 
-## Metrics
-
+## Data Collected
+### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv) for a list of metrics provided by this check.
+
+### Events
+The Postfix check does not include any event at this time.
+
+### Service Checks
+The Postfix check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor Postfix queue performance with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-postfix-queues/) about it.
+* [Monitor Postfix queue performance](https://www.datadoghq.com/blog/monitor-postfix-queues/)

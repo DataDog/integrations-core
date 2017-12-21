@@ -7,17 +7,18 @@ Get metrics from mapreduce service in real time to:
 * Visualize and monitor mapreduce states
 * Be notified about mapreduce failovers and events.
 
-## Installation
+## Setup
+### Installation
 
 Install the `dd-check-mapreduce` package manually or with your favorite configuration manager
 
-## Configuration
+### Configuration
 
-Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor
+Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml](https://github.com/DataDog/integrations-core/blob/master/mapreduce/conf.yaml.example) for all available configuration options.
 
-## Validation
+### Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mapreduce` under the Checks section:
 
     Checks
     ======
@@ -31,6 +32,22 @@ When you run `datadog-agent info` you should see something like the following:
 
 The mapreduce check is compatible with all major platforms
 
+## Data Collected
+### Metrics
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mapreduce/metadata.csv) for a list of metrics provided by this integration.
+
+### Events
+The Mapreduce check does not include any event at this time.
+
+### Service Checks
+The Mapreduce check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
 
-To get a better idea of how (or why) to monitor Hadoop health and performance with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/hadoop-architecture-overview/) about it.
+* [Hadoop architectural overview](https://www.datadoghq.com/blog/hadoop-architecture-overview/)
+* [How to monitor Hadoop metrics](https://www.datadoghq.com/blog/monitor-hadoop-metrics/)
+* [How to collect Hadoop metrics](https://www.datadoghq.com/blog/collecting-hadoop-metrics/)
+* [How to monitor Hadoop with Datadog](https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/)
