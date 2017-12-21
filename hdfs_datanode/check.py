@@ -62,16 +62,16 @@ class HDFSDataNode(AgentCheck):
         jmx_address = instance.get('hdfs_datanode_jmx_uri')
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
-        validate_ssl = instance.get('validate_ssl', True)
+        disable_ssl_validation = instance.get('disable_ssl_validation', False)
 
         # Get metrics from JMX
-        self._hdfs_datanode_metrics(jmx_address, validate_ssl)
+        self._hdfs_datanode_metrics(jmx_address, disable_ssl_validation)
 
-    def _hdfs_datanode_metrics(self, jmx_uri, validate_ssl):
+    def _hdfs_datanode_metrics(self, jmx_uri, disable_ssl_validation):
         '''
         Get HDFS data node metrics from JMX
         '''
-        response = self._rest_request_to_json(jmx_uri, validate_ssl,
+        response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
             JMX_PATH,
             query_params={'qry':HDFS_DATANODE_BEAN_NAME})
 
@@ -102,7 +102,7 @@ class HDFSDataNode(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, validate_ssl, object_path, query_params):
+    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, query_params):
         '''
         Query the given URL and return the JSON response
         '''
@@ -123,7 +123,7 @@ class HDFSDataNode(AgentCheck):
         self.log.debug('Attempting to connect to "%s"' % url)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=validate_ssl)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=not disable_ssl_validation)
             response.raise_for_status()
             response_json = response.json()
 

@@ -10,7 +10,7 @@ instances:
   # the property dfs.http.address or dfs.namenode.http-address
   #
   -  hdfs_namenode_jmx_uri: http://localhost:50070
-  
-  # Optionally override SSL validation. Sometimes when using proxies or self-signed certs
+
+  # Optionally disable SSL validation. Sometimes when using proxies or self-signed certs
   # we'll want to override validation.
-  # validate_ssl: false
+  # disable_ssl_validation: false
