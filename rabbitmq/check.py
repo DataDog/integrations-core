@@ -324,7 +324,7 @@ class RabbitMQ(AgentCheck):
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, vhosts, custom_tags, auth=None, ssl_verify=True):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -347,12 +347,12 @@ class RabbitMQ(AgentCheck):
                 url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
                 try:
                     data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
-                                            ssl_verify=ssl_verify, proxies=instance_proxy)
+                                           ssl_verify=ssl_verify, proxies=instance_proxy)
                 except Exception as e:
                     self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
         else:
             data = self._get_data(urlparse.urljoin(base_url, object_type), auth=auth,
-                              ssl_verify=ssl_verify, proxies=instance_proxy)
+                                  ssl_verify=ssl_verify, proxies=instance_proxy)
 
         """ data is a list of nodes or queues:
         data = [
