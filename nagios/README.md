@@ -17,7 +17,7 @@ The Nagios check is packaged with the Agent, so simply [install the Agent](https
 
 ### Configuration
 
-Create a file `nagios.yaml` in the Agent's `conf.d` directory:
+Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml](https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -39,7 +39,7 @@ Restart the Agent to start sending Nagios events and (optionally) perfdata metri
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `nagios` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nagios` under the Checks section:
 
 ```
   Checks
@@ -83,6 +83,9 @@ The check watches the Nagios events log for log lines containing these string, e
 ### Service Checks
 The Nagios check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how to understand your Nagios alerts with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/nagios-monitoring/) about it.
+
+* [Understand your Nagios alerts with Datadog](https://www.datadoghq.com/blog/nagios-monitoring/)

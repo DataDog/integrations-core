@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2016
+# (C) Datadog, Inc. 2015-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -67,6 +67,9 @@ class MesosMaster(AgentCheck):
         'master/cpus_percent'                               : ('mesos.cluster.cpus_percent', GAUGE),
         'master/cpus_total'                                 : ('mesos.cluster.cpus_total', GAUGE),
         'master/cpus_used'                                  : ('mesos.cluster.cpus_used', GAUGE),
+        'master/gpus_percent'                               : ('mesos.cluster.gpus_percent', GAUGE),
+        'master/gpus_total'                                 : ('mesos.cluster.gpus_total', GAUGE),
+        'master/gpus_used'                                  : ('mesos.cluster.gpus_used', GAUGE),
         'master/disk_percent'                               : ('mesos.cluster.disk_percent', GAUGE),
         'master/disk_total'                                 : ('mesos.cluster.disk_total', GAUGE),
         'master/disk_used'                                  : ('mesos.cluster.disk_used', GAUGE),

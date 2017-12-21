@@ -10,6 +10,29 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
 Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
+You can check for this using the following command:
+
+```
+Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
+```
+
+This class should be installed as part of the web-http-common Windows Feature:
+
+```
+PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
+
+Display Name                       Name               Install State
+------------                       ----               -------------
+[X] Web Server (IIS)               Web-Server             Installed
+    [X] Web Server                 Web-WebServer          Installed
+        [X] Common HTTP Features   Web-Common-Http        Installed
+            [X] Default Document   Web-Default-Doc        Installed
+            [X] Directory Browsing Web-Dir-Browsing       Installed
+            [X] HTTP Errors        Web-Http-Errors        Installed
+            [X] Static Content     Web-Static-Content     Installed
+```
+
+You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
 
 ### Configuration
 #### Prepare IIS
@@ -31,7 +54,7 @@ C:/> winmgmt /resyncperf
 
 #### Connect the Agent
 
-Create a file `iis.yaml` in the Agent's `conf.d` directory:
+Create a file `iis.yaml` in the Agent's `conf.d` directory. See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -47,13 +70,36 @@ To collect metrics on a per-site basis, you *must* use the `sites` option. The A
 
 If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites — `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
-You can also monitor sites on remote IIS servers. See the [sample iis.conf](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for relevant configuration options.
+You can also monitor sites on remote IIS servers. See the [sample iis.conf](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 
-Restart the Agent to begin sending IIS metrics to Datadog.
+If you want to check other remote machines as well, you can add one instance per host.
+Note: If you also want to check the counters on the current machine, you will haveto create an instance with empty params.
+
+The optional `provider` parameter allows to specify a WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`. For more information, [review this MSDN article](https://msdn.microsoft.com/en-us/library/aa393067.aspx).
+
+The `sites` parameter allows you to specify a list of sites you want to read metrics from. With sites specified, metrics will be tagged with the site name. If you don't define any sites, the check will pull the aggregate values across all sites.
+
+Here's an example of configuration that would check the current machine and a remote machine called MYREMOTESERVER. For the remote host we are only pulling metrics from the default site.
+
+```
+- host: .
+  tags:
+    - myapp1
+  sites:
+    - Default Web Site
+- host: MYREMOTESERVER
+  username: MYREMOTESERVER\fred
+  password: mysecretpassword
+  is_2008: false
+```
+
+* `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
+
+[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending IIS metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `iis` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `iis` under the Checks section:
 
 ```
   Checks
@@ -82,4 +128,8 @@ The IIS check does not include any event at this time.
 
 The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)

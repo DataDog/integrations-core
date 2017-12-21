@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2014-2017
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
 # 3p
 from nose.plugins.attrib import attr
 

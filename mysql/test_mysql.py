@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -399,6 +399,8 @@ class TestMySql(AgentCheckTest):
         config = {'instances': self.MYSQL_COMPLEX_CONFIG}
         config['instances'][0]['port'] = 13307
         self.run_check_twice(config)
+
+        self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
 
         # Test service check
         self.assertServiceCheck('mysql.can_connect', status=AgentCheck.OK,

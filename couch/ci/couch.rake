@@ -1,4 +1,5 @@
 require 'ci/common'
+require 'net/http'
 
 def couch_version
   ENV['FLAVOR_VERSION'] || '1.6.1'
@@ -8,8 +9,45 @@ def couch_rootdir
   "#{ENV['INTEGRATIONS_DIR']}/couch_#{couch_version}"
 end
 
+class ArgsProvider
+  attr_reader :version
+
+  def initialize(couch_version)
+    @version = couch_version.split('.').first
+    @couch_version = couch_version
+  end
+
+  def docker_image
+    case @version
+    when '1'
+      "couchdb:#{@couch_version}"
+    when '2'
+      "klaemo/couchdb:#{@couch_version}"
+    end
+  end
+
+  def docker_args
+    case @version
+    when '2'
+      '--admin=dduser:pawprint --with-haproxy'
+    else
+      ''
+    end
+  end
+
+  def nose_filter
+    case @version
+    when '1'
+      'couch_version==\'1.x\''
+    when '2'
+      'couch_version==\'2.x\''
+    end
+  end
+end
+
 container_name = 'dd-test-couch'
 container_port = 5984
+provider = ArgsProvider.new(couch_version)
 
 namespace :ci do
   namespace :couch do |flavor|
@@ -20,36 +58,46 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('couch')
-      sh %(docker run -p #{container_port}:#{container_port} --name #{container_name} -d couchdb:#{couch_version})
+      sh %(docker run -p #{container_port}:#{container_port}\
+        --name #{container_name} -d #{provider.docker_image} #{provider.docker_args})
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for container_port
-      count = 0
-      logs = `docker logs dd-test-couch 2>&1`
-      puts 'Waiting for couchdb to come up'
-      until count == 20 || logs.include?('CouchDB has started')
-        sleep_for 2
-        logs = `docker logs dd-test-couch 2>&1`
-        count += 1
-      end
-      puts 'couchdb is up!' if logs.include? 'CouchDB has started'
+      Wait.for 'http://localhost:5984', 30
+
       # Create a test database
-      sh %(curl -X PUT http://localhost:5984/kennel)
+      if provider.version == '2'
+        sh %(curl -X PUT http://dduser:pawprint@localhost:5984/kennel)
+        sh "curl -X PUT http://dduser:pawprint@localhost:5984/kennel/_design/dummy -d \
+          '{\"language\":\"javascript\",\
+            \"views\":{\
+              \"all\":{\"map\":\"function(doc) { emit(doc._id, doc); }\"},\
+              \"by_data\":{ \"map\": \"function(doc) { emit(doc.data, doc); }\"}}}'"
 
-      # Create a user
-      sh %(curl -X PUT http://localhost:5984/_config/admins/dduser -d '"pawprint"')
+        times = 0
+        data = []
+        uri = URI('http://localhost:5984/_node/node1@127.0.0.1/_stats')
+        req = Net::HTTP::Get.new(uri)
+        req.basic_auth('dduser', 'pawprint')
 
-      # Restrict test databse to authenticated user
-      sh %(curl -X PUT http://dduser:pawprint@127.0.0.1:5984/kennel/_security \
-           -d '{"admins":{"names":[],"roles":[]},"members":{"names":["dduser"],"roles":[]}}')
+        puts 'Waiting for stats to be generated on the nodes...'
+        while times < 20 || data.empty?
+          res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+            http.request(req)
+          end
+          data = JSON.parse(res.body)
+          times += 1
+          sleep 0.5
+        end
+
+      else
+        sh %(curl -X PUT http://localhost:5984/kennel)
+      end
     end
 
     task script: ['ci:common:script'] do
-      this_provides = [
-        'couch'
-      ]
-      Rake::Task['ci:common:run_tests'].invoke(this_provides)
+      ENV['NOSE_FILTER'] = provider.nose_filter
+      Rake::Task['ci:common:run_tests'].invoke(['couch'])
     end
 
     task before_cache: ['ci:common:before_cache']

@@ -19,7 +19,7 @@ The Couchbase check is packaged with the Agent, so simply [install the Agent](ht
 
 ### Configuration
 
-Create a file `couchbase.yaml` in the Agent's `conf.d` directory:
+Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml](https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -34,7 +34,7 @@ Restart the Agent to begin sending Couchbase metrics to Datadog.
 
 ### Validation
 
-Run the Agent's `info` subcommand and look for `couchbase` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `couchbase` under the Checks section:
 
 ```
   Checks
@@ -67,6 +67,9 @@ The Couchbase check does not include any event at this time.
 
 Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-To get a better idea of how (or why) to integrate your Couchbase cluster with Datadog, check out our [blog post](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/) about it.
+
+* [Monitor key Couchbase metrics](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/).

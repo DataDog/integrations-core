@@ -11,7 +11,7 @@ The Windows Service check is packaged with the Agent, so simply [install the Age
 
 ### Configuration
 
-Create a file `windows_service.yaml` in the Agent's `conf.d` directory:
+Create a file `windows_service.yaml` in the Agent's `conf.d` directory. See the [sample windwos_service.yaml](https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -32,7 +32,7 @@ Restart the Agent to start monitoring the services and sending service checks to
 
 ### Validation
 
-See the info page in the Agent Manager and look for `windows_service` under the Checks section:
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `windows_service` under the Checks section:
 
 ```
   Checks
@@ -53,7 +53,8 @@ The Windows Service check is compatible with all Windows platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv) for a list of metrics provided by this integration.
+
+The Windows Service check does not include any metrics at this time.
 
 ### Events
 The Windows Service check does not include any event at this time.
@@ -74,6 +75,11 @@ The Agent submits this service check for each Windows service configured in `ser
 |Paused|WARNING|
 |Unknown|UNKNOWN|
 
+## Troubleshooting
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
 ## Further Reading
-### Blog Article
-See our [series of blog posts](https://www.datadoghq.com/blog/monitoring-windows-server-2012) about monitoring Windows Server 2012 with Datadog.
+
+* [Monitoring Windows Server 2012](https://www.datadoghq.com/blog/monitoring-windows-server-2012/)
+* [How to collect Windows Server 2012 metrics](https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/)
+* [Monitoring Windows Server 2012 with Datadog](https://www.datadoghq.com/blog/windows-server-monitoring/)

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -34,8 +34,8 @@ class TestWin32_event_log(AgentCheckTest, TestCommonWMI):
         'source_name': ["MSSQLSERVER"]
     }
 
-    @patch('checks.wmi_check.to_time', side_effect=to_time)
-    @patch('checks.wmi_check.from_time', side_effect=from_time)
+    @patch('checks.winwmi_check.to_time', side_effect=to_time)
+    @patch('checks.winwmi_check.from_time', side_effect=from_time)
     def test_check(self, from_time, to_time):
         """
         Returns the right metrics and service checks

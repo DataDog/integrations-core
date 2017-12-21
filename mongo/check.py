@@ -9,6 +9,8 @@ import pymongo
 # project
 from checks import AgentCheck
 from urlparse import urlsplit
+from config import _is_affirmative
+from distutils.version import LooseVersion # pylint: disable=E0611,E0401
 
 DEFAULT_TIMEOUT = 30
 GAUGE = AgentCheck.gauge
@@ -300,6 +302,8 @@ class MongoDb(AgentCheck):
         "wiredTiger.cache.maximum bytes configured": GAUGE,
         "wiredTiger.cache.maximum page size at eviction": GAUGE,
         "wiredTiger.cache.modified pages evicted": GAUGE,
+        "wiredTiger.cache.pages read into cache": GAUGE, # noqa
+        "wiredTiger.cache.pages written from cache": GAUGE, # noqa
         "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),  # noqa
         "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (RATE, "wiredTiger.cache.pages_evicted_exceeding_the_in-memory_maximum"),  # noqa
         "wiredTiger.cache.pages evicted by application threads": RATE,
@@ -622,6 +626,22 @@ class MongoDb(AgentCheck):
 
         return username, password, db_name, nodelist, clean_server_name, auth_source
 
+    def _collect_indexes_stats(self, instance, db, tags):
+        """
+        Collect indexes statistics for all collections in the configuration.
+        This use the "$indexStats" command.
+        """
+        for coll_name in instance.get('collections', []):
+            try:
+                for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
+                    idx_tags = tags + [
+                        "name:{0}".format(stats.get('name', 'unknown')),
+                        "collection:{0}".format(coll_name),
+                    ]
+                    self.gauge('mongodb.collection.indexes.accesses.ops', int(stats.get('accesses', {}).get('ops', 0)), idx_tags)
+            except Exception as e:
+                self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+
     def check(self, instance):
         """
         Returns a dictionary that looks a lot like what's sent back by
@@ -827,7 +847,7 @@ class MongoDb(AgentCheck):
                 )
 
         except Exception as e:
-            if "OperationFailure" in repr(e) and "replSetGetStatus" in str(e):
+            if "OperationFailure" in repr(e) and "not running with --replSet" in str(e):
                 pass
             else:
                 raise e
@@ -904,6 +924,13 @@ class MongoDb(AgentCheck):
                     self._resolve_metric(metric_name, metrics_to_collect)
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
+        if _is_affirmative(instance.get('collections_indexes_stats')):
+            mongo_version = cli.server_info().get('version', '0.0')
+            if LooseVersion(mongo_version) >= LooseVersion("3.2"):
+                self._collect_indexes_stats(instance, db, tags)
+            else:
+                self.log.error("'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s", mongo_version)
+
         # Report the usage metrics for dbs/collections
         if 'top' in additional_metrics:
             try:
@@ -965,8 +992,8 @@ class MongoDb(AgentCheck):
                         localdb.command("collstats", ol_collection_name)['size'] / 2.0 ** 20, 2
                     )
 
-                    op_asc_cursor = oplog.find().sort("$natural", pymongo.ASCENDING).limit(1)
-                    op_dsc_cursor = oplog.find().sort("$natural", pymongo.DESCENDING).limit(1)
+                    op_asc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.ASCENDING).limit(1)
+                    op_dsc_cursor = oplog.find({"ts": {"$exists": 1}}).sort("$natural", pymongo.DESCENDING).limit(1)
 
                     try:
                         first_timestamp = op_asc_cursor[0]['ts'].as_datetime()

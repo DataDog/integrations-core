@@ -13,15 +13,17 @@ instances:
   # only the first 50 databases will be checked.
   #
   - server: http://localhost:5984
-    # user: username                # optional
-    # password: password            # optional
-    # timeout: 5                    # in seconds
-    # db_whitelist:
+    # name: <Erlang name>         # CouchDB 2.x only. If not provided, the check will scan up to max_nodes_per_check nodes of the cluster
+    # user: username              # optional
+    # password: password          # optional
+    # timeout: 5                  # optional. in seconds. Defaults to 5
+    # db_whitelist:               # optional. A list of dbs to scan. All by default.
     #  - db1
     #  - db2
     #  - db3
-    # db_blacklist:
+    # db_blacklist:               # optional. A list of dbs to skip. None by default.
     #  - db1
     #  - db2
     #  - db3
-
+    # max_nodes_per_check: 10     # CouchDB 2.x only. How many nodes each check will report if no name is provided. Defaults to 20.
+    # max_dbs_per_check: 20       # Optional. How many databases to scan. Default to 50.

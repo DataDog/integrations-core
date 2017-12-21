@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -15,7 +15,6 @@ from urlparse import urlparse
 
 # 3rd party
 import requests
-import tornado
 
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
@@ -132,13 +131,19 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    CA_CERTS = [
-        '/opt/datadog-agent/embedded/ssl/certs/cacert.pem',
-        os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'),
-        '/etc/ssl/certs/ca-certificates.crt',
-    ]
+    ca_certs = ['/opt/datadog-agent/embedded/ssl/certs/cacert.pem']
 
-    for f in CA_CERTS:
+    try:
+        import tornado
+    except ImportError:
+        # if `tornado` is not present, simply ignore its certificates
+        pass
+    else:
+        ca_certs.append(os.path.join(os.path.dirname(tornado.__file__), 'ca-certificates.crt'))
+
+    ca_certs.append('/etc/ssl/certs/ca-certificates.crt')
+
+    for f in ca_certs:
         if os.path.exists(f):
             return f
     return None
@@ -162,6 +167,8 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         username = instance.get('username')
         password = instance.get('password')
+        client_cert = instance.get('client_cert')
+        client_key = instance.get('client_key')
         http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
         timeout = int(instance.get('timeout', 10))
         config_headers = instance.get('headers', {})
@@ -186,12 +193,12 @@ class HTTPCheck(NetworkCheck):
         skip_proxy = _is_affirmative(instance.get('no_proxy', False))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
-        return url, username, password, method, data, http_response_status_code, timeout, include_content,\
+        return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
             headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
             weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
-        addr, username, password, method, data, http_response_status_code, timeout, include_content, headers,\
+        addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
             ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
@@ -239,7 +246,8 @@ class HTTPCheck(NetworkCheck):
                              proxies = instance_proxy, allow_redirects=allow_redirects,
                              verify=False if disable_ssl_validation else instance_ca_certs,
                              json = data if method == 'post' and isinstance(data, dict) else None,
-                             data = data if method == 'post' and isinstance(data, basestring) else None)
+                             data = data if method == 'post' and isinstance(data, basestring) else None,
+                             cert = (client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
@@ -273,7 +281,11 @@ class HTTPCheck(NetworkCheck):
             running_time = time.time() - start
             # Store tags in a temporary list so that we don't modify the global tags data structure
             tags_list = list(tags)
-            tags_list.append('url:%s' % addr)
+
+            # Only add the URL tag if it's not already present
+            if not filter(re.compile('^url:').match, tags_list):
+                tags_list.append('url:%s' % addr)
+
             self.gauge('network.http.response_time', running_time, tags=tags_list)
 
         # Check HTTP response status code
@@ -345,7 +357,10 @@ class HTTPCheck(NetworkCheck):
         tags = instance.get('tags', [])
         tags_list = []
         tags_list.extend(tags)
-        tags_list.append('url:%s' % url)
+
+        # Only add the URL tag if it's not already present
+        if not filter(re.compile('^url:').match, tags_list):
+            tags_list.append('url:%s' % url)
 
         # Get a custom message that will be displayed in the event
         custom_message = instance.get('message', "")
@@ -409,9 +424,12 @@ class HTTPCheck(NetworkCheck):
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
         url = instance.get('url', None)
-        sc_tags = ['url:{0}'.format(url), "instance:{0}".format(instance_name)]
-        custom_tags = instance.get('tags', [])
-        tags = sc_tags + custom_tags
+        tags = instance.get('tags', [])
+        tags.append("instance:{0}".format(instance_name))
+
+        # Only add the URL tag if it's not already present
+        if not filter(re.compile('^url:').match, tags):
+            tags.append('url:{0}'.format(url))
 
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
@@ -438,6 +456,7 @@ class HTTPCheck(NetworkCheck):
 
         o = urlparse(url)
         host = o.hostname
+        server_name = instance.get('ssl_server_name', o.hostname)
 
         port = o.port or 443
 
@@ -449,7 +468,7 @@ class HTTPCheck(NetworkCheck):
             context.verify_mode = ssl.CERT_REQUIRED
             context.check_hostname = True
             context.load_verify_locations(instance_ca_certs)
-            ssl_sock = context.wrap_socket(sock, server_hostname=host)
+            ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
         except Exception as e:

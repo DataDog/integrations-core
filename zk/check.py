@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -7,12 +7,12 @@ As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of 
 This check first parses the `stat` admin command for a version number.
 If the zookeeper version supports `mntr`, it is also parsed.
 
-Duplicate information is being reported by both `mntr` and `stat` to keep backwards compatability.
+Duplicate information is being reported by both `mntr` and `stat` to keep backwards compatibility.
 Example:
     `stat` reports: zookeeper.latency.avg
     `mntr` reports: zookeeper.avg.latency
 If available, make use of the data reported by `mntr` not `stat`.
-The duplicate `stat` reports are only kept for backward compatability.
+The duplicate `stat` reports are only kept for backward compatibility.
 
 Besides the usual zookeeper state of `leader`, `follower`, `observer` and `standalone`,
 this check will report three other states:
@@ -310,11 +310,17 @@ class ZookeeperCheck(AgentCheck):
 
         # Received: 101032173
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_received', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.received', long(value.strip()), "rate"))
 
         # Sent: 1324
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_sent', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.sent', long(value.strip()), "rate"))
 
         if has_connections_val:
             # Connections: 1

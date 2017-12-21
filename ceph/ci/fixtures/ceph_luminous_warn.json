@@ -1,0 +1,353 @@
+{
+    "health_detail": {
+        "checks": {
+            "OSD_NEARFULL": {
+                "severity": "HEALTH_WARN",
+                "summary": {
+                    "message": "1 nearfull osd(s)"
+                },
+                "detail": [
+                    {
+                        "message": "osd.0 is near full"
+                    }
+                ]
+            },
+            "OSD_FULL": {
+                "severity": "HEALTH_WARN",
+                "summary": {
+                    "message": "1 full osd(s)"
+                },
+                "detail": [
+                    {
+                        "message": "osd.0 is full"
+                    }
+                ]
+            },
+            "POOL_APP_NOT_ENABLED": {
+                "severity": "HEALTH_ERR",
+                "summary": {
+                    "message": "application not enabled on 1 pool(s)"
+                },
+                "detail": [
+                    {
+                        "message": "application not enabled on pool 'test-pool'"
+                    },
+                    {
+                        "message": "use 'ceph osd pool application enable <pool-name> <app-name>', where <app-name> is 'cephfs', 'rbd', 'rgw', or freeform for custom applications."
+                    }
+                ]
+            }
+        },
+        "status": "HEALTH_ERR",
+        "overall_status": "HEALTH_WARN",
+        "detail": [
+            "'ceph health' JSON format has changed in luminous. If you see this your monitoring system is scraping the wrong fields. Disable this with 'mon health preluminous compat warning = false'"
+        ]
+    },
+    "df_detail": {
+        "pools": [
+            {
+                "id": 0,
+                "name": "rbd",
+                "stats": {
+                    "bytes_used": 0,
+                    "dirty": 0,
+                    "kb_used": 0,
+                    "max_avail": 183768246939,
+                    "objects": 0,
+                    "rd": 0,
+                    "rd_bytes": 0,
+                    "wr": 0,
+                    "wr_bytes": 0
+                }
+            },
+            {
+                "id": 1,
+                "name": "pool0",
+                "stats": {
+                    "bytes_used": 36266725508,
+                    "dirty": 8872,
+                    "kb_used": 35416725,
+                    "max_avail": 275652370408,
+                    "objects": 8872,
+                    "rd": 250612,
+                    "rd_bytes": 30539931648,
+                    "wr": 588776,
+                    "wr_bytes": 62512706560
+                }
+            }
+        ],
+        "stats": {
+            "total_avail_bytes": 556422717440,
+            "total_bytes": 627829063680,
+            "total_objects": 8872,
+            "total_used_bytes": 71406346240
+        }
+    },
+    "mon_status": {
+        "election_epoch": 38,
+        "extra_probe_peers": [
+            "10.240.0.9:6789/0",
+            "10.240.0.10:6789/0"
+        ],
+        "monmap": {
+            "created": "0.000000",
+            "epoch": 1,
+            "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
+            "modified": "0.000000",
+            "mons": [
+                {
+                    "addr": "10.240.0.9:6789/0",
+                    "name": "ceph1",
+                    "rank": 0
+                },
+                {
+                    "addr": "10.240.0.10:6789/0",
+                    "name": "ceph2",
+                    "rank": 1
+                },
+                {
+                    "addr": "10.240.0.11:6789/0",
+                    "name": "ceph3",
+                    "rank": 2
+                }
+            ]
+        },
+        "name": "ceph3",
+        "outside_quorum": [],
+        "quorum": [
+            0,
+            1,
+            2
+        ],
+        "rank": 2,
+        "state": "peon",
+        "sync_provider": []
+    },
+    "osd_perf": {
+        "osd_perf_infos": [
+            {
+                "id": 0,
+                "perf_stats": {
+                    "apply_latency_ms": 195,
+                    "commit_latency_ms": 137
+                }
+            },
+            {
+                "id": 1,
+                "perf_stats": {
+                    "apply_latency_ms": 107,
+                    "commit_latency_ms": 71
+                }
+            },
+            {
+                "id": 2,
+                "perf_stats": {
+                    "apply_latency_ms": 125,
+                    "commit_latency_ms": 85
+                }
+            }
+        ]
+    },
+    "osd_pool_stats": [
+        {
+            "client_io_rate": {},
+            "pool_id": 0,
+            "pool_name": "rbd",
+            "recovery": {},
+            "recovery_rate": {}
+        },
+        {
+            "client_io_rate": {
+                "op_per_sec": 996,
+                "read_bytes_sec": 259930926,
+                "write_bytes_sec": 378295
+            },
+            "pool_id": 1,
+            "pool_name": "pool0",
+            "recovery": {},
+            "recovery_rate": {}
+        }
+    ],
+    "status": {
+        "fsid": "33b913f4-12f9-460a-a820-3ff3b4435417",
+        "health": {
+            "checks": {
+                "OSD_NEARFULL": {
+                    "severity": "HEALTH_WARN",
+                    "summary": {
+                        "message": "1 nearfull osd(s)"
+                    }
+                },
+                "OSD_FULL": {
+                    "severity": "HEALTH_ERR",
+                    "summary": {
+                        "message": "1 full osd(s)"
+                    }
+                },
+                "POOL_APP_NOT_ENABLED": {
+                    "severity": "HEALTH_WARN",
+                    "summary": {
+                        "message": "application not enabled on 1 pool(s)"
+                    }
+                }
+            },
+            "status": "HEALTH_ERR",
+            "overall_status": "HEALTH_WARN"
+        },
+        "election_epoch": 7,
+        "quorum": [
+            0
+        ],
+        "quorum_names": [
+            "dogbox"
+        ],
+        "monmap": {
+            "epoch": 1,
+            "fsid": "33b913f4-12f9-460a-a820-3ff3b4435417",
+            "modified": "2017-11-30 17:30:20.761238",
+            "created": "2017-11-30 17:30:20.761238",
+            "features": {
+                "persistent": [
+                    "kraken",
+                    "luminous"
+                ],
+                "optional": []
+            },
+            "mons": [
+                {
+                    "rank": 0,
+                    "name": "dogbox",
+                    "addr": "10.0.2.15:6789/0",
+                    "public_addr": "10.0.2.15:6789/0"
+                }
+            ]
+        },
+        "osdmap": {
+            "osdmap": {
+                "epoch": 120,
+                "num_osds": 1,
+                "num_up_osds": 1,
+                "num_in_osds": 1,
+                "full": false,
+                "nearfull": true,
+                "num_remapped_pgs": 0
+            }
+        },
+        "pgmap": {
+            "pgs_by_state": [
+                {
+                    "state_name": "active+clean",
+                    "count": 156
+                }
+            ],
+            "num_pgs": 156,
+            "num_pools": 8,
+            "num_objects": 227,
+            "data_bytes": 7795340351,
+            "bytes_used": 9426182144,
+            "bytes_avail": 1311236096,
+            "bytes_total": 10737418240
+        },
+        "fsmap": {
+            "epoch": 135,
+            "id": 1,
+            "up": 1,
+            "in": 1,
+            "max": 1,
+            "by_rank": [
+                {
+                    "filesystem_id": 1,
+                    "rank": 0,
+                    "name": "0",
+                    "status": "up:active"
+                }
+            ]
+        },
+        "mgrmap": {
+            "epoch": 10,
+            "active_gid": 24106,
+            "active_name": "dogbox",
+            "active_addr": "10.0.2.15:6805/413",
+            "available": true,
+            "standbys": [],
+            "modules": [
+                "dashboard",
+                "restful",
+                "status"
+            ],
+            "available_modules": [
+                "dashboard",
+                "prometheus",
+                "restful",
+                "status",
+                "zabbix"
+            ]
+        },
+        "servicemap": {
+            "epoch": 7,
+            "modified": "2017-12-07 13:32:05.210390",
+            "services": {
+                "rbd-mirror": {
+                    "daemons": {
+                        "summary": "",
+                        "admin": {
+                            "start_epoch": 6,
+                            "start_stamp": "2017-12-07 13:31:53.171768",
+                            "gid": 24100,
+                            "addr": "10.0.2.15:0/1325850103",
+                            "metadata": {
+                                "arch": "x86_64",
+                                "ceph_version": "ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)",
+                                "cpu": "Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz",
+                                "distro": "ubuntu",
+                                "distro_description": "Ubuntu 16.04.3 LTS",
+                                "distro_version": "16.04",
+                                "hostname": "dogbox",
+                                "instance_id": "24100",
+                                "kernel_description": "#181-Ubuntu SMP Wed Sep 13 13:25:03 UTC 2017",
+                                "kernel_version": "3.13.0-132-generic",
+                                "mem_swap_kb": "0",
+                                "mem_total_kb": "4048156",
+                                "os": "Linux"
+                            }
+                        }
+                    }
+                },
+                "rgw": {
+                    "daemons": {
+                        "summary": "",
+                        "dogbox": {
+                            "start_epoch": 7,
+                            "start_stamp": "2017-12-07 13:32:04.193192",
+                            "gid": 24099,
+                            "addr": "10.0.2.15:0/1923399559",
+                            "metadata": {
+                                "arch": "x86_64",
+                                "ceph_version": "ceph version 12.2.1 (3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e) luminous (stable)",
+                                "cpu": "Intel(R) Core(TM) i7-4578U CPU @ 3.00GHz",
+                                "distro": "ubuntu",
+                                "distro_description": "Ubuntu 16.04.3 LTS",
+                                "distro_version": "16.04",
+                                "frontend_config#0": "civetweb port=8080",
+                                "frontend_type#0": "civetweb",
+                                "hostname": "dogbox",
+                                "kernel_description": "#181-Ubuntu SMP Wed Sep 13 13:25:03 UTC 2017",
+                                "kernel_version": "3.13.0-132-generic",
+                                "mem_swap_kb": "0",
+                                "mem_total_kb": "4048156",
+                                "num_handles": "1",
+                                "os": "Linux",
+                                "pid": "235",
+                                "zone_id": "10e8e4a2-1f89-4f13-a1ef-37c9f7961f2c",
+                                "zone_name": "default",
+                                "zonegroup_id": "28ec05ba-c470-4bc4-a9c3-238dbc06ae51",
+                                "zonegroup_name": "default"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

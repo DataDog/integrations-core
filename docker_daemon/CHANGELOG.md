@@ -1,6 +1,40 @@
 # CHANGELOG - docker_daemon
 
-1.3.2 / Unreleased
+1.7.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881][]
+* [IMPROVEMENT] Improve logging when cgroup metrics can't be retrieved. See [#914][]
+
+1.6.0 / 2017-11-21
+==================
+### Changes
+
+* [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
+* [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
+* [IMPROVEMENT] Add docker.containers.running.total & docker.containers.stopped.total metrics. See [#859][]
+
+1.5.1 / 2017-11-08
+==================
+### Changes
+
+* [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
+
+1.5.0 / 2017-10-10
+==================
+### Changes
+
+* [IMPROVEMENT] Remove namespace from pod_name tag. See [#770][]
+
+1.4.0 / 2017-09-12
+==================
+### Changes
+
+* [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
+* [FEATURE] Add client-side event filtering by event type. See [#744][]
+
+1.3.2 / 2017-08-28
 ==================
 ### Changes
 
@@ -86,4 +120,11 @@
 [#616]: https://github.com/DataDog/integrations-core/issues/616
 [#641]: https://github.com/DataDog/integrations-core/issues/641
 [#701]: https://github.com/DataDog/integrations-core/issues/701
+[#722]: https://github.com/DataDog/integrations-core/issues/722
+[#744]: https://github.com/DataDog/integrations-core/issues/744
+[#760]: https://github.com/DataDog/integrations-core/issues/760
+[#770]: https://github.com/DataDog/integrations-core/issues/770
+[#782]: https://github.com/DataDog/integrations-core/issues/782
+[#817]: https://github.com/DataDog/integrations-core/issues/817
+[#859]: https://github.com/DataDog/integrations-core/issues/859
 [@sophaskins]: https://github.com/sophaskins

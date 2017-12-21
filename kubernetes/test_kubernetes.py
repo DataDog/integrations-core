@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -129,18 +129,12 @@ class TestKubernetes(AgentCheckTest):
         self.run_check_twice(config, mocks=mocks, force_reload=True)
 
         expected_tags = [
-            (['container_name:/kubelet', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
             (['kube_replication_controller:propjoe', 'kube_namespace:default', 'container_name:k8s_POD.e4cc795_propjoe-dhdzk_default_ba151259-36e0-11e5-84ce-42010af01c62_ef0ed5f9', 'pod_name:default/propjoe-dhdzk'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['container_name:/kube-proxy', 'pod_name:no_pod'], [MEM, CPU, NET]),
             (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'container_name:k8s_POD.2688308a_kube-dns-v8-smhcb_kube-system_b80ffab3-3619-11e5-84ce-42010af01c62_295f14ff', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['container_name:/docker-daemon', 'pod_name:no_pod'], [MEM, CPU, DISK, NET]),
             (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'container_name:k8s_etcd.2e44beff_kube-dns-v8-smhcb_kube-system_b80ffab3-3619-11e5-84ce-42010af01c62_e3e504ad', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:fluentd-cloud-logging-kubernetes-minion', 'kube_namespace:kube-system', 'container_name:k8s_POD.e4cc795_fluentd-cloud-logging-kubernetes-minion-mu4w_kube-system_d0feac1ad02da9e97c4bf67970ece7a1_49dd977d', 'pod_name:kube-system/fluentd-cloud-logging-kubernetes-minion-mu4w'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'container_name:k8s_skydns.1e752dc0_kube-dns-v8-smhcb_kube-system_b80ffab3-3619-11e5-84ce-42010af01c62_7c1345a1', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['container_name:/', 'pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
-            (['container_name:/system/docker', 'pod_name:no_pod'], [MEM, CPU, DISK, NET]),
             (['kube_replication_controller:propjoe', 'kube_namespace:default', 'container_name:k8s_propjoe.21f63023_propjoe-dhdzk_default_ba151259-36e0-11e5-84ce-42010af01c62_19879457', 'pod_name:default/propjoe-dhdzk'], [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['container_name:/system', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
             (['kube_replication_controller:kube-ui-v1', 'kube_namespace:kube-system', 'container_name:k8s_POD.3b46e8b9_kube-ui-v1-sv2sq_kube-system_b7e8f250-3619-11e5-84ce-42010af01c62_209ed1dc', 'pod_name:kube-system/kube-ui-v1-sv2sq'], [MEM, CPU, FS, NET, NET_ERRORS]),
             (['kube_replication_controller:kube-dns-v8', 'kube_namespace:kube-system', 'container_name:k8s_kube2sky.1afa6a47_kube-dns-v8-smhcb_kube-system_b80ffab3-3619-11e5-84ce-42010af01c62_624bc34c', 'pod_name:kube-system/kube-dns-v8-smhcb'], [MEM, CPU, FS, NET, NET_ERRORS]),
             (['kube_replication_controller:propjoe', 'kube_namespace:default', 'container_name:k8s_POD.e4cc795_propjoe-lkc3l_default_3a9b1759-4055-11e5-84ce-42010af01c62_45d1185b', 'pod_name:default/propjoe-lkc3l'], [MEM, CPU, FS, NET, NET_ERRORS]),
@@ -259,17 +253,14 @@ class TestKubernetes(AgentCheckTest):
         self.run_check_twice(config, mocks=mocks, force_reload=True)
 
         expected_tags = [
-            (['container_name:/kubelet', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
             (['container_name:k8s_POD.35220667_dd-agent-1rxlh_default_12c7be82-33ca-11e6-ac8f-42010af00003_f5cf585f',
               'container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
-              'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh', 'kube_namespace:default', 'kube_app:dd-agent',
+              'image_tag:2.0', 'pod_name:dd-agent-1rxlh', 'kube_namespace:default', 'kube_app:dd-agent',
               'kube_foo:bar','kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'],
             [MEM, CPU, FS, NET, NET_ERRORS]),
-            (['container_name:/', 'pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
-            (['container_name:/system', 'pod_name:no_pod'], [MEM, CPU, NET, DISK]),
             (['container_name:k8s_dd-agent.7b520f3f_dd-agent-1rxlh_default_12c7be82-33ca-11e6-ac8f-42010af00003_321fecb4',
               'container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
-              'image_tag:massi_ingest_k8s_events','pod_name:default/dd-agent-1rxlh',
+              'image_tag:massi_ingest_k8s_events','pod_name:dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar',
               'kube_bar:baz', 'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [LIM, REQ, MEM, CPU, NET, DISK, DISK_USAGE]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
@@ -317,14 +308,13 @@ class TestKubernetes(AgentCheckTest):
 
         expected_tags = [
             (['container_image:datadog/docker-dd-agent:massi_ingest_k8s_events', 'image_name:datadog/docker-dd-agent',
-              'image_tag:massi_ingest_k8s_events', 'pod_name:default/dd-agent-1rxlh',
+              'image_tag:massi_ingest_k8s_events', 'pod_name:dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
               'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:dd-agent'], [MEM, CPU, NET, DISK, DISK_USAGE, LIM, REQ]),
             (['container_image:gcr.io/google_containers/pause:2.0', 'image_name:gcr.io/google_containers/pause',
-              'image_tag:2.0', 'pod_name:default/dd-agent-1rxlh',
+              'image_tag:2.0', 'pod_name:dd-agent-1rxlh',
               'kube_namespace:default', 'kube_app:dd-agent', 'kube_foo:bar','kube_bar:baz',
               'kube_replication_controller:dd-agent', 'kube_daemon_set:dd-agent', 'kube_container_name:POD'], [MEM, CPU, NET, NET_ERRORS, DISK_USAGE]),
-            (['pod_name:no_pod'], [MEM, CPU, FS, NET, NET_ERRORS, DISK]),
             (['kube_replication_controller:dd-agent', 'kube_namespace:default', 'kube_daemon_set:dd-agent'], [PODS]),
             ([], [LIM, REQ, CAP])  # container from kubernetes api doesn't have a corresponding entry in Cadvisor
         ]
@@ -496,6 +486,7 @@ class TestKubeutil(unittest.TestCase):
     @mock.patch('utils.kubernetes.KubeUtil._locate_kubelet', return_value='http://172.17.0.1:10255')
     def setUp(self, _locate_kubelet):
         self.kubeutil = KubeUtil()
+        self.kubeutil.__init__()  # It's a singleton, force re-init
 
     @mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list', side_effect=['foo'])
     @mock.patch('utils.kubernetes.KubeUtil.extract_kube_pod_tags')
@@ -744,22 +735,27 @@ class TestKubeutil(unittest.TestCase):
             self.assertEqual(name, 'bar')
             f.assert_not_called()
 
-    def test__fetch_host_data(self):
+    def test__fetch_host_data_1_1(self):
         """
-        Test with both 1.1 and 1.2 version payloads
+        Test with 1.1 version payload
         """
         with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
-            self.kubeutil.host_name = 'dd-agent-1rxlh'
-            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
-            self.kubeutil._fetch_host_data()
-            self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
-            self.assertEqual(self.kubeutil._node_name, 'kubernetes-massi-minion-k23m')
-
-            self.kubeutil.host_name = 'heapster-v11-l8sh1'
+            self.kubeutil.pod_name = 'heapster-v11-l8sh1'
             mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.1.json", sdk_dir=FIXTURE_DIR, string_escape=False))
             self.kubeutil._fetch_host_data()
             self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
             self.assertEqual(self.kubeutil._node_name, 'gke-cluster-1-8046fdfa-node-ld35')
+
+    def test__fetch_host_data_1_2(self):
+        """
+        Test with 1.2 version payload
+        """
+        with mock.patch('utils.kubernetes.KubeUtil.retrieve_pods_list') as mock_pods:
+            self.kubeutil.pod_name = 'dd-agent-1rxlh'
+            mock_pods.return_value = json.loads(Fixtures.read_file("pods_list_1.2.json", sdk_dir=FIXTURE_DIR, string_escape=False))
+            self.kubeutil._fetch_host_data()
+            self.assertEqual(self.kubeutil._node_ip, '10.240.0.9')
+            self.assertEqual(self.kubeutil._node_name, 'kubernetes-massi-minion-k23m')
 
     def test_get_auth_token(self):
         KubeUtil.AUTH_TOKEN_PATH = '/foo/bar'
@@ -777,12 +773,14 @@ class TestKubeutil(unittest.TestCase):
         events = json.loads(Fixtures.read_file("events.json", sdk_dir=FIXTURE_DIR, string_escape=False))['items']
         for ev in events:
             tags = KubeUtil().extract_event_tags(ev)
-            # there should be 4 tags except for some events where source.host is missing
-            self.assertTrue(len(tags) >= 3)
+            # there should be 6 tags except for some events where source.host is missing
+            self.assertTrue(len(tags) >= 5)
 
             tag_names = [tag.split(':')[0] for tag in tags]
             self.assertIn('reason', tag_names)
             self.assertIn('namespace', tag_names)
             self.assertIn('object_type', tag_names)
-            if len(tags) == 4:
+            self.assertIn('object_name', tag_names)
+            self.assertIn('source_component', tag_names)
+            if len(tags) == 6:
                 self.assertIn('node_name', tag_names)

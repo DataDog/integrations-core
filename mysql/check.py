@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -528,7 +528,11 @@ class MySql(AgentCheck):
 
         if _is_affirmative(options.get('replication', False)):
             # Get replica stats
-            results.update(self._get_replica_stats(db))
+            is_mariadb = self._get_is_mariadb(db, host)
+            replication_channel = options.get('replication_channel')
+            if replication_channel:
+                self.service_check_tags.append("channel:{0}".format(replication_channel))
+            results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
             nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
             results.update(self._get_slave_status(db, above_560, nonblocking))
             metrics.update(REPLICA_VARS)
@@ -543,12 +547,12 @@ class MySql(AgentCheck):
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
             if self._version_compatible(db, host, (5, 7, 0)):
-                slave_io_running = self._collect_string('Slave_IO_Running', results)
-                slave_sql_running = self._collect_string('Slave_SQL_Running', results)
+                slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
+                slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
                 if slave_io_running:
-                    slave_io_running = (slave_io_running.lower().strip() == "yes")
+                    slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
                 if slave_sql_running:
-                    slave_sql_running = (slave_sql_running.lower().strip() == "yes")
+                    slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
 
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
@@ -672,6 +676,13 @@ class MySql(AgentCheck):
             self.mysql_version[hostkey] = version
             return version
 
+    def _get_is_mariadb(self, db, host):
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
+            result = cursor.fetchone()
+
+            return result[0] == 1
+
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
             yield None, None
@@ -744,7 +755,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
             pid = self._get_server_pid(db)
 
         if pid:
@@ -847,24 +858,57 @@ class MySql(AgentCheck):
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s" % str(e))
             return False
 
-    def _get_replica_stats(self, db):
+    def _get_replica_stats(self, db, is_mariadb, replication_channel):
+        replica_results = {}
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-                replica_results = {}
-                cursor.execute("SHOW SLAVE STATUS;")
-                slave_results = cursor.fetchone()
+                if is_mariadb and replication_channel:
+                    cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
+                    cursor.execute("SHOW SLAVE STATUS;")
+                elif replication_channel:
+                    cursor.execute("SHOW SLAVE STATUS FOR CHANNEL '{0}';".format(replication_channel))
+                else:
+                    cursor.execute("SHOW SLAVE STATUS;")
+
+                if replication_channel:
+                    slave_results = cursor.fetchone()
+                else:
+                    slave_results = cursor.fetchall()
+
                 if slave_results:
-                    replica_results.update(slave_results)
+                    if replication_channel:
+                        replica_results.update(slave_results)
+                    elif len(slave_results) > 0:
+                        for slave_result in slave_results:
+                            # MySQL <5.7 does not have Channel_Name.
+                            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                            channel = slave_result.get('Channel_Name') or 'default'
+                            for key in slave_result:
+                                if slave_result[key] is not None:
+                                    if key not in replica_results:
+                                        replica_results[key] = {}
+                                    replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
+        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            errno, msg = e.args
+            if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
+                # MariaDB complains when you try to get slave status with a
+                # connection name on the master, without connection name it
+                # responds an empty string as expected.
+                # Mysql behaves the same with or without connection name.
+                pass
+            else:
+                self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
+
+        try:
+            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
-
-                return replica_results
-
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
-            return {}
+            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s" % str(e))
+
+        return replica_results
 
     def _get_slave_status(self, db, above_560, nonblocking):
         """

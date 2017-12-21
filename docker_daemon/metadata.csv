@@ -43,8 +43,10 @@ docker.container.size_rootfs.avg,gauge,,byte,,Average value of docker.container.
 docker.container.size_rootfs.count,rate,,sample,second,The rate that the value of docker.container.size_rw was sampled,0,docker,filesystem size count
 docker.container.size_rootfs.max,gauge,,byte,,Max value of docker.container.size_rootfs,0,docker,filesystem size max
 docker.container.size_rootfs.median,gauge,,byte,,Median value of docker.container.size_rootfs,0,docker,filesystem size median
-docker.containers.running,gauge,,,,The number of containers running on this host,0,docker,containers running
-docker.containers.stopped,gauge,,,,The number of containers stopped on this host,0,docker,containers stopped
+docker.containers.running,gauge,,,,The number of containers running on this host tagged by image,0,docker,containers running
+docker.containers.stopped,gauge,,,,The number of containers stopped on this host tagged by image,0,docker,containers stopped
+docker.containers.running.total,gauge,,,,The total number of containers running on this host,0,docker,total containers running
+docker.containers.stopped.total,gauge,,,,The total number of containers stopped on this host,0,docker,total containers stopped
 docker.images.available,gauge,,,,The number of top-level images,0,docker,images avail
 docker.images.intermediate,gauge,,,,"The number of intermediate images, which are intermediate layers that make up other images",0,docker,images intermediate
 docker.mem.limit,gauge,,byte,,"The memory limit for the container, if set",0,docker,mem limit
@@ -59,7 +61,13 @@ docker.mem.sw_limit.avg,gauge,,byte,,Average value of docker.mem.sw_limit. Ordin
 docker.mem.sw_limit.count,rate,,sample,second,The rate that the value of docker.mem.sw_limit was sampled,0,docker,mem + sw limit count
 docker.mem.sw_limit.max,gauge,,byte,,Max value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit max
 docker.mem.sw_limit.median,gauge,,byte,,Median value of docker.mem.sw_limit. Ordinarily this value will not change,0,docker,mem + sw limit median
-docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, if the limit is set",0,docker,mem in use
+docker.mem.soft_limit,gauge,,byte,,"The memory reservation limit for the container, if set",0,docker,mem soft limit
+docker.mem.soft_limit.95percentile,gauge,,byte,,95th percentile of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit 95%
+docker.mem.soft_limit.avg,gauge,,byte,,Average value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit avg
+docker.mem.soft_limit.count,rate,,sample,second,The rate that the value of docker.mem.soft_limit was sampled,0,docker,soft limit count
+docker.mem.soft_limit.max,gauge,,byte,,Max value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit max
+docker.mem.soft_limit.median,gauge,,byte,,Median value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit median
+docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, IF THE LIMIT IS SET",0,docker,mem in use
 docker.mem.in_use.95percentile,gauge,,fraction,,95th percentile of docker.mem.in_use,0,docker,mem in use 95%
 docker.mem.in_use.avg,gauge,,fraction,,Average value of docker.mem.in_use,0,docker,mem in use avg
 docker.mem.in_use.count,rate,,sample,second,The rate that the value of docker.mem.in_use was sampled,0,docker,mem in use count

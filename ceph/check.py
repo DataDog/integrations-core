@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -24,6 +24,26 @@ class Ceph(AgentCheck):
 
     DEFAULT_CEPH_CMD = '/usr/bin/ceph'
     DEFAULT_CEPH_CLUSTER = 'ceph'
+    DEFAULT_HEALTH_CHECKS = [
+        'OSD_DOWN',
+        'OSD_ORPHAN',
+        'OSD_FULL',
+        'OSD_NEARFULL',
+        'POOL_FULL',
+        'POOL_NEAR_FULL',
+        'PG_AVAILABILITY',
+        'PG_DEGRADED',
+        'PG_DEGRADED_FULL',
+        'PG_DAMAGED',
+        'PG_NOT_SCRUBBED',
+        'PG_NOT_DEEP_SCRUBBED',
+        'CACHE_POOL_NEAR_FULL',
+        'TOO_FEW_PGS',
+        'TOO_MANY_PGS',
+        'OBJECT_UNFOUND',
+        'REQUEST_SLOW',
+        'REQUEST_STUCK',
+    ]
     NAMESPACE = 'ceph'
 
     def _collect_raw(self, ceph_cmd, ceph_cluster, instance):
@@ -88,21 +108,46 @@ class Ceph(AgentCheck):
 
         try:
             health = {'num_near_full_osds': 0, 'num_full_osds': 0}
-            # Health summary will be empty if no bad news
-            if raw['health_detail']['summary'] != []:
-                for osdhealth in raw['health_detail']['detail']:
-                    osd, pct = self._osd_pct_used(osdhealth)
-                    if osd:
-                        local_tags = tags + ['ceph_osd:%s' % osd.replace('.','')]
+            # In luminous, there are no more overall summary and detail fields, but rather
+            # one summary and one detail field per check type in the checks field
+            # For example, for near full osds, we have:
+            # "checks": {
+            # "OSD_NEARFULL": {
+            #     "severity": "HEALTH_WARN",
+            #     "summary": {
+            #         "message": "1 nearfull osd(s)"
+            #     },
+            #     "detail": [
+            #         {
+            #             "message": "osd.0 is near full"
+            #         }
+            #     ]
+            # }
+            # The percentage used per osd does not appear anymore in the message,
+            # so we won't send the metric osd.pct_used
+            if 'checks' in raw['health_detail']:
+                checks = raw['health_detail']['checks']
+                for check_name, check_detail in checks.iteritems():
+                    if check_name == 'OSD_NEARFULL':
+                        health['num_near_full_osds'] = len(check_detail['detail'])
+                    if check_name == 'OSD_FULL':
+                        health['num_full_osds'] = len(check_detail['detail'])
+            else:
+                # Health summary will be empty if no bad news
+                if raw['health_detail']['summary'] != []:
+                    for osdhealth in raw['health_detail']['detail']:
+                        osd, pct = self._osd_pct_used(osdhealth)
+                        if osd:
+                            local_tags = tags + ['ceph_osd:%s' % osd.replace('.','')]
 
-                        if 'near' in osdhealth:
-                            health['num_near_full_osds'] += 1
-                            local_health = {'osd.pct_used': pct}
-                            self._publish(local_health, self.gauge, ['osd.pct_used'], local_tags)
-                        else:
-                            health['num_full_osds'] += 1
-                            local_health = {'osd.pct_used': pct}
-                            self._publish(local_health, self.gauge, ['osd.pct_used'], local_tags)
+                            if 'near' in osdhealth:
+                                health['num_near_full_osds'] += 1
+                                local_health = {'osd.pct_used': pct}
+                                self._publish(local_health, self.gauge, ['osd.pct_used'], local_tags)
+                            else:
+                                health['num_full_osds'] += 1
+                                local_health = {'osd.pct_used': pct}
+                                self._publish(local_health, self.gauge, ['osd.pct_used'], local_tags)
 
             self._publish(health, self.gauge, ['num_full_osds'], tags)
             self._publish(health, self.gauge, ['num_near_full_osds'], tags)
@@ -176,6 +221,12 @@ class Ceph(AgentCheck):
             self.log.debug('Error retrieving mon_status metrics')
 
         try:
+            num_mons_active = len(raw['mon_status']['quorum'])
+            self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
+        except KeyError:
+            self.log.debug('Error retrieving mon_status quorum metrics')
+
+        try:
             stats = raw['df_detail']['stats']
             self._publish(stats, self.gauge, ['total_objects'], tags)
             used = float(stats['total_used_bytes'])
@@ -211,9 +262,13 @@ class Ceph(AgentCheck):
             else:
                 return None, None
 
-    def _perform_service_checks(self, raw, tags):
+    def _perform_service_checks(self, raw, tags, health_checks):
         if 'status' in raw:
-            s_status = raw['status']['health']['overall_status']
+            # In ceph luminous, the field name is now `status`
+            s_status = raw['status']['health'].get('status', None)
+            if not s_status:
+                s_status = raw['status']['health']['overall_status']
+
             if s_status.find('_OK') != -1:
                 status = AgentCheck.OK
             elif s_status.find('_WARN') != -1:
@@ -222,10 +277,23 @@ class Ceph(AgentCheck):
                 status = AgentCheck.CRITICAL
             self.service_check(self.NAMESPACE + '.overall_status', status)
 
+            # If we are in ceph luminous, the 'checks' fields contains details of the health checks that are not OK
+            # Report a service check for each of the checks listed in the yaml
+            if "checks" in raw['status']['health']:
+                for check in health_checks:
+                    status = AgentCheck.OK
+                    if check in raw['status']['health']['checks']:
+                        if '_WARN' in raw['status']['health']['checks'][check]['severity']:
+                            status = AgentCheck.WARNING
+                        else:
+                            status = AgentCheck.CRITICAL
+                    self.service_check(self.NAMESPACE + '.' + check.lower(), status)
+
     def check(self, instance):
         ceph_cmd = instance.get('ceph_cmd') or self.DEFAULT_CEPH_CMD
         ceph_cluster = instance.get('ceph_cluster') or self.DEFAULT_CEPH_CLUSTER
+        ceph_health_checks = instance.get('collect_service_check_for') or self.DEFAULT_HEALTH_CHECKS
         raw = self._collect_raw(ceph_cmd, ceph_cluster, instance)
         tags = self._extract_tags(raw, instance)
         self._extract_metrics(raw, tags)
-        self._perform_service_checks(raw, tags)
+        self._perform_service_checks(raw, tags, ceph_health_checks)

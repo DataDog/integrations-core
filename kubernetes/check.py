@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -55,6 +55,13 @@ FUNC_MAP = {
 
 EVENT_TYPE = 'kubernetes'
 
+# Mapping between k8s events and ddog alert types per
+# https://github.com/kubernetes/kubernetes/blob/adb75e1fd17b11e6a0256a4984ef9b18957d94ce/staging/src/k8s.io/client-go/1.4/tools/record/event.go#L59
+K8S_ALERT_MAP = {
+    'Warning': 'warning',
+    'Normal': 'info'
+}
+
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
 FACTORS = {
@@ -90,10 +97,13 @@ class Kubernetes(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         inst = instances[0] if instances is not None else None
-        self.kubeutil = KubeUtil(instance=inst)
+        self.kubeutil = KubeUtil(init_config=init_config, instance=inst)
 
-        if not self.kubeutil.kubelet_api_url:
-            raise Exception('Unable to reach kubelet. Try setting the host parameter.')
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.log.warning("Kubelet client failed to initialized for now, pausing the Kubernetes check.")
+            else:
+                raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
 
         if agentConfig.get('service_discovery') and \
            agentConfig.get('service_discovery_backend') == 'docker':
@@ -171,6 +181,14 @@ class Kubernetes(AgentCheck):
             self.event_retriever = None
 
     def check(self, instance):
+        if not self.kubeutil.init_success:
+            if self.kubeutil.left_init_retries > 0:
+                self.kubeutil.init_kubelet(instance)
+                self.log.warning("Kubelet client is not initialized, Kubernetes check is paused.")
+                return
+            else:
+                raise Exception("Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.")
+
         # Leader election
         self.refresh_leader_status(instance)
 
@@ -253,7 +271,7 @@ class Kubernetes(AgentCheck):
         # kube_container_name is the name of the Kubernetes container resource,
         # not the name of the docker container (that's tagged as container_name)
         kube_container_name = cont_labels[KubeUtil.CONTAINER_NAME_LABEL]
-        tags.append(u"pod_name:{0}/{1}".format(pod_namespace, pod_name))
+        tags.append(u"pod_name:{0}".format(pod_name))
         tags.append(u"kube_namespace:{0}".format(pod_namespace))
         tags.append(u"kube_container_name:{0}".format(kube_container_name))
 
@@ -308,12 +326,12 @@ class Kubernetes(AgentCheck):
             # The first alias seems to always match the docker container name
             container_name = subcontainer['aliases'][0]
         else:
-            # We default to the container id
-            container_name = subcontainer['name']
+            self.log.debug("Subcontainer doesn't have a name, skipping.")
+            return
 
         tags.append('container_name:%s' % container_name)
 
-        container_image = subcontainer['spec'].get('image')
+        container_image = self.kubeutil.image_name_resolver(subcontainer['spec'].get('image'))
         if container_image:
             tags.append('container_image:%s' % container_image)
 
@@ -392,6 +410,9 @@ class Kubernetes(AgentCheck):
         container_tags = {}
         for subcontainer in metrics:
             c_id = subcontainer.get('id')
+            if 'aliases' not in subcontainer:
+                # it means the subcontainer is about a higher-level entity than a container
+                continue
             try:
                 tags = self._update_container_metrics(instance, subcontainer, kube_labels)
                 if c_id:
@@ -533,6 +554,9 @@ class Kubernetes(AgentCheck):
             title = '{} {} on {}'.format(involved_obj.get('name'), event.get('reason'), node_name)
             message = event.get('message')
             source = event.get('source')
+            k8s_event_type = event.get('type')
+            alert_type = K8S_ALERT_MAP.get(k8s_event_type, 'info')
+
             if source:
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
@@ -543,6 +567,7 @@ class Kubernetes(AgentCheck):
                 'msg_title': title,
                 'msg_text': msg_body,
                 'source_type_name': EVENT_TYPE,
+                'alert_type': alert_type,
                 'event_object': 'kubernetes:{}'.format(involved_obj.get('name')),
                 'tags': tags,
             }
