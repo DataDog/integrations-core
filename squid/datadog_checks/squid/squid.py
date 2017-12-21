@@ -12,7 +12,7 @@ from checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
-METRIC_PREFIX = "squid"
+METRIC_PREFIX = "squid.cachemgr"
 SERVICE_CHECK = "squid.can_connect"
 SQUID_COUNTERS = [
     "client_http.requests",

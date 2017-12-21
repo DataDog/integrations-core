@@ -81,7 +81,7 @@ class TestSquidIntegration(AgentCheckTest):
         self.run_check_twice(conf)
         self.assertServiceCheckOK("squid.can_connect", tags=["name:ok_instance", "custom_tag"])
         for metric in expected_metrics:
-            self.assertMetric("squid." + metric, tags=["name:ok_instance", "custom_tag"])
+            self.assertMetric("squid.cachemgr." + metric, tags=["name:ok_instance", "custom_tag"])
         self.coverage_report()
 
     def test_check_fail(self):
