@@ -230,8 +230,7 @@ class RabbitMQCheckTest(AgentCheckTest):
             self.assertMetricTag('rabbitmq.queue.%s' %
                                  mname, 'rabbitmq_queue:tralala', count=0)
         for mname in E_METRICS:
-            self.assertMetric('rabbitmq.exchange.%s' %
-                                 mname, count=2)
+            self.assertMetric('rabbitmq.exchange.%s' % mname, count=2)
 
         # Service checks
         self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:/'])
