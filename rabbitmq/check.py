@@ -218,7 +218,7 @@ class RabbitMQ(AgentCheck):
     def check(self, instance):
         base_url, max_detailed, specified, auth, ssl_verify, custom_tags = self._get_config(instance)
         try:
-            vhosts, limit_vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
+            vhosts = self._get_vhosts(instance, base_url, auth=auth, ssl_verify=ssl_verify)
             self.cached_vhosts[base_url] = vhosts
 
             limit_vhosts = []
@@ -342,7 +342,7 @@ class RabbitMQ(AgentCheck):
 
         # only do this if vhosts were specified,
         # otherwise it'll just be making more queries for the same data
-        if limit_vhosts and object_type == QUEUE_TYPE:
+        if self._limit_vhosts() and object_type == QUEUE_TYPE:
             for vhost in limit_vhosts:
                 url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
                 try:
@@ -427,7 +427,7 @@ class RabbitMQ(AgentCheck):
 
         grab_all_data = True
 
-        if limit_vhosts:
+        if self._limit_vhosts():
             grab_all_data = False
             data = []
             for vhost in vhosts:
