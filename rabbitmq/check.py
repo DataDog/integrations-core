@@ -342,7 +342,7 @@ class RabbitMQ(AgentCheck):
 
         # only do this if vhosts were specified,
         # otherwise it'll just be making more queries for the same data
-        if self._limit_vhosts() and object_type == QUEUE_TYPE:
+        if self._limit_vhosts(instance) and object_type == QUEUE_TYPE:
             for vhost in limit_vhosts:
                 url = '{}/{}'.format(object_type, urllib.quote_plus(vhost))
                 try:
@@ -427,7 +427,7 @@ class RabbitMQ(AgentCheck):
 
         grab_all_data = True
 
-        if self._limit_vhosts():
+        if self._limit_vhosts(instance):
             grab_all_data = False
             data = []
             for vhost in vhosts:
