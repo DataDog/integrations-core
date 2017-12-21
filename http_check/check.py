@@ -280,7 +280,7 @@ class HTTPCheck(NetworkCheck):
         # Only add the URL tag if it's not already present
         if not filter(re.compile('^url:').match, tags_list):
             tags_list.append('url:%s' % addr)
-                
+
         # Only report this metric if the site is not down
         if response_time and not service_checks:
             # Stop the timer as early as possible
@@ -334,7 +334,7 @@ class HTTPCheck(NetworkCheck):
         if service_checks:
             can_status = 1 if service_checks[0][1] == "UP" else 0
             self.gauge('network.http.can_connect', can_status, tags=tags_list)
- 
+
             # cant_connect is useful for top lists
             cant_status = 0 if service_checks[0][1] == "UP" else 1
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
