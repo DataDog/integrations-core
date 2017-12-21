@@ -213,9 +213,9 @@ class VarnishCheckTest(AgentCheckTest):
         self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the Varnishadm output for version >= 5.x
-    @mock.patch('_varnish.geteuid')
-    @mock.patch('_varnish.Varnish._get_version_info')
-    @mock.patch('_varnish.get_subprocess_output', side_effect=backend_list_mock_v5)
+    @mock.patch('datadog_checks.varnish.varnish.geteuid')
+    @mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
+    @mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=backend_list_mock_v5)
     def test_command_line_post_varnish5(self, mock_subprocess, mock_version, mock_geteuid):
         mock_version.return_value = LooseVersion('5.0.0'), 'json'
         mock_geteuid.return_value = 0
