@@ -1,3 +1,4 @@
 # integration pip requirements
 httplib2==0.9 --hash=sha256:e227e67f676293025fbedca080c7114685e55857d6079d15f12704dfda03dd62
-simplejson==3.6.5
+simplejson==3.6.5 \
+    --hash=sha256:2a3189f79d1c7b8a2149a0e783c0b4217fad9b30a6e7d60450f2553dc2c0e57e
