@@ -471,11 +471,11 @@ class TestCouchdb2(AgentCheckTest):
 
         self.run_check({"instances": [self.NODE1, self.NODE2, self.NODE3]})
 
+        t.join()
+
         for node in [self.NODE1, self.NODE2, self.NODE3]:
             for gauge in self.indexing_tasks_gauges:
                 self.assertMetric(gauge, tags=['database:kennel', 'design_document:dummy', 'instance:{0}'.format(node['name'])])
-
-        t.join()
 
     def test_view_compaction_metrics(self):
         class LoadGenerator(threading.Thread):
