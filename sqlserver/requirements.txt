@@ -5,4 +5,8 @@ testfixtures==4.14.3 --hash=sha256:f9ab6face00b0b3284ced1e46acf0d715d1c5988f3826
 serpent==1.23 --hash=sha256:cf91b21c34fbf89d7c619b0baa8c53b3f9520815e355515a0c1cc6b0a8b58875
 
 # Requires unixodbc on Linux, so only build on windows for now
-pyodbc==4.0.13; sys_platform == 'win32'
+pyodbc==4.0.13 \
+    --hash=sha256:26b719271c8676578d5732f517ef56438669f90fbb6a33f16b0825b8311156af \
+    --hash=sha256:05da16d4f6464498d78a4618db4d888a8528f0a03a9b1a17d62a2d0e84c424a4 \
+    --hash=sha256:e50af893c8aefbbb9437951d2b9b7c14f9d9be504f907805ba83388f0397a537 \
+    --hash=sha256:32a3967c508827a25621eb8e8fe1806152d1a2d608bfed5e268a38d6f05dcc0b
