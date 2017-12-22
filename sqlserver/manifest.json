@@ -10,7 +10,7 @@
     "linux",
     "windows"
   ],
-  "version": "1.2.0",
+  "version": "1.2.1",
   "guid": "635cb962-ee9f-4788-aa55-a7ffb9661498",
   "public_title": "Datadog-SQL Server Integration",
   "categories":["data store"],
