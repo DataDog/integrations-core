@@ -43,6 +43,18 @@ CONFIG_REGEX = {
     ]
 }
 
+CONFIG_VHOSTS = {
+    'init_config': {},
+    'instances': [
+        {
+            'rabbitmq_api_url': 'http://localhost:15672/api/',
+            'rabbitmq_user': 'guest',
+            'rabbitmq_pass': 'guest',
+            'vhosts': ['/', 'myvhost'],
+        }
+    ]
+}
+
 CONFIG_WITH_FAMILY = {
     'init_config': {},
     'instances': [
@@ -142,6 +154,8 @@ class RabbitMQCheckTest(AgentCheckTest):
 
         self.assertMetric('rabbitmq.node.partitions', value=0, count=1)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1)
 
         # Queue attributes, should be only one queue fetched
         for mname in Q_METRICS:
@@ -154,6 +168,9 @@ class RabbitMQCheckTest(AgentCheckTest):
                                  mname, 'rabbitmq_exchange:test1', count=1)
 
         self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:/', "tag1:1", "tag2"])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myvhost', "tag1:1", "tag2"])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myothervhost', "tag1:1", "tag2"])
+
         self.assertServiceCheckOK('rabbitmq.status', tags=["tag1:1", "tag2"])
 
         self.coverage_report()
@@ -166,6 +183,8 @@ class RabbitMQCheckTest(AgentCheckTest):
             self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
 
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
 
         # Exchange attributes
         for mname in E_METRICS:
@@ -179,14 +198,44 @@ class RabbitMQCheckTest(AgentCheckTest):
         # Queue attributes
         for mname in Q_METRICS:
             self.assertMetricTag('rabbitmq.queue.%s' %
-                                 mname, 'rabbitmq_queue:test1', count=1)
+                                 mname, 'rabbitmq_queue:test1', count=3)
             self.assertMetricTag('rabbitmq.queue.%s' %
-                                 mname, 'rabbitmq_queue:test5', count=1)
+                                 mname, 'rabbitmq_queue:test5', count=3)
             self.assertMetricTag('rabbitmq.queue.%s' %
                                  mname, 'rabbitmq_queue:tralala', count=0)
 
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:/'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myvhost'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myothervhost'])
+        self.assertServiceCheckOK('rabbitmq.status')
+
+        self.coverage_report()
+
+    def test_limit_vhosts(self):
+        self.run_check(CONFIG_REGEX)
+
+        # Node attributes
+        for mname in COMMON_METRICS:
+            self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
+
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
+
+        for mname in Q_METRICS:
+            self.assertMetricTag('rabbitmq.queue.%s' %
+                                 mname, 'rabbitmq_queue:test1', count=3)
+            self.assertMetricTag('rabbitmq.queue.%s' %
+                                 mname, 'rabbitmq_queue:test5', count=3)
+            self.assertMetricTag('rabbitmq.queue.%s' %
+                                 mname, 'rabbitmq_queue:tralala', count=0)
+        for mname in E_METRICS:
+            self.assertMetric('rabbitmq.exchange.%s' % mname, count=2)
+
         # Service checks
         self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:/'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myvhost'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myothervhost'])
         self.assertServiceCheckOK('rabbitmq.status')
 
         self.coverage_report()
@@ -198,17 +247,22 @@ class RabbitMQCheckTest(AgentCheckTest):
         for mname in COMMON_METRICS:
             self.assertMetricTagPrefix(mname, 'rabbitmq_node', count=1)
 
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost'], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost'], value=0, count=1)
         for mname in E_METRICS:
             self.assertMetricTag('rabbitmq.exchange.%s' %
                                  mname, 'rabbitmq_exchange_family:test', count=2)
 
         for mname in Q_METRICS:
             self.assertMetricTag('rabbitmq.queue.%s' %
-                                 mname, 'rabbitmq_queue_family:test', count=2)
+                                 mname, 'rabbitmq_queue_family:test', count=6)
 
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=0, count=1)
 
         self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:/'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myvhost'])
+        self.assertServiceCheckOK('rabbitmq.aliveness', tags=['vhost:myothervhost'])
         self.assertServiceCheckOK('rabbitmq.status')
 
         self.coverage_report()
@@ -217,6 +271,9 @@ class RabbitMQCheckTest(AgentCheckTest):
         # no connections and no 'vhosts' list in the conf don't produce 'connections' metric
         self.run_check(CONFIG)
         self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myvhost', "tag1:1", "tag2"], value=0, count=1)
+        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:myothervhost', "tag1:1", "tag2"], value=0, count=1)
+
 
         # no connections with a 'vhosts' list in the conf produce one metrics per vhost
         self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
@@ -227,26 +284,29 @@ class RabbitMQCheckTest(AgentCheckTest):
         # create connections
         connection1 = pika.BlockingConnection()
         connection2 = pika.BlockingConnection()
+        try:
+            self.run_check(CONFIG, force_reload=True)
+            self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=2, count=1)
+            self.assertMetric('rabbitmq.connections', count=3)
+            self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"], value=2, count=1)
 
-        self.run_check(CONFIG, force_reload=True)
-        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/', "tag1:1", "tag2"], value=2, count=1)
-        self.assertMetric('rabbitmq.connections', count=1)
-        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"], value=2, count=1)
+            self.run_check(CONFIG_DEFAULT_VHOSTS, force_reload=True)
+            self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
+            self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+            self.assertMetric('rabbitmq.connections', count=2)
+            self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
 
-        self.run_check(CONFIG_DEFAULT_VHOSTS, force_reload=True)
-        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:/'], value=2, count=1)
-        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
-        self.assertMetric('rabbitmq.connections', count=2)
-        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
-
-        self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
-        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
-        self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
-        self.assertMetric('rabbitmq.connections', count=2)
-        self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
-
-        connection1.close()
-        connection2.close()
+            self.run_check(CONFIG_TEST_VHOSTS, force_reload=True)
+            self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test'], value=0, count=1)
+            self.assertMetric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
+            self.assertMetric('rabbitmq.connections', count=2)
+            self.assertMetric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
+        except Exception as e:
+            raise e
+        finally:
+            # if these are not closed it makes all the other tests fail, too
+            connection1.close()
+            connection2.close()
 
 @attr(requires='rabbitmq')
 class TestRabbitMQ(AgentCheckTest):
