@@ -88,6 +88,10 @@ class Etcd(AgentCheck):
         for key, param in ssl_params.items():
             if param is None:
                 del ssl_params[key]
+
+        # Get a copy of tags for the CRIT statuses
+        critical_tags = list(instance_tags)
+
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
         instance_tags.append("url:{0}".format(url))
@@ -96,7 +100,7 @@ class Etcd(AgentCheck):
 
         # Gather self health status
         health_state = AgentCheck.UNKNOWN
-        self_response = self._get_self_health(url, ssl_params, timeout)
+        self_response = self._get_self_health(url, ssl_params, timeout, critical_tags)
         if self_response is not None:
             if self.HEALTH_KEY in self_response:
                 health_state = AgentCheck.OK if self_response[self.HEALTH_KEY] == 'true' else AgentCheck.CRITICAL
@@ -106,7 +110,7 @@ class Etcd(AgentCheck):
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, health_state, tags=instance_tags)
 
         # Gather self metrics
-        self_response = self._get_self_metrics(url, ssl_params, timeout)
+        self_response = self._get_self_metrics(url, ssl_params, timeout, critical_tags)
         if self_response is not None:
             if self_response['state'] == 'StateLeader':
                 is_leader = True
@@ -127,7 +131,7 @@ class Etcd(AgentCheck):
                     self.log.warn("Missing key {0} in stats.".format(key))
 
         # Gather store metrics
-        store_response = self._get_store_metrics(url, ssl_params, timeout)
+        store_response = self._get_store_metrics(url, ssl_params, timeout, critical_tags)
         if store_response is not None:
             for key in self.STORE_RATES:
                 if key in store_response:
@@ -143,7 +147,7 @@ class Etcd(AgentCheck):
 
         # Gather leader metrics
         if is_leader:
-            leader_response = self._get_leader_metrics(url, ssl_params, timeout)
+            leader_response = self._get_leader_metrics(url, ssl_params, timeout, critical_tags)
             if leader_response is not None and len(leader_response.get("followers", {})) > 0:
                 # Get the followers
                 followers = leader_response.get("followers")
@@ -162,21 +166,21 @@ class Etcd(AgentCheck):
         # Service check
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=["url:{0}".format(url)])
+                               tags=instance_tags)
 
-    def _get_self_health(self, url, ssl_params, timeout):
-        return self._get_json(url, "/health",  ssl_params, timeout)
+    def _get_self_health(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/health",  ssl_params, timeout, tags)
 
-    def _get_self_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout)
+    def _get_self_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout, tags)
 
-    def _get_store_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout)
+    def _get_store_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout, tags)
 
-    def _get_leader_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout)
+    def _get_leader_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout, tags)
 
-    def _get_json(self, url, path, ssl_params, timeout):
+    def _get_json(self, url, path, ssl_params, timeout, tags):
         try:
             certificate = None
             if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
@@ -187,18 +191,18 @@ class Etcd(AgentCheck):
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Timeout when hitting %s" % url,
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Error hitting %s. Error: %s" % (url, e.message),
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise
 
         if r.status_code != 200:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Got %s when hitting %s" % (r.status_code, url),
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise Exception("Http status code {0} on url {1}".format(r.status_code, url))
 
         return r.json()
