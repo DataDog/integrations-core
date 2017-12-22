@@ -48,7 +48,7 @@ class CheckEtcdTest(AgentCheckTest):
         self.assertMetric('etcd.self.recv.appendrequest.count', tags=tags, count=1)
 
         self.assertServiceCheckOK(self.check.SERVICE_CHECK_NAME, count=1,
-                                  tags=['url:http://localhost:2379'])
+                                  tags=['url:http://localhost:2379', 'etcd_state:leader'])
         self.assertServiceCheckOK(self.check.HEALTH_SERVICE_CHECK_NAME, count=1,
                                   tags=['url:http://localhost:2379', 'etcd_state:leader'])
         self.coverage_report()
@@ -89,7 +89,7 @@ class CheckEtcdTest(AgentCheckTest):
         }
 
         mocks = {
-            '_get_leader_metrics': lambda url, ssl, timeout: mock
+            '_get_leader_metrics': lambda url, path, ssl, timeout: mock
         }
 
         self.run_check_twice(self.config, mocks=mocks)
