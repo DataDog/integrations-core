@@ -90,7 +90,7 @@ class Etcd(AgentCheck):
                 del ssl_params[key]
 
         # Get a copy of tags for the CRIT statuses
-        critical_tags = instance_tags[:]
+        critical_tags = list(instance_tags)
 
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
