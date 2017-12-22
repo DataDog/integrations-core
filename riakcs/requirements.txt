@@ -1,3 +1,6 @@
 # integration pip requirements
-simplejson==3.6.5
-boto==2.46.1
+simplejson==3.6.5 \
+    --hash=sha256:2a3189f79d1c7b8a2149a0e783c0b4217fad9b30a6e7d60450f2553dc2c0e57e
+boto==2.46.1 \
+    --hash=sha256:d6c7046a1a199fad87ae95edeecb8e5a900b70c854199d3949d1dbb9f3385fcb \
+    --hash=sha256:d24a68d97276445d1b5baee6537bc565ab7070afcd449a72f2541b1da1328ed4
