@@ -80,8 +80,6 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_status_running': 'container.running',
             'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
             'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
-            'kube_pod_status_ready': 'pod.ready',
-            'kube_pod_status_scheduled': 'pod.scheduled',
             'kube_replicaset_spec_replicas': 'replicaset.replicas_desired',
             'kube_replicaset_status_fully_labeled_replicas': 'replicaset.fully_labeled_replicas',
             'kube_replicaset_status_ready_replicas': 'replicaset.replicas_ready',
@@ -115,7 +113,6 @@ class KubernetesState(PrometheusCheck):
             'kube_node_labels',
             'kube_pod_created'
             'kube_pod_container_info',
-            'kube_pod_info',
             'kube_pod_owner',
             'kube_pod_start_time',
             'kube_pod_labels',
@@ -154,6 +151,8 @@ class KubernetesState(PrometheusCheck):
             'kube_job_status_start_time',
         ]
 
+        self.pod_node_mapping = {}
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
         if endpoint is None:
@@ -176,12 +175,19 @@ class KubernetesState(PrometheusCheck):
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
 
+        self.active_pod_set = set()
+
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
         for job_tags, job_count in self.job_succeeded_count.iteritems():
             self.monotonic_count(self.NAMESPACE + '.job.succeeded', job_count, list(job_tags))
         for job_tags, job_count in self.job_failed_count.iteritems():
             self.monotonic_count(self.NAMESPACE + '.job.failed', job_count, list(job_tags))
+
+        #clean pod/node mapping
+        for key in self.pod_node_mapping.keys():
+            if key not in self.active_pod_set:
+                self.pod_node_mapping.pop(key, None)
 
     def _condition_to_service_check(self, metric, sc_name, mapping, tags=None):
         """
@@ -508,3 +514,37 @@ class KubernetesState(PrometheusCheck):
                 self.gauge(metric_base_name.format(resource, constraint), val, tags)
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
+
+    def _enrich_pod_with_node_tag(self, metric, metric_name, message_type):
+        for label in metric.label:
+            if label.name == "pod":
+                self.active_pod_set.add(label.value)
+                if label.value in self.pod_node_mapping.keys():
+                    tags = [
+                        self._label_to_tag("condition", metric.label),
+                        self._label_to_tag("namespace", metric.label),
+                        self._label_to_tag("pod", metric.label),
+                        self._format_tag("node", self.pod_node_mapping[label.value])
+                    ]
+                    self.gauge(metric_name, getattr(metric, METRIC_TYPES[message_type]).value, tags, hostname=self.pod_node_mapping[label.value])
+
+    def kube_pod_status_ready(self, message, **kwargs):
+        """ Whether the pod is ready to serve requests. """
+        for metric in message.metric:
+            self._enrich_pod_with_node_tag(metric, self.NAMESPACE + ".pod.ready", message.type)
+
+    def kube_pod_status_scheduled(self, message, **kwargs):
+        """ Describes the status of the scheduling process for the pod. """
+        for metric in message.metric:
+            self._enrich_pod_with_node_tag(metric, self.NAMESPACE + ".pod.scheduled", message.type)
+
+    def kube_pod_info(self, message, **kwargs):
+        """ Collect information about pod (no metric sent). """
+        for metric in message.metric:
+            pod_name = node_name =  ""
+            for label in metric.label:
+                if label.name == "pod":
+                    pod_name = label.value
+                elif label.name == "node":
+                    node_name = label.value
+            self.pod_node_mapping[pod_name] = node_name
