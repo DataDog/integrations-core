@@ -20,7 +20,7 @@ init_config:
 instances: [{}]
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start collecting swap metrics.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start collecting swap metrics.
 
 ### Validation
 

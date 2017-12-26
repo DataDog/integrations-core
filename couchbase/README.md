@@ -30,7 +30,7 @@ instances:
     #password: <your_password>
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending Couchbase metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Couchbase metrics to Datadog.
 
 ### Validation
 

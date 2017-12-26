@@ -40,7 +40,7 @@ instances:
     #  - plg2
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending Fluentd metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Fluentd metrics to Datadog.
 
 ### Validation
 

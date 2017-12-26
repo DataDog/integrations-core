@@ -35,7 +35,7 @@ Configuration Options:
 * `user` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending PHP-FPM metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
 

@@ -23,7 +23,7 @@ instances:
     port: 8126 # or wherever your statsd listens
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending StatsD metrics and service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation
 

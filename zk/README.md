@@ -22,7 +22,7 @@ instances:
     timeout: 3
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Zookeeper metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Zookeeper metrics to Datadog.
 
 ### Validation
 

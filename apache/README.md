@@ -25,7 +25,7 @@ instances:
 #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Apache metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Apache metrics to Datadog.
 
 ### Validation
 

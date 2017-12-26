@@ -38,7 +38,7 @@ Next, in your PGBouncer pgbouncer.ini file add
 stats_users = datadog
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending PgBouncer metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending PgBouncer metrics to Datadog.
 
 ### Validation
 

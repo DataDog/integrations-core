@@ -29,7 +29,7 @@ instances:
 
 If you omit the `nameserver` option, the check will use whichever nameserver is configured in local network settings.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending DNS service checks and response times to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending DNS service checks and response times to Datadog.
 
 ### Validation
 

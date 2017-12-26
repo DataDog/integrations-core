@@ -26,7 +26,7 @@ instances:
 #   excluded_interface_re: eth1.*
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to effect any configuration changes.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to effect any configuration changes.
 
 ### Validation
 

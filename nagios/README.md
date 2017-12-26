@@ -35,7 +35,7 @@ The Agent reads the main nagios configuration file to get the locations of the n
 
 This check also works with Icinga, the popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Nagios events and (optionally) perfdata metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Nagios events and (optionally) perfdata metrics to Datadog.
 
 ### Validation
 

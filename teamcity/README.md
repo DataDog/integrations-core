@@ -36,7 +36,7 @@ instances:
 
 Add an item like the above to `instances` for each build configuration you want to track.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start collecting and sending Teamcity events to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start collecting and sending Teamcity events to Datadog.
 
 ### Validation
 

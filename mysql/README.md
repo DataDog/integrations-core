@@ -90,7 +90,7 @@ If you found above that MySQL doesn't have `performance_schema` enabled, do not 
 
 See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending MySQL metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MySQL metrics to Datadog.
 
 ### Validation
 
