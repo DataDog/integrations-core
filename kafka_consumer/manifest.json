@@ -15,7 +15,7 @@
   "public_title": "Datadog-Kafka Consumer Integration",
   "categories":["processing", "messaging"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kafka_consumer/",
+  "doc_link": "https://docs.datadoghq.com/integrations/kafka/",
   "is_public": true,
   "has_logo": true
 }
