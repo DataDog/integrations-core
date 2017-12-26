@@ -102,7 +102,7 @@ class TestSquidUnit(AgentCheckTest):
     def test_parse_counter(self):
         self.load_check({}, {})
 
-        # Good format 
+        # Good format
         line = "counter = 0\n"
         counter, value = self.check.parse_counter(line)
         self.assertEquals(counter, "counter")
