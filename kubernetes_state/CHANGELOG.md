@@ -6,6 +6,7 @@
 
 * [IMPROVEMENT] Merge kubernetes-state pod.phase.[running|succeeded|pending|failed|unknown] service checks into one actionnable service check. Will be introduced in 5.20 and will change the behavior of the service check. [#874][]
 * [IMPROVEMENT] Adding statefulset metrics. [#936][]
+* [IMPROVEMENT] Bumping protobuf to version 3.5.1. See [#965][]
 
 1.4.0 / 2017-11-21
 ==================
@@ -54,3 +55,6 @@
 [#801]: https://github.com/DataDog/integrations-core/issues/801
 [#853]: https://github.com/DataDog/integrations-core/issues/853
 [#860]: https://github.com/DataDog/integrations-core/issues/860
+[#874]: https://github.com/DataDog/integrations-core/issues/874
+[#936]: https://github.com/DataDog/integrations-core/issues/936
+[#965]: https://github.com/DataDog/integrations-core/issues/965
