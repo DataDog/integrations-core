@@ -1,5 +1,5 @@
 # Solr Check
-
+{{< img src="integrations/solr/solrgraph.png" alt="Solr Graph" responsive="true" popup="true">}}
 ## Overview
 
 The Solr check tracks the state and performance of a Solr cluster. It collects metrics like number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
@@ -94,7 +94,7 @@ init_config:
 
 Again, see the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-Restart the Agent to start sending Solr metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Solr metrics to Datadog.
 
 Configuration Options
 
@@ -204,7 +204,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `solr` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `solr` under the Checks section:
 
 ```
   Checks

@@ -1,5 +1,5 @@
 # Wmi_check Integration
-
+{{< img src="integrations/wmi/wmimetric.png" alt="WMI Metric" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from your Windows applications/servers with Windows Management Instrumentation (WMI) in real time to
@@ -112,7 +112,7 @@ Setting this will cause any instance number to be removed from tag_by values i.e
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `wmi_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `wmi_check` under the Checks section:
 
     Checks
     ======

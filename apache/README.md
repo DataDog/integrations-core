@@ -1,5 +1,5 @@
 # Agent Check: Apache Web Server
-
+{{< img src="integrations/apache/apachegraph.png" alt="apache graph" responsive="true" popup="true">}}
 ## Overview
 
 The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
@@ -25,11 +25,11 @@ instances:
 #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
 ```
 
-Restart the Agent to start sending Apache metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Apache metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `apache` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
 ```
   Checks
@@ -63,7 +63,9 @@ The Apache check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [Issues with Apache Integration](https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration)
+* [Apache SSL certificate issues](https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues)
 
 ## Further Reading
 

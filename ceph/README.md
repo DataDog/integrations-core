@@ -1,5 +1,5 @@
 # Ceph Integration
-
+{{< img src="integrations/ceph/ceph_graph.png" alt="Ceph Graph" responsive="true" popup="true">}}
 ## Overview
 
 Enable the Datadog-Ceph integration to:
@@ -33,7 +33,7 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ceph` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ceph` under the Checks section:
 
 ```
   Checks

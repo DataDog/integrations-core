@@ -1,5 +1,5 @@
 # Go Expvar Integration
-
+{{< img src="integrations/goexpvar/go_graph.png" alt="Go Graph" responsive="true" popup="true">}}
 ## Overview
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
@@ -42,11 +42,11 @@ instances:
 
 If you don't configure a `metrics` list, the Agent will still collect memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
 
-Restart the Agent to begin sending memstat and expvar metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending memstat and expvar metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `go_expvar` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `go_expvar` under the Checks section:
 
 ```
   Checks

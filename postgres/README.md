@@ -1,4 +1,5 @@
 # Postgres Integration
+{{< img src="integrations/postgresql/pggraph.png" alt="PostgreSQL Graph" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -57,7 +58,7 @@ relations:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `postgres` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postgres` under the Checks section:
 
     Checks
     ======
@@ -83,23 +84,7 @@ The Postgres check does not include any service check at this time.
 
 ## Troubleshooting
 
-If you have any questions about Datadog or a use case our [Docs](https://docs.datadoghq.com/) didn’t mention, we’d love to help! Here’s how you can reach out to us:
-
-### Visit the Knowledge Base
-
-Learn more about what you can do in Datadog on the [Support Knowledge Base](https://datadog.zendesk.com/agent/).
-
-### Web Support
-
-Messages in the [event stream](https://app.datadoghq.com/event/stream) containing **@support-datadog** will reach our Support Team. This is a convenient channel for referencing graph snapshots or a particular event. In addition, we have a livechat service available during the day (EST) from any page within the app.
-
-### By Email
-
-You can also contact our Support Team via email at [support@datadoghq.com](mailto:support@datadoghq.com).
-
-### Over Slack
-
-Reach out to our team and other Datadog users on [Slack](http://chat.datadoghq.com/).
+* [Postgres custom metric collection explained](https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained)
 
 ## Further Reading
 ### Blog Post

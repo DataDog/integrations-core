@@ -1,5 +1,5 @@
 # Etcd Integration
-
+{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" popup="true">}}
 ## Overview
 
 Collect etcd metrics to:
@@ -24,11 +24,11 @@ instances:
   - url: "https://server:port" # API endpoint of your etcd instance
 ```
 
-Restart the Agent to begin sending etcd metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending etcd metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `etcd` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `etcd` under the Checks section:
 
 ```
   Checks

@@ -1,5 +1,5 @@
 # Network check
-
+{{< img src="integrations/network/netdashboard.png" alt="Network Dashboard" responsive="true" popup="true">}}
 ## Overview
 
 The network check collects TCP/IP stats from the host operating system.
@@ -26,11 +26,11 @@ instances:
 #   excluded_interface_re: eth1.*
 ```
 
-Restart the Agent to effect any configuration changes.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to effect any configuration changes.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `network` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `network` under the Checks section:
 
 ```
   Checks
@@ -60,11 +60,12 @@ The Network check does not include any event at this time.
 The Network check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [How to send TCP/UDP host metrics via the Datadog API ?](https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api)
 
 ## Further Reading
 ### Datadog Blog
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
 ### Knowledge Base
-* [Built a network monitor on an http check](https://help.datadoghq.com/hc/en-us/articles/115003314726-Built-a-network-monitor-on-an-http-check-)
+* [Built a network monitor on an http check](https://docs.datadoghq.com/monitors/monitor_types/network)

@@ -1,5 +1,5 @@
 # Agent Check: Windows Service
-
+{{< img src="integrations/winservices/windows-service.png" alt="Windows Service Event" responsive="true" popup="true">}}
 ## Overview
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
@@ -28,11 +28,11 @@ instances:
 
 You must provide service names as they appear in services.msc's properties field (e.g. wmiApSrv), NOT the display name (e.g. WMI Performance Adapter).
 
-Restart the Agent to start monitoring the services and sending service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start monitoring the services and sending service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `windows_service` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `windows_service` under the Checks section:
 
 ```
   Checks

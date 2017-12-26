@@ -33,7 +33,7 @@ instances:
   - proc_name: <YOUR_APP_NAME>
 ```
 
-Restart the Agent to begin sending Gunicorn metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
@@ -41,7 +41,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `gunicorn` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `gunicorn` under the Checks section:
 
 ```
   Checks

@@ -1,5 +1,5 @@
 # Docker_daemon Integration
-
+{{< img src="integrations/docker/docker.png" alt="Docker default dashboard" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from docker_daemon service in real time to:
@@ -95,7 +95,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `docker_daemon` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `docker_daemon` under the Checks section:
 
     Checks
     ======

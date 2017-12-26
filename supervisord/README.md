@@ -1,5 +1,5 @@
 # Agent Check: Supervisor
-
+{{< img src="integrations/supervisor/supervisorevent.png" alt="Supervisor Event" responsive="true" popup="true">}}
 ## Overview
 
 This check monitors the uptime, status, and number of processes running under supervisord.
@@ -76,11 +76,11 @@ Configuration Options
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Supervisor metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Supervisor metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `supervisord` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `supervisord` under the Checks section:
 
 ```
   Checks

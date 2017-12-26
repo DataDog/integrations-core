@@ -13,7 +13,7 @@
   ],
   "version": "1.0.2",
   "guid": "944452d0-208e-4d1c-8adb-495f517ce2c2",
-  "public_title": "Datadog-Openstack Integration",
+  "public_title": "Datadog-OpenStack Integration",
   "categories":["cloud"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/openstack/",
