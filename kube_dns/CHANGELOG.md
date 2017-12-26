@@ -1,5 +1,11 @@
 # CHANGELOG - Kube-dns
 
+1.2.0 / Unreleased 
+==================
+### Changes
+
+* [IMPROVEMENT] Bumping protobuf to version 3.5.1. See [#965][]
+
 1.1.0 / 2017-11-21
 ==================
 ### Changes
@@ -17,4 +23,5 @@
 [#410]: https://github.com/DataDog/integrations-core/issues/410
 [#451]: https://github.com/DataDog/integrations-core/issues/451
 [#860]: https://github.com/DataDog/integrations-core/issues/860
+[#965]: https://github.com/DataDog/integrations-core/issues/965
 [@aerostitch]: https://github.com/aerostitch
