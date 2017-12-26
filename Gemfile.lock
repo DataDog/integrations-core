@@ -3,7 +3,7 @@ GEM
   specs:
     ast (2.3.0)
     colorize (0.8.1)
-    datadog-sdk-testing (0.8.1)
+    datadog-sdk-testing (0.8.2)
       colorize (~> 0.8)
       httparty (~> 0.15)
       rake (~> 12.0)
