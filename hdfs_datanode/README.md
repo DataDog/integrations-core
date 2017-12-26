@@ -36,7 +36,7 @@ instances:
   - hdfs_datanode_jmx_uri: http://localhost:50075
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending DataNode metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending DataNode metrics to Datadog.
 
 ### Validation
 

@@ -25,7 +25,7 @@ instances:
     password: <PASSWORD>
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending vSphere metrics and events to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending vSphere metrics and events to Datadog.
 
 #### Configuration Options
 

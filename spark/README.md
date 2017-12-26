@@ -44,7 +44,7 @@ instances:
 
 Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Spark metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Spark metrics to Datadog.
 
 ### Validation
 

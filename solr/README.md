@@ -94,7 +94,7 @@ init_config:
 
 Again, see the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending Solr metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Solr metrics to Datadog.
 
 Configuration Options
 

@@ -21,7 +21,7 @@ instances:
       port: 2222 # change if your twemproxy doesn't use the default stats monitoring port
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending twemproxy metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending twemproxy metrics to Datadog.
 
 ### Validation
 

@@ -50,7 +50,7 @@ instances:
     version: 4 # omit this line if you're running pdns_recursor version 3.x
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending PowerDNS Recursor metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending PowerDNS Recursor metrics to Datadog.
 
 ### Validation
 

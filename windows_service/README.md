@@ -28,7 +28,7 @@ instances:
 
 You must provide service names as they appear in services.msc's properties field (e.g. wmiApSrv), NOT the display name (e.g. WMI Performance Adapter).
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start monitoring the services and sending service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start monitoring the services and sending service checks to Datadog.
 
 ### Validation
 

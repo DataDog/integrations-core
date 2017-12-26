@@ -29,7 +29,7 @@ instances:
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for a comprehensive list and description of all check options.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending YARN metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending YARN metrics to Datadog.
 
 ### Validation
 

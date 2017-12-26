@@ -24,7 +24,7 @@ instances:
   - url: "https://server:port" # API endpoint of your etcd instance
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending etcd metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending etcd metrics to Datadog.
 
 ### Validation
 

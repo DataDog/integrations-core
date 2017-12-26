@@ -84,7 +84,7 @@ Put all your pysnmp MIBs into any directory and point the SNMP check to this dir
 
 ---
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending SNMP metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending SNMP metrics to Datadog.
 
 ### Validation
 

@@ -39,7 +39,7 @@ If you don't set `varnishadm`, the Agent won't check backend health. If you do s
 dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to start sending varnish metrics and service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending varnish metrics and service checks to Datadog.
 
 ### Validation
 

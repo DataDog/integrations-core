@@ -36,7 +36,7 @@ instances:
   - hdfs_namenode_jmx_uri: http://localhost:50070
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending NameNode metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending NameNode metrics to Datadog.
 
 ### Validation
 

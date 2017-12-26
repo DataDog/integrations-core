@@ -33,7 +33,7 @@ instances:
   - proc_name: <YOUR_APP_NAME>
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)to begin sending Gunicorn metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
