@@ -241,7 +241,7 @@ class LogEvent(object):
         event_dict = {
             'timestamp': self.timestamp,
             'event_type': EVENT_TYPE,
-            'priority': self._default_event_priority,
+            'priority': self.default_event_priority,
             'msg_title': self._msg_title,
             'msg_text': self._msg_text.strip(),
             'aggregation_key': self._aggregation_key,
