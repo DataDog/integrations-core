@@ -121,11 +121,9 @@ class SQLServer(AgentCheck):
             self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
             self.connector = 'adodbapi'
 
-        self.log.debug("instances: %s", str(instances))
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
         for instance in instances:
-            self.log.debug("initializing %s", str(instance))
             try:
                 instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
                 self.do_check[instance_key] = True
