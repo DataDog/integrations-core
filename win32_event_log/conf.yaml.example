@@ -3,6 +3,10 @@ init_config:
     # event sent from this check. Defaults to false.
     # tag_event_id: false
 
+    # Set priority level in event stream for events created by integration
+    # Options are 'low' or 'normal', defaults to 'normal'
+    # default_event_priority: normal
+
 instances:
   # Each Event Log instance lets you define the type of events you want to
   # match and how to tag those events.
