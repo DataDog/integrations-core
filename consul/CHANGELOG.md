@@ -4,6 +4,7 @@
 ==================
 
 * [IMPROVEMENT] Add support for Consul 1.0. See [#876][], thanks [@byronwolfman][]
+* [BUG FIX] Fixes TypeError if/when services are culled. See [#][]
 
 
 1.2.0 2017-11-21
