@@ -23,7 +23,15 @@ instances:
   #    to this directory when starting/restarting the agent
   #       export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1
   #
-  - server: 127.0.0.1
+  # NOTE: connection string used will have the format:
+  #        user/password@//server/service_name
+  #
+  # - server: 127.0.0.1
+  #   service_name: my_sid
+  #   user: my_username
+  #   password: my_password
+  #
+  - server: localhost:1521
     service_name: my_sid
     user: my_username
     password: my_password
