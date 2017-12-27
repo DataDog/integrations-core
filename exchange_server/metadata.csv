@@ -11,7 +11,7 @@ exchange.memory.available,gauge,,megabytes,,"Shows the amount of physical memory
 exchange.memory.committed,gauge,,percent,,"Shows the ratio of Memory\Committed Bytes to the Memory\Commit Limit.",-1,exchange_server,memory in use
 exchange.network.outbound_errors,gauge,,errors,,"Indicates the number of outbound packets that couldn't be transmitted because of errors.",-1,exchange_server,exchange net errors
 exchange.network.tcpv6.connection_failures,gauge,,errors,,"Shows the number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.",-1,exchange_server,exchange v6 errors
-exchange.network.tcpv4.conns_reset,,count,connections,,"Shows the number of times TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.",-1,exchange_server,tcp4 resets
+exchange.network.tcpv4.conns_reset,count,,connections,,"Shows the number of times TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.",-1,exchange_server,tcp4 resets
 exchange.network.tcpv6.conns_reset,count,,connections,,"Shows the number of times TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.",-1,exchange_server,tcp6 resets
 exchange.netlogon.semaphore_waiters,gauge,,threads,,"The number of threads that are waiting to obtain the semaphore.",-1,exchange_server,sem waiters
 exchange.netlogon.semaphore_holders,gauge,,threads,,"The number of threads that are holding the semaphore.",-1,exchange_server,sem holders
@@ -32,7 +32,7 @@ exchange.rpc.requests,gauge,,requests,,"Shows the number of client requests curr
 exchange.rpc.active_user_count,gauge,,users,,"Shows the number of unique users that have shown some activity in the last 2 minutes.",-1,exchange_server,active users
 exchange.rpc.conn_count,gauge,,connection,,"Shows the total number of client connections maintained.",-1,exchange_server,conn_count
 exchange.rpc.ops_persec,gauge,,operation,second,"Shows the rate at which RPC operations occur, per second.",-1,exchange_server,rpc ops per sec
-exchange.rpc.user_count,gauge,,users,,"Shows the number of users connected to the service.",-1,rpc user count
+exchange.rpc.user_count,gauge,,users,,"Shows the number of users connected to the service.",-1,exchange_server,rpc user count
 exchange.httpproxy.server_locator_latency,gauge,,milliseconds,,"Shows the average latency (ms) of MailboxServerLocator web service calls.",-1,exchange_server,mailbox server web service
 exchange.httpproxy.avg_auth_latency,gauge,,milliseconds,,"Shows the average time spent authenticating CAS requests over the last 200 samples.",-1,exchange_server,avg auth latency
 exchange.httpproxy.clientaccess_processing_latency,gauge,,milliseconds,,"Shows the average latency (ms) of CAS processing time (does not include time spent proxying) over the last 200 requests.",-1,exchange_server,avg cas time
