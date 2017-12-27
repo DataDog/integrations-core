@@ -17,4 +17,4 @@ instances:
   #       rate, histogram or counter
   #   
   #   additional_metrics:
-  #     - ['MSExchange Content Filter Agent', none, 'Messages that Bypassed Scanning', exchange.content_filter.bypassed_messages, gauge]
+  #     - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
