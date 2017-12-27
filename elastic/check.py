@@ -323,6 +323,14 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.force_merge.rejected": ("rate", "thread_pool.force_merge.rejected"),
     }
 
+    ADDITIONAL_METRICS_POST_5_0 = {
+        "elasticsearch.fs.total.disk_reads": ("rate", "fs.io_stats.total.read_operations"),
+        "elasticsearch.fs.total.disk_writes": ("rate", "fs.io_stats.total.write_operations"),
+        "elasticsearch.fs.total.disk_io_op": ("rate", "fs.io_stats.total.operations"),
+        "elasticsearch.fs.total.disk_read_size_in_bytes": ("gauge", "fs.io_stats.total.read_kilobytes", lambda v: float(v)*1000),
+        "elasticsearch.fs.total.disk_write_size_in_bytes": ("gauge", "fs.io_stats.total.write_kilobytes", lambda v: float(v)*1000),
+    }
+
     CLUSTER_HEALTH_METRICS = {
         "elasticsearch.number_of_nodes": ("gauge", "number_of_nodes"),
         "elasticsearch.number_of_data_nodes": ("gauge", "number_of_data_nodes"),
@@ -552,6 +560,9 @@ class ESCheck(AgentCheck):
 
         if version >= [2, 1, 0]:
             stats_metrics.update(self.ADDITIONAL_METRICS_POST_2_1)
+
+        if version >= [5, 0, 0]:
+            stats_metrics.update(self.ADDITIONAL_METRICS_POST_5_0)
 
         # Version specific stats metrics about the primary shards
         pshard_stats_metrics = dict(self.PRIMARY_SHARD_METRICS)
