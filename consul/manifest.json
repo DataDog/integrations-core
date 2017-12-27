@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.3.0",
+  "version": "1.3.1",
   "guid": "ec1e9fac-a339-49a3-b501-60656d2a5671",
   "public_title": "Datadog-Consul Integration",
   "categories":["containers", "orchestration", "configuration & deployment", "notification"],

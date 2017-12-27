@@ -1,10 +1,10 @@
 # CHANGELOG - consul
 
-1.3.0 / Unreleased
+1.3.1 / Unreleased
 ==================
 
 * [IMPROVEMENT] Add support for Consul 1.0. See [#876][], thanks [@byronwolfman][]
-* [BUG FIX] Fixes TypeError if/when services are culled. See [#][]
+* [BUG FIX] Fixes TypeError if/when services are culled. See [#968][]
 
 
 1.2.0 2017-11-21
@@ -32,4 +32,5 @@
 [#521]: https://github.com/DataDog/integrations-core/issues/521
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#876]: https://github.com/DataDog/integrations-core/pull/876
+[#968]: https://github.com/DataDog/integrations-core/pull/968
 [@byronwolfman]: https://github.com/byronwolfman
