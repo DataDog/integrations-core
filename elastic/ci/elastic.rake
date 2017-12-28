@@ -38,7 +38,13 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for 'http://localhost:9200', 20
+      begin
+        Wait.for 'http://localhost:9200', 20
+      rescue => e
+        puts "temporarily debugging why the container isn't working"
+        sh "docker logs #{container_name}"
+        raise e
+      end
       # Create an index in ES
       http = Net::HTTP.new('localhost', 9200)
       http.send_request('PUT', '/datadog/')
