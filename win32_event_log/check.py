@@ -41,9 +41,9 @@ class Win32EventLogWMI(WinWMICheck):
         # Settings
         self._tag_event_id = init_config.get('tag_event_id', False)
         self._verbose = init_config.get('verbose', True)
-        self._default_event_priority = init_config.get('default_event_priority', 'normal')
-        if (self._default_event_priority.lower() != 'normal') or (self._default_event_priority.lower() != 'low'):
-            self._default_event_priority = 'normal'
+        self._event_priority = init_config.get('event_priority', 'normal')
+        if (self._event_priority.lower() != 'normal') or (self._event_priority.lower() != 'low'):
+            self._event_priority = 'normal'
 
         # State
         self.last_ts = {}
@@ -141,7 +141,7 @@ class Win32EventLogWMI(WinWMICheck):
                 hostname = None if (host == "localhost" or host == ".") else host
                 log_ev = LogEvent(
                     ev, self.log, hostname, instance_tags, notify,
-                    self._tag_event_id, event_format, self._default_event_priority
+                    self._tag_event_id, event_format, self._event_priority
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to
@@ -165,7 +165,7 @@ class Win32EventLogWMI(WinWMICheck):
 
 
 class LogEvent(object):
-    def __init__(self, ev, log, hostname, tags, notify_list, tag_event_id, event_format, default_event_priority):
+    def __init__(self, ev, log, hostname, tags, notify_list, tag_event_id, event_format, event_priority):
         self.event = ev
         self.log = log
         self.hostname = hostname
@@ -173,7 +173,7 @@ class LogEvent(object):
         self.notify_list = notify_list
         self.timestamp = self._wmi_to_ts(self.event['TimeGenerated'])
         self._format = event_format
-        self.default_event_priority = default_event_priority
+        self.event_priority = event_priority
 
     @property
     def _msg_title(self):
@@ -241,7 +241,7 @@ class LogEvent(object):
         event_dict = {
             'timestamp': self.timestamp,
             'event_type': EVENT_TYPE,
-            'priority': self.default_event_priority,
+            'priority': self.event_priority,
             'msg_title': self._msg_title,
             'msg_text': self._msg_text.strip(),
             'aggregation_key': self._aggregation_key,
