@@ -33,6 +33,32 @@ init_config:
     #   instance_name: ALL
     #   tag_by: db
 
+    # the default table from which counters are drawn is the sys.dm_os_performance_counters
+    # table.  This integration also supports 
+    #  sys.dm_os_wait_stats
+    #  sys.dm_os_memory_clerks
+    #  sys.dm_io_virtual_file_stats
+
+    # to report a metric drawn from one of the additional tables, specify the table in
+    # the counter definition, as well as the counter columns to be reported
+    
+    # - name: sqlserver.LCK_M_S
+    #   table: sys.dm_os_wait_stats
+    #   counter_name: LCK_M_S
+    #   columns:
+    #     - max_wait_time_ms
+    #     - signal_wait_time_ms
+    #
+    # will report two metrics, sqlserver.LCK_M_S.max_wait_time.ms and sqlserver.LCK_M_S.signal_wait_time_ms
+
+    # - name: sqlserver.io_file_stats
+    #   table: sys.dm_io_virtual_file_stats
+    #   columns:
+    #   - num_of_reads
+    #   - num_of_writes
+    # will report two metrics, sqlserver.io_file_stats.num_of_reads and sqlserver.io_file_stats.num_of_writes
+    # each will be tagged with the database id and file id.
+
     # As well as capturing from the DMV you can also capture from a custom proc
     # Please note this feature will produce a number of custom metrics that might affect your billing
     # To use this feature, specify in your instance the procedure to execute : 
