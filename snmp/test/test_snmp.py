@@ -253,9 +253,9 @@ class SNMPTestCase(AgentCheckTest):
 
         self.coverage_report()
 
-    def test_snpget(self):
+    def test_snmpget(self):
         """
-        When failing with 'snpget' command, SNMP check falls back to 'snpgetnext'
+        When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
 
             > snmpget -v2c -c public localhost:11111 1.3.6.1.2.1.25.6.3.1.4
             iso.3.6.1.2.1.25.6.3.1.4 = No Such Instance currently exists at this OID
