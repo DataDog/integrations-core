@@ -41,9 +41,7 @@ class Win32EventLogWMI(WinWMICheck):
         # Settings
         self._tag_event_id = init_config.get('tag_event_id', False)
         self._verbose = init_config.get('verbose', True)
-        self._event_priority = init_config.get('event_priority', 'normal')
-        if (self._event_priority.lower() != 'normal') or (self._event_priority.lower() != 'low'):
-            self._event_priority = 'normal'
+        self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
         # State
         self.last_ts = {}
@@ -55,6 +53,9 @@ class Win32EventLogWMI(WinWMICheck):
         password = instance.get('password', "")
         instance_tags = instance.get('tags', [])
         notify = instance.get('notify', [])
+        event_priority = instance.get('event_priority', self._default_event_priority)
+        if (event_priority.lower() != 'normal') and (event_priority.lower() != 'low'):
+            event_priority = 'normal'
 
         user = instance.get('user')
         ltypes = instance.get('type', [])
@@ -141,7 +142,7 @@ class Win32EventLogWMI(WinWMICheck):
                 hostname = None if (host == "localhost" or host == ".") else host
                 log_ev = LogEvent(
                     ev, self.log, hostname, instance_tags, notify,
-                    self._tag_event_id, event_format, self._event_priority
+                    self._tag_event_id, event_format, event_priority
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to

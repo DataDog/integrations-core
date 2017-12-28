@@ -3,7 +3,7 @@ init_config:
     # event sent from this check. Defaults to false.
     # tag_event_id: false
 
-    # Set priority level in event stream for events created by integration
+    # Set priority level in event stream for all events created by integration
     # Options are 'low' or 'normal', defaults to 'normal'
     # default_event_priority: normal
 
@@ -19,6 +19,9 @@ instances:
     # host: remote_machine_name
     # username: user
     # password: pass
+
+    # Override default event priority by setting it per instance
+    # event_priority: low
 
     # The (optional) `log_file` filter will instruct the check to only capture events
     # that belong to one of the specified LogFiles (Application, System, Setup, Security,
