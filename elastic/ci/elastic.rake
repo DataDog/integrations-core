@@ -41,6 +41,8 @@ namespace :ci do
     task before_script: ['ci:common:before_script'] do
       begin
         Wait.for 'http://localhost:9200', 20
+        puts "temporarily checking whether the node name setting is actually working"
+        sh "curl -s localhost:9200"
       rescue => e
         puts "temporarily debugging why the container isn't working"
         sh "docker logs #{container_name}"
