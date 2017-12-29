@@ -100,9 +100,9 @@ class Etcd(AgentCheck):
 
         # Gather self health status
         sc_state = AgentCheck.UNKNOWN
-        health_state = self._get_health_state(url, ssl_params, timeout, critical_tags)
-        if health_state is not None:
-            sc_state = AgentCheck.OK if health_state == 'true' else AgentCheck.CRITICAL
+        health_status = self._get_health_status(url, ssl_params, timeout, critical_tags)
+        if health_status is not None:
+            sc_state = AgentCheck.OK if self._is_healthy(health_status) else AgentCheck.CRITICAL
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
 
         # Gather self metrics
@@ -164,7 +164,7 @@ class Etcd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=instance_tags)
 
-    def _get_health_state(self, url, ssl_params, timeout, tags):
+    def _get_health_status(self, url, ssl_params, timeout, tags):
         """
         Don't send the "can connect" service check if we have troubles getting
         the health status
@@ -214,3 +214,18 @@ class Etcd(AgentCheck):
             raise Exception("Http status code {0} on url {1}".format(r.status_code, url))
 
         return r.json()
+
+    def _is_healthy(self, status):
+        """
+        Version of etcd prior to 3.3 return this payload when you hit /health:
+          {"health": "true"}
+
+        which is wrong since the value is a `bool` on etcd.
+
+        Version 3.3 fixed this issue in https://github.com/coreos/etcd/pull/8312
+        but we need to support both.
+        """
+        if isinstance(status, bool):
+            return status
+
+        return status == "true"
