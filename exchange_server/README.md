@@ -36,7 +36,7 @@ The exchange_server check is compatible with Windows.
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
-The PDH check does not include any event at this time.
+The exchange server check does not include any events at this time.
 
 ### Service Checks
-The PDH check does not include any service check at this time.
+The exchange server check does not include any service check at this time.

@@ -1,11 +1,11 @@
 require 'ci/common'
 
-def pdh_check_version
+def exchange_server_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def pdh_check_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/exchange_check_#{pdh_check_version}"
+def exchange_server_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/exchange_server_#{exchange_server_version}"
 end
 
 namespace :ci do
@@ -23,7 +23,7 @@ namespace :ci do
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'exchange_check'
+        'exchange_server'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
