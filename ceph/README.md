@@ -70,7 +70,7 @@ In addition to this service check, the Ceph check also collects a configurable l
 
 * `ceph.osd_full` : Returns `OK` if your OSDs are not full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
-* `ceph.osd_nearfull` : Returns `OK` if your OSDs are not nearfull. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
+* `ceph.osd_nearfull` : Returns `OK` if your OSDs are not near full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 * `ceph.pool_full` : Returns `OK` if your pools have not reached their quota. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
@@ -88,7 +88,7 @@ In addition to this service check, the Ceph check also collects a configurable l
 
 * `ceph.pg_not_deep_scrubbed` : Returns `OK` if the PGs were deep scrubbed recently. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
-* `ceph.cache_pool_near_full` : Returns `OK` if the cache pools are not nearfull. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
+* `ceph.cache_pool_near_full` : Returns `OK` if the cache pools are not near full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 * `ceph.too_few_pgs` : Returns `OK` if the number of PGs is above the min threshold. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
@@ -98,7 +98,7 @@ In addition to this service check, the Ceph check also collects a configurable l
 
 * `ceph.request_slow` : Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
-* `ceph.request_stuck` : Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.` :
+* `ceph.request_stuck` : Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
