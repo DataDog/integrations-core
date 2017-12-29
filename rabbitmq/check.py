@@ -158,11 +158,13 @@ class RabbitMQ(AgentCheck):
         password = instance.get('rabbitmq_pass', 'guest')
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse.urlparse(base_url)
-        if not parsed_url.scheme:
+        if not parsed_url.scheme or "://" not in parsed_url.geturl():
             self.log.warning('The rabbit url did not include a protocol, assuming http')
             # urlparse.urljoin cannot add a protocol to the rest of the url for some reason.
             # This still leaves the potential for errors, but such urls would never have been valid, either
-            # and it's not likely to be useful to attempt to catch all possible mistakes people could make
+            # and it's not likely to be useful to attempt to catch all possible mistakes people could make.
+            # urlparse also has a known issue parsing url with no schema, but a port in the host section
+            # mistakingly taking the host for the schema, hence the additional validation
             base_url = 'http://' + base_url
             parsed_url = urlparse.urlparse(base_url)
 
