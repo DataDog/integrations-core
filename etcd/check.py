@@ -99,15 +99,11 @@ class Etcd(AgentCheck):
         is_leader = False
 
         # Gather self health status
-        health_state = AgentCheck.UNKNOWN
-        self_response = self._get_self_health(url, ssl_params, timeout, critical_tags)
-        if self_response is not None:
-            if self.HEALTH_KEY in self_response:
-                health_state = AgentCheck.OK if self_response[self.HEALTH_KEY] == 'true' else AgentCheck.CRITICAL
-            else:
-                self.log.debug("Missing '{}' key in stats, can't determine health status.".format(self.HEALTH_KEY))
-
-        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, health_state, tags=instance_tags)
+        sc_state = AgentCheck.UNKNOWN
+        health_state = self._get_health_state(url, ssl_params, timeout, critical_tags)
+        if health_state is not None:
+            sc_state = AgentCheck.OK if health_state == 'true' else AgentCheck.CRITICAL
+        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
 
         # Gather self metrics
         self_response = self._get_self_metrics(url, ssl_params, timeout, critical_tags)
@@ -168,8 +164,18 @@ class Etcd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=instance_tags)
 
-    def _get_self_health(self, url, ssl_params, timeout, tags):
-        return self._get_json(url, "/health",  ssl_params, timeout, tags)
+    def _get_health_state(self, url, ssl_params, timeout, tags):
+        """
+        Don't send the "can connect" service check if we have troubles getting
+        the health status
+        """
+        try:
+            r = self._perform_request(url, "/health", ssl_params, timeout)
+            # we don't use get() here so we can report a KeyError
+            return r.json()[self.HEALTH_KEY]
+        except Exception as e:
+            self.log.debug("Can't determine health status: {}".format(e))
+            return None
 
     def _get_self_metrics(self, url, ssl_params, timeout, tags):
         return self._get_json(url, "/v2/stats/self",  ssl_params, timeout, tags)
@@ -180,15 +186,17 @@ class Etcd(AgentCheck):
     def _get_leader_metrics(self, url, ssl_params, timeout, tags):
         return self._get_json(url, "/v2/stats/leader", ssl_params, timeout, tags)
 
+    def _perform_request(self, url, path, ssl_params, timeout):
+        certificate = None
+        if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
+            certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
+        verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
+        return requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+
     def _get_json(self, url, path, ssl_params, timeout, tags):
         try:
-            certificate = None
-            if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
-                certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
-            verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-            r = requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+            r = self._perform_request(url, path, ssl_params, timeout)
         except requests.exceptions.Timeout:
-            # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Timeout when hitting %s" % url,
                                tags=tags + ["url:{0}".format(url)])
