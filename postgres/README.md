@@ -20,6 +20,8 @@ To get started with the PostgreSQL integration, create at least a read-only data
     grant SELECT ON pg_stat_database to datadog;
 ```
 
+**Note**: `grant SELECT ON pg_stat_database to datadog;` is for most cases, but Postgres instances with more tables locked down or custom queries require granting `CONNECT` to additional tables.
+
 To verify the correct permissions run the following command:
 
 ```
