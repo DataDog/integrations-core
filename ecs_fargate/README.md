@@ -1,8 +1,8 @@
-# Fargate Integration
+# ECS Fargate Integration
 
 ## Overview
 
-Get metrics from all your containers running in fargate:
+Get metrics from all your containers running in ECS Fargate:
 
 * CPU/Memory usage & limit metrics
 * I/O metrics
@@ -11,11 +11,11 @@ Get metrics from all your containers running in fargate:
 
 ### Installation
 
-Install the `dd-check-fargate` package manually or with your favorite configuration manager
+Install the `dd-check-ecs_fargate` package manually or with your favorite configuration manager
 
 ### Configuration
 
-Edit the `fargate.yaml` file to point to your server and port, set the masters to monitor
+Edit the `ecs_fargate.yaml` file to point to your server and port, set the masters to monitor
 
 ### Validation
 
@@ -24,28 +24,28 @@ When you run `datadog-agent info` you should see something like the following:
     Checks
     ======
 
-        fargate
+        ecs_fargate
         -----------
           - instance #0 [OK]
           - Collected 63 metrics, 0 events & 1 service checks
 
 ## Compatibility
 
-The fargate check is compatible with all major platforms
+The ecs_fargate check is compatible with all major platforms
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/fargate/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv) for a list of metrics provided by this integration.
 
 ### Events
 
-The Fargate check does not include any event at this time.
+The ECS Fargate check does not include any event at this time.
 
 ### Service Checks
 
-The Fargate check does not include any service check at this time.
+The ECS Fargate check does not include any service check at this time.
 
 ## Troubleshooting
 

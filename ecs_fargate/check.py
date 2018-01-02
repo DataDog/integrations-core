@@ -9,7 +9,7 @@ import requests
 from checks import AgentCheck
 
 # Fargate related constants
-EVENT_TYPE = SOURCE_TYPE_NAME = 'fargate'
+EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
 API_ENDPOINT = 'http://169.254.170.2/v2'
 METADATA_ROUTE = '/metadata'
 STATS_ROUTE = '/stats'

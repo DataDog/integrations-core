@@ -1,8 +1,8 @@
-# CHANGELOG - Fargate
+# CHANGELOG - ECS Fargate
 
 1.0.0/ Unreleased
 ==================
 
 ### Changes
 
-* [FEATURE] adds fargate integration.
+* [FEATURE] adds ecs_fargate integration.

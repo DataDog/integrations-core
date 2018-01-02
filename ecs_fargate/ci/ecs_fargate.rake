@@ -1,29 +1,29 @@
 require 'ci/common'
 
-def fargate_version
+def ecs_fargate_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
-def fargate_rootdir
-  "#{ENV['INTEGRATIONS_DIR']}/fargate_#{fargate_version}"
+def ecs_fargate_rootdir
+  "#{ENV['INTEGRATIONS_DIR']}/ecs_fargate_#{ecs_fargate_version}"
 end
 
 namespace :ci do
-  namespace :fargate do |flavor|
+  namespace :ecs_fargate do |flavor|
     task before_install: ['ci:common:before_install']
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('fargate')
+      Rake::Task['ci:common:install'].invoke('ecs_fargate')
       # sample docker usage
-      # sh %(docker create -p XXX:YYY --name fargate source/fargate:fargate_version)
-      # sh %(docker start fargate)
+      # sh %(docker create -p XXX:YYY --name ecs_fargate source/ecs_fargate:ecs_fargate_version)
+      # sh %(docker start ecs_fargate)
     end
 
     task before_script: ['ci:common:before_script']
 
     task script: ['ci:common:script'] do
       this_provides = [
-        'fargate'
+        'ecs_fargate'
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
@@ -33,8 +33,8 @@ namespace :ci do
     task cleanup: ['ci:common:cleanup']
     # sample cleanup task
     # task cleanup: ['ci:common:cleanup'] do
-    #   sh %(docker stop fargate)
-    #   sh %(docker rm fargate)
+    #   sh %(docker stop ecs_fargate)
+    #   sh %(docker rm ecs_fargate)
     # end
 
     task :execute do

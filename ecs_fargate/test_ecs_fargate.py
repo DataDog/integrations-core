@@ -44,7 +44,7 @@ def mocked_requests_get(*args, **kwargs):
 
     return MockResponse(None, 404)
 
-@attr(requires='fargate')
+@attr(requires='ecs_fargate')
 class TestFargate(AgentCheckTest):
     """Basic Test for fargate integration."""
     CHECK_NAME = 'fargate'
