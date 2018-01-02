@@ -4,11 +4,19 @@ def mysql_version
   ENV['FLAVOR_VERSION'] || 'latest'
 end
 
+def mysql_flavor
+  ENV['MYSQL_FLAVOR'] || 'mysql'
+end
+
 def mysql_repo
-  if mysql_version == '5.5'
-    'jfullaondo/mysql-replication'
-  else
-    'bergerx/mysql-replication'
+  if mysql_flavor == 'mysql'
+    if mysql_version == '5.5'
+      'jfullaondo/mysql-replication'
+    else
+      'bergerx/mysql-replication'
+    end
+  elsif mysql_flavor == 'mariadb'
+    'bitnami/mariadb'
   end
 end
 
@@ -31,8 +39,19 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('mysql')
-      sh %(docker run -p #{container_port}:3306 --name #{container_name}_master \
-           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d #{mysql_repo}:#{mysql_version})
+      if mysql_flavor == 'mariadb'
+        sh %(docker run -p #{container_port}:3306 --name #{container_name}_master \
+	     -e MARIADB_ROOT_PASSWORD=master_root_password \
+             -e MARIADB_REPLICATION_MODE=master \
+             -e MARIADB_REPLICATION_USER=my_repl_user \
+             -e MARIADB_REPLICATION_PASSWORD=my_repl_password \
+             -e MARIADB_USER=my_user \
+             -e MARIADB_PASSWORD=my_password \
+             -e MARIADB_DATABASE=my_database -d #{mysql_repo}:#{mysql_version})
+      else
+        sh %(docker run -p #{container_port}:3306 --name #{container_name}_master \
+             -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d #{mysql_repo}:#{mysql_version})
+      end
     end
 
     task before_script: ['ci:common:before_script'] do
@@ -40,33 +59,57 @@ namespace :ci do
       count = 0
       logs = `docker logs #{container_name}_master 2>&1`
       puts 'Waiting for MySQL to come up'
-      until count == 20 || logs.include?('MySQL init process done. Ready for start up')
+      if mysql_flavor == 'mariadb'
+        expect_log = 'mariadb successfully initialized'
+        expect_log_up = 'Starting mysqld daemon with databases'
+      else
+        expect_log = 'MySQL init process done. Ready for start up'
+        expect_log_up = 'MySQL init process done. Ready for start up'
+      end
+
+      until count == 20 || logs.include?(expect_log)
         sleep_for 2
         logs = `docker logs #{container_name}_master 2>&1`
         count += 1
       end
-      if logs.include? 'MySQL init process done. Ready for start up'
-        puts 'MySQL is up!'
-      end
+      raise 'Master not up in time. Failing...' unless logs.include? expect_log_up
+      puts 'MySQL is up!'
 
-      sh %(docker run -p #{slave_container_port}:3306 --name #{container_name}_slave \
-           -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
-           -d #{mysql_repo}:#{mysql_version})
+      if mysql_flavor == 'mariadb'
+        sh %(docker run -p #{slave_container_port}:3306 --name #{container_name}_slave \
+             -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
+	     -e MARIADB_REPLICATION_MODE=slave \
+             -e MARIADB_REPLICATION_USER=my_repl_user \
+             -e MARIADB_REPLICATION_PASSWORD=my_repl_password \
+             -e MARIADB_MASTER_HOST=master \
+             -e MARIADB_MASTER_ROOT_PASSWORD=master_root_password -d #{mysql_repo}:#{mysql_version})
+      else
+        sh %(docker run -p #{slave_container_port}:3306 --name #{container_name}_slave \
+             -e MYSQL_ALLOW_EMPTY_PASSWORD=1 --link #{container_name}_master:master \
+             -d #{mysql_repo}:#{mysql_version})
+      end
       Wait.for slave_container_port
       count = 0
       logs = `docker logs #{container_name}_slave 2>&1`
       puts 'Waiting for MySQL to come up'
-      until count == 20 || logs.include?('MySQL init process done. Ready for start up')
+
+      until count == 20 || logs.include?(expect_log)
         sleep_for 2
         logs = `docker logs #{container_name}_slave 2>&1`
         count += 1
       end
-      raise 'Slave not up in time. Failing...' unless logs.include? 'MySQL init process done. Ready for start up'
+      raise 'Slave not up in time. Failing...' unless logs.include? expect_log_up
       puts 'MySQL is up!'
 
-      sh %(docker run -it --link #{container_name}_master:mysql --rm mysql:#{mysql_version} \
-           sh -c 'exec mysql -h"$MYSQL_PORT_3306_TCP_ADDR" -P"MYSQL_PORT_3306_TCP_PORT" -uroot \
-           -e "create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; \
+      opts = ''
+      cli_version = mysql_version
+      if mysql_flavor == 'mariadb'
+        opts = '--password=master_root_password'
+        cli_version = 'latest'
+      end
+      sh %(docker run -it --link #{container_name}_master:mysql --rm mysql:#{cli_version} \
+           sh -c 'exec mysql -h\"$MYSQL_PORT_3306_TCP_ADDR\" -P\"MYSQL_PORT_3306_TCP_PORT\" -uroot \
+           #{opts} -e \"create user \\"dog\\"@\\"%\\" identified by \\"dog\\"; \
            GRANT PROCESS, REPLICATION CLIENT ON *.* TO \\"dog\\"@\\"%\\" WITH MAX_USER_CONNECTIONS 5; \
            CREATE DATABASE testdb; \
            CREATE TABLE testdb.users (name VARCHAR(20), age INT); \
