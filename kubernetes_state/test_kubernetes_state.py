@@ -108,11 +108,16 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.memory_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:task-pv-pod']) # Running
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,tags=['namespace:default','pod:failingtest-f585bbd4-2fsml']) # Pending
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:hello-1509998340-k4f8q']) # Succeeded
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,tags=['namespace:default','pod:should-run-once']) # Failed
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,tags=['namespace:default','pod:hello-1509998460-tzh8k']) # Unknown
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
+                                tags=['namespace:default', 'pod:task-pv-pod'])  # Running
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,
+                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml'])  # Pending
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
+                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q'])  # Succeeded
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,
+                                tags=['namespace:default', 'pod:should-run-once'])  # Failed
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,
+                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
 
         for metric in self.METRICS:
             self.assertMetric(metric)
@@ -138,7 +143,6 @@ class TestKubernetesState(AgentCheckTest):
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
-
 
         for metric in self.METRICS:
             if not metric.startswith(NAMESPACE + '.hpa'):
