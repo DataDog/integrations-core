@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+Unreleased
+==========
+
+* [BUGFIX] Check that the private_key_file exists in the yaml configuration before attempting to access. See [#988][]
+
 2017-11-21
 ==========
 
@@ -32,4 +37,5 @@
 [#416]: https://github.com/DataDog/integrations-core/issues/416
 [#426]: https://github.com/DataDog/integrations-core/issues/426
 [#454]: https://github.com/DataDog/integrations-core/issues/454
+[#988]: https://github.com/DataDog/integrations-core/issues/988
 [@ilkka]: https://github.com/ilkka
