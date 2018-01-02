@@ -47,12 +47,12 @@ def mocked_requests_get(*args, **kwargs):
 @attr(requires='ecs_fargate')
 class TestFargate(AgentCheckTest):
     """Basic Test for fargate integration."""
-    CHECK_NAME = 'fargate'
+    CHECK_NAME = 'ecs_fargate'
 
     @mock.patch('requests.get', return_value=MockResponse("{}", 500))
     def test_failing_check(self, *args):
         """
-        Testing failing fargate check.
+        Testing fargate metadata endpoint error.
         """
         self.run_check(check_config)
         self.assertServiceCheck("fargate_check", status=AgentCheck.CRITICAL, tags=None, count=1)
@@ -60,7 +60,7 @@ class TestFargate(AgentCheckTest):
     @mock.patch('requests.get', return_value=MockResponse("{}", 200))
     def test_invalid_response_check(self, *args):
         """
-        Testing failing fargate check.
+        Testing invalid fargate metadata payload.
         """
         self.run_check(check_config)
         self.assertServiceCheck("fargate_check", status=AgentCheck.WARNING, tags=None, count=1)
