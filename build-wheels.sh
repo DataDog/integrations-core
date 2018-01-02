@@ -20,15 +20,15 @@ for PYBIN in /opt/python/cp27-cp27m*/bin; do
   "${PYBIN}/pip" install -U pip
 done
 
-# Build and test datadog-base, upon which all other integrations depend on.
+# Build and test datadog-checks-base, upon which all other integrations depend on.
 # Also build external dependencies from PyPI.
 for PYBIN in /opt/python/cp27-cp27m*/bin; do
-  # Build datadog-base, which should have no requirements.
+  # Build datadog-checks-base, which should have no requirements.
   # NOTE: Deliberately use the wrong default address for PyPI, so that
   # external dependencies are not downloaded from PyPI.
-  "${PYBIN}/pip" wheel /shared/datadog-base/ -w dogehouse/ --index-url https://example.com
+  "${PYBIN}/pip" wheel /shared/datadog-checks-base/ -w dogehouse/ --index-url https://example.com
 
-  # TODO: Test datadog-base.
+  # TODO: Test datadog-checks-base.
 
   # Build wheels for external dependencies.
   # https://stackoverflow.com/a/2087038
@@ -40,7 +40,7 @@ for PYBIN in /opt/python/cp27-cp27m*/bin; do
 done
 
 # Build all other integrations.
-# FIXME: shouldn't rebuild datadog-base again
+# FIXME: shouldn't rebuild datadog-checks-base again
 # FIXME: even though each INTEGRATION is in a separate directory, can one
 # accidentally / maliciously override another by using the same package name?
 for INTEGRATION in /shared/*/setup.py; do
