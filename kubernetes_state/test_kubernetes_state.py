@@ -11,8 +11,25 @@ from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
 
-class TestKubernetesState(AgentCheckTest):
 
+class MockResponse:
+    """
+    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
+    """
+
+    def __init__(self, content, content_type):
+        self.content = content
+        self.headers = {'Content-Type': content_type}
+
+    def iter_lines(self, **_):
+        for elt in self.content.split("\n"):
+            yield elt
+
+    def close(self):
+        pass
+
+
+class TestKubernetesState(AgentCheckTest):
     CHECK_NAME = 'kubernetes_state'
 
     METRICS = [
@@ -92,7 +109,7 @@ class TestKubernetesState(AgentCheckTest):
     def test__update_kube_state_metrics(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('text/plain', f.read())
+            mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
         config = {
             'instances': [{
@@ -130,7 +147,7 @@ class TestKubernetesState(AgentCheckTest):
     def test__update_kube_state_metrics_v040(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('text/plain', f.read())
+            mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
         config = {
             'instances': [{
