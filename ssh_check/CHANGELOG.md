@@ -1,10 +1,19 @@
 # CHANGELOG - ssh_check
 
-2017-11-21
-==========
+1.1.3 / Unreleased 
+==================
 
-* If `ssh_check` passes and uses `None` as `exception_message`, downstream aggregator rejects it with a type error. 
-  Instead, specify a default message.
+### Changes
+
+* [BUGFIX] Check that the private_key_file exists in the yaml configuration before attempting to access it. See [#988][]
+
+1.1.2 / 2017-11-21
+==================
+
+### Changes
+
+* [BUGFIX] If `ssh_check` passes and uses `None` as `exception_message`, downstream aggregator rejects it with a type error. 
+  Instead, specify a default message. See [#852][]
 
 1.1.1 / 2017-08-28
 ==================
@@ -32,4 +41,6 @@
 [#416]: https://github.com/DataDog/integrations-core/issues/416
 [#426]: https://github.com/DataDog/integrations-core/issues/426
 [#454]: https://github.com/DataDog/integrations-core/issues/454
+[#852]: https://github.com/DataDog/integrations-core/issues/852
+[#988]: https://github.com/DataDog/integrations-core/issues/988
 [@ilkka]: https://github.com/ilkka
