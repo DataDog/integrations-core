@@ -3,10 +3,9 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
-# module version
-from datadog_checks.supervisord import __version__  # pylint: disable=import-error,no-name-in-module
 
 import json
+import re
 
 here = path.abspath(path.dirname(__file__))
 
@@ -31,7 +30,21 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
         else:
             runtime_reqs.append(req[0])
 
-version = __version__
+def read(*parts):
+    with open(path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+# https://packaging.python.org/guides/single-sourcing-package-version/
+version = find_version("datadog_checks", "supervisord", "__init__.py")
+
 manifest_version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
     manifest = json.load(f)

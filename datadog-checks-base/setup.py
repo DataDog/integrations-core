@@ -3,8 +3,8 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
-# module version
-from datadog_checks import __version__  # pylint: disable=import-error,no-name-in-module
+
+import re
 
 here = path.abspath(path.dirname(__file__))
 
@@ -12,9 +12,24 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+def read(*parts):
+    with open(path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+# https://packaging.python.org/guides/single-sourcing-package-version/
+version = find_version("datadog_checks", "__init__.py")
+
 setup(
     name='datadog-checks-base',
-    version=__version__,
+    version=version,
     description='The Datadog Checks Base package',
     long_description=long_description,
     keywords='datadog checks base',
