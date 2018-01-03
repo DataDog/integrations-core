@@ -3,6 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+from os import environ
+
+# 3rd-party
 from nose.plugins.attrib import attr
 
 # project
@@ -355,7 +358,7 @@ class TestMySql(AgentCheckTest):
         testable_metrics = (self.STATUS_VARS + self.VARIABLES_VARS + self.INNODB_VARS +
                             self.BINLOG_VARS + self.SYSTEM_METRICS + self.SCHEMA_VARS + self.SYNTHETIC_VARS)
 
-        if ver >= (5, 6, 0):
+        if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
             testable_metrics.extend(self.PERFORMANCE_VARS)
 
         # Test metrics
@@ -416,7 +419,7 @@ class TestMySql(AgentCheckTest):
         testable_metrics = (self.STATUS_VARS + self.VARIABLES_VARS + self.INNODB_VARS +
                             self.BINLOG_VARS + self.SYSTEM_METRICS + self.SCHEMA_VARS + self.SYNTHETIC_VARS)
 
-        if ver >= (5, 6, 0):
+        if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
             testable_metrics.extend(self.PERFORMANCE_VARS)
 
         # Test metrics
