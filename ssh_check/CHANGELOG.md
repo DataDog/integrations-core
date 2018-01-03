@@ -1,14 +1,14 @@
 # CHANGELOG - ssh_check
 
-Unreleased
-==========
+1.1.3 / Unreleased 
+==================
 
 ### Changes
 
 * [BUGFIX] Check that the private_key_file exists in the yaml configuration before attempting to access it. See [#988][]
 
-2017-11-21
-==========
+1.1.2 / 2017-11-21
+==================
 
 ### Changes
 
