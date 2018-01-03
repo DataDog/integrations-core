@@ -20,6 +20,17 @@ INVALID_HOST_INSTANCE = {
     'services': ['EventLog'],
 }
 
+WILDCARD_INSTANCE = {
+    'host': '.',
+    'services': ['Event%', 'Dns%'],
+}
+
+ALL_INSTANCE = {
+    'host': '.',
+    'services': ['ALL'],
+}
+
+
 @attr('windows')
 @attr(requires='windows_service')
 class TestWindowsService(AgentCheckTest):
@@ -38,6 +49,23 @@ class TestWindowsService(AgentCheckTest):
         self.run_check({'instances': [INVALID_HOST_INSTANCE]})
         self.assertServiceCheckCritical(self.SERVICE_CHECK_NAME, tags=['host:nonexistinghost', 'service:EventLog'], count=1)
         self.coverage_report()
+
+    def test_wildcard(self):
+        self.run_check({'instances': [WILDCARD_INSTANCE]})
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventLog'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventSystem'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:Dnscache'], count=1)
+        self.coverage_report()
+
+    def test_all(self):
+        self.run_check({'instances': [ALL_INSTANCE]})
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventLog'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:Dnscache'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventSystem'], count=1)
+        # don't do coverage report as there will be a lot of services we didn't check
+        # above.  Just make sure some of the services we know about are present.
+
+
 
 
 class WindowsServiceTestCase(AgentCheckTest, TestCommonWMI):

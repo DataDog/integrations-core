@@ -39,7 +39,11 @@ class WindowsService(WinWMICheck):
             raise Exception('No services defined in windows_service.yaml')
 
         properties = ["Name", "State"]
-        filters = map(lambda x: {"Name": tuple(('=', x))}, services)
+        filters = map(lambda x: {"Name": tuple(('LIKE', x)) if '%' in x else tuple(('=', x))}, services)
+        if "ALL" in services:
+            self.log.debug("tracking all services")
+            filters = None
+
         wmi_sampler = self._get_wmi_sampler(
             instance_key,
             self.CLASS, properties,
@@ -64,17 +68,29 @@ class WindowsService(WinWMICheck):
             self._process_services(wmi_sampler, services, tags)
 
     def _process_services(self, wmi_sampler, services, tags):
-        collected_services_by_names = {sc['Name'].lower(): sc for sc in wmi_sampler}
+        specific_services = {}
+        for svc in services:
+            if svc == "ALL":
+                continue
+            if '%' in svc:
+                continue
+            specific_services[svc.lower()] = svc
 
-        for service in services:
-            service_lower = service.lower()
-            if service_lower in collected_services_by_names:
-                wmi_obj = collected_services_by_names[service_lower]
-                sc_name = wmi_obj['Name']
-                status = self.STATE_TO_VALUE.get(wmi_obj["state"], AgentCheck.UNKNOWN)
-                self.service_check("windows_service.state", status,
-                               tags=tags + ['service:{0}'.format(sc_name)])
+        for wmi_obj in wmi_sampler:
+            sc_name = wmi_obj['Name']
+            sc_name_lower = sc_name.lower()
+            if sc_name_lower in specific_services:
+                try:
+                    specific_services.pop(sc_name_lower, None)
+                except KeyError:
+                    pass
 
-            else:
-                self.service_check("windows_service.state", AgentCheck.CRITICAL,
-                               tags=tags + ['service:{0}'.format(service)])
+            status = self.STATE_TO_VALUE.get(wmi_obj["state"], AgentCheck.UNKNOWN)
+            self.service_check("windows_service.state", status,
+                        tags=tags + ['service:{0}'.format(sc_name)])
+            self.log.debug("service state for %s %s" % (sc_name, str(status)))
+
+        for lsvc, svc in specific_services.items():
+            self.service_check("windows_service.state", AgentCheck.CRITICAL,
+                        tags=tags + ['service:{0}'.format(svc)])
+            self.log.debug("service state for %s %s" % (svc, str(AgentCheck.CRITICAL)))
