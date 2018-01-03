@@ -14,6 +14,9 @@ set -e -x
 # https://unix.stackexchange.com/a/240004
 shopt -s nullglob
 
+# Install prerequisites needed to build some wheels.
+yum install -y unixODBC-devel
+
 # Install any system package required by any integration.
 # Update pip.
 for PYBIN in /opt/python/cp27-cp27m*/bin; do
