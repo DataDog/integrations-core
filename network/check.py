@@ -76,7 +76,6 @@ class Network(AgentCheck):
         elif Platform.is_windows():
             self._check_psutil()
 
-
     def _setup_metrics(self, instance):
         self._combine_connection_states = instance.get('combine_connection_states', True)
 
@@ -140,34 +139,34 @@ class Network(AgentCheck):
             }
         else:
             self.cx_state_gauge = {
-                ('udp4', 'connections') : 'system.net.udp4.connections',
-                ('udp6', 'connections') : 'system.net.udp6.connections',
+                ('udp4', 'connections'): 'system.net.udp4.connections',
+                ('udp6', 'connections'): 'system.net.udp6.connections',
 
-                ('tcp4', 'estab') : 'system.net.tcp4.estab',
-                ('tcp4', 'syn_sent') : 'system.net.tcp4.syn_sent',
-                ('tcp4', 'syn_recv') : 'system.net.tcp4.syn_recv',
-                ('tcp4', 'fin_wait_1') : 'system.net.tcp4.fin_wait_1',
-                ('tcp4', 'fin_wait_2') : 'system.net.tcp4.fin_wait_2',
-                ('tcp4', 'time_wait') : 'system.net.tcp4.time_wait',
-                ('tcp4', 'unconn') : 'system.net.tcp4.unconn',
-                ('tcp4', 'close') : 'system.net.tcp4.close',
-                ('tcp4', 'close_wait') : 'system.net.tcp4.close_wait',
-                ('tcp4', 'closing') : 'system.net.tcp4.closing',
-                ('tcp4', 'listen') : 'system.net.tcp4.listen',
-                ('tcp4', 'last_ack') : 'system.net.tcp4.time_wait',
+                ('tcp4', 'estab'): 'system.net.tcp4.estab',
+                ('tcp4', 'syn_sent'): 'system.net.tcp4.syn_sent',
+                ('tcp4', 'syn_recv'): 'system.net.tcp4.syn_recv',
+                ('tcp4', 'fin_wait_1'): 'system.net.tcp4.fin_wait_1',
+                ('tcp4', 'fin_wait_2'): 'system.net.tcp4.fin_wait_2',
+                ('tcp4', 'time_wait'): 'system.net.tcp4.time_wait',
+                ('tcp4', 'unconn'): 'system.net.tcp4.unconn',
+                ('tcp4', 'close'): 'system.net.tcp4.close',
+                ('tcp4', 'close_wait'): 'system.net.tcp4.close_wait',
+                ('tcp4', 'closing'): 'system.net.tcp4.closing',
+                ('tcp4', 'listen'): 'system.net.tcp4.listen',
+                ('tcp4', 'last_ack'): 'system.net.tcp4.time_wait',
 
-                ('tcp6', 'estab') : 'system.net.tcp6.estab',
-                ('tcp6', 'syn_sent') : 'system.net.tcp6.syn_sent',
-                ('tcp6', 'syn_recv') : 'system.net.tcp6.syn_recv',
-                ('tcp6', 'fin_wait_1') : 'system.net.tcp6.fin_wait_1',
-                ('tcp6', 'fin_wait_2') : 'system.net.tcp6.fin_wait_2',
-                ('tcp6', 'time_wait') : 'system.net.tcp6.time_wait',
-                ('tcp6', 'unconn') : 'system.net.tcp6.unconn',
-                ('tcp6', 'close') : 'system.net.tcp6.close',
-                ('tcp6', 'close_wait') : 'system.net.tcp6.close_wait',
-                ('tcp6', 'closing') : 'system.net.tcp6.closing',
-                ('tcp6', 'listen') : 'system.net.tcp6.listen',
-                ('tcp6', 'last_ack') : 'system.net.tcp6.time_wait',
+                ('tcp6', 'estab'): 'system.net.tcp6.estab',
+                ('tcp6', 'syn_sent'): 'system.net.tcp6.syn_sent',
+                ('tcp6', 'syn_recv'): 'system.net.tcp6.syn_recv',
+                ('tcp6', 'fin_wait_1'): 'system.net.tcp6.fin_wait_1',
+                ('tcp6', 'fin_wait_2'): 'system.net.tcp6.fin_wait_2',
+                ('tcp6', 'time_wait'): 'system.net.tcp6.time_wait',
+                ('tcp6', 'unconn'): 'system.net.tcp6.unconn',
+                ('tcp6', 'close'): 'system.net.tcp6.close',
+                ('tcp6', 'close_wait'): 'system.net.tcp6.close_wait',
+                ('tcp6', 'closing'): 'system.net.tcp6.closing',
+                ('tcp6', 'listen'): 'system.net.tcp6.listen',
+                ('tcp6', 'last_ack'): 'system.net.tcp6.time_wait',
             }
 
             self.tcp_states = {
@@ -237,13 +236,10 @@ class Network(AgentCheck):
         self.log.debug("tracked %s network metrics for interface %s" % (count, iface))
 
     def _parse_value(self, v):
-        if v == "-":
+        try:
+            return long(v)
+        except ValueError:
             return 0
-        else:
-            try:
-                return long(v)
-            except ValueError:
-                return 0
 
     def _submit_regexed_values(self, output, regex_list):
         lines = output.splitlines()
@@ -265,7 +261,8 @@ class Network(AgentCheck):
                         # between the IP versions in the output
                         # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
                         # bug that print `tcp` even if it's `udp`
-                        output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log)
+                        output, _, _ = get_subprocess_output(["ss", "-n", "-{0}".format(protocol[0]),
+                                                              "-a", "-{0}".format(ip_version)], self.log)
                         lines = output.splitlines()
 
                         # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
@@ -276,7 +273,8 @@ class Network(AgentCheck):
                         # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
                         # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
 
-                        metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version)
+                        metrics = self._parse_linux_cx_state(lines[1:], self.tcp_states['ss'], 0, protocol=protocol,
+                                                             ip_version=ip_version)
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in self.cx_state_gauge.iteritems():
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
@@ -303,11 +301,8 @@ class Network(AgentCheck):
                 self.log.exception("Error collecting connection stats.")
 
         proc_dev_path = "{}/net/dev".format(proc_location)
-        proc = open(proc_dev_path, 'r')
-        try:
+        with open(proc_dev_path, 'r') as proc:
             lines = proc.readlines()
-        finally:
-            proc.close()
         # Inter-|   Receive                                                 |  Transmit
         #  face |bytes     packets errs drop fifo frame compressed multicast|bytes       packets errs drop fifo colls carrier compressed
         #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0
@@ -325,11 +320,9 @@ class Network(AgentCheck):
                     'packets_in.count': self._parse_value(x[1]),
                     'packets_in.error': self._parse_value(x[2]) + self._parse_value(x[3]),
                     'packets_out.count': self._parse_value(x[9]),
-                    'packets_out.error':self._parse_value(x[10]) + self._parse_value(x[11]),
+                    'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
                 self._submit_devicemetrics(iface, metrics)
-
-
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
@@ -339,7 +332,7 @@ class Network(AgentCheck):
                     while True:
                         n_header = netstat.readline()
                         if not n_header:
-                            break # No more? Abort!
+                            break  # No more? Abort!
                         n_data = netstat.readline()
 
                         h_parts = n_header.strip().split(' ')
@@ -382,9 +375,11 @@ class Network(AgentCheck):
                 if met in netstat_data.get(k, {}):
                     self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]))
 
-    # Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
-    # Returns a dict metric_name -> value
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
+        """
+        Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
+        Returns a dict metric_name -> value
+        """
         metrics = dict.fromkeys(self.cx_state_gauge.values(), 0)
         for l in lines:
             cols = l.split()
@@ -467,12 +462,11 @@ class Network(AgentCheck):
                         'packets_in.count': self._parse_value(x[-7]),
                         'packets_in.error': self._parse_value(x[-6]),
                         'packets_out.count': self._parse_value(x[-4]),
-                        'packets_out.error':self._parse_value(x[-3]),
+                        'packets_out.error': self._parse_value(x[-3]),
                     }
                     self._submit_devicemetrics(iface, metrics)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting connection stats.")
-
 
         try:
             netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p" "tcp"], self.log)
@@ -497,7 +491,6 @@ class Network(AgentCheck):
             self._submit_regexed_values(netstat, BSD_TCP_METRICS)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
-
 
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
@@ -524,7 +517,6 @@ class Network(AgentCheck):
             self._submit_regexed_values(netstat, SOLARIS_TCP_METRICS)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
-
 
     def _parse_solaris_netstat(self, netstat_output):
         """
@@ -592,12 +584,12 @@ class Network(AgentCheck):
 
         # A mapping of solaris names -> datadog names
         metric_by_solaris_name = {
-            'rbytes64':'bytes_rcvd',
-            'obytes64':'bytes_sent',
-            'ipackets64':'packets_in.count',
-            'ierrors':'packets_in.error',
-            'opackets64':'packets_out.count',
-            'oerrors':'packets_out.error',
+            'rbytes64': 'bytes_rcvd',
+            'obytes64': 'bytes_sent',
+            'ipackets64': 'packets_in.count',
+            'ierrors': 'packets_in.error',
+            'opackets64': 'packets_out.count',
+            'oerrors': 'packets_out.error',
         }
 
         lines = [l for l in netstat_output.splitlines() if len(l) > 0]
