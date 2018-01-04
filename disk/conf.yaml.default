@@ -41,3 +41,8 @@ instances:
     # get metrics for all partitions. use_mount should be set to yes (to avoid
     # collecting empty device names) when using this option.
     # all_partitions: no
+    #
+    # The (optional) device_tag_re parameter will instruct the check to apply additional tags
+    # to volumes/mountpoints matching these regexes
+    # device_tag_re:
+    #  - /san/.*: device_type:san
