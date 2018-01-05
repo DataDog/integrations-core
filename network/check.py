@@ -249,9 +249,35 @@ class Network(AgentCheck):
                 if value:
                     self.rate(metric, self._parse_value(value.group(1)))
 
+    def _is_collect_cx_state_runnable(self, proc_location):
+        """
+        Determine if collect_connection_state is set and can effectively run.
+        If self._collect_cx_state is True and a custom proc_location is provided, the system cannot
+         run `ss` or `netstat` over a custom proc_location
+        :param proc_location: str
+        :return: bool
+        """
+        if self._collect_cx_state is False:
+            return False
+
+        if proc_location != "/proc":
+            self.warning("Cannot collect connection state: currently with a custom /proc path: %s" % proc_location)
+            return False
+
+        return True
+
     def _check_linux(self, instance):
+        """
+        _check_linux can be run inside a container and still collects the network metrics from the host
+        For that procfs_path can be set to something like "/host/proc"
+        When a custom procfs_path is set, the collect_connection_state option is ignored
+        """
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
-        if self._collect_cx_state:
+
+        if Platform.is_containerized() and proc_location != "/proc":
+            proc_location = "%s/1" % proc_location
+
+        if self._is_collect_cx_state_runnable(proc_location):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
