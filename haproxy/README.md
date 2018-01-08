@@ -49,7 +49,8 @@ instances:
 ```
 
 See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
-Restart the Agent to begin sending HAProxy metrics to Datadog.
+
+2. Restart the Agent to begin sending HAProxy metrics to Datadog.
 
 #### Log Collection
 
