@@ -16,6 +16,9 @@ The HAProxy check is packaged with the Agent, so simply [install the Agent](http
 Make sure that stats are enabled on your HAProxy configuration. See [this post for guidance on doing this](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/).
 
 ### Configuration
+
+Create a file `haproxy.yaml` in the Agent's `conf.d` directory.
+
 #### Prepare HAProxy
 
 The Agent collects metrics via a stats endpoint. Configure one in your `haproxy.conf`:
@@ -32,9 +35,9 @@ stats auth <your_username>:<your_password>  # Authentication credentials
 
 Restart HAProxy to enable the stats endpoint.
 
-### Connect the Agent
+#### Metric Collection
 
-Create a file `haproxy.yaml` in the Agent's `conf.d` directory. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options:
+1. Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics)
 
 ```
 init_config:
@@ -45,7 +48,27 @@ instances:
       password: <your_password>
 ```
 
+See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 Restart the Agent to begin sending HAProxy metrics to Datadog.
+
+#### Log Collection
+
+**Available for agent >6.O, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+
+1. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+    ```
+    logs:
+      - type: udp
+        port: 514
+        service: haproxy
+        source: haproxy  
+        sourcecategory: http_web_access
+    ```
+    
+    Change the `service` parameter value and configure it for your environment.
+See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
