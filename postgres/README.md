@@ -82,7 +82,12 @@ log_file_mode = 0644
 #log_destination = ‘eventlog’
 ```
 
-2. Add this configuration setup to your `postgres.yaml` file to start collecting your Postgres Logs:
+2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+   ```
+   logs_enabled: true
+   ```
+
+3. Add this configuration setup to your `postgres.yaml` file to start collecting your Postgres Logs:
 ```
 logs:
   - type: file
@@ -99,7 +104,7 @@ logs:
 Change the `service` and `path` parameter values and configure it for your environment.
 See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
