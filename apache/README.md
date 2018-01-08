@@ -35,9 +35,14 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 #### Log Collection
 
-**Available for agent >6.O, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
 
-1. Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+   ```
+   logs_enabled: true
+   ```
+   
+2. Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
     ```
     logs:
          - type: file
@@ -55,7 +60,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
     Change the `path` and `service` parameter value and configure it for your environment.  
     See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
