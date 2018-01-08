@@ -18,9 +18,15 @@ The varnish check is packaged with the Agent, so simply [install the Agent](http
 
 ### Configuration
 
+Create a file `varnish.yaml` in the Agent's `conf.d` directory
+
+#### Prepare Varnish
+
 If you're running Varnish 4.1+, add the dd-agent system user to the varnish group (e.g. `sudo usermod -G varnish -a dd-agent`).
 
-Then, create a file `varnish.yaml` in the Agent's `conf.d` directory. See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options:
+#### Metic Collection
+
+1. Add this configuration setup to your `varnish.yaml` file to start gathering your [Varnish Metrics](#metrics)
 
 ```
 init_config:
@@ -39,7 +45,50 @@ If you don't set `varnishadm`, the Agent won't check backend health. If you do s
 dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
 ```
 
-Restart the Agent to start sending varnish metrics and service checks to Datadog.
+See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
+
+2. Restart the Agent to start sending varnish metrics and service checks to Datadog.
+
+#### Log Collection
+
+**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+
+1. To enable varnish logging uncomment the following in `/etc/default/varnishncsa`:
+
+```
+# VARNISHNCSA_ENABLED=1
+```
+
+Add the following at the end of the same file:
+
+```
+LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\":\"%h\", \"http.auth\" : \"%u\", \"varnish.x_forwarded_for\" : \"%{X-Forwarded-For}i\", \"varnish.hit_miss\":  \"%{Varnish:hitmiss}x\", \"network.bytes_written\": %b, \"http.response_time\": %D, \"http.status_code\": \"%s\", \"http.url\": \"%r\", \"http.ident\": \"%{host}i\", \"http.method\": \"%m\", \"varnish.time_first_byte\" : %{Varnish:time_firstbyte}x, \"varnish.handling\" : \"%{Varnish:handling}x\", \"http.referer\": \"%{Referer}i\", \"http.useragent\": \"%{User-agent}i\" }"
+
+DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
+```
+Restart varnishncsa to make sure the changes are taken into account.
+
+
+2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+   ```
+   logs_enabled: true
+   ```
+
+3. Add this configuration setup to your `varnish.yaml` file to start collecting your Varnish Logs:
+
+```
+logs:
+   - type: file
+     path: /var/log/varnish/varnishncsa.log
+     source: varnish
+     sourcecategory: http_web_access   
+     service: varnish
+```
+Change the `path` and `service` parameter value and configure it for your environment.  
+See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
+
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+ 
 
 ### Validation
 
