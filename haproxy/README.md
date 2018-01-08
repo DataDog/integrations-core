@@ -53,7 +53,7 @@ Restart the Agent to begin sending HAProxy metrics to Datadog.
 
 #### Log Collection
 
-**Available for agent >6.O, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
 
 1. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
     ```
