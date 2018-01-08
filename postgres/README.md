@@ -8,9 +8,16 @@ Get metrics from postgres service in real time to:
 * Be notified about postgres failovers and events.
 
 ## Setup
+
 ### Installation
 
-Install the `dd-check-postgres` package manually or with your favorite configuration manager
+The Postgres check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent). If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
+
+### Configuration
+
+Create a file `postgres.yaml` in the Agent's `conf.d` directory.
+
+#### Prepare Postgres
 
 To get started with the PostgreSQL integration, create at least a read-only datadog user with proper access to your PostgreSQL Server. Start psql on your PostgreSQL database and run:
 
@@ -30,9 +37,9 @@ To verify the correct permissions run the following command:
 
 When it prompts for a password, enter the one used in the first command.
 
-### Configuration
+#### Metric Collection
 
-Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
+1. Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
 Configuration Options:
 
@@ -54,6 +61,45 @@ relations:
 
 * **`collect_function_metrics`** (Optional) - Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
 * **`collect_count_metrics`** (Optional) - Collect count metrics. The default value is `True` for backward compatibility, but this might be slow. The recommended value is `False`.
+
+2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Postgres metrics to Datadog.
+
+#### Log Collection
+
+Postgres default logging is to stderr and logs do not contains much information. This is why we suggest to log into a file with a specific log prefix. 
+
+1. Edit your postgres configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
+
+```
+logging_collector = on
+log_directory = 'pg_log'	# directory where log files are written,
+                                       	# can be absolute or relative to PGDATA
+log_filename = 'pg.log' 	#log file name, can include pattern
+log_statement = 'all' 		#log all queries
+log_line_prefix= ‘%m [%p] %d %a %u %h %c ‘
+log_file_mode = 0644
+#For Windows
+#log_destination = ‘eventlog’
+```
+
+2. Add this configuration setup to your `postgres.yaml` file to start collecting your Postgres Logs:
+```
+logs:
+  - type: file
+    path: /var/log/pg_log/pg.log
+    source: postgresql
+    sourcecategory: database
+    service: myapp
+    #To handle multi line that starts with yyyy-mm-dd use the following pattern
+    #log_processing_rules:
+    #  - type: multi_line
+    #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+    #    name: new_log_start_with_date
+```
+Change the `service` and `path` parameter values and configure it for your environment.
+See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
+
+3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
