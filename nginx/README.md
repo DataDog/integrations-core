@@ -40,9 +40,12 @@ http_stub_status_module
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX—enabling the module as you compile it—but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 ### Configuration
+
+Create an `nginx.yaml` in the Agent's `conf.d` directory.
+
 #### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`). See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options:
+On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
 
 ```
 server {
@@ -71,9 +74,9 @@ You may optionally configure HTTP basic authentication in the server block, but 
 
 Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
-#### Connect the Agent
+#### Metric Collection
 
-Create an `nginx.yaml` in the Agent's `conf.d` directory:
+1. Add this configuration setup to your `nginx.yaml` file to start gathering your [Nginx Metrics](#metrics)
 
 ```
 init_config:
@@ -84,8 +87,42 @@ instances:
   # user: <USER>
   # password: <PASSWORD>
 ```
+See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-Restart the Agent to start sending NGINX metrics to Datadog.
+2. Restart the Agent to start sending NGINX metrics to Datadog.
+
+#### Log Collection
+
+**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+```
+logs_enabled: true
+```
+
+2. Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
+
+```
+
+logs:
+   - type: file
+     path: /var/log/nginx/access.log
+     service: nginx
+     source: nginx
+     sourcecategory: http_web_access
+    
+   - type: file
+     path: /var/log/nginx/error.log
+     service: nginx
+     source: nginx
+     sourcecategory: http_web_access
+     
+```
+    
+Change the `service` and `path` parameter values and configure it for your environment.
+See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
+
+3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
