@@ -55,7 +55,12 @@ Restart the Agent to begin sending HAProxy metrics to Datadog.
 
 **Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
 
-1. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+   ```
+   logs_enabled: true
+   ```
+
+2. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
     ```
     logs:
       - type: udp
@@ -68,7 +73,7 @@ Restart the Agent to begin sending HAProxy metrics to Datadog.
     Change the `service` parameter value and configure it for your environment.
 See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 ### Validation
 
