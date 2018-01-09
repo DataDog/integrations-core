@@ -14,12 +14,6 @@ from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
 
-<<<<<<< HEAD
-=======
-@attr(requires='kubernetes_state')
-class TestKubernetesState(AgentCheckTest):
->>>>>>> Add node tag for pod.ready/schedule metric
-
 class MockResponse:
     """
     MockResponse is used to simulate the object requests.Response commonly returned by requests.get
@@ -37,6 +31,7 @@ class MockResponse:
         pass
 
 
+@attr(requires='kubernetes_state')
 class TestKubernetesState(AgentCheckTest):
     CHECK_NAME = 'kubernetes_state'
 
