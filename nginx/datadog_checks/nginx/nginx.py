@@ -5,6 +5,8 @@
 # stdlib
 import re
 import urlparse
+import time
+from datetime import datetime
 
 # 3rd party
 import requests
@@ -43,14 +45,45 @@ class Nginx(AgentCheck):
             raise Exception('NginX instance missing "nginx_status_url" value.')
         tags = instance.get('tags', [])
 
-        response, content_type = self._get_data(instance)
-        self.log.debug(u"Nginx status `response`: {0}".format(response))
-        self.log.debug(u"Nginx status `content_type`: {0}".format(content_type))
+        url, ssl_validation, auth, use_plus_api, plus_api_version = self._get_instance_params(instance)
 
-        if content_type.startswith('application/json'):
-            metrics = self.parse_json(response, tags)
+        if not use_plus_api:
+            response, content_type = self._get_data(url, ssl_validation, auth)
+            self.log.debug(u"Nginx status `response`: {0}".format(response))
+            self.log.debug(u"Nginx status `content_type`: {0}".format(content_type))
+
+            if content_type.startswith('application/json'):
+                metrics = self.parse_json(response, tags)
+            else:
+                metrics = self.parse_text(response, tags)
         else:
-            metrics = self.parse_text(response, tags)
+            metrics = []
+            self._perform_service_check("/".join([url, plus_api_version]), ssl_validation, auth)
+            # These are all the endpoints we have to call to get the same data as we did with the old API
+            # since we can't get everything in one place anymore.
+            # The endpoints names are the names of the keys under which we should have the data in the payload dict.
+            # Only data from flat_endpoints should be moved one level up
+            # i.e. instead of
+            # {
+            #   http: {
+            #     requests: {<http/requests_data>}
+            #   }
+            # }
+            # we want
+            # {
+            #   requests: {<http/requests_data>}
+            # }
+            flat_endpoints = ["nginx", "http/requests", "http/server_zones", "http/upstreams", "http/caches"]
+            nested_endpoints = ["processes", "connections", "ssl", "slabs", "stream/server_zones", "stream/upstreams"]
+
+            for endpoint in flat_endpoints:
+                response = self._get_plus_api_data(url, ssl_validation, auth, plus_api_version, endpoint, False)
+                self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
+                metrics.extend(self.parse_json(response, tags))
+            for endpoint in nested_endpoints:
+                response = self._get_plus_api_data(url, ssl_validation, auth, plus_api_version, endpoint, True)
+                self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
+                metrics.extend(self.parse_json(response, tags))
 
         funcs = {
             'gauge': self.gauge,
@@ -62,13 +95,13 @@ class Nginx(AgentCheck):
                 name, value, tags, metric_type = row
                 if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
                     func_count = funcs['count']
-                    func_count(name+"_count", value, tags)
+                    func_count(name + "_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
             except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
 
-    def _get_data(self, instance):
+    def _get_instance_params(self, instance):
         url = instance.get('nginx_status_url')
         ssl_validation = instance.get('ssl_validation', True)
 
@@ -76,6 +109,26 @@ class Nginx(AgentCheck):
         if 'user' in instance and 'password' in instance:
             auth = (instance['user'], instance['password'])
 
+        use_plus_api = instance.get("use_plus_api", False)
+        plus_api_version = str(instance.get("plus_api_version", 2))
+
+        return url, ssl_validation, auth, use_plus_api, plus_api_version
+
+    def _get_data(self, url, ssl_validation, auth):
+
+        r = self._perform_service_check(url, ssl_validation, auth)
+
+        body = r.content
+        resp_headers = r.headers
+        return body, resp_headers.get('content-type', 'text/plain')
+
+    def _perform_request(self, url, ssl_validation, auth):
+        r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
+                         verify=ssl_validation, timeout=self.default_integration_http_timeout)
+        r.raise_for_status()
+        return r
+
+    def _perform_service_check(self, url, ssl_validation, auth):
         # Submit a service check for status page availability.
         parsed_url = urlparse.urlparse(url)
         nginx_host = parsed_url.hostname
@@ -84,9 +137,7 @@ class Nginx(AgentCheck):
         service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port]
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
-            r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
-                             verify=ssl_validation, timeout=self.default_integration_http_timeout)
-            r.raise_for_status()
+            r = self._perform_request(url, ssl_validation, auth)
         except Exception:
             self.service_check(service_check_name, AgentCheck.CRITICAL,
                                tags=service_check_tags)
@@ -94,10 +145,34 @@ class Nginx(AgentCheck):
         else:
             self.service_check(service_check_name, AgentCheck.OK,
                                tags=service_check_tags)
+        return r
 
-        body = r.content
-        resp_headers = r.headers
-        return body, resp_headers.get('content-type', 'text/plain')
+    def _nest_payload(self, keys, payload):
+        # Nest a payload in a dict under the keys contained in `keys`
+        if len(keys) == 0:
+            return payload
+        else:
+            return {
+                keys[0]: self._nest_payload(keys[1:], payload)
+            }
+
+    def _get_plus_api_data(self, api_url, ssl_validation, auth, plus_api_version, endpoint, nested):
+        # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
+        # so we can treat it the same way
+
+        url = "/".join([api_url, plus_api_version, endpoint])
+        try:
+            self.log.debug(u"Querying URL: {0}".format(url))
+            r = self._perform_request(url, ssl_validation, auth)
+            split_endpoint = endpoint.split("/")
+            if nested:
+                payload = self._nest_payload(split_endpoint, r.json())
+            else:
+                payload = self._nest_payload(split_endpoint[1:], r.json())
+        except Exception as e:
+            self.log.error("Error querying %s metrics at %s: %s", endpoint, url, e)
+
+        return payload
 
     @classmethod
     def parse_text(cls, raw, tags):
@@ -134,7 +209,10 @@ class Nginx(AgentCheck):
     def parse_json(cls, raw, tags=None):
         if tags is None:
             tags = []
-        parsed = json.loads(raw)
+        if isinstance(raw, dict):
+            parsed = raw
+        else:
+            parsed = json.loads(raw)
         metric_base = 'nginx'
         output = []
         all_keys = parsed.keys()
@@ -190,5 +268,17 @@ class Nginx(AgentCheck):
 
         elif isinstance(val, (int, float)):
             output.append((metric_base, val, tags, 'gauge'))
+
+        elif isinstance(val, (unicode, str)):
+            # In the new Plus API, timestamps are now formatted strings, some include microseconds, some don't...
+            try:
+                timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%S.%fZ").timetuple())
+                output.append((metric_base, timestamp, tags, 'gauge'))
+            except ValueError:
+                try:
+                    timestamp = time.mktime(datetime.strptime(val, "%Y-%m-%dT%H:%M:%SZ").timetuple())
+                    output.append((metric_base, timestamp, tags, 'gauge'))
+                except ValueError:
+                    pass
 
         return output
