@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.1 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add SSL as a connect option.
+
 1.2.1 / 2017-11-29
 ==================
 
