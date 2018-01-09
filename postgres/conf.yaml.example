@@ -73,7 +73,7 @@ instances:
 #    collect_default_database: False
 #
 
-#log Section
+##log Section
 #logs:
 
     # - type : (mandatory) type of log input source (tcp / udp / file)

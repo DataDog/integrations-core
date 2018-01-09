@@ -1,5 +1,6 @@
 # IIS Integration
 {{< img src="integrations/iis/iisgraph.png" alt="IIS Graph" responsive="true" popup="true">}}
+
 ## Overview
 
 Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.
@@ -7,32 +8,33 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 ## Setup
 ### Installation
 
-The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
+The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
-You can check for this using the following command:
+1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
-```
-Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
-```
+2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.  
+  You can check for this using the following command:
+  ```
+  Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
+  ```
 
-This class should be installed as part of the web-http-common Windows Feature:
+  This class should be installed as part of the web-http-common Windows Feature:
 
-```
-PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
+  ```
+  PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
 
-Display Name                       Name               Install State
-------------                       ----               -------------
-[X] Web Server (IIS)               Web-Server             Installed
-    [X] Web Server                 Web-WebServer          Installed
-        [X] Common HTTP Features   Web-Common-Http        Installed
-            [X] Default Document   Web-Default-Doc        Installed
-            [X] Directory Browsing Web-Dir-Browsing       Installed
-            [X] HTTP Errors        Web-Http-Errors        Installed
-            [X] Static Content     Web-Static-Content     Installed
-```
-
-You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
+  Display Name                       Name               Install State
+  ------------                       ----               -------------
+  [X] Web Server (IIS)               Web-Server             Installed
+  [X] Web Server                     Web-WebServer          Installed
+  [X] Common HTTP Features           Web-Common-Http        Installed
+  [X] Default Document               Web-Default-Doc        Installed
+  [X] Directory Browsing             Web-Dir-Browsing       Installed
+  [X] HTTP Errors                    Web-Http-Errors        Installed
+  [X] Static Content                 Web-Static-Content     Installed
+  ```
+  
+  You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
 
 ### Configuration
 #### Prepare IIS

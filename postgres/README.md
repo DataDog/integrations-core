@@ -12,7 +12,8 @@ Get metrics from postgres service in real time to:
 
 ### Installation
 
-The Postgres check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent). If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
+The Postgres check is packaged with the Agent, to start gathering your Postgres metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent).  
+If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
 
 ### Configuration
 
@@ -23,8 +24,8 @@ Create a file `postgres.yaml` in the Agent's `conf.d` directory.
 To get started with the PostgreSQL integration, create at least a read-only datadog user with proper access to your PostgreSQL Server. Start psql on your PostgreSQL database and run:
 
 ```
-    create user datadog with password '<PASSWORD>';
-    grant SELECT ON pg_stat_database to datadog;
+create user datadog with password '<PASSWORD>';
+grant SELECT ON pg_stat_database to datadog;
 ```
 
 **Note**: `grant SELECT ON pg_stat_database to datadog;` is for most cases, but Postgres instances with more tables locked down or custom queries require granting `CONNECT` to additional tables.
@@ -32,40 +33,38 @@ To get started with the PostgreSQL integration, create at least a read-only data
 To verify the correct permissions run the following command:
 
 ```
-    psql -h localhost -U datadog postgres -c \
-    "select * from pg_stat_database LIMIT(1);"
-    && echo -e "\e[0;32mPostgres connection - OK\e[0m" || \
-    || echo -e "\e[0;31mCannot connect to Postgres\e[0m"
+psql -h localhost -U datadog postgres -c \
+"select * from pg_stat_database LIMIT(1);"
+&& echo -e "\e[0;32mPostgres connection - OK\e[0m" || \
+|| echo -e "\e[0;31mCannot connect to Postgres\e[0m"
 ```
 
 When it prompts for a password, enter the one used in the first command.
 
 #### Metric Collection
 
-1. Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
+1. Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options. Configuration Options:
+  
+  * **`username`** (Optional) - The user account used to collect metrics, set in the [Installation section above](#installation)
+  * **`password`** (Optional) - The password for the user account.
+  * **`dbname`** (Optional) - The name of the database you want to monitor.
+  * **`ssl`** (Optional) - Defaults to False. Indicates whether to use an SSL connection.
+  * **`use_psycopg2`** (Optional) - Defaults to False. Setting this option to `True` will force the Datadog Agent to collect PostgreSQL metrics using psycopg2 instead of pg8000. Note that pyscopg2 does not support SSL connections.
+  * **`tags`** (Optional) - A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs.
+  * **`relations`** (Optional) - By default, all schemas are included. Add specific schemas here to collect metrics for schema relations. Each relation will generate 10 metrics and an additional 10 metrics per index. Use the following structure to declare relations:
 
-Configuration Options:
+  ```
+  relations:
+    - relation_name: my_relation
+      schemas:
+        - my_schema_1
+        - my_schema_2
+  ```
 
-* **`username`** (Optional) - The user account used to collect metrics, set in the [Installation section above](#installation)
-* **`password`** (Optional) - The password for the user account.
-* **`dbname`** (Optional) - The name of the database you want to monitor.
-* **`ssl`** (Optional) - Defaults to False. Indicates whether to use an SSL connection.
-* **`use_psycopg2`** (Optional) - Defaults to False. Setting this option to `True` will force the Datadog Agent to collect PostgreSQL metrics using psycopg2 instead of pg8000. Note that pyscopg2 does not support SSL connections.
-* **`tags`** (Optional) - A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs.
-* **`relations`** (Optional) - By default, all schemas are included. Add specific schemas here to collect metrics for schema relations. Each relation will generate 10 metrics and an additional 10 metrics per index. Use the following structure to declare relations:
+  * **`collect_function_metrics`** (Optional) - Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
+  * **`collect_count_metrics`** (Optional) - Collect count metrics. The default value is `True` for backward compatibility, but this might be slow. The recommended value is `False`.
 
-```
-relations:
-  - relation_name: my_relation
-    schemas:
-      - my_schema_1
-      - my_schema_2
-```
-
-* **`collect_function_metrics`** (Optional) - Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
-* **`collect_count_metrics`** (Optional) - Collect count metrics. The default value is `True` for backward compatibility, but this might be slow. The recommended value is `False`.
-
-2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Postgres metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Postgres metrics to Datadog.
 
 #### Log Collection
 
@@ -73,57 +72,59 @@ Postgres default logging is to stderr and logs do not contains much information.
 
 1. Edit your postgres configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
 
-```
-logging_collector = on
-log_directory = 'pg_log'	# directory where log files are written,
-                                       	# can be absolute or relative to PGDATA
-log_filename = 'pg.log' 	#log file name, can include pattern
-log_statement = 'all' 		#log all queries
-log_line_prefix= ‘%m [%p] %d %a %u %h %c ‘
-log_file_mode = 0644
-#For Windows
-#log_destination = ‘eventlog’
-```
+  ```
+  logging_collector = on
+  log_directory = 'pg_log'	# directory where log files are written,
+                            # can be absolute or relative to PGDATA
+  log_filename = 'pg.log' 	#log file name, can include pattern
+  log_statement = 'all' 		#log all queries
+  log_line_prefix= ‘%m [%p] %d %a %u %h %c ‘
+  log_file_mode = 0644
+  ## For Windows
+  #log_destination = ‘eventlog’
+  ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
-   ```
-   logs_enabled: true
-   ```
+  ```
+  logs_enabled: true
+  ```
 
 3. Add this configuration setup to your `postgres.yaml` file to start collecting your Postgres Logs:
-```
-logs:
-  - type: file
-    path: /var/log/pg_log/pg.log
-    source: postgresql
-    sourcecategory: database
-    service: myapp
-    #To handle multi line that starts with yyyy-mm-dd use the following pattern
-    #log_processing_rules:
-    #  - type: multi_line
-    #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-    #    name: new_log_start_with_date
-```
-Change the `service` and `path` parameter values and configure it for your environment.
-See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
+  ```
+  logs:
+    - type: file
+      path: /var/log/pg_log/pg.log
+      source: postgresql
+      sourcecategory: database
+      service: myapp
+      #To handle multi line that starts with yyyy-mm-dd use the following pattern
+      #log_processing_rules:
+      #  - type: multi_line
+      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+      #    name: new_log_start_with_date
+  ```
+  Change the `service` and `path` parameter values and configure it for your environment.  
+  See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
 
 ### Validation
 
 [Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postgres` under the Checks section:
 
-    Checks
-    ======
+```
+Checks
+======
 
-        postgres
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+    postgres
+    -----------
+      - instance #0 [OK]
+      - Collected 39 metrics, 0 events & 7 service checks
+```
 
 ## Compatibility
 
-The postgres check is compatible with all major platforms
+The Postgres check is compatible with all major platforms
 
 ## Data Collected
 ### Metrics
