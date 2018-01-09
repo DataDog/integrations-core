@@ -41,6 +41,12 @@ instances:
                             # collections. If kafka consumer offsets disabled
                             # this has no effect.
     # zk_prefix: /0.8
+
+    # SSL Configuration
+    # ssl_cafile: /etc/dd-agent/conf.d/kafka.cer
+    # security_protocol: SSL
+    # ssl_check_hostname: False
+
     # kafka_consumer_offsets: false
     consumer_groups:
       my_consumer:  # consumer group name
