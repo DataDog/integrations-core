@@ -12,3 +12,27 @@ instances:
 # to your sudoers file, and uncomment the below option.
 #
 #    use_sudo: True
+#
+#    # If you wish to customize the health checks that will be sent as a service check, uncomment and edit the list below.
+#    # It will by default collect the health check listed below.
+#    # The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
+#    # The health checks are only available if you're running ceph luminous or later
+#    collect_service_check_for:
+#      - OSD_DOWN
+#      - OSD_ORPHAN
+#      - OSD_FULL
+#      - OSD_NEARFULL
+#      - POOL_FULL
+#      - POOL_NEAR_FULL
+#      - PG_AVAILABILITY
+#      - PG_DEGRADED
+#      - PG_DEGRADED_FULL
+#      - PG_DAMAGED
+#      - PG_NOT_SCRUBBED
+#      - PG_NOT_DEEP_SCRUBBED
+#      - CACHE_POOL_NEAR_FULL
+#      - TOO_FEW_PGS
+#      - TOO_MANY_PGS
+#      - OBJECT_UNFOUND
+#      - REQUEST_SLOW
+#      - REQUEST_STUCK

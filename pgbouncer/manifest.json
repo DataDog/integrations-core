@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "pgbouncer",
@@ -13,8 +13,9 @@
   "package_deps": false,
   "version": "1.0.2",
   "guid": "51386802-4502-4991-b592-27eff1ca111c",
-  "public_title": "Datadog-PGbouncer Integration",
+  "public_title": "Datadog-PGBouncer Integration",
   "categories":["data store"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/pgbouncer/",
   "is_public": true,
   "has_logo": true

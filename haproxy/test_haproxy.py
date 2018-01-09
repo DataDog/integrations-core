@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2012-2016
+# (C) Datadog, Inc. 2012-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -28,10 +28,10 @@ b,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,
 b,i-4,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
 b,i-5,0,0,0,1,,1,1,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
 b,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,"space, afterspace",,,,,,,,,0,0,
-c,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
-c,i-2,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN (agent),1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
-c,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
-c,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
+be_edge_http_sre-production_elk-kibana,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+be_edge_http_sre-production_elk-kibana,i-2,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN (agent),1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+be_edge_http_sre-production_elk-kibana,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+be_edge_http_sre-production_elk-kibana,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
 """
 
 MOCK_DATA_EVIL = """# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
@@ -45,21 +45,21 @@ b,i-4,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,
 b,i-5,0,0,0,1,,1,1,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,1,0,,1,3,3,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
 b,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,"Now, this is just plain
 EVIL",,,,,,,,,0,0,
-c,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,"And this is 'end of days' stuff,
+be_edge_http_sre-production_elk-kibana,i-1,0,0,0,1,,1,1,0,,0,,0,0,0,0,UP,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,"And this is 'end of days' stuff,
 am I right? ""Pure EVIL
 DOIN'""
 ",,,,,0,,,,0,0,
-c,i-2,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN (agent),1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
-c,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
-c,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
+be_edge_http_sre-production_elk-kibana,i-2,0,0,0,1,,1,1,0,,0,,0,0,0,0,DOWN (agent),1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+be_edge_http_sre-production_elk-kibana,i-3,0,0,0,1,,1,1,0,,0,,0,0,0,0,NO CHECK,1,1,0,0,1,1,30,,1,3,1,,70,,2,0,,1,1,,0,,,,,,,0,,,,0,0,
+be_edge_http_sre-production_elk-kibana,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,,,,,,,,,,,0,0,
 """
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
     (['status:available', 'service:b'], 4),
     (['status:unavailable', 'service:b'], 2),
-    (['status:available', 'service:c'], 1),
-    (['status:unavailable', 'service:c'], 2)
+    (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
+    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2)
 )
 
 AGG_STATUSES = (
@@ -115,9 +115,9 @@ class TestCheckHAProxy(AgentCheckTest):
         self.assertMetric('haproxy.count_per_status', value=1, tags=['status:open', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['status:down', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['status:maint', 'service:b'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:up', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:down', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:no_check', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:up', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:down', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['status:no_check', 'service:be_edge_http_sre-production_elk-kibana'])
 
         self._assert_agg_statuses()
 
@@ -133,9 +133,9 @@ class TestCheckHAProxy(AgentCheckTest):
             self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:%s' % backend, 'status:up', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-4', 'status:down', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-5', 'status:maint', 'service:b'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:up', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:down', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:no_check', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:up', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:down', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:no_check', 'service:be_edge_http_sre-production_elk-kibana'])
 
         self._assert_agg_statuses()
 
@@ -152,9 +152,9 @@ class TestCheckHAProxy(AgentCheckTest):
             self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:%s' % backend, 'status:available', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-4', 'status:unavailable', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-5', 'status:unavailable', 'service:b'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:available', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:unavailable', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:unavailable', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:available', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'])
 
         self._assert_agg_statuses(collate_status_tags_per_host=True)
 
@@ -171,9 +171,9 @@ class TestCheckHAProxy(AgentCheckTest):
             self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:%s' % backend, 'status:available', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-4', 'status:unavailable', 'service:b'])
         self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-5', 'status:unavailable', 'service:b'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:available', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:unavailable', 'service:c'])
-        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:unavailable', 'service:c'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-1', 'status:available', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-2', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'])
+        self.assertMetric('haproxy.count_per_status', value=1, tags=['backend:i-3', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'])
 
         self._assert_agg_statuses(collate_status_tags_per_host=True)
 
@@ -267,6 +267,34 @@ b,BACKEND,0,0,1,2,0,421,1,0,0,0,,0,0,0,0,UP,6,6,0,,0,1,0,,1,3,0,,421,,1,0,,1,,,,
         self.assertMetricTag('haproxy.count_per_status', 'my:new:tag')
         self.assertServiceCheck('haproxy.backend_up', tags=['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND'])
 
+    @mock.patch('requests.get', return_value=mock.Mock(content=MOCK_DATA))
+    def test_regex_tags(self, mock_requests):
+        config = copy.deepcopy(self.BASE_CONFIG)
+        config['instances'][0]['tags'] = ['region:infra']
+        # OS3 service: be_edge_http_sre-production_elk-kibana
+        config['instances'][0]['tags_regex'] = 'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(' \
+                                               '?P<app>.*)'
+        self.run_check(config)
+
+        expected_tags = ['service:be_edge_http_sre-production_elk-kibana',
+                         'type:BACKEND',
+                         'instance_url:http://localhost/admin?stats',
+                         'region:infra',
+                         'security:edge_http',
+                         'app:elk-kibana',
+                         'env:production',
+                         'team:sre',
+                         'backend:BACKEND'
+                         ]
+        self.assertMetric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
+        self.assertMetricTag('haproxy.backend.session.current', 'app:elk-kibana', 1)
+        self.assertServiceCheck('haproxy.backend_up', tags=['service:be_edge_http_sre-production_elk-kibana',
+           'region:infra',
+           'security:edge_http',
+           'app:elk-kibana',
+           'env:production',
+           'team:sre',
+           'backend:i-1'])
 
 @attr(requires='haproxy')
 class HaproxyTest(AgentCheckTest):

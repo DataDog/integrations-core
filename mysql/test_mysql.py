@@ -1,8 +1,11 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+from os import environ
+
+# 3rd-party
 from nose.plugins.attrib import attr
 
 # project
@@ -355,7 +358,7 @@ class TestMySql(AgentCheckTest):
         testable_metrics = (self.STATUS_VARS + self.VARIABLES_VARS + self.INNODB_VARS +
                             self.BINLOG_VARS + self.SYSTEM_METRICS + self.SCHEMA_VARS + self.SYNTHETIC_VARS)
 
-        if ver >= (5, 6, 0):
+        if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
             testable_metrics.extend(self.PERFORMANCE_VARS)
 
         # Test metrics
@@ -400,6 +403,8 @@ class TestMySql(AgentCheckTest):
         config['instances'][0]['port'] = 13307
         self.run_check_twice(config)
 
+        self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
+
         # Test service check
         self.assertServiceCheck('mysql.can_connect', status=AgentCheck.OK,
                                 tags=self.SC_TAGS_REPLICA, count=1)
@@ -414,7 +419,7 @@ class TestMySql(AgentCheckTest):
         testable_metrics = (self.STATUS_VARS + self.VARIABLES_VARS + self.INNODB_VARS +
                             self.BINLOG_VARS + self.SYSTEM_METRICS + self.SCHEMA_VARS + self.SYNTHETIC_VARS)
 
-        if ver >= (5, 6, 0):
+        if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
             testable_metrics.extend(self.PERFORMANCE_VARS)
 
         # Test metrics

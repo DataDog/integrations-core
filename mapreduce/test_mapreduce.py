@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -177,13 +177,19 @@ class MapReduceCheck(AgentCheckTest):
         'task_type:reduce'
     ]
 
-    MAPREDUCE_JOB_COUNTER_METRIC_VALUES = {
+    MAPREDUCE_JOB_COUNTER_METRIC_VALUES_READ = {
         'mapreduce.job.counter.total_counter_value': {'value': 0, 'tags': ['counter_name:file_bytes_read']},
         'mapreduce.job.counter.map_counter_value': {'value': 1, 'tags': ['counter_name:file_bytes_read']},
         'mapreduce.job.counter.reduce_counter_value': {'value': 2, 'tags': ['counter_name:file_bytes_read']},
+    }
+
+    MAPREDUCE_JOB_COUNTER_METRIC_VALUES_WRITTEN = {
         'mapreduce.job.counter.total_counter_value': {'value': 3, 'tags': ['counter_name:file_bytes_written']},
         'mapreduce.job.counter.map_counter_value': {'value': 4, 'tags': ['counter_name:file_bytes_written']},
         'mapreduce.job.counter.reduce_counter_value': {'value': 5, 'tags': ['counter_name:file_bytes_written']},
+    }
+
+    MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS = {
         'mapreduce.job.counter.total_counter_value': {'value': 9, 'tags': ['counter_name:map_output_records']},
         'mapreduce.job.counter.map_counter_value': {'value': 10, 'tags': ['counter_name:map_output_records']},
         'mapreduce.job.counter.reduce_counter_value': {'value': 11, 'tags': ['counter_name:map_output_records']},
@@ -224,7 +230,23 @@ class MapReduceCheck(AgentCheckTest):
                 tags=self.MAPREDUCE_REDUCE_TASK_METRIC_TAGS)
 
         # Check the MapReduce job counter metrics
-        for metric, attributes in self.MAPREDUCE_JOB_COUNTER_METRIC_VALUES.iteritems():
+        for metric, attributes in self.MAPREDUCE_JOB_COUNTER_METRIC_VALUES_READ.iteritems():
+            tags = attributes['tags']
+            tags.extend(self.MAPREDUCE_JOB_COUNTER_METRIC_TAGS)
+            self.assertMetric(metric,
+                value=attributes['value'],
+                tags=tags)
+
+        # Check the MapReduce job counter metrics
+        for metric, attributes in self.MAPREDUCE_JOB_COUNTER_METRIC_VALUES_WRITTEN.iteritems():
+            tags = attributes['tags']
+            tags.extend(self.MAPREDUCE_JOB_COUNTER_METRIC_TAGS)
+            self.assertMetric(metric,
+                value=attributes['value'],
+                tags=tags)
+
+        # Check the MapReduce job counter metrics
+        for metric, attributes in self.MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS.iteritems():
             tags = attributes['tags']
             tags.extend(self.MAPREDUCE_JOB_COUNTER_METRIC_TAGS)
             self.assertMetric(metric,

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -62,6 +62,6 @@ class PDHCheck(AgentCheck):
                     tags = self._tags[key]
 
                 if not counter.is_single_instance():
-                    tag = "instance=%s" % key
+                    tag = "instance:%s" % key
                     tags.append(tag)
                 metric_func(dd_name, val, tags)

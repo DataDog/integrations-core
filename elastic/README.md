@@ -1,4 +1,5 @@
 # Elasticsearch Integration
+{{< img src="integrations/elasticsearch/elasticsearchgraph.png" alt="Elasticsearch" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -29,11 +30,11 @@ If you're collecting Elasticsearch metrics from just one Datadog Agent running o
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending Elasticsearch metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Elasticsearch metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `elastic` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `elastic` under the Checks section:
 
 ```
   Checks
@@ -73,15 +74,8 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 
 ## Troubleshooting
 
-### Agent cannot connect
-```
-    elastic
-    -------
-      - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
-      - Collected 0 metrics, 0 events & 1 service check
-```
-
-Check that the `url` in `elastic.yaml` is correct.
+* [Agent can't connect](https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect)
+* [Why isn't Elasticsearch sending all my metrics?](/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics)
 
 ## Further Reading
 To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/) about it.

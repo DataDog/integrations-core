@@ -1,0 +1,77 @@
+init_config:
+  # List of metrics to extract from Prometheus
+  allowed_metrics:
+    - ci_docker_machines_provider_machine_creation_duration_seconds
+    - ci_docker_machines_provider_machine_states
+    - ci_runner_builds
+    - ci_runner_errors
+    - ci_runner_version_info
+    - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
+    - ci_ssh_docker_machines_provider_machine_states
+    - go_gc_duration_seconds
+    - go_goroutines
+    - go_memstats_alloc_bytes
+    - go_memstats_alloc_bytes_total
+    - go_memstats_buck_hash_sys_bytes
+    - go_memstats_frees_total
+    - go_memstats_gc_sys_bytes
+    - go_memstats_heap_alloc_bytes
+    - go_memstats_heap_idle_bytes
+    - go_memstats_heap_inuse_bytes
+    - go_memstats_heap_objects
+    - go_memstats_heap_released_bytes_total
+    - go_memstats_heap_sys_bytes
+    - go_memstats_last_gc_time_seconds
+    - go_memstats_lookups_total
+    - go_memstats_mallocs_total
+    - go_memstats_mcache_inuse_bytes
+    - go_memstats_mcache_sys_bytes
+    - go_memstats_mspan_inuse_bytes
+    - go_memstats_mspan_sys_bytes
+    - go_memstats_next_gc_bytes
+    - go_memstats_other_sys_bytes
+    - go_memstats_stack_inuse_bytes
+    - go_memstats_stack_sys_bytes
+    - go_memstats_sys_bytes
+    - process_cpu_seconds_total
+    - process_max_fds
+    - process_open_fds
+    - process_resident_memory_bytes
+    - process_start_time_seconds
+    - process_virtual_memory_bytes
+
+instances:
+    # url of the metrics endpoint of prometheus
+  - prometheus_endpoint: http://localhost:9252/metrics
+    # The histogram buckets can be noisy and generate a lot of tags.
+    # send_histograms_buckets controls whether or not you want to pull them.
+    #
+    # send_histograms_buckets: True
+    #
+    # Note that like all checks based on the PrometheusCheck class, you can add
+    # tags to the instance that will be added to all the metrics of this check
+    # instance.
+    #
+    # tags:
+    #   - 'mytag1:myValue1'
+
+    # Master URL to probe for service health status
+    # This check is disabled if `gitlab_url` is not configured
+    # gitlab_url: https://GITLAB_URL/
+
+    # The (optional) connect_timeout will override the default value, and fail
+    # the check if the time to establish the (TCP) connection exceeds the
+    # connect_timeout value (in seconds)
+    # connect_timeout: 5
+
+    # The (optional) receive_timeout will override the default value, and fail
+    # the check if the time to receive the server status from the Apache server
+    # exceeds the receive_timeout value (in seconds)
+    # receive_timeout: 15
+
+    # Set to `false` to disable the validation of Gitlab's SSL certificates (default: true).
+    # ssl_cert_validation: true
+
+    # If ssl_cert_validation is enabled, you can provide a custom file
+    # that lists trusted CA certificates (optional).
+    # ssl_ca_certs: /path/to/CA/certificate/file

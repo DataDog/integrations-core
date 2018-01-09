@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -47,11 +47,11 @@ class CheckEtcdTest(AgentCheckTest):
         self.assertMetric('etcd.self.send.appendrequest.count', tags=tags, count=1)
         self.assertMetric('etcd.self.recv.appendrequest.count', tags=tags, count=1)
 
-        self.assertServiceCheckOK(self.check.SERVICE_CHECK_NAME,
-                                  count=1,
-                                  tags=['url:http://localhost:2379'])
+        self.assertServiceCheckOK(self.check.SERVICE_CHECK_NAME, count=1,
+                                  tags=['url:http://localhost:2379', 'etcd_state:leader'])
+        self.assertServiceCheckOK(self.check.HEALTH_SERVICE_CHECK_NAME, count=1,
+                                  tags=['url:http://localhost:2379', 'etcd_state:leader'])
         self.coverage_report()
-
 
     # FIXME: not really an integration test, should be pretty easy
     # to spin up a cluster to test that.
@@ -89,7 +89,7 @@ class CheckEtcdTest(AgentCheckTest):
         }
 
         mocks = {
-            '_get_leader_metrics': lambda url, ssl, timeout: mock
+            '_get_leader_metrics': lambda url, path, ssl, timeout: mock
         }
 
         self.run_check_twice(self.config, mocks=mocks)
@@ -116,5 +116,6 @@ class CheckEtcdTest(AgentCheckTest):
         self.assertServiceCheckCritical(self.check.SERVICE_CHECK_NAME,
                                         count=1,
                                         tags=['url:http://localhost:2379/test'])
+        self.assertServiceCheckUnknown(self.check.HEALTH_SERVICE_CHECK_NAME)
 
         self.coverage_report()

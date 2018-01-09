@@ -1,9 +1,6 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlibb
-import time
 
 # 3p
 from nose.plugins.attrib import attr
@@ -11,7 +8,7 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest
 
-RESULTS_TIMEOUT = 40
+RESULTS_TIMEOUT = 20
 
 CONFIG = {
     'init_config': {},
@@ -65,28 +62,6 @@ class TCPCheckTest(AgentCheckTest):
     def tearDown(self):
         self.check.stop()
 
-    def wait_for_async(self, method, attribute, count):
-        """
-        Loop on `self.check.method` until `self.check.attribute >= count`.
-
-        Raise after
-        """
-
-        # Check the initial values to see if we already have results before waiting for the async
-        # instances to finish
-        initial_values = getattr(self, attribute)
-
-        i = 0
-        while i < RESULTS_TIMEOUT:
-            self.check._process_results()
-            if len(getattr(self.check, attribute)) + len(initial_values) >= count:
-                return getattr(self.check, method)() + initial_values
-            time.sleep(1.1)
-            i += 1
-        raise Exception("Didn't get the right count of service checks in time, {0}/{1} in {2}s: {3}"
-                        .format(len(getattr(self.check, attribute)), count, i,
-                                getattr(self.check, attribute)))
-
     def test_event_deprecation(self):
         """
         Deprecate events usage for service checks.
@@ -95,7 +70,7 @@ class TCPCheckTest(AgentCheckTest):
         self.run_check(CONFIG_EVENTS)
 
         # Overrides self.service_checks attribute when values are available
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', len(CONFIG_EVENTS['instances']))
+        self.warnings = self.wait_for_async('get_warnings', 'warnings', len(CONFIG_EVENTS['instances']), RESULTS_TIMEOUT)
 
         # Assess warnings
         self.assertWarning(
@@ -113,7 +88,7 @@ class TCPCheckTest(AgentCheckTest):
         self.run_check(CONFIG)
 
         # Overrides self.service_checks attribute when values are available
-        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']))
+        self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']), RESULTS_TIMEOUT)
         self.metrics = self.check.get_metrics()
 
         expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530"]

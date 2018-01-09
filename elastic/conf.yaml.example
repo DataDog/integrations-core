@@ -34,6 +34,7 @@ instances:
     # password: password
     # cluster_stats: false
     # pshard_stats: false
+    # pshard_graceful_timeout: false  # continue gracefully if pshard stats TO
     # pending_task_stats: true
     # ssl_verify: false
     # ssl_cert: /path/to/cert.pem

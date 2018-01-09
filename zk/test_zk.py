@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -51,6 +51,8 @@ class ZooKeeperTestCase(AgentCheckTest):
         'zookeeper.zxid.count',
         'zookeeper.nodes',
         'zookeeper.instances',
+        'zookeeper.packets.received',
+        'zookeeper.packets.sent'
     ]
 
     MNTR_METRICS = [

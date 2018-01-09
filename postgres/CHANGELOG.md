@@ -1,6 +1,6 @@
 # CHANGELOG - postgres
 
-1.2.0 / Unreleased
+1.2.0 / 2017-11-21
 ==================
 
 ### Changes
@@ -49,9 +49,9 @@
 [#446]: https://github.com/DataDog/integrations-core/issues/446
 [#607]: https://github.com/DataDog/integrations-core/issues/607
 [#639]: https://github.com/DataDog/integrations-core/issues/639
+[#689]: https://github.com/DataDog/integrations-core/issues/689
 [#699]: https://github.com/DataDog/integrations-core/issues/699
-[#689]: https://github.com/Erouan50/integrations-core/issues/689
-[#740]: https://github.com/DataDog/integrations-core/pull/740
+[#740]: https://github.com/DataDog/integrations-core/issues/740
 [#776]: https://github.com/DataDog/integrations-core/issues/776
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill

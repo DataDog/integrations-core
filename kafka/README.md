@@ -7,9 +7,9 @@ Connect Kafka to Datadog in order to:
 * Visualize the performance of your cluster in real time
 * Correlate the performance of Kafka with the rest of your applications
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](/integrations/java) for more detailed instructions.
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](https://docs.datadoghq.com/integrations/java/) for more detailed instructions.
 
-To collect Kafka consumer metrics, see the [kafka_consumer check](https://docs.datadoghq.com/integrations/kafka_consumer/).
+To collect Kafka consumer metrics, see the [kafka_consumer check](https://docs.datadoghq.com/integrations/kafka/).
 
 ## Setup
 ### Installation
@@ -28,7 +28,7 @@ After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka m
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kafka` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kafka` under the Checks section:
 
 ```
   Checks
@@ -60,41 +60,10 @@ The Kafka check does not include any service check at this time.
 
 
 ## Troubleshooting
-### Agent failed to retrieve RMIServer stub
 
-```
-instance #kafka-localhost-<PORT_NUM> [ERROR]: 'Cannot connect to instance localhost:<PORT_NUM>. java.io.IOException: Failed to retrieve RMIServer stub
-```
-
-The Datadog Agent is unable to connect to the Kafka instance to retrieve metrics from the exposed mBeans over the RMI protocol.
-
-Include the following JVM arguments when starting the Kafka instance to solve resolve this issue *(required for Producer, Consumer, and Broker as they are all separate Java instances)*
-
-```
--Dcom.sun.management.jmxremote.port=<PORT_NUM> -Dcom.sun.management.jmxremote.rmi.port=<PORT_NUM>
-```
-
-### Producer and Consumer metrics don't appear in my Datadog application
-By default we only collect broker based metrics. 
-
-If you're running Java based Producers and Consumers, uncomment this section of the yaml file and point the Agent to the proper ports to start pulling in metrics:
-
-```yaml
-# - host: remotehost
-    # port: 9998 # Producer
-    # tags:
-    # kafka: producer0
-    # env: stage
-    # newTag: test
-    # - host: remotehost
-    # port: 9997 # Consumer
-    # tags:
-    # kafka: consumer0
-    # env: stage
-    # newTag: test
-```
-
-If you are using custom Producer and Consumer clients that are not written in Java and/or not exposing mBeans, having this enabled would still collect zero metrics. To still submit your metrics from your code use [dogstatsd](https://docs.datadoghq.com/guides/dogstatsd/).
+* [Troubleshooting and Deep Dive for Kafka](https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka)
+* [Agent failed to retrieve RMIServer stub](https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub)
+* [Producer and Consumer metrics don't appear in my Datadog application](https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application)
 
 ## Further Reading
 

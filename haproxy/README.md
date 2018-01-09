@@ -1,5 +1,5 @@
 # Haproxy Integration
-
+{{< img src="integrations/haproxy/haproxydash.png" alt="HAProxy default dashboard" responsive="true" popup="true">}}
 ## Overview
 
 Capture HAProxy activity in Datadog to:
@@ -78,7 +78,7 @@ See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `haproxy` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `haproxy` under the Checks section:
 
 ```
   Checks

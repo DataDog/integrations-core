@@ -168,7 +168,7 @@ See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/ma
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `mysql` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mysql` under the Checks section:
 
 ```
   Checks
@@ -353,40 +353,14 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 
 ## Troubleshooting
 
-You may observe one of these common problems in the output of the Datadog Agent's `info` subcommand.
-
-### Agent cannot authenticate
-```
-    mysql
-    -----
-      - instance #0 [ERROR]: '(1045, u"Access denied for user \'datadog\'@\'localhost\' (using password: YES)")'
-      - Collected 0 metrics, 0 events & 1 service check
-```
-
-Either the `'datadog'@'localhost'` user doesn't exist or the Agent is not configured with correct credentials. Review the Configuration section to add a user, and review the Agent's `mysql.yaml`.
-
-### Database user lacks privileges
-```
-    mysql
-    -----
-      - instance #0 [WARNING]
-          Warning: Privilege error or engine unavailable accessing the INNODB status                          tables (must grant PROCESS): (1227, u'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation')
-      - Collected 21 metrics, 0 events & 1 service check
-```
-
-The Agent can authenticate, but it lacks privileges for one or more metrics it wants to collect. In this case, it lacks the PROCESS privilege:
-
-```
-mysql> select user,host,process_priv from mysql.user where user='datadog';
-+---------+-----------+--------------+
-| user    | host      | process_priv |
-+---------+-----------+--------------+
-| datadog | localhost | N            |
-+---------+-----------+--------------+
-1 row in set (0.00 sec)
-```
-
-Review the Configuration section and grant the datadog user all necessary privileges. Do NOT grant all privileges on all databases to this user.
+* [Connection Issues with the SQL Server Integration](https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration)
+* [MySQL Localhost Error - Localhost VS 127.0.0.1](https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1)
+* [Can I use a named instance in the SQL Server integration?](https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration)
+* [Can I set up the dd-agent mysql check on my Google CloudSQL?](https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql)
+* [How to collect metrics from custom MySQL queries](https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries)
+* [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI](https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi)
+* [How can I collect more metrics from my SQL Server integration?](https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration)
+* [Database user lacks privileges](https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges)
 
 ## Further Reading
 Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.

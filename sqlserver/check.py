@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 '''
@@ -121,11 +121,9 @@ class SQLServer(AgentCheck):
             self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
             self.connector = 'adodbapi'
 
-        self.log.debug("instances: %s", str(instances))
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
         for instance in instances:
-            self.log.debug("initializing %s", str(instance))
             try:
                 instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
                 self.do_check[instance_key] = True
@@ -265,8 +263,8 @@ class SQLServer(AgentCheck):
             elif type(m) is SqlOsWaitStat:
                 self.log.debug("Adding SqlOsWaitStat metric %s", m.sql_name)
                 wait_stat_metrics.append(m.sql_name)
-            elif type(m) is SqlOsVirtualFileStat:
-                self.log.debug("Adding SqlOsVirtualFileStat metric %s", m.sql_name)
+            elif type(m) is SqlIoVirtualFileStat:
+                self.log.debug("Adding SqlIoVirtualFileStat metric %s", m.sql_name)
                 vfs_metrics.append(m.sql_name)
             elif type(m) is SqlOsMemoryClerksStat:
                 self.log.debug("Adding SqlOsMemoryClerksStat metric %s", m.sql_name)
@@ -275,7 +273,7 @@ class SQLServer(AgentCheck):
         self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"] = simple_metrics
         self.instances_per_type_metrics[instance_key]["SqlFractionMetric"] = fraction_metrics
         self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"] = wait_stat_metrics
-        self.instances_per_type_metrics[instance_key]["SqlOsVirtualFileStat"] = vfs_metrics
+        self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"] = vfs_metrics
         self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"] = clerk_metrics
 
     def typed_metric(self, instance, cfg_inst, table, base_name, user_type, sql_type, column):
@@ -305,7 +303,7 @@ class SQLServer(AgentCheck):
             table_type_mapping = {
                 DM_OS_WAIT_STATS_TABLE: (self.gauge, SqlOsWaitStat),
                 DM_OS_MEMORY_CLERKS_TABLE: (self.gauge, SqlOsMemoryClerksStat),
-                DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlOsVirtualFileStat)
+                DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlIoVirtualFileStat)
             }
             metric_type, cls = table_type_mapping[table]
 
@@ -470,7 +468,7 @@ class SQLServer(AgentCheck):
                 simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
                 fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
                 waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
-                vfs_rows, vfs_cols = SqlOsVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsVirtualFileStat"], self.log)
+                vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
                 clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
 
                 for metric in metrics_to_collect:
@@ -481,7 +479,7 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, fraction_results, custom_tags)
                         elif type(metric) is SqlOsWaitStat:
                             metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
-                        elif type(metric) is SqlOsVirtualFileStat:
+                        elif type(metric) is SqlIoVirtualFileStat:
                             metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsMemoryClerksStat:
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
@@ -638,7 +636,7 @@ class SqlServerMetric(object):
         self.connector = connector
         self.cfg_instance = cfg_instance
         self.datadog_name = cfg_instance['name']
-        self.sql_name = cfg_instance['counter_name']
+        self.sql_name = cfg_instance.get('counter_name', '')
         self.base_name = base_name
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
@@ -685,7 +683,8 @@ class SqlSimpleMetric(SqlServerMetric):
                         metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
                     self.report_function(self.datadog_name, cntr_value,
                                         tags=metric_tags)
-                    break
+                    if self.instance != ALL_INSTANCES:
+                        break
 
 
 class SqlFractionMetric(SqlServerMetric):
@@ -819,9 +818,10 @@ class SqlOsWaitStat(SqlServerMetric):
 
         self.log.debug("Value for %s %s is %d", self.sql_name, self.column, value)
         metric_tags = tags
-        self.report_function(self.datadog_name, value, tags=metric_tags)
+        metric_name = '%s.%s' % (self.datadog_name, self.column)
+        self.report_function(metric_name, value, tags=metric_tags)
 
-class SqlOsVirtualFileStat(SqlServerMetric):
+class SqlIoVirtualFileStat(SqlServerMetric):
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -836,7 +836,7 @@ class SqlOsVirtualFileStat(SqlServerMetric):
 
     def __init__(self, connector,  cfg_instance, base_name,
                  report_function, column, logger):
-        super(SqlOsVirtualFileStat, self).__init__(connector, cfg_instance,
+        super(SqlIoVirtualFileStat, self).__init__(connector, cfg_instance,
                                               base_name, report_function, column,
                                               logger)
         self.dbid = self.cfg_instance.get('database_id', None)

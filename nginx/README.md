@@ -1,4 +1,5 @@
 # NGINX check
+{{< img src="integrations/nginx/nginx.jpg" alt="NGINX default dashboard" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -61,6 +62,9 @@ server {
 
     # freely available with open source NGINX
     stub_status;
+
+    # for open source NGINX < version 1.7.5
+    # stub_status on;
 
     # available only with NGINX Plus
     # status;
@@ -126,7 +130,7 @@ See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/ma
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nginx` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nginx` under the Checks section:
 
 ```
   Checks
@@ -192,7 +196,7 @@ You may observe one of these common problems in the output of the Datadog Agent'
 ```
   Checks
   ======
-  
+
     nginx
     -----
       - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
@@ -205,7 +209,7 @@ Check that the main `nginx.conf` includes a line like the following:
 
 ```
 http{
-  
+
   ...
 
   include <directory_that_contains_status.conf>/*.conf;
