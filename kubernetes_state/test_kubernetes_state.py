@@ -11,8 +11,25 @@ from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
 
-class TestKubernetesState(AgentCheckTest):
 
+class MockResponse:
+    """
+    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
+    """
+
+    def __init__(self, content, content_type):
+        self.content = content
+        self.headers = {'Content-Type': content_type}
+
+    def iter_lines(self, **_):
+        for elt in self.content.split("\n"):
+            yield elt
+
+    def close(self):
+        pass
+
+
+class TestKubernetesState(AgentCheckTest):
     CHECK_NAME = 'kubernetes_state'
 
     METRICS = [
@@ -92,7 +109,7 @@ class TestKubernetesState(AgentCheckTest):
     def test__update_kube_state_metrics(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('text/plain', f.read())
+            mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
         config = {
             'instances': [{
@@ -108,11 +125,16 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.memory_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:task-pv-pod']) # Running
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,tags=['namespace:default','pod:failingtest-f585bbd4-2fsml']) # Pending
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,tags=['namespace:default','pod:hello-1509998340-k4f8q']) # Succeeded
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,tags=['namespace:default','pod:should-run-once']) # Failed
-        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,tags=['namespace:default','pod:hello-1509998460-tzh8k']) # Unknown
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
+                                tags=['namespace:default', 'pod:task-pv-pod'])  # Running
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,
+                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml'])  # Pending
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
+                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q'])  # Succeeded
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,
+                                tags=['namespace:default', 'pod:should-run-once'])  # Failed
+        self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,
+                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
 
         for metric in self.METRICS:
             self.assertMetric(metric)
@@ -125,7 +147,7 @@ class TestKubernetesState(AgentCheckTest):
     def test__update_kube_state_metrics_v040(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
         with open(f_name, 'rb') as f:
-            mock_poll.return_value = ('text/plain', f.read())
+            mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
         config = {
             'instances': [{
@@ -138,7 +160,6 @@ class TestKubernetesState(AgentCheckTest):
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
-
 
         for metric in self.METRICS:
             if not metric.startswith(NAMESPACE + '.hpa'):

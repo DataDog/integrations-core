@@ -16,6 +16,23 @@ instance = {
 }
 
 
+class MockResponse:
+    """
+    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
+    """
+
+    def __init__(self, content, content_type):
+        self.content = content
+        self.headers = {'Content-Type': content_type}
+
+    def iter_lines(self, **_):
+        for elt in self.content.split("\n"):
+            yield elt
+
+    def close(self):
+        pass
+
+
 @attr(requires='kube_dns')
 class TestKubeDNS(AgentCheckTest):
     """Basic Test for kube_dns integration."""
@@ -41,7 +58,7 @@ class TestKubeDNS(AgentCheckTest):
             bin_data = f.read()
 
         mocks = {
-            'poll': MagicMock(return_value=[content_type, bin_data])
+            'poll': MagicMock(return_value=MockResponse(bin_data, content_type))
         }
 
         self.run_check({'instances': [instance]}, mocks=mocks)
