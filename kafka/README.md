@@ -24,7 +24,7 @@ The check collects metrics via JMX, so you'll need a JVM on each kafka node so t
 
 Configure a `kafka.yaml` in the Datadog Agent's `conf.d` directory. Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample conf file](https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example) as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
 
-After you've configured `kafka.yaml`, restart the Agent to begin sending Kafka metrics to Datadog.
+After you've configured `kafka.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Kafka metrics to Datadog.
 
 ### Validation
 

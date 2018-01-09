@@ -57,7 +57,7 @@ db.createUser({
   ```
   See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending MongoDB metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
 
 #### Log Collection
 
