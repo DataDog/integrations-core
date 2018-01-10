@@ -5,5 +5,5 @@
 # project
 from checks.generic_prometheus_check import GenericPrometheusCheck
 
-class KubeProxyCheck(GenericPrometheusCheck):
+class PrometheusCheck(GenericPrometheusCheck):
     pass
