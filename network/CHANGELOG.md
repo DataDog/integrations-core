@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-1.4.0 / 2017-10-01
+1.4.0 / unreleased
 ==================
 
 * [FEATURE] Get some host network stats when the agent is running inside a container and not in the host network namespace. See [#994][]
