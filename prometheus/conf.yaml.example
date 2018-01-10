@@ -1,0 +1,51 @@
+init_config:
+  # Any global configurable parameters should be added here
+
+instances:
+  # The prometheus endpoint to query
+  #
+  # - prometheus_url: http://service/prometheus
+
+  #   The namespace to be appended before all metrics namespace
+  #
+  #   namespace: "service"
+
+  #  List of metrics to be fetched from the prometheus endpoint, if there's a value it'll be renamed
+  #  This list should contain at least one metric
+  #
+  #   metrics:
+  #     - processor: cpu
+  #     - memory: mem
+  #     - io
+
+  #   Override the hostname with the value of one label
+  #
+  #   label_to_hostname: node
+
+  #   The label join allows to target a metric and retrieve it's label via a 1:1 mapping
+  #
+  #   label_joins:
+  #     target_metric:
+  #       label_to_match: matched_label
+  #       labels_to_get:
+  #         - extra_label_1
+  #         - extra_label_2
+
+  #   The label mapper allows you to rename some labels
+  #
+  #   labels_mapper:
+  #     flavor: origin
+
+  #   Tags to be added to all metrics
+  #
+  #   tags:
+  #     - foo:bar
+
+  #   To send the histograms bucket
+  #
+  #   send_histograms_buckets: True
+
+  #   List of label to be excluded
+  #
+  #   exclude_labels:
+  #     - timestamp
