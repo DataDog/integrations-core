@@ -679,6 +679,12 @@ class DockerDaemon(AgentCheck):
         if not container.get('_pid'):
             raise BogusPIDException('Cannot report on bogus pid(0)')
 
+        # Count the number of processes running in the cgroup.
+        procs_file = self._get_cgroup_from_proc("cpu", container['_pid'], "cgroup.procs")
+        total_procs = sum(1 for line in open(procs_file))
+        metric_func = FUNC_MAP[GAUGE][self.use_histogram]
+        metric_func(self, "docker.pids.count", int(total_procs), tags=tags)
+
         for cgroup in CGROUP_METRICS:
             try:
                 stat_file = self._get_cgroup_from_proc(cgroup["cgroup"], container['_pid'], cgroup['file'])
