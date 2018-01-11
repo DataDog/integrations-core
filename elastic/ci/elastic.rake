@@ -21,7 +21,8 @@ namespace :ci do
 
     task :install do
       Rake::Task['ci:common:install'].invoke('elastic')
-      docker_cmd = 'elasticsearch -Des.node.name="batman" '
+      node_name_setting = elastic_version == '5.0.0' ? '-Edefault.node.name=batman' : '-Des.node.name=batman'
+      docker_cmd = "elasticsearch #{node_name_setting} "
       if ['0.90.13', '1.0.3', '1.1.2', '1.2.4'].any? { |v| v == elastic_version }
         docker_image = 'datadog/docker-library:elasticsearch_' + elastic_version.split('.')[0..1].join('_')
         docker_cmd += ' -f' if elastic_version == '0.90.13'
@@ -38,7 +39,15 @@ namespace :ci do
     end
 
     task before_script: ['ci:common:before_script'] do
-      Wait.for 'http://localhost:9200', 20
+      begin
+        Wait.for 'http://localhost:9200', 20
+        puts "temporarily checking whether the node name setting is actually working"
+        sh "curl -s localhost:9200"
+      rescue => e
+        puts "temporarily debugging why the container isn't working"
+        sh "docker logs #{container_name}"
+        raise e
+      end
       # Create an index in ES
       http = Net::HTTP.new('localhost', 9200)
       http.send_request('PUT', '/datadog/')

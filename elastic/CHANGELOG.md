@@ -7,6 +7,7 @@
 
 * [FEATURE] adds `pshard_graceful_timeout` that will skip pshard_stats if TO. See [#463][]
 * [IMPROVEMENT] get rid of pretty json. See [#893][].
+* [BUG] disk I/O stats are not being collected for ES version >= 5.0.0. See [#972][]
 
 1.2.0 / 2017-11-21
 ==================
