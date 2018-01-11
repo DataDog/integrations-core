@@ -93,6 +93,16 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.statefulset.replicas_updated',
     ]
 
+    TAGS = {
+        NAMESPACE + '.pod.ready': ['node:minikube'],
+        NAMESPACE + '.pod.scheduled': ['node:minikube']
+    }
+
+    HOSTNAMES = {
+        NAMESPACE + '.pod.ready': 'minikube',
+        NAMESPACE + '.pod.scheduled': 'minikube'
+    }
+
     ZERO_METRICS = [
         NAMESPACE + '.deployment.replicas_unavailable',
         NAMESPACE + '.deployment.paused',
@@ -141,7 +151,14 @@ class TestKubernetesState(AgentCheckTest):
                                 tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
 
         for metric in self.METRICS:
-            self.assertMetric(metric)
+            self.assertMetric(
+                metric,
+                hostname=self.HOSTNAMES.get(metric, None)
+            )
+            tags = self.TAGS.get(metric, None)
+            if tags:
+                for tag in tags:
+                    self.assertMetricTag(metric, tag)
             if metric not in self.ZERO_METRICS:
                 self.assertMetricNotAllZeros(metric)
 
