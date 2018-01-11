@@ -31,11 +31,39 @@ To go beyond we advise you to read the full documentation [here](http://docs.dat
 
 The [Datadog Agent](https://github.com/DataDog/dd-agent) contains all core integrations from this repository, so to get started using them, simply install the `datadog-agent` package for your operating system.
 
-Additionally, you may install any individual core integration via its own `dd-check-<integration_name>` package, e.g. `dd-check-nginx`. We build these packages from this repository and release them more often than `datadog-agent`. This allows us to distribute integration updates - and brand new integrations - in between releases of `datadog-agent`.
+Now that integrations are cleanly defined as python packages we will soon be able to ship them as python wheels that will be pip-installable from any platform (so long as the integration supports the platform). This presents a paradigm change in the way we will be delivering standalone integration upgrades, moving away from OS-specific packages to idiomatic python package delivery. 
 
-In other words: on the day of a new `datadog-agent` release, you'll likely get the same version of the nginx check from the agent package as you would from `dd-check-nginx`. But if we haven't released a new agent in 6 weeks and this repository contains a bugfix for the nginx check, install the latest `dd-check-nginx` to override the buggy check packaged with `datadog-agent`.
+Agent releases will bundle all the latest wheels for an integration, but if you wish to upgrade between releases, or even downgrade should you need to, you will be able to do so. 
 
-For a check with underscores in its name, its package name replaces underscores with dashes. For example, the `powerdns_recursor` check is packaged as `dd-check-powerdns-recursor`.
+# Integrations as Python wheels 
+
+When working with an integration, you will now be dealing with a more structured python project. The new structure should help keep a more sane and modular codebase. To help with the transition, please take a look at the following map to understand where everything falls into place in the new approach. 
+
+```
+FORMER LOCATION                   ->                  NEW LOCATION
+{integration}/check.py            -> {integration}/datadog_checks/{integration}/{integration}.py
+{integration}/conf.yaml.example   -> {integration}/datadog_checks/{integration}/conf.yaml.example
+new                               -> {integration}/datadog_checks/{integration}/__init.py 
+{integration}/test_check.py       -> {integration}/test/test_{integration}.py
+new                               -> {integration}/test/__init__.py
+new                               -> {integration}/setup.py
+```
+
+- `setup.py` provides the distutils setup script that will help us package and build the wheel. If you wish to learn more about python packaging please take a look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
+
+Once your setup.py is ready, creating a wheel is a easy as:
+```
+cd {integration}
+python setup.py bdist_wheel
+```
+
+Installing the wheel into your pip environment (once ready):
+```
+cd {integration}
+pip install .
+```
+
+NOTE: until our pip repositories are ready, you might have to install `datadog-checks-base` manually before this works seamlessly.
 
 # Building the integrations as Python wheels (work in progress)
 
