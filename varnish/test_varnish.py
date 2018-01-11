@@ -258,7 +258,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list'])
 
     # This the docker image is in a different repository, we check that the
     # verison requested in the FLAVOR_VERSION is the on running inside the
