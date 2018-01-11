@@ -125,6 +125,7 @@ env:
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.7
     - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
+    - TRAVIS_FLAVOR=squid FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 install:
   - bundle install
@@ -135,8 +136,11 @@ install:
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - pip install -r requirements-test.txt
   - bundle exec rake setup_agent_libs
+  - cd $TRAVIS_BUILD_DIR/datadog-checks-base && python setup.py bdist_wheel && pip install . && cd -
+  - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci
+  - if [ -e $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR/setup.py ]; then cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && pip install -r requirements.txt && python setup.py bdist_wheel && pip install . && cd - ; fi
   - bundle exec rake ci:run
   - bundle exec rake requirements
 # we should clean generated files before we save the cache
