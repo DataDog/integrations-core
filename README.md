@@ -49,7 +49,7 @@ new                               -> {integration}/test/__init__.py
 new                               -> {integration}/setup.py
 ```
 
-- `setup.py` provides the distutils setup script that will help us package and build the wheel. If you wish to learn more about python packaging please take a look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
+- `setup.py` provides the setuptools setup script that will help us package and build the wheel. If you wish to learn more about python packaging please take a look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
 
 Once your setup.py is ready, creating a wheel is a easy as:
 ```
