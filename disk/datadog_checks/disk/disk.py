@@ -305,11 +305,11 @@ class Disk(AgentCheck):
         """
         Compile regex strings from device_tag_re option and return list of compiled regex/tag pairs
         """
-        device_tag_re = []
+        device_tag_list = []
         for pair in self._device_tag_re:
-            for regex_str, tag in pair.items():
+            for regex_str, tags in pair.items():
                 try:
-                    device_tag_re.append([re.compile(regex_str), [t.strip() for t in tag.split(",")]])
+                    device_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(",")]])
                 except TypeError:
                     self.log.warning('{0} is not a valid regular expression and will be ignored'.format(regex_str))
-        self._device_tag_re = device_tag_re
+        self._device_tag_re = device_tag_list

@@ -43,6 +43,7 @@ instances:
     # all_partitions: no
     #
     # The (optional) device_tag_re parameter will instruct the check to apply additional tags
-    # to volumes/mountpoints matching these regexes
+    # to volumes/mountpoints matching these regexes. Multiple comma-separated tags are supported.
     # device_tag_re:
     #  - /san/.*: device_type:san
+    #  - /dev/sda3: role:db,disk_size:large
