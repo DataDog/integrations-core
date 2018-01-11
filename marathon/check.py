@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2014-2016
+# (C) Datadog, Inc. 2014-2017
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -152,10 +152,10 @@ class Marathon(AgentCheck):
         if response is not None:
             self.gauge('marathon.apps', len(response['apps']), tags=tags)
             for app in response['apps']:
-                tags = ['app_id:' + app['id'], 'version:' + app['version']] + tags
+                app_tags = ['app_id:' + app['id'], 'version:' + app['version']] + tags
                 for attr in self.APP_METRICS:
                     if attr in app:
-                        self.gauge('marathon.' + attr, app[attr], tags=tags)
+                        self.gauge('marathon.' + attr, app[attr], tags=app_tags)
 
     def process_deployments(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
         # Number of running/pending deployments

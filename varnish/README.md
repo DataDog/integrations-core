@@ -1,4 +1,5 @@
 # Agent Check: Varnish
+{{< img src="integrations/varnish/varnish.png" alt="Varnish default dashboard" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -14,7 +15,8 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers. If you need the newest version of the check, install the `dd-check-varnish` package.
+The varnish check is packaged with the Agent. To start gathering your Varnish metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers.  
+If you need the newest version of the check, install the `dd-check-varnish` package.
 
 ### Configuration
 
@@ -26,85 +28,82 @@ If you're running Varnish 4.1+, add the dd-agent system user to the varnish grou
 
 #### Metic Collection
 
-1. Add this configuration setup to your `varnish.yaml` file to start gathering your [Varnish Metrics](#metrics)
+1. Add this configuration setup to your `varnish.yaml` file to start gathering your [Varnish Metrics](#metrics):
+  ```
+  init_config:
 
-```
-init_config:
+  instances:
+    - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
+      varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
+  #   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
+  #   tags:
+  #     - instance:production
+  ```
 
-instances:
-  - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
-    varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
-#   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
-#   tags:
-#     - instance:production
-```
+  If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
 
-If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
+  ```
+  dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
+  ```
 
-```
-dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
-```
+  See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
 
-See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
-
-2. Restart the Agent to start sending varnish metrics and service checks to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending varnish metrics and service checks to Datadog.
 
 #### Log Collection
 
-**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+**Available for agent >6.0**
 
 1. To enable varnish logging uncomment the following in `/etc/default/varnishncsa`:
+  ```
+  # VARNISHNCSA_ENABLED=1
+  ```
 
-```
-# VARNISHNCSA_ENABLED=1
-```
+  Add the following at the end of the same file:
 
-Add the following at the end of the same file:
+  ```
+  LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\":\"%h\", \"http.auth\" : \"%u\", \"varnish.x_forwarded_for\" : \"%{X-Forwarded-For}i\", \"varnish.hit_miss\":  \"%{Varnish:hitmiss}x\", \"network.bytes_written\": %b, \"http.response_time\": %D, \"http.status_code\": \"%s\", \"http.url\": \"%r\", \"http.ident\": \"%{host}i\", \"http.method\": \"%m\", \"varnish.time_first_byte\" : %{Varnish:time_firstbyte}x, \"varnish.handling\" : \"%{Varnish:handling}x\", \"http.referer\": \"%{Referer}i\", \"http.useragent\": \"%{User-agent}i\" }"
 
-```
-LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\":\"%h\", \"http.auth\" : \"%u\", \"varnish.x_forwarded_for\" : \"%{X-Forwarded-For}i\", \"varnish.hit_miss\":  \"%{Varnish:hitmiss}x\", \"network.bytes_written\": %b, \"http.response_time\": %D, \"http.status_code\": \"%s\", \"http.url\": \"%r\", \"http.ident\": \"%{host}i\", \"http.method\": \"%m\", \"varnish.time_first_byte\" : %{Varnish:time_firstbyte}x, \"varnish.handling\" : \"%{Varnish:handling}x\", \"http.referer\": \"%{Referer}i\", \"http.useragent\": \"%{User-agent}i\" }"
-
-DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
-```
-Restart varnishncsa to make sure the changes are taken into account.
+  DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
+  ```
+  Restart varnishncsa to make sure the changes are taken into account.
 
 
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
-   ```
-   logs_enabled: true
-   ```
+  ```
+  logs_enabled: true
+  ```
 
 3. Add this configuration setup to your `varnish.yaml` file to start collecting your Varnish Logs:
+  ```
+  logs:
+    - type: file
+       path: /var/log/varnish/varnishncsa.log
+      source: varnish
+      sourcecategory: http_web_access   
+      service: varnish
+  ```
+  Change the `path` and `service` parameter value and configure it for your environment.  
+  See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
 
-```
-logs:
-   - type: file
-     path: /var/log/varnish/varnishncsa.log
-     source: varnish
-     sourcecategory: http_web_access   
-     service: varnish
-```
-Change the `path` and `service` parameter value and configure it for your environment.  
-See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
- 
-
+**Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `varnish` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `varnish` under the Checks section:
 
 ```
-  Checks
-  ======
-    [...]
+Checks
+======
+  [...]
 
-    varnish
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
+  varnish
+  -------
+    - instance #0 [OK]
+    - Collected 26 metrics, 0 events & 1 service check
 
-    [...]
+  [...]
 ```
 ## Compatibility
 

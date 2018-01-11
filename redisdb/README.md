@@ -36,11 +36,11 @@ Configuration Options:
 
 See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending Redis metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `redisdb` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `redisdb` under the Checks section:
 
 ```
   Checks
@@ -74,6 +74,9 @@ The RedisDB check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
 
 ## Troubleshooting
+
+* [Redis Integration Error: "unknown command 'CONFIG'"](https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config)
+
 ### Agent cannot connect
 ```
     redisdb

@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "hdfs_namenode",
@@ -10,10 +10,11 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "41454590-0a25-4146-9c74-9d377db42764",
   "public_title": "Datadog-HDFS Namenode Integration",
   "categories":["processing", "os & system"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/hdfs_namenode/",
   "is_public": true,
   "has_logo": true

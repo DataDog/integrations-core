@@ -1,5 +1,5 @@
 # Ceph Integration
-
+{{< img src="integrations/ceph/ceph_graph.png" alt="Ceph Graph" responsive="true" popup="true">}}
 ## Overview
 
 Enable the Datadog-Ceph integration to:
@@ -33,17 +33,17 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `ceph` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ceph` under the Checks section:
 
 ```
   Checks
   ======
     [...]
 
-    ceph
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
+   ceph (5.19.0)
+   -------------
+   - instance #0 [OK]
+   - Collected 24 metrics, 0 events & 1 service check
 
     [...]
 ```
@@ -53,11 +53,14 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv) for a list of metrics provided by this integration.
 
+Note: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
+
 ### Events
 The Ceph check does not include any event at this time.
 
 ### Service Checks
-The Ceph check does not include any service check at this time.
+
+* `ceph.overall_status` : The Datadog Agent submits a service check for each of Ceph's host health checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

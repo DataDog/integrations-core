@@ -24,7 +24,7 @@ Use the commands below to provide key information from your environment:
 You do NOT have to include this information if this is a FEATURE REQUEST
 -->
 
-**Output of the [info page](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) **
+**Output of the [info page](https://docs.datadoghq.com/agent/faq/agent-status-and-information/)**
 
 ```
 (paste your output here)

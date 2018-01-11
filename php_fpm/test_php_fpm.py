@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -95,9 +95,6 @@ class PHPFPMCheckTest(AgentCheckTest):
 
         for mname in metrics:
             self.assertMetric(mname, count=1, tags=expected_tags)
-
-        self.assertMetric('php_fpm.processes.idle', count=1, value=0)
-        self.assertMetric('php_fpm.processes.total', count=1, value=1)
 
         self.assertServiceCheck('php_fpm.can_ping', status=AgentCheck.OK,
                                 count=1,

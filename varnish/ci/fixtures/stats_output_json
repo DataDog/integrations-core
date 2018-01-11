@@ -1,0 +1,18 @@
+{
+  "timestamp": "2017-12-19T16:59:01",
+  "MAIN.fetch_304": {
+    "description": "Fetch no body (304)",
+    "type": "MAIN", "flag": "c", "format": "d",
+    "value": 0
+  },
+  "MAIN.n_sess_mem": {
+    "description": "N struct sess_mem",
+    "type": "MAIN", "flag": "g", "format": "i",
+    "value": 334
+  },
+  "LCK.vcl.creat": {
+    "description": "Created locks",
+    "type": "LCK", "ident": "vcl", "flag": "c", "format": "i",
+    "value": 1
+  }
+}

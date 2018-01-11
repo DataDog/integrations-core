@@ -408,7 +408,7 @@
         "dnsPolicy": "ClusterFirst",
         "serviceAccountName": "default",
         "serviceAccount": "default",
-        "nodeName": "kubernetes-massi-minion-txyy",
+        "nodeName": "kubernetes-massi-minion-k23m",
         "securityContext": {}
       },
       "status": {
@@ -421,7 +421,7 @@
             "lastTransitionTime": "2016-06-16T13:56:09Z"
           }
         ],
-        "hostIP": "10.240.0.5",
+        "hostIP": "10.240.0.9",
         "podIP": "10.244.1.4",
         "startTime": "2016-06-16T13:56:07Z",
         "containerStatuses": [
@@ -562,7 +562,7 @@
         "dnsPolicy": "ClusterFirst",
         "serviceAccountName": "default",
         "serviceAccount": "default",
-        "nodeName": "kubernetes-massi-minion-ze6g",
+        "nodeName": "kubernetes-massi-minion-k23m",
         "securityContext": {}
       },
       "status": {
@@ -575,7 +575,7 @@
             "lastTransitionTime": "2016-06-16T13:56:09Z"
           }
         ],
-        "hostIP": "10.240.0.4",
+        "hostIP": "10.240.0.9",
         "podIP": "10.244.2.5",
         "startTime": "2016-06-16T13:56:07Z",
         "containerStatuses": [

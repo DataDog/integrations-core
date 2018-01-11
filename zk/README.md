@@ -1,5 +1,5 @@
 # Agent Check: Zookeeper
-
+{{< img src="integrations/zookeeper/zookeepergraph.png" alt="Zookeeper Dashboard" responsive="true" popup="true">}}
 ## Overview
 
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
@@ -22,11 +22,11 @@ instances:
     timeout: 3
 ```
 
-Restart the Agent to start sending Zookeeper metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Zookeeper metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `zk` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `zk` under the Checks section:
 
 ```
   Checks
@@ -48,7 +48,34 @@ The Zookeeper check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv) for a list of metrics provided by this check.
+As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of
+zookeeper stats. This check first parses the `stat` admin command for a version
+number. If the zookeeper version supports `mntr`, it is also parsed.
+
+Duplicate information is being reported by both `mntr` and `stat`: the duplicated
+ `stat` metrics are only kept for backward compatibility.
+
+**Important:** if available, make use of the data reported by `mntr`, not `stat`.
+
+| Metric reported by `mntr` | Duplicate reported by `stat` |
+| ------------------------- | ---------------------------- |
+| `zookeeper.avg_latency` | `zookeeper.latency.avg` |
+| `zookeeper.max_latency` | `zookeeper.latency.max` |
+| `zookeeper.min_latency` | `zookeeper.latency.min` |
+| `zookeeper.packets_received` | `zookeeper.packets.received` |
+| `zookeeper.packets_sent` | `zookeeper.packets.sent` |
+| `zookeeper.num_alive_connections` | `zookeeper.connections` |
+| `zookeeper.znode_count` | `zookeeper.nodes` |
+
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv)
+for a list of metrics provided by this check.
+
+#### Deprecated metrics
+
+Following metrics are still sent but will be removed eventually:
+ * `zookeeper.bytes_received`
+ * `zookeeper.bytes_sent`
+ * `zookeeper.bytes_outstanding`
 
 ### Events
 The Zookeeper check does not include any event at this time.

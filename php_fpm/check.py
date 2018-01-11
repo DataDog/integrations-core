@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -8,6 +8,9 @@ import requests
 # project
 from checks import AgentCheck
 from util import headers
+from config import _is_affirmative
+
+DEFAULT_TIMEOUT = 20
 
 
 class PHPFPMCheck(AgentCheck):
@@ -44,6 +47,10 @@ class PHPFPMCheck(AgentCheck):
         tags = instance.get('tags', [])
         http_host = instance.get('http_host')
 
+        timeout = instance.get('timeout', DEFAULT_TIMEOUT)
+
+        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', False))
+
         if user and password:
             auth = (user, password)
 
@@ -54,25 +61,28 @@ class PHPFPMCheck(AgentCheck):
         status_exception = None
         if status_url is not None:
             try:
-                pool = self._process_status(status_url, auth, tags, http_host)
+                pool = self._process_status(status_url, auth, tags, http_host, timeout, disable_ssl_validation)
             except Exception as e:
                 status_exception = e
                 pass
 
         if ping_url is not None:
-            self._process_ping(ping_url, ping_reply, auth, tags, pool, http_host)
+            self._process_ping(ping_url, ping_reply, auth, tags, pool, http_host, timeout, disable_ssl_validation)
 
         # pylint doesn't understand that we are raising this only if it's here
         if status_exception is not None:
             raise status_exception  # pylint: disable=E0702
 
-    def _process_status(self, status_url, auth, tags, http_host):
+    def _process_status(self, status_url, auth, tags, http_host, timeout, disable_ssl_validation):
         data = {}
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(status_url, auth=auth,
+            resp = requests.get(status_url,
+                                auth=auth,
+                                timeout=timeout,
                                 headers=headers(self.agentConfig, http_host=http_host),
+                                verify=not disable_ssl_validation,
                                 params={'json': True})
             resp.raise_for_status()
 
@@ -101,7 +111,7 @@ class PHPFPMCheck(AgentCheck):
         # return pool, to tag the service check with it if we have one
         return pool_name
 
-    def _process_ping(self, ping_url, ping_reply, auth, tags, pool_name, http_host):
+    def _process_ping(self, ping_url, ping_reply, auth, tags, pool_name, http_host, timeout, disable_ssl_validation):
         if ping_reply is None:
             ping_reply = 'pong'
 
@@ -112,8 +122,11 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(ping_url, auth=auth,
-                                headers=headers(self.agentConfig, http_host=http_host))
+            resp = requests.get(ping_url,
+                                auth=auth,
+                                timeout=timeout,
+                                headers=headers(self.agentConfig, http_host=http_host),
+                                verify=not disable_ssl_validation)
             resp.raise_for_status()
 
             if ping_reply not in resp.text:

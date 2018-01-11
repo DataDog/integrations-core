@@ -85,14 +85,21 @@ def debug_health_mock(*args, **kwargs):
     else:
         return (Fixtures.read_file('stats_output', sdk_dir=FIXTURE_DIR), "", 0)
 
-# Varnish >= 4.x varnishadm output
+# Varnish >= 4.x && <= 5.x varnishadm output
 def backend_list_mock(*args, **kwargs):
     if args[0][0] == VARNISHADM_PATH or args[0][1] == VARNISHADM_PATH:
         return (Fixtures.read_file('backend_list_output', sdk_dir=FIXTURE_DIR), "", 0)
     else:
         return (Fixtures.read_file('stats_output', sdk_dir=FIXTURE_DIR), "", 0)
 
-# Varnish >= 4.x Varnishadm manually set backend to sick
+# Varnish >= 5.x varnishadm output
+def backend_list_mock_v5(*args, **kwargs):
+    if args[0][0] == VARNISHADM_PATH or args[0][1] == VARNISHADM_PATH:
+        return (Fixtures.read_file('backend_list_output', sdk_dir=FIXTURE_DIR), "", 0)
+    else:
+        return (Fixtures.read_file('stats_output_json', sdk_dir=FIXTURE_DIR), "", 0)
+
+# Varnish >= 4.x && <= 5.x Varnishadm manually set backend to sick
 def backend_manual_unhealthy_mock(*args, **kwargs):
     if args[0][0] == VARNISHADM_PATH or args[0][1] == VARNISHADM_PATH:
         return (Fixtures.read_file('backend_manually_unhealthy', sdk_dir=FIXTURE_DIR), "", 0)
@@ -160,7 +167,7 @@ class VarnishCheckTest(AgentCheckTest):
     @mock.patch('_varnish.Varnish._get_version_info')
     @mock.patch('_varnish.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
     def test_command_line_manually_unhealthy(self, mock_subprocess, mock_version, mock_geteuid):
-        mock_version.return_value = LooseVersion('4.0.0'), True
+        mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
 
         config = self._get_config_by_version()
@@ -172,7 +179,7 @@ class VarnishCheckTest(AgentCheckTest):
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
         self.assertServiceCheckCritical("varnish.backend_healthy", tags=['backend:default'], count=1)
 
-        mock_version.return_value = LooseVersion('4.1.0'), True
+        mock_version.return_value = LooseVersion('4.1.0'), 'xml'
         mock_geteuid.return_value = 1
 
         self.run_check(config)
@@ -186,7 +193,7 @@ class VarnishCheckTest(AgentCheckTest):
     @mock.patch('_varnish.Varnish._get_version_info')
     @mock.patch('_varnish.get_subprocess_output', side_effect=backend_list_mock)
     def test_command_line_post_varnish4(self, mock_subprocess, mock_version, mock_geteuid):
-        mock_version.return_value = LooseVersion('4.0.0'), True
+        mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
 
         config = self._get_config_by_version()
@@ -198,20 +205,43 @@ class VarnishCheckTest(AgentCheckTest):
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
         self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:backend2'], count=1)
 
-        mock_version.return_value = LooseVersion('4.1.0'), True
+        mock_version.return_value = LooseVersion('4.1.0'), 'xml'
         mock_geteuid.return_value = 1
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
         self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
+    # Test the Varnishadm output for version >= 5.x
+    @mock.patch('_varnish.geteuid')
+    @mock.patch('_varnish.Varnish._get_version_info')
+    @mock.patch('_varnish.get_subprocess_output', side_effect=backend_list_mock_v5)
+    def test_command_line_post_varnish5(self, mock_subprocess, mock_version, mock_geteuid):
+        mock_version.return_value = LooseVersion('5.0.0'), 'json'
+        mock_geteuid.return_value = 0
+
+        config = self._get_config_by_version()
+        config['instances'][0]['varnishadm'] = VARNISHADM_PATH
+        config['instances'][0]['secretfile'] = SECRETFILE_PATH
+
+        self.run_check(config)
+        args, _ = mock_subprocess.call_args
+        self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:backend2'], count=1)
+
+        mock_version.return_value = LooseVersion('5.0.0'), 'json'
+        mock_geteuid.return_value = 1
+
+        self.run_check(config)
+        args, _ = mock_subprocess.call_args
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the varnishadm output for Varnish < 4.x
     @mock.patch('_varnish.geteuid')
     @mock.patch('_varnish.Varnish._get_version_info')
     @mock.patch('_varnish.get_subprocess_output', side_effect=debug_health_mock)
     def test_command_line(self, mock_subprocess, mock_version, mock_geteuid):
-        mock_version.return_value = LooseVersion('4.0.0'), True
+        mock_version.return_value = LooseVersion('4.0.0'), 'xml'
         mock_geteuid.return_value = 0
 
         config = self._get_config_by_version()
@@ -223,7 +253,7 @@ class VarnishCheckTest(AgentCheckTest):
         self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'debug.health'])
         self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:default'], count=1)
 
-        mock_version.return_value = LooseVersion('4.1.0'), True
+        mock_version.return_value = LooseVersion('4.1.0'), 'xml'
         mock_geteuid.return_value = 1
 
         self.run_check(config)

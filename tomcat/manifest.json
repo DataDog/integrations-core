@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.6.3",
   "name": "tomcat",
@@ -11,10 +11,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997",
   "public_title": "Datadog-Tomcat Integration",
   "categories":["web"],
+  "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/tomcat/",
   "is_public": true,
   "has_logo": true

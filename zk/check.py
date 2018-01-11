@@ -1,19 +1,8 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-'''
-As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of zookeeper stats.
-This check first parses the `stat` admin command for a version number.
-If the zookeeper version supports `mntr`, it is also parsed.
-
-Duplicate information is being reported by both `mntr` and `stat` to keep backwards compatibility.
-Example:
-    `stat` reports: zookeeper.latency.avg
-    `mntr` reports: zookeeper.avg.latency
-If available, make use of the data reported by `mntr` not `stat`.
-The duplicate `stat` reports are only kept for backward compatibility.
-
+"""
 Besides the usual zookeeper state of `leader`, `follower`, `observer` and `standalone`,
 this check will report three other states:
 
@@ -24,8 +13,8 @@ this check will report three other states:
 States can be accessed through the gauge `zookeeper.instances.<state>,
 through the set `zookeeper.instances`, or through the `mode:<state>` tag.
 
-Parses the response from zookeeper's `stat` admin command, which looks like:
-
+Parses the response from zookeeper's `stat` admin command, tested with Zookeeper
+versions 3.0.0 to 3.4.5, which looks like:
 ```
 Zookeeper version: 3.2.2--1, built on 03/16/2010 07:31 GMT
 Clients:
@@ -45,10 +34,9 @@ Mode: leader
 Node count: 487
 ```
 
-`stat` tested with Zookeeper versions 3.0.0 to 3.4.5
 
-The following is an example of the `mntr` commands output:
-
+The following is an example of the `mntr` commands output, tested with ZooKeeper
+3.4.5:
 ```
 zk_version  3.4.5-cdh4.4.0--1, built on 09/04/2013 01:46 GMT
 zk_avg_latency  0
@@ -67,8 +55,7 @@ zk_open_file_descriptor_count   29
 zk_max_file_descriptor_count    4096
 ```
 
-`mntr` tested with ZooKeeper 3.4.5
-'''
+"""
 # stdlib
 from collections import defaultdict
 from distutils.version import LooseVersion # pylint: disable=E0611,E0401
@@ -163,7 +150,7 @@ class ZookeeperCheck(AgentCheck):
                 'zookeeper.ruok', status, message=message, tags=sc_tags
             )
 
-        # Read metrics from the `stat` output.
+        # Read metrics from the `stat` output
         try:
             stat_out = self._send_command('stat', *cx_args)
         except ZKConnectionFailure:
@@ -272,9 +259,10 @@ class ZookeeperCheck(AgentCheck):
         return buf
 
     def parse_stat(self, buf):
-        ''' `buf` is a readable file-like object
-            returns a tuple: (metrics, tags, mode, version)
-        '''
+        """
+        `buf` is a readable file-like object
+        returns a tuple: (metrics, tags, mode, version)
+        """
         metrics = []
         buf.seek(0)
 
@@ -310,11 +298,17 @@ class ZookeeperCheck(AgentCheck):
 
         # Received: 101032173
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_received', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.received', long(value.strip()), "rate"))
 
         # Sent: 1324
         _, value = buf.readline().split(':')
+        # Fixme: This metric name is wrong. It should be removed in a major version of the agent
+        # See https://github.com/DataDog/integrations-core/issues/816
         metrics.append(ZKMetric('zookeeper.bytes_sent', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.sent', long(value.strip()), "rate"))
 
         if has_connections_val:
             # Connections: 1
@@ -358,13 +352,13 @@ class ZookeeperCheck(AgentCheck):
         return metrics, tags, mode, version
 
     def parse_mntr(self, buf):
-        '''
+        """
         Parse `mntr` command's content.
         `buf` is a readable file-like object
 
         Returns: a tuple (metrics, mode)
         if mode == 'inactive', metrics will be None
-        '''
+        """
         buf.seek(0)
         first = buf.readline()  # First is version string or error
         if first == 'This ZooKeeper instance is not currently serving requests':

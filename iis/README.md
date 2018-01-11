@@ -1,4 +1,5 @@
 # IIS Integration
+{{< img src="integrations/iis/iisgraph.png" alt="IIS Graph" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -7,32 +8,33 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 ## Setup
 ### Installation
 
-The IIS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
+The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-Also, your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed. 
-You can check for this using the following command:
+1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers.
 
-```
-Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
-```
+2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.  
+  You can check for this using the following command:
+  ```
+  Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
+  ```
 
-This class should be installed as part of the web-http-common Windows Feature:
+  This class should be installed as part of the web-http-common Windows Feature:
 
-```
-PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
+  ```
+  PS C:\Users\vagrant> Get-WindowsFeature web-* | where installstate -eq installed | ft -AutoSize
 
-Display Name                       Name               Install State
-------------                       ----               -------------
-[X] Web Server (IIS)               Web-Server             Installed
-    [X] Web Server                 Web-WebServer          Installed
-        [X] Common HTTP Features   Web-Common-Http        Installed
-            [X] Default Document   Web-Default-Doc        Installed
-            [X] Directory Browsing Web-Dir-Browsing       Installed
-            [X] HTTP Errors        Web-Http-Errors        Installed
-            [X] Static Content     Web-Static-Content     Installed
-```
-
-You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
+  Display Name                       Name               Install State
+  ------------                       ----               -------------
+  [X] Web Server (IIS)               Web-Server             Installed
+  [X] Web Server                     Web-WebServer          Installed
+  [X] Common HTTP Features           Web-Common-Http        Installed
+  [X] Default Document               Web-Default-Doc        Installed
+  [X] Directory Browsing             Web-Dir-Browsing       Installed
+  [X] HTTP Errors                    Web-Http-Errors        Installed
+  [X] Static Content                 Web-Static-Content     Installed
+  ```
+  
+  You can add the missing features with `install-windowsfeature web-common-http`, this will require a restart of the system to work properly.
 
 ### Configuration
 #### Prepare IIS
@@ -95,11 +97,11 @@ Here's an example of configuration that would check the current machine and a re
 
 * `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending IIS metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending IIS metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `iis` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `iis` under the Checks section:
 
 ```
   Checks

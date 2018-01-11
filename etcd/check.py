@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2016
+# (C) Datadog, Inc. 2015-2017
 # (C) Cory G Watson <gphat@keen.io> 2014-2015
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -17,6 +17,8 @@ class Etcd(AgentCheck):
     DEFAULT_TIMEOUT = 5
 
     SERVICE_CHECK_NAME = 'etcd.can_connect'
+    HEALTH_SERVICE_CHECK_NAME = 'etcd.healthy'
+    HEALTH_KEY = 'health'
 
     STORE_RATES = {
         'getsSuccess': 'etcd.store.gets.success',
@@ -86,14 +88,25 @@ class Etcd(AgentCheck):
         for key, param in ssl_params.items():
             if param is None:
                 del ssl_params[key]
+
+        # Get a copy of tags for the CRIT statuses
+        critical_tags = list(instance_tags)
+
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
         instance_tags.append("url:{0}".format(url))
         timeout = float(instance.get('timeout', self.DEFAULT_TIMEOUT))
         is_leader = False
 
+        # Gather self health status
+        sc_state = AgentCheck.UNKNOWN
+        health_status = self._get_health_status(url, ssl_params, timeout, critical_tags)
+        if health_status is not None:
+            sc_state = AgentCheck.OK if self._is_healthy(health_status) else AgentCheck.CRITICAL
+        self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
+
         # Gather self metrics
-        self_response = self._get_self_metrics(url, ssl_params, timeout)
+        self_response = self._get_self_metrics(url, ssl_params, timeout, critical_tags)
         if self_response is not None:
             if self_response['state'] == 'StateLeader':
                 is_leader = True
@@ -114,7 +127,7 @@ class Etcd(AgentCheck):
                     self.log.warn("Missing key {0} in stats.".format(key))
 
         # Gather store metrics
-        store_response = self._get_store_metrics(url, ssl_params, timeout)
+        store_response = self._get_store_metrics(url, ssl_params, timeout, critical_tags)
         if store_response is not None:
             for key in self.STORE_RATES:
                 if key in store_response:
@@ -130,7 +143,7 @@ class Etcd(AgentCheck):
 
         # Gather leader metrics
         if is_leader:
-            leader_response = self._get_leader_metrics(url, ssl_params, timeout)
+            leader_response = self._get_leader_metrics(url, ssl_params, timeout, critical_tags)
             if leader_response is not None and len(leader_response.get("followers", {})) > 0:
                 # Get the followers
                 followers = leader_response.get("followers")
@@ -149,40 +162,70 @@ class Etcd(AgentCheck):
         # Service check
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=["url:{0}".format(url)])
+                               tags=instance_tags)
 
-    def _get_self_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout)
-
-    def _get_store_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout)
-
-    def _get_leader_metrics(self, url, ssl_params, timeout):
-        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout)
-
-    def _get_json(self, url, path, ssl_params, timeout):
+    def _get_health_status(self, url, ssl_params, timeout, tags):
+        """
+        Don't send the "can connect" service check if we have troubles getting
+        the health status
+        """
         try:
-            certificate = None
-            if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
-                certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
-            verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-            r = requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+            r = self._perform_request(url, "/health", ssl_params, timeout)
+            # we don't use get() here so we can report a KeyError
+            return r.json()[self.HEALTH_KEY]
+        except Exception as e:
+            self.log.debug("Can't determine health status: {}".format(e))
+            return None
+
+    def _get_self_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/self",  ssl_params, timeout, tags)
+
+    def _get_store_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/store",  ssl_params, timeout, tags)
+
+    def _get_leader_metrics(self, url, ssl_params, timeout, tags):
+        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout, tags)
+
+    def _perform_request(self, url, path, ssl_params, timeout):
+        certificate = None
+        if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
+            certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
+        verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
+        return requests.get(url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig))
+
+    def _get_json(self, url, path, ssl_params, timeout, tags):
+        try:
+            r = self._perform_request(url, path, ssl_params, timeout)
         except requests.exceptions.Timeout:
-            # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Timeout when hitting %s" % url,
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Error hitting %s. Error: %s" % (url, e.message),
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise
 
         if r.status_code != 200:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message="Got %s when hitting %s" % (r.status_code, url),
-                               tags=["url:{0}".format(url)])
+                               tags=tags + ["url:{0}".format(url)])
             raise Exception("Http status code {0} on url {1}".format(r.status_code, url))
 
         return r.json()
+
+    def _is_healthy(self, status):
+        """
+        Version of etcd prior to 3.3 return this payload when you hit /health:
+          {"health": "true"}
+
+        which is wrong since the value is a `bool` on etcd.
+
+        Version 3.3 fixed this issue in https://github.com/coreos/etcd/pull/8312
+        but we need to support both.
+        """
+        if isinstance(status, bool):
+            return status
+
+        return status == "true"

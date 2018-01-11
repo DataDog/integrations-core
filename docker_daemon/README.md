@@ -1,5 +1,5 @@
 # Docker_daemon Integration
-
+{{< img src="integrations/docker/docker.png" alt="Docker default dashboard" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from docker_daemon service in real time to:
@@ -54,6 +54,8 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation](https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy) |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide](/guides/autodiscovery/). |
 
+**Note**: Add `--restart=unless-stopped` if you want your agent to be resistant to restarts.
+
 #### Running the agent container on Amazon Linux
 
 To run the Datadog Agent container on Amazon Linux, you'll need to make one small change to the `cgroup` volume mount location:
@@ -95,7 +97,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `docker_daemon` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `docker_daemon` under the Checks section:
 
     Checks
     ======
@@ -135,103 +137,10 @@ Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 ### Knowledge Base
-#### Compose and the Datadog Agent
 
-[Compose](https://docs.docker.com/compose/overview/) is a Docker tool that simplifies building applications on Docker by allowing you to define, build and run multiple containers as a single application.
+* [Compose and the Datadog Agent](http://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent)
 
-While the Single Container Installation instructions above will get the stock Datadog Agent container running, you will most likely want to enable integrations for other containerized services that are part of your Compose application. To do this, you'll need to combine integration YAML files with the base Datadog Agent image to create your Datadog Agent container. Then you'll need to add your container to the Compose YAML.
-
-##### Example: Monitoring Redis
-
-Let's look at how you would monitor a Redis container using Compose. Our example file structure is:
-
-    |- docker-compose.yml
-    |- datadog
-        |- Dockerfile
-        |- conf.d
-           |-redisdb.yaml
-
-First we'll take a look at the `docker-compose.yml` that describes how our containers work together and sets some of the configuration details for the containers.
-
-```yaml
-version: "2"
-services:
-  # Redis container
-  redis:
-    image: redis
-  # Agent container
-  datadog:
-    build: datadog
-    links:
-     - redis # Ensures datadog container can connect to redis container
-    environment:
-     - API_KEY=__your_datadog_api_key_here__
-    volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
-     - /proc/mounts:/host/proc/mounts:ro
-     - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
-```
-
-In this file, we can see that Compose will run the Docker image `redis` and it will also build and run a `datadog` container. By default it will look for a matching directory called `datadog` and run the `Dockerfile` in that directory.
-
-Our `Dockerfile` simply takes the standard [Datadog docker image](https://hub.docker.com/r/datadog/docker-dd-agent/) and places a copy of the `redisdb.yaml` integration configuration into the appropriate directory:
-
-    FROM datadog/docker-dd-agent
-    ADD conf.d/redisdb.yaml /etc/dd-agent/conf.d/redisdb.yaml
-
-Finally our `redisdb.yaml` is patterned after the [redisdb.yaml.example file](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) and tells the Datadog Agent to look for Redis on the host named `redis` (defined in our `docker-compose.yaml` above) and the standard Redis port 6379:
-
-    init_config:
-
-    instances:
-      - host: redis
-        port: 6379
-
-For a more complete example, please see our [Docker Compose example project on Github](https://github.com/DataDog/docker-compose-example).
-
-#### DogStatsD and Docker
-
-Datadog has a huge number of [integrations with common applications](/integrations/), but it can also be used to instrument your custom applications. This is typically using one of the many [Datadog libraries](/libraries/).
-
-Libraries that communicate over HTTP using the [Datadog API](/api/) don't require any special configuration with regard to Docker. However, applications using libraries that integrate with DogStatsD or StatsD will need to configure the library to connect to the Agent. Note that each library will handle this configuration differently, so please refer to the individual library's documentation for more details.
-
-After your code is configured you can run your custom application container using [the `--link` option](https://docs.docker.com/engine/reference/run/#/expose-incoming-ports) to create a network connection between your application container and the Datadog Agent container.
-
-##### Example: Monitoring a basic Python application
-
-To start monitoring our application, we first need to run the Datadog container using the [Single Container Installation](#single-container-installation) instructions above. Note that the `docker run` command sets the name of the container to `dd-agent`.
-
-Next, we'll need to instrument our code. Here's a basic Flask-based web application:
-
-```python
-from flask import Flask
-from datadog import initialize, statsd
-
-# Initialize DogStatsD and set the host.
-initialize(statsd_host = 'dd-agent')
-
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    # Increment a Datadog counter.
-    statsd.increment('my_webapp.page.views')
-
-    return "Hello World!"
-
-if __name__ == "__main__"
-    app.run()
-```
-
-In our example code above, we set the DogStatsD host to match the Datadog Agent container name, `dd-agent`.
-
-After we build our web application container, we can run it and use the `--link` argument to setup a network connection to the Datadog Agent container:
-
-    docker run -d --name my-web-app \
-      --link dd-agent:dd-agent
-      my-web-app
-
-For another example using DogStatsD, see our [Docker Compose example project on Github](https://github.com/DataDog/docker-compose-example).
+* [DogStatsD and Docker](http://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker)
 
 ### Datadog Blog
 

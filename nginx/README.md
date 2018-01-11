@@ -1,4 +1,5 @@
 # NGINX check
+{{< img src="integrations/nginx/nginx.jpg" alt="NGINX default dashboard" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -19,7 +20,8 @@ And many more.
 ## Setup
 ### Installation
 
-The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the check, install the `dd-check-nginx` package.
+The NGINX check is packaged with the Agent. To start gathering your NGINX metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers.  
+If you need the newest version of the check, install the `dd-check-nginx` package.
 
 #### NGINX status module
 
@@ -62,6 +64,9 @@ server {
     # freely available with open source NGINX
     stub_status;
 
+    # for open source NGINX < version 1.7.5
+    # stub_status on;
+
     # available only with NGINX Plus
     # status;
   }
@@ -77,56 +82,53 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 #### Metric Collection
 
 1. Add this configuration setup to your `nginx.yaml` file to start gathering your [Nginx Metrics](#metrics)
+  ```
+  init_config:
 
-```
-init_config:
+  instances:
+    - nginx_status_url: http://localhost:81/nginx_status/
+    # If you configured the endpoint with HTTP basic authentication
+    # user: <USER>
+    # password: <PASSWORD>
+  ```
+  See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-instances:
-  - nginx_status_url: http://localhost:81/nginx_status/
-  # If you configured the endpoint with HTTP basic authentication
-  # user: <USER>
-  # password: <PASSWORD>
-```
-See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
-
-2. Restart the Agent to start sending NGINX metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
-**Available for agent >6.0, Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+**Available for agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
-```
-logs_enabled: true
-```
+  ```
+  logs_enabled: true
+  ```
 
 2. Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
-
-```
-
-logs:
-   - type: file
-     path: /var/log/nginx/access.log
-     service: nginx
-     source: nginx
-     sourcecategory: http_web_access
+  ```
+  logs:
+     - type: file
+       path: /var/log/nginx/access.log
+      service: nginx
+      source: nginx
+      sourcecategory: http_web_access
     
-   - type: file
-     path: /var/log/nginx/error.log
-     service: nginx
-     source: nginx
-     sourcecategory: http_web_access
-     
-```
-    
-Change the `service` and `path` parameter values and configure it for your environment.
-See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
+    - type: file
+       path: /var/log/nginx/error.log
+      service: nginx
+      source: nginx
+      sourcecategory: http_web_access   
+  ```
+  Change the `service` and `path` parameter values and configure it for your environment.  
+  See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
 3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
+**Learn more about Log collection [here](https://docs.datadoghq.com/logs)**
+
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nginx` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nginx` under the Checks section:
 
 ```
   Checks
@@ -140,8 +142,6 @@ See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/ma
 
     [...]
 ```
-
-See the Troubleshooting section if the status is not OK.
 
 ## Compatibility
 
@@ -192,7 +192,7 @@ You may observe one of these common problems in the output of the Datadog Agent'
 ```
   Checks
   ======
-  
+
     nginx
     -----
       - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
@@ -205,7 +205,7 @@ Check that the main `nginx.conf` includes a line like the following:
 
 ```
 http{
-  
+
   ...
 
   include <directory_that_contains_status.conf>/*.conf;

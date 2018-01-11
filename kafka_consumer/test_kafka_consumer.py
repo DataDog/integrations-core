@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -246,6 +246,33 @@ class TestKafka(AgentCheckTest):
         # let's reassert for the __consumer_offsets - multiple partitions
         self.assertMetric('kafka.broker_offset', at_least=1)
         self.coverage_report()
+
+    def test_multiple_servers_zk(self):
+        """
+        Testing Kafka_consumer check.
+        """
+
+        if not self.is_supported(['zookeeper']):
+            raise SkipTest("Skipping test - not supported in current environment")
+
+        multiple_server_zk_instance = copy.deepcopy(zk_instance)
+        multiple_server_zk_instance['kafka_connect_str'] = [
+            multiple_server_zk_instance['kafka_connect_str'],
+            'localhost:9092']
+
+        instances = [multiple_server_zk_instance]
+        self.run_check({'instances': instances})
+
+        for instance in instances:
+            for name, consumer_group in instance['consumer_groups'].iteritems():
+                for topic, partitions in consumer_group.iteritems():
+                    for partition in partitions:
+                        tags = ["topic:{}".format(topic),
+                                "partition:{}".format(partition)]
+                        for mname in BROKER_METRICS:
+                            self.assertMetric(mname, tags=tags, at_least=1)
+                        for mname in CONSUMER_METRICS:
+                            self.assertMetric(mname, tags=tags + ["source:zk", "consumer_group:{}".format(name)], at_least=1)
 
 
     def test_check_nogroups_zk(self):

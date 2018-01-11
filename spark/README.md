@@ -1,5 +1,5 @@
 # Spark Check
-
+{{< img src="integrations/spark/sparkgraph.png" alt="spark graph" responsive="true" popup="true">}}
 ## Overview
 
 The Spark check collects metrics for:
@@ -44,11 +44,11 @@ instances:
 
 Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
-Restart the Agent to start sending Spark metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Spark metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `spark` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `spark` under the Checks section:
 
 ```
   Checks

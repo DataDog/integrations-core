@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -377,6 +377,22 @@ class ProcessCheckTest(AgentCheckTest):
         self.run_check(config, mocks={'_get_child_processes': self.mock_get_child_processes})
 
         self.assertMetric('system.processes.number', 4, tags=self.generate_expected_tags(config['instances'][0]))
+
+    @patch('psutil.Process', return_value=MockProcess())
+    def test_check_filter_user(self, mock_process):
+        config = {
+            'instances': [{
+                'name': 'foo',
+                'pid': 1,
+                'user': 'Bob',
+            }]
+        }
+
+        def _filter_by_user(user, pids):
+            return {1, 2}
+
+        self.run_check(config, mocks={'_filter_by_user': _filter_by_user})
+        self.assertMetric('system.processes.number', 2, tags=self.generate_expected_tags(config['instances'][0]))
 
     def test_check_missing_pid(self):
         config = {

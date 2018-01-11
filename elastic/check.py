@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -23,6 +23,7 @@ class NodeNotFound(Exception):
 ESInstanceConfig = namedtuple(
     'ESInstanceConfig', [
         'pshard_stats',
+        'pshard_graceful_to',
         'cluster_stats',
         'password',
         'service_check_tags',
@@ -354,6 +355,7 @@ class ESCheck(AgentCheck):
             raise Exception("A URL must be specified in the instance")
 
         pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
+        pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
 
         cluster_stats = _is_affirmative(instance.get('cluster_stats', False))
         if 'is_external' in instance:
@@ -384,6 +386,7 @@ class ESCheck(AgentCheck):
 
         config = ESInstanceConfig(
             pshard_stats=pshard_stats,
+            pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
             password=instance.get('password'),
             service_check_tags=service_check_tags,
@@ -421,10 +424,17 @@ class ESCheck(AgentCheck):
         self._process_stats_data(stats_data, stats_metrics, config)
 
         # Load clusterwise data
+        # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
+            send_sc = bubble_ex = not config.pshard_graceful_to
             pshard_stats_url = urlparse.urljoin(config.url, pshard_stats_url)
-            pshard_stats_data = self._get_data(pshard_stats_url, config)
-            self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
+            try:
+                pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
+                self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
+            except requests.ReadTimeout as e:
+                if bubble_ex:
+                    raise
+                self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
 
         # Load the health data.
@@ -476,8 +486,8 @@ class ESCheck(AgentCheck):
 
         if version >= [0, 90, 10]:
             # ES versions 0.90.10 and above
-            health_url = "/_cluster/health?pretty=true"
-            pending_tasks_url = "/_cluster/pending_tasks?pretty=true"
+            health_url = "/_cluster/health"
+            pending_tasks_url = "/_cluster/pending_tasks"
 
             # For "external" clusters, we want to collect from all nodes.
             if cluster_stats:
@@ -491,7 +501,7 @@ class ESCheck(AgentCheck):
 
             additional_metrics = self.JVM_METRICS_POST_0_90_10
         else:
-            health_url = "/_cluster/health?pretty=true"
+            health_url = "/_cluster/health"
             pending_tasks_url = None
             if cluster_stats:
                 stats_url = "/_cluster/nodes/stats?all=true"
