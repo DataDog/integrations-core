@@ -21,14 +21,14 @@ class NfsStatCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         # if they set the path, use that
         if init_config.get('nfsiostat_path'):
-            self.nfs_cmd = init_config.get('nfsiostat_path')
+            self.nfs_cmd = [init_config.get('nfsiostat_path'), '1', '2']
         else:
             # if not, check if it's installed in the opt dir, if so use that
             if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
-                self.nfs_cmd = '/opt/datadog-agent/embedded/sbin/nfsiostat'
+                self.nfs_cmd = ['/opt/datadog-agent/embedded/sbin/nfsiostat', '1', '2']
             # if not, then check if it is in the default place
             elif os.path.exists('/usr/local/sbin/nfsiostat'):
-                self.nfs_cmd = '/usr/local/sbin/nfsiostat'
+                self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
             else:
                 raise Exception('nfsstat check requires nfsiostat be installed, please install it (through nfs-utils) or set the path to the installed version')
 
@@ -49,6 +49,10 @@ class NfsStatCheck(AgentCheck):
         # Add the last device into the array
         device = Device(this_device, self.log)
         all_devices.append(device)
+
+        # Disregard the first half of device stats (report 1 of 2)
+        # as that is the moving average
+        all_devices = all_devices[len(all_devices) // 2:]
 
         for device in all_devices:
             device.send_metrics(self.gauge)
