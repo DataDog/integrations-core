@@ -18,6 +18,11 @@ instances:
   #     - memory: mem
   #     - io
 
+  #   Send a service check reporting about the health of the prometheus endpoint
+  #   It will be named <namespace>.prometheus.health (true by default)
+  #
+  #   health_service_check: True
+
   #   Override the hostname with the value of one label
   #
   #   label_to_hostname: node
