@@ -62,7 +62,7 @@ class Disk(AgentCheck):
             instance.get('tag_by_filesystem', False))
         self._all_partitions = _is_affirmative(
             instance.get('all_partitions', False))
-        self._device_tag_re = instance.get('device_tag_re', [])
+        self._device_tag_re = instance.get('device_tag_re', {})
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
@@ -306,10 +306,9 @@ class Disk(AgentCheck):
         Compile regex strings from device_tag_re option and return list of compiled regex/tag pairs
         """
         device_tag_list = []
-        for pair in self._device_tag_re:
-            for regex_str, tags in pair.items():
-                try:
-                    device_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(",")]])
-                except TypeError:
-                    self.log.warning('{0} is not a valid regular expression and will be ignored'.format(regex_str))
+        for regex_str, tags in self._device_tag_re.iteritems():
+            try:
+                device_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(",")]])
+            except TypeError:
+                self.log.warning('{0} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
