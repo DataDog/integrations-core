@@ -1,13 +1,13 @@
 # CHANGELOG - elastic
 
-1.4.0 / Unreleased
+1.4.0 / 2018-01-10
 ==================
 
 ### Changes
 
 * [BUG] Fix missing fs metrics for elastic >= 5. See [#997][].
 
-1.3.0 / Unreleased
+1.3.0 / 2018-01-10
 ==================
 
 ### Changes

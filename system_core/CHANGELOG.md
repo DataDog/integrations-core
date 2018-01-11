@@ -1,6 +1,6 @@
 # CHANGELOG - system_core
 
-1.0.1 / Unreleased
+1.0.1 / 2018-01-10
 ==================
 
 ### Changes

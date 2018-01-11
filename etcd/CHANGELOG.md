@@ -1,6 +1,6 @@
 # CHANGELOG - etcd
 
-1.3.0 / Unreleased
+1.3.0 / 2018-01-10
 ==================
 ### Changes
 

@@ -1,6 +1,6 @@
 # CHANGELOG - gitlab_runner
 
-1.0.0 / Unreleased
+1.0.0 / 2018-01-10
 ==================
 
 ### Changes
