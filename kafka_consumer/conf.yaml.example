@@ -43,9 +43,13 @@ instances:
     # zk_prefix: /0.8
 
     # SSL Configuration
-    # ssl_cafile: /etc/dd-agent/conf.d/kafka.cer
-    # security_protocol: SSL
-    # ssl_check_hostname: False
+
+    # ssl_cafile: /path/to/file
+    # security_protocol: PLAINTEXT
+    # ssl_check_hostname: True
+    # ssl_certfile:
+    # ssl_keyfile:
+    # ssl_password:
 
     # kafka_consumer_offsets: false
     consumer_groups:
