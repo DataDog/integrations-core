@@ -12,7 +12,7 @@ The Agent's Squid integration is packaged with the Agent, so simply [install the
 
 ## Configuration
 
-Create a file `squid.yaml` in the Agent's `conf.d` directory. See the [sample squid.yaml](https://github.com/DataDog/integrations-core/blob/master/squid/squid.yaml.example) for all available configuration options:
+Create a file `squid.yaml` in the Agent's `conf.d` directory. See the [sample squid.yaml](https://github.com/DataDog/integrations-core/blob/master/squid/conf.yaml.example) for all available configuration options:
 
 ```yaml
 init_config:
@@ -30,7 +30,7 @@ Restart the Agent to start sending metrics and service checks to Datadog.
 
 ## Validation
 
-[Run the Agent's info subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `squid` under the Checks section:
+[Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `squid` under the Checks section:
 
 ```
     Checks
