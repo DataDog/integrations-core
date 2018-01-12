@@ -37,6 +37,7 @@ class Disk(AgentCheck):
                             agentConfig, instances=instances)
         # Get the configuration once for all
         self._load_conf(instances[0])
+        self._compile_tag_re()
 
     def check(self, instance):
         """Get disk space/inode stats"""
@@ -61,6 +62,7 @@ class Disk(AgentCheck):
             instance.get('tag_by_filesystem', False))
         self._all_partitions = _is_affirmative(
             instance.get('all_partitions', False))
+        self._device_tag_re = instance.get('device_tag_re', {})
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
@@ -114,6 +116,11 @@ class Disk(AgentCheck):
 
             tags = [part.fstype, 'filesystem:{}'.format(part.fstype)] if self._tag_by_filesystem else []
             device_name = part.mountpoint if self._use_mount else part.device
+
+            # apply device/mountpoint specific tags
+            for regex, device_tags in self._device_tag_re:
+                if regex.match(device_name):
+                    tags += device_tags
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -224,6 +231,10 @@ class Disk(AgentCheck):
             self.log.debug("Passed: {0}".format(device))
             tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
             device_name = device[-1] if self._use_mount else device[0]
+            # apply device/mountpoint specific tags
+            for regex, device_tags in self._device_tag_re:
+                if regex.match(device_name):
+                    tags += device_tags
             for metric_name, value in self._collect_metrics_manually(device).iteritems():
                 self.gauge(metric_name, value, tags=tags,
                            device_name=device_name)
@@ -289,3 +300,15 @@ class Disk(AgentCheck):
 
         # Filter fake or unwanteddisks.
         return [d for d in flattened_devices if self._keep_device(d)]
+
+    def _compile_tag_re(self):
+        """
+        Compile regex strings from device_tag_re option and return list of compiled regex/tag pairs
+        """
+        device_tag_list = []
+        for regex_str, tags in self._device_tag_re.iteritems():
+            try:
+                device_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(",")]])
+            except TypeError:
+                self.log.warning('{0} is not a valid regular expression and will be ignored'.format(regex_str))
+        self._device_tag_re = device_tag_list

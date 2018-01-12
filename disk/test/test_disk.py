@@ -257,6 +257,7 @@ class TestCheckDisk(AgentCheckTest):
         self.assertFalse(self.check._tag_by_filesystem)
         self.assertFalse(self.check._all_partitions)
         self.assertEqual(self.check._excluded_disk_re, re.compile('^$'))
+        self.assertEqual(self.check._device_tag_re, {})
 
     def test_ignore_empty_regex(self):
         """
@@ -266,3 +267,22 @@ class TestCheckDisk(AgentCheckTest):
         self.load_check({'instances': [{}]}, agent_config={'device_blacklist_re': ''})
         self.check._load_conf({})
         self.assertEqual(self.check._excluded_disk_re, re.compile('^$'))
+
+    @mock.patch('psutil.disk_partitions', return_value=[MockPart()])
+    @mock.patch('psutil.disk_usage', return_value=MockDiskMetrics())
+    @mock.patch('os.statvfs', return_value=MockInodesMetrics())
+    def test_device_tagging(self, mock_partitions, mock_usage, mock_inodes):
+        # Mocking
+        mock_usage.__name__ = "foo"
+        mock_inodes.__name__ = "foo"
+        mock_partitions.__name__ = "foo"
+        self.run_check({'instances': [{'use_mount': 'no',
+                                       'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}}]},
+                       mocks={'collect_metrics': lambda: None})
+
+        # Assert metrics
+        for metric, value in self.GAUGES_VALUES.iteritems():
+            self.assertMetric(metric, value=value, tags=["type:dev", "tag:two"],
+                              device_name=DEFAULT_DEVICE_NAME)
+
+        self.coverage_report()

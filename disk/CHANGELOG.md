@@ -1,5 +1,12 @@
 # CHANGELOG - disk
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds additional device/mount tagging based on regex
+
 1.0.2 / 2017-10-10
 ==================
 
