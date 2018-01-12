@@ -82,6 +82,7 @@ env:
     - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.9.0
     - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
     - TRAVIS_FLAVOR=kubernetes
+    - TRAVIS_FLAVOR=kubernetes_state
     - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
     - TRAVIS_FLAVOR=lighttpd
     - TRAVIS_FLAVOR=mcache FLAVOR_VERSION=1.4.22

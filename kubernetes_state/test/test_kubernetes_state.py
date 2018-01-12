@@ -6,11 +6,13 @@
 import mock
 import os
 
+# 3p
+from nose.plugins.attrib import attr
+
 # project
 from tests.checks.common import AgentCheckTest
 
 NAMESPACE = 'kubernetes_state'
-
 
 class MockResponse:
     """
@@ -29,6 +31,7 @@ class MockResponse:
         pass
 
 
+@attr(requires='kubernetes_state')
 class TestKubernetesState(AgentCheckTest):
     CHECK_NAME = 'kubernetes_state'
 
@@ -90,6 +93,16 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.statefulset.replicas_updated',
     ]
 
+    TAGS = {
+        NAMESPACE + '.pod.ready': ['node:minikube'],
+        NAMESPACE + '.pod.scheduled': ['node:minikube']
+    }
+
+    HOSTNAMES = {
+        NAMESPACE + '.pod.ready': 'minikube',
+        NAMESPACE + '.pod.scheduled': 'minikube'
+    }
+
     ZERO_METRICS = [
         NAMESPACE + '.deployment.replicas_unavailable',
         NAMESPACE + '.deployment.paused',
@@ -118,7 +131,8 @@ class TestKubernetesState(AgentCheckTest):
             }]
         }
 
-        self.run_check(config)
+        # run check twice to have pod/node mapping
+        self.run_check_twice(config)
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)
@@ -137,7 +151,14 @@ class TestKubernetesState(AgentCheckTest):
                                 tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
 
         for metric in self.METRICS:
-            self.assertMetric(metric)
+            self.assertMetric(
+                metric,
+                hostname=self.HOSTNAMES.get(metric, None)
+            )
+            tags = self.TAGS.get(metric, None)
+            if tags:
+                for tag in tags:
+                    self.assertMetricTag(metric, tag)
             if metric not in self.ZERO_METRICS:
                 self.assertMetricNotAllZeros(metric)
 
@@ -156,7 +177,8 @@ class TestKubernetesState(AgentCheckTest):
             }]
         }
 
-        self.run_check(config)
+        # run check twice to have pod/node mapping
+        self.run_check_twice(config)
 
         self.assertServiceCheck(NAMESPACE + '.node.ready', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.out_of_disk', self.check.OK)

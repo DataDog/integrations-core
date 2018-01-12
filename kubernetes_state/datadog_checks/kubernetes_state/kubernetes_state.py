@@ -154,6 +154,15 @@ class KubernetesState(PrometheusCheck):
             'kube_job_status_start_time',
         ]
 
+        self.label_joins = {
+            'kube_pod_info': {
+                'label_to_match': 'pod',
+                'labels_to_get': ['node']
+            }
+        }
+
+        self.label_to_hostname = 'node'
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
         if endpoint is None:
