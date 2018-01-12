@@ -105,7 +105,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.kubernetes': ['kubernetes.yaml.example']},
+    package_data={b'datadog_checks.kubernetes': ['conf.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent

@@ -105,7 +105,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.wmi_check': ['wmi_datadog_checks.yaml.example']},
+    package_data={b'datadog_checks.wmi_check': ['conf.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent

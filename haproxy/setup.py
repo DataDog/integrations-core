@@ -110,7 +110,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.haproxy': ['haproxy.yaml.example']},
+    package_data={b'datadog_checks.haproxy': ['conf.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
