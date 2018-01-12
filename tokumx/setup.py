@@ -105,7 +105,7 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.tokumx': ['tokumx.yaml.example']},
+    package_data={b'datadog_checks.tokumx': ['conf.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
