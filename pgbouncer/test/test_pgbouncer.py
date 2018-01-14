@@ -80,7 +80,7 @@ class TestPgbouncer(AgentCheckTest):
             pass
         time.sleep(1)
         self.run_check(config)
-        # self.assertMetric('pgbouncer.stats.requests_per_second')        
+        # self.assertMetric('pgbouncer.stats.requests_per_second')
         self.assertMetric('pgbouncer.stats.bytes_received_per_second')
         self.assertMetric('pgbouncer.stats.bytes_sent_per_second')
 
