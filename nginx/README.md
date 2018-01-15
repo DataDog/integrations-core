@@ -20,7 +20,9 @@ And many more.
 ## Setup
 ### Installation
 
-The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers. If you need the newest version of the check, install the `dd-check-nginx` package.
+The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers.  
+
+If you need the newest version of the NGINX check, install the `dd-check-nginx` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 #### NGINX status module
 

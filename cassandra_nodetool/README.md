@@ -9,7 +9,6 @@ It uses the `nodetool` utility to collect them.
 ### Installation
 
 The cassandra nodetool check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your cassandra nodes.
-If you need the newest version of the check, install the `dd-check-cassandra_nodetool` package.
 
 ### Configuration
 

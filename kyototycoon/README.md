@@ -7,7 +7,8 @@ The Agent's Kyototycoon check tracks get, set, and delete operations, and lets y
 ## Setup
 ### Installation
 
-The Kyototycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kyototycoon servers. If you need the newest version of the check, install the `dd-check-kyototycoon` package.
+The Kyototycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kyototycoon servers.  
+If you need the newest version of the Kyototycoon check, install the `dd-check-kyototycoon` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
