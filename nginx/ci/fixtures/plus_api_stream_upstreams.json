@@ -1,0 +1,269 @@
+{
+    "dns_udp_backends": {
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "connect_time": 0,
+                "connections": 105986,
+                "downtime": 0,
+                "fails": 0,
+                "first_byte_time": 10,
+                "health_checks": {
+                    "checks": 55514,
+                    "fails": 0,
+                    "last_passed": true,
+                    "unhealthy": 0
+                },
+                "id": 0,
+                "name": "10.0.0.5:53",
+                "received": 17561904,
+                "response_time": 10,
+                "selected": "2018-01-09T15:11:39Z",
+                "sent": 2861622,
+                "server": "10.0.0.5:53",
+                "state": "up",
+                "unavail": 0,
+                "weight": 2
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connect_time": 0,
+                "connections": 52993,
+                "downtime": 0,
+                "fails": 0,
+                "first_byte_time": 10,
+                "health_checks": {
+                    "checks": 55514,
+                    "fails": 0,
+                    "last_passed": true,
+                    "unhealthy": 0
+                },
+                "id": 1,
+                "name": "10.0.0.2:53",
+                "received": 8782156,
+                "response_time": 10,
+                "selected": "2018-01-09T15:11:39Z",
+                "sent": 1430811,
+                "server": "10.0.0.2:53",
+                "state": "up",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 2,
+                "name": "10.0.0.7:53",
+                "received": 0,
+                "sent": 0,
+                "server": "10.0.0.7:53",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "dns_backends"
+    },
+    "postgresql_backends": {
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "connect_time": 0,
+                "connections": 2,
+                "downstart": "2018-01-06T10:00:06.738Z",
+                "downtime": 277894003,
+                "fails": 0,
+                "first_byte_time": 5,
+                "health_checks": {
+                    "checks": 27776,
+                    "fails": 27776,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 0,
+                "max_conns": 42,
+                "name": "10.0.0.2:15432",
+                "received": 28265,
+                "response_time": 5,
+                "selected": "2018-01-06T10:00:04Z",
+                "sent": 212,
+                "server": "10.0.0.2:15432",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connect_time": 0,
+                "connections": 2,
+                "downstart": "2018-01-06T10:00:06.738Z",
+                "downtime": 277894003,
+                "fails": 0,
+                "first_byte_time": 1,
+                "health_checks": {
+                    "checks": 27775,
+                    "fails": 27775,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 1,
+                "name": "10.0.0.2:15433",
+                "received": 28473,
+                "response_time": 1,
+                "selected": "2018-01-06T10:00:05Z",
+                "sent": 212,
+                "server": "10.0.0.2:15433",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connect_time": 0,
+                "connections": 1,
+                "downstart": "2018-01-06T10:00:06.738Z",
+                "downtime": 277894003,
+                "fails": 0,
+                "first_byte_time": 1,
+                "health_checks": {
+                    "checks": 27775,
+                    "fails": 27775,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 2,
+                "name": "10.0.0.2:15434",
+                "received": 14271,
+                "response_time": 1,
+                "selected": "2018-01-06T10:00:03Z",
+                "sent": 106,
+                "server": "10.0.0.2:15434",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 3,
+                "name": "10.0.0.2:15435",
+                "received": 0,
+                "sent": 0,
+                "server": "10.0.0.2:15435",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "dynamic"
+    },
+    "unused_tcp_backends": {
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 2,
+                "name": "nginx.org:80",
+                "received": 0,
+                "sent": 0,
+                "server": "95.211.80.227:80",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 4,
+                "name": "nginx.org:80",
+                "received": 0,
+                "sent": 0,
+                "server": "[2001:1af8:4060:a004:21::e3]:80",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 7,
+                "name": "nginx.org:80",
+                "received": 0,
+                "sent": 0,
+                "server": "206.251.255.63:80",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": false,
+                "connections": 0,
+                "downtime": 0,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 8,
+                "name": "nginx.org:80",
+                "received": 0,
+                "sent": 0,
+                "server": "[2606:7100:1:69::3f]:80",
+                "state": "down",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "nginxorg"
+    }
+}

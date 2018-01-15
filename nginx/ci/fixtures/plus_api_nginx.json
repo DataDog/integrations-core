@@ -1,0 +1,10 @@
+{
+    "address": "206.251.255.64",
+    "build": "nginx-plus-r14",
+    "generation": 12,
+    "load_timestamp": "2018-01-06T10:00:00.542Z",
+    "pid": 95126,
+    "ppid": 3657,
+    "timestamp": "2018-01-09T15:11:56.566Z",
+    "version": "1.13.7"
+}

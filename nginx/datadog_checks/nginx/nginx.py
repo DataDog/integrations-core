@@ -41,6 +41,7 @@ class Nginx(AgentCheck):
 
     """
     def check(self, instance):
+
         if 'nginx_status_url' not in instance:
             raise Exception('NginX instance missing "nginx_status_url" value.')
         tags = instance.get('tags', [])
@@ -161,6 +162,7 @@ class Nginx(AgentCheck):
         # so we can treat it the same way
 
         url = "/".join([api_url, plus_api_version, endpoint])
+        payload = {}
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
             r = self._perform_request(url, ssl_validation, auth)
@@ -170,7 +172,7 @@ class Nginx(AgentCheck):
             else:
                 payload = self._nest_payload(split_endpoint[1:], r.json())
         except Exception as e:
-            self.log.error("Error querying %s metrics at %s: %s", endpoint, url, e)
+            self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
         return payload
 
