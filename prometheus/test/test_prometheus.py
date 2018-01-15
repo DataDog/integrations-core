@@ -49,12 +49,13 @@ class TestPrometheus(AgentCheckTest):
         NAMESPACE + '.metric2'
     ]
 
-    @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
+    @mock.patch('datadog_checks.prometheus_base.PrometheusCheck.poll')
     def test_check(self, mock_poll):
         """
         Testing prometheus check.
         """
         registry = CollectorRegistry()
+        # pylint: disable=E1123
         g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
         g1.labels(matched_label="foobar", node="localhost", flavor="test").set(99.9)
         g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
