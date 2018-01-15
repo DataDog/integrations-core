@@ -268,7 +268,7 @@ class Nginx(AgentCheck):
                 val = 0
             output.append((metric_base, val, tags, 'gauge'))
 
-        elif isinstance(val, (int, float)):
+        elif isinstance(val, (int, float, long)):
             output.append((metric_base, val, tags, 'gauge'))
 
         elif isinstance(val, (unicode, str)):
