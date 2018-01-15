@@ -52,7 +52,7 @@ class TestPrometheus(AgentCheckTest):
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test_check(self, mock_poll):
         """
-        Testing Kube_proxy in userspace mode.
+        Testing prometheus check.
         """
         registry = CollectorRegistry()
         g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
