@@ -10,7 +10,7 @@ Get metrics from kubernetes_state service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-kubernetes_state` package manually or with your favorite configuration manager
+The Kubernetes-Sate check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kubernetes servers.
 
 ### Configuration
 

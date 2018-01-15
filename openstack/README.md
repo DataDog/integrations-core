@@ -10,13 +10,11 @@ Get metrics from openstack service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-openstack` package manually or with your favorite configuration manager.
+To capture OpenStack metrics you need to [install the Agent](https://app.datadoghq.com/account/settings#agent) on your hosts running hypervisors.
 
-Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, please visit our Billing FAQ.
+**Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, please visit our Billing FAQ.
 
 ### Configuration
-
-To capture OpenStack metrics you need to install the Datadog Agent on your hosts running hypervisors.
 
 1. First configure a Datadog role and user with your identity server
 

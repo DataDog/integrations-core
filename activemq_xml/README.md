@@ -10,7 +10,7 @@ Get metrics from activemq_xml service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-activemq_xml` package manually or with your favorite configuration manager
+The Activemq XML check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

@@ -9,7 +9,7 @@ Get metrics from aspdotnet service in real time to:
 
 ## Installation
 
-Install the `dd-check-aspdotnet` package manually or with your favorite configuration manager
+The Aspdotnet check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ## Configuration
 

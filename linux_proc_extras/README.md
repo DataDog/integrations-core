@@ -9,7 +9,7 @@ Get metrics from linux_proc_extras service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-linux_proc_extras` package manually or with your favorite configuration manager
+The Linux_proc_extras check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

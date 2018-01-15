@@ -9,7 +9,7 @@ Get metrics from Windows performance counters in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-pdh_check` package manually or with your favorite configuration manager
+The PDH check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

@@ -10,7 +10,7 @@ Get metrics from agent_metrics service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-agent_metrics` package manually or with your favorite configuration manager
+The Agent Metrics check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

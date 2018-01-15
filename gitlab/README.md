@@ -12,7 +12,7 @@ more information about Gitlab and its integration with Prometheus
 ## Setup
 ### Installation
 
-Install the `dd-check-gitlab` package manually or with your favorite configuration manager
+The Gitlab check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gitlab servers.
 
 ### Configuration
 

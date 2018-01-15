@@ -7,7 +7,7 @@ nfsiostat is a tool that gets metrics from NFS mounts. This check grabs these me
 ## Setup
 ### Installation
 
-Install the `dd-check-nfsstat` package manually or with your favorite configuration manager
+The NFSstat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 
