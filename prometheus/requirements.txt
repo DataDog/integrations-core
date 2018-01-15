@@ -1,1 +1,3 @@
 # integration pip requirements
+# TODO: add this requirement once cheese shop is up
+# datadog_prometheus_base==1.0.0

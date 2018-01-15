@@ -1,6 +1,8 @@
 from . import prometheus
+import sys
+import os
 
-PrometheusCheck = prometheus.PrometheusCheck
+GenericPrometheusCheck = prometheus.GenericPrometheusCheck
 
 __version__ = "1.0.0"
 

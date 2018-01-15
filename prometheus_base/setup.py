@@ -33,7 +33,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Parse requirements
-runtime_reqs = ['datadog-checks-base', 'datadog-prometheus-base']
+runtime_reqs = ['datadog-checks-base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = parse_req_line(line)
@@ -53,7 +53,7 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 # https://packaging.python.org/guides/single-sourcing-package-version/
-version = find_version("datadog_checks", "prometheus", "__init__.py")
+version = find_version("datadog_checks", "prometheus_base", "__init__.py")
 
 manifest_version = None
 with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
@@ -64,11 +64,11 @@ if version != manifest_version:
     raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
-    name='datadog-prometheus',
+    name='datadog-prometheus_base',
     version=version,
-    description='The prometheus check',
+    description='The prometheus_base check',
     long_description=long_description,
-    keywords='datadog agent prometheus check',
+    keywords='datadog agent prometheus_base check',
 
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
@@ -92,7 +92,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.prometheus'],
+    packages=['datadog_checks.prometheus_base'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
@@ -115,13 +115,13 @@ setup(
     test_suite='nose.collector',
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.prometheus': ['conf.yaml.example']},
+    package_data={b'datadog_checks.prometheus_base': ['conf.yaml.example']},
     include_package_data=True,
 
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'prometheus=datadog_checks.prometheus:main',
+            'prometheus_base=datadog_checks.prometheus_base:main',
         ],
     },
 )
