@@ -10,7 +10,9 @@ Get metrics from agent_metrics service in real time to:
 ## Setup
 ### Installation
 
-The Agent Metrics check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
+The Agent Metrics check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+
+If you need the newest version of the Agent Metrics check, install the `dd-check-agent_metrics` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

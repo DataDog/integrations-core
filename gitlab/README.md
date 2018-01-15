@@ -12,7 +12,9 @@ more information about Gitlab and its integration with Prometheus
 ## Setup
 ### Installation
 
-The Gitlab check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gitlab servers.
+The Gitlab check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gitlab servers.  
+
+If you need the newest version of the Gitlab check, install the `dd-check-gitlab` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

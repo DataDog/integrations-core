@@ -7,7 +7,9 @@ The ActiveMQ check lets you collect metrics for brokers and queues, producers an
 ## Setup
 ### Installation
 
-The Agent's ActiveMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your ActiveMQ nodes.
+The Agent's ActiveMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your ActiveMQ nodes.  
+
+If you need the newest version of the ActiveMQ XML check, install the `dd-check-activemq_xml` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 The check collects metrics via JMX, so you'll need a JVM on each node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). We recommend using an Oracle-provided JVM.
 
