@@ -128,9 +128,8 @@ class Disk(AgentCheck):
             for metric_name, metric_value in self._collect_part_metrics(part, disk_usage).iteritems():
                 self.gauge(metric_name, metric_value,
                            tags=tags, device_name=device_name)
-        # And finally, latency metrics, a legacy gift from the old Windows Check
-        if Platform.is_win32():
-            self.collect_latency_metrics()
+
+        self.collect_latency_metrics()
 
     def _exclude_disk_psutil(self, part):
         # skip cd-rom drives with no disk in it; they may raise
@@ -214,14 +213,19 @@ class Disk(AgentCheck):
     def collect_latency_metrics(self):
         for disk_name, disk in psutil.disk_io_counters(True).iteritems():
             self.log.debug('IO Counters: {0} -> {1}'.format(disk_name, disk))
-            # x100 to have it as a percentage,
-            # /1000 as psutil returns the value in ms
-            read_time_pct = disk.read_time * 100.0 / 1000.0
-            write_time_pct = disk.write_time * 100.0 / 1000.0
-            self.rate(self.METRIC_DISK.format('read_time_pct'),
+            try:
+                # x100 to have it as a percentage,
+                # /1000 as psutil returns the value in ms
+                read_time_pct = disk.read_time * 100.0 / 1000.0
+                write_time_pct = disk.write_time * 100.0 / 1000.0
+                self.rate(self.METRIC_DISK.format('read_time_pct'),
                       read_time_pct, device_name=disk_name)
-            self.rate(self.METRIC_DISK.format('write_time_pct'),
+                self.rate(self.METRIC_DISK.format('write_time_pct'),
                       write_time_pct, device_name=disk_name)
+            except AttributeError:
+                # Some OS don't return read_time/write_time fields
+                # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
+                self.log.debug("Latency metrics not collected for {0}".format(disk_name))
 
     # no psutil, let's use df
     def collect_metrics_manually(self):
