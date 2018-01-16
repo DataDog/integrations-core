@@ -1,5 +1,12 @@
 # CHANGELOG - mysql
 
+1.1.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Changes default value of `connect_timeout` to 10. See [#1020][]
+
 1.1.0 / 2018-01-10
 ==================
 
@@ -66,4 +73,5 @@
 [#586]: https://github.com/DataDog/integrations-core/issues/586
 [#637]: https://github.com/DataDog/integrations-core/issues/637
 [#660]: https://github.com/DataDog/integrations-core/issues/660
+[#1020]: https://github.com/DataDog/integrations-core/issues/1020
 [@EdwardMcConnell]: https://github.com/EdwardMcConnell
