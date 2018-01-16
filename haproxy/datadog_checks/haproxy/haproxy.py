@@ -65,7 +65,10 @@ class HAProxy(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        # Host status needs to persist across all checks
+        # Host status needs to persist across all checks.
+        # We'll create keys when they are referenced. See:
+        # https://en.wikipedia.org/wiki/Autovivification
+        # https://gist.github.com/hrldcpr/2012250
         self.host_status = defaultdict(lambda: defaultdict(lambda: None))
 
     METRICS = {
