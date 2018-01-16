@@ -23,7 +23,7 @@ INSTANCE_METRICS = [
 @attr('windows')
 @attr(requires='active_directory')
 class ActiveDirectoryCheckTest(AgentCheckTest):
-    CHECK_NAME = 'exchange_check'
+    CHECK_NAME = 'active_directory'
 
     def test_basic_check(self):
         instance = copy.deepcopy(INSTANCE)
