@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.2 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Check explicitly that node_id is None instead of 0. See [][]
+
 1.2.1 / 2017-11-29
 ==================
 
