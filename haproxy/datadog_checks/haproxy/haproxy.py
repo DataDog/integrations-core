@@ -115,8 +115,9 @@ class HAProxy(AgentCheck):
             username = instance.get('username')
             password = instance.get('password')
             verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
+            custom_headers = instance.get('headers', {})
 
-            data = self._fetch_url_data(url, username, password, verify)
+            data = self._fetch_url_data(url, username, password, verify, custom_headers)
 
         collect_aggregates_only = _is_affirmative(
             instance.get('collect_aggregates_only', True)
@@ -162,16 +163,17 @@ class HAProxy(AgentCheck):
             tags_regex=tags_regex,
         )
 
-    def _fetch_url_data(self, url, username, password, verify):
+    def _fetch_url_data(self, url, username, password, verify, custom_headers):
         ''' Hit a given http url and return the stats lines '''
         # Try to fetch data from the stats URL
 
         auth = (username, password)
         url = "%s%s" % (url, STATS_URL)
+        custom_headers.update(headers(self.agentConfig))
 
         self.log.debug("Fetching haproxy stats from url: %s" % url)
 
-        response = requests.get(url, auth=auth, headers=headers(self.agentConfig), verify=verify, timeout=self.default_integration_http_timeout)
+        response = requests.get(url, auth=auth, headers=custom_headers, verify=verify, timeout=self.default_integration_http_timeout)
         response.raise_for_status()
 
         return response.content.splitlines()
