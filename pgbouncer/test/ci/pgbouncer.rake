@@ -13,6 +13,16 @@ pgbname = 'dd-test-pgbouncer'
 pg_resources_path = (ENV['SDK_HOME']).to_s + '/pgbouncer/test/ci/resources/pg'
 pgb_resources_path = (ENV['SDK_HOME']).to_s + '/pgbouncer/test/ci/resources/pgb'
 
+pgbouncer_images = {
+  # pgbouncer-1.5.4 on debian jessie
+  '1.5' => 'kotaimen/pgbouncer:debian-jessie',
+  # pgbouncer-1.7.2 on debian stretch
+  '1.7' => 'kotaimen/pgbouncer:debian-stretch',
+  # pgbouncer-1.8.1 on debian jessie
+  '1.8' => 'inonit/pgbouncer:latest',
+  'latest' => 'inonit/pgbouncer:latest',
+}
+
 namespace :ci do
   namespace :pgbouncer do |flavor|
     task before_install: ['ci:common:before_install'] do
@@ -32,7 +42,7 @@ namespace :ci do
       end
       puts 'Postgres is running, installing PgBouncer'
       sh %(docker run -d --name #{pgbname} --link #{pgname}:postgres -v #{pgb_resources_path}:/etc/pgbouncer:ro -p \
-        16432:6432 kotaimen/pgbouncer:#{pgbouncer_version})
+        16432:6432 #{pgbouncer_images.fetch(pgbouncer_version)})
       sleep_for 10
     end
 
