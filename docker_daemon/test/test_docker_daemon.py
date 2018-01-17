@@ -289,10 +289,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_basic_config_single(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
@@ -324,10 +324,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_basic_config_twice(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.images.available', None),
@@ -373,10 +373,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_exclude_filter(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
@@ -430,10 +430,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_include_filter(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
@@ -559,10 +559,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_labels_collection(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -642,10 +642,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
         metric_suffix = ["count", "avg", "median", "max", "95percentile"]
 
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -735,10 +735,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_container_size(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -817,8 +817,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
 
         expected_service_checks = [
-            (AgentCheck.OK, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-ok']),
-            (AgentCheck.CRITICAL, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-fail']),
+            (AgentCheck.OK, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-ok', 'short_image:nginx:latest']),
+            (AgentCheck.CRITICAL, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-fail', 'short_image:nginx:latest']),
         ]
 
         container_ok = self.docker_client.create_container(
