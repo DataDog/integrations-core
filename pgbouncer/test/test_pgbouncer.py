@@ -61,10 +61,10 @@ class TestPgbouncer(AgentCheckTest):
         self.assertMetric('pgbouncer.pools.maxwait')
 
         self.assertMetric('pgbouncer.stats.total_query_time')
-        self.assertMetric('pgbouncer.stats.avg_req')
+        # self.assertMetric('pgbouncer.stats.avg_req')
         self.assertMetric('pgbouncer.stats.avg_recv')
         self.assertMetric('pgbouncer.stats.avg_sent')
-        self.assertMetric('pgbouncer.stats.avg_query')
+        # self.assertMetric('pgbouncer.stats.avg_query')
         # Rate metrics, need 2 collection rounds
         try:
             connection = pg.connect(
@@ -80,7 +80,7 @@ class TestPgbouncer(AgentCheckTest):
             pass
         time.sleep(1)
         self.run_check(config)
-        self.assertMetric('pgbouncer.stats.requests_per_second')
+        # self.assertMetric('pgbouncer.stats.requests_per_second')
         self.assertMetric('pgbouncer.stats.bytes_received_per_second')
         self.assertMetric('pgbouncer.stats.bytes_sent_per_second')
 

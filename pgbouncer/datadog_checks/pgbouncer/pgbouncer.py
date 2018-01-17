@@ -33,14 +33,24 @@ class PgBouncer(AgentCheck):
             ('database', 'db'),
         ],
         'metrics': [
-            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)),
-            ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)),
-            ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),
-            ('total_query_time',     ('pgbouncer.stats.total_query_time', GAUGE)),
-            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)),
-            ('avg_recv',             ('pgbouncer.stats.avg_recv', GAUGE)),
-            ('avg_sent',             ('pgbouncer.stats.avg_sent', GAUGE)),
-            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)),
+            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)),       # < 1.8
+            ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)), # All versions
+            ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),     # All versions
+            ('total_query_time',     ('pgbouncer.stats.total_query_time', GAUGE)),         # All versions
+            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)),                  # < 1.8
+            ('avg_recv',             ('pgbouncer.stats.avg_recv', GAUGE)),                 # All versions
+            ('avg_sent',             ('pgbouncer.stats.avg_sent', GAUGE)),                 # All versions
+            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)),                # < 1.8
+
+            ('avg_query_time',       ('pgbouncer.stats.avg_query', GAUGE)),                 # >= 1.8
+            ('total_xact_count',     ('pgbouncer.stats.transactions_per_second', RATE)),   # >= 1.8
+            ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)),        # >= 1.8
+            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', GAUGE)),   # >= 1.8
+            ('total_wait_time',      ('pgbouncer.stats.total_client_wait_time', GAUGE)),   # >= 1.8
+            ('avg_xact_count',       ('pgbouncer.stats.avg_transactions_per_second', RATE)), # >= 1.8
+            ('avg_query_count',      ('pgbouncer.stats.avg_queries_per_second', RATE)),              # >= 1.8
+            ('avg_xact_time',        ('pgbouncer.stats.avg_transactions_time', GAUGE)),    # >= 1.8
+            ('avg_wait_time',        ('pgbouncer.stats.avg_wait_time', GAUGE))             # >= 1.8
         ],
         'query': """SHOW STATS""",
     }
@@ -84,22 +94,22 @@ class PgBouncer(AgentCheck):
         """Query pgbouncer for various metrics
         """
 
-        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS]
+        results = None
+        metrics_scope = [self.STATS_METRICS, self.POOLS_METRICS]
 
         try:
             cursor = db.cursor()
-            results = None
 
-            for scope in metric_scope:
-
+            for scope in metrics_scope:
+                column_names = []
+                query = scope['query']
                 metrics = scope['metrics']
-                cols = [m[0] for m in metrics]
-
+                descriptors = scope['descriptors']
                 try:
-                    query = scope['query']
-                    self.log.debug("Running query: %s" % query)
                     cursor.execute(query)
 
+                    ## Get list of columns in the Query output
+                    [column_names.append(value.name) for value in cursor.description]
                     results = cursor.fetchall()
 
                 except pg.Error as e:
@@ -110,26 +120,25 @@ class PgBouncer(AgentCheck):
                     if row[0] == self.DB_NAME:
                         continue
 
-                    desc = scope['descriptors']
-
-                    # Some versions of pgbouncer have extra fields at the end of SHOW POOLS
-                    if len(row) == len(cols) + len(desc) + 1:
-                        row = row[:-1]
-                    elif len(row) == len(cols) + len(desc) + 2:
-                        row = row[:-2]
-
-                    assert len(row) == len(cols) + len(desc)
+                    query_output = dict(zip(column_names, row))
+                    self.log.debug("Ran query: %s and returned: %s", query, query_output)
 
                     tags = list(instance_tags)
-                    tags += ["%s:%s" % (d[0][1], d[1]) for d in zip(desc, row[:len(desc)])]
+
+                    for descriptor_name, descriptor_tag in descriptors:
+                        if descriptor_name in column_names:
+                            tags.append("{}:{}".format(descriptor_tag, query_output[descriptor_name]))
+
                     for i, (key_name, (mname, mtype)) in enumerate(metrics):
-                        value = row[i + len(desc)]
-                        mtype(self, mname, value, tags)
+                        if key_name in column_names:
+                            value = query_output[key_name]
+                            mtype(self, mname, value, tags)
 
             if not results:
-                self.warning('No results were found for query: "%s"' % query)
+                self.warning("No results were found for query: '%s'" % query)
 
             cursor.close()
+
         except pg.Error as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
@@ -215,11 +224,6 @@ class PgBouncer(AgentCheck):
             key = database_url
         else:
             key = '%s:%s' % (host, port)
-
-        if tags is None:
-            tags = []
-        else:
-            tags = list(set(tags))
 
         try:
             db = self._get_connection(key, host, port, user, password,

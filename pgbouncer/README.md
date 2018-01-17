@@ -65,6 +65,8 @@ The PgBouncer check is compatible with all major platforms.
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv) for a list of metrics provided by this check.
 
+Note: Not all metrics are available with all versions of PGBouncer. 
+
 ### Events
 The PGboucer check does not include any event at this time.
 
