@@ -1,6 +1,5 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from .disk import Disk
 
-__all__ = ['Disk']
+__version__ = "1.1.0"

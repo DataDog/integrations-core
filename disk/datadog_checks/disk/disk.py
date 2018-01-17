@@ -1,26 +1,26 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import os
 import re
 
-# 3p
 try:
     import psutil
 except ImportError:
     psutil = None
 
-# datadog
-from checks import AgentCheck
-from config import _is_affirmative
-from utils.platform import Platform
-from utils.subprocess_output import get_subprocess_output
-from utils.timeout import (
-    timeout,
-    TimeoutException,
-)
+try:
+    from agent import AgentCheck
+    from agent.config import is_affirmative as _is_affirmative
+    from agent.utils.platform import Platform
+    from agent.utils.subprocess_output import get_subprocess_output
+    from agent.utils.timeout import timeout, TimeoutException
+except ImportError:
+    from checks import AgentCheck
+    from config import _is_affirmative
+    from utils.platform import Platform
+    from utils.subprocess_output import get_subprocess_output
+    from utils.timeout import timeout, TimeoutException
 
 
 class Disk(AgentCheck):
@@ -96,6 +96,7 @@ class Disk(AgentCheck):
                 continue
 
             # Get disk metrics here to be able to exclude on total usage
+            disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             try:
                 disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
