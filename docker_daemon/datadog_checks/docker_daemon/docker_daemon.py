@@ -109,6 +109,7 @@ CGROUP_METRICS = [
 
 DEFAULT_CONTAINER_TAGS = [
     "docker_image",
+    "short_image",
     "image_name",
     "image_tag",
 ]
@@ -134,6 +135,7 @@ TAG_EXTRACTORS = {
     "docker_image": lambda c: [DockerUtil().image_name_extractor(c)],
     "image_name": lambda c: DockerUtil().image_tag_extractor(c, 0),
     "image_tag": lambda c: DockerUtil().image_tag_extractor(c, 1),
+    "short_image": lambda c: [DockerUtil().image_name_extractor(c, short=True)],
     "container_command": lambda c: [c["Command"]],
     "container_name": DockerUtil.container_name_extractor,
     "container_id": lambda c: [c["Id"]],

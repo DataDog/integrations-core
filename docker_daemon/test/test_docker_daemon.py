@@ -605,11 +605,11 @@ class TestCheckDockerDaemon(AgentCheckTest):
         expected_metrics = [
             ('docker.containers.stopped.total', None),
             ('docker.containers.running.total', None),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
             ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
             ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.mem.limit', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
             ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
@@ -633,8 +633,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
         }
         self.check = load_check('docker_daemon', config, self.agentConfig)
 
-        self.check.check(config)
-        self.metrics = self.check.get_metrics()
+        self.run_check(config)
         for mname, tags in expected_metrics:
             self.assertMetric(mname, tags=tags, count=1, at_least=1)
 
