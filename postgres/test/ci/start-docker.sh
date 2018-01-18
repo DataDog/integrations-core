@@ -15,7 +15,7 @@ CI_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if docker ps | grep dd-test-postgres >/dev/null; then
   echo 'the containers already exist, we have to remove them'
-  bash postgres/ci/stop-docker.sh
+  bash postgres/test/ci/stop-docker.sh
 fi
 
 POSTGRES00_ID=$(docker run -p $PORT:5432 --name $NAME -v $CI_PATH/resources:/docker-entrypoint-initdb.d -e POSTGRES_PASSWORD=datadog -d postgres:${FLAVOR_VERSION})
