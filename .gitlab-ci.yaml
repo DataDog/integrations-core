@@ -1,0 +1,6 @@
+image: python:latest
+
+test:
+  script:
+  - pip install tox flake8 invoke
+  - inv test --changed-only
