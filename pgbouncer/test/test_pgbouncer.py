@@ -24,7 +24,7 @@ class TestPgbouncer(AgentCheckTest):
 
     def test_checks(self):
         pgbouncer_version = os.environ.get('FLAVOR_VERSION', 'latest')
-        pgbouncer_deprecated = pgbouncer_version in ('1.5', '1.7')
+        pgbouncer_pre18 = pgbouncer_version in ('1.5', '1.7')
 
         config = {
             'init_config': {},
@@ -68,7 +68,7 @@ class TestPgbouncer(AgentCheckTest):
         self.assertMetric('pgbouncer.stats.avg_recv')
         self.assertMetric('pgbouncer.stats.avg_sent')
 
-        if pgbouncer_deprecated:
+        if pgbouncer_pre18:
             self.assertMetric('pgbouncer.stats.avg_req')
             self.assertMetric('pgbouncer.stats.avg_query')
         else:
@@ -93,7 +93,7 @@ class TestPgbouncer(AgentCheckTest):
             pass
         time.sleep(1)
         self.run_check(config)
-        if pgbouncer_deprecated:
+        if pgbouncer_pre18:
             self.assertMetric('pgbouncer.stats.requests_per_second')
         else:
             self.assertMetric('pgbouncer.stats.queries_per_second')
