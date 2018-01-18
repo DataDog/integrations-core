@@ -245,8 +245,8 @@ class HTTPCheck(NetworkCheck):
             r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
                              proxies = instance_proxy, allow_redirects=allow_redirects,
                              verify=False if disable_ssl_validation else instance_ca_certs,
-                             json = data if method == 'post' and isinstance(data, dict) else None,
-                             data = data if method == 'post' and isinstance(data, basestring) else None,
+                             json = data if method.lower() == 'post' and isinstance(data, dict) else None,
+                             data = data if method.lower() == 'post' and isinstance(data, basestring) else None,
                              cert = (client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
