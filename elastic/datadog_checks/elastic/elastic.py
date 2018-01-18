@@ -603,6 +603,7 @@ class ESCheck(AgentCheck):
         else:
             cert = None
 
+        resp = None
         try:
             resp = requests.get(
                 url,
