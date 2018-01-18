@@ -102,16 +102,18 @@ class PgBouncer(AgentCheck):
                     query = scope['query']
 
                     try:
-                        self.log.debug("Running query: %s" % query)
+                        self.log.debug("Running query: %s", query)
                         cursor.execute(query)
 
                         rows = cursor.fetchall()
 
                     except pg.Error as e:
-                        self.log.warning("Not all metrics may be available: %s" % str(e))
+                        self.log.exception("Not all metrics may be available")
 
                     else:
                         for row in rows:
+                            self.log.debug("Processing row: %r", row)
+
                             # Skip the "pgbouncer" database
                             if row['database'] == self.DB_NAME:
                                 continue
@@ -123,9 +125,11 @@ class PgBouncer(AgentCheck):
                                     reporter(self, name, row[column], tags)
 
                         if not rows:
-                            self.warning('No results were found for query: "%s"' % query)
+                            self.log.warning("No results were found for query: %s", query)
+
         except pg.Error as e:
-            self.log.error("Connection error: %s" % str(e))
+            self.log.exception("Connection error")
+
             raise ShouldRestartException
 
     def _get_connect_kwargs(self, host, port, user, password, database_url):
