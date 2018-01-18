@@ -222,10 +222,10 @@ class Disk(AgentCheck):
                       read_time_pct, device_name=disk_name)
                 self.rate(self.METRIC_DISK.format('write_time_pct'),
                       write_time_pct, device_name=disk_name)
-            except AttributeError:
+            except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
-                self.log.debug("Latency metrics not collected for {0}".format(disk_name))
+                self.log.debug("Latency metrics not collected for {0}: {1}".format(disk_name, e))
 
     # no psutil, let's use df
     def collect_metrics_manually(self):
