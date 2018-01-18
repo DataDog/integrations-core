@@ -11,7 +11,7 @@ Get metrics from postgres service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-postgres` package manually or with your favorite configuration manager
+The Postgres check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 To get started with the PostgreSQL integration, create at least a read-only datadog user with proper access to your PostgreSQL Server. Start psql on your PostgreSQL database and run:
 

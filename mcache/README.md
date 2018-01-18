@@ -7,7 +7,9 @@ The Agent's memcache check lets you track memcache's memory use, hits, misses, e
 ## Setup
 ### Installation
 
-The memcache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your memcache servers. If you need the newest version of the check, install the `dd-check-mcache` package.
+The memcache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your memcache servers.
+
+If you need the newest version of the Memcache check, install the `dd-check-mcache` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

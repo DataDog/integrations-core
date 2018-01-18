@@ -10,7 +10,9 @@ Get metrics from Fluentd to:
 ## Setup
 ### Installation
 
-The Fluentd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Fluentd servers.
+The Fluentd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Fluentd servers.  
+
+If you need the newest version of the Fluentd check, install the `dd-check-fluentd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 #### Prepare Fluentd
