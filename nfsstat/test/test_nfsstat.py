@@ -65,7 +65,7 @@ class TestNfsstat(AgentCheckTest):
         nfs_export_tag = 'nfs_export:/exports/nfs/datadog/{0}'
         nfs_mount_tag = 'nfs_mount:/mnt/datadog/{0}'
 
-        folder_names = ['one', 'two', 'three', 'four', 'five']
+        folder_names = ['two']
 
         # self.assertTrue(False)
 
