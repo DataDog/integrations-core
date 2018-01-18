@@ -1,5 +1,13 @@
 # CHANGELOG - elastic
 
+1.4.0 / Unreleased
+==================
+
+### Changes
+
+* [BUG] Fixes bug that causes poor failovers when authentication fails. [#1026][].
+
+
 1.4.0 / 2018-01-10
 ==================
 

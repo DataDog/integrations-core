@@ -414,7 +414,11 @@ class ESCheck(AgentCheck):
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
-        version = self._get_es_version(config)
+        try:
+            version = self._get_es_version(config)
+        except AuthenticationError as e:
+            self.log.exception("The ElasticSearch credentials are incorrect")
+            raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url, stats_metrics, \
             pshard_stats_metrics = self._define_params(version, config.cluster_stats)
@@ -472,6 +476,8 @@ class ESCheck(AgentCheck):
             # peel that off so that the map below doesn't error out
             version = data['version']['number'].split('-')[0]
             version = map(int, version.split('.')[0:3])
+        except AuthenticationError as e:
+            raise
         except Exception as e:
             self.warning(
                 "Error while trying to get Elasticsearch version "
@@ -597,6 +603,7 @@ class ESCheck(AgentCheck):
         else:
             cert = None
 
+        resp = None
         try:
             resp = requests.get(
                 url,
@@ -608,6 +615,10 @@ class ESCheck(AgentCheck):
             )
             resp.raise_for_status()
         except Exception as e:
+            # this means we've hit a particular kind of auth error that means the config is broken
+            if resp and resp.status_code == 400:
+                raise AuthenticationError("The ElasticSearch credentials are incorrect")
+
             if send_sc:
                 self.service_check(
                     self.SERVICE_CHECK_CONNECT_NAME,
@@ -769,3 +780,7 @@ class ESCheck(AgentCheck):
             'event_object': hostname,
             'tags': tags
         }
+
+
+class AuthenticationError(requests.exceptions.HTTPError):
+    """Authentication Error, unable to reach server"""
