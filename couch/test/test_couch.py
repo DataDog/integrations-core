@@ -119,6 +119,17 @@ class CouchTestCase(AgentCheckTest):
             for gauge in self.CHECK_GAUGES:
                 self.assertMetric(gauge, tags=tags, count=0)
 
+    def test_config_tags(self):
+        TEST_TAG = "test_tag"
+        self.config['instances'][0]['tags'] = [TEST_TAG]
+        self.run_check(self.config)
+
+        for gauge in self.CHECK_GAUGES:
+            self.assertMetricTag(gauge, TEST_TAG)
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                tags=["instance:{0}".format(self.config['instances'][0]["server"]), TEST_TAG])
+
+
 @attr(requires='couch')
 @attr(couch_version='2.x')
 class TestCouchdb2(AgentCheckTest):
@@ -569,3 +580,17 @@ class TestCouchdb2(AgentCheckTest):
 
         if tries >= 20:
             self.fail("Could not find the view_compaction happening")
+
+    def test_config_tags(self):
+        TEST_TAG = "test_tag"
+        conf = self.NODE1.copy()
+        conf['tags'] = [TEST_TAG]
+
+        self.run_check({"instances": [conf]})
+
+        for gauge in self.erlang_gauges:
+            self.assertMetricTag(gauge, TEST_TAG)
+        for gauge in self.by_db_gauges:
+            self.assertMetricTag(gauge, TEST_TAG)
+        self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
+                                tags=["instance:{0}".format(conf["name"]), TEST_TAG])

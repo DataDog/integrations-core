@@ -63,7 +63,8 @@ class CouchDb(AgentCheck):
         server = self.get_server(instance)
         if self.checker is None:
             name = instance.get('name', server)
-            version = self.get(self.get_server(instance), instance, ["instance:{0}".format(name)], True)['version']
+            tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
+            version = self.get(self.get_server(instance), instance, tags, True)['version']
             if version.startswith('1.'):
                 self.checker = CouchDB1(self)
             elif version.startswith('2.'):
@@ -78,6 +79,18 @@ class CouchDb(AgentCheck):
         if server is None:
             raise Exception("A server must be specified")
         return server
+
+    def get_config_tags(self, instance):
+        tags = instance.get('tags', [])
+
+        # Clean up tags in case there was a None entry in the instance
+        # e.g. if the yaml contains tags: but no actual tags
+        if tags is None:
+            tags = []
+        else:
+            tags = list(set(tags))
+        return tags
+
 
 class CouchDB1:
     """Extracts stats from CouchDB via its REST API
@@ -107,7 +120,7 @@ class CouchDB1:
 
     def check(self, instance):
         server = self.agent_check.get_server(instance)
-        tags = ['instance:%s' % server]
+        tags = ['instance:%s' % server] + self.agent_check.get_config_tags(instance)
         data = self.get_data(server, instance, tags)
         self._create_metric(data, tags=tags)
 
@@ -283,9 +296,10 @@ class CouchDB2:
     def check(self, instance):
         server = self.agent_check.get_server(instance)
 
+        config_tags = self.agent_check.get_config_tags(instance)
         max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         for name in self._get_instance_names(server, instance):
-            tags = ["instance:{0}".format(name)]
+            tags = config_tags + ["instance:{0}".format(name)]
             self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
             self._build_system_metrics(self._get_system_stats(server, name, instance, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, instance, tags), tags)
@@ -295,11 +309,11 @@ class CouchDB2:
             scanned_dbs = 0
             for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
-                    tags = ["instance:{0}".format(name), "db:{0}".format(db)]
+                    db_tags = tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
-                    self._build_db_metrics(self.agent_check.get(db_url, instance, tags), tags)
-                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, tags)['rows']:
-                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, tags), tags)
+                    self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
+                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags)['rows']:
+                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, db_tags), db_tags)
                     scanned_dbs += 1
                     if scanned_dbs >= max_dbs_per_check:
                         break
