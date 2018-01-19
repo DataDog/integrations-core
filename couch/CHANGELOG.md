@@ -8,6 +8,7 @@
 ### Changes
 
 * [BUGFIX] Handle the case where there is no database.
+* [IMPROVEMENT] Add custom tags to metrics and service checks. See [#1034][]
 
 2.2.0 / 2018-01-10
 =================
