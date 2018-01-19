@@ -16,7 +16,7 @@ def is_affirmative(value):
         return bool(value)
 
     # try string cast
-    return value.lower() in ('yes', 'true', '1')
+    return value.lower() in ('yes', 'true', '1', 'y', 'on')
 
 
 # Compatibility layer for Agent5
