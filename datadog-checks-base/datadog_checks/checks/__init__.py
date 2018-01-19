@@ -2,7 +2,7 @@
 try:
     # Agent5 compatibility layer
     from checks import AgentCheck
-except:
+except ImportError:
     from .base import AgentCheck
 
 __all__ = [
