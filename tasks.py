@@ -24,7 +24,7 @@ def test(ctx, targets=None, changed_only=False, dry_run=False):
         targets = [t for t in targets.split(',') if t in AGENT_BASED_INTEGRATIONS]
 
     if changed_only:
-        targets = list(set(targets)&integrations_changed(ctx))
+        targets = list(set(targets) & integrations_changed(ctx))
 
     if dry_run:
         print(targets)
