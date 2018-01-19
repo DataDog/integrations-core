@@ -1,7 +1,6 @@
-# Unless explicitly stated otherwise all files in this repository are licensed
-# under the Apache License Version 2.0.
-# This product includes software developed at Datadog (https://www.datadoghq.com/).
-# Copyright 2018 Datadog, Inc.
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 
 def subprocess_output(*args, **kwargs):
