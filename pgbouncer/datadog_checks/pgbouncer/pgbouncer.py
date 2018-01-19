@@ -119,7 +119,7 @@ class PgBouncer(AgentCheck):
                                 continue
 
                             tags = list(instance_tags)
-                            tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors]
+                            tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
                             for (column, (name, reporter)) in metrics:
                                 if column in row:
                                     reporter(self, name, row[column], tags)
