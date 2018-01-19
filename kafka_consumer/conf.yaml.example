@@ -45,7 +45,8 @@ instances:
     consumer_groups:
       my_consumer:  # consumer group name
         my_topic: [0, 1, 4, 12]  # topic_name: list of partitions
-      # Note that each level of values is optional. Any omitted values will be
+      # Note that each level of values is optional (this is currently only available
+      # when using zookeeper, to store consumer groups). Any omitted values will be
       # fetched from Zookeeper. You can omit partitions (example: myconsumer2),
       # topics (example: myconsumer3), and even consumer_groups. If you omit
       # consumer_groups, you must set 'monitor_unlisted_consumer_groups': True.
