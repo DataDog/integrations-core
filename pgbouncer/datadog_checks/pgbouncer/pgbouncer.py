@@ -12,6 +12,7 @@ import urlparse
 
 # 3p
 import psycopg2 as pg
+import psycopg2.extras as pgextras
 
 # project
 from checks import AgentCheck, CheckException
@@ -33,14 +34,21 @@ class PgBouncer(AgentCheck):
             ('database', 'db'),
         ],
         'metrics': [
-            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)),
+            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)), # < 1.8
+            ('total_xact_count',     ('pgbouncer.stats.transactions_per_second', RATE)), # >= 1.8
+            ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)), # >= 1.8
             ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)),
             ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),
-            ('total_query_time',     ('pgbouncer.stats.total_query_time', GAUGE)),
-            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)),
+            ('total_query_time',     ('pgbouncer.stats.total_query_time', RATE)),
+            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', RATE)), # >= 1.8
+            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)), # < 1.8
+            ('avg_xact_count',       ('pgbouncer.stats.avg_transaction_count', GAUGE)), # >= 1.8
+            ('avg_query_count',      ('pgbouncer.stats.avg_query_count', GAUGE)), # >= 1.8
             ('avg_recv',             ('pgbouncer.stats.avg_recv', GAUGE)),
             ('avg_sent',             ('pgbouncer.stats.avg_sent', GAUGE)),
-            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)),
+            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)), # < 1.8
+            ('avg_xact_time',        ('pgbouncer.stats.avg_transaction_time', GAUGE)), # >= 1.8
+            ('avg_query_time',       ('pgbouncer.stats.avg_query_time', GAUGE)), # >= 1.8
         ],
         'query': """SHOW STATS""",
     }
@@ -87,51 +95,41 @@ class PgBouncer(AgentCheck):
         metric_scope = [self.STATS_METRICS, self.POOLS_METRICS]
 
         try:
-            cursor = db.cursor()
-            results = None
-
-            for scope in metric_scope:
-
-                metrics = scope['metrics']
-                cols = [m[0] for m in metrics]
-
-                try:
+            with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+                for scope in metric_scope:
+                    descriptors = scope['descriptors']
+                    metrics = scope['metrics']
                     query = scope['query']
-                    self.log.debug("Running query: %s" % query)
-                    cursor.execute(query)
 
-                    results = cursor.fetchall()
+                    try:
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
 
-                except pg.Error as e:
-                    self.log.warning("Not all metrics may be available: %s" % str(e))
-                    continue
+                        rows = cursor.fetchall()
 
-                for row in results:
-                    if row[0] == self.DB_NAME:
-                        continue
+                    except pg.Error:
+                        self.log.exception("Not all metrics may be available")
 
-                    desc = scope['descriptors']
+                    else:
+                        for row in rows:
+                            self.log.debug("Processing row: %r", row)
 
-                    # Some versions of pgbouncer have extra fields at the end of SHOW POOLS
-                    if len(row) == len(cols) + len(desc) + 1:
-                        row = row[:-1]
-                    elif len(row) == len(cols) + len(desc) + 2:
-                        row = row[:-2]
+                            # Skip the "pgbouncer" database
+                            if row['database'] == self.DB_NAME:
+                                continue
 
-                    assert len(row) == len(cols) + len(desc)
+                            tags = list(instance_tags)
+                            tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
+                            for (column, (name, reporter)) in metrics:
+                                if column in row:
+                                    reporter(self, name, row[column], tags)
 
-                    tags = list(instance_tags)
-                    tags += ["%s:%s" % (d[0][1], d[1]) for d in zip(desc, row[:len(desc)])]
-                    for i, (key_name, (mname, mtype)) in enumerate(metrics):
-                        value = row[i + len(desc)]
-                        mtype(self, mname, value, tags)
+                        if not rows:
+                            self.log.warning("No results were found for query: %s", query)
 
-            if not results:
-                self.warning('No results were found for query: "%s"' % query)
+        except pg.Error:
+            self.log.exception("Connection error")
 
-            cursor.close()
-        except pg.Error as e:
-            self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
     def _get_connect_kwargs(self, host, port, user, password, database_url):
