@@ -2,5 +2,5 @@ image: python:2.7
 
 test:
   script:
-  - pip install tox flake8 invoke
+  - pip install -q tox flake8 invoke
   - inv test --changed-only

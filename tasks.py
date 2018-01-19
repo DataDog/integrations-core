@@ -33,6 +33,7 @@ def test(ctx, targets=None, changed_only=False, dry_run=False):
 
     for check in targets:
         with ctx.cd(check):
+            print("\nRunning tox in '{}'\n".format(check))
             ctx.run('tox')
 
 def integrations_changed(ctx):
