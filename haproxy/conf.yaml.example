@@ -75,3 +75,7 @@ instances:
     # tags: ['team:sre','env:prod','app:elk']
     #
     # tags_regex: 'be_edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
+    #
+    # The (optional) headers to use when requesting stats.
+    # headers:
+    #   key1: value1
