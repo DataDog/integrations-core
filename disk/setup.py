@@ -78,7 +78,6 @@ setup(
     # Run-time dependencies
     install_requires=get_requirements('requirements.txt')+[
         'datadog-checks-base',
-        'datadog_agent_tk',
     ],
 
     # Development dependencies, run with:

@@ -9,18 +9,11 @@ try:
 except ImportError:
     psutil = None
 
-try:
-    from agent import AgentCheck
-    from agent.config import is_affirmative as _is_affirmative
-    from agent.utils.platform import Platform
-    from agent.utils.subprocess_output import get_subprocess_output
-    from agent.utils.timeout import timeout, TimeoutException
-except ImportError:
-    from checks import AgentCheck
-    from config import _is_affirmative
-    from utils.platform import Platform
-    from utils.subprocess_output import get_subprocess_output
-    from utils.timeout import timeout, TimeoutException
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.platform import Platform
+from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.utils.timeout import timeout, TimeoutException
 
 
 class Disk(AgentCheck):

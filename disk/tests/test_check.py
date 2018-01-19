@@ -66,7 +66,7 @@ class MockIoCountersMetrics(object):
 
 @pytest.fixture
 def aggregator():
-    from agent.stubs import aggregator
+    from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
 

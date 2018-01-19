@@ -1,1 +1,3 @@
-__version__ = "1.0.0"
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
