@@ -107,7 +107,7 @@ class PgBouncer(AgentCheck):
 
                         rows = cursor.fetchall()
 
-                    except pg.Error as e:
+                    except pg.Error:
                         self.log.exception("Not all metrics may be available")
 
                     else:
@@ -127,7 +127,7 @@ class PgBouncer(AgentCheck):
                         if not rows:
                             self.log.warning("No results were found for query: %s", query)
 
-        except pg.Error as e:
+        except pg.Error:
             self.log.exception("Connection error")
 
             raise ShouldRestartException
