@@ -39,8 +39,8 @@ class PgBouncer(AgentCheck):
             ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)), # >= 1.8
             ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)),
             ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),
-            ('total_query_time',     ('pgbouncer.stats.total_query_time', GAUGE)),
-            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', GAUGE)), # >= 1.8
+            ('total_query_time',     ('pgbouncer.stats.total_query_time', RATE)),
+            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', RATE)), # >= 1.8
             ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)), # < 1.8
             ('avg_xact_count',       ('pgbouncer.stats.avg_transaction_count', GAUGE)), # >= 1.8
             ('avg_query_count',      ('pgbouncer.stats.avg_query_count', GAUGE)), # >= 1.8

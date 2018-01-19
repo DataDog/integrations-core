@@ -64,7 +64,6 @@ class TestPgbouncer(AgentCheckTest):
         self.assertMetric('pgbouncer.pools.sv_login')
         self.assertMetric('pgbouncer.pools.maxwait')
 
-        self.assertMetric('pgbouncer.stats.total_query_time')
         self.assertMetric('pgbouncer.stats.avg_recv')
         self.assertMetric('pgbouncer.stats.avg_sent')
 
@@ -72,7 +71,6 @@ class TestPgbouncer(AgentCheckTest):
             self.assertMetric('pgbouncer.stats.avg_req')
             self.assertMetric('pgbouncer.stats.avg_query')
         else:
-            self.assertMetric('pgbouncer.stats.total_transaction_time')
             self.assertMetric('pgbouncer.stats.avg_transaction_time')
             self.assertMetric('pgbouncer.stats.avg_query_time')
             self.assertMetric('pgbouncer.stats.avg_transaction_count')
@@ -98,6 +96,8 @@ class TestPgbouncer(AgentCheckTest):
         else:
             self.assertMetric('pgbouncer.stats.queries_per_second')
             self.assertMetric('pgbouncer.stats.transactions_per_second')
+            self.assertMetric('pgbouncer.stats.total_transaction_time')
+        self.assertMetric('pgbouncer.stats.total_query_time')
         self.assertMetric('pgbouncer.stats.bytes_received_per_second')
         self.assertMetric('pgbouncer.stats.bytes_sent_per_second')
 
