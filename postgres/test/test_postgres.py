@@ -222,7 +222,9 @@ class TestPostgres(AgentCheckTest):
 
         # instance connection metrics
         for mname in self.CONNECTION_METRICS:
-            self.assertMetric(mname, count=1, tags=[instance_tag])
+            self.assertMetric(mname, count=1, tags=[])            
+            self.assertMetric(mname, count=1, tags=['postgresinstance: additionalTag'])            
+
 
         # db level connections
         for inst in instances:
@@ -230,7 +232,9 @@ class TestPostgres(AgentCheckTest):
             self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
 
         # By schema metrics
+        self.assertMetric('postgresql.table.count', value=1, count=1, tags=['schema:public', instance_tag])
         self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
+
         self.assertMetric('postgresql.db.count', value=2, count=1)
 
         # Our custom metric
@@ -247,242 +251,242 @@ class TestPostgres(AgentCheckTest):
         )
 
         # Assert service metadata
-        # self.assertServiceMetadata(['version'], count=2)
+        self.assertServiceMetadata(['version'], count=2)
 
-        # self.coverage_report()
-        # from pg8000.core import Connection
-        # self.assertTrue(type(self.check.dbs[key]) == Connection)
-        # self.check.dbs[key].close()
+        self.coverage_report()
+        from pg8000.core import Connection
+        self.assertTrue(type(self.check.dbs[key]) == Connection)
+        self.check.dbs[key].close()
 
-    # def test_psycopg2(self):
-    #     host = 'localhost'
-    #     port = 15432
-    #     dbname = 'datadog_test'
+    def test_psycopg2(self):
+        host = 'localhost'
+        port = 15432
+        dbname = 'datadog_test'
 
-    #     instances = [
-    #         {
-    #             'host': host,
-    #             'port': port,
-    #             'username': 'datadog',
-    #             'password': 'datadog',
-    #             'use_psycopg2': 'yes',
-    #             'dbname': dbname,
-    #             'relations': ['persons'],
-    #             'custom_metrics': [{
-    #                 'descriptors': [('datname', 'customdb')],
-    #                 'metrics': {
-    #                     'numbackends': ['custom.numbackends', 'Gauge'],
-    #                 },
-    #                 'query': "SELECT datname, %s FROM pg_stat_database WHERE datname = 'datadog_test' LIMIT(1)",
-    #                 'relation': False,
-    #             }]
-    #         },
-    #         {
-    #             'host': host,
-    #             'port': port,
-    #             'username': 'datadog',
-    #             'password': 'datadog',
-    #             'dbname': 'dogs',
-    #             'relations': ['breed', 'kennel']
-    #         }
-    #     ]
+        instances = [
+            {
+                'host': host,
+                'port': port,
+                'username': 'datadog',
+                'password': 'datadog',
+                'use_psycopg2': 'yes',
+                'dbname': dbname,
+                'relations': ['persons'],
+                'custom_metrics': [{
+                    'descriptors': [('datname', 'customdb')],
+                    'metrics': {
+                        'numbackends': ['custom.numbackends', 'Gauge'],
+                    },
+                    'query': "SELECT datname, %s FROM pg_stat_database WHERE datname = 'datadog_test' LIMIT(1)",
+                    'relation': False,
+                }]
+            },
+            {
+                'host': host,
+                'port': port,
+                'username': 'datadog',
+                'password': 'datadog',
+                'dbname': 'dogs',
+                'relations': ['breed', 'kennel']
+            }
+        ]
 
-    #     self.run_check_twice(dict(instances=instances), force_reload=True)
+        self.run_check_twice(dict(instances=instances), force_reload=True)
 
-    #     # Useful to get server version
-    #     # FIXME: Not great, should have a function like that available
-    #     key = (host, port, dbname)
-    #     db = self.check.dbs[key]
+        # Useful to get server version
+        # FIXME: Not great, should have a function like that available
+        key = (host, port, dbname)
+        db = self.check.dbs[key]
 
-    #     # Testing DB_METRICS scope
-    #     for mname in self.COMMON_METRICS:
-    #         for db in ('datadog_test', 'dogs'):
-    #             self.assertMetric(mname, count=1, tags=['db:%s' % db])
+        # Testing DB_METRICS scope
+        for mname in self.COMMON_METRICS:
+            for db in ('datadog_test', 'dogs'):
+                self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
-    #     for mname in self.DATABASE_SIZE_METRICS:
-    #         for db in ('datadog_test', 'dogs'):
-    #             self.assertMetric(mname, count=1, tags=['db:%s' % db])
+        for mname in self.DATABASE_SIZE_METRICS:
+            for db in ('datadog_test', 'dogs'):
+                self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
-    #     if self.check._is_9_2_or_above(key, db):
-    #         for mname in self.NEWER_92_METRICS:
-    #             for db in ('datadog_test', 'dogs'):
-    #                 self.assertMetric(mname, count=1, tags=['db:%s' % db])
+        if self.check._is_9_2_or_above(key, db):
+            for mname in self.NEWER_92_METRICS:
+                for db in ('datadog_test', 'dogs'):
+                    self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
-    #     # Testing BGW_METRICS scope
-    #     for mname in self.COMMON_BGW_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # Testing BGW_METRICS scope
+        for mname in self.COMMON_BGW_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     if self.check._is_9_1_or_above(key, db):
-    #         for mname in self.NEWER_91_BGW_METRICS:
-    #             self.assertMetric(mname, count=1)
+        if self.check._is_9_1_or_above(key, db):
+            for mname in self.NEWER_91_BGW_METRICS:
+                self.assertMetric(mname, count=1)
 
-    #     if self.check._is_9_2_or_above(key, db):
-    #         for mname in self.NEWER_92_BGW_METRICS:
-    #             self.assertMetric(mname, count=1)
+        if self.check._is_9_2_or_above(key, db):
+            for mname in self.NEWER_92_BGW_METRICS:
+                self.assertMetric(mname, count=1)
 
-    #     # Testing ARCHIVER_METRICS scope
-    #     for mname in self.COMMON_ARCHIVER_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # Testing ARCHIVER_METRICS scope
+        for mname in self.COMMON_ARCHIVER_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     # FIXME: Test postgresql.locks
+        # FIXME: Test postgresql.locks
 
-    #     # Relation specific metrics
-    #     for inst in instances:
-    #         for rel in inst.get('relations', []):
-    #             expected_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel]
-    #             expected_rel_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, 'schema:public']
-    #             for mname in self.RELATION_METRICS:
-    #                 count = 1
-    #                 # We only build a test index and stimulate it on breed
-    #                 # in the dogs DB, so the other index metrics shouldn't be
-    #                 # here.
-    #                 if 'index' in mname and rel != 'breed':
-    #                     count = 0
-    #                 self.assertMetric(mname, count=count, tags=expected_rel_tags)
+        # Relation specific metrics
+        for inst in instances:
+            for rel in inst.get('relations', []):
+                expected_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel]
+                expected_rel_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, 'schema:public']
+                for mname in self.RELATION_METRICS:
+                    count = 1
+                    # We only build a test index and stimulate it on breed
+                    # in the dogs DB, so the other index metrics shouldn't be
+                    # here.
+                    if 'index' in mname and rel != 'breed':
+                        count = 0
+                    self.assertMetric(mname, count=count, tags=expected_rel_tags)
 
-    #             for mname in self.SIZE_METRICS:
-    #                 self.assertMetric(mname, count=1, tags=expected_tags)
+                for mname in self.SIZE_METRICS:
+                    self.assertMetric(mname, count=1, tags=expected_tags)
 
-    #             for mname in self.STATIO_METRICS:
-    #                 at_least = None
-    #                 count = 1
-    #                 if '.index' in mname and rel != 'breed':
-    #                     count = 0
-    #                 # FIXME: toast are not reliable, need to do some more setup
-    #                 # to get some values here I guess
-    #                 if 'toast' in mname:
-    #                     at_least = 0  # how to set easily a flaky metric, w/o impacting coverage
-    #                     count = None
-    #                 self.assertMetric(mname, count=count, at_least=at_least, tags=expected_rel_tags)
+                for mname in self.STATIO_METRICS:
+                    at_least = None
+                    count = 1
+                    if '.index' in mname and rel != 'breed':
+                        count = 0
+                    # FIXME: toast are not reliable, need to do some more setup
+                    # to get some values here I guess
+                    if 'toast' in mname:
+                        at_least = 0  # how to set easily a flaky metric, w/o impacting coverage
+                        count = None
+                    self.assertMetric(mname, count=count, at_least=at_least, tags=expected_rel_tags)
 
-    #     # Index metrics
-    #     # we have a single index defined!
-    #     expected_tags = ['db:dogs', 'table:breed', 'index:breed_names', 'schema:public']
-    #     for mname in self.IDX_METRICS:
-    #         self.assertMetric(mname, count=1, tags=expected_tags)
+        # Index metrics
+        # we have a single index defined!
+        expected_tags = ['db:dogs', 'table:breed', 'index:breed_names', 'schema:public']
+        for mname in self.IDX_METRICS:
+            self.assertMetric(mname, count=1, tags=expected_tags)
 
-    #     # instance connection metrics
-    #     for mname in self.CONNECTION_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # instance connection metrics
+        for mname in self.CONNECTION_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     # db level connections
-    #     for inst in instances:
-    #         expected_tags = ['db:%s' % inst['dbname']]
-    #         self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
+        # db level connections
+        for inst in instances:
+            expected_tags = ['db:%s' % inst['dbname']]
+            self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
 
-    #     # By schema metrics
-    #     self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
-    #     self.assertMetric('postgresql.db.count', value=2, count=1)
+        # By schema metrics
+        self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
+        self.assertMetric('postgresql.db.count', value=2, count=1)
 
-    #     # Our custom metric
-    #     self.assertMetric('custom.numbackends', value=1, tags=['customdb:datadog_test'])
+        # Our custom metric
+        self.assertMetric('custom.numbackends', value=1, tags=['customdb:datadog_test'])
 
-    #     # Test service checks
-    #     self.assertServiceCheck('postgres.can_connect',
-    #         count=1, status=AgentCheck.OK,
-    #         tags=['host:localhost', 'port:15432', 'db:datadog_test']
-    #     )
-    #     self.assertServiceCheck('postgres.can_connect',
-    #         count=1, status=AgentCheck.OK,
-    #         tags=['host:localhost', 'port:15432', 'db:dogs']
-    #     )
+        # Test service checks
+        self.assertServiceCheck('postgres.can_connect',
+            count=1, status=AgentCheck.OK,
+            tags=['host:localhost', 'port:15432', 'db:datadog_test', "tags:['db:datadog_test']"]
+        )
+        self.assertServiceCheck('postgres.can_connect',
+            count=1, status=AgentCheck.OK,
+            tags=['host:localhost', 'port:15432', 'db:dogs', "tags:['db:dogs']"]
+        )
 
-    #     # Assert service metadata
-    #     self.assertServiceMetadata(['version'], count=2)
+        # Assert service metadata
+        self.assertServiceMetadata(['version'], count=2)
 
-    #     self.coverage_report()
+        self.coverage_report()
 
-    #     from psycopg2.extensions import connection
-    #     self.assertTrue(type(self.check.dbs[key]) == connection)
-    #     self.check.dbs[key].close()
+        from psycopg2.extensions import connection
+        self.assertTrue(type(self.check.dbs[key]) == connection)
+        self.check.dbs[key].close()
 
-    # def test_collect_database_size_metrics_disabled(self):
-    #     host = 'localhost'
-    #     port = 15432
-    #     dbname = 'datadog_test'
+    def test_collect_database_size_metrics_disabled(self):
+        host = 'localhost'
+        port = 15432
+        dbname = 'datadog_test'
 
-    #     instances = [
-    #         {
-    #             'host': host,
-    #             'port': port,
-    #             'username': 'datadog',
-    #             'password': 'datadog',
-    #             'dbname': dbname,
-    #             'collect_database_size_metrics': False
-    #         },
-    #         {
-    #             'host': host,
-    #             'port': port,
-    #             'username': 'datadog',
-    #             'password': 'datadog',
-    #             'dbname': 'dogs',
-    #             'collect_database_size_metrics': False
-    #         }
-    #     ]
+        instances = [
+            {
+                'host': host,
+                'port': port,
+                'username': 'datadog',
+                'password': 'datadog',
+                'dbname': dbname,
+                'collect_database_size_metrics': False
+            },
+            {
+                'host': host,
+                'port': port,
+                'username': 'datadog',
+                'password': 'datadog',
+                'dbname': 'dogs',
+                'collect_database_size_metrics': False
+            }
+        ]
 
-    #     self.run_check_twice(dict(instances=instances), force_reload=True)
+        self.run_check_twice(dict(instances=instances), force_reload=True)
 
-    #     # Useful to get server version
-    #     # FIXME: Not great, should have a function like that available
-    #     key = (host, port, dbname)
-    #     db = self.check.dbs[key]
+        # Useful to get server version
+        # FIXME: Not great, should have a function like that available
+        key = (host, port, dbname)
+        db = self.check.dbs[key]
 
-    #     for mname in self.COMMON_METRICS:
-    #         for db in ('datadog_test', 'dogs'):
-    #             self.assertMetric(mname, count=1, tags=['db:%s' % db])
+        for mname in self.COMMON_METRICS:
+            for db in ('datadog_test', 'dogs'):
+                self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
-    #     for mname in self.DATABASE_SIZE_METRICS:
-    #         for db in ('datadog_test', 'dogs'):
-    #             self.assertMetric(mname, count=0, tags=['db:%s' % db])
+        for mname in self.DATABASE_SIZE_METRICS:
+            for db in ('datadog_test', 'dogs'):
+                self.assertMetric(mname, count=0, tags=['db:%s' % db])
 
-    #     if self.check._is_9_2_or_above(key, db):
-    #         for mname in self.NEWER_92_METRICS:
-    #             for db in ('datadog_test', 'dogs'):
-    #                 self.assertMetric(mname, count=1, tags=['db:%s' % db])
+        if self.check._is_9_2_or_above(key, db):
+            for mname in self.NEWER_92_METRICS:
+                for db in ('datadog_test', 'dogs'):
+                    self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
-    #     # Testing BGW_METRICS scope
-    #     for mname in self.COMMON_BGW_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # Testing BGW_METRICS scope
+        for mname in self.COMMON_BGW_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     if self.check._is_9_1_or_above(key, db):
-    #         for mname in self.NEWER_91_BGW_METRICS:
-    #             self.assertMetric(mname, count=1)
+        if self.check._is_9_1_or_above(key, db):
+            for mname in self.NEWER_91_BGW_METRICS:
+                self.assertMetric(mname, count=1)
 
-    #     if self.check._is_9_2_or_above(key, db):
-    #         for mname in self.NEWER_92_BGW_METRICS:
-    #             self.assertMetric(mname, count=1)
+        if self.check._is_9_2_or_above(key, db):
+            for mname in self.NEWER_92_BGW_METRICS:
+                self.assertMetric(mname, count=1)
 
-    #     # Testing ARCHIVER_METRICS scope
-    #     for mname in self.COMMON_ARCHIVER_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # Testing ARCHIVER_METRICS scope
+        for mname in self.COMMON_ARCHIVER_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     # FIXME: Test postgresql.locks
+        # FIXME: Test postgresql.locks
 
-    #     # instance connection metrics
-    #     for mname in self.CONNECTION_METRICS:
-    #         self.assertMetric(mname, count=1)
+        # instance connection metrics
+        for mname in self.CONNECTION_METRICS:
+            self.assertMetric(mname, count=1)
 
-    #     # db level connections
-    #     for inst in instances:
-    #         expected_tags = ['db:%s' % inst['dbname']]
-    #         self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
+        # db level connections
+        for inst in instances:
+            expected_tags = ['db:%s' % inst['dbname']]
+            self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
 
-    #     # By schema metrics
-    #     self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
-    #     self.assertMetric('postgresql.db.count', value=2, count=1)
+        # By schema metrics
+        self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
+        self.assertMetric('postgresql.db.count', value=2, count=1)
 
-    #     # Test service checks
-    #     self.assertServiceCheck('postgres.can_connect',
-    #         count=1, status=AgentCheck.OK,
-    #         tags=['host:localhost', 'port:15432', 'db:datadog_test']
-    #     )
-    #     self.assertServiceCheck('postgres.can_connect',
-    #         count=1, status=AgentCheck.OK,
-    #         tags=['host:localhost', 'port:15432', 'db:dogs']
-    #     )
+        # Test service checks
+        self.assertServiceCheck('postgres.can_connect',
+            count=1, status=AgentCheck.OK,
+            tags=['host:localhost', 'port:15432', 'db:datadog_test', "tags:['db:datadog_test']"]
+        )
+        self.assertServiceCheck('postgres.can_connect',
+            count=1, status=AgentCheck.OK,
+            tags=['host:localhost', 'port:15432', 'db:dogs', "tags:['db:dogs']"]
+        )
 
-    #     # Assert service metadata
-    #     self.assertServiceMetadata(['version'], count=2)
+        # Assert service metadata
+        self.assertServiceMetadata(['version'], count=2)
 
-    #     self.coverage_report()
-    #     self.check.dbs[key].close()
+        self.coverage_report()
+        self.check.dbs[key].close()
