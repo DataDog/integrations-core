@@ -10,3 +10,11 @@ instances:
     # them to other tags, you can use the labels_mapper dictionary
     # labels_mapper:
     #   namespace: kube_namespace
+    # Add the tags to join from the KSM.
+    # Example: Joining for deployment metrics. Based on: kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+    # Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM deployment metrics.
+    # label_joins:
+    #  kube_deployment_labels:
+    #    label_to_match: deployment
+    #    labels_to_get:
+    #      - label_addonmanager_kubernetes_io_mode
