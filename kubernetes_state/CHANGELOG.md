@@ -1,9 +1,10 @@
 # CHANGELOG - kubernetes_state
 
-2.1.0 / Unreleased
+2.2.0 / Unreleased
 ==================
 ### Changes
 
+* [IMPROVEMENT] Add option in yaml to configure which label from KSM metrics to join over [#1040][]
 * [IMPROVEMENT] Add the node label wherever the pod label is present [#1000][]
 * [IMPROVEMENT] Override hostname with the node label if present [#1000][]
 

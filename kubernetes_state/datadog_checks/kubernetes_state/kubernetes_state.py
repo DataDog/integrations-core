@@ -161,6 +161,8 @@ class KubernetesState(PrometheusCheck):
             }
         }
 
+        extra_labels = instances[0].get("label_joins", {}) # We do not support more than one instance of kube-state-metrics
+        self.label_joins.update(extra_labels)
         self.label_to_hostname = 'node'
 
     def check(self, instance):

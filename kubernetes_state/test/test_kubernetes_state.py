@@ -98,6 +98,16 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.pod.scheduled': ['node:minikube']
     }
 
+    JOINED_METRICS = {
+        NAMESPACE + '.deployment.replicas': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.replicas_available': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.replicas_unavailable': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.replicas_updated': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.replicas_desired': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.paused': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+        NAMESPACE + '.deployment.rollingupdate.max_unavailable': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
+    }
+
     HOSTNAMES = {
         NAMESPACE + '.pod.ready': 'minikube',
         NAMESPACE + '.pod.scheduled': 'minikube'
@@ -188,6 +198,38 @@ class TestKubernetesState(AgentCheckTest):
                 self.assertMetric(metric)
 
         self.assert_resourcequota()
+
+    @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
+    def test__join_custom_labels(self, mock_poll):
+        f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
+        with open(f_name, 'rb') as f:
+            mock_poll.return_value = MockResponse(f.read(), 'text/plain')
+
+        config = {
+            'instances': [{
+                'host': 'foo',
+                'kube_state_url': 'http://foo',
+                'label_joins': {
+                    'kube_deployment_labels': {
+                        'label_to_match': 'deployment',
+                        'labels_to_get':['label_addonmanager_kubernetes_io_mode']
+                    }
+                },
+            }]
+        }
+        # run check twice to have the labels join mapping.
+        self.run_check_twice(config)
+        for metric in self.METRICS:
+            self.assertMetric(
+                metric,
+                hostname=self.HOSTNAMES.get(metric, None)
+            )
+            tags = self.JOINED_METRICS.get(metric, None)
+            if tags:
+                for tag in tags:
+                    self.assertMetricTag(metric, tag)
+            if metric not in self.ZERO_METRICS:
+                self.assertMetricNotAllZeros(metric)
 
     def assert_resourcequota(self):
         """ The metric name is created dynamically so we just check some exist. """
