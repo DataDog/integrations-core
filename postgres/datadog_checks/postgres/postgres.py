@@ -667,9 +667,8 @@ SELECT s.schemaname,
         service_check_tags = [
             "host:%s" % host,
             "port:%s" % port,
-            "db:%s" % dbname,
-            "tags:%s" % tags
-        ]
+            "db:%s" % dbname
+        ].extend(tags)
         return service_check_tags
 
     def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=True):
