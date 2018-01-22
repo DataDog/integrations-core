@@ -222,8 +222,8 @@ class TestPostgres(AgentCheckTest):
 
         # instance connection metrics
         for mname in self.CONNECTION_METRICS:
-            self.assertMetric(mname, count=1, tags=[])            
-            self.assertMetric(mname, count=1, tags=['postgresinstance:additionalTag'])            
+            self.assertMetric(mname, count=1, tags=[])
+            self.assertMetric(mname, count=1, tags=['postgresinstance:additionalTag'])
 
 
         # db level connections
@@ -243,11 +243,11 @@ class TestPostgres(AgentCheckTest):
         # Test service checks
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:datadog_test', instance_tag, 'db:datadog_test']
+            tags=['host:localhost', 'port:15432', 'db:datadog_test', instance_tag]
         )
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:dogs', 'db:dogs']
+            tags=['host:localhost', 'port:15432', 'db:dogs']
         )
 
         # Assert service metadata
@@ -384,11 +384,11 @@ class TestPostgres(AgentCheckTest):
         # Test service checks
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:datadog_test', 'db:datadog_test']
+            tags=['host:localhost', 'port:15432', 'db:datadog_test']
         )
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:dogs', 'db:dogs']
+            tags=['host:localhost', 'port:15432', 'db:dogs']
         )
 
         # Assert service metadata
@@ -478,11 +478,11 @@ class TestPostgres(AgentCheckTest):
         # Test service checks
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:datadog_test', 'db:datadog_test']
+            tags=['host:localhost', 'port:15432', 'db:datadog_test']
         )
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:dogs', 'db:dogs']
+            tags=['host:localhost', 'port:15432', 'db:dogs']
         )
 
         # Assert service metadata
