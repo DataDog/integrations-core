@@ -1,5 +1,13 @@
 # CHANGELOG - postgres
 
+1.2.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Adding instance tags to service check See[]
+
+
 1.2.0 / 2017-11-21
 ==================
 
