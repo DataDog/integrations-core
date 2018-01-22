@@ -663,11 +663,10 @@ SELECT s.schemaname,
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
-    def _get_service_check_tags(self, host, port, dbname, tags):
+    def _get_service_check_tags(self, host, port, tags):
         service_check_tags = [
             "host:%s" % host,
-            "port:%s" % port,
-            "db:%s" % dbname
+            "port:%s" % port
         ]
         service_check_tags.extend(tags)
         service_check_tags = set(service_check_tags)
@@ -696,7 +695,7 @@ SELECT s.schemaname,
                         database=dbname, ssl=ssl)
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
-                service_check_tags = self._get_service_check_tags(host, port, dbname, tags)
+                service_check_tags = self._get_service_check_tags(host, port, tags)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                     tags=service_check_tags, message=message)
                 raise
@@ -796,7 +795,7 @@ SELECT s.schemaname,
             self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error)
 
         if db is not None:
-            service_check_tags = self._get_service_check_tags(host, port, dbname, tags)
+            service_check_tags = self._get_service_check_tags(host, port, tags)
             message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                 tags=service_check_tags, message=message)
