@@ -377,10 +377,8 @@ class SnmpCheck(NetworkCheck):
             if "service_check_error" not in instance:
                 instance["service_check_error"] = "Fail to collect metrics for {0} - {1}".format(instance['name'], e)
             self.warning(instance["service_check_error"])
-            return [(self.SC_STATUS, Status.CRITICAL, instance["service_check_error"])]
         finally:
             # Report service checks
-            tags = ["snmp_device:%s" % ip_address]
             if "service_check_error" in instance:
                 status = Status.DOWN
                 if "service_check_severity" in instance:
