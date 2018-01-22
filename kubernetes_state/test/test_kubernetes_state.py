@@ -97,7 +97,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.pod.ready': ['node:minikube'],
         NAMESPACE + '.pod.scheduled': ['node:minikube']
     }
-    
+
     JOINED_METRICS = {
         NAMESPACE + '.deployment.replicas': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
         NAMESPACE + '.deployment.replicas_available': ['label_addonmanager_kubernetes_io_mode:Reconcile','deployment:kube-dns'],
@@ -198,7 +198,7 @@ class TestKubernetesState(AgentCheckTest):
                 self.assertMetric(metric)
 
         self.assert_resourcequota()
-    
+
     @mock.patch('checks.prometheus_check.PrometheusCheck.poll')
     def test__join_custom_labels(self, mock_poll):
         f_name = os.path.join(os.path.dirname(__file__), 'ci', 'fixtures', 'prometheus', 'prometheus.txt')
@@ -206,8 +206,7 @@ class TestKubernetesState(AgentCheckTest):
             mock_poll.return_value = MockResponse(f.read(), 'text/plain')
 
         config = {
-            'instances': [
-                {
+            'instances': [{
                 'host': 'foo',
                 'kube_state_url': 'http://foo',
                 'label_joins': {
@@ -218,7 +217,7 @@ class TestKubernetesState(AgentCheckTest):
                 },
             }]
         }
-        # run check twice to have pod/node mapping
+        # run check twice to have the labels join mapping.
         self.run_check_twice(config)
         for metric in self.METRICS:
             self.assertMetric(
