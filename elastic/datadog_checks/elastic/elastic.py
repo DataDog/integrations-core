@@ -27,6 +27,7 @@ ESInstanceConfig = namedtuple(
         'cluster_stats',
         'password',
         'service_check_tags',
+        'health_tags',
         'tags',
         'timeout',
         'url',
@@ -399,6 +400,7 @@ class ESCheck(AgentCheck):
             cluster_stats=cluster_stats,
             password=instance.get('password'),
             service_check_tags=service_check_tags,
+            health_tags=[],
             ssl_cert=instance.get('ssl_cert'),
             ssl_key=instance.get('ssl_key'),
             ssl_verify=instance.get('ssl_verify'),
@@ -433,7 +435,9 @@ class ESCheck(AgentCheck):
         if stats_data['cluster_name']:
             # retreive the cluster name from the data, and append it to the
             # master tag list.
-            config.tags.append("cluster_name:{}".format(stats_data['cluster_name']))
+            cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
+            config.tags.append(cluster_name_tag)
+            config.health_tags.append(cluster_name_tag)
         self._process_stats_data(stats_data, stats_metrics, config)
 
         # Load clusterwise data
@@ -747,7 +751,7 @@ class ESCheck(AgentCheck):
             self.SERVICE_CHECK_CLUSTER_STATUS,
             status,
             message=msg,
-            tags=config.service_check_tags
+            tags=config.service_check_tags+config.health_tags
         )
 
     def _metric_not_found(self, metric, path):

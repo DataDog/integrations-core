@@ -452,10 +452,10 @@ class TestElastic(AgentCheckTest):
             # Warning because elasticsearch status should be yellow, according to
             # http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
             self.assertServiceCheckWarning('elasticsearch.cluster_health',
-                                           tags=good_sc_tags + tags,
+                                           tags=good_sc_tags + tags + cluster_tag,
                                            count=1)
             self.assertServiceCheckWarning('elasticsearch.cluster_health',
-                                           tags=good_sc_tags,
+                                           tags=good_sc_tags + cluster_tag,
                                            count=1)
             # Assert event
             self.assertEvent('ElasticSearch: foo just reported as yellow', count=1,
@@ -523,7 +523,7 @@ class TestElastic(AgentCheckTest):
 
     def test_health_event(self):
         dummy_tags = ['foo:bar', 'elastique:recherche']
-        server_tags = ['cluster_name:elasticsearch']
+        cluster_tag = ["cluster_name:elasticsearch"]
 
         config = {'instances': [
             {'url': 'http://localhost:9200', 'tags': dummy_tags}
@@ -536,12 +536,12 @@ class TestElastic(AgentCheckTest):
         self.assertEquals(len(self.events), 1)
         self.assertIn('yellow', self.events[0]['msg_title'])
         self.assertEquals(
-            ['url:http://localhost:9200'] + dummy_tags + server_tags,
+            ['url:http://localhost:9200'] + dummy_tags + cluster_tag,
             self.events[0]['tags']
         )
         self.assertServiceCheckWarning(
             'elasticsearch.cluster_health',
-            tags=['host:localhost', 'port:9200'] + dummy_tags,
+            tags=['host:localhost', 'port:9200'] + dummy_tags + cluster_tag,
             count=1
         )
 
@@ -554,12 +554,12 @@ class TestElastic(AgentCheckTest):
         self.assertEquals(len(self.events), 1)
         self.assertIn('green', self.events[0]['msg_title'])
         self.assertEquals(
-            ['url:http://localhost:9200'] + dummy_tags + server_tags,
+            ['url:http://localhost:9200'] + dummy_tags + cluster_tag,
             self.events[0]['tags']
         )
         self.assertServiceCheckOK(
             'elasticsearch.cluster_health',
-            tags=['host:localhost', 'port:9200'] + dummy_tags,
+            tags=['host:localhost', 'port:9200'] + dummy_tags + cluster_tag,
             count=1
         )
 
