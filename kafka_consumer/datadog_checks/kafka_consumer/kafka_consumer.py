@@ -102,8 +102,8 @@ class KafkaCheck(AgentCheck):
         if get_kafka_consumer_offsets:
             # For now, consumer groups are mandatory if not using ZK
             if not zk_hosts_ports and not consumer_groups:
-                raise BadKafkaConsumerConfiguration('Invalid configuration - if you\'re not collecing '
-                                'offset from ZK you _must_ specify consumer groups')
+                raise BadKafkaConsumerConfiguration('Invalid configuration - if you\'re not collecting '
+                                'offsets from ZK you _must_ specify consumer groups')
             if self._kafka_compatible(kafka_version):
                 kafka_consumer_offsets, topics = self._get_kafka_consumer_offsets(instance, consumer_groups)
 
