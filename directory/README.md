@@ -12,7 +12,9 @@ Capture metrics from directories and files of your choosing. The Agent will coll
 ## Setup
 ### Installation
 
-The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
+The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.  
+
+If you need the newest version of the Directory check, install the `dd-check-directory` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

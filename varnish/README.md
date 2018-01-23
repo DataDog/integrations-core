@@ -15,8 +15,9 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The varnish check is packaged with the Agent. To start gathering your Varnish metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers.  
-If you need the newest version of the check, install the `dd-check-varnish` package.
+The varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your varnish servers.  
+
+If you need the newest version of the Varnish check, install the `dd-check-varnish` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

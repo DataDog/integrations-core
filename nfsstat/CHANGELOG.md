@@ -1,5 +1,12 @@
 # CHANGELOG - Nfsstat
 
+0.1.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] makes reports output stats in actual realtime. See [#974][].
+
 0.1.0/ 2017-10-10
 ==================
 

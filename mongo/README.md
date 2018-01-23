@@ -10,8 +10,9 @@ Connect MongoDB to Datadog in order to:
 ## Setup
 ### Installation
 
-The MongoDB check is packaged with the Agent, to start gathering your MongoDB metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters.  
-If you need the newest version of the check, install the `dd-check-mongo` package.
+The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. 
+
+If you need the newest version of the MongoDB check, install the `dd-check-mongo` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -43,10 +44,9 @@ db.createUser({
 
 #### Metric Collection
 
-1. Add this configuration setup to your `mongodb.yaml` file to start gathering your [Mongodb Metrics](#metrics)
+1. Add this configuration setup to your `mongodb.yaml` file to start gathering your [Mongodb Metrics](#metrics). See the [sample mongo.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
   ```
   init_config:
-
   instances:
     - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017/admin
       additional_metrics:

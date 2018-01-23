@@ -1,6 +1,13 @@
 # CHANGELOG - haproxy
 
-1.1.0 / Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] allows the use of custom HTTP headers when requesting stats. See [#1019][]
+
+1.1.0 / 2018-01-10
 ==================
 
 ### Changes

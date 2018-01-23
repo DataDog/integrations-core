@@ -1,5 +1,12 @@
 # CHANGELOG - snmp
 
+1.3.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Fix warning service check reporting. See [#1041][]
+
 1.3.0 / 2017-10-10
 ==================
 
@@ -32,3 +39,4 @@
 [#248]: https://github.com/DataDog/integrations-core/issues/248
 [#426]: https://github.com/DataDog/integrations-core/issues/426
 [#723]: https://github.com/DataDog/integrations-core/issues/723
+[#1041]: https://github.com/DataDog/integrations-core/issues/1041

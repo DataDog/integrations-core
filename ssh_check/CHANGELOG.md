@@ -1,6 +1,6 @@
 # CHANGELOG - ssh_check
 
-1.1.3 / Unreleased 
+1.1.3 / 2018-01-10 
 ==================
 
 ### Changes

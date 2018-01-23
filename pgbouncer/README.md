@@ -7,7 +7,9 @@ The PgBouncer check tracks connection pool metrics and lets you monitor traffic 
 ## Setup
 ### Installation
 
-The PgBouncer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your PgBouncer nodes. If you need the newest version of the check, install the `dd-check-pgbouncer` package.
+The PgBouncer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your PgBouncer nodes.  
+
+If you need the newest version of the PgBouncer check, install the `dd-check-pgbouncer` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -64,6 +66,8 @@ The PgBouncer check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv) for a list of metrics provided by this check.
+
+Note: Not all metrics are available with all versions of PGBouncer.
 
 ### Events
 The PGboucer check does not include any event at this time.

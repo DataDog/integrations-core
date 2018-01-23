@@ -1,6 +1,15 @@
 # CHANGELOG - couch
 
-2.2.0 / UNRELEASED
+
+
+2.2.1 / Unreleased
+=================
+
+### Changes
+
+* [BUGFIX] Handle the case where there is no database.
+
+2.2.0 / 2018-01-10
 =================
 
 ### Changes

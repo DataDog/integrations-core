@@ -1,6 +1,6 @@
 # CHANGELOG - win32_event_log
 
-1.1.1 / Unreleased
+1.1.1 / 2018-01-10
 ==================
 
 ### Changes

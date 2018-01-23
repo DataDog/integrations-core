@@ -16,9 +16,11 @@ is available in our contribution guidelines.
 
 ### Versioning
 
-- [ ] Bumped the version check in `manifest.json`
+- [ ] Bumped the check version in `manifest.json`
+- [ ] Bumped the check version in `datadog_checks/{integration}/__init__.py`
 - [ ] Updated `CHANGELOG.md`. Please use `Unreleased` as the date in the title
   for the new section.
+- [ ] If PR impacts documentation, docs team has been notified or [an issue has been opened on the documentation repo](https://github.com/DataDog/documentation/issues/new) 
 
 ### Additional Notes
 

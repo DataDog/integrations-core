@@ -10,7 +10,9 @@ The process check lets you:
 ## Setup
 ### Installation
 
-The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check. If you need the newest version of the check, install the `dd-check-process` package.
+The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check.  
+
+If you need the newest version of the Process check, install the `dd-check-process` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 

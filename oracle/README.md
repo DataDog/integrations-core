@@ -7,8 +7,6 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 ## Setup
 ### Installation
 
-Install the `dd-check-oracle` package manually or with your favorite configuration manager.
-
 In order to use the Oracle integration you must install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
 
 You will need to install the Instant Client Basic and SDK packages.

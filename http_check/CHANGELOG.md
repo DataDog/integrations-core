@@ -1,6 +1,13 @@
 # CHANGELOG - http_check
 
-1.3.0 / UNRELEASED
+1.3.1 / 2018-01-17
+==================
+
+### Changes
+
+* [BUGFIX] Use lowercase in an `if statement` for a user defined HTTP method.
+
+1.3.0 / 2018-01-10
 ==================
 
 ### Changes

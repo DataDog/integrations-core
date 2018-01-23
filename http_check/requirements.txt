@@ -1,4 +1,4 @@
 # integration pip requirements
 # note: requests is also used in many checks
 # upgrade with caution
-requests==2.11.1
+requests==2.11.1 --hash=sha256:545c4855cd9d7c12671444326337013766f4eea6068c3f0307fb2dc2696d580e

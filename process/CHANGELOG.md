@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-1.2.0 / Unreleased
+1.2.0 / 2018-01-10
 ==================
 
 * [IMPROVEMENT] Filter processes by user. See [#337][]
