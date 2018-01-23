@@ -31,6 +31,7 @@ class DirectoryCheck(AgentCheck):
         "filegauges" - boolean, when true stats will be an individual gauge per file (max. 20 files!) and not a histogram of the whole directory. default False
         "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. default "*"
         "recursive" - boolean, when true the stats will recurse into directories. default False
+        "countonly" - boolean, when true the stats will only count the number of files matching the pattern. Useful for very large directories. default False
     """
 
     SOURCE_TYPE_NAME = 'system'
