@@ -27,7 +27,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
     #   apache_password: example_password
     #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
     ```
-    Change the `apache_status_url` parameter value and configure it for your environment.  
+    Change the `apache_status_url` parameter values and configure them for your environment.  
     See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
 
@@ -57,7 +57,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
            sourcecategory: http_web_access
            service: apache
     ```
-    Change the `path` and `service` parameter value and configure it for your environment.  
+    Change the `path` and `service` parameter values and configure them for your environment.  
     See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
 3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 

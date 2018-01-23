@@ -13,7 +13,7 @@ Capture HAProxy activity in Datadog to:
 
 The HAProxy check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your HAProxy servers.
 
-Make sure that stats are enabled on your HAProxy configuration. See [this post for guidance on doing this](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/).
+Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/).
 
 ### Configuration
 
@@ -71,8 +71,8 @@ See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/
         sourcecategory: http_web_access
     ```
     
-    Change the `service` parameter value and configure it for your environment.
-See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  Change the `service` parameter value and configure it for your environment.
+  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
 3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
