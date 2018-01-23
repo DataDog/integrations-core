@@ -110,6 +110,7 @@ class TestPostgres(AgentCheckTest):
         host = 'localhost'
         port = 15432
         dbname = 'datadog_test'
+        instance_tag = 'postgresinstance:additionalTag'
 
         instances = [
             {
@@ -126,7 +127,9 @@ class TestPostgres(AgentCheckTest):
                     },
                     'query': "SELECT datname, %s FROM pg_stat_database WHERE datname = 'datadog_test' LIMIT(1)",
                     'relation': False,
-                }]
+                }],
+                'tags': [instance_tag]
+
             },
             {
                 'host': host,
@@ -148,16 +151,16 @@ class TestPostgres(AgentCheckTest):
         # Testing DB_METRICS scope
         for mname in self.COMMON_METRICS:
             for db in ('datadog_test', 'dogs'):
-                self.assertMetric(mname, count=1, tags=['db:%s' % db])
+                self.assertMetric(mname, count=1, tags=[instance_tag, 'db:%s' % db])
 
         for mname in self.DATABASE_SIZE_METRICS:
             for db in ('datadog_test', 'dogs'):
-                self.assertMetric(mname, count=1, tags=['db:%s' % db])
+                self.assertMetric(mname, count=1, tags=[instance_tag, 'db:%s' % db])
 
         if self.check._is_9_2_or_above(key, db):
             for mname in self.NEWER_92_METRICS:
                 for db in ('datadog_test', 'dogs'):
-                    self.assertMetric(mname, count=1, tags=['db:%s' % db])
+                    self.assertMetric(mname, count=1, tags=[instance_tag, 'db:%s' % db])
 
         # Testing BGW_METRICS scope
         for mname in self.COMMON_BGW_METRICS:
@@ -180,8 +183,13 @@ class TestPostgres(AgentCheckTest):
         # Relation specific metrics
         for inst in instances:
             for rel in inst.get('relations', []):
-                expected_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel]
-                expected_rel_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, 'schema:public']
+                if "tags" in inst:
+                    expected_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, instance_tag]
+                    expected_rel_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, 'schema:public', instance_tag]
+                else:
+                    expected_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel]
+                    expected_rel_tags = ['db:%s' % inst['dbname'], 'table:%s' % rel, 'schema:public']
+
                 for mname in self.RELATION_METRICS:
                     count = 1
                     # We only build a test index and stimulate it on breed
@@ -214,24 +222,28 @@ class TestPostgres(AgentCheckTest):
 
         # instance connection metrics
         for mname in self.CONNECTION_METRICS:
-            self.assertMetric(mname, count=1)
+            self.assertMetric(mname, count=1, tags=[])
+            self.assertMetric(mname, count=1, tags=['postgresinstance:additionalTag'])
+
 
         # db level connections
         for inst in instances:
-            expected_tags = ['db:%s' % inst['dbname']]
+            expected_tags = ['db:%s' % inst['dbname'], instance_tag]
             self.assertMetric('postgresql.connections', count=1, tags=expected_tags)
 
         # By schema metrics
+        self.assertMetric('postgresql.table.count', value=1, count=1, tags=['schema:public', instance_tag])
         self.assertMetric('postgresql.table.count', value=2, count=1, tags=['schema:public'])
+
         self.assertMetric('postgresql.db.count', value=2, count=1)
 
         # Our custom metric
-        self.assertMetric('custom.numbackends', value=1, tags=['customdb:datadog_test'])
+        self.assertMetric('custom.numbackends', value=1, tags=['customdb:datadog_test', instance_tag])
 
         # Test service checks
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:datadog_test']
+            tags=['host:localhost', 'port:15432', 'db:datadog_test', instance_tag]
         )
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,

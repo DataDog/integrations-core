@@ -663,15 +663,16 @@ SELECT s.schemaname,
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
-    def _get_service_check_tags(self, host, port, dbname):
+    def _get_service_check_tags(self, host, port, tags):
         service_check_tags = [
             "host:%s" % host,
             "port:%s" % port,
-            "db:%s" % dbname
         ]
+        service_check_tags.extend(tags)
+        service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
-    def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, use_cached=True):
+    def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=True):
         "Get and memoize connections to instances"
         if key in self.dbs and use_cached:
             return self.dbs[key]
@@ -694,7 +695,7 @@ SELECT s.schemaname,
                         database=dbname, ssl=ssl)
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
-                service_check_tags = self._get_service_check_tags(host, port, dbname)
+                service_check_tags = self._get_service_check_tags(host, port, tags)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                     tags=service_check_tags, message=message)
                 raise
@@ -784,17 +785,17 @@ SELECT s.schemaname,
         # Collect metrics
         try:
             # Check version
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
             self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, use_cached=False)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
             self._collect_stats(key, db, tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error)
 
         if db is not None:
-            service_check_tags = self._get_service_check_tags(host, port, dbname)
+            service_check_tags = self._get_service_check_tags(host, port, tags)
             message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                 tags=service_check_tags, message=message)
