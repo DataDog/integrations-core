@@ -89,7 +89,6 @@ class Disk(AgentCheck):
                 continue
 
             # Get disk metrics here to be able to exclude on total usage
-            disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             try:
                 disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
