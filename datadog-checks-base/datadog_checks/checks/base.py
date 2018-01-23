@@ -19,7 +19,7 @@ try:
 except ImportError:
     from ..stubs import aggregator
 
-from ..utils.proxy import get_requests_proxy, config_proxy_skip
+from ..utils.proxy import config_proxy_skip
 from ..config import is_affirmative
 
 
@@ -62,7 +62,7 @@ class AgentCheck(object):
         self.log = logging.getLogger('%s.%s' % (__name__, self.name))
 
         # Set proxy settings
-        self.proxies = get_requests_proxy(self.agentConfig)
+        self.proxies = self._get_requests_proxy()
         if not self.init_config:
             self._use_agent_proxy = True
         else:
@@ -298,3 +298,21 @@ class AgentCheck(object):
             ])
 
         return result
+
+    def _get_requests_proxy(self):
+        no_proxy_settings = {
+            "http": None,
+            "https": None,
+            "no": [],
+        }
+
+        # First we read the proxy configuration from datadog.conf
+        proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))
+        if proxies:
+            proxies = proxies.copy()
+
+        # requests compliant dict
+        if proxies and 'no_proxy' in proxies:
+            proxies['no'] = proxies.pop('no_proxy')
+
+        return proxies if proxies else no_proxy_settings

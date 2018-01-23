@@ -1,37 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
 from urlparse import urlparse
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
-
-
-log = logging.getLogger(__name__)
-
-
-def get_requests_proxy(agentConfig):
-    no_proxy_settings = {
-        "http": None,
-        "https": None,
-        "no": [],
-    }
-
-    config = {} if agentConfig is None else agentConfig
-
-    # First we read the proxy configuration from datadog.conf
-    proxies = config.get('proxy', datadog_agent.get_config('proxy'))
-    if proxies:
-        proxies = proxies.copy()
-
-    # requests compliant dict
-    if proxies and 'no_proxy' in proxies:
-        proxies['no'] = proxies.pop('no_proxy')
-
-    return proxies if proxies else no_proxy_settings
 
 
 def config_proxy_skip(proxies, uri, skip_proxy=False):
