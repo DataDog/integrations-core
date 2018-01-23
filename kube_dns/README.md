@@ -13,7 +13,7 @@ more informations about kube-dns
 ## Setup
 ### Installation
 
-Install the `dd-check-kube_dns` package manually or with your favorite configuration manager
+The Kube-dns check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 
@@ -46,7 +46,7 @@ metadata:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kube_dns` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kube_dns` under the Checks section:
 
     Checks
     ======

@@ -1,5 +1,5 @@
 # Agent Check: TCP connectivity
-
+{{< img src="integrations/tcpcheck/netgraphs.png" alt="Network Graphs" responsive="true" popup="true">}}
 ## Overview
 
 Monitor TCP connectivity and response time for any host and port.
@@ -7,9 +7,9 @@ Monitor TCP connectivity and response time for any host and port.
 ## Setup
 ### Installation
 
-The TCP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
+The TCP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.  
 
-If you need the newest version of the TCP check, install the `dd-check-tcp` package.
+If you need the newest version of the TCP check, install the `dd-check-tcp` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -28,7 +28,7 @@ instances:
 
 Configuration Options
 
-* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`.
+* `name` (Required) - Name of the service. This will be included as a tag: `instance:<name>`. Note: This tag will have any spaces and dashes converted to underscores.
 * `host` (Required) - Host to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
@@ -36,11 +36,11 @@ Configuration Options
 * `skip_event` (Optional) - Defaults to false. Set to true to skip creating an event. This option will be removed in a future version and will default to true.
 * `tags` (Optional) - Tags to be assigned to the metric.
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending TCP service checks and response times to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending TCP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `tcp_check` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `tcp_check` under the Checks section:
 
 ```
   Checks

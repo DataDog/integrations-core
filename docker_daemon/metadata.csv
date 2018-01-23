@@ -67,7 +67,7 @@ docker.mem.soft_limit.avg,gauge,,byte,,Average value of docker.mem.soft_limit. O
 docker.mem.soft_limit.count,rate,,sample,second,The rate that the value of docker.mem.soft_limit was sampled,0,docker,soft limit count
 docker.mem.soft_limit.max,gauge,,byte,,Max value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit max
 docker.mem.soft_limit.median,gauge,,byte,,Median value of docker.mem.soft_limit. Ordinarily this value will not change,0,docker,soft limit median
-docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, if the limit is set",0,docker,mem in use
+docker.mem.in_use,gauge,,fraction,,"The fraction of used memory to available memory, IF THE LIMIT IS SET",0,docker,mem in use
 docker.mem.in_use.95percentile,gauge,,fraction,,95th percentile of docker.mem.in_use,0,docker,mem in use 95%
 docker.mem.in_use.avg,gauge,,fraction,,Average value of docker.mem.in_use,0,docker,mem in use avg
 docker.mem.in_use.count,rate,,sample,second,The rate that the value of docker.mem.in_use was sampled,0,docker,mem in use count

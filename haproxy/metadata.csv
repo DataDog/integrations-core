@@ -22,8 +22,8 @@ haproxy.backend.session.pct,gauge,,percent,,Percentage of sessions in use (backe
 haproxy.backend.session.rate,gauge,,connection,second,Number of backend sessions created per second.,0,haproxy,backend sess rate
 haproxy.backend.session.time,gauge,,millisecond,,Average total session time over the last 1024 requests.,0,haproxy,backend sess time
 haproxy.backend.uptime,gauge,,second,,Number of seconds since the last UP<->DOWN transition,0,haproxy,backend uptime
-haproxy.backend.warnings.redis_rate,gauge,,error,second,Number of times a connection to a server was retried.,-1,haproxy,backend warn redis rate
-haproxy.backend.warnings.retr_rate,gauge,,error,second,Number of times a request was redispatched to another server.,-1,haproxy,backend warn retry rate
+haproxy.backend.warnings.redis_rate,gauge,,error,second,Number of times a request was redispatched to another server.,-1,haproxy,backend warn redis rate
+haproxy.backend.warnings.retr_rate,gauge,,error,second,Number of times a connection to a server was retried.,-1,haproxy,backend warn retry rate
 haproxy.count_per_status,gauge,,host,,Number of hosts by status (UP/DOWN/NOLB/MAINT).,0,haproxy,hosts status
 haproxy.frontend.bytes.in_rate,gauge,,byte,second,Rate of bytes in on frontend hosts.,0,haproxy,frontend bytes in rate
 haproxy.frontend.bytes.out_rate,gauge,,byte,second,Rate of bytes out on frontend hosts.,0,haproxy,frontend bytes out rate

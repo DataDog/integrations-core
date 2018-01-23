@@ -1,5 +1,13 @@
 # CHANGELOG - spark
 
+1.1.0 / [2018-01-10]
+==================
+
+### Changes
+
+* [IMPROVEMENT] Filter Spark frameworks by port. See [#459][].  (Thanks [@johnjeffers][])
+
+
 1.0.1 / 2017-07-18
 ==================
 

@@ -21,7 +21,7 @@ Style/PercentLiteralDelimiters:
   Enabled: false
 
 Metrics/BlockLength:
-  Max: 100
+  Max: 125
 
 Lint/RescueWithoutErrorClass:
   Enabled: false

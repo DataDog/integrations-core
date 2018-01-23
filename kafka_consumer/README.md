@@ -11,7 +11,9 @@ This check does NOT support Kafka versions > 0.8—it can't collect consumer off
 ## Setup
 ### Installation
 
-The Agent's Kafka consumer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes. If you need the newest version of the check, install the `dd-check-kafka-consumer` package.
+The Agent's Kafka consumer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.  
+
+If you need the newest version of the DNS check, install the `dd-check-kafka-consumer` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -19,7 +21,7 @@ Create a `kafka_consumer.yaml` file using [this sample conf file](https://github
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kafka_consumer` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kafka_consumer` under the Checks section:
 
 ```
   Checks

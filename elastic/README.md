@@ -1,4 +1,5 @@
 # Elasticsearch Integration
+{{< img src="integrations/elasticsearch/elasticsearchgraph.png" alt="Elasticsearch" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -9,7 +10,9 @@ The Datadog Agent's Elasticsearch check collects metrics for search and indexing
 ## Setup
 ### Installation
 
-The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
+The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).  
+
+If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -29,11 +32,11 @@ If you're collecting Elasticsearch metrics from just one Datadog Agent running o
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-2. [Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to begin sending Elasticsearch metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Elasticsearch metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `elastic` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `elastic` under the Checks section:
 
 ```
   Checks
@@ -73,15 +76,8 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 
 ## Troubleshooting
 
-### Agent cannot connect
-```
-    elastic
-    -------
-      - instance #0 [ERROR]: "('Connection aborted.', error(111, 'Connection refused'))"
-      - Collected 0 metrics, 0 events & 1 service check
-```
-
-Check that the `url` in `elastic.yaml` is correct.
+* [Agent can't connect](https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect)
+* [Why isn't Elasticsearch sending all my metrics?](/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics)
 
 ## Further Reading
 To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/) about it.

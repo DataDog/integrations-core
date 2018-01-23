@@ -7,7 +7,9 @@ nfsiostat is a tool that gets metrics from NFS mounts. This check grabs these me
 ## Setup
 ### Installation
 
-Install the `dd-check-nfsstat` package manually or with your favorite configuration manager
+The NFSstat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+
+If you need the newest version of the NFSstat check, install the `dd-check-nfsstat` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -15,7 +17,7 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `nfsstat` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nfsstat` under the Checks section:
 
     Checks
     ======
@@ -47,4 +49,4 @@ Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
 ### Knowledge Base
-* [Built a network monitor on an http check](https://help.datadoghq.com/hc/en-us/articles/115003314726-Built-a-network-monitor-on-an-http-check-)
+* [Built a network monitor on an http check](https://docs.datadoghq.com/monitors/monitor_types/network)

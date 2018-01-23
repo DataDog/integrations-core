@@ -1,5 +1,21 @@
 # CHANGELOG - http_check
 
+1.3.1 / 2018-01-17
+==================
+
+### Changes
+
+* [BUGFIX] Use lowercase in an `if statement` for a user defined HTTP method.
+
+1.3.0 / 2018-01-10
+==================
+
+### Changes
+
+* [FEATURE] Report http connect status as metrics. See #659.
+* [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][]. (Thanks [@colinmollenhour][])
+* [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
+
 1.2.0 / 2017-10-10
 ==================
 
@@ -45,3 +61,4 @@
 [#688]: https://github.com/DataDog/integrations-core/issues/688
 [#758]: https://github.com/DataDog/integrations-core/issues/758
 [@xkrt]: https://github.com/xkrt
+[#905]:https://github.com/DataDog/integrations-core/pull/905

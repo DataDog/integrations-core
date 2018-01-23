@@ -1,5 +1,13 @@
 # CHANGELOG - sqlserver
 
+1.2.1 / 2018-01-10
+==================
+
+### Changes
+
+* [BUGFIX] Allows metric collection from all instances in custom query. See [#959][].
+* [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975][].
+
 1.2.0 / 2017-10-10
 ==================
 
@@ -29,5 +37,7 @@
 [#357]: https://github.com/DataDog/integrations-core/issues/357
 [#456]: https://github.com/DataDog/integrations-core/issues/456
 [#573]: https://github.com/DataDog/integrations-core/issues/573
+[#959]: https://github.com/DataDog/integrations-core/issues/959
+[#975]: https://github.com/DataDog/integrations-core/pull/975
 [@rlaveycal]: https://github.com/rlaveycal
 [@themsquared]: https://github.com/themsquared

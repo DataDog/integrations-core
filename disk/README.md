@@ -7,7 +7,9 @@ Collect metrics related to disk usage and IO.
 ## Setup
 ### Installation
 
-The disk check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
+The disk check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.  
+
+If you need the newest version of the Disk check, install the `dd-check-disk` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -15,7 +17,7 @@ The disk check is enabled by default, and the Agent will collect metrics on all 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `disk` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `disk` under the Checks section:
 
 ```
   Checks

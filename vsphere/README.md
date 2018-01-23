@@ -1,5 +1,5 @@
 # Agent Check: VMWare vSphere
-
+{{< img src="integrations/vmware/vsphere_graph.png" alt="vsphere graph" responsive="true" popup="true">}}
 ## Overview
 
 This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
@@ -7,7 +7,9 @@ This check collects resource usage metrics from your vSphere cluster—CPU, disk
 ## Setup
 ### Installation
 
-The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server. If you need the newest version of the check, install the `dd-check-mcache` package.
+The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server.  
+
+If you need the newest version of the vSphere check, install the `dd-check-vsphere` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -25,7 +27,7 @@ instances:
     password: <PASSWORD>
 ```
 
-Restart the Agent to start sending vSphere metrics and events to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending vSphere metrics and events to Datadog.
 
 #### Configuration Options
 
@@ -39,7 +41,7 @@ Restart the Agent to start sending vSphere metrics and events to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `vsphere` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `vsphere` under the Checks section:
 
 ```
   Checks
@@ -91,7 +93,8 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+
+* [Can I limit the number of VMs that are pulled in via the VMWare integration?](https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration)
 
 ## Further Reading
 See our [blog post](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers) on monitoring vSphere environments with Datadog.

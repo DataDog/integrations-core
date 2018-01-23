@@ -86,3 +86,15 @@ tmp
 
 # Vi(m) stuff
 *.swp
+
+# Rbenv stuff
+.rbenv-gemsets
+.ruby-version
+
+# Common IDEs & editors
+.idea/
+.vscode/
+
+# wheels
+wheelhouse/
+*.whl

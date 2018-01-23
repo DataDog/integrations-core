@@ -1,6 +1,19 @@
 # CHANGELOG - docker_daemon
 
-1.6.0 / Unreleased
+1.8.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add `short_image` tag to container metrics. See [#986][]
+
+1.7.0 / 2018-01-10
+==================
+### Changes
+
+* [FEATURE] Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881][]
+* [IMPROVEMENT] Improve logging when cgroup metrics can't be retrieved. See [#914][]
+
+1.6.0 / 2017-11-21
 ==================
 ### Changes
 
@@ -115,7 +128,9 @@
 [#701]: https://github.com/DataDog/integrations-core/issues/701
 [#722]: https://github.com/DataDog/integrations-core/issues/722
 [#744]: https://github.com/DataDog/integrations-core/issues/744
+[#760]: https://github.com/DataDog/integrations-core/issues/760
 [#770]: https://github.com/DataDog/integrations-core/issues/770
 [#782]: https://github.com/DataDog/integrations-core/issues/782
 [#817]: https://github.com/DataDog/integrations-core/issues/817
+[#859]: https://github.com/DataDog/integrations-core/issues/859
 [@sophaskins]: https://github.com/sophaskins

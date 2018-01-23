@@ -45,7 +45,7 @@ instances:
     # varnishadm command, if enabled.
     # secretfile: /etc/varnish/secret
     
-#Log section
+## Log section
 #logs:
 
     # - type : (mandatory) type of log input source (tcp / udp / file)

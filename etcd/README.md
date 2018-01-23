@@ -1,5 +1,5 @@
 # Etcd Integration
-
+{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" popup="true">}}
 ## Overview
 
 Collect etcd metrics to:
@@ -11,7 +11,9 @@ Collect etcd metrics to:
 ## Setup
 ### Installation
 
-The etcd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your etcd instance(s).
+The etcd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your etcd instance(s).  
+
+If you need the newest version of the etcd check, install the `dd-check-etcd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ### Configuration
 
@@ -24,11 +26,11 @@ instances:
   - url: "https://server:port" # API endpoint of your etcd instance
 ```
 
-Restart the Agent to begin sending etcd metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending etcd metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `etcd` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `etcd` under the Checks section:
 
 ```
   Checks
@@ -62,6 +64,11 @@ The Etcd check does not include any event at this time.
 `etcd.can_connect`:
 
 Returns 'Critical' if the Agent cannot collect metrics from your etcd API endpoint.
+
+`etcd.healthy`:
+
+Returns 'Critical' if a member node is not healthy. Returns 'Unknown' if the Agent
+can't reach the `/health` endpoint, or if the health status is missing.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

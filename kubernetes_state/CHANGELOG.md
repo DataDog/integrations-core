@@ -1,10 +1,28 @@
 # CHANGELOG - kubernetes_state
 
-1.4.0 / Unreleased
+2.2.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add option in yaml to configure which label from KSM metrics to join over [#1040][]
+* [IMPROVEMENT] Add the node label wherever the pod label is present [#1000][]
+* [IMPROVEMENT] Override hostname with the node label if present [#1000][]
+
+2.0.0 / 2018-01-10
+==================
+### Changes
+
+* [IMPROVEMENT] Merge kubernetes-state pod.phase.[running|succeeded|pending|failed|unknown] service checks into one actionnable service check. Will be introduced in 5.20 and will change the behavior of the service check. [#874][]
+* [IMPROVEMENT] Adding statefulset metrics. [#936][]
+* [IMPROVEMENT] Bumping protobuf to version 3.5.1. See [#965][]
+
+1.4.0 / 2017-11-21
 ==================
 ### Changes
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
+* [FEATURE] Adding HPA metrics. See [#801][]
+* [FEATURE] Add metrics for GPU, PVC, CronJobs and other added in kubernetes_state 1.1.0. See [#853][]
 
 1.3.0 / 2017-08-28
 ==================
@@ -42,3 +60,9 @@
 [#651]: https://github.com/DataDog/integrations-core/issues/651
 [#686]: https://github.com/DataDog/integrations-core/issues/686
 [#696]: https://github.com/DataDog/integrations-core/issues/696
+[#801]: https://github.com/DataDog/integrations-core/issues/801
+[#853]: https://github.com/DataDog/integrations-core/issues/853
+[#860]: https://github.com/DataDog/integrations-core/issues/860
+[#874]: https://github.com/DataDog/integrations-core/issues/874
+[#936]: https://github.com/DataDog/integrations-core/issues/936
+[#965]: https://github.com/DataDog/integrations-core/issues/965

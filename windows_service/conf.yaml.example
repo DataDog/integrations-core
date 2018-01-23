@@ -22,3 +22,22 @@ instances:
     -   host: . # "." means the current host
         services:
           - wmiApSrv
+
+    # NOTE when using wildcards or the "ALL" option, the check will NOT report
+    # services that are not registered with the SCM.  When a service is explicitly
+    # requested, then the check will report CRITICAL if the service is not found.
+    # However, it is not possible to report missing services with wildcards or the
+    # ALL feature.
+
+    # services can be specified via wildcard, using '%' as the wildcard. So,
+    # the following will report all services that start with Event (i.e EventLog and
+    # EventSystem)
+    # - host: .
+    #   services:
+    #     - Event%
+
+    # using the ALL keyword, the check will report the status of all services registered
+    # with the SCM. (ALL is case-sensitive.  Must be all caps)
+    # - host: .
+    #   services:
+    #     - ALL

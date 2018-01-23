@@ -1,11 +1,28 @@
 # CHANGELOG - mysql
 
-1.0.5 / Unreleased
+1.1.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Changes default value of `connect_timeout` to 10. See [#1020][]
+
+1.1.0 / 2018-01-10
+==================
+
+### Changes
+
+* [FEATURE] Add support for multi-source replication in both MariaDB and MySQL
+* [FEATURE] tag `mysql.replication.*` metrics with the replication channel name
+
+
+1.0.5 / 2017-11-21
 ==================
 
 ### Changes
 
 * [BUGFIX] Fixes https://github.com/DataDog/integrations-core/issues/783
+
 
 1.0.4 / 2017-08-28
 ==================
@@ -56,4 +73,5 @@
 [#586]: https://github.com/DataDog/integrations-core/issues/586
 [#637]: https://github.com/DataDog/integrations-core/issues/637
 [#660]: https://github.com/DataDog/integrations-core/issues/660
+[#1020]: https://github.com/DataDog/integrations-core/issues/1020
 [@EdwardMcConnell]: https://github.com/EdwardMcConnell

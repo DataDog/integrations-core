@@ -27,7 +27,6 @@ services:
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
   - set PATH=C:\Ruby22-x64\bin;%PATH%
-  - gem install bundler --quiet --no-ri --no-rdoc
   - bundle install
   - bundle package
   - git clone -b %DD_AGENT_BRANCH% https://github.com/DataDog/dd-agent.git c:\projects\dd-agent
@@ -40,6 +39,45 @@ install:
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
+  - cd datadog-checks-base
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd sqlserver
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd iis
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd windows_service
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd wmi_check
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd pdh_check
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd aspdotnet 
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd dotnetclr 
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
+  - cd exchange_server 
+  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%

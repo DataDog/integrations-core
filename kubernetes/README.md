@@ -1,5 +1,5 @@
 # Kubernetes Integration
-
+{{< img src="integrations/kubernetes/k8sdashboard.png" alt="Kubernetes Dashboard" responsive="true" popup="true">}}
 ## Overview
 
 Get metrics from kubernetes service in real time to:
@@ -10,7 +10,7 @@ Get metrics from kubernetes service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-kubernetes` package manually or with your favorite configuration manager
+The Kubernetes check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kubernetes servers.
 
 ### Configuration
 
@@ -85,7 +85,7 @@ The longer it is, the less hard your agent hits the apiserver with requests, but
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `kubernetes` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kubernetes` under the Checks section:
 
     Checks
     ======
@@ -169,5 +169,5 @@ The docker_daemon check ignores them through a default exclusion list, but they 
 To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts](https://www.datadoghq.com/blog/monitoring-kubernetes-era/) about it.
 
 ### Knowledge Base
-* [How to get more out of your Kubernetes integration?](https://help.datadoghq.com/hc/en-us/articles/115001293983-How-to-get-more-out-of-your-Kubernetes-integration)
-* [How to report host disk metrics when dd-agent runs in a docker container?](https://help.datadoghq.com/hc/en-us/articles/115001786703-How-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container-)
+* [How to get more out of your Kubernetes integration?](https://docs.datadoghq.com/agent/faq/how-to-get-more-out-of-your-kubernetes-integration)
+* [How to report host disk metrics when dd-agent runs in a docker container?](https://docs.datadoghq.com/agent/faq/how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container)

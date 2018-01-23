@@ -1,5 +1,5 @@
 # Postfix Check
-
+{{< img src="integrations/postfix/postfixgraph.png" alt="Postfix Graph" responsive="true" popup="true">}}
 ## Overview
 
 This check monitors the size of all your Postfix queues.
@@ -7,7 +7,9 @@ This check monitors the size of all your Postfix queues.
 ## Setup
 ### Installation
 
-The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers. If you need the newest version of the check, install the `dd-check-postfix` package.
+The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers.  
+
+If you need the newest version of the Postfix check, install the `dd-check-postfix` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
 
 ## Configuration
 This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
@@ -76,11 +78,11 @@ http://www.postfix.org/postqueue.1.html
                 List of users who are authorized to view the queue.
 
 
-[Restart the Agent](https://help.datadoghq.com/hc/en-us/articles/203764515-Start-Stop-Restart-the-Datadog-Agent) to start sending Postfix metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Postfix metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `postfix` under the Checks section:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postfix` under the Checks section:
 
 ```
   Checks
