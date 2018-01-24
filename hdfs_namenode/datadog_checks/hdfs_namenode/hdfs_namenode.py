@@ -96,9 +96,7 @@ class HDFSNameNode(AgentCheck):
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
 
-
-        namenode_url = ['namenode_url:' + jmx_address]
-        tags.extend(namenode_url)
+        tags.append('namenode_url:' + jmx_address)
         tags = list(set(tags))
 
         # Get metrics from JMX

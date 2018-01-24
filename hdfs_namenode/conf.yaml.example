@@ -10,6 +10,7 @@ instances:
   # the property dfs.http.address or dfs.namenode.http-address
   #
   -  hdfs_namenode_jmx_uri: http://localhost:50070
+  # Optional tags to be applied to every emitted metric and service check.
   #   tags:
   #      - optional_tag1
   #      - optional_tag2
