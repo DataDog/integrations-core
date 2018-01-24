@@ -578,13 +578,13 @@ class KafkaCheck(AgentCheck):
                                 assert isinstance(partition, int)
         return val
 
-    def _send_event(self, title, text, tags, type, aggregation_key, severity='info'):
+    def _send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
             'timestamp': int(time()),
             'source_type_name': self.SOURCE_TYPE_NAME,
             'msg_title': title,
-            'event_type': type,
+            'event_type': event_type,
             'alert_type': severity,
             'msg_text': text,
             'tags': tags,
