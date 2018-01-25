@@ -1,5 +1,11 @@
 # CHANGELOG - nginx
 
+1.1.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 1.1.0 / 2017-07-18
 ==================
 
