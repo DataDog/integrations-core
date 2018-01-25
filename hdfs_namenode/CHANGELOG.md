@@ -1,5 +1,11 @@
 # CHANGELOG - hdfs_namenode
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+* [FEATURE] add instance level tags to metrics and service check. See [#1047][]
+
 1.1.0 / 2018-01-10
 ==================
 

@@ -51,7 +51,8 @@ class HDFSNameNode(AgentCheckTest):
     CHECK_NAME = 'hdfs_namenode'
 
     HDFS_NAMENODE_CONFIG = {
-        'hdfs_namenode_jmx_uri': 'http://localhost:50070'
+        'hdfs_namenode_jmx_uri': 'http://localhost:50070',
+        'tags': ['cluster_name:hdfs_dev', 'cluster_name:hdfs_dev', 'instance:level_tags'],
     }
 
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES = {
@@ -85,7 +86,9 @@ class HDFSNameNode(AgentCheckTest):
     }
 
     HDFS_NAMESYSTEM_METRIC_TAGS = [
-        'namenode_url:' + HDFS_NAMENODE_CONFIG['hdfs_namenode_jmx_uri']
+        'namenode_url:' + HDFS_NAMENODE_CONFIG['hdfs_namenode_jmx_uri'],
+        'cluster_name:hdfs_dev',
+        'instance:level_tags',
     ]
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
@@ -98,6 +101,5 @@ class HDFSNameNode(AgentCheckTest):
 
         for metric, value in self.HDFS_NAMESYSTEM_STATE_METRICS_VALUES.iteritems():
             self.assertMetric(metric, value=value, tags=self.HDFS_NAMESYSTEM_METRIC_TAGS)
-
         for metric, value in self.HDFS_NAMESYSTEM_METRICS_VALUES.iteritems():
             self.assertMetric(metric, value=value, tags=self.HDFS_NAMESYSTEM_METRIC_TAGS)

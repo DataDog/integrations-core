@@ -92,24 +92,28 @@ class HDFSNameNode(AgentCheck):
     def check(self, instance):
         jmx_address = instance.get('hdfs_namenode_jmx_uri')
         disable_ssl_validation = instance.get('disable_ssl_validation', False)
+        tags = instance.get('tags')
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
+
+        tags.append('namenode_url:' + jmx_address)
+        tags = list(set(tags))
 
         # Get metrics from JMX
         self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation,
             HDFS_NAME_SYSTEM_STATE_BEAN,
-            HDFS_NAME_SYSTEM_STATE_METRICS)
+            HDFS_NAME_SYSTEM_STATE_METRICS, tags)
 
         self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation,
             HDFS_NAME_SYSTEM_BEAN,
-            HDFS_NAME_SYSTEM_METRICS)
+            HDFS_NAME_SYSTEM_METRICS, tags)
 
         self.service_check(JMX_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['namenode_url:' + jmx_address],
+            tags=tags,
             message='Connection to %s was successful' % jmx_address)
 
-    def _hdfs_namenode_metrics(self, jmx_uri, disable_ssl_validation, bean_name, metrics):
+    def _hdfs_namenode_metrics(self, jmx_uri, disable_ssl_validation, bean_name, metrics, tags):
         '''
         Get HDFS namenode metrics from JMX
         '''
@@ -118,8 +122,6 @@ class HDFSNameNode(AgentCheck):
             query_params={'qry':bean_name})
 
         beans = response.get('beans', [])
-
-        tags = ['namenode_url:' + jmx_uri]
 
         if beans:
 
