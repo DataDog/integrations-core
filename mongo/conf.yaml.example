@@ -49,7 +49,7 @@ instances:
     # the 'collections' list. This is available starting mongo 3.2.
     # collections_indexes_stats: false
 
-##Log section
+## Log section (Available for Agent >=6.0)
 
 #logs:
 

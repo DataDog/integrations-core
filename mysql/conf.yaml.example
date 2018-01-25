@@ -69,7 +69,7 @@ instances:
     #    type: gauge
     #    field: last_user
     
-##Log section
+## Log section (Available for Agent >=6.0)
 #logs:
 
     # - type : (mandatory) type of log input source (tcp / udp / file)

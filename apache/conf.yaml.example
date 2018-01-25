@@ -24,7 +24,7 @@ instances:
     # receive_timeout: 15
     
 
-##Log Section
+## Log Section (Available for Agent >=6.0)
 
 #logs:
 

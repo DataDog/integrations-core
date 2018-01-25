@@ -73,7 +73,7 @@ instances:
 #    collect_default_database: False
 #
 
-##log Section
+## log Section (Available for Agent >=6.0)
 #logs:
 
     # - type : (mandatory) type of log input source (tcp / udp / file)

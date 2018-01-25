@@ -68,7 +68,7 @@ instances:
     # tags:
     #   - "my-grouping:foo"
     
-##Log section
+## Log section (Available for Agent >=6.0)
 
 #logs:
 

@@ -24,7 +24,7 @@ instances:
   #   tags:
   #     - instance:bar
  
-##Log section
+## Log section (Available for Agent >=6.0)
 
 #logs:
 
