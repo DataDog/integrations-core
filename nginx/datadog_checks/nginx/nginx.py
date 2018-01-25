@@ -217,26 +217,8 @@ class Nginx(AgentCheck):
         else:
             parsed = json.loads(raw)
         metric_base = 'nginx'
+
         output = []
-        # all_keys = parsed.keys()
-
-        # tagged_keys = [('caches', 'cache'), ('server_zones', 'server_zone'),
-        #                ('upstreams', 'upstream'), ('slabs', 'slab'), ('slots', 'slot')]
-
-        # Process the special keys that should turn into tags instead of
-        # getting concatenated to the metric name
-        # for key, tag_name in tagged_keys:
-        #     metric_name = '%s.%s' % (metric_base, tag_name)
-        #     for tag_val, data in parsed.get(key, {}).iteritems():
-        #         tag = '%s:%s' % (tag_name, tag_val)
-        #         output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
-
-        # # Process the rest of the keys
-        # rest = set(all_keys) - set([k for k, _ in tagged_keys])
-        # for key in rest:
-        #     metric_name = '%s.%s' % (metric_base, key)
-        #     output.extend(cls._flatten_json(metric_name, parsed[key], tags))
-
         output.extend(cls._flatten_json(metric_base, parsed, tags))
 
         return output
