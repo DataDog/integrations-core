@@ -25,6 +25,20 @@ UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.5xx'
 ]
 
+PLUS_API_ENDPOINTS = {
+    "nginx": [],
+    "http/requests": ["requests"],
+    "http/server_zones": ["server_zones"],
+    "http/upstreams": ["upstreams"],
+    "http/caches": ["caches"],
+    "processes": ["processes"],
+    "connections": ["connections"],
+    "ssl": ["ssl"],
+    "slabs": ["slabs"],
+    "stream/server_zones": ["stream", "server_zones"],
+    "stream/upstreams": ["stream", "upstreams"],
+}
+
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
     * number of connections
@@ -62,27 +76,9 @@ class Nginx(AgentCheck):
             self._perform_service_check("/".join([url, plus_api_version]), ssl_validation, auth)
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
-            # The endpoints names are the names of the keys under which we should have the data in the payload dict.
-            # Only data from flat_endpoints should be moved one level up
-            # i.e. instead of
-            # {
-            #   http: {
-            #     requests: {<http/requests_data>}
-            #   }
-            # }
-            # we want
-            # {
-            #   requests: {<http/requests_data>}
-            # }
-            flat_endpoints = ["nginx", "http/requests", "http/server_zones", "http/upstreams", "http/caches"]
-            nested_endpoints = ["processes", "connections", "ssl", "slabs", "stream/server_zones", "stream/upstreams"]
 
-            for endpoint in flat_endpoints:
-                response = self._get_plus_api_data(url, ssl_validation, auth, plus_api_version, endpoint, False)
-                self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
-                metrics.extend(self.parse_json(response, tags))
-            for endpoint in nested_endpoints:
-                response = self._get_plus_api_data(url, ssl_validation, auth, plus_api_version, endpoint, True)
+            for endpoint, nest in PLUS_API_ENDPOINTS.iteritems():
+                response = self._get_plus_api_data(url, ssl_validation, auth, plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
@@ -157,7 +153,7 @@ class Nginx(AgentCheck):
                 keys[0]: self._nest_payload(keys[1:], payload)
             }
 
-    def _get_plus_api_data(self, api_url, ssl_validation, auth, plus_api_version, endpoint, nested):
+    def _get_plus_api_data(self, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
@@ -166,11 +162,7 @@ class Nginx(AgentCheck):
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
             r = self._perform_request(url, ssl_validation, auth)
-            split_endpoint = endpoint.split("/")
-            if nested:
-                payload = self._nest_payload(split_endpoint, r.json())
-            else:
-                payload = self._nest_payload(split_endpoint[1:], r.json())
+            payload = self._nest_payload(nest, r.json())
         except Exception as e:
             self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
