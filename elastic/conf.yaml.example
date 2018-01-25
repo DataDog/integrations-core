@@ -29,6 +29,10 @@ instances:
   # Some managed ElasticSearch services (e.g. AWS ElasticSearch) do not expose this endpoint.
   # Set `pending_task_stats` to false if you use such a service.
 
+  # `admin_forwarder` (defaults to False) is used to signify a URL that includes a
+  # context roote needed for a forwarder application to access Elasticsearch REST services
+  # for example: https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
+
   - url: http://localhost:9200
     # username: username
     # password: password
@@ -36,6 +40,7 @@ instances:
     # pshard_stats: false
     # pshard_graceful_timeout: false  # continue gracefully if pshard stats TO
     # pending_task_stats: true
+    # admin_forwarder: false
     # ssl_verify: false
     # ssl_cert: /path/to/cert.pem
     # ssl_key: /path/to/cert.key

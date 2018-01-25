@@ -370,10 +370,11 @@ class ESCheck(AgentCheck):
             cluster_stats = _is_affirmative(instance.get('is_external', False))
 
         pending_task_stats = _is_affirmative(instance.get('pending_task_stats', True))
+        admin_forwarder = _is_affirmative(instance.get('admin_forwarder', True))
         # Support URLs that have a path in them from the config, for
         # backwards-compatibility.
         parsed = urlparse.urlparse(url)
-        if parsed[2] != "":
+        if parsed[2] != "" and not admin_forwarder:
             url = "%s://%s" % (parsed[0], parsed[1])
         port = parsed.port
         host = parsed.hostname
