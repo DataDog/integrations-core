@@ -12,7 +12,7 @@ Connect MongoDB to Datadog in order to:
 
 The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. 
 
-If you need the newest version of the MongoDB check, install the `dd-check-mongo` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+If you need the newest version of the MongoDB check, install the `dd-check-mongo` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 #### Prepare MongoDB

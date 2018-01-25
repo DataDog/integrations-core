@@ -9,6 +9,8 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 The Apache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
 
+If you need the newest version of the ActiveMQ XML check, install the `dd-check-apache` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+
 Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
 ### Configuration

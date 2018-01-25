@@ -15,7 +15,7 @@ And more.
 
 The TokuMX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your TokuMX servers.  
 
-If you need the newest version of the TokuMX check, install the `dd-check-tokumx` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+If you need the newest version of the TokuMX check, install the `dd-check-tokumx` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 #### Prepare TokuMX
