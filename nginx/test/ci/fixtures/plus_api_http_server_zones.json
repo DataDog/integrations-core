@@ -1,0 +1,47 @@
+{
+    "hg.nginx.org": {
+        "discarded": 2007,
+        "processing": 0,
+        "received": 217959437,
+        "requests": 885490,
+        "responses": {
+            "1xx": 0,
+            "2xx": 870762,
+            "3xx": 8964,
+            "4xx": 1806,
+            "5xx": 1951,
+            "total": 883483
+        },
+        "sent": 30851262331
+    },
+    "lxr.nginx.org": {
+        "discarded": 144,
+        "processing": 0,
+        "received": 1524921,
+        "requests": 4201,
+        "responses": {
+            "1xx": 0,
+            "2xx": 2634,
+            "3xx": 358,
+            "4xx": 563,
+            "5xx": 502,
+            "total": 4057
+        },
+        "sent": 97625364
+    },
+    "trac.nginx.org": {
+        "discarded": 43392,
+        "processing": 6,
+        "received": 84917755,
+        "requests": 302399,
+        "responses": {
+            "1xx": 0,
+            "2xx": 117554,
+            "3xx": 56202,
+            "4xx": 3720,
+            "5xx": 81525,
+            "total": 259001
+        },
+        "sent": 2862577112
+    }
+}
