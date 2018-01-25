@@ -25,10 +25,8 @@ instances:
     # days_warning: 28                   # default 14
     # days_critical: 14                  # default 7
     # timeout: 3                         # in seconds. Default is 1.
-    skip_event: true # Default is false, i.e. emit events instead of service checks. Recommend to set to true.
   - name: Example website (staging)
     url: http://staging.example.com/
-    skip_event: true
 ```
 
 The HTTP check has more configuration options than many checks — many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
@@ -54,7 +52,6 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `check_certificate_expiration` | When `check_certificate_expiration` is enabled, the service check will check the expiration date of the SSL certificate. Note that this will cause the SSL certificate to be validated, regardless of the value of the `disable_ssl_validation` setting. |
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration. |
 | `headers` | This parameter allows you to send additional headers with the request. Please see the [example YAML file](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for additional information and caveats. |
-| `skip_event` | When enabled, the check will not create an event. This is useful to avoid duplicates with a server side service check. This defaults to `false`. |
 | `skip_proxy` | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`. |
 | `allow_redirects` | This setting allows the service check to follow HTTP redirects and defaults to `true`.
 | `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging](/guides/tagging/) and blog post, [The power of tagged metrics](https://www.datadoghq.com/blog/the-power-of-tagged-metrics/) |
@@ -92,9 +89,7 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/http
 
 ### Events
 
-Older versions of the HTTP check only emitted events to reflect site status, but now the check supports service checks, too. However, emitting events is still the default behavior. Set `skip_event` to true for all configured instances to submit service checks instead of events.
-
-The Agent will soon deprecate `skip_event`, i.e. the HTTP check will only support service checks.
+The HTTP check does not include any event at this time.
 
 ### Service Checks
 

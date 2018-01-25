@@ -128,8 +128,6 @@ class DNSCheck(NetworkCheck):
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         tags = self._get_tags(instance)
 
-        instance['skip_event'] = True
-
         if status == Status.UP:
             msg = None
 

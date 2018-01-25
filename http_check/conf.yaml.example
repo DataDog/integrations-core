@@ -117,12 +117,6 @@ instances:
     #   Host: alternative.host.example.com
     #   X-Auth-Token: SOME-AUTH-TOKEN
 
-    # The (optional) skip_event parameter will instruct the check to not
-    # create any event to avoid duplicates with a server side service check.
-    # This default to False.
-    #
-    skip_event: true
-
     # The (optional) skip_proxy parameter would bypass any proxy settings enabled
     # and attempt to reach the the URL directly.
     # If no proxy is defined at any level, this flag bears no effect.

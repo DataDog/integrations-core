@@ -59,7 +59,6 @@ class SnmpCheck(NetworkCheck):
         for instance in instances:
             if 'name' not in instance:
                 instance['name'] = self._get_instance_key(instance)
-            instance['skip_event'] = True
 
         self.generators = {}
 
