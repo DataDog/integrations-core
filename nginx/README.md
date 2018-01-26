@@ -83,7 +83,8 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
-1. Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics)
+1. Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics):
+
   ```
   init_config:
 
@@ -102,11 +103,13 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
 
 2. Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
+
   ```
   logs:
      - type: file

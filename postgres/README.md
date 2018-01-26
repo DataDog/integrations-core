@@ -85,11 +85,13 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
   ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
 
 3. Add this configuration setup to your `postgres.yaml` file to start collecting your PostgreSQL logs:
+
   ```
   logs:
     - type: file

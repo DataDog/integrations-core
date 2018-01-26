@@ -71,7 +71,8 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Metric Collection
 
-1. Add this configuration setup to your `mysql.yaml` file to start gathering your [MySQL metrics](#metrics)
+1. Add this configuration setup to your `mysql.yaml` file to start gathering your [MySQL metrics](#metrics):
+
   ```
   init_config:
 
@@ -102,6 +103,7 @@ Query OK, 0 rows affected (0.00 sec)
 
   - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
   - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error and slow query logs:
+
   ```
   [mysqld_safe]
   log_error=/var/log/mysql/mysql_error.log
@@ -130,11 +132,13 @@ Query OK, 0 rows affected (0.00 sec)
   ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
 
 3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:
+
   ```
   logs:
       - type: file
