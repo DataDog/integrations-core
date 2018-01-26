@@ -4,11 +4,18 @@
 import logging
 
 try:
-    from _util import get_subprocess_output as subprocess_output
+    # Agent5
+    from utils.subprocess_output import get_subprocess_output as subprocess_output
 except ImportError:
-    from ..stubs._util import subprocess_output
+    try:
+        # Agent6
+        from _util import get_subprocess_output as subprocess_output
+    except ImportError:
+        # No agent
+        from ..stubs._util import subprocess_output
 
 log = logging.getLogger(__name__)
+
 
 def get_subprocess_output(command, log, raise_on_empty_output=True):
     """
