@@ -83,7 +83,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
-1. Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics):
+* Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics):
 
   ```
   init_config:
@@ -96,30 +96,30 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
   ```
   See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  logs_enabled: true
+  log_enabled: true
   ```
 
-2. Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
+*  Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
 
   ```
   logs:
      - type: file
-       path: /var/log/nginx/access.log
+      path: /var/log/nginx/access.log
       service: nginx
       source: nginx
       sourcecategory: http_web_access
     
     - type: file
-       path: /var/log/nginx/error.log
+      path: /var/log/nginx/error.log
       service: nginx
       source: nginx
       sourcecategory: http_web_access   
@@ -127,7 +127,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
   Change the `service` and `path` parameter values and configure them for your environment.  
   See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 

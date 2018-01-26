@@ -44,7 +44,7 @@ db.createUser({
 
 #### Metric Collection
 
-1. Add this configuration setup to your `mongodb.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
+* Add this configuration setup to your `mongodb.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
 
   ```
   init_config:
@@ -58,19 +58,19 @@ db.createUser({
   ```
   See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
 
 #### Log Collection
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  logs_enabled: true
+  log_enabled: true
   ```
 
-2. Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:
+* Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:
 
   ```
   logs:
@@ -82,7 +82,7 @@ db.createUser({
   Change the `service` and `path` parameter values and configure them for your environment.  
   See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
