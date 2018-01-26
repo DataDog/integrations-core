@@ -188,3 +188,19 @@ class DirectoryTestCase(AgentCheckTest):
 
         # Raises when coverage < 100%
         self.coverage_report()
+
+    def test_non_existent_directory(self):
+        """
+        Missing or inaccessible directory coverage.
+        """
+        config = {'instances': [{'directory': '/non-existent/directory'}]}
+        self.assertRaises(Exception, lambda: self.run_check(config))
+
+    def test_non_existent_directory_ignore_missing(self):
+        config = {
+            'instances': [
+                {'directory': '/non-existent/directory',
+                 'ignore_missing': True}
+            ]
+        }
+        self.run_check(config)

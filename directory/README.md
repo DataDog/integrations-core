@@ -29,6 +29,7 @@ instances:
     pattern: "*.log"                # defaults to "*" (all files)
     recursive: True                 # default False
     countonly: False                # set to True to only collect the number of files matching 'pattern'. Useful for very large directories.
+    ignore_missing: False           # set to True to not raise exceptions on missing or inaccessible directories
 ```
 
 Ensure that the user running the Agent process (usually `dd-agent`) has read access to the directories, subdirectories, and files you configure.

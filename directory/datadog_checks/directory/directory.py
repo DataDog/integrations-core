@@ -31,6 +31,8 @@ class DirectoryCheck(AgentCheck):
         "filegauges" - boolean, when true stats will be an individual gauge per file (max. 20 files!) and not a histogram of the whole directory. default False
         "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. default "*"
         "recursive" - boolean, when true the stats will recurse into directories. default False
+        "countonly" - boolean, when true the stats will only count the number of files matching the pattern. Useful for very large directories. default False
+        "ignore_missing" - boolean, when true do not raise an exception on missing/inaccessible directories. default False
     """
 
     SOURCE_TYPE_NAME = 'system'
@@ -48,8 +50,13 @@ class DirectoryCheck(AgentCheck):
         filetagname = instance.get("filetagname", "filename")
         filegauges = _is_affirmative(instance.get("filegauges", False))
         countonly = _is_affirmative(instance.get("countonly", False))
+        ignore_missing = _is_affirmative(instance.get("ignore_missing", False))
 
         if not exists(abs_directory):
+            if ignore_missing:
+                self.log.info("DirectoryCheck: the directory (%s) does not exist.  Skipping." % abs_directory)
+                return
+
             raise Exception("DirectoryCheck: the directory (%s) does not exist" % abs_directory)
 
         self._get_stats(abs_directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly)
