@@ -42,7 +42,7 @@ The Agent collects metrics via a stats endpoint:
 
 #### Metric Collection
 
-1. Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics):
+*  Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
   ```
   init_config:
@@ -54,33 +54,31 @@ The Agent collects metrics via a stats endpoint:
   ```
   See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
 #### Log Collection
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
   logs_enabled: true
   ```
 
-2. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
-
-    ```
-    logs:
+* Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+  
+  ```
+  logs:
       - type: udp
         port: 514
         service: haproxy
         source: haproxy  
         sourcecategory: http_web_access
-    ```
-    
-  Change the `service` parameter value and configure it for your environment.
-  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  ```
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.  
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 

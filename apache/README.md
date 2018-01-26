@@ -19,7 +19,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
-1. Add this configuration setup to your `apache.yaml` file to start gathering your [Apache Metrics](#metrics):
+*  Add this configuration setup to your `apache.yaml` file to start gathering your [Apache Metrics](#metrics):
 
   ```
   init_config:
@@ -33,39 +33,39 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
   Change the `apache_status_url` parameter value and configure it for your environment.  
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
 #### Log Collection
 
 **Available for Agent >6.0** 
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
   logs_enabled: true
   ```
    
-2. Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
+* Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
 
   ```
     logs:
-          + type: file
-            path: /var/log/apache2/access.log
-            source: apache
-            sourcecategory: http_web_access
-            service: apache
+        - type: file
+          path: /var/log/apache2/access.log
+          source: apache
+          sourcecategory: http_web_access
+          service: apache
 
-           + type: file
-             path: /var/log/apache2/error.log
-             source: apache
-             sourcecategory: http_web_access
-             service: apache
+        - type: file
+          path: /var/log/apache2/error.log
+          source: apache
+          sourcecategory: http_web_access
+          service: apache
   ```
   
   Change the `path` and `service` parameter values and configure them for your environment.  
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**  
 
