@@ -1,5 +1,11 @@
 # CHANGELOG - rabbitmq
 
+1.5.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][].
 
 1.4.0 / 2018-01-10
 ==================
