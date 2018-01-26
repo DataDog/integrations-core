@@ -5,13 +5,15 @@
 # stdlib
 import unittest
 import os
+import mock
+import json
 
 # 3p
 import requests
 from nose.plugins.attrib import attr
 
 # project
-from tests.checks.common import Fixtures, load_check
+from tests.checks.common import Fixtures, load_check, AgentCheckTest
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
@@ -112,3 +114,72 @@ class TestNginx(unittest.TestCase):
 
         # Check that the parsed test data is the same as the expected output
         self.assertEquals(parsed, expected)
+
+class dummy_http_response:
+    def __init__(self, json):
+        self._json = json
+
+    def json(self):
+        return json.loads(self._json)
+
+def api_call(*args, **kwargs):
+
+    json = ""
+
+    if "nginx" in args[0]:
+        json = Fixtures.read_file('plus_api_nginx.json', sdk_dir=FIXTURE_DIR)
+    elif "processes" in args[0]:
+        json = Fixtures.read_file('plus_api_processes.json', sdk_dir=FIXTURE_DIR)
+    elif "connections" in args[0]:
+        json = Fixtures.read_file('plus_api_connections.json', sdk_dir=FIXTURE_DIR)
+    elif "ssl" in args[0]:
+        json = Fixtures.read_file('plus_api_ssl.json', sdk_dir=FIXTURE_DIR)
+    elif "slabs" in args[0]:
+        json = Fixtures.read_file('plus_api_slabs.json', sdk_dir=FIXTURE_DIR)
+    elif "http/requests" in args[0]:
+        json = Fixtures.read_file('plus_api_http_requests.json', sdk_dir=FIXTURE_DIR)
+    elif "http/server_zones" in args[0]:
+        json = Fixtures.read_file('plus_api_http_server_zones.json', sdk_dir=FIXTURE_DIR)
+    elif "http/caches" in args[0]:
+        json = Fixtures.read_file('plus_api_http_caches.json', sdk_dir=FIXTURE_DIR)
+    elif "http/upstreams" in args[0]:
+        json = Fixtures.read_file('plus_api_http_upstreams.json', sdk_dir=FIXTURE_DIR)
+    elif "stream/upstreams" in args[0]:
+        json = Fixtures.read_file('plus_api_stream_upstreams.json', sdk_dir=FIXTURE_DIR)
+    elif "stream/server_zones" in args[0]:
+        json = Fixtures.read_file('plus_api_stream_server_zones.json', sdk_dir=FIXTURE_DIR)
+
+    return dummy_http_response(json)
+
+class TestNginxPlusAPI(AgentCheckTest):
+
+    CHECK_NAME = "nginx"
+
+    def test_plus_api(self):
+        config = {
+            "instances": [{
+                "nginx_status_url": "http://dummy/api",
+                "use_plus_api": True
+            }]
+        }
+        self.load_check(config, {})
+        with mock.patch('datadog_checks.nginx.Nginx._perform_request', side_effect=api_call):
+            self.run_check(config)
+            self.assertEquals(len(self.metrics), 956)
+
+    def test_nest_payload(self):
+        self.load_check({}, {})
+        keys = ["foo", "bar"]
+        payload = {
+            "key1": "val1",
+            "key2": "val2"
+        }
+
+        result = self.check._nest_payload(keys, payload)
+        expected = {
+            "foo": {
+                "bar": payload
+            }
+        }
+
+        self.assertEquals(result, expected)

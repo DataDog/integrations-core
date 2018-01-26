@@ -62,7 +62,7 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging](/guides/tagging/) and blog post, [The power of tagged metrics](https://www.datadoghq.com/blog/the-power-of-tagged-metrics/) |
 
 
-When you have finished configuring `http_check.yaml`, restart the Agent to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 

@@ -1,5 +1,11 @@
 # CHANGELOG - haproxy
 
+1.2.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 1.2.0 / Unreleased
 ==================
 

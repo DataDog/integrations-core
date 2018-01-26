@@ -32,6 +32,7 @@ The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx
 * [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) – only for NGINX Plus
 
 NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
+For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement](https://www.nginx.com/blog/nginx-plus-r13-released/) for more information.
 
 If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
@@ -43,9 +44,12 @@ http_stub_status_module
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX—enabling the module as you compile it—but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
 ### Configuration
+
+Create a `nginx.yaml` file in the Agent's `conf.d` directory.
+
 #### Prepare NGINX
 
-On each NGINX server, create a `status.conf` in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`). See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options:
+On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
 
 ```
 server {
@@ -77,21 +81,55 @@ You may optionally configure HTTP basic authentication in the server block, but 
 
 Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
-#### Connect the Agent
+#### Metric Collection
 
-Create an `nginx.yaml` in the Agent's `conf.d` directory:
+1. Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics):
 
-```
-init_config:
+  ```
+  init_config:
 
-instances:
-  - nginx_status_url: http://localhost:81/nginx_status/
-  # If you configured the endpoint with HTTP basic authentication
-  # user: <USER>
-  # password: <PASSWORD>
-```
+  instances:
+    - nginx_status_url: http://localhost:81/nginx_status/
+    # If you configured the endpoint with HTTP basic authentication
+    # user: <USER>
+    # password: <PASSWORD>
+  ```
+  See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
+  ```
+  logs_enabled: true
+  ```
+
+2. Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
+
+  ```
+  logs:
+     - type: file
+       path: /var/log/nginx/access.log
+      service: nginx
+      source: nginx
+      sourcecategory: http_web_access
+    
+    - type: file
+       path: /var/log/nginx/error.log
+      service: nginx
+      source: nginx
+      sourcecategory: http_web_access   
+  ```
+  Change the `service` and `path` parameter values and configure them for your environment.  
+  See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
+
+3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
@@ -109,8 +147,6 @@ instances:
 
     [...]
 ```
-
-See the Troubleshooting section if the status is not OK.
 
 ## Compatibility
 
@@ -146,7 +182,7 @@ Finally, these metrics have no good equivalent:
 | nginx.net.writing | The current number of connections where nginx is writing the response back to the client. |
 
 ### Events
-The Nginx check does not include any event at this time.
+The NGINX check does not include any event at this time.
 
 ### Service Checks
 

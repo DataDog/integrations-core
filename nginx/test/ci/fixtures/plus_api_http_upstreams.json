@@ -1,0 +1,248 @@
+{
+    "demo-backend": {
+        "keepalive": 0,
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "downstart": "2018-01-06T10:00:06.743Z",
+                "downtime": 277772168,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 277126,
+                    "fails": 277121,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 0,
+                "name": "10.0.0.2:15431",
+                "received": 0,
+                "requests": 0,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 0,
+                    "3xx": 0,
+                    "4xx": 0,
+                    "5xx": 0,
+                    "total": 0
+                },
+                "sent": 0,
+                "server": "10.0.0.2:15431",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "demo-backend"
+    },
+    "hg-backend": {
+        "keepalive": 0,
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "downtime": 0,
+                "fails": 0,
+                "header_time": 47,
+                "health_checks": {
+                    "checks": 27649,
+                    "fails": 0,
+                    "last_passed": true,
+                    "unhealthy": 0
+                },
+                "id": 0,
+                "name": "10.0.0.1:8088",
+                "received": 34019509508,
+                "requests": 840176,
+                "response_time": 71,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 838369,
+                    "3xx": 0,
+                    "4xx": 1806,
+                    "5xx": 1,
+                    "total": 840176
+                },
+                "selected": "2018-01-09T15:09:38Z",
+                "sent": 317830706,
+                "server": "10.0.0.1:8088",
+                "state": "up",
+                "unavail": 0,
+                "weight": 5
+            },
+            {
+                "active": 0,
+                "backup": true,
+                "downstart": "2018-01-06T10:00:01.737Z",
+                "downtime": 277777174,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 27767,
+                    "fails": 27767,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 1,
+                "name": "10.0.0.1:8089",
+                "received": 0,
+                "requests": 0,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 0,
+                    "3xx": 0,
+                    "4xx": 0,
+                    "5xx": 0,
+                    "total": 0
+                },
+                "sent": 0,
+                "server": "10.0.0.1:8089",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "hg-backend"
+    },
+    "lxr-backend": {
+        "keepalive": 0,
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "downtime": 25421956,
+                "fails": 148,
+                "header_time": 108,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 0,
+                "name": "unix:/tmp/cgi.sock",
+                "received": 94404584,
+                "requests": 1702,
+                "response_time": 119,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 1554,
+                    "3xx": 0,
+                    "4xx": 0,
+                    "5xx": 0,
+                    "total": 1554
+                },
+                "selected": "2018-01-09T15:02:29Z",
+                "sent": 1508128,
+                "server": "unix:/tmp/cgi.sock",
+                "state": "up",
+                "unavail": 85,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": true,
+                "downstart": "2018-01-07T05:56:13.200Z",
+                "downtime": 206005711,
+                "fails": 10,
+                "header_time": 0,
+                "health_checks": {
+                    "checks": 0,
+                    "fails": 0,
+                    "unhealthy": 0
+                },
+                "id": 1,
+                "max_conns": 42,
+                "name": "unix:/tmp/cgib.sock",
+                "received": 0,
+                "requests": 10,
+                "response_time": 0,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 0,
+                    "3xx": 0,
+                    "4xx": 0,
+                    "5xx": 0,
+                    "total": 0
+                },
+                "selected": "2018-01-09T09:18:43Z",
+                "sent": 0,
+                "server": "unix:/tmp/cgib.sock",
+                "state": "unavail",
+                "unavail": 1,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "lxr-backend"
+    },
+    "trac-backend": {
+        "keepalive": 0,
+        "peers": [
+            {
+                "active": 0,
+                "backup": false,
+                "downtime": 0,
+                "fails": 0,
+                "header_time": 126,
+                "health_checks": {
+                    "checks": 27730,
+                    "fails": 0,
+                    "last_passed": true,
+                    "unhealthy": 0
+                },
+                "id": 0,
+                "name": "10.0.0.1:8080",
+                "received": 2272966991,
+                "requests": 61802,
+                "response_time": 126,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 59727,
+                    "3xx": 1681,
+                    "4xx": 394,
+                    "5xx": 0,
+                    "total": 61802
+                },
+                "selected": "2018-01-09T15:09:35Z",
+                "sent": 24282949,
+                "server": "10.0.0.1:8080",
+                "state": "up",
+                "unavail": 0,
+                "weight": 1
+            },
+            {
+                "active": 0,
+                "backup": true,
+                "downstart": "2018-01-06T10:00:01.737Z",
+                "downtime": 277777174,
+                "fails": 0,
+                "health_checks": {
+                    "checks": 27767,
+                    "fails": 27767,
+                    "last_passed": false,
+                    "unhealthy": 1
+                },
+                "id": 1,
+                "name": "10.0.0.1:8081",
+                "received": 0,
+                "requests": 0,
+                "responses": {
+                    "1xx": 0,
+                    "2xx": 0,
+                    "3xx": 0,
+                    "4xx": 0,
+                    "5xx": 0,
+                    "total": 0
+                },
+                "sent": 0,
+                "server": "10.0.0.1:8081",
+                "state": "unhealthy",
+                "unavail": 0,
+                "weight": 1
+            }
+        ],
+        "zombies": 0,
+        "zone": "trac-backend"
+    }
+}

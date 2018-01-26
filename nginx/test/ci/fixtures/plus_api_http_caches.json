@@ -1,0 +1,41 @@
+{
+    "http_cache": {
+        "bypass": {
+            "bytes": 9566886911,
+            "bytes_written": 9566815735,
+            "responses": 921823,
+            "responses_written": 921696
+        },
+        "cold": false,
+        "expired": {
+            "bytes": 7765571819,
+            "bytes_written": 7712572857,
+            "responses": 261407,
+            "responses_written": 252017
+        },
+        "hit": {
+            "bytes": 19912886288,
+            "responses": 1569253
+        },
+        "max_size": 536870912,
+        "miss": {
+            "bytes": 334579707937,
+            "bytes_written": 306632421222,
+            "responses": 8227103,
+            "responses_written": 7499154
+        },
+        "revalidated": {
+            "bytes": 0,
+            "responses": 0
+        },
+        "size": 533667840,
+        "stale": {
+            "bytes": 0,
+            "responses": 0
+        },
+        "updating": {
+            "bytes": 0,
+            "responses": 0
+        }
+    }
+}

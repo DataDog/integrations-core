@@ -1,0 +1,808 @@
+{
+    "SSL": {
+        "pages": {
+            "free": 5956,
+            "used": 6769
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 16,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 14198,
+                "reqs": 773263,
+                "used": 58026
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 101,
+                "used": 2
+            },
+            "256": {
+                "fails": 0,
+                "free": 14137,
+                "reqs": 773144,
+                "used": 58023
+            },
+            "32": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "512": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            }
+        }
+    },
+    "ban": {
+        "pages": {
+            "free": 29,
+            "used": 2
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 31,
+                "reqs": 1,
+                "used": 1
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 126,
+                "reqs": 1,
+                "used": 1
+            },
+            "512": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            }
+        }
+    },
+    "bot": {
+        "pages": {
+            "free": 29,
+            "used": 2
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 22,
+                "reqs": 240,
+                "used": 10
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 126,
+                "reqs": 1,
+                "used": 1
+            },
+            "512": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            }
+        }
+    },
+    "demo-backend": {
+        "pages": {
+            "free": 1,
+            "used": 6
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 28,
+                "reqs": 4,
+                "used": 4
+            },
+            "16": {
+                "fails": 0,
+                "free": 252,
+                "reqs": 2,
+                "used": 2
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 125,
+                "reqs": 2,
+                "used": 2
+            },
+            "512": {
+                "fails": 0,
+                "free": 7,
+                "reqs": 1,
+                "used": 1
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "dns_backends": {
+        "pages": {
+            "free": 2,
+            "used": 5
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 24,
+                "reqs": 8,
+                "used": 8
+            },
+            "16": {
+                "fails": 0,
+                "free": 249,
+                "reqs": 5,
+                "used": 5
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "512": {
+                "fails": 0,
+                "free": 5,
+                "reqs": 3,
+                "used": 3
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "dynamic": {
+        "pages": {
+            "free": 2,
+            "used": 5
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 22,
+                "reqs": 10,
+                "used": 10
+            },
+            "16": {
+                "fails": 0,
+                "free": 253,
+                "reqs": 1,
+                "used": 1
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 121,
+                "reqs": 6,
+                "used": 6
+            },
+            "512": {
+                "fails": 0,
+                "free": 4,
+                "reqs": 4,
+                "used": 4
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "hg-backend": {
+        "pages": {
+            "free": 2,
+            "used": 5
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 26,
+                "reqs": 6,
+                "used": 6
+            },
+            "16": {
+                "fails": 0,
+                "free": 252,
+                "reqs": 2,
+                "used": 2
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 122,
+                "reqs": 5,
+                "used": 5
+            },
+            "512": {
+                "fails": 0,
+                "free": 6,
+                "reqs": 2,
+                "used": 2
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "http_cache": {
+        "pages": {
+            "free": 3320,
+            "used": 751
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 128,
+                "reqs": 8238107,
+                "used": 11856
+            },
+            "32": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "512": {
+                "fails": 0,
+                "free": 7,
+                "reqs": 1,
+                "used": 1
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            }
+        }
+    },
+    "lxr-backend": {
+        "pages": {
+            "free": 2,
+            "used": 5
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 26,
+                "reqs": 6,
+                "used": 6
+            },
+            "16": {
+                "fails": 0,
+                "free": 252,
+                "reqs": 2,
+                "used": 2
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 122,
+                "reqs": 5,
+                "used": 5
+            },
+            "512": {
+                "fails": 0,
+                "free": 6,
+                "reqs": 2,
+                "used": 2
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "nginx_plus_versions": {
+        "pages": {
+            "free": 28,
+            "used": 3
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 18,
+                "reqs": 14,
+                "used": 14
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "512": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 478,
+                "reqs": 26,
+                "used": 26
+            }
+        }
+    },
+    "nginxorg": {
+        "pages": {
+            "free": 1,
+            "used": 6
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 20,
+                "reqs": 16,
+                "used": 12
+            },
+            "16": {
+                "fails": 0,
+                "free": 247,
+                "reqs": 9,
+                "used": 7
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 15,
+                "reqs": 1,
+                "used": 1
+            },
+            "32": {
+                "fails": 0,
+                "free": 125,
+                "reqs": 2,
+                "used": 2
+            },
+            "512": {
+                "fails": 0,
+                "free": 3,
+                "reqs": 7,
+                "used": 5
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    },
+    "one": {
+        "pages": {
+            "free": 251,
+            "used": 3
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 43,
+                "reqs": 458237,
+                "used": 21
+            },
+            "16": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 126,
+                "reqs": 1,
+                "used": 1
+            },
+            "512": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "64": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "8": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            }
+        }
+    },
+    "trac-backend": {
+        "pages": {
+            "free": 1,
+            "used": 6
+        },
+        "slots": {
+            "1024": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "128": {
+                "fails": 0,
+                "free": 26,
+                "reqs": 6,
+                "used": 6
+            },
+            "16": {
+                "fails": 0,
+                "free": 252,
+                "reqs": 2,
+                "used": 2
+            },
+            "2048": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "256": {
+                "fails": 0,
+                "free": 0,
+                "reqs": 0,
+                "used": 0
+            },
+            "32": {
+                "fails": 0,
+                "free": 123,
+                "reqs": 4,
+                "used": 4
+            },
+            "512": {
+                "fails": 0,
+                "free": 6,
+                "reqs": 2,
+                "used": 2
+            },
+            "64": {
+                "fails": 0,
+                "free": 63,
+                "reqs": 1,
+                "used": 1
+            },
+            "8": {
+                "fails": 0,
+                "free": 503,
+                "reqs": 1,
+                "used": 1
+            }
+        }
+    }
+}
