@@ -32,6 +32,7 @@ The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx
 * [http status module](http://nginx.org/en/docs/http/ngx_http_status_module.html) – only for NGINX Plus
 
 NGINX Plus packages _always_ include the http status module, so if you're a Plus user, skip to **Configuration** now.
+For NGINX Plus release 13 and above, the status module is deprecated and you should use the new Plus API instead. See [the announcement](https://www.nginx.com/blog/nginx-plus-r13-released/) for more information.
 
 If you use open source NGINX, however, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 

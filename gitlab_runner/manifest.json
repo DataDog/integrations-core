@@ -12,6 +12,6 @@
   "public_title": "Datadog-Gitlab Runners Integration",
   "categories":["web", "network"],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab_runner/",
-  "is_public": false,
+  "is_public": true,
   "has_logo": false
 }

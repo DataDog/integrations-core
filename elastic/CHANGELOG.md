@@ -1,10 +1,11 @@
 # CHANGELOG - elastic
 
-1.4.0 / Unreleased
+1.5.0 / Unreleased
 ==================
 
 ### Changes
 
+* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. [#1050][].
 * [BUG] Fixes bug that causes poor failovers when authentication fails. [#1026][].
 
 
@@ -60,3 +61,5 @@
 [#820]: https://github.com/DataDog/integrations-core/issues/820
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#893]: https://github.com/DataDog/integrations-core/issues/893
+[#1026]: https://github.com/DataDog/integrations-core/issues/1026
+[#1050]: https://github.com/DataDog/integrations-core/issues/1050
