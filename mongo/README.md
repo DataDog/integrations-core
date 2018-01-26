@@ -45,6 +45,7 @@ db.createUser({
 #### Metric Collection
 
 1. Add this configuration setup to your `mongodb.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
+
   ```
   init_config:
   instances:
@@ -64,11 +65,13 @@ db.createUser({
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
 
 2. Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:
+
   ```
   logs:
       - type: file

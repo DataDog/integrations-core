@@ -19,7 +19,8 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
-1. Add this configuration setup to your `apache.yaml` file to start gathering your [Apache Metrics](#metrics)
+1. Add this configuration setup to your `apache.yaml` file to start gathering your [Apache Metrics](#metrics):
+
   ```
   init_config:
 
@@ -39,11 +40,13 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 **Available for Agent >6.0** 
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
    
 2. Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
+
   ```
     logs:
           + type: file
@@ -58,6 +61,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
              sourcecategory: http_web_access
              service: apache
   ```
+  
   Change the `path` and `service` parameter values and configure them for your environment.  
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 

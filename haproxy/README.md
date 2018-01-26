@@ -27,6 +27,7 @@ Create a `haproxy.yaml` file in the Agent's `conf.d` directory.
 The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
+
   ```
   listen stats :9000  # Listen on localhost:9000
   mode http
@@ -41,7 +42,8 @@ The Agent collects metrics via a stats endpoint:
 
 #### Metric Collection
 
-1. Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics)
+1. Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics):
+
   ```
   init_config:
 
@@ -59,11 +61,13 @@ The Agent collects metrics via a stats endpoint:
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+
   ```
   logs_enabled: true
   ```
 
 2. Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+
     ```
     logs:
       - type: udp
