@@ -1,5 +1,12 @@
 # CHANGELOG - http_check
 
+1.4.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][].
+
 1.3.1 / 2018-01-17
 ==================
 
