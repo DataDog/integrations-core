@@ -67,7 +67,7 @@ db.createUser({
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  logs_enabled: true
+  log_enabled: true
   ```
 
 * Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:

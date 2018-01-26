@@ -134,7 +134,7 @@ Query OK, 0 rows affected (0.00 sec)
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```
-    logs_enabled: true
+    log_enabled: true
     ```
 
 3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:

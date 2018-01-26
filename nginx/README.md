@@ -105,7 +105,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  logs_enabled: true
+  log_enabled: true
   ```
 
 *  Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
