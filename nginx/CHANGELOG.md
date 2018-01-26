@@ -1,11 +1,18 @@
 # CHANGELOG - nginx
 
+1.2.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 1.2.0 / Unreleased
 ==================
 
 ### Changes
 
 * [IMPROVEMENT] Make the check compatible with the new Plus API. [#1013][]
+
 
 1.1.0 / 2017-07-18
 ==================

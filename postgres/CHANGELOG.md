@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+1.2.2 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 1.2.1 / Unreleased
 ==================
 

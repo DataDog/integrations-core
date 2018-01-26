@@ -1,5 +1,12 @@
 # CHANGELOG - apache
 
+1.1.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
+
 1.1.0 / 2017-11-21
 ==================
 ### Changes

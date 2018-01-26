@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+1.1.2 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 1.1.1 / Unreleased
 ==================
 

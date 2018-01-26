@@ -45,7 +45,22 @@ instances:
     # collections:
     #   - my_collection
     #   - my_other_collection
-    #
     # Collect indexes access metrics for every index in every collections in
     # the 'collections' list. This is available starting mongo 3.2.
     # collections_indexes_stats: false
+
+## Log section (Available for Agent >=6.0)
+
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+    # - type: file
+    #   path: /var/log/mongodb/mongodb.log
+    #   service: mongo
+    #   source: mongodb

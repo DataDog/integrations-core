@@ -1,5 +1,11 @@
 # CHANGELOG - iis
 
+2.0.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
 2.0.0 / 2018-01-10
 ==================
 
