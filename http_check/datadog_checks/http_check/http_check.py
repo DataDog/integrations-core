@@ -190,7 +190,8 @@ class HTTPCheck(NetworkCheck):
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
-        skip_proxy = _is_affirmative(instance.get('no_proxy', False))
+        skip_proxy = _is_affirmative(
+            instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
