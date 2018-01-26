@@ -71,7 +71,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Metric Collection
 
-1. Add this configuration setup to your `mysql.yaml` file to start gathering your [MySQL metrics](#metrics):
+* Add this configuration setup to your `mysql.yaml` file to start gathering your [MySQL metrics](#metrics):
 
   ```
   init_config:
@@ -93,7 +93,7 @@ Query OK, 0 rows affected (0.00 sec)
   In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.  
   See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MySQL metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MySQL metrics to Datadog.
 
 #### Log Collection
 
@@ -104,69 +104,71 @@ Query OK, 0 rows affected (0.00 sec)
   - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
   - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error and slow query logs:
 
-  ```
-  [mysqld_safe]
-  log_error=/var/log/mysql/mysql_error.log
-  [mysqld]
-  general_log = on
-  general_log_file = /var/log/mysql/mysql.log
-  log_error=/var/log/mysql/mysql_error.log
-  slow_query_log = on
-  slow_query_log_file = /var/log/mysql/mysql-slow.log
-  long_query_time = 2
-  ```
+    ```
+    [mysqld_safe]
+    log_error=/var/log/mysql/mysql_error.log
+    [mysqld]
+    general_log = on
+    general_log_file = /var/log/mysql/mysql.log
+    log_error=/var/log/mysql/mysql_error.log
+    slow_query_log = on
+    slow_query_log_file = /var/log/mysql/mysql-slow.log
+    long_query_time = 2
+    ```
 
   - Save the file and restart MySQL using following commands:  
     `service mysql restart`
   - Make sure the Agent has read access on those files (and the `/var/log/mysql` directory) and double check your logrotate configuration to make sure those files are taken into account and permissions are correctly set as well.
   - In `/etc/logrotate.d/mysql-serverthere` should be something similar to: 
 
-  ```
-  /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
-          daily
-          rotate 7
-          missingok
-          create 644 mysql adm
-          Compress
-  }
-  ```
+    ```
+    /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
+            daily
+            rotate 7
+            missingok
+            create 644 mysql adm
+            Compress
+    }
+    ```
 
-2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
+2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-  ```
-  logs_enabled: true
-  ```
+    ```
+    log_enabled: true
+    ```
 
 3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:
 
-  ```
-  logs:
-      - type: file
-        path: /var/log/mysql/mysql_error.log
-        source: mysql
-        sourcecategory: database
-        service: myapplication
+    ```
+    logs:
+        - type: file
+          path: /var/log/mysql/mysql_error.log
+          source: mysql
+          sourcecategory: database
+          service: myapplication
 
-      - type: file
-        path: /var/log/mysql/mysql-slow.log
-        source: mysql
-        sourcecategory: database
-        service: myapplication
+        - type: file
+          path: /var/log/mysql/mysql-slow.log
+          source: mysql
+          sourcecategory: database
+          service: myapplication
 
-      - type: file
-        path: /var/log/mysql/mysql.log
-        source: mysql
-        sourcecategory: database
-        service: myapplication
-        # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
-        # log_processing_rules:
-        #   - type: multi_line
-        #     name: new_log_start_with_date
-        #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-  ```
-  See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
+        - type: file
+          path: /var/log/mysql/mysql.log
+          source: mysql
+          sourcecategory: database
+          service: myapplication
+          # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
+          # log_processing_rules:
+          #   - type: multi_line
+          #     name: new_log_start_with_date
+          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+    ```
+    See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
