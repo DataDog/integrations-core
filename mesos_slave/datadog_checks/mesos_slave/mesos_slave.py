@@ -208,6 +208,7 @@ class MesosSlave(AgentCheck):
                       self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
             for m in metrics:
                 for key_name, (metric_name, metric_func) in m.iteritems():
-                    metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
+                    if key_name in stats_metrics:
+                        metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 
         self.service_check_needed = True
