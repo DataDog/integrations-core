@@ -31,29 +31,24 @@ class TestNginx(unittest.TestCase):
                 {
                     'nginx_status_url': 'http://localhost:44441/nginx_status/',
                     'tags': ['first_one'],
-                    'skip_proxy': True,
                 },
                 {
                     'nginx_status_url': 'http://dummyurl:44441/nginx_status/',
                     'tags': ['dummy'],
-                    'skip_proxy': True,
                 },
                 {
                     'nginx_status_url': 'http://localhost:44441/nginx_status/',
                     'tags': ['second'],
-                    'skip_proxy': True,
                 },
                 {
                     'nginx_status_url': 'https://localhost:44442/https_nginx_status/',
                     'tags': ['ssl_enabled'],
                     'ssl_validation': True,
-                    'skip_proxy': True,
                 },
                 {
                     'nginx_status_url': 'https://localhost:44442/https_nginx_status/',
                     'tags': ['ssl_disabled'],
                     'ssl_validation': False,
-                    'skip_proxy': True,
                 },
             ]
         }
