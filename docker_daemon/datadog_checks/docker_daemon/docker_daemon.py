@@ -821,11 +821,12 @@ class DockerDaemon(AgentCheck):
     def _format_events(self, aggregated_events, containers_by_id):
         events = []
         for image_name, event_group in aggregated_events.iteritems():
-            container_tags = set()
             filtered_events_count = 0
-            normal_prio_events = []
 
             for event in event_group:
+                container_tags = set()
+                normal_prio_events = []
+
                 # Only keep events that are not configured to be filtered out
                 if event['status'].startswith(self.filtered_event_types):
                     filtered_events_count += 1
@@ -843,12 +844,12 @@ class DockerDaemon(AgentCheck):
                             container_tags.add('%s:%s' % (attr, event['Actor']['Attributes'][attr]))
 
                 normal_prio_events.append((event, container_name))
+                normal_event = self._create_dd_event(normal_prio_events, image_name, container_tags, priority='Normal')
+                if normal_event:
+                    events.append(normal_event)
+
             if filtered_events_count:
                 self.log.debug('%d events were filtered out because of ignored event type' % filtered_events_count)
-
-            normal_event = self._create_dd_event(normal_prio_events, image_name, container_tags, priority='Normal')
-            if normal_event:
-                events.append(normal_event)
 
         return events
 
