@@ -771,5 +771,3 @@ class SparkCheck(AgentCheckTest):
         threading.Thread(target=httpd.handle_request).start()
         time.sleep(.5)
         return httpd
-
-
