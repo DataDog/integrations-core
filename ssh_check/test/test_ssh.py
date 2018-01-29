@@ -20,7 +20,7 @@ class SshTestCase(unittest.TestCase):
     def test_ssh(self):
         config = {
             'instances': [{
-                'host': 'io.netgarage.org',
+                'host': 'ioarm.netgarage.org',
                 'port': 22,
                 'username': 'level1',
                 'password': 'level1',
@@ -58,7 +58,7 @@ class SshTestCase(unittest.TestCase):
         service = self.check.get_service_checks()
         self.assertEqual(service[0].get('status'), AgentCheck.OK)
         self.assertEqual(service[0].get('message'), "No errors occured")
-        self.assertEqual(service[0].get('tags'), ["instance:io.netgarage.org-22"])
+        self.assertEqual(service[0].get('tags'), ["instance:ioarm.netgarage.org-22"])
 
         # Testing that bad authentication will raise exception
         self.assertRaises(Exception, self.check.check, config['instances'][1])
