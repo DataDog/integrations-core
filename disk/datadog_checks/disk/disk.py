@@ -1,26 +1,19 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
 
-# 3p
 try:
     import psutil
 except ImportError:
     psutil = None
 
-# datadog
-from checks import AgentCheck
-from config import _is_affirmative
-from utils.platform import Platform
-from utils.subprocess_output import get_subprocess_output
-from utils.timeout import (
-    timeout,
-    TimeoutException,
-)
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.platform import Platform
+from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.utils.timeout import timeout, TimeoutException
 
 
 class Disk(AgentCheck):

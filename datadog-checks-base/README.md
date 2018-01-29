@@ -2,14 +2,25 @@
 
 ## Overview
 
-This wheel provides the base datadog-checks python package. It simply provides the base module and namespace all other integrations descend from. As of now, it has no other purpose.  
+This package provides the Python bits needed by the [Datadog Agent](https://github.com/DataDog/datadog-agent)
+to run Agent-based Integrations (also known as _Checks_).
 
-## Setup
-### Installation
+This _Check toolkit_ is used in two scenarios:
 
-To install the wheel on the agent:
+ 1. When used from within the Python interpreter embedded in the Agent, it
+ provides all the base classes and utilities needed by any Check.
+
+ 2. When installed in a local environment with a regular Python interpreter, it
+ mocks the presence of a running Agent so checks can work in standalone mode,
+ mostly useful for testing and development.
+
+## Installation
+
+Checks from [integrations-core](https://github.com/DataDog/integrations-core) already
+use the toolkit in a transparent way when you run the tests with Tox but you can
+install the toolkit locally and play with it:
 ```
-/opt/datadog-agent/embedded/bin/pip install .
+pip install git+https://github.com/DataDog/datadog-agent-tk.git
 ```
 
 ## Development
@@ -25,6 +36,11 @@ pip install -e .[dev]
 To build the wheel package:
 ```
 python setup.py bdist_wheel
+```
+
+To run the tests, [install tox](http://tox.readthedocs.io/en/latest/install.html) and just run:
+```
+tox
 ```
 
 ## Troubleshooting

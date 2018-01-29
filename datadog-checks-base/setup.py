@@ -1,87 +1,56 @@
-# Always prefer setuptools over distutils
-from setuptools import setup
-# To use a consistent encoding
-from codecs import open
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from setuptools import setup, find_packages
+from codecs import open  # To use a consistent encoding
 from os import path
 
-import re
 
-here = path.abspath(path.dirname(__file__))
+HERE = path.abspath(path.dirname(__file__))
+
+ABOUT = {}
+with open(path.join(HERE, "datadog_checks", "__about__.py")) as f:
+    exec(f.read(), ABOUT)
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
-def read(*parts):
-    with open(path.join(here, *parts), 'r') as fp:
-        return fp.read()
-
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
-# https://packaging.python.org/guides/single-sourcing-package-version/
-version = find_version("datadog_checks", "__init__.py")
+LONG_DESC = ""
+with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    LONG_DESC = f.read()
 
 setup(
+    # Version should always match one from an agent release
+    version=ABOUT["__version__"],
+
     name='datadog-checks-base',
-    version=version,
-    description='The Datadog Checks Base package',
-    long_description=long_description,
-    keywords='datadog checks base',
-
-    # The project's main homepage.
-    url='https://github.com/DataDog/integrations-core',
-
-    # Author details
+    description='The Datadog Check Toolkit',
+    long_description=LONG_DESC,
+    keywords='datadog agent checks',
+    url='https://github.com/DataDog/datadog-agent-tk',
     author='Datadog',
     author_email='packages@datadoghq.com',
-
-    # License
-    license='MIT',
+    license='New BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
 
-    # The package we're going to ship
-    packages=['datadog_checks'],
+    packages=find_packages(),
 
-    # Run-time dependencies
-    install_requires=[],
-
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'datadog_agent_tk>=5.15',
-        ],
-    },
-
-    # Testing setup and dependencies
-    tests_require=[
-        'nose',
-        'coverage',
-        'datadog_agent_tk>=5.15',
+    setup_requires=['pytest-runner',],
+    tests_require=['pytest<4',],
+    install_requires=[
+        # 'requests==2.11.1',
+        # 'pyyaml==3.11',
+        # 'simplejson==3.6.5',
+        # 'docker-py==1.10.6',
+        # 'python-etcd==0.4.5',
+        # 'python-consul==0.4.7',
+        # 'kazoo==2.2.1',
     ],
-    test_suite='nose.collector',
-
-    # Extra files to ship with the wheel package
-    package_data={},
-    include_package_data=True,
-
-    # The entrypoint to run the check manually without an agent
-    entry_points={},
 )

@@ -1,8 +1,5 @@
-# CHANGELOG - ntp
+# CHANGELOG - datadog_checks
 
-1.0.0 / 2017-03-22
-==================
+## 1.0.0 / 2017-03-22
 
-### Changes
-
-* [FEATURE] adds ntp integration.
+* [FEATURE] adds `datadog_checks`
