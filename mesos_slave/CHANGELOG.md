@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [BUGFIX] Checks if metric exists before submitting it. See [#1066][].
+* [BUGFIX] Checks available metrics for backwards compatibility. See [#1066][].
 
 1.1.0 / 2017-08-21
 ==================
