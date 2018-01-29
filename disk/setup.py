@@ -7,26 +7,7 @@ from os import path
 
 HERE = path.abspath(path.dirname(__file__))
 
-def parse_req_line(line):
-    line = line.strip()
-    if not line or line.startswith('--hash') or line[0] == '#':
-        return None
-    req = line.rpartition('#')
-    if len(req[1]) == 0:
-        line = req[2].strip()
-    else:
-        line = req[1].strip()
-
-    if '--hash=' in line:
-        line = line[:line.find('--hash=')].strip()
-    if ';' in line:
-        line = line[:line.find(';')].strip()
-    if '\\' in line:
-        line = line[:line.find('\\')].strip()
-
-    return line
-
-
+# Get version info
 ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "disk", "__about__.py")) as f:
     exec(f.read(), ABOUT)
@@ -37,13 +18,8 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 # Parse requirements
 def get_requirements(fpath):
-    requirements_txt = set()
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
-        for line in f.readlines():
-            req = parse_req_line(line)
-            if req:
-                requirements_txt.add(req)
-    return list(requirements_txt)
+        return f.readlines()
 
 
 setup(
@@ -78,7 +54,7 @@ setup(
     packages=['datadog_checks.disk'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.txt')+[
+    install_requires=get_requirements('requirements.in')+[
         'datadog-checks-base',
     ],
 
