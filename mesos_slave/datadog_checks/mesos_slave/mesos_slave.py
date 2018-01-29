@@ -66,9 +66,9 @@ class MesosSlave(AgentCheck):
         'slave/cpus_percent'                : ('mesos.slave.cpus_percent', GAUGE),
         'slave/cpus_total'                  : ('mesos.slave.cpus_total', GAUGE),
         'slave/cpus_used'                   : ('mesos.slave.cpus_used', GAUGE),
-        'slave/gpus_percent'                : ('mesos.slave.gpus_percent', GAUGE),
-        'slave/gpus_total'                  : ('mesos.slave.gpus_total', GAUGE),
-        'slave/gpus_used'                   : ('mesos.slave.gpus_used', GAUGE),
+        'slave/gpus_percent'                : ('mesos.slave.gpus_percent', GAUGE), # >= 1.0.0
+        'slave/gpus_total'                  : ('mesos.slave.gpus_total', GAUGE), # >= 1.0.0
+        'slave/gpus_used'                   : ('mesos.slave.gpus_used', GAUGE), # >= 1.0.0
         'slave/disk_percent'                : ('mesos.slave.disk_percent', GAUGE),
         'slave/disk_total'                  : ('mesos.slave.disk_total', GAUGE),
         'slave/disk_used'                   : ('mesos.slave.disk_used', GAUGE),
@@ -208,6 +208,7 @@ class MesosSlave(AgentCheck):
                       self.SLAVE_EXECUTORS_METRICS, self.STATS_METRICS]
             for m in metrics:
                 for key_name, (metric_name, metric_func) in m.iteritems():
-                    metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
+                    if key_name in stats_metrics:
+                        metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 
         self.service_check_needed = True
