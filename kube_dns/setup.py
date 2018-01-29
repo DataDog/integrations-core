@@ -33,7 +33,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Parse requirements
-runtime_reqs = ['datadog-checks-base']
+runtime_reqs = ['datadog_checks_base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
         req = parse_req_line(line)

@@ -28,7 +28,7 @@ setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
 
-    name='datadog-checks-base',
+    name='datadog_checks_base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
     keywords='datadog agent checks',
