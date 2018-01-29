@@ -198,6 +198,14 @@ SPARK_RDD_METRICS = {
     'diskUsed': ('spark.rdd.disk_used', INCREMENT)
 }
 
+SSLConfig = namedtuple(
+    'SSLConfig', [
+        'verify',
+        'cert',
+        'key'
+    ]
+)
+
 
 class SparkCheck(AgentCheck):
 
@@ -208,6 +216,8 @@ class SparkCheck(AgentCheck):
             tags = []
         else:
             tags = list(set(tags))
+
+        ssl_config = self._get_ssl_config(instance)
 
         spark_apps = self._get_running_apps(instance, tags)
 
@@ -233,6 +243,13 @@ class SparkCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=['url:%s' % am_address],
                 message='Connection to ApplicationMaster "%s" was successful' % am_address)
+
+    def _get_ssl_config(self, instance):
+        return SSLConfig(
+            cert=instance.get('ssl_cert'),
+            key=instance.get('ssl_key'),
+            verify=instance.get('ssl_verify'),
+        )
 
     def _get_master_address(self, instance):
         '''
@@ -586,6 +603,19 @@ class SparkCheck(AgentCheck):
 
         if object_path:
             url = self._join_url_dir(url, object_path)
+
+        # Load SSL configuration, if available.
+        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        if isinstance(ssl_config.verify, bool) or isinstance(ssl_config.verify, str):
+            verify = ssl_config.verify
+        else:
+            verify = None
+        if ssl_config.cert and ssl_config.key:
+            cert = (ssl_config.cert, ssl_config.key)
+        elif ssl_config.cert:
+            cert = ssl_config.cert
+        else:
+            cert = None
 
         # Add args to the url
         if args:

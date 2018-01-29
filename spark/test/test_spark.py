@@ -13,6 +13,11 @@ import json
 
 from tests.checks.common import AgentCheckTest, Fixtures
 
+import BaseHTTPServer, SimpleHTTPServer
+import threading
+import ssl
+import time
+
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
@@ -24,6 +29,10 @@ SPARK_APP_URL = 'http://localhost:4040'
 SPARK_YARN_URL = 'http://localhost:8088'
 SPARK_MESOS_URL = 'http://localhost:5050'
 STANDALONE_URL = 'http://localhost:8080'
+
+SSL_SERVER_PORT = 44443
+SSL_SERVER_ADDRESS = 'localhost'
+SSL_SERVER_URL = 'https://{}:{}'.format(SSL_SERVER_ADDRESS, SSL_SERVER_PORT)
 
 # URL Paths
 SPARK_REST_PATH = 'api/v1/applications'
@@ -81,6 +90,7 @@ STANDALONE_SPARK_EXECUTOR_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PAT
 STANDALONE_SPARK_RDD_URL_PRE20 = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'storage/rdd')
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'ci/certificate')
 
 def yarn_requests_get_mock(*args, **kwargs):
 
@@ -314,6 +324,12 @@ class SparkCheck(AgentCheckTest):
         'cluster_name': CLUSTER_NAME,
         'spark_cluster_mode': 'spark_standalone_mode',
         'spark_pre_20_mode': 'true'
+    }
+
+    SSL_CONFIG = {
+        'spark_url': SSL_SERVER_URL,
+        'cluster_name': CLUSTER_NAME,
+        'spark_cluster_mode': 'spark_standalone_mode'
     }
 
     SPARK_JOB_RUNNING_METRIC_VALUES = {
@@ -698,3 +714,33 @@ class SparkCheck(AgentCheckTest):
             tags=['url:http://localhost:8080'])
         self.assertServiceCheckOK(SPARK_SERVICE_CHECK,
             tags=['url:http://localhost:4040'])
+
+    def test_ssl(self):
+        self.run_ssl_server()
+        config = {
+            'instances': [self.SSL_CONFIG]
+        }
+
+        self.assertRaises(ssl.SSLError, self.run_check, config)
+
+    def test_ssl_no_verify(self):
+        self.run_ssl_server()
+        config = {
+            'instances': [self.SSL_CONFIG],
+            'ssl_verify' : False
+        }
+
+        self.run_check(config)
+
+
+    def run_ssl_server(self):
+        cert_file = os.path.join(CERTIFICATE_DIR, 'server.pem')
+
+        httpd = BaseHTTPServer.HTTPServer((SSL_SERVER_ADDRESS, SSL_SERVER_PORT), SimpleHTTPServer.SimpleHTTPRequestHandler)
+        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=cert_file, server_side=True)
+        httpd.timeout = 5
+
+        threading.Thread(target=httpd.handle_request).start()
+        time.sleep(.5)
+        return httpd
+
