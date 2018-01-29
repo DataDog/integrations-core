@@ -75,6 +75,7 @@ spark.rdd.disk_used
 
 # stdlib
 from urlparse import urljoin, urlsplit, urlunsplit, urlparse
+from collections import namedtuple
 
 # 3rd party
 import requests
@@ -219,19 +220,19 @@ class SparkCheck(AgentCheck):
 
         ssl_config = self._get_ssl_config(instance)
 
-        spark_apps = self._get_running_apps(instance, tags)
+        spark_apps = self._get_running_apps(instance, tags, ssl_config)
 
         # Get the job metrics
-        self._spark_job_metrics(instance, spark_apps, tags)
+        self._spark_job_metrics(instance, spark_apps, tags, ssl_config)
 
         # Get the stage metrics
-        self._spark_stage_metrics(instance, spark_apps, tags)
+        self._spark_stage_metrics(instance, spark_apps, tags, ssl_config)
 
         # Get the executor metrics
-        self._spark_executor_metrics(instance, spark_apps, tags)
+        self._spark_executor_metrics(instance, spark_apps, tags, ssl_config)
 
         # Get the rdd metrics
-        self._spark_rdd_metrics(instance, spark_apps, tags)
+        self._spark_rdd_metrics(instance, spark_apps, tags, ssl_config)
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
@@ -284,7 +285,7 @@ class SparkCheck(AgentCheck):
         self.log.debug('Request URL returned: %s', _url)
         return _url
 
-    def _get_running_apps(self, instance, tags):
+    def _get_running_apps(self, instance, tags, ssl_config):
         '''
         Determine what mode was specified
         '''
@@ -308,28 +309,28 @@ class SparkCheck(AgentCheck):
         if cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
             pre20 = _is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
-            return self._standalone_init(master_address, pre20)
+            return self._standalone_init(master_address, pre20, ssl_config)
 
         elif cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(instance, master_address)
-            return self._get_spark_app_ids(running_apps)
+            running_apps = self._mesos_init(instance, master_address, ssl_config)
+            return self._get_spark_app_ids(running_apps, ssl_config)
 
 
         elif cluster_mode == SPARK_YARN_MODE:
-            running_apps = self._yarn_init(master_address)
-            return self._get_spark_app_ids(running_apps)
+            running_apps = self._yarn_init(master_address, ssl_config)
+            return self._get_spark_app_ids(running_apps, ssl_config)
 
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE,
                 cluster_mode))
 
-    def _standalone_init(self, spark_master_address, pre_20_mode):
+    def _standalone_init(self, spark_master_address, pre_20_mode, ssl_config):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         '''
         metrics_json = self._rest_request_to_json(spark_master_address,
             SPARK_MASTER_STATE_PATH,
-            SPARK_STANDALONE_SERVICE_CHECK)
+            SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
 
         running_apps = {}
 
@@ -340,14 +341,14 @@ class SparkCheck(AgentCheck):
 
                 # Parse through the HTML to grab the application driver's link
                 try:
-                    app_url = self._get_standalone_app_url(app_id, spark_master_address)
+                    app_url = self._get_standalone_app_url(app_id, spark_master_address, ssl_config)
 
                     if app_id and app_name and app_url:
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(app_url,
                                 SPARK_APPS_PATH,
-                                SPARK_STANDALONE_SERVICE_CHECK)
+                                SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
                             for appl in applist:
                                 aid = appl.get('id')
                                 aname = appl.get('name')
@@ -367,7 +368,7 @@ class SparkCheck(AgentCheck):
         self.log.info("Returning running apps %s" % running_apps)
         return running_apps
 
-    def _mesos_init(self, instance, master_address):
+    def _mesos_init(self, instance, master_address, ssl_config):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
@@ -375,7 +376,7 @@ class SparkCheck(AgentCheck):
 
         metrics_json = self._rest_request_to_json(master_address,
             MESOS_MASTER_APP_PATH,
-            MESOS_SERVICE_CHECK)
+            MESOS_SERVICE_CHECK, ssl_config)
 
         if metrics_json.get('frameworks'):
             for app_json in metrics_json.get('frameworks'):
@@ -402,12 +403,12 @@ class SparkCheck(AgentCheck):
 
         return running_apps
 
-    def _yarn_init(self, rm_address):
+    def _yarn_init(self, rm_address, ssl_config):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
         running_apps = {}
-        running_apps = self._yarn_get_running_spark_apps(rm_address)
+        running_apps = self._yarn_get_running_spark_apps(rm_address, ssl_config)
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(YARN_SERVICE_CHECK,
@@ -417,7 +418,7 @@ class SparkCheck(AgentCheck):
 
         return running_apps
 
-    def _get_standalone_app_url(self, app_id, spark_master_address):
+    def _get_standalone_app_url(self, app_id, spark_master_address, ssl_config):
         '''
         Return the application URL from the app info page on the Spark master.
         Due to a bug, we need to parse the HTML manually because we cannot
@@ -426,6 +427,7 @@ class SparkCheck(AgentCheck):
         app_page = self._rest_request(spark_master_address,
             SPARK_MASTER_APP_PATH,
             SPARK_STANDALONE_SERVICE_CHECK,
+            ssl_config,
             appId=app_id)
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
@@ -434,7 +436,7 @@ class SparkCheck(AgentCheck):
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             return app_detail_ui_links[0].attrs['href']
 
-    def _yarn_get_running_spark_apps(self, rm_address):
+    def _yarn_get_running_spark_apps(self, rm_address, ssl_config):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
 
@@ -444,6 +446,7 @@ class SparkCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(rm_address,
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
+            ssl_config,
             states=APPLICATION_STATES,
             applicationTypes=YARN_APPLICATION_TYPES)
 
@@ -462,7 +465,7 @@ class SparkCheck(AgentCheck):
 
         return running_apps
 
-    def _get_spark_app_ids(self, running_apps):
+    def _get_spark_app_ids(self, running_apps, ssl_config):
         '''
         Traverses the Spark application master in YARN to get a Spark application ID.
 
@@ -472,7 +475,7 @@ class SparkCheck(AgentCheck):
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
             response = self._rest_request_to_json(tracking_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK)
+                SPARK_SERVICE_CHECK, ssl_config)
 
             for app in response:
                 app_id = app.get('id')
@@ -483,7 +486,7 @@ class SparkCheck(AgentCheck):
 
         return spark_apps
 
-    def _spark_job_metrics(self, instance, running_apps, addl_tags):
+    def _spark_job_metrics(self, instance, running_apps, addl_tags, ssl_config):
         '''
         Get metrics for each Spark job.
         '''
@@ -492,7 +495,7 @@ class SparkCheck(AgentCheck):
             base_url = self._get_request_url(instance, tracking_url)
             response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'jobs')
+                SPARK_SERVICE_CHECK, ssl_config, app_id, 'jobs')
 
             for job in response:
 
@@ -505,7 +508,7 @@ class SparkCheck(AgentCheck):
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', INCREMENT, 1, tags)
 
-    def _spark_stage_metrics(self, instance, running_apps, addl_tags):
+    def _spark_stage_metrics(self, instance, running_apps, addl_tags, ssl_config):
         '''
         Get metrics for each Spark stage.
         '''
@@ -514,7 +517,7 @@ class SparkCheck(AgentCheck):
             base_url = self._get_request_url(instance, tracking_url)
             response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'stages')
+                SPARK_SERVICE_CHECK, ssl_config, app_id, 'stages')
 
             for stage in response:
 
@@ -527,7 +530,7 @@ class SparkCheck(AgentCheck):
                 self._set_metrics_from_json(tags, stage, SPARK_STAGE_METRICS)
                 self._set_metric('spark.stage.count', INCREMENT, 1, tags)
 
-    def _spark_executor_metrics(self, instance, running_apps, addl_tags):
+    def _spark_executor_metrics(self, instance, running_apps, addl_tags, ssl_config):
         '''
         Get metrics for each Spark executor.
         '''
@@ -536,7 +539,7 @@ class SparkCheck(AgentCheck):
             base_url = self._get_request_url(instance, tracking_url)
             response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'executors')
+                SPARK_SERVICE_CHECK, ssl_config, app_id, 'executors')
 
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
@@ -550,7 +553,7 @@ class SparkCheck(AgentCheck):
             if len(response):
                 self._set_metric('spark.executor.count', INCREMENT, len(response), tags)
 
-    def _spark_rdd_metrics(self, instance, running_apps, addl_tags):
+    def _spark_rdd_metrics(self, instance, running_apps, addl_tags, ssl_config):
         '''
         Get metrics for each Spark RDD.
         '''
@@ -559,7 +562,7 @@ class SparkCheck(AgentCheck):
             base_url = self._get_request_url(instance, tracking_url)
             response = self._rest_request_to_json(base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, app_id, 'storage/rdd')
+                SPARK_SERVICE_CHECK, ssl_config, app_id, 'storage/rdd')
 
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
@@ -592,7 +595,7 @@ class SparkCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request(self, address, object_path, service_name, *args, **kwargs):
+    def _rest_request(self, address, object_path, service_name, ssl_config, *args, **kwargs):
         '''
         Query the given URL and return the response
         '''
@@ -657,11 +660,11 @@ class SparkCheck(AgentCheck):
 
         return response
 
-    def _rest_request_to_json(self, address, object_path, service_name, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, service_name, ssl_config, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
-        response = self._rest_request(address, object_path, service_name, *args, **kwargs)
+        response = self._rest_request(address, object_path, service_name, ssl_config, *args, **kwargs)
 
         try:
             response_json = response.json()
