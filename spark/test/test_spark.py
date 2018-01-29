@@ -754,12 +754,12 @@ class SparkCheck(AgentCheckTest):
         self.run_check(config)
 
     class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-        def do_GET(s):
-            s.send_response(200)
-            s.send_header("Content-type", "application/json")
-            s.end_headers()
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
             with open(Fixtures.file('spark_standalone_apps', sdk_dir=FIXTURE_DIR), 'r') as f:
-                s.wfile.write(f.read())
+                self.wfile.write(f.read())
 
     def run_ssl_server(self):
         cert_file = os.path.join(CERTIFICATE_DIR, 'server.pem')
