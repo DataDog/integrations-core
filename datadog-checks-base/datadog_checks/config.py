@@ -7,15 +7,13 @@ def is_affirmative(value):
     """
     Attempt to convert different type of values to a meaningful boolean
     """
-    if value is None:
-        return False
-
-    # int or real bool
-    if isinstance(value, int):
-        return bool(value)
-
     # try string cast
-    return value.lower() in ('yes', 'true', '1', 'y', 'on')
+    if isinstance(value, str):
+        return value.lower() in {'yes', 'true', '1', 'y', 'on'}
+
+    # use object's implementation of `__nonzero__`, it's faster than cast.
+    # None -> False, 0 -> False, 1 -> True, etc.
+    return not not value
 
 
 # Compatibility layer for Agent5
