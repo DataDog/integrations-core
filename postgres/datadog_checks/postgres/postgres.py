@@ -15,6 +15,12 @@ try:
 except ImportError:
     psycopg2 = None
 
+try:
+    # this module is only available in agent 6
+    import datadog_agent
+except ImportError:
+    datadog_agent = None
+
 import pg8000
 
 # project
@@ -32,6 +38,8 @@ def psycopg2_connect(*args, **kwargs):
         del kwargs['unix_sock']
     return psycopg2.connect(*args, **kwargs)
 
+def add_instance_tags_to_server_metrics():
+    return datadog_agent is None
 
 class ShouldRestartException(Exception):
     pass
@@ -47,38 +55,6 @@ class PostgreSql(AgentCheck):
     SERVICE_CHECK_NAME = 'postgres.can_connect'
 
     # turning columns into tags
-
-    DB_METRICS = {
-        'descriptors': [
-            ('datname', 'db')
-        ],
-        'metrics': {},
-        'query': """
-SELECT datname,
-       %s
-  FROM pg_stat_database
- WHERE datname not ilike 'template%%'
-   AND datname not ilike 'rdsadmin'
-   AND datname not ilike 'postgres'
-""",
-        'relation': False,
-    }
-
-    # Copy of the previous DB_METRICS, _including_ the default 'postgres' database
-    DB_METRICS_WITH_DEFAULT = {
-        'descriptors': [
-            ('datname', 'db')
-        ],
-        'metrics': {},
-        'query': """
-SELECT datname,
-       %s
-  FROM pg_stat_database
- WHERE datname not ilike 'template%%'
-   AND datname not ilike 'rdsadmin'
-""",
-        'relation': False,
-    }
 
     COMMON_METRICS = {
         'numbackends'       : ('postgresql.connections', GAUGE),
@@ -103,13 +79,6 @@ SELECT datname,
         'temp_files'        : ('postgresql.temp_files', RATE),
     }
 
-    BGW_METRICS = {
-        'descriptors': [],
-        'metrics': {},
-        'query': "select %s FROM pg_stat_bgwriter",
-        'relation': False,
-    }
-
     COMMON_BGW_METRICS = {
         'checkpoints_timed'    : ('postgresql.bgwriter.checkpoints_timed', MONOTONIC),
         'checkpoints_req'      : ('postgresql.bgwriter.checkpoints_requested', MONOTONIC),
@@ -127,13 +96,6 @@ SELECT datname,
     NEWER_92_BGW_METRICS = {
         'checkpoint_write_time': ('postgresql.bgwriter.write_time', MONOTONIC),
         'checkpoint_sync_time' : ('postgresql.bgwriter.sync_time', MONOTONIC),
-    }
-
-    ARCHIVER_METRICS = {
-        'descriptors': [],
-        'metrics': {},
-        'query': "select %s FROM pg_stat_archiver",
-        'relation': False,
     }
 
     COMMON_ARCHIVER_METRICS = {
@@ -388,7 +350,7 @@ SELECT s.schemaname,
     def _is_9_4_or_above(self, key, db):
         return self._is_above(key, db, [9,4,0])
 
-    def _get_instance_metrics(self, key, db, database_size_metrics):
+    def _get_instance_metrics(self, key, db, database_size_metrics, with_default):
         """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
         depending on the postgres version.
         Uses a dictionnary to save the result for each instance
@@ -418,7 +380,23 @@ SELECT s.schemaname,
                 self.instance_metrics[key] = dict(self.instance_metrics[key], **self.DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics.get(key)
-        return metrics
+
+        if not metrics:
+            return None
+
+        res = {
+            'descriptors': [('datname', 'db')],
+            'metrics': metrics,
+            'query': "SELECT datname, %s "
+            "FROM pg_stat_database "
+            "WHERE datname not ilike 'template%%' "
+            "  AND datname not ilike 'rdsadmin' ",
+            'relation': False,
+        }
+        if not with_default:
+            res["query"] += "  AND datname not ilike 'postgres'"
+        return res
+
 
     def _get_bgw_metrics(self, key, db):
         """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
@@ -446,8 +424,18 @@ SELECT s.schemaname,
                 self.bgw_metrics[key].update(self.NEWER_91_BGW_METRICS)
             if self._is_9_2_or_above(key, db):
                 self.bgw_metrics[key].update(self.NEWER_92_BGW_METRICS)
+
             metrics = self.bgw_metrics.get(key)
-        return metrics
+
+        if not metrics:
+            return None
+
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select %s FROM pg_stat_bgwriter",
+            'relation': False,
+        }
 
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
@@ -471,7 +459,16 @@ SELECT s.schemaname,
 
             self.archiver_metrics[key] = dict(self.COMMON_ARCHIVER_METRICS)
             metrics = self.archiver_metrics.get(key)
-        return metrics
+
+        if not metrics:
+            return None
+
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select %s FROM pg_stat_archiver",
+            'relation': False,
+        }
 
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_9_1 or REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2
@@ -505,12 +502,103 @@ SELECT s.schemaname,
                 self.log.warn('Failed to parse config element=%s, check syntax' % str(element))
         return config
 
+    def _query_scope(self, cursor, scope, key, db, instance_tags, relations, is_custom_metrics, programming_error, relations_config):
+        if scope is None:
+            return None
+
+        if scope == self.REPLICATION_METRICS or not self._is_above(key, db, [9,0,0]):
+            log_func = self.log.debug
+        else:
+            log_func = self.log.warning
+
+        # build query
+        cols = scope['metrics'].keys()  # list of metrics to query, in some order
+        # we must remember that order to parse results
+
+        try:
+            # if this is a relation-specific query, we need to list all relations last
+            if scope['relation'] and len(relations) > 0:
+                relnames = ', '.join("'{0}'".format(w) for w in relations_config.iterkeys())
+                query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
+                self.log.debug("Running query: %s with relations: %s" % (query, relnames))
+                cursor.execute(query % (relnames))
+            else:
+                query = scope['query'] % (", ".join(cols))
+                self.log.debug("Running query: %s" % query)
+                cursor.execute(query.replace(r'%', r'%%'))
+
+            results = cursor.fetchall()
+        except programming_error as e:
+            log_func("Not all metrics may be available: %s" % str(e))
+            return None
+
+        if not results:
+            return None
+
+        if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
+            self.warning(
+                "Query: {0} returned more than {1} results ({2}). Truncating"
+                .format(query, MAX_CUSTOM_RESULTS, len(results))
+            )
+            results = results[:MAX_CUSTOM_RESULTS]
+
+        desc = scope['descriptors']
+
+        # parse & submit results
+        # A row should look like this
+        # (descriptor, descriptor, ..., value, value, value, value, ...)
+        # with descriptor a PG relation or index name, which we use to create the tags
+        for row in results:
+            # Check that all columns will be processed
+            assert len(row) == len(cols) + len(desc)
+
+            # build a map of descriptors and their values
+            desc_map = dict(zip([x[1] for x in desc], row[0:len(desc)]))
+            if 'schema' in desc_map and relations:
+                try:
+                    relname = desc_map['table']
+                    config_schemas = relations_config[relname]['schemas']
+                    if config_schemas and desc_map['schema'] not in config_schemas:
+                        return len(results)
+                except (KeyError):
+                    pass
+
+            # Build tags
+            # descriptors are: (pg_name, dd_tag_name): value
+            # Special-case the "db" tag, which overrides the one that is passed as instance_tag
+            # The reason is that pg_stat_database returns all databases regardless of the
+            # connection.
+            if not scope['relation']:
+                tags = [t for t in instance_tags if not t.startswith("db:")]
+            else:
+                tags = [t for t in instance_tags]
+
+            tags += [("%s:%s" % (k,v)) for (k,v) in desc_map.iteritems()]
+
+            # [(metric-map, value), (metric-map, value), ...]
+            # metric-map is: (dd_name, "rate"|"gauge")
+            # shift the results since the first columns will be the "descriptors"
+            values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
+
+            # To submit simply call the function for each value v
+            # v[0] == (metric_name, submit_function)
+            # v[1] == the actual value
+            # tags are
+            for v in values:
+                v[0][1](self, v[0][0], v[1], tags=tags)
+
+        return len(results)
+
     def _collect_stats(self, key, db, instance_tags, relations, custom_metrics, function_metrics, count_metrics, database_size_metrics, collect_default_db, interface_error, programming_error):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
+
+        db_instance_metrics = self._get_instance_metrics(key, db, database_size_metrics, collect_default_db)
+        bgw_instance_metrics = self._get_bgw_metrics(key, db)
+        archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
         metric_scope = [
             self.CONNECTION_METRICS,
@@ -519,36 +607,10 @@ SELECT s.schemaname,
 
         if function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
-
         if count_metrics:
             metric_scope.append(self.COUNT_METRICS)
-
-        # These are added only once per PG server, thus the test
-        db_instance_metrics = self._get_instance_metrics(key, db, database_size_metrics)
-        bgw_instance_metrics = self._get_bgw_metrics(key, db)
-        archiver_instance_metrics = self._get_archiver_metrics(key, db)
-
-        if db_instance_metrics is not None:
-            # FIXME: constants shouldn't be modified
-            self.DB_METRICS['metrics'] = db_instance_metrics
-            self.DB_METRICS_WITH_DEFAULT['metrics'] = db_instance_metrics
-            # DB_METRICS query is chosen according to collect_default_db parameter
-            if not(collect_default_db):
-                metric_scope.append(self.DB_METRICS)
-            else:
-                metric_scope.append(self.DB_METRICS_WITH_DEFAULT)
-
-        if bgw_instance_metrics is not None:
-            # FIXME: constants shouldn't be modified
-            self.BGW_METRICS['metrics'] = bgw_instance_metrics
-            metric_scope.append(self.BGW_METRICS)
-
-        if archiver_instance_metrics is not None:
-            # FIXME: constants shouldn't be modified
-            self.ARCHIVER_METRICS['metrics'] = archiver_instance_metrics
-            metric_scope.append(self.ARCHIVER_METRICS)
-
         # Do we need relation-specific metrics?
+        relations_config = {}
         if relations:
             metric_scope += [
                 self.REL_METRICS,
@@ -564,96 +626,24 @@ SELECT s.schemaname,
             self.REPLICATION_METRICS['metrics'] = replication_metrics
             metric_scope.append(self.REPLICATION_METRICS)
 
-        full_metric_scope = list(metric_scope) + custom_metrics
         try:
             cursor = db.cursor()
 
-            for scope in full_metric_scope:
-                if scope == self.REPLICATION_METRICS or not self._is_above(key, db, [9,0,0]):
-                    log_func = self.log.debug
-                else:
-                    log_func = self.log.warning
+            # server wide metrics aren't tagged anymore with instance tags, starting from Agent 6.0
+            if add_instance_tags_to_server_metrics():
+                server_metric_tags = instance_tags
+            else:
+                server_metric_tags = []
 
-                # build query
-                cols = scope['metrics'].keys()  # list of metrics to query, in some order
-                # we must remember that order to parse results
+            results_len = self._query_scope(cursor, db_instance_metrics, key, db, server_metric_tags, relations, False, programming_error, relations_config)
+            if results_len is not None:
+                self.gauge("postgresql.db.count", results_len, tags=[t for t in server_metric_tags if not t.startswith("db:")])
 
-                try:
-                    # if this is a relation-specific query, we need to list all relations last
-                    if scope['relation'] and len(relations) > 0:
-                        relnames = ', '.join("'{0}'".format(w) for w in relations_config.iterkeys())
-                        query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
-                        self.log.debug("Running query: %s with relations: %s" % (query, relnames))
-                        cursor.execute(query % (relnames))
-                    else:
-                        query = scope['query'] % (", ".join(cols))
-                        self.log.debug("Running query: %s" % query)
-                        cursor.execute(query.replace(r'%', r'%%'))
+            self._query_scope(cursor, bgw_instance_metrics, key, db, server_metric_tags, relations, False, programming_error, relations_config)
+            self._query_scope(cursor, archiver_instance_metrics, key, db, server_metric_tags, relations, False, programming_error, relations_config)
 
-                    results = cursor.fetchall()
-                except programming_error as e:
-                    log_func("Not all metrics may be available: %s" % str(e))
-                    continue
-
-                if not results:
-                    continue
-
-                if scope in custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
-                    self.warning(
-                        "Query: {0} returned more than {1} results ({2}). Truncating"
-                        .format(query, MAX_CUSTOM_RESULTS, len(results))
-                    )
-                    results = results[:MAX_CUSTOM_RESULTS]
-
-                # FIXME this cramps my style
-                if scope == self.DB_METRICS:
-                    self.gauge("postgresql.db.count", len(results),
-                        tags=[t for t in instance_tags if not t.startswith("db:")])
-
-                desc = scope['descriptors']
-
-                # parse & submit results
-                # A row should look like this
-                # (descriptor, descriptor, ..., value, value, value, value, ...)
-                # with descriptor a PG relation or index name, which we use to create the tags
-                for row in results:
-                    # Check that all columns will be processed
-                    assert len(row) == len(cols) + len(desc)
-
-                    # build a map of descriptors and their values
-                    desc_map = dict(zip([x[1] for x in desc], row[0:len(desc)]))
-                    if 'schema' in desc_map and relations:
-                        try:
-                            relname = desc_map['table']
-                            config_schemas = relations_config[relname]['schemas']
-                            if config_schemas and desc_map['schema'] not in config_schemas:
-                                continue
-                        except (KeyError):
-                            pass
-
-                    # Build tags
-                    # descriptors are: (pg_name, dd_tag_name): value
-                    # Special-case the "db" tag, which overrides the one that is passed as instance_tag
-                    # The reason is that pg_stat_database returns all databases regardless of the
-                    # connection.
-                    if not scope['relation']:
-                        tags = [t for t in instance_tags if not t.startswith("db:")]
-                    else:
-                        tags = [t for t in instance_tags]
-
-                    tags += [("%s:%s" % (k,v)) for (k,v) in desc_map.iteritems()]
-
-                    # [(metric-map, value), (metric-map, value), ...]
-                    # metric-map is: (dd_name, "rate"|"gauge")
-                    # shift the results since the first columns will be the "descriptors"
-                    values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
-
-                    # To submit simply call the function for each value v
-                    # v[0] == (metric_name, submit_function)
-                    # v[1] == the actual value
-                    # tags are
-                    for v in values:
-                        v[0][1](self, v[0][0], v[1], tags=tags)
+            for scope in list(metric_scope) + custom_metrics:
+                self._query_scope(cursor, scope, key, db, instance_tags, relations, scope in custom_metrics, programming_error, relations_config)
 
             cursor.close()
         except interface_error as e:
