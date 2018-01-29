@@ -13,7 +13,7 @@ import json
 
 from tests.checks.common import AgentCheckTest, Fixtures
 
-import BaseHTTPServer, SimpleHTTPServer
+import BaseHTTPServer
 import threading
 import ssl
 import time
