@@ -59,7 +59,7 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
 * To enable Varnish logging uncomment the following in `/etc/default/varnishncsa`:
 
 ```
-# VARNISHNCSA_ENABLED=1
+VARNISHNCSA_ENABLED=1
 ```
 
   Add the following at the end of the same file:
