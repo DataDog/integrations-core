@@ -57,7 +57,6 @@ class SshTestCase(unittest.TestCase):
 
         service = self.check.get_service_checks()
         self.assertEqual(service[0].get('status'), AgentCheck.OK)
-        self.assertEqual(service[0].get('message'), None)
         self.assertEqual(service[0].get('tags'), ["instance:io.netgarage.org-22"])
 
         # Testing that bad authentication will raise exception
