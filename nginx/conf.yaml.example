@@ -10,7 +10,7 @@ instances:
   #   http://docs.datadoghq.com/integrations/nginx/
   #
   # If you are using the commercial version of nginx, for releases R13 and above,
-  # there is a new API to replace the extended status API. 
+  # there is a new API to replace the extended status API.
   # See https://www.nginx.com/blog/nginx-plus-r13-released/
   # To use it, you specify the URL in `nginx_status_url`, and use the option `use_plus_api`.
 
@@ -21,18 +21,23 @@ instances:
   # - nginx_status_url: http://example2.com:1234/nginx_status/
   #   ssl_validation: False
 
+  #   The (optional) skip_proxy parameter will bypass any proxy
+  #   settings enabled and attempt to reach the URL directly.
+  #
+  #   skip_proxy: false
+
   #   # Set this option to true if you are using the nginx Plus API. Default to false
   #   use_plus_api: False
-  #   # Specify the version of the Plus API to use. We support versions 1 & 2. Default to 2 
+  #   # Specify the version of the Plus API to use. We support versions 1 & 2. Default to 2
   #   plus_api_version: 2
-  
-  #   If the status page is behind basic auth. 
+
+  #   If the status page is behind basic auth.
   #   user: USER
   #   password: PASSWORD
-  
+
   #   tags:
   #     - instance:bar
- 
+
 ## Log section (Available for Agent >=6.0)
 
 #logs:
@@ -43,13 +48,13 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
-    
+
   # - type: file
   #   path: /var/log/nginx/access.log
   #   service: nginx
   #   source: nginx
   #   sourcecategory: http_web_access
-    
+
   # - type: file
   #   path: /var/log/nginx/error.log
   #   service: nginx

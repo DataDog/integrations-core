@@ -125,28 +125,29 @@ class dummy_http_response:
 def api_call(*args, **kwargs):
 
     json = ""
+    url = args[1]
 
-    if "nginx" in args[0]:
+    if "nginx" in url:
         json = Fixtures.read_file('plus_api_nginx.json', sdk_dir=FIXTURE_DIR)
-    elif "processes" in args[0]:
+    elif "processes" in url:
         json = Fixtures.read_file('plus_api_processes.json', sdk_dir=FIXTURE_DIR)
-    elif "connections" in args[0]:
+    elif "connections" in url:
         json = Fixtures.read_file('plus_api_connections.json', sdk_dir=FIXTURE_DIR)
-    elif "ssl" in args[0]:
+    elif "ssl" in url:
         json = Fixtures.read_file('plus_api_ssl.json', sdk_dir=FIXTURE_DIR)
-    elif "slabs" in args[0]:
+    elif "slabs" in url:
         json = Fixtures.read_file('plus_api_slabs.json', sdk_dir=FIXTURE_DIR)
-    elif "http/requests" in args[0]:
+    elif "http/requests" in url:
         json = Fixtures.read_file('plus_api_http_requests.json', sdk_dir=FIXTURE_DIR)
-    elif "http/server_zones" in args[0]:
+    elif "http/server_zones" in url:
         json = Fixtures.read_file('plus_api_http_server_zones.json', sdk_dir=FIXTURE_DIR)
-    elif "http/caches" in args[0]:
+    elif "http/caches" in url:
         json = Fixtures.read_file('plus_api_http_caches.json', sdk_dir=FIXTURE_DIR)
-    elif "http/upstreams" in args[0]:
+    elif "http/upstreams" in url:
         json = Fixtures.read_file('plus_api_http_upstreams.json', sdk_dir=FIXTURE_DIR)
-    elif "stream/upstreams" in args[0]:
+    elif "stream/upstreams" in url:
         json = Fixtures.read_file('plus_api_stream_upstreams.json', sdk_dir=FIXTURE_DIR)
-    elif "stream/server_zones" in args[0]:
+    elif "stream/server_zones" in url:
         json = Fixtures.read_file('plus_api_stream_server_zones.json', sdk_dir=FIXTURE_DIR)
 
     return dummy_http_response(json)
