@@ -17,6 +17,7 @@ import BaseHTTPServer, SimpleHTTPServer
 import threading
 import ssl
 import time
+import requests
 
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
@@ -30,6 +31,7 @@ SPARK_YARN_URL = 'http://localhost:8088'
 SPARK_MESOS_URL = 'http://localhost:5050'
 STANDALONE_URL = 'http://localhost:8080'
 
+# SSL test server
 SSL_SERVER_PORT = 44443
 SSL_SERVER_ADDRESS = 'localhost'
 SSL_SERVER_URL = 'https://{}:{}'.format(SSL_SERVER_ADDRESS, SSL_SERVER_PORT)
@@ -330,6 +332,20 @@ class SparkCheck(AgentCheckTest):
         'spark_url': SSL_SERVER_URL,
         'cluster_name': CLUSTER_NAME,
         'spark_cluster_mode': 'spark_standalone_mode'
+    }
+
+    SSL_NO_VERIFY_CONFIG = {
+        'spark_url': SSL_SERVER_URL,
+        'cluster_name': CLUSTER_NAME,
+        'spark_cluster_mode': 'spark_standalone_mode',
+        'ssl_verify' : False
+    }
+
+    SSL_CERT_CONFIG = {
+        'spark_url': SSL_SERVER_URL,
+        'cluster_name': CLUSTER_NAME,
+        'spark_cluster_mode': 'spark_standalone_mode',
+        'ssl_verify' : os.path.join(CERTIFICATE_DIR, 'cert.cert')
     }
 
     SPARK_JOB_RUNNING_METRIC_VALUES = {
@@ -721,26 +737,39 @@ class SparkCheck(AgentCheckTest):
             'instances': [self.SSL_CONFIG]
         }
 
-        self.assertRaises(ssl.SSLError, self.run_check, config)
+        self.assertRaises(requests.exceptions.SSLError, self.run_check, config)
 
     def test_ssl_no_verify(self):
         self.run_ssl_server()
         config = {
-            'instances': [self.SSL_CONFIG],
-            'ssl_verify' : False
+            'instances': [self.SSL_NO_VERIFY_CONFIG]
         }
-
         self.run_check(config)
 
+    def test_ssl_cert(self):
+        self.run_ssl_server()
+        config = {
+            'instances': [self.SSL_CERT_CONFIG]
+        }
+        self.run_check(config)
+
+    class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+        def do_GET(s):
+            s.send_response(200)
+            s.send_header("Content-type", "application/json")
+            s.end_headers()
+            with open(Fixtures.file('spark_standalone_apps', sdk_dir=FIXTURE_DIR), 'r') as f:
+                s.wfile.write(f.read())
 
     def run_ssl_server(self):
         cert_file = os.path.join(CERTIFICATE_DIR, 'server.pem')
 
-        httpd = BaseHTTPServer.HTTPServer((SSL_SERVER_ADDRESS, SSL_SERVER_PORT), SimpleHTTPServer.SimpleHTTPRequestHandler)
-        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=cert_file, server_side=True)
+        httpd = BaseHTTPServer.HTTPServer((SSL_SERVER_ADDRESS, SSL_SERVER_PORT), self.StandaloneAppsResponseHandler)
+        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=cert_file, server_side=False)
         httpd.timeout = 5
 
         threading.Thread(target=httpd.handle_request).start()
         time.sleep(.5)
         return httpd
+
 

@@ -632,7 +632,12 @@ class SparkCheck(AgentCheck):
 
         try:
             self.log.debug('Spark check URL: %s' % url)
-            response = requests.get(url)
+            response = requests.get(
+                url,
+                verify=verify,
+                cert=cert
+            )
+
             response.raise_for_status()
 
         except Timeout as e:
