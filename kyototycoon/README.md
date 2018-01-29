@@ -1,14 +1,14 @@
-# Kyototycoon Integration
+# KyotoTycoon Integration
 
 ## Overview
 
-The Agent's Kyototycoon check tracks get, set, and delete operations, and lets you monitor replication lag.
+The Agent's KyotoTycoon check tracks get, set, and delete operations, and lets you monitor replication lag.
 
 ## Setup
 ### Installation
 
-The Kyototycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kyototycoon servers.  
-If you need the newest version of the Kyototycoon check, install the `dd-check-kyototycoon` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The KyotoTycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your KyotoTycoon servers.  
+If you need the newest version of the KyotoTycoon check, install the `dd-check-kyototycoon` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 
@@ -50,7 +50,7 @@ instances:
 
 ## Compatibility
 
-The kyototycoon check is compatible with all major platforms.
+The KyotoTycoon check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
@@ -58,13 +58,13 @@ The kyototycoon check is compatible with all major platforms.
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
-The Kyototycoon check does not include any event at this time.
+The KyotoTycoon check does not include any event at this time.
 
 ### Service Checks
 
 `kyototycoon.can_connect`:
 
-Returns CRITICAL if the Agent cannot connect to Kyototycoon to collect metrics, otherwise OK.
+Returns CRITICAL if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise OK.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
