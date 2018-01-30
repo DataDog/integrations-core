@@ -96,7 +96,7 @@ class Apache(AgentCheck):
                 # Send metric as a gauge, if applicable
                 if metric in self.METRICS:
                     metric_count += 1
-                    metric_name = self.GAUGES[metric]
+                    metric_name = self.METRICS[metric]
                     self.gauge(metric_name, value, tags=tags)
 
         if metric_count == 0:
