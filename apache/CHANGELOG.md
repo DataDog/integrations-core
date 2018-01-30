@@ -4,6 +4,7 @@
 ==================
 ### Changes
 
+* [BUGFIX] fixes metric collection. See [#1071][].
 * [DOC] Adding configuration for log collection in `conf.yaml`
 
 
