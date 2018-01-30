@@ -330,7 +330,7 @@ class TestCouchdb2(AgentCheckTest):
 
         for db in ['_users', '_global_changes', '_metadata', '_replicator']:
             for gauge in self.by_db_gauges:
-                self.assertMetric(gauge, tags=[tag, "db:{0}".format(db)])
+                self.assertMetric(gauge, tags=["db:{0}".format(db)])
 
         for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
             for gauge in self.by_dd_gauges:
