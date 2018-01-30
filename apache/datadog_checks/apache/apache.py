@@ -81,6 +81,7 @@ class Apache(AgentCheck):
                                tags=service_check_tags)
         self.log.debug("apache check succeeded")
         response = r.content
+        self.log.debug('response:\n'.format(response))
         metric_count = 0
         # Loop through and extract the numerical values
         for line in response.splitlines():
