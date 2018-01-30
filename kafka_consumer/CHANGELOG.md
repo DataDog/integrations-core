@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.2.2 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Check explicitly that node_id is None instead of 0. See [#1022][]
+
 1.2.1 / 2017-11-29
 ==================
 
@@ -57,4 +64,5 @@
 [#733]: https://github.com/DataDog/integrations-core/issues/733
 [#753]: https://github.com/DataDog/integrations-core/issues/753
 [#904]: https://github.com/DataDog/integrations-core/issues/904
+[#1022]: https://github.com/DataDog/integrations-core/issues1022
 [@jeffwidman]: https://github.com/jeffwidman
