@@ -107,7 +107,7 @@ class Apache(AgentCheck):
                 if metric in self.RATES:
                     metric_count += 1
                     metric_name = self.RATES[metric]
-                    self.rate(metric_name, value, tags=tags)
+                    self.gauge(metric_name, value, tags=tags)
 
         if metric_count == 0:
             if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
