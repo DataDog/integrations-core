@@ -17,7 +17,7 @@ And many more.
 
 The Couchbase check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Couchbase nodes.  
 
-If you need the newest version of the Couchbase check, install the `dd-check-couchbase` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+If you need the newest version of the Couchbase check, install the `dd-check-couchbase` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

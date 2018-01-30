@@ -16,7 +16,7 @@ To collect Kafka consumer metrics, see the [kafka_consumer check](https://docs.d
 
 The Agent's Kafka check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.  
 
-If you need the newest version of the Kafka check, install the `dd-check-kafka` package; this package's check overrides the one packaged with the Agent. See the [integrations-core](https://github.com/DataDog/integrations-core#installing-the-integrations) repository for more details.
+If you need the newest version of the Kafka check, install the `dd-check-kafka` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 The check collects metrics via JMX, so you'll need a JVM on each kafka node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). You can use the same JVM that Kafka uses.
 

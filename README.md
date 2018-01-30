@@ -29,9 +29,15 @@ To go beyond we advise you to read the full documentation [here](http://docs.dat
 
 # Installing the Integrations
 
-The [Datadog Agent](https://github.com/DataDog/dd-agent) contains all core integrations from this repository, so to get started using them, simply install the `datadog-agent` package for your operating system.
+The [Datadog Agent](https://github.com/DataDog/dd-agent) contains all core integrations from this repository, if you need the newest version of a given check, simply run:
 
-Now that integrations are cleanly defined as python packages we will soon be able to ship them as python wheels that will be pip-installable from any platform (so long as the integration supports the platform). This presents a paradigm change in the way we will be delivering standalone integration upgrades, moving away from OS-specific packages to idiomatic python package delivery. 
+* For Ubuntu/Debian:
+    `sudo apt-get install dd-check-<integration_name>`
+
+* For Rhel/CentOS:
+    `sudo yum install dd-check-<integration_name>`
+
+**Note**: Now that integrations are cleanly defined as python packages we will soon be able to ship them as python wheels that will be pip-installable from any platform (so long as the integration supports the platform). This presents a paradigm change in the way we will be delivering standalone integration upgrades, moving away from OS-specific packages to idiomatic python package delivery. 
 
 Agent releases will bundle all the latest wheels for an integration, but if you wish to upgrade between releases, or even downgrade should you need to, you will be able to do so. 
 
