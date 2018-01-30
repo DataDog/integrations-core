@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Allow custom connection string to connect. See [#1068][].
+
 1.2.1 / 2018-01-10
 ==================
 
@@ -39,5 +46,6 @@
 [#573]: https://github.com/DataDog/integrations-core/issues/573
 [#959]: https://github.com/DataDog/integrations-core/issues/959
 [#975]: https://github.com/DataDog/integrations-core/pull/975
+[#1068]: https://github.com/DataDog/integrations-core/pull/1065
 [@rlaveycal]: https://github.com/rlaveycal
 [@themsquared]: https://github.com/themsquared

@@ -591,13 +591,19 @@ class SQLServer(AgentCheck):
             'db:%s' % database
         ]
 
+        cs = instance.get('connection_string', '')
+        cs += ';' if cs != '' else ''
+
         try:
             if self._get_connector(instance) == 'adodbapi':
-                cs = self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
+                cs += self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
+                self.log.debug("Formatted connection string: {0}".format(cs))
+
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout':timeout, 'autocommit':True})
             else:
-                cs = self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
+                cs += self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
+                self.log.debug("Formatted connection string: {0}".format(cs))
                 rawconn = pyodbc.connect(cs, timeout=timeout)
 
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
