@@ -19,7 +19,7 @@ class Apache(AgentCheck):
 
     See http://httpd.apache.org/docs/2.2/mod/mod_status.html for more details
     """
-    GAUGES = {
+    METRICS = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',
         'CPULoad': 'apache.performance.cpu_load',
@@ -29,10 +29,7 @@ class Apache(AgentCheck):
         'ConnsTotal': 'apache.conns_total',
         'ConnsAsyncWriting': 'apache.conns_async_writing',
         'ConnsAsyncKeepAlive': 'apache.conns_async_keep_alive',
-        'ConnsAsyncClosing' : 'apache.conns_async_closing'
-    }
-
-    RATES = {
+        'ConnsAsyncClosing' : 'apache.conns_async_closing',
         'BytesPerSec': 'apache.net.bytes_per_s',
         'ReqPerSec': 'apache.net.request_per_s'
     }
@@ -98,15 +95,9 @@ class Apache(AgentCheck):
                     value = value * 1024
 
                 # Send metric as a gauge, if applicable
-                if metric in self.GAUGES:
+                if metric in self.METRICS:
                     metric_count += 1
                     metric_name = self.GAUGES[metric]
-                    self.gauge(metric_name, value, tags=tags)
-
-                # Send metric as a rate, if applicable
-                if metric in self.RATES:
-                    metric_count += 1
-                    metric_name = self.RATES[metric]
                     self.gauge(metric_name, value, tags=tags)
 
         if metric_count == 0:
