@@ -515,6 +515,8 @@ class Kubernetes(AgentCheck):
         to avoid interfering with service discovery
         """
         node_ip, node_name = self.kubeutil.get_node_info()
+        # hostname of the node where the kubernetes pod leader agent processing the events is running
+        hostname = node_name
         self.log.debug('Processing events on {} [{}]'.format(node_name, node_ip))
 
         k8s_namespaces = instance.get('namespaces', DEFAULT_NAMESPACES)
@@ -559,10 +561,11 @@ class Kubernetes(AgentCheck):
 
             if source:
                 message += '\nSource: {} {}\n'.format(source.get('component', ''), source.get('host', ''))
+                hostname = source.get('host', '')
             msg_body = "%%%\n{}\n```\n{}\n```\n%%%".format(title, message)
             dd_event = {
                 'timestamp': event_ts,
-                'host': node_ip,
+                'host': hostname,
                 'event_type': EVENT_TYPE,
                 'msg_title': title,
                 'msg_text': msg_body,
