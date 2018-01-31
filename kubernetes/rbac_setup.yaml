@@ -1,0 +1,56 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: netsil
+  namespace: netsil
+rules:
+  - nonResourceURLs:
+      - "/version"
+      - "/healthz"
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources:
+      - "nodes"
+      - "namespaces"
+      - "events"
+      - "services"
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources:
+      - "pods"
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources:
+      - "configmaps"
+    resourceNames: ["configmap-volume", "configmap-auto-conf"]
+    verbs: ["get", "delete", "update"]
+  - apiGroups: [""]
+    resources:
+      - "configmaps"
+    resourceNames: ["datadog-leader-elector"]
+    verbs: ["get", "delete", "update"]
+  - apiGroups: [""]
+    resources:
+      - "configmaps"
+    verbs: ["create"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: netsil
+  namespace: netsil
+automountServiceAccountToken: true
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: netsil
+subjects:
+  - kind: ServiceAccount
+    name: netsil
+    namespace: netsil
+roleRef:
+  kind: ClusterRole
+  name: netsil
+  apiGroup: rbac.authorization.k8s.io
