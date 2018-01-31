@@ -523,7 +523,7 @@ class TestElastic(AgentCheckTest):
 
     def test_health_event(self):
         dummy_tags = ['foo:bar', 'elastique:recherche']
-        cluster_tag = ["cluster_name:elasticsearch"]
+        cluster_tag = ['cluster_name:elasticsearch']
 
         config = {'instances': [
             {'url': 'http://localhost:9200', 'tags': dummy_tags}
