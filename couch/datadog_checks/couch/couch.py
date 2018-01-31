@@ -85,11 +85,7 @@ class CouchDb(AgentCheck):
 
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
-        if tags is None:
-            tags = []
-        else:
-            tags = list(set(tags))
-        return tags
+        return list(set(tags)) if tags else []
 
 
 class CouchDB1:
