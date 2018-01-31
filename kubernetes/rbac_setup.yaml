@@ -28,7 +28,7 @@ rules:
   - apiGroups: [""]
     resources:
       - "configmaps"
-    resourceNames: ["datadog-leader-elector"]
+    resourceNames: ["netsil-dd-agent-leader-elector"]
     verbs: ["get", "delete", "update"]
   - apiGroups: [""]
     resources:
