@@ -4,10 +4,20 @@
 
 try:
     # Agent5 compatibility layer
-    from checks import PrometheusCheck
+    from checks import (
+        UnknownFormatError,
+        PrometheusFormat,
+        PrometheusCheck
+    )
 except ImportError:
-    from .prometheus_base import PrometheusCheck
+    from .prometheus_base import (
+        PrometheusFormat,
+        UnknownFormatError,
+        PrometheusCheck
+    )
 
 __all__ = [
+    'PrometheusFormat',
+    'UnknownFormatError',
     'PrometheusCheck',
 ]
