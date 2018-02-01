@@ -188,7 +188,8 @@ class ProcessCheckTest(AgentCheckTest):
         name = self.check.psutil_wrapper(
             self.get_psutil_proc(),
             'name',
-            None
+            None,
+            False
         )
 
         self.assertNotEquals(name, None)
@@ -199,7 +200,8 @@ class ProcessCheckTest(AgentCheckTest):
         name = self.check.psutil_wrapper(
             self.get_psutil_proc(),
             'blah',
-            None
+            None,
+            False
         )
 
         self.assertEquals(name, None)
@@ -210,7 +212,8 @@ class ProcessCheckTest(AgentCheckTest):
         meminfo = self.check.psutil_wrapper(
             self.get_psutil_proc(),
             'memory_info',
-            ['rss', 'vms', 'foo']
+            ['rss', 'vms', 'foo'],
+            False
         )
 
         self.assertIn('rss', meminfo)
@@ -223,7 +226,8 @@ class ProcessCheckTest(AgentCheckTest):
         meminfo = self.check.psutil_wrapper(
             self.get_psutil_proc(),
             'memory_infoo',
-            ['rss', 'vms']
+            ['rss', 'vms'],
+            False
         )
 
         self.assertNotIn('rss', meminfo)
@@ -263,7 +267,7 @@ class ProcessCheckTest(AgentCheckTest):
             idx = search_string[0].split('_')[1]
         return self.CONFIG_STUBS[int(idx)]['mocked_processes']
 
-    def mock_psutil_wrapper(self, process, method, accessors, *args, **kwargs):
+    def mock_psutil_wrapper(self, process, method, accessors, try_sudo, *args, **kwargs):
         if method == 'num_handles':  # remove num_handles as it's win32 only
             return None
 
