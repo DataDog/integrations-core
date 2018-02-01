@@ -19,7 +19,7 @@ class Apache(AgentCheck):
 
     See http://httpd.apache.org/docs/2.2/mod/mod_status.html for more details
     """
-    METRICS = {
+    GAUGES = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',
         'CPULoad': 'apache.performance.cpu_load',
@@ -94,9 +94,9 @@ class Apache(AgentCheck):
                     value = value * 1024
 
                 # Send metric as a gauge, if applicable
-                if metric in self.METRICS:
+                if metric in self.GAUGES:
                     metric_count += 1
-                    metric_name = self.METRICS[metric]
+                    metric_name = self.GAUGES[metric]
                     self.gauge(metric_name, value, tags=tags)
 
         if metric_count == 0:
