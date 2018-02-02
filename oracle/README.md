@@ -7,7 +7,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 ## Setup
 ### Installation
 
-In order to use the Oracle integration you must install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
+In order to use the Oracle integration, install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
 
 You will need to install the Instant Client Basic and SDK packages.
 
@@ -22,7 +22,7 @@ sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
 sudo ldconfig
 ```
 
-Alternately, you can update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries. For example:
+Alternately, update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries. For example:
 
 ```
 mkdir -p /opt/oracle/ && cd /opt/oracle/
@@ -34,7 +34,7 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
-Finally, you will need to create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
+Finally, create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
 ```
 -- Enable Oracle Script.
@@ -46,6 +46,12 @@ CREATE USER datadog IDENTIFIED BY <password>;
 -- Grant access to the datadog user.
 GRANT CONNECT TO datadog;
 GRANT SELECT ON gv_$sysmetric TO datadog;
+GRANT SELECT ON sys.dba_data_files TO datadog;
+```
+
+**Note**: If you're using Oracle 11g (or lower), there's no need to run the following line:
+```
+ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
 
 ### Configuration
