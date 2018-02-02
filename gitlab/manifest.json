@@ -17,5 +17,5 @@
   "categories":["web", "network"],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
   "is_public": true,
-  "has_logo": false
+  "has_logo": true
 }
