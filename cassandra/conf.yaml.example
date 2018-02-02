@@ -11,8 +11,8 @@ instances:
     #
     # The 'datacenter' tag should be the name of the Cassandra data center the node belongs to.
     # tags:
-    #  environment: default_environment
-    #  datacenter: default_datacenter
+    #   environment: default_environment
+    #   datacenter: default_datacenter
     
     # user: username
     # password: password
