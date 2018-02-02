@@ -188,7 +188,7 @@ class TestCouchdb2(AgentCheckTest):
                     self.indexing_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.view_compaction"):
                     self.view_compaction_tasks_gauges.append(row[0])
-                elif row[0].startswith("couchdb.by_dd."):
+                elif row[0].startswith("couchdb.by_ddoc."):
                     self.by_dd_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
@@ -209,7 +209,7 @@ class TestCouchdb2(AgentCheckTest):
 
         for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
             for gauge in self.by_dd_gauges:
-                self.assertMetric(gauge, tags=["dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
+                self.assertMetric(gauge, tags=["design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         for db in ['_users', '_global_changes', '_metadata', '_replicator', 'kennel']:
             for gauge in self.by_db_gauges:
@@ -307,7 +307,7 @@ class TestCouchdb2(AgentCheckTest):
 
         for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
             for gauge in self.by_dd_gauges:
-                self.assertMetric(gauge, tags=["dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
+                self.assertMetric(gauge, tags=["design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -344,7 +344,7 @@ class TestCouchdb2(AgentCheckTest):
 
         for db, dd in {"_replicator": "_replicator", "_users": "_auth"}.items():
             for gauge in self.by_dd_gauges:
-                self.assertMetric(gauge, tags=["dd:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
+                self.assertMetric(gauge, tags=["design_document:{0}".format(dd), "language:javascript", "db:{0}".format(db)])
 
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
@@ -574,7 +574,7 @@ class TestCouchdb2(AgentCheckTest):
             self.fail("Could not find the view_compaction happening")
 
     def test_config_tags(self):
-        TEST_TAG = "test_tag"
+        TEST_TAG = "test_tag:test"
         conf = self.NODE1.copy()
         conf['tags'] = [TEST_TAG]
 

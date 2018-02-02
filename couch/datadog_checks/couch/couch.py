@@ -313,7 +313,7 @@ class CouchDB2:
             scanned_dbs = 0
             for db in self._get_dbs_to_scan(server, instance, name, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
-                    db_tags = tags + ["db:{0}".format(db)]
+                    db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
                     self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
                     for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags)['rows']:
