@@ -5,6 +5,7 @@
 # stdlib
 from urlparse import urljoin
 from urllib import quote
+import math
 
 # 3rd party
 import requests
@@ -289,6 +290,13 @@ class CouchDB2:
         else:
             return [name]
 
+    def _get_dbs_to_scan(self, server, instance, name, tags):
+        dbs = self.agent_check.get(urljoin(server, "_all_dbs"), instance, tags)
+        nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+        idx = nodes.index(name)
+        size = int(math.ceil(len(dbs) / float(len(nodes))))
+        return dbs[(idx * size):((idx + 1) * size)]
+
     def check(self, instance):
         server = self.agent_check.get_server(instance)
 
@@ -303,9 +311,9 @@ class CouchDB2:
             db_whitelist = instance.get('db_whitelist', None)
             db_blacklist = instance.get('db_blacklist', [])
             scanned_dbs = 0
-            for db in self.agent_check.get(urljoin(server, "/_all_dbs"), instance, tags):
+            for db in self._get_dbs_to_scan(server, instance, name, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
-                    db_tags = tags + ["db:{0}".format(db)]
+                    db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
                     self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
                     for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags)['rows']:
