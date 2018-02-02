@@ -315,9 +315,9 @@ class CouchDB2:
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
                     tags = ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
-                    self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
-                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags)['rows']:
-                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, db_tags), db_tags)
+                    self._build_db_metrics(self.agent_check.get(db_url, instance, tags), tags)
+                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, tags)['rows']:
+                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, tags), tags)
                     scanned_dbs += 1
                     if scanned_dbs >= max_dbs_per_check:
                         break

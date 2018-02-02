@@ -188,7 +188,7 @@ class TestCouchdb2(AgentCheckTest):
                     self.indexing_tasks_gauges.append(row[0])
                 elif row[0].startswith("couchdb.active_tasks.view_compaction"):
                     self.view_compaction_tasks_gauges.append(row[0])
-                elif row[0].startswith("couchdb.by_ddoc."):
+                elif row[0].startswith("couchdb.by_dd."):
                     self.by_dd_gauges.append(row[0])
                 else:
                     self.cluster_gauges.append(row[0])
