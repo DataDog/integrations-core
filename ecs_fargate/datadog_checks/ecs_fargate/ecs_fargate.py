@@ -123,13 +123,6 @@ class FargateCheck(AgentCheck):
             tags = container_tags[container_id]
             self.rate('ecs.fargate.cpu.system', container_stats['cpu_stats']['system_cpu_usage'], tags)
             self.rate('ecs.fargate.cpu.user', container_stats['cpu_stats']['cpu_usage']['total_usage'], tags)
-            cpu_percent = 0.0
-            cpu_delta = container_stats['cpu_stats']['cpu_usage']['total_usage'] - container_stats['precpu_stats']['cpu_usage']['total_usage']
-            system_delta = container_stats['cpu_stats']['system_cpu_usage'] - container_stats['precpu_stats']['system_cpu_usage']
-            if system_delta > 0 and cpu_delta > 0:
-                cpu_percent = (float(cpu_delta) / float(system_delta)) * len(container_stats['cpu_stats']['cpu_usage']['percpu_usage']) * 100.0
-                cpu_percent = round(cpu_percent, 2)
-            self.gauge('ecs.fargate.cpu.percent', cpu_percent, tags)
             # Memory metrics
             for metric in MEMORY_GAUGE_METRICS:
                 value = container_stats['memory_stats']['stats'][metric]
