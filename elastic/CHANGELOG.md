@@ -1,6 +1,22 @@
 # CHANGELOG - elastic
 
-1.3.0 / Unreleased
+1.5.0 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. [#1050][].
+* [BUG] Fixes bug that causes poor failovers when authentication fails. See [#1026][].
+* [IMPROVEMENT] Adds `cluster_name` tag to the `elasticsearch.cluster_health` service check. See [#1038][].
+
+1.4.0 / 2018-01-10
+==================
+
+### Changes
+
+* [BUG] Fix missing fs metrics for elastic >= 5. See [#997][].
+
+1.3.0 / 2018-01-10
 ==================
 
 ### Changes
@@ -45,3 +61,5 @@
 [#820]: https://github.com/DataDog/integrations-core/issues/820
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#893]: https://github.com/DataDog/integrations-core/issues/893
+[#1026]: https://github.com/DataDog/integrations-core/issues/1026
+[#1050]: https://github.com/DataDog/integrations-core/issues/1050

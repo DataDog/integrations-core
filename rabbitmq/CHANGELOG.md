@@ -1,7 +1,13 @@
 # CHANGELOG - rabbitmq
 
+1.5.0 / Unreleased
+==================
 
-1.4.0 / Unreleased
+### Changes
+
+* [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][].
+
+1.4.0 / 2018-01-10
 ==================
 
 ### Changes
@@ -58,14 +64,11 @@
 [#635]: https://github.com/DataDog/integrations-core/issues/635
 [#674]: https://github.com/DataDog/integrations-core/issues/674
 [#729]: https://github.com/DataDog/integrations-core/issues/729
-<<<<<<< HEAD
-[#909]: https://github.com/DataDog/integrations-core/issues/909
-[#910]: https://github.com/DataDog/integrations-core/issues/910
-=======
 [#902]: https://github.com/DataDog/integrations-core/issues/902
 [#909]: https://github.com/DataDog/integrations-core/issues/909
 [#924]: https://github.com/DataDog/integrations-core/issues/924
+[#909]: https://github.com/DataDog/integrations-core/issues/909
+[#910]: https://github.com/DataDog/integrations-core/issues/910
 [@dnavre]: https://github.com/dnavre
->>>>>>> master
 [@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr

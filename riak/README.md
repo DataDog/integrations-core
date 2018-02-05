@@ -8,7 +8,9 @@ This check lets you track node, vnode and ring performance metrics from RiakKV o
 ## Setup
 ### Installation
 
-The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers. If you need the newest version of the check, install the `dd-check-riak` package.
+The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers.  
+
+If you need the newest version of the Riak check, install the `dd-check-riak` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

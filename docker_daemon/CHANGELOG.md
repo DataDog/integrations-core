@@ -1,6 +1,12 @@
 # CHANGELOG - docker_daemon
 
-1.7.0 / Unreleased
+1.8.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add `short_image` tag to container metrics. See [#986][]
+
+1.7.0 / 2018-01-10
 ==================
 ### Changes
 

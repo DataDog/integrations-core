@@ -123,12 +123,12 @@ instances:
     #
     skip_event: true
 
-    # The (optional) no_proxy parameter would bypass any proxy settings enabled
+    # The (optional) skip_proxy parameter would bypass any proxy settings enabled
     # and attempt to reach the the URL directly.
     # If no proxy is defined at any level, this flag bears no effect.
     # Defaults to False.
     #
-    # no_proxy: false
+    # skip_proxy: false
 
     # The (optional) allow_redirects parameter can enable redirection.
     # Defaults to True.

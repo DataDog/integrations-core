@@ -1,12 +1,19 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-pgbouncer.stats.requests_per_second,gauge,,request,second,The request rate,0,pgbouncer,requests
-pgbouncer.stats.bytes_received_per_second,gauge,,byte,second,The total network traffic received,0,pgbouncer,bytes received
-pgbouncer.stats.bytes_sent_per_second,gauge,,byte,second,The total network traffic sent,0,pgbouncer,bytes sent
-pgbouncer.stats.total_query_time,gauge,,microsecond,,Time spent by pgbouncer actively querying PostgreSQL,0,pgbouncer,query time
+pgbouncer.stats.requests_per_second,rate,,request,second,The request rate,0,pgbouncer,requests
+pgbouncer.stats.queries_per_second,rate,,query,second,The query rate,0,pgbouncer,queries
+pgbouncer.stats.transactions_per_second,rate,,transaction,second,The transaction rate,0,pgbouncer,transactions
+pgbouncer.stats.bytes_received_per_second,rate,,byte,second,The total network traffic received,0,pgbouncer,bytes received
+pgbouncer.stats.bytes_sent_per_second,rate,,byte,second,The total network traffic sent,0,pgbouncer,bytes sent
+pgbouncer.stats.total_query_time,rate,,microsecond,,Time spent by pgbouncer actively querying PostgreSQL,0,pgbouncer,query time
+pgbouncer.stats.total_transaction_time,rate,,microsecond,,Time spent by pgbouncer in transactions,0,pgbouncer,transaction time
 pgbouncer.stats.avg_req,gauge,,request,second,The average number of requests per second in last stat period,0,pgbouncer,requests per second
+pgbouncer.stats.avg_query_count,gauge,,query,second,The average number of queries per second in last stat period,0,pgbouncer,queries per second
+pgbouncer.stats.avg_transaction_count,gauge,,transaction,second,The average number of transactions per second in last stat period,0,pgbouncer,transactions per second
 pgbouncer.stats.avg_recv,gauge,,byte,second,The client network traffic received,0,pgbouncer,client bytes received
 pgbouncer.stats.avg_sent,gauge,,byte,second,The client network traffic sent,0,pgbouncer,client bytes sent
 pgbouncer.stats.avg_query,gauge,,microsecond,,The average query duration,-1,pgbouncer,query duration
+pgbouncer.stats.avg_query_time,gauge,,microsecond,,The average query duration,-1,pgbouncer,query duration
+pgbouncer.stats.avg_transaction_time,gauge,,microsecond,,The average transaction duration,-1,pgbouncer,transaction duration
 pgbouncer.pools.cl_active,gauge,,connection,,Client connections linked to server connection and able to process queries,0,pgbouncer,active conns
 pgbouncer.pools.cl_waiting,gauge,,connection,,Client connections waiting on a server connection,-1,pgbouncer,waiting conns
 pgbouncer.pools.sv_active,gauge,,connection,,Server connections linked to a client connection,0,pgbouncer,server conns

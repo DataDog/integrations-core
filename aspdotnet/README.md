@@ -9,7 +9,9 @@ Get metrics from aspdotnet service in real time to:
 
 ## Installation
 
-Install the `dd-check-aspdotnet` package manually or with your favorite configuration manager
+The Aspdotnet check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+
+If you need the newest version of the Aspdotnet check, install the `dd-check-aspdotnet` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ## Configuration
 

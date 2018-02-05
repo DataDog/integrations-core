@@ -1,6 +1,6 @@
 # CHANGELOG - zk
 
-1.2.0 / Unreleased
+1.2.0 / 2018-01-10
 ==================
 
 * [IMPROVEMENT] Add `zookeeper.packets.received` and `zookeeper.packets.sent` as `rate` metrics

@@ -6,12 +6,12 @@ system.nfs.read.ops,gauge,,operation,second,this is the number of read operation
 system.nfs.read_per_s,gauge,,kibibyte,second,this is the number of kibibytes read per second,0,nfsstat,reads per sec
 system.nfs.read.retrans,gauge,,operation,,this is the number of retransmissions in read operations,-1,nfsstat,read retransmissions
 system.nfs.read.retrans.pct,gauge,,percent,,this is the percent of retransmissions in read operations,-1,nfsstat,read percent retransmissions
-system.nfs.read.rtt,gauge,,millisecond,read operation round trip time,-1,nfsstat,read round trip time
-system.nfs.read.exe,gauge,,millisecond,this is the time between making a read rpc request and the request being completed,,-1,nfsstat,read execution time
-system.nfs.write_per_op,gauge,,kibibyte,operation,this is the number of kibibytes written per operation
-system.nfs.write.ops,gauge,,operation,second,this is the number of write operations per second
-system.nfs.write_per_s,gauge,,kibibyte,second,this is the number of kibibytes written per second
+system.nfs.read.rtt,gauge,,millisecond,,read operation round trip time,-1,nfsstat,read round trip time
+system.nfs.read.exe,gauge,,millisecond,,this is the time between making a read rpc request and the request being completed,-1,nfsstat,read execution time
+system.nfs.write_per_op,gauge,,kibibyte,operation,this is the number of kibibytes written per operation,0,nfsstat,write per operation
+system.nfs.write.ops,gauge,,operation,second,this is the number of write operations per second,0,nfsstat,operations per sec
+system.nfs.write_per_s,gauge,,kibibyte,second,this is the number of kibibytes written per second,0,nfsstat,writes per sec
 system.nfs.write.retrans,gauge,,operation,,this is the number of retransmissions in write operations,-1,nfsstat,retransmissions
 system.nfs.write.retrans.pct,gauge,,percent,,this is the percent of retransmissions in write operations,-1,nfsstat,percent retransmissions
 system.nfs.write.rtt,gauge,,millisecond,,write operation round trip time,-1,nfsstat,write round trip time
-system.nfs.write.exe,gauge,,millisecond,,this is the time between making a write rpc request and the request being completed,,-1,nfsstat,write execution time
+system.nfs.write.exe,gauge,,millisecond,,this is the time between making a write rpc request and the request being completed,-1,nfsstat,write execution time

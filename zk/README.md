@@ -7,7 +7,10 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 ## Setup
 ### Installation
 
-The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers. If you need the newest version of the check, install the `dd-check-zk` package.
+The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers.  
+
+
+If you need the newest version of the Zookeeper check, install the `dd-check-zk` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

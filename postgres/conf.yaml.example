@@ -72,3 +72,24 @@ instances:
 #    Include statistics from the default database 'postgres' in the check metrics, default to false
 #    collect_default_database: False
 #
+
+## log Section (Available for Agent >=6.0)
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+#  - type: file
+#    path: /path/to/postgres.log
+#    source: postgresql
+#    sourcecategory: database
+#    service: myapp
+#    #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
+#    log_processing_rules:
+#      - type: multi_line
+#        pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#        name: new_log_start_with_date

@@ -12,7 +12,8 @@ And more.
 ## Setup
 ### Installation
 
-The YARN check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your YARN ResourceManager. If you need the newest version of the check, install the `dd-check-yarn` package.
+The YARN check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your YARN ResourceManager.  
+If you need the newest version of the YARN check, install the `dd-check-yarn` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

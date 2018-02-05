@@ -91,3 +91,10 @@ tmp
 .rbenv-gemsets
 .ruby-version
 
+# Common IDEs & editors
+.idea/
+.vscode/
+
+# wheels
+wheelhouse/
+*.whl

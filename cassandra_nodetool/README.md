@@ -8,8 +8,9 @@ It uses the `nodetool` utility to collect them.
 ## Setup
 ### Installation
 
-The cassandra nodetool check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your cassandra nodes.
-If you need the newest version of the check, install the `dd-check-cassandra_nodetool` package.
+The Cassandra nodetool check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your cassandra nodes.  
+
+If you need the newest version of the Cassandra nodetool check, install the `dd-check-cassandra-nodetool` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

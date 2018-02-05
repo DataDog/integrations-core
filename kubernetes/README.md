@@ -10,7 +10,7 @@ Get metrics from kubernetes service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-kubernetes` package manually or with your favorite configuration manager
+The Kubernetes check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kubernetes servers.
 
 ### Configuration
 

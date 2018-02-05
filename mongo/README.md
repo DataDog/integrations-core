@@ -10,12 +10,17 @@ Connect MongoDB to Datadog in order to:
 ## Setup
 ### Installation
 
-The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. If you need the newest version of the check, install the `dd-check-mongo` package.
+The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. 
+
+If you need the newest version of the MongoDB check, install the `dd-check-mongo` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
+
+Create a `mongodb.yaml` file in the Agent's `conf.d` directory.
+
 #### Prepare MongoDB
 
-In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
+In a mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
 ```
 # Authenticate as the admin user.
@@ -37,46 +42,70 @@ db.createUser({
 })
 ```
 
-#### Connect the Agent
+#### Metric Collection
 
-Create a file `mongodb.yaml` in the Agent's `conf.d` directory. See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
+* Add this configuration setup to your `mongodb.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options:
 
-```
-init_config:
+  ```
+  init_config:
+  instances:
+    - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017/admin
+      additional_metrics:
+        - collection       # collect metrics for each collection
+        - metrics.commands 
+        - tcmalloc
+        - top
+  ```
+  See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-instances:
-  - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017/admin
-    additional_metrics:
-      - collection       # collect metrics for each collection
-      - metrics.commands 
-      - tcmalloc
-      - top
-```
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
 
+#### Log Collection
 
+**Available for Agent >6.0**
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+  ```
+  log_enabled: true
+  ```
+
+* Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:
+
+  ```
+  logs:
+      - type: file
+        path: /var/log/mongodb/mongodb.log
+        service: mongo
+        source: mongodb
+  ```
+  Change the `service` and `path` parameter values and configure them for your environment.  
+  See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
+
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
 [Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mongo` under the Checks section:
 
 ```
-  Checks
-  ======
-    [...]
+Checks
+======
+  [...]
 
-    mongo
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 1 event & 1 service check
+  mongo
+  -------
+    - instance #0 [OK]
+    - Collected 26 metrics, 1 event & 1 service check
 
-    [...]
+  [...]
 ```
 
 ## Compatibility
 
-The mongo check is compatible with all major platforms.
+The MongoDB check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics

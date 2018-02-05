@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
+  "version": "1.3.0",
   "guid": "1675eced-b435-464a-8f84-f65e438f838e",
   "public_title": "Datadog-Processes Integration",
   "categories":["os & system"],

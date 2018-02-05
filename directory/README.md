@@ -12,7 +12,9 @@ Capture metrics from directories and files of your choosing. The Agent will coll
 ## Setup
 ### Installation
 
-The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.
+The directory check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you wish to use it.  
+
+If you need the newest version of the Directory check, install the `dd-check-directory` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 
@@ -27,6 +29,7 @@ instances:
     pattern: "*.log"                # defaults to "*" (all files)
     recursive: True                 # default False
     countonly: False                # set to True to only collect the number of files matching 'pattern'. Useful for very large directories.
+    ignore_missing: False           # set to True to not raise exceptions on missing or inaccessible directories
 ```
 
 Ensure that the user running the Agent process (usually `dd-agent`) has read access to the directories, subdirectories, and files you configure.

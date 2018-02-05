@@ -10,7 +10,7 @@ Get metrics from mapreduce service in real time to:
 ## Setup
 ### Installation
 
-Install the `dd-check-mapreduce` package manually or with your favorite configuration manager
+The Mapreduce check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

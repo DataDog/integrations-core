@@ -18,7 +18,8 @@ The Spark check is packaged with the Agent, so simply [install the Agent](https:
 - YARN ResourceManager (if you're running Spark on YARN), or
 - Spark master (if you're running Standalone Spark)
 
-If you need the newest version of the check, install the `dd-check-spark` package.
+
+If you need the newest version of the Spark check, install the `dd-check-spark` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 

@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-1.4.0 / Unreleased
+1.4.0 / 2018-01-10
 
 ### Changes
 

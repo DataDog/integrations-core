@@ -1,0 +1,53 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+squid.client_http.requests,gauge,,requests,second,The number of HTTP requests received from clients,0,squid,client http reqs
+squid.client_http.hits,gauge,,hits,second,The number of cache hits in response to client requests.,0,squid,client http hits
+squid.client_http.errors,gauge,,errors,second,The number of client transactions that resulted in an error.,-1,squid,client http errs
+squid.client_http.kbytes_in,gauge,,kilobytes,second,The amount of traffic received from clients in their requests.,0,squid,client http kb in
+squid.client_http.kbytes_out,gauge,,kilobytes,second,The amount of traffic sent to clients in responses.,0,squid,client http kb out
+squid.client_http.hit_kbytes_out,gauge,,kilobytes,second,The amount of traffic sent to clients in responses that are cache hits,0,squid,client http hits kb out
+squid.server.all.requests,gauge,,requests,second,The number of requests forwarded to origin servers (or neighbor caches) for all server-side protocols.,0,squid,serv all reqs
+squid.server.all.errors,gauge,,errors,second,The number of server-side requests (all protocols) that resulted in some kind of error.,-1,squid,serv all errs
+squid.server.all.kbytes_in,gauge,,kilobytes,second,The amount of traffic read from the server-side for all protocols.,0,squid,serv all kb in
+squid.server.all.kbytes_out,gauge,,kilobytes,second,The amount of traffic written to origin servers and/or neighbor caches for server-side requests.,0,squid,serv all kb out
+squid.server.http.requests,gauge,,requests,second,"The number of server-side requests to HTTP servers, including neighbor caches.",0,squid,serv http reqs
+squid.server.http.errors,gauge,,errors,second,The number of server-side HTTP requests that resulted in an error.,-1,squid,serv http errs
+squid.server.http.kbytes_in,gauge,,kilobytes,second,The amount of traffic read from HTTP origin servers and neighbor caches.,0,squid,serv http kb in
+squid.server.http.kbytes_out,gauge,,kilobytes,second,The amount of traffic written to HTTP origin servers and neighbor caches.,0,squid,serv http kb out
+squid.server.ftp.requests,gauge,,requests,second,The number of requests sent to FTP servers.,0,squid,serv ftp reqs
+squid.server.ftp.errors,gauge,,errors,second,The number of requests sent to FTP servers that resulted in an error.,-1,squid,serv ftp errs
+squid.server.ftp.kbytes_in,gauge,,kilobytes,second,"The amount of traffic read from FTP servers, including control channel traffic.",0,squid,serv ftp kb in
+squid.server.ftp.kbytes_out,gauge,,kilobytes,second,"The amount of traffic written to FTP servers, including control channel traffic.",0,squid,serv ftp kb out
+squid.server.other.requests,gauge,,requests,second,"The number of ""other"" server-side requests. Currently, the other protocols are Gopher, WAIS, and SSL.",0,squid,serv other reqs
+squid.server.other.errors,gauge,,errors,second,"The number of Gopher, WAIS, and SSL requests that resulted in an error.",-1,squid,serv other errs
+squid.server.other.kbytes_in,gauge,,kilobytes,second,"The amount of traffic read from Gopher, WAIS, and SSL servers.",0,squid,serv other kb in
+squid.server.other.kbytes_out,gauge,,kilobytes,second,"The amount of traffic written to Gopher, WAIS, and SSL servers.",0,squid,serv other kb out
+squid.icp.pkts_sent,gauge,,messages,second,The number of ICP messages sent to neighbors. This includes both queries and replies but doesn't include HTCP messages.,0,squid,icp pkts sent
+squid.icp.pkts_recv,gauge,,messages,second,"The number of ICP messages received from neighbors, including both queries and replies",0,squid,icp pkts recv
+squid.icp.queries_sent,gauge,,queries,second,The number of ICP queries sent to neighbors.,0,squid,icp queries sent
+squid.icp.replies_sent,gauge,,replies,second,The number of ICP replies sent to neighbors.,0,squid,icp replies sent
+squid.icp.queries_recv,gauge,,queries,second,The number of ICP queries received from neighbors.,0,squid,icp queries recv
+squid.icp.replies_recv,gauge,,replies,second,The number of ICP replies received from neighbors.,0,squid,icp replies recv
+squid.icp.query_timeouts,gauge,,timeouts,second,The number of times that Squid timed out waiting for ICP replies to arrive.,-1,squid,icp query timeouts
+squid.icp.replies_queued,gauge,,messages,second,The number of times Squid queued an ICP message after the initial attempt to send failed.,-1,squid,icp replies queued
+squid.icp.kbytes_sent,gauge,,kilobytes,second,"The amount of traffic sent in all ICP messages, including both queries and replies.",0,squid,icp kb sent
+squid.icp.kbytes_recv,gauge,,kilobytes,second,"The amount of traffic received in all ICP messages, including both queries and replies.",0,squid,icp kb recv
+squid.icp.q_kbytes_sent,gauge,,kilobytes,second,The amount of traffic sent to neighbors in ICP queries.,0,squid,icp queries kb sent
+squid.icp.r_kbytes_sent,gauge,,kilobytes,second,The amount of traffic sent to neighbors in ICP replies.,0,squid,icp replies kb sent
+squid.icp.q_kbytes_recv,gauge,,kilobytes,second,The amount of traffic received from neighbors in ICP queries.,0,squid,icp queries kb recv
+squid.icp.r_kbytes_recv,gauge,,kilobytes,second,The amount of traffic received from neighbors in ICP replies.,0,squid,icp replies kb recv
+squid.icp.times_used,gauge,,,second,The number of times ICP resulted in the selection of a neighbor as the next-hop for a cache miss.,0,squid,icp times used
+squid.cd.times_used,gauge,,,second,The number of times Cache Digests resulted in the selection of a neighbor as the next-hop for a cache miss.,0,squid,cd times used
+squid.cd.msgs_sent,gauge,,messages,second,The number of Cache Digest messages sent to neighbors.,0,squid,cd msgs sent
+squid.cd.msgs_recv,gauge,,messages,second,The number of Cache Digest messages received from neighbors.,0,squid,cd msgs recv
+squid.cd.memory,gauge,,kilobytes,second,The amount of memory used by enabling the Cache Digests' feature.,0,squid,cd mem
+squid.cd.local_memory,gauge,,kilobytes,second,The amount of memory used to store Squid's own Cache Digest.,0,squid,cd local mem
+squid.cd.kbytes_sent,gauge,,kilobytes,second,The amount of traffic sent to neighbors in Cache Digest messages.,0,squid,cd kb sent
+squid.cd.kbytes_recv,gauge,,kilobytes,second,The amount of traffic received from neighbors in Cache Digest messages.,0,squid,cd kb recv
+squid.unlink.requests,gauge,,requests,second,The number of unlink requests given to the (optional) unlinkd process.,0,squid,unlink reqs
+squid.page_faults,gauge,,faults,second,The number of (major) page faults as reported by getrusage( ).,-1,squid,page faults
+squid.select_loops,gauge,,select,second,The number of times Squid called select( ) or poll( ) in the main I/O loop.,0,squid,select loops
+squid.cpu_time,gauge,,percent,,"The amount of CPU used by squid, as reported by getrusage( ).",0,squid,cpu time
+squid.swap.outs,gauge,,files,second,The number of objects (swap files) saved to disk.,0,squid,swap outs
+squid.swap.ins,gauge,,files,second,The number of objects (swap files) read from disk.,0,squid,swap ins
+squid.swap.files_cleaned,gauge,,files,second,The number of orphaned cache files removed by the periodic cleanup procedure.,0,squid,swap created
+squid.aborted_requests,gauge,,requests,second,The number of server-side HTTP requests aborted due to client-side aborts.,0,squid,aborted reqs

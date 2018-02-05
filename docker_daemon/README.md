@@ -24,8 +24,6 @@ Whichever you choose, your hosts need to have cgroup memory management enabled f
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
     {{< img src="integrations/docker/integrations-docker-dockerps.png" >}}
 
-{{< insert-example-links conf="docker_daemon" check="docker_daemon" >}}
-
 **Note:** docker_daemon has replaced the older docker integration.
 
 #### Container Installation

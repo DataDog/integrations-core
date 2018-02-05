@@ -1,5 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 php_fpm.listen_queue.size,gauge,,,,Size of the socket queue of pending connections,0,php_fpm,listen queue size
-php_fpm.processes.active, gauge,,process,, Total number of active processes,0,php_fpm, active processes
-php_fpm.processes.idle, gauge,,process,,Total number of idle processes,0,php_fpm, idle processes
-php_fpm.processes.total, gauge,,process,, Total number of processes,0,php_fpm, total processes
+php_fpm.processes.active,gauge,,process,, Total number of active processes,0,php_fpm,active processes
+php_fpm.processes.idle,gauge,,process,,Total number of idle processes,0,php_fpm,idle processes
+php_fpm.processes.total,gauge,,process,, Total number of processes,0,php_fpm,total processes
+php_fpm.requests.accepted,count,,request,,Total number of accepted requests,0,php_fpm,accepted requests
+php_fpm.processes.max_reached,count,,process,,The number of times the process limit has been reached (when pm tries to start more children),0,php_fpm,max processes reached
+php_fpm.requests.slow,count,,request,,Total number of slow requests,0,php_fpm,slow requests

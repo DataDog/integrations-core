@@ -7,7 +7,9 @@ This check monitors the uptime, status, and number of processes running under su
 ## Setup
 ### Installation
 
-The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes. If you need the newest version of the check, install the `dd-check-supervisord` package.
+The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes.  
+
+If you need the newest version of the Supervisor check, install the `dd-check-supervisord` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 #### Prepare supervisord

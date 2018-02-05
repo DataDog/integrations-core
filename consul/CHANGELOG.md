@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-1.3.0 / Unreleased
+1.3.0 / 2018-01-10
 ==================
 
 * [IMPROVEMENT] Add support for Consul 1.0. See [#876][], thanks [@byronwolfman][]

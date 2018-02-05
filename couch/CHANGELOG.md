@@ -1,6 +1,21 @@
 # CHANGELOG - couch
 
-2.2.0 / UNRELEASED
+2.4.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] reduces by db and by dd amplification by distributing the dbs to report on the running agents
+
+2.3.0 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Handle the case where there is no database. See [#1029][]
+* [IMPROVEMENT] Add custom tags to metrics and service checks. See [#1034][]
+
+2.2.0 / 2018-01-10
 =================
 
 ### Changes

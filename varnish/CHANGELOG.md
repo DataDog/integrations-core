@@ -1,6 +1,12 @@
 # CHANGELOG - varnish
 
-1.1.0 / Unreleased
+1.1.1 / Unreleased
+==================
+### Changes
+
+* [DOC] Adding configuration for log collection in `conf.yaml`
+
+1.1.0 / 2018-01-10
 ==================
 
 ### Changes

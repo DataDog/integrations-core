@@ -10,7 +10,9 @@ The process check lets you:
 ## Setup
 ### Installation
 
-The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check. If you need the newest version of the check, install the `dd-check-process` package.
+The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check.  
+
+If you need the newest version of the Process check, install the `dd-check-process` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
 
@@ -34,6 +36,15 @@ instances:
 You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check will the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).
 
 To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent](https://github.com/DataDog/docker-dd-agent)) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check](https://github.com/DataDog/integrations-core/tree/master/docker_daemon) monitors those.
+
+Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved.
+Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric.
+As of now, only the `open_fd` metric on Unix platforms is taking advantage of this setting.
+Note: the appropriate sudoers rules have to be configured for this to work, e.g. if packaged with the datadog agent:
+```
+dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/agent/checks.d/process.py num_fds *
+dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/agent/checks.d/process.pyc num_fds *
+```
 
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.
 
