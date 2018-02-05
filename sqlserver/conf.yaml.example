@@ -72,6 +72,8 @@ init_config:
     # 	[value] float not null,
     # 	[tags] varchar(255)
     # )
+    #
+    # NOTE: SET NOCOUNT to ON inside proc to avoid extra resultsets that prevent valid query results
     # 
     # You can also specify:
     # ignore_missing_database : if DB doesn't exist on the server then don't do the check. Default False
