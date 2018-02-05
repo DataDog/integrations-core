@@ -29,7 +29,7 @@ init_config:
     # tagged as "db:mydb1", "db:mydb2".
     #
     # - name: sqlserver.db.commit_table_entries
-    #   counter_name: Log Flushes/sec
+    #   counter_name: Commit table entries
     #   instance_name: ALL
     #   tag_by: db
 
