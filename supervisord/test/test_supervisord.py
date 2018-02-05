@@ -428,6 +428,10 @@ Stop time: {time_stop}\nExit Status: 0""".format(
 
     def assert_metrics(self, expected, actual):
         actual = [TestSupervisordCheck.norm_metric(metric) for metric in actual]
+        for metric in expected:
+            metric[2]['tags'] = sorted(metric[2]['tags'])
+        for metric in actual:
+            metric[2]['tags'] = sorted(metric[2]['tags'])
         self.assertEquals(len(actual), len(expected), msg='Invalid # metrics reported.\n'
             'Expected: {0}. Found: {1}'.format(len(expected), len(actual)))
         self.assertTrue(all([expected_metric in actual for expected_metric in expected]),
@@ -437,6 +441,10 @@ Stop time: {time_stop}\nExit Status: 0""".format(
     def assert_service_checks(self, expected, actual):
         actual = [TestSupervisordCheck.norm_service_check(service_check)
                   for service_check in actual]
+        for sc in expected:
+            sc['tags'] = sorted(sc['tags'])
+        for sc in actual:
+            sc['tags'] = sorted(sc['tags'])
         self.assertEquals(len(actual), len(expected), msg='Invalid # service checks reported.'
             '\nExpected: {0}. Found: {1}.'.format(expected, actual))
         self.assertTrue(all([expected_service_check in actual
