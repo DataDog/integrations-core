@@ -13,7 +13,11 @@ If you need the newest version of the Redis check, install the `dd-check-redis` 
 
 ### Configuration
 
-Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory. See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options:
+Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory. 
+
+#### Metric Collection
+
+Add this configuration setup to your `redisdb.yaml` file to start gathering your [Redis Metrics](#metrics):
 
 ```
 init_config:
@@ -36,7 +40,33 @@ Configuration Options:
         set the value here. Warning: It may impact the performance of your redis instance
 * `command_stats` - (Optional) - Collect INFO COMMANDSTATS output as metrics.
 
-See [this sample redisdb.yaml](https://github.com/Datadog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
+See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
+
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis metrics to Datadog.
+
+#### Log Collection
+
+**Available for Agent >6.0** 
+
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+  ```
+  log_enabled: true
+  ```
+   
+* Add this configuration setup to your `redisdb.yaml` file to start collecting your Redis Logs:
+
+  ```
+    logs:
+        - type: file
+          path: /var/log/redis_6379.log
+          source: redis
+          sourcecategory: database
+          service: myapplication
+  ```
+  
+  Change the `path` and `service` parameter values and configure them for your environment.  
+See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
 [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis metrics to Datadog.
 
