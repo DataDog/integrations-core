@@ -16,6 +16,9 @@ init_config:
     # - name: sqlserver.clr.execution
     #   counter_name: CLR Execution
 
+    # The counter_name field uses the counter name of SQL server database objects
+    # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
+
     # This counter has multiple instances associated with it and we're
     # choosing to only fetch the 'Cumulative execution time (ms) per second' instance.
     #
@@ -29,7 +32,7 @@ init_config:
     # tagged as "db:mydb1", "db:mydb2".
     #
     # - name: sqlserver.db.commit_table_entries
-    #   counter_name: Log Flushes/sec
+    #   counter_name: Commit table entries
     #   instance_name: ALL
     #   tag_by: db
 
@@ -50,6 +53,9 @@ init_config:
     #     - signal_wait_time_ms
     #
     # will report two metrics, sqlserver.LCK_M_S.max_wait_time.ms and sqlserver.LCK_M_S.signal_wait_time_ms
+
+    # sys.dm_io_virtual_file_stats and sys.dm_os_memory_clerks are not associated with a counter_name
+    # only the columns need to be specified
 
     # - name: sqlserver.io_file_stats
     #   table: sys.dm_io_virtual_file_stats
@@ -72,6 +78,8 @@ init_config:
     # 	[value] float not null,
     # 	[tags] varchar(255)
     # )
+    #
+    # NOTE: SET NOCOUNT to ON inside proc to avoid extra resultsets that prevent valid query results
     # 
     # You can also specify:
     # ignore_missing_database : if DB doesn't exist on the server then don't do the check. Default False
