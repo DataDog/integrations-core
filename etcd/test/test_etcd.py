@@ -50,7 +50,7 @@ class CheckEtcdTest(AgentCheckTest):
         self.assertServiceCheckOK(self.check.SERVICE_CHECK_NAME, count=1,
                                   tags=['url:http://localhost:2379', 'etcd_state:leader'])
         self.assertServiceCheckOK(self.check.HEALTH_SERVICE_CHECK_NAME, count=1,
-                                  tags=['url:http://localhost:2379', 'etcd_state:leader'])
+                                  tags=['url:http://localhost:2379'])
         self.coverage_report()
 
     # FIXME: not really an integration test, should be pretty easy

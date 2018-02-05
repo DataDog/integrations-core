@@ -536,7 +536,7 @@ class TestElastic(AgentCheckTest):
         self.assertEquals(len(self.events), 1)
         self.assertIn('yellow', self.events[0]['msg_title'])
         self.assertEquals(
-            ['url:http://localhost:9200'] + dummy_tags + cluster_tag,
+            sorted(set(['url:http://localhost:9200'] + dummy_tags + cluster_tag)),
             self.events[0]['tags']
         )
         self.assertServiceCheckWarning(
@@ -554,7 +554,7 @@ class TestElastic(AgentCheckTest):
         self.assertEquals(len(self.events), 1)
         self.assertIn('green', self.events[0]['msg_title'])
         self.assertEquals(
-            ['url:http://localhost:9200'] + dummy_tags + cluster_tag,
+            sorted(set(['url:http://localhost:9200'] + dummy_tags + cluster_tag)),
             self.events[0]['tags']
         )
         self.assertServiceCheckOK(
