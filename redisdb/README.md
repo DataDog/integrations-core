@@ -68,7 +68,7 @@ See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/
   Change the `path` and `service` parameter values and configure them for your environment.  
 See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis logs to Datadog.
 
 ### Validation
 
