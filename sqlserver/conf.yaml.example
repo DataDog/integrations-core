@@ -54,7 +54,7 @@ init_config:
     #
     # will report two metrics, sqlserver.LCK_M_S.max_wait_time.ms and sqlserver.LCK_M_S.signal_wait_time_ms
 
-    # sys.dm_io_virtual_file_stats and sys.dm_os_memory_clerks are not accociated with a counter_name
+    # sys.dm_io_virtual_file_stats and sys.dm_os_memory_clerks are not associated with a counter_name
     # only the columns need to be specified
 
     # - name: sqlserver.io_file_stats
