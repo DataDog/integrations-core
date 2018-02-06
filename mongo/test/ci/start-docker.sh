@@ -77,10 +77,10 @@ echo "The shards have been initialized"
 
 # echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 # echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
-docker exec -it $NAME bash -l -c "mongo --eval \"cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());\" --host localhost --port $PORT"
+docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" --host localhost --port $PORT
 
 echo "Setting test user"
-docker exec -it $NAME bash -l -c "mongo --eval \"db.createUser({ user: \"testUser\", pwd: \"testPass\", roles: [ { role: \"read\", db: \"test\" } ] })\" --host localhost --port $PORT authDB"
+docker exec -it $NAME mongo --eval "db.createUser({ user: 'testUser', pwd: 'testPass', roles: [ { role: 'read', db: 'test' } ] })" --host localhost --port $PORT authDB
 
 echo "Setting test user"
-docker exec -it $NAME bash -l -c "mongo --eval \"db.createUser({ user: \"testUser2\", pwd: \"testPass2\", roles: [ { role: \"read\", db: \"test\" } ] })\" --host localhost --port $PORT test"
+docker exec -it $NAME mongo --eval "db.createUser({ user: 'testUser2', pwd: 'testPass2', roles: [ { role: 'read', db: 'test' } ] })" --host localhost --port $PORT test
