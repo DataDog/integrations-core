@@ -1,1 +1,2 @@
 # integration pip requirements
+-e .
