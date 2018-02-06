@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 PORT=47017
 PORT1=$(( $PORT + 1 ))
