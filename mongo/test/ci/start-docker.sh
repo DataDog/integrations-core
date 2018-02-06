@@ -60,8 +60,8 @@ docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD01_IP:$PORT1')); pri
 echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD02_IP:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
 docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD02_IP:$PORT2')); printjson(rs.status());" localhost:$PORT
 
-docker exec -it $NAME mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/test
-docker exec -it $NAME mongo --eval "db.getCollectionNames()" localhost:$PORT/test
+docker exec -it $NAME bash -l -c 'mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/test'
+docker exec -it $NAME bash -l -c 'mongo --eval "db.getCollectionNames()" localhost:$PORT/test'
 
 sleep 2
 
@@ -75,10 +75,10 @@ echo "The shards have been initialized"
 
 echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
 echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
-docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
+docker exec -it $NAME bash -l -c 'mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT'
 
 echo "Setting test user"
-docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser", pwd: "testPass", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/authDB
+docker exec -it $NAME bash -l -c 'mongo --eval "db.createUser({ user: \"testUser\", pwd: \"testPass\", roles: [ { role: \"read\", db: \"test\" } ] })" localhost:$PORT/authDB'
 
 echo "Setting test user"
-docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser2", pwd: "testPass2", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/test
+docker exec -it $NAME bash -l -c 'mongo --eval "db.createUser({ user: \"testUser2\", pwd: \"testPass2\", roles: [ { role: \"read\", db: \"test\" } ] })" localhost:$PORT/test'
