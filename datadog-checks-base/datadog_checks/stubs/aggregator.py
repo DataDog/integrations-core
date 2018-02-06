@@ -74,7 +74,7 @@ class AggregatorStub(object):
         """
         Return the metrics assertion coverage
         """
-        return len(self._asserted) / len(self._metrics) * 100.0
+        return len(self._asserted) / float(len(self._metrics)) * 100.0
 
     @property
     def metric_names(self):
