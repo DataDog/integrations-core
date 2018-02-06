@@ -20,7 +20,6 @@ Create a file `marathon.yaml` in the Agent's `conf.d` directory. See the [sample
 
 ```
 init_config:
-  - default_timeout: 5 # how many seconds to wait for Marathon API response
 
 instances:
   - url: https://<server>:<port> # the API endpoint of your Marathon master; required
