@@ -52,8 +52,6 @@ setup(
 
     # The package we're going to ship
     packages=['datadog_checks.disk'],
-    # This package is part of the `datadog_checks` namespace
-    namespace_packages=['datadog_checks'],
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[

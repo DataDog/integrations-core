@@ -93,7 +93,6 @@ setup(
 
     # The package we're going to ship
     packages=['datadog_checks.windows_service'],
-    namespace_packages=['datadog_checks'],
 
     # Run-time dependencies
     install_requires=list(set(runtime_reqs)),
