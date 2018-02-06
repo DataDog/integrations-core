@@ -117,11 +117,4 @@ setup(
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.powerdns_recursor': ['conf.yaml.example']},
     include_package_data=True,
-
-    # The entrypoint to run the check manually without an agent
-    entry_points={
-        'console_scripts': [
-            'powerdns_recursor=datadog_checks.powerdns_recursor:main',
-        ],
-    },
 )
