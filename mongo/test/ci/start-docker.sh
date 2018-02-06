@@ -60,8 +60,8 @@ docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD01_IP:$PORT1')); pri
 # echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD02_IP:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
 docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD02_IP:$PORT2')); printjson(rs.status());" localhost:$PORT
 
-docker exec -it $NAME bash -l -c "mongo --eval 'db.getMongo().getDBNames()' localhost:$PORT/test"
-docker exec -it $NAME bash -l -c "mongo --eval 'db.getCollectionNames()' localhost:$PORT/test"
+docker exec -it $NAME bash -l -c "mongo --eval 'db.getMongo().getDBNames()' --port $PORT localhost/test"
+docker exec -it $NAME bash -l -c "mongo --eval 'db.getCollectionNames()' --port $PORT localhost/test"
 
 sleep 2
 
