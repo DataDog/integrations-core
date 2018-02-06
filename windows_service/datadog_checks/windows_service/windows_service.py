@@ -39,10 +39,11 @@ class WindowsService(WinWMICheck):
             raise Exception('No services defined in windows_service.yaml')
 
         properties = ["Name", "State"]
-        filters = map(lambda x: {"Name": tuple(('LIKE', x)) if '%' in x else tuple(('=', x))}, services)
         if "ALL" in services:
             self.log.debug("tracking all services")
             filters = None
+        else:
+            filters = map(lambda x: {"Name": tuple(('LIKE', x)) if '%' in x else tuple(('=', x))}, services)
 
         wmi_sampler = self._get_wmi_sampler(
             instance_key,
