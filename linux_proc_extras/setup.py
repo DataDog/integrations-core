@@ -117,11 +117,4 @@ setup(
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.linux_proc_extras': ['conf.yaml.example']},
     include_package_data=True,
-
-    # The entrypoint to run the check manually without an agent
-    entry_points={
-        'console_scripts': [
-            'linux_proc_extras=datadog_checks.linux_proc_extras:main',
-        ],
-    },
 )
