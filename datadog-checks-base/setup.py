@@ -41,7 +41,6 @@ setup(
     ],
 
     packages=find_packages(),
-    namespace_packages=['datadog_checks'],
 
     setup_requires=['pytest-runner',],
     tests_require=['pytest<4',],
