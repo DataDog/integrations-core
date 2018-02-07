@@ -117,11 +117,4 @@ setup(
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.php_fpm': ['conf.yaml.example']},
     include_package_data=True,
-
-    # The entrypoint to run the check manually without an agent
-    entry_points={
-        'console_scripts': [
-            'php_fpm=datadog_checks.php_fpm:main',
-        ],
-    },
 )

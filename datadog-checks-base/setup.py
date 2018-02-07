@@ -42,15 +42,6 @@ setup(
 
     packages=find_packages(),
 
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest<4',],
-    install_requires=[
-        # 'requests==2.11.1',
-        # 'pyyaml==3.11',
-        # 'simplejson==3.6.5',
-        # 'docker-py==1.10.6',
-        # 'python-etcd==0.4.5',
-        # 'python-consul==0.4.7',
-        # 'kazoo==2.2.1',
-    ],
+    setup_requires=['pytest-runner', ],
+    tests_require=['pytest<4', ],
 )
