@@ -11,7 +11,7 @@
 ==================
 ### Changes
 
-* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception See [#915][]
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception. See [#915][]
 
 1.5.0 / 2017-11-21
 ==================
