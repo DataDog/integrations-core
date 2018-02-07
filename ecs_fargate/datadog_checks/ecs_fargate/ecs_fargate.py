@@ -20,7 +20,8 @@ CGROUP_NO_VALUE = 0x7ffffffffffff000
 
 # Do not collect these labels are we already have the info as tags
 LABEL_BLACKLIST = ["com.amazonaws.ecs.cluster", "com.amazonaws.ecs.container-name", "com.amazonaws.ecs.task-arn",
-                   "com.amazonaws.ecs.task-definition-family", "com.amazonaws.ecs.task-definition-version"]
+                   "com.amazonaws.ecs.task-definition-family", "com.amazonaws.ecs.task-definition-version",
+                   "com.datadoghq.ad.check_names", "com.datadoghq.ad.init_configs", "com.datadoghq.ad.instances"]
 
 # Metrics constants
 MEMORY_GAUGE_METRICS = ['cache','mapped_file','rss','hierarchical_memory_limit','active_anon',
