@@ -81,6 +81,7 @@ class FargateCheck(AgentCheck):
             c_id = container['DockerId']
             container_tags[c_id] = []
             container_tags[c_id].extend(common_tags)
+            container_tags[c_id].append('docker_name:' + container['DockerName'])
             container_tags[c_id].append('docker_image:' + container['Image'])
             image_split = container['Image'].split(':')
             container_tags[c_id].append('image_name:' + ':'.join(image_split[:-1]))

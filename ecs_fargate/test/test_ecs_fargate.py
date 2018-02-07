@@ -77,9 +77,9 @@ class TestFargate(AgentCheckTest):
 
         common_tags = ['foo:bar', 'ecs_cluster:pierrem-test-fargate', 'ecs_task_family:redis-datadog', 'ecs_task_version:1']
         container_tags = [
-            ['docker_image:datadog/docker-dd-agent:latest','image_name:datadog/docker-dd-agent','image_tag:latest','com.amazonaws.ecs.container-name:dd-agent'],
-            ['docker_image:redis:latest','image_name:redis','image_tag:latest','com.amazonaws.ecs.container-name:redis'],
-            ['docker_image:amazon/amazon-ecs-pause:0.1.0','image_name:amazon/amazon-ecs-pause','image_tag:0.1.0','com.amazonaws.ecs.container-name:~internal~ecs~pause']
+            ['docker_image:datadog/docker-dd-agent:latest','image_name:datadog/docker-dd-agent','image_tag:latest','com.amazonaws.ecs.container-name:dd-agent', 'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601'],
+            ['docker_image:redis:latest','image_name:redis','image_tag:latest','com.amazonaws.ecs.container-name:redis', 'docker_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00'],
+            ['docker_image:amazon/amazon-ecs-pause:0.1.0','image_name:amazon/amazon-ecs-pause','image_tag:0.1.0','com.amazonaws.ecs.container-name:~internal~ecs~pause', 'docker_name:ecs-redis-datadog-1-internalecspause-a2df9cefc2938ec19e01']
         ]
         expected_container_metrics = ['ecs.fargate.io.ops.write','ecs.fargate.io.bytes.write','ecs.fargate.io.ops.read','ecs.fargate.io.bytes.read',
                                       'ecs.fargate.cpu.user','ecs.fargate.cpu.system','ecs.fargate.mem.cache','ecs.fargate.mem.active_file',
