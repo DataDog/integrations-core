@@ -117,6 +117,10 @@ class HAProxy(AgentCheck):
             verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
             custom_headers = instance.get('headers', {})
 
+            # Ensure string values
+            for key, value in custom_headers.items():
+                custom_headers[key] = str(value)
+
             data = self._fetch_url_data(url, username, password, verify, custom_headers)
 
         collect_aggregates_only = _is_affirmative(
