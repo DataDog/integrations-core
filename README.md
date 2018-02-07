@@ -87,6 +87,7 @@ checks to Pytest is a work in progress, this is the list of the checks supportin
 the new testing approach:
 
  * [disk](disk)
+ * [vsphere](vsphere)
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
 
