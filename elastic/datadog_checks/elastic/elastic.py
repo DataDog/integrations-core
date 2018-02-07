@@ -371,7 +371,7 @@ class ESCheck(AgentCheck):
             cluster_stats = _is_affirmative(instance.get('is_external', False))
 
         pending_task_stats = _is_affirmative(instance.get('pending_task_stats', True))
-        admin_forwarder = _is_affirmative(instance.get('admin_forwarder', True))
+        admin_forwarder = _is_affirmative(instance.get('admin_forwarder', False))
         # Support URLs that have a path in them from the config, for
         # backwards-compatibility.
         parsed = urlparse.urlparse(url)
