@@ -1,7 +1,7 @@
-from . import vsphere
+from .vsphere import VSphereCheck
+from .__about__ import __version__
 
-VSphereCheck = vsphere.VSphereCheck
-
-__version__ = "1.0.4"
-
-__all__ = ['vsphere']
+__all__ = [
+    '__version__',
+    'VSphereCheck'
+]
