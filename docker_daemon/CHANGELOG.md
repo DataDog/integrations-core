@@ -1,5 +1,12 @@
 # CHANGELOG - docker_daemon
 
+1.9.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add the `ignore_docker_cloud_containers` option to ignore Docker Cloud agent's containers.
+* [BUGFIX] Ignore the excluded containers in the containers.{running|stopped} metrics.
+
 1.8.0 / Unreleased
 ==================
 ### Changes
