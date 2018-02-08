@@ -33,7 +33,7 @@ instances:
 #    collect_children: BOOLEAN. If true, the check will also collect metrics from all child processes of a matched process. Default to false.
 #                      Please be aware that the collection is recursive, and might take some time depending on the use case.
 #    user: STRING. Only report processes belonging to a specific user.
-#	 try_sudo: (optional) Boolean. Default value of False. Value of True lets the process chck try using 'sudo' to collect this metric
+#    try_sudo: (optional) Boolean. If set to True (default is False), the check will try to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
 #
 # Examples:
 #
