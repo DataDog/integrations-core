@@ -1,8 +1,4 @@
 init_config:
-  # Custom tags can be added to all metrics reported by this integration
-  #    tags:
-  #      - optional_tag1
-  #      - optional_tag2
 
 instances:
   # To enable Kube State metrics you must specify the url exposing the API
@@ -23,3 +19,8 @@ instances:
     #    label_to_match: deployment
     #    labels_to_get:
     #      - label_addonmanager_kubernetes_io_mode
+    
+    # You can also specify here custom tags to be added to all metrics reported by this integration
+    #  tags:
+    #    - optional_tag1
+    #    - optional_tag2
