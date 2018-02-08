@@ -490,7 +490,15 @@ class PrometheusCheck(AgentCheck):
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
                 _tags.append('{}:{}'.format(tag_name, label.value))
+        _tags = self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname)
         self.gauge('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
+
+    def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
+        """
+        Format the finalized tags
+        This is generally a noop, but it can be used to hook into _submit_gauge and change the tags before sending
+        """
+        return _tags
 
     def _submit_gauges_from_summary(self, name, metric, custom_tags=None, hostname=None):
         """

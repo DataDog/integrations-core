@@ -28,12 +28,12 @@ class WinPDHCounter(object):
                 path = win32pdh.MakeCounterPath((machine_name, self._class_name, inst, None, 0, self._counter_name))
                 try:
                     self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
-                except:
+                except: # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
                         self._class_name, self._counter_name))
                 try:
                     self.logger.debug("Path: %s\n" % unicode(path))
-                except:
+                except: # noqa: E722
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Failed to log path")
@@ -54,14 +54,14 @@ class WinPDHCounter(object):
             path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, self._counter_name))
             try:
                 self.logger.debug("Path: %s\n" % unicode(path))
-            except:
+            except: # noqa: E722
                 # some unicode characters are not translatable here.  Don't fail just
                 # because we couldn't log
                 self.logger.debug("Failed to log path")
                 pass
             try:
                 self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
-            except:
+            except: # noqa: E722
                 self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
                     self._class_name, self._counter_name))
                 raise
@@ -113,7 +113,7 @@ class WinPDHCounter(object):
 
         try:
             val, t = _winreg.QueryValueEx(_winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
-        except:
+        except: # noqa: E722
             raise
 
         # val is an array of strings.  The underlying win32 API returns a list of strings

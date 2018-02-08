@@ -17,6 +17,13 @@ LONG_DESC = ""
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
+
+# Parse requirements
+def get_requirements(fpath):
+    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+        return f.readlines()
+
+
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
@@ -41,6 +48,10 @@ setup(
     ],
 
     packages=find_packages(),
+
+    namespace_packages=['datadog_checks'],
+
+    install_requires=get_requirements('requirements.in'),
 
     setup_requires=['pytest-runner', ],
     tests_require=['pytest<4', ],
