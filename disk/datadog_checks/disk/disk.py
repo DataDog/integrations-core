@@ -305,7 +305,10 @@ class Disk(AgentCheck):
         device_tag_list = []
         for regex_str, tags in self._device_tag_re.iteritems():
             try:
-                device_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(",")]])
+                device_tag_list.append([
+                    re.compile(regex_str, re.IGNORECASE),
+                    [t.strip() for t in tags.split(",")]
+                ])
             except TypeError:
                 self.log.warning('{0} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
