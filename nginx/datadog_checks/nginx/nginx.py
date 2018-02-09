@@ -122,7 +122,7 @@ class Nginx(AgentCheck):
     def _perform_request(self, instance, url, ssl_validation, auth):
         r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
                          verify=ssl_validation, timeout=self.default_integration_http_timeout,
-                         proxies=self.get_instance_proxy(instance, url, proxies={}))
+                         proxies=self.get_instance_proxy(instance, url))
         r.raise_for_status()
         return r
 
