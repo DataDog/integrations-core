@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform
 import re
 
 try:
@@ -14,6 +15,8 @@ from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
 from datadog_checks.utils.subprocess_output import get_subprocess_output
 from datadog_checks.utils.timeout import timeout, TimeoutException
+
+IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
 class Disk(AgentCheck):
@@ -306,7 +309,7 @@ class Disk(AgentCheck):
         for regex_str, tags in self._device_tag_re.iteritems():
             try:
                 device_tag_list.append([
-                    re.compile(regex_str, re.IGNORECASE),
+                    re.compile(regex_str, IGNORE_CASE),
                     [t.strip() for t in tags.split(",")]
                 ])
             except TypeError:
