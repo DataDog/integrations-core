@@ -119,7 +119,7 @@ class HDFSNameNode(AgentCheck):
         '''
         response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
             JMX_PATH,
-            query_params={'qry':bean_name}, tags)
+            query_params={'qry':bean_name}, tags=tags)
 
         beans = response.get('beans', [])
 
