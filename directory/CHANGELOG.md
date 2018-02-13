@@ -1,6 +1,6 @@
 # CHANGELOG - directory
 
-1.1.1 / Unreleased
+1.1.1 / 2018-02-13
 ==================
 
 * [FEATURE] adds option to ignore missing configured directories. See [#1045][] (Thanks [@oeuftete][])

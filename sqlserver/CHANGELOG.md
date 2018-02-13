@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-1.3.0 / Unreleased
+1.3.0 / 2018-02-13
 ==================
 
 ### Changes

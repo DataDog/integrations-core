@@ -1,13 +1,13 @@
 # CHANGELOG - postgres
 
-2.0.0 / Unreleased
+2.0.0 / 2018-02-13
 ==================
 ### Changes
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 * [DEPRECATING] Starting with agent6 the postgres check no longer tag server wide metrics with instance tags. See [#1073][]
 
-1.2.1 / Unreleased
+1.2.1 / 2018-02-13
 ==================
 
 ### Changes

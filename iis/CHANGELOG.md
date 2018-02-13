@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-2.0.1 / Unreleased
+2.0.1 / 2018-02-13
 ==================
 ### Changes
 
