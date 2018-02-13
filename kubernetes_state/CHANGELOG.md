@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-2.2.0 / Unreleased
+2.2.0 / 2018-02-13
 ==================
 ### Changes
 
