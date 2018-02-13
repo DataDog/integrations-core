@@ -7,7 +7,7 @@
 
 * [BUGFIX] makes reports output stats in actual realtime. See [#974][].
 
-0.1.0/ 2017-10-10
+0.1.0 / 2017-10-10
 ==================
 
 ### Changes
