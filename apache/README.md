@@ -43,7 +43,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
    
 * Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
