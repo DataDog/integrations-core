@@ -49,7 +49,7 @@ GRANT SELECT ON gv_$sysmetric TO datadog;
 GRANT SELECT ON sys.dba_data_files TO datadog;
 ```
 
-**Note**: If you're using Oracle 11g (or lower), there's no need to run the following line:
+**Note**: If you're using Oracle 11g, there's no need to run the following line:
 ```
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
