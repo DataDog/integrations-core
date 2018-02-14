@@ -129,7 +129,6 @@ env:
     - TRAVIS_FLAVOR=squid FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=kube_proxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=prometheus FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=prometheus_base FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
 install:
   - bundle install

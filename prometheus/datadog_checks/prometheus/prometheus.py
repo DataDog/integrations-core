@@ -2,11 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from checks import CheckException
+from datadog_checks.checks.prometheus import PrometheusCheck
 
-from datadog_checks.prometheus_base import PrometheusCheck
+from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
 
-from checks import AgentCheck
+# try:
+#     from datadog_checks.checks import aggregator
+# except ImportError:
+#     from datadog_checks..stubs import aggregator
 
 # GenericPrometheusCheck is a class that helps instanciating PrometheusCheck only
 # with YAML configurations. As each check has it own states it maintains a map
@@ -67,8 +71,8 @@ class GenericPrometheusCheck(AgentCheck):
         check.exclude_labels = instance.get("exclude_labels", [])
         check.label_to_hostname = instance.get("label_to_hostname", None)
         check.health_service_check = instance.get("health_service_check", True)
-        # Use the parent aggregator
-        check.aggregator = self.aggregator
+        # # Use the parent aggregator
+        # check.aggregator = self.aggregator
         self.check_map[instance["prometheus_url"]] = check
 
         return check

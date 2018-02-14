@@ -85,7 +85,6 @@ test:
         - rake ci:run[squid]
         - rake ci:run[kube_proxy]
         - rake ci:run[prometheus]
-        - rake ci:run[prometheus_base]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi

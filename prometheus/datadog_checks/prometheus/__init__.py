@@ -1,6 +1,4 @@
 from . import prometheus
-import sys
-import os
 
 GenericPrometheusCheck = prometheus.GenericPrometheusCheck
 
