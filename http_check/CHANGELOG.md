@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-1.4.0 / Unreleased
+1.4.0 / 2018-02-13
 ==================
 
 ### Changes
