@@ -702,6 +702,9 @@ class OpenStackCheck(AgentCheck):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
 
+    def get_stats_for_all_projects(self, projects):
+        for project in projects:
+            self.get_stats_for_single_project(project)
     ###
 
     ### Cache util
@@ -794,6 +797,8 @@ class OpenStackCheck(AgentCheck):
             # Store the scope on the object so we don't have to keep passing it around
             self._current_scope = instance_scope
 
+            collect_all_projects = instance.get("collect_all_projects", False)
+
             self.log.debug("Running check with credentials: \n")
             self.log.debug("Nova Url: %s", self.get_nova_endpoint())
             self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
@@ -803,7 +808,15 @@ class OpenStackCheck(AgentCheck):
             # and it's guest servers
 
             hyp = self.get_local_hypervisor()
+
             project = self.get_scoped_project(instance)
+            projects = []
+
+            if collect_all_projects:
+                projects = self.get_all_projects(instance)
+                self.log.debug("Collected all {0} projects".format(projects))
+            else:
+                projects.append(project)
 
             # Restrict monitoring to non-excluded servers
             server_ids = self.get_servers_managed_by_hypervisor()
@@ -825,8 +838,7 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
-            if project:
-                self.get_stats_for_single_project(project)
+            self.get_stats_for_all_projects(projects)
 
             # For now, monitor all networks
             self.get_network_stats()
@@ -857,6 +869,21 @@ class OpenStackCheck(AgentCheck):
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
+
+    def get_all_projects(self, instance):
+        """
+        Returns all projects in the domain
+        """
+        url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        headers = {'X-Auth-Token': self.get_auth_token(instance)}
+        try:
+            r = self._make_request_with_auth_fallback(url, headers)
+            return r['projects']
+
+        except Exception as e:
+            self.warning('Unable to get projects: {0}'.format(str(e)))
+
+        return None
 
     def get_scoped_project(self, instance):
         """
