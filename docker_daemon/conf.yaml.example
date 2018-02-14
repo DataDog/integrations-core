@@ -149,7 +149,10 @@ instances:
     # To customize this default behavior, override exclude.
     # If you do so, default exclusion patterns won't apply anymore and will need to be added explicitly.
 
-
+    # Use `ignore_docker_cloud_containers` if you are running the agent in Docker Cloud
+    # and you want the Docker check to ignore the containers used for the Docker cloud agent.
+    # The agent will ignore the docker images starting with `dockercloud/*` (i.e.: dockercloud/network-daemon).
+    # ignore_docker_cloud_containers: true
 
     ## Tagging
     ##
