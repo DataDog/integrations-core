@@ -33,6 +33,8 @@ Query OK, 0 rows affected (0.00 sec)
 
 Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here](https://dev.mysql.com/doc/refman/5.7/en/adding-users.html)
 
+The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
+
 Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
 
 ```
