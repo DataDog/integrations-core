@@ -1,6 +1,6 @@
 # CHANGELOG - docker_daemon
 
-1.8.0 / Unreleased
+1.8.0 / 2018-02-13
 ==================
 ### Changes
 

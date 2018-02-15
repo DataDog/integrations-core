@@ -415,7 +415,7 @@ class RabbitMQ(AgentCheck):
         for item in data:
             vhost = item['vhost']
             tags = self._get_tags(item, object_type, custom_tags)
-            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), item['name'])
+            url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), urllib.quote_plus(item['name']))
             bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
                     ssl_verify=ssl_verify, proxies=instance_proxy))
 
