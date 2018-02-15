@@ -54,3 +54,17 @@ instances:
   #
   #   exclude_labels:
   #     - timestamp
+
+  # If your prometheus endpoint is secured, here are the settings to configure it
+  #
+  # Can either be only the path to the certificate and thus you should specify the private key
+  # or it can be the path to a file containing both the certificate & the private key
+  # self.ssl_cert: "/path/to/cert"
+  #
+  # Needed if the certificate does not include the private key
+  #
+  # /!\ The private key to your local certificate must be unencrypted.
+  # self.ssl_private_key: "/path/to/key"
+  #
+  # The path to the trusted CA used for generating custom certificates
+  # self.ssl_ca_cert: "/path/to/cacert"
