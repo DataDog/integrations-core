@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.5.0",
+  "version": "1.5.1",
   "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b",
   "public_title": "Datadog-RabbitMQ Integration",
   "categories":["processing"],
