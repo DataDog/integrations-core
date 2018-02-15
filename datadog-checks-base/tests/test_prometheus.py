@@ -241,8 +241,7 @@ def test_process(bin_data, mocked_prometheus_check, ref_gauge):
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
     check.poll.assert_called_with(endpoint)
-    check.process_metric.assert_called_with(ref_gauge, custom_tags=[], instance=None,
-                                            send_histograms_buckets=True, ignore_unmapped=False)
+    check.process_metric.assert_called_with(ref_gauge, instance=None)
 
 
 def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_gauge):
@@ -254,8 +253,7 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
     check.poll.assert_called_with(endpoint)
-    check.process_metric.assert_called_with(ref_gauge, custom_tags=[], instance=None,
-                                            send_histograms_buckets=False, ignore_unmapped=False)
+    check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
 def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge):
@@ -269,7 +267,7 @@ def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge
     check.process(endpoint, instance=instance)
     check.poll.assert_called_with(endpoint)
     check.process_metric.assert_called_with(ref_gauge, custom_tags=['tag1:tagValue1', 'tag2:tagValue2'],
-                                            instance=instance, send_histograms_buckets=True, ignore_unmapped=False)
+                                            instance=instance)
 
 
 def test_process_metric_gauge(mocked_prometheus_check, ref_gauge):
