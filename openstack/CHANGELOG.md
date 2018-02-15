@@ -5,7 +5,7 @@
 
 ### Changes
 
-* [BUGFIX] Properly disable the Agent's proxy settings when desired. See [][]
+* [BUGFIX] Properly disable the Agent's proxy settings when desired. See [#1123][]
 
 1.0.2 / 2017-11-21
 ==================
