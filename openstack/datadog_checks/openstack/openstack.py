@@ -148,8 +148,9 @@ class OpenStackProjectScope(object):
         try:
             auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            exception_msg = "Failed keystone auth with identity:{id} scope:{scope} @{url}".format(
-                id=identity,
+            exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
+                user=identity['password']['user']['name'],
+                domain=identity['password']['user']['domain']['id'],
                 scope=auth_scope,
                 url=keystone_server_url)
 
@@ -163,9 +164,10 @@ class OpenStackProjectScope(object):
                     auth_scope['project']['name'] = auth_scope['project'].pop('id')
                 auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
             except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                exception_msg = "{msg} and also failed kaystone auth with identity:{id} scope:{scope} @{url}: {ex}".format(
+                exception_msg = "{msg} and also failed keystone auth with identity:{id} domain:{domain} scope:{scope} @{url}: {ex}".format(
                     msg=exception_msg,
-                    id=identity,
+                    user=identity['password']['user']['name'],
+                    domain = identity['password']['user']['domain']['name'],
                     scope=auth_scope,
                     url=keystone_server_url,
                     ex=e)
