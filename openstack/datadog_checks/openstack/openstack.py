@@ -807,7 +807,6 @@ class OpenStackCheck(AgentCheck):
             self.log.debug("Running check with credentials: \n")
             self.log.debug("Nova Url: %s", self.get_nova_endpoint())
             self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
-            self.log.debug("Auth Token: %s", self.get_auth_token())
 
             # Restrict monitoring to this (host, hypervisor, project)
             # and it's guest servers
