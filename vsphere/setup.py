@@ -29,16 +29,10 @@ setup(
     description='The vSphere check',
     long_description=long_description,
     keywords='datadog agent vSphere check',
-
-    # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
-
-    # Author details
     author='Datadog',
     author_email='packages@datadoghq.com',
-
-    # License
-    license='MIT',
+    license='New BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -51,23 +45,12 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    # The package we're going to ship
     packages=['datadog_checks.vsphere'],
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
         'datadog-checks-base',
     ],
-
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-        ],
-    },
-
-    # Testing setup and dependencies
     setup_requires=['pytest-runner', ],
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
