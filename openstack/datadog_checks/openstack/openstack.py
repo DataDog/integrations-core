@@ -689,12 +689,19 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
+        project_name = None
+        if 'name' in project:
+            project_name = project['name']
+
+        self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
+
         url = '{0}/limits'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
         tags = ['tenant_id:{0}'.format(project['id'])]
-        if 'name' in project:
+
+        if project_name:
             tags.append('project_name:{0}'.format(project['name']))
 
         for st in server_stats['limits']['absolute']:
@@ -814,7 +821,6 @@ class OpenStackCheck(AgentCheck):
 
             if collect_all_projects:
                 projects = self.get_all_projects(instance)
-                self.log.debug("Collected all {0} projects".format(projects))
             else:
                 projects.append(project)
 
