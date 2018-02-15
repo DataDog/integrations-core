@@ -71,6 +71,10 @@ class GenericPrometheusCheck(AgentCheck):
         check.exclude_labels = instance.get("exclude_labels", [])
         check.label_to_hostname = instance.get("label_to_hostname", None)
         check.health_service_check = instance.get("health_service_check", True)
+        check.ssl_cert = instance.get("ssl_cert", None)
+        check.ssl_private_key = instance.get("ssl_private_key", None)
+        check.ssl_ca_cert = instance.get("ssl_ca_cert", None)
+
         # # Use the parent aggregator
         # check.aggregator = self.aggregator
         self.check_map[instance["prometheus_url"]] = check
