@@ -10,14 +10,9 @@ try:
         PrometheusCheck
     )
 except ImportError:
-    from .prometheus_base import (
-        PrometheusFormat,
-        UnknownFormatError,
-        PrometheusCheck,
-    )
-    from .base_check import (
-        GenericPrometheusCheck
-    )
+    from .mixins import PrometheusFormat, UnknownFormatError
+    from .prometheus_base import PrometheusCheck
+    from .base_check import GenericPrometheusCheck
 
 __all__ = [
     'PrometheusFormat',
