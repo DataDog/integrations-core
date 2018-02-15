@@ -1,5 +1,12 @@
 # CHANGELOG - openstack
 
+1.0.3 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Properly disable the Agent's proxy settings when desired. See [#1123][]
+
 1.0.2 / 2017-11-21
 ==================
 
@@ -7,14 +14,12 @@
 
 * [IMPROVEMENT] Don't check on powered off VMs. See [#878][]
 
-
 1.0.1 / 2017-08-28
 ==================
 
 ### Changes
 
 * [IMPROVEMENT] Adds human friendly "project_name" tag in all cases. See [#515][]
-
 
 1.0.0 / 2017-03-22
 ==================

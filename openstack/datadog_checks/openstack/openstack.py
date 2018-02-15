@@ -388,6 +388,9 @@ class OpenStackCheck(AgentCheck):
             [re.compile(ex) for ex in init_config.get('exclude_server_ids', [])]
         )
 
+        skip_proxy = not init_config.get('use_agent_proxy', True)
+        self.proxy_config = None if skip_proxy else self.proxies
+
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
         Generic request handler for OpenStack API requests
@@ -395,7 +398,7 @@ class OpenStackCheck(AgentCheck):
         """
         try:
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
-                                timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                                timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
         except requests.exceptions.HTTPError:
             if resp.status_code == 401:
@@ -725,7 +728,7 @@ class OpenStackCheck(AgentCheck):
 
         try:
             requests.get(instance_scope.service_catalog.nova_endpoint, headers=headers,
-                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.COMPUTE_API_SC, AgentCheck.OK,
                                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
@@ -735,7 +738,7 @@ class OpenStackCheck(AgentCheck):
         # Neutron
         try:
             requests.get(instance_scope.service_catalog.neutron_endpoint, headers=headers,
-                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.NETWORK_API_SC, AgentCheck.OK,
                                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
@@ -758,7 +761,7 @@ class OpenStackCheck(AgentCheck):
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
-                instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxies)
+                instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
                 self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["server:%s" % self.init_config.get("keystone_server_url")])
             except KeystoneUnreachable as e:
                 self.warning("The agent could not contact the specified identity server at %s . Are you sure it is up at that address?" % self.init_config.get("keystone_server_url"))
