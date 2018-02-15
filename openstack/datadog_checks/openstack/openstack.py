@@ -689,9 +689,7 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
-        project_name = None
-        if 'name' in project:
-            project_name = project['name']
+        project_name = project.get('name')
 
         self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
 
