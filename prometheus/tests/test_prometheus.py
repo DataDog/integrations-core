@@ -9,7 +9,7 @@ import mock
 from prometheus_client import generate_latest, CollectorRegistry, Gauge
 
 # project
-from datadog_checks.prometheus import GenericPrometheusCheck
+from datadog_checks.prometheus import PrometheusCheck
 
 class MockResponse:
     """
@@ -65,9 +65,7 @@ def poll_mock():
         'datadog_checks.checks.prometheus.PrometheusCheck.poll',
         return_value=MockResponse(generate_latest(registry), 'text/plain')
     )
-
     yield poll_mock.start()
-
     poll_mock.stop()
 
 def test_prometheus_check(aggregator, poll_mock):
@@ -75,7 +73,7 @@ def test_prometheus_check(aggregator, poll_mock):
     Testing prometheus check.
     """
 
-    c = GenericPrometheusCheck('prometheus', None, {}, [instance])
+    c = PrometheusCheck('prometheus', None, {}, [instance])
     c.check(instance)
     for metric in METRICS_COMMON:
         aggregator.assert_metric(metric, tags=[])

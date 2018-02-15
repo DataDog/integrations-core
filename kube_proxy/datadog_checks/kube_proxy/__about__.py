@@ -2,10 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from . import prometheus
-
-PrometheusCheck = prometheus.PrometheusCheck
-
 __version__ = "1.0.0"
-
-__all__ = ['prometheus']
