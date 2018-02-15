@@ -1,0 +1,6 @@
+# integration pip requirements
+protobuf==3.5.1 \
+    --hash=sha256:11788df3e176f44e0375fe6361342d7258a457b346504ea259a21b77ffc18a90 \
+    --hash=sha256:c1f9c36004a7ae6f1ce4a23f06070f6b07f57495f251851aa15cc4da16d08378 \
+    --hash=sha256:4d2e665410b0a278d2eb2c0a529ca2366bb325eb2ae34e189a826b71fb1b28cd \
+    --hash=sha256:95b78959572de7d7fafa3acb718ed71f482932ddddddbd29ba8319c10639d863

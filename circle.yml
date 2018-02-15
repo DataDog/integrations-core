@@ -84,6 +84,7 @@ test:
         - rake ci:run[cassandra_nodetool]
         - rake ci:run[squid]
         - rake ci:run[ecs_fargate]
+        - rake ci:run[linkerd]
         - bundle exec rake requirements
     post:
         - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
