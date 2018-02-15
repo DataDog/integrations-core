@@ -1,9 +1,7 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# project
-from checks.generic_prometheus_check import GenericPrometheusCheck
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
 class KubeProxyCheck(GenericPrometheusCheck):
     pass

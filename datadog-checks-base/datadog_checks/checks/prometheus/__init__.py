@@ -13,11 +13,15 @@ except ImportError:
     from .prometheus_base import (
         PrometheusFormat,
         UnknownFormatError,
-        PrometheusCheck
+        PrometheusCheck,
+    )
+    from .base_check import (
+        GenericPrometheusCheck
     )
 
 __all__ = [
     'PrometheusFormat',
     'UnknownFormatError',
     'PrometheusCheck',
+    'GenericPrometheusCheck'
 ]

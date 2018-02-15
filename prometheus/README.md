@@ -2,10 +2,7 @@
 
 ## Overview
 
-Get metrics from prometheus service in real time to:
-
-* Visualize and monitor prometheus states
-* Be notified about prometheus failovers and events.
+Extract custom metrics from any prometheus endpoints.
 
 ## Installation
 
@@ -15,7 +12,7 @@ Install the `dd-check-prometheus` package manually or with your favorite configu
 
 Edit the `prometheus.yaml` file to point to your prometheus endpoints
 
-/!\ All the metrics retrieved by this integration will be considered as custom metrics
+/!\ All the metrics retrieved by this integration will be considered as custom metrics /!\
 
 If you want to submit an official integration based on this, you can see `kube-proxy` for an example
 
