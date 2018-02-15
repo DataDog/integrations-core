@@ -681,7 +681,6 @@ class VSphereCheck(AgentCheck):
             if mor['mor_type'] == 'vm':
                 vm_count += 1
             if 'metrics' not in mor or not mor['metrics']:
-                # self.log.debug("Skipping entity %s collection b/c we didn't cache its metrics yet" % mor['hostname'])
                 continue
 
             self.pool.apply_async(self._collect_metrics_atomic, args=(instance, mor))
