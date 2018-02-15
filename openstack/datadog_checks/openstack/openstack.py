@@ -842,7 +842,9 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
-            self.get_stats_for_all_projects(projects)
+            if projects and project:
+                # Ensure projects list and scoped project exists
+                self.get_stats_for_all_projects(projects)
 
             # For now, monitor all networks
             self.get_network_stats()
