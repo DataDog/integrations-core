@@ -7,11 +7,6 @@ from . import PrometheusCheck
 from .. import AgentCheck
 from ...errors import CheckException
 
-# try:
-#     from datadog_checks.checks import aggregator
-# except ImportError:
-#     from datadog_checks..stubs import aggregator
-
 # GenericPrometheusCheck is a class that helps instanciating PrometheusCheck only
 # with YAML configurations. As each check has it own states it maintains a map
 # of all checks so that the one corresponding to the instance is executed
@@ -75,8 +70,13 @@ class GenericPrometheusCheck(AgentCheck):
         check.ssl_private_key = instance.get("ssl_private_key", None)
         check.ssl_ca_cert = instance.get("ssl_ca_cert", None)
 
-        # # Use the parent aggregator
-        # check.aggregator = self.aggregator
+        try:
+            # Use the same aggregator
+            check.aggregator = self.aggregator
+        except AttributeError:
+            # This means this is either run in Agent 6 or in the tests
+            pass
+
         self.check_map[instance["prometheus_url"]] = check
 
         return check
