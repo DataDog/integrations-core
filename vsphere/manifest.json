@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.15.0",
   "name": "vsphere",
@@ -11,7 +11,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.4",
   "guid": "930b1839-cc1f-4e7a-b706-0e8cf3218464",
   "public_title": "Datadog-vSphere Integration",
   "categories":["cloud"],

@@ -20,6 +20,16 @@ ENV['SDK_HOME'] = File.dirname(__FILE__)
 spec = Gem::Specification.find_by_name 'datadog-sdk-testing'
 load "#{spec.gem_dir}/lib/tasks/sdk.rake"
 
+# OVERRIDE!
+# This overrides the `test_files` function in the sdk-test gem, the difference
+# is this version searches for `default` flavored tests in `<check>/test/test_*`.
+# New tests ported to pytest will live in `<check>/tests/` thus ignored.
+def test_files(sdk_dir)
+  Dir.glob(File.join(sdk_dir, '**/test/test_*.py')).reject do |path|
+    !%r{#{sdk_dir}/embedded/.*$}.match(path).nil? || !%r{#{sdk_dir}\/venv\/.*$}.match(path).nil?
+  end
+end
+
 def find_changelogs
   changelogs = Dir.glob("#{ENV['SDK_HOME']}/*/CHANGELOG.md").collect do |file_path|
     file_path
