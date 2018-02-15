@@ -5,7 +5,8 @@
 
 ### Changes
 
-*[IMPROVEMENT] Adds parameter to collect metrics on all projects in a domain. See [#1119][]
+* [BUGFIX] Properly disable the Agent's proxy settings when desired. See [#1123][]
+* [IMPROVEMENT] Adds parameter to collect metrics on all projects in a domain. See [#1119][]
 
 1.0.2 / 2017-11-21
 ==================
@@ -14,14 +15,12 @@
 
 * [IMPROVEMENT] Don't check on powered off VMs. See [#878][]
 
-
 1.0.1 / 2017-08-28
 ==================
 
 ### Changes
 
 * [IMPROVEMENT] Adds human friendly "project_name" tag in all cases. See [#515][]
-
 
 1.0.0 / 2017-03-22
 ==================
