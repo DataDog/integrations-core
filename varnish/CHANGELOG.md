@@ -1,5 +1,11 @@
 # CHANGELOG - varnish
 
+1.1.2 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add support for collecting varnishadm service checks for Varnish 5. See [#1127][].
+
 1.1.1 / 2018-02-13
 ==================
 ### Changes
@@ -73,5 +79,6 @@ and varnishadm in order to better support service discovery. See [#498][], thank
 [#795]: https://github.com/DataDog/integrations-core/issues/795
 [#805]: https://github.com/DataDog/integrations-core/issues/805
 [#805]: https://github.com/DataDog/integrations-core/issues/939
+[#1127]: https://github.com/DataDog/integrations-core/issues/1127
 [@adongy]: https://github.com/adongy
 [@philipseidel]: https://github.com/philipseidel
