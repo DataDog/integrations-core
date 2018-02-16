@@ -7,6 +7,7 @@
 
 * [BUGFIX] Properly disable the Agent's proxy settings when desired. See [#1123][]
 * [IMPROVEMENT] Adds parameter to collect metrics on all projects in a domain. See [#1119][]
+* [IMPROVEMENT] Added support for Agent >= 6.0
 
 1.0.2 / 2017-11-21
 ==================
