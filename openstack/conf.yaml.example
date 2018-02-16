@@ -55,6 +55,11 @@ instances:
           #     domain:
           #         id: default
 
+      # All projects in a domain can be collected by enabling collect_all_projects 
+      # Note: `domain` field must be set in project
+      #
+      # collect_all_projects: true
+
 
       # User credentials
       # Password authentication is the only auth method supported right now
