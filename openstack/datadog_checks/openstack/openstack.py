@@ -1,18 +1,21 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from datetime import datetime, timedelta
 from urlparse import urljoin
-
-# project
-from checks import AgentCheck
-
-# 3p
 import re
+
 import requests
 import simplejson as json
+
+from checks import AgentCheck
+try:
+    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
+    from datadog_agent import set_external_tags
+except ImportError:
+    # Agent < 6.0: the Agent pulls tags invoking `OpenStackCheck.get_external_host_tags`
+    set_external_tags = None
+
 
 SOURCE_TYPE = 'openstack'
 
@@ -853,6 +856,9 @@ class OpenStackCheck(AgentCheck):
             # For now, monitor all networks
             self.get_network_stats()
 
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
+
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):
                 self.warning("""Please specify the auth scope via the `auth_scope` variable in your init_config.\n
@@ -867,7 +873,6 @@ class OpenStackCheck(AgentCheck):
                              "The user should look like: {'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}")
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
-
 
     #### Local Info accessors
     def get_local_hypervisor(self):
@@ -935,8 +940,6 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-
-
     def get_my_hostname(self):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
@@ -954,7 +957,6 @@ class OpenStackCheck(AgentCheck):
             ]
 
         return server_ids
-
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
@@ -977,7 +979,7 @@ class OpenStackCheck(AgentCheck):
         integration.
         List of pairs (hostname, list_of_tags)
         """
-        self.log.info("Collecting external_host_tags now")
+        self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
         for k,v in self.external_host_tags.iteritems():
             external_host_tags.append((k, {SOURCE_TYPE: v}))
