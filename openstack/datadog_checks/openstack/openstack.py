@@ -13,7 +13,7 @@ try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
 except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `VSphereCheck.get_external_host_tags`
+    # Agent < 6.0: the Agent pulls tags invoking `OpenStackCheck.get_external_host_tags`
     set_external_tags = None
 
 
