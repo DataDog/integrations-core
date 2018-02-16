@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from . import PrometheusCheck
 from .mixins import PrometheusScraper
 
 from .. import AgentCheck
@@ -101,7 +100,6 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.ssl_cert = instance.get("ssl_cert", None)
         scraper.ssl_private_key = instance.get("ssl_private_key", None)
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", None)
-
 
         self.scrapers_map[instance["prometheus_url"]] = scraper
 

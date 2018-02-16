@@ -11,23 +11,6 @@ from prometheus_client import generate_latest, CollectorRegistry, Gauge
 # project
 from datadog_checks.prometheus import PrometheusCheck
 
-class MockResponse:
-    """
-    MockResponse is used to simulate the object requests.Response commonly returned by requests.get
-    """
-
-    def __init__(self, content, content_type):
-        self.content = content
-        self.headers = {'Content-Type': content_type}
-
-    def iter_lines(self, **_):
-        for elt in self.content.split("\n"):
-            yield elt
-
-    def close(self):
-        pass
-
-
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
     'namespace': 'prometheus',
@@ -62,8 +45,12 @@ def poll_mock():
     g2.labels(matched_label="foobar", node="localhost", timestamp="123").set(12.2)
 
     poll_mock = mock.patch(
-        'datadog_checks.checks.prometheus.PrometheusCheck.poll',
-        return_value=MockResponse(generate_latest(registry), 'text/plain')
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: generate_latest(registry).split("\n"),
+            headers={'Content-Type': "text/plain"}
+        )
     )
     yield poll_mock.start()
     poll_mock.stop()

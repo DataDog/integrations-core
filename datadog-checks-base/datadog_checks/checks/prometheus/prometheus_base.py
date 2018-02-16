@@ -1,15 +1,9 @@
-# (C) Datadog, Inc. 2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-from collections import defaultdict
-
-import requests
-from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
-from prometheus_client.parser import text_fd_to_metric_families
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .mixins import PrometheusScraper
 from .. import AgentCheck
-from ...utils.prometheus import metrics_pb2
 
 # Prometheus check is a parent class providing a structure and some helpers
 # to collect metrics, events and service checks exposed via Prometheus.

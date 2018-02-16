@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 import requests
 from collections import defaultdict
@@ -27,6 +27,10 @@ class UnknownFormatError(TypeError):
 
 
 class PrometheusScraper(object):
+    # pylint: disable=E1101
+    # This class is not supposed to be used by itself, it provides scraping behavior but
+    # need to be within a check in the end
+
     UNWANTED_LABELS = ["le", "quantile"]  # are specifics keys for prometheus itself
     REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
 
