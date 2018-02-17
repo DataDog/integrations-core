@@ -92,7 +92,7 @@ class HDFSNameNode(AgentCheck):
     def check(self, instance):
         jmx_address = instance.get('hdfs_namenode_jmx_uri')
         disable_ssl_validation = instance.get('disable_ssl_validation', False)
-        tags = instance.get('tags')
+        tags = instance.get('tags', [])
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
 
