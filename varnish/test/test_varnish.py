@@ -76,6 +76,7 @@ COMMON_METRICS = [
 VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
+DAEMON_ADDRESS = "localhost:8062"
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 # Varnish < 4.x varnishadm output
@@ -226,7 +227,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], [VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
         self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:backend2'], count=1)
 
         mock_version.return_value = LooseVersion('5.0.0'), 'json'
