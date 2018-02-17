@@ -76,7 +76,7 @@ COMMON_METRICS = [
 VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
-DAEMON_ADDRESS = "localhost:8062"
+DAEMON_ADDRESS = "localhost:6082"
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 # Varnish < 4.x varnishadm output
