@@ -133,7 +133,7 @@ class Varnish(AgentCheck):
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
             daemon_host = instance.get('daemon_host', 'localhost')
-            daemon_host = instance.get('daemon_port', '6082')
+            daemon_port = instance.get('daemon_port', '6082')
 
             cmd = []
             if geteuid() != 0:
