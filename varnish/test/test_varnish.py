@@ -235,7 +235,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], [VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the varnishadm output for Varnish < 4.x
     @mock.patch('datadog_checks.varnish.varnish.geteuid')
