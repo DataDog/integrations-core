@@ -70,6 +70,7 @@ logs:
     path: /var/log/kafka/server.log
     source: kafka
     service: myapp
+    #To handle multi line that starts with yyyy-mm-dd use the following pattern
     #log_processing_rules:
     #  - type: multi_line
     #    name: log_start_with_date
