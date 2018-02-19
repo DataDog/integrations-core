@@ -1,0 +1,18 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kubernetes.cpu.capacity,gauge,,,,The number of cores in this machine.,0,kubernetes,k8s.cpu.capacity
+kubernetes.cpu.usage.total,gauge,,percent_nano,,The percentage of CPU time used,-1,kubelet,k8s.cpu
+kubernetes.cpu.limits,gauge,,cpu,,The limit of cpu cores set,0,kubelet,k8s.cpu.limits
+kubernetes.cpu.requests,gauge,,cpu,,The requested cpu cores,0,kubelet,k8s.cpu.requests
+kubernetes.filesystem.usage,gauge,,byte,,The amount of disk used,-1,kubelet,k8s.disk.usage
+kubernetes.filesystem.usage_pct,gauge,,fraction,,The percentage of disk used,-1,kubelet,k8s.disk.used_pct
+kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubelet,k8s.mem.capacity
+kubernetes.memory.limits,gauge,,byte,,The limit of memory set,0,kubelet,k8s.mem.limits
+kubernetes.memory.requests,gauge,,byte,,The requested memory,0,kubelet,k8s.mem.requests
+kubernetes.memory.usage,gauge,,byte,,The amount of memory used,-1,kubelet,k8s.mem
+kubernetes.memory.usage_pct,gauge,,fraction,,The percentage of memory used,-1,kubelet,k8s.mem.used_pct
+kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubelet,k8s.net.rx
+kubernetes.network.rx_dropped,gauge,,packet,second,The amount of rx packets dropped per second,-1,kubelet,k8s.net.rx.drop
+kubernetes.network.rx_errors,gauge,,error,second,The amount of rx errors per second,-1,kubelet,k8s.net.rx.errors
+kubernetes.network.tx_bytes,gauge,,byte,second,The amount of bytes per second transmitted,-1,kubelet,k8s.net.tx
+kubernetes.network.tx_dropped,gauge,,packet,second,The amount of tx packets dropped per second,-1,kubelet,k8s.net.tx.drop
+kubernetes.network.tx_errors,gauge,,error,second,The amount of tx errors per second,-1,kubelet,k8s.net.tx.errors

@@ -40,7 +40,7 @@ class AggregatorStub(object):
         self._asserted.add(name)
 
         candidates = []
-        for metric in self._metrics.get(name):
+        for metric in self._metrics.get(name, []):
             if value is not None and value != metric.value:
                 continue
 
