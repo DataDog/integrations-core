@@ -177,7 +177,9 @@ def test_is_pod_metric():
     true_metrics = [
         MockMetric('foo', [Label(name='container_name', value='POD')]),
         MockMetric('bar', [Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
-        MockMetric('foobar', [Label(name='container_name', value='POD'), Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
+        MockMetric('foobar', [
+            Label(name='container_name', value='POD'),
+            Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
     ]
 
     for metric in false_metrics:
