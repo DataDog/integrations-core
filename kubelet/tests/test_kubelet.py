@@ -7,6 +7,7 @@ import os
 import mock
 import pytest
 import json
+from collections import namedtuple
 
 from datadog_checks.kubelet import KubeletCheck
 
@@ -43,19 +44,28 @@ EXPECTED_METRICS = [
     'kubernetes.cpu.limits',
     'kubernetes.cpu.requests',
     'kubernetes.filesystem.usage',
-    'kubernetes.filesystem.usage_pct',
     'kubernetes.memory.capacity',
     'kubernetes.memory.limits',
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
-    'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
     'kubernetes.network.tx_bytes',
     'kubernetes.network.tx_dropped',
-    'kubernetes.network.tx_errors'
+    'kubernetes.network.tx_errors',
+    'kubernetes.io.write_bytes',
+    'kubernetes.io.read_bytes',
 ]
+
+Label = namedtuple('Label', 'name value')
+
+
+class MockMetric(object):
+    def __init__(self, name, labels=[], value=None):
+        self.name = name
+        self.label = labels
+        self.value = value
 
 
 @pytest.fixture
@@ -63,11 +73,6 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
-
-
-# @pytest.fixture
-# def get_tags(entity):
-#     return []
 
 
 def mock_from_file(fname):
@@ -94,37 +99,89 @@ def test_parse_quantity():
         assert KubeletCheck.parse_quantity(raw) == res
 
 
-@mock.patch.object(KubeletCheck, 'retrieve_pod_list')
-def test_kubelet_check(aggregator, monkeypatch):
+def test_kubelet_check(monkeypatch, aggregator):
     check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', lambda: json.loads(mock_from_file('pods.txt')))
-    monkeypatch.setattr(check, 'retrieve_node_spec', lambda: NODE_SPEC)
-    monkeypatch.setattr(check, '_perform_kubelet_check', lambda x: None)
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.txt'))))
+    monkeypatch.setattr(check, 'retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_perform_kubelet_check',  mock.Mock(return_value=None))
     attrs = {
         'close.return_value': True,
         'iter_lines.return_value': mock_from_file('metrics.txt').split('\n')
     }
     mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-    monkeypatch.setattr(check, 'poll', lambda x: mock_resp)
-# TODO: implement these in the poll response mock
-# 'text/plain' in response.headers['Content-Type']:
-# text_fd_to_metric_families(response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)):
+    monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
     check.check({})
 
     check.retrieve_pod_list.assert_called_once()
     check.retrieve_node_spec.assert_called_once()
-
+    check._perform_kubelet_check.assert_called_once()
     check.poll.assert_called_once()
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric)
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-# def test_is_container_metric():
+def test_is_container_metric():
+    check = KubeletCheck('kubelet', None, {}, [{}])
+
+    false_metrics = [
+        MockMetric('foo', []),
+        MockMetric(
+            'bar',
+            [
+                Label(name='container_name', value='POD'),  # POD --> False
+                Label(name='namespace', value='default'),
+                Label(name='pod_name', value='pod0'),
+                Label(name='name', value='foo'),
+                Label(name='image', value='foo'),
+                Label(name='id', value='deadbeef'),
+            ]
+        ),
+        MockMetric(  # missing container_name
+            'foobar',
+            [
+                Label(name='namespace', value='default'),
+                Label(name='pod_name', value='pod0'),
+                Label(name='name', value='foo'),
+                Label(name='image', value='foo'),
+                Label(name='id', value='deadbeef'),
+            ]
+        ),
+    ]
+    for metric in false_metrics:
+        assert check._is_container_metric(metric) is False
+
+    true_metric = MockMetric(
+        'foo',
+        [
+            Label(name='container_name', value='ctr0'),
+            Label(name='namespace', value='default'),
+            Label(name='pod_name', value='pod0'),
+            Label(name='name', value='foo'),
+            Label(name='image', value='foo'),
+            Label(name='id', value='deadbeef'),
+        ]
+    )
+    assert check._is_container_metric(true_metric) is True
 
 
-# def test_is_pod_metric():
-# def test_get_container_label():
-# def test_get_container_id():
-# def test_get_pod_uid():
-# def test_is_pod_host_networked():
+def test_is_pod_metric():
+    check = KubeletCheck('kubelet', None, {}, [{}])
+
+    false_metrics = [
+        MockMetric('foo', []),
+        MockMetric('bar', [Label(name='container_name', value='ctr0')]),
+        MockMetric('foobar', [Label(name='container_name', value='ctr0'), Label(name='id', value='deadbeef')]),
+    ]
+
+    true_metrics = [
+        MockMetric('foo', [Label(name='container_name', value='POD')]),
+        MockMetric('bar', [Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
+        MockMetric('foobar', [Label(name='container_name', value='POD'), Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
+    ]
+
+    for metric in false_metrics:
+        assert check._is_pod_metric(metric) is False
+
+    for metric in true_metrics:
+        assert check._is_pod_metric(metric) is True

@@ -281,7 +281,7 @@ class KubeletCheck(PrometheusCheck):
                     if ml.name == lbl:
                         if ml.value == '' or ml.value == 'POD':
                             return False
-            elif lbl not in [ml.name for ml in metric.label]:
+            if lbl not in [ml.name for ml in metric.label]:
                 return False
         return True
 
