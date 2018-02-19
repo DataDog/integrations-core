@@ -50,6 +50,12 @@ instances:
    #   path: /var/log/kafka/server.log
    #   source: kafka
    #   service: myservice
+      #To handle multi line that starts with yyyy-mm-dd use the following pattern
+      #log_processing_rules:
+      # - type: multi_line
+      #   name: start_with_date
+      #   pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+```
        
 
 init_config:
