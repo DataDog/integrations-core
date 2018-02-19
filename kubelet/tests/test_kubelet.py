@@ -44,10 +44,12 @@ EXPECTED_METRICS = [
     'kubernetes.cpu.limits',
     'kubernetes.cpu.requests',
     'kubernetes.filesystem.usage',
+    'kubernetes.filesystem.usage_pct',
     'kubernetes.memory.capacity',
     'kubernetes.memory.limits',
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
+    'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
@@ -116,6 +118,8 @@ def test_kubelet_check(monkeypatch, aggregator):
     check.retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.poll.assert_called_once()
+    # called twice so pct metrics are guaranteed to be there
+    check.check({})
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric)
     assert aggregator.metrics_asserted_pct == 100.0
