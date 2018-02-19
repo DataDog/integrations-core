@@ -1,0 +1,12 @@
+admin:
+  port: 9990
+  ip: 0.0.0.0
+
+routers:
+- protocol: http
+  dtab: /svc => /$/inet/127.1/9990;
+  servers:
+  - port: 8080
+telemetry:
+  - kind: io.l5d.prometheus
+    prefix: "dd_linkerd_"
