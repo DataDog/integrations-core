@@ -7,8 +7,7 @@
 # 3rd party
 
 # project
-from checks import CheckException
-from checks.prometheus_check import PrometheusCheck
+from datadog_checks.checks.prometheus import PrometheusCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'linkerd'
 
@@ -250,7 +249,7 @@ class LinkerdCheck(PrometheusCheck):
     def check(self, instance):
         endpoint = instance.get('prometheus_endpoint')
         if endpoint is None:
-            raise CheckException("Unable to find prometheus_endpoint in config file.")
+            raise Exception("Unable to find prometheus_endpoint in config file.")
 
         send_buckets = instance.get('send_histograms_buckets', True)
         # By default we send the buckets.
