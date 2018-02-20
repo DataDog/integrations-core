@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.2.0",
+  "version": "1.2.1",
   "guid": "41454590-0a25-4146-9c74-9d377db42764",
   "public_title": "Datadog-HDFS Namenode Integration",
   "categories":["processing", "os & system"],
