@@ -17,3 +17,23 @@ instances:
     # For example if the current instance mode is `observer` - `zookeeper.instances.observer` reports as 1
     # and `zookeeper.instances.(leader|follower|standalone|etc.)` reports as 0
     # report_instance_mode: true
+
+## Log Section (Available for Agent >=6.0)
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file / docker)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+   # - type: file
+   #   path: /var/log/zookeeper.log
+   #   source: zookeeper
+   #   service: myservice
+      #To handle multi line that starts with yyyy-mm-dd use the following pattern
+      #log_processing_rules:
+      # - type: multi_line
+      #   name: start_with_date
+      #   pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
