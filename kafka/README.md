@@ -54,9 +54,9 @@ By default, our integration pipeline support the following conversion patterns:
   %r [%t] %p %c %x - %m%n
   ```
 
-Make sure you clone and edit the integration pipeline if you have a different format.
+Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.com/logs/processing/#integration-pipelines) if you have a different format.
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
 
   ```
   logs_enabled: true
@@ -64,18 +64,18 @@ Make sure you clone and edit the integration pipeline if you have a different fo
    
 * Add this configuration setup to your `kafka.yaml` file to start collecting your Kafka Logs:
 
-```
-logs:
-  - type: file
-    path: /var/log/kafka/server.log
-    source: kafka
-    service: myapp
-    #To handle multi line that starts with yyyy-mm-dd use the following pattern
-    #log_processing_rules:
-    #  - type: multi_line
-    #    name: log_start_with_date
-    #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-```
+  ```
+  logs:
+    - type: file
+      path: /var/log/kafka/server.log
+      source: kafka
+      service: myapp
+      #To handle multi line that starts with yyyy-mm-dd use the following pattern
+      #log_processing_rules:
+      #  - type: multi_line
+      #    name: log_start_with_date
+      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+  ```
   
   Change the `path` and `service` parameter values and configure them for your environment.  
   See the [sample kafka.yaml](https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example) for all available configuration options.

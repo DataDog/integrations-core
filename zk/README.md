@@ -18,7 +18,7 @@ Create a file `zk.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
-*  Add this configuration setup to your `zk.yaml` file to start gathering your [Zookeeper Metrics](#metrics):
+*  Add this configuration setup to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
 
 ```
 init_config:
@@ -57,7 +57,7 @@ By default, our integration pipeline support the following conversion patterns:
 
 Make sure you clone and edit the integration pipeline if you have a different format.
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
 
   ```
   logs_enabled: true
@@ -65,18 +65,18 @@ Make sure you clone and edit the integration pipeline if you have a different fo
    
 * Add this configuration setup to your `zk.yaml` file to start collecting your Zookeeper Logs:
 
-```
-logs:
-  - type: file
-    path: /var/log/zookeeper.log
-    source: zookeeper
-    service: myapp
-    #To handle multi line that starts with yyyy-mm-dd use the following pattern
-    #log_processing_rules:
-    #  - type: multi_line
-    #    name: log_start_with_date
-    #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-```
+  ```
+  logs:
+    - type: file
+      path: /var/log/zookeeper.log
+      source: zookeeper
+      service: myapp
+      #To handle multi line that starts with yyyy-mm-dd use the following pattern
+      #log_processing_rules:
+      #  - type: multi_line
+      #    name: log_start_with_date
+      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+  ```
 
 * See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options.
 

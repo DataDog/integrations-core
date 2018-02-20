@@ -16,7 +16,7 @@
   "description": "Track requests per second, bytes served, worker threads, uptime, and more.",
   "guid": "cb2b4a06-4ede-465e-9478-a45f8b32058a",
   "public_title": "Datadog-Apache Integration",
-  "categories":["web"],
+  "categories":["web", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/apache/",
   "is_public": true,
