@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+2.3.0 / Unreleased
+==================
+
+* [BUGFIX] Fix fetching kubernetes_state.container.restarts with kube-state-metrics v1.2.0 [#1137][]
+
 2.2.0 / 2018-02-13
 ==================
 ### Changes
@@ -66,3 +71,4 @@
 [#874]: https://github.com/DataDog/integrations-core/issues/874
 [#936]: https://github.com/DataDog/integrations-core/issues/936
 [#965]: https://github.com/DataDog/integrations-core/issues/965
+[#1137]: https://github.com/DataDog/integrations-core/issues/1137
