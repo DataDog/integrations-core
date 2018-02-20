@@ -11,8 +11,6 @@ from datadog_checks.linkerd import LinkerdCheck
 # 3p
 import docker
 
-CHECK_NAME = 'linkerd'
-
 PROMETHEUS_ENDPOINT = 'http://127.0.0.1:9990/admin/metrics/prometheus'
 
 INSTANCES = [{
@@ -20,6 +18,8 @@ INSTANCES = [{
 }]
 
 INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}
+
+CHECK_NAME = METRIC_PREFIX = 'linkerd'
 
 
 def wait_for(url, max_retries):
@@ -68,6 +68,7 @@ def linkerd(request):
 
 
 def test_check(linkerd, aggregator):
-    linkerd_check = LinkerdCheck('linkerd', INIT_CONFIG, {}, INSTANCES)
+    linkerd_check = LinkerdCheck(CHECK_NAME, INIT_CONFIG, {}, INSTANCES)
     linkerd_check.check(INSTANCES[0])
-    aggregator.assert_metric('linkerd.jvm.start_time')
+    for metric in linkerd_check.metrics_mapper.values():
+        aggregator.assert_metric(METRIC_PREFIX + "." + metric)
