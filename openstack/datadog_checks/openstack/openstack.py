@@ -1,18 +1,21 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 from datetime import datetime, timedelta
 from urlparse import urljoin
-
-# project
-from checks import AgentCheck
-
-# 3p
 import re
+
 import requests
 import simplejson as json
+
+from checks import AgentCheck
+try:
+    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
+    from datadog_agent import set_external_tags
+except ImportError:
+    # Agent < 6.0: the Agent pulls tags invoking `OpenStackCheck.get_external_host_tags`
+    set_external_tags = None
+
 
 SOURCE_TYPE = 'openstack'
 
@@ -148,8 +151,9 @@ class OpenStackProjectScope(object):
         try:
             auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            exception_msg = "Failed keystone auth with identity:{id} scope:{scope} @{url}".format(
-                id=identity,
+            exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
+                user=identity['password']['user']['name'],
+                domain=identity['password']['user']['domain']['id'],
                 scope=auth_scope,
                 url=keystone_server_url)
 
@@ -163,9 +167,10 @@ class OpenStackProjectScope(object):
                     auth_scope['project']['name'] = auth_scope['project'].pop('id')
                 auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
             except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                exception_msg = "{msg} and also failed kaystone auth with identity:{id} scope:{scope} @{url}: {ex}".format(
+                exception_msg = "{msg} and also failed keystone auth with identity:{id} domain:{domain} scope:{scope} @{url}: {ex}".format(
                     msg=exception_msg,
-                    id=identity,
+                    user=identity['password']['user']['name'],
+                    domain = identity['password']['user']['domain']['name'],
                     scope=auth_scope,
                     url=keystone_server_url,
                     ex=e)
@@ -388,6 +393,9 @@ class OpenStackCheck(AgentCheck):
             [re.compile(ex) for ex in init_config.get('exclude_server_ids', [])]
         )
 
+        skip_proxy = not init_config.get('use_agent_proxy', True)
+        self.proxy_config = None if skip_proxy else self.proxies
+
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
         Generic request handler for OpenStack API requests
@@ -395,7 +403,7 @@ class OpenStackCheck(AgentCheck):
         """
         try:
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
-                                timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                                timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
         except requests.exceptions.HTTPError:
             if resp.status_code == 401:
@@ -689,12 +697,17 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
+        project_name = project.get('name')
+
+        self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
+
         url = '{0}/limits'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
         tags = ['tenant_id:{0}'.format(project['id'])]
-        if 'name' in project:
+
+        if project_name:
             tags.append('project_name:{0}'.format(project['name']))
 
         for st in server_stats['limits']['absolute']:
@@ -702,6 +715,9 @@ class OpenStackCheck(AgentCheck):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
 
+    def get_stats_for_all_projects(self, projects):
+        for project in projects:
+            self.get_stats_for_single_project(project)
     ###
 
     ### Cache util
@@ -725,7 +741,7 @@ class OpenStackCheck(AgentCheck):
 
         try:
             requests.get(instance_scope.service_catalog.nova_endpoint, headers=headers,
-                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.COMPUTE_API_SC, AgentCheck.OK,
                                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
@@ -735,7 +751,7 @@ class OpenStackCheck(AgentCheck):
         # Neutron
         try:
             requests.get(instance_scope.service_catalog.neutron_endpoint, headers=headers,
-                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxies)
+                         verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.NETWORK_API_SC, AgentCheck.OK,
                                tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
@@ -758,7 +774,7 @@ class OpenStackCheck(AgentCheck):
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
-                instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxies)
+                instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
                 self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["server:%s" % self.init_config.get("keystone_server_url")])
             except KeystoneUnreachable as e:
                 self.warning("The agent could not contact the specified identity server at %s . Are you sure it is up at that address?" % self.init_config.get("keystone_server_url"))
@@ -794,16 +810,24 @@ class OpenStackCheck(AgentCheck):
             # Store the scope on the object so we don't have to keep passing it around
             self._current_scope = instance_scope
 
+            collect_all_projects = instance.get("collect_all_projects", False)
+
             self.log.debug("Running check with credentials: \n")
             self.log.debug("Nova Url: %s", self.get_nova_endpoint())
             self.log.debug("Neutron Url: %s", self.get_neutron_endpoint())
-            self.log.debug("Auth Token: %s", self.get_auth_token())
 
             # Restrict monitoring to this (host, hypervisor, project)
             # and it's guest servers
 
             hyp = self.get_local_hypervisor()
+
             project = self.get_scoped_project(instance)
+            projects = []
+
+            if collect_all_projects:
+                projects = self.get_all_projects(instance)
+            else:
+                projects.append(project)
 
             # Restrict monitoring to non-excluded servers
             server_ids = self.get_servers_managed_by_hypervisor()
@@ -825,11 +849,15 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
-            if project:
-                self.get_stats_for_single_project(project)
+            if projects and project:
+                # Ensure projects list and scoped project exists
+                self.get_stats_for_all_projects(projects)
 
             # For now, monitor all networks
             self.get_network_stats()
+
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
 
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):
@@ -846,7 +874,6 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
 
-
     #### Local Info accessors
     def get_local_hypervisor(self):
         """
@@ -857,6 +884,21 @@ class OpenStackCheck(AgentCheck):
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
+
+    def get_all_projects(self, instance):
+        """
+        Returns all projects in the domain
+        """
+        url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
+        headers = {'X-Auth-Token': self.get_auth_token(instance)}
+        try:
+            r = self._make_request_with_auth_fallback(url, headers)
+            return r['projects']
+
+        except Exception as e:
+            self.warning('Unable to get projects: {0}'.format(str(e)))
+
+        return None
 
     def get_scoped_project(self, instance):
         """
@@ -898,8 +940,6 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-
-
     def get_my_hostname(self):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
@@ -917,7 +957,6 @@ class OpenStackCheck(AgentCheck):
             ]
 
         return server_ids
-
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
@@ -940,7 +979,7 @@ class OpenStackCheck(AgentCheck):
         integration.
         List of pairs (hostname, list_of_tags)
         """
-        self.log.info("Collecting external_host_tags now")
+        self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
         for k,v in self.external_host_tags.iteritems():
             external_host_tags.append((k, {SOURCE_TYPE: v}))

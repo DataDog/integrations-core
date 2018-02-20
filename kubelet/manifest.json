@@ -1,0 +1,11 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "max_agent_version": "7.0.0",
+  "min_agent_version": "6.0.0",
+  "name": "kubelet",
+  "short_description": "Collects container stats from kubelet.",
+  "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
+  "support": "core",
+  "supported_os": ["linux"]
+}

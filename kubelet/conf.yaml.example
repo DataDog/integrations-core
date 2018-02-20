@@ -1,0 +1,17 @@
+init_config:
+
+instances:
+    # url of the kubelet metrics endpoint
+  - {}
+    # metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
+    #
+    # The histogram buckets can be noisy and generate a lot of tags.
+    # send_histograms_buckets controls whether or not you want to pull them.
+    #
+    # send_histograms_buckets: True
+    #
+    # Like all checks based on the PrometheusCheck class, you can add tags
+    # to the instance that will be added to all the metrics of this check instance.
+    #
+    # tags:
+    #   - 'mytag1:myValue1'

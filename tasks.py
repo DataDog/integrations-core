@@ -5,6 +5,8 @@ from invoke import task
 AGENT_BASED_INTEGRATIONS = [
     "datadog-checks-base",
     "disk",
+    "kubelet",
+    "vsphere",
 ]
 
 @task(help={
