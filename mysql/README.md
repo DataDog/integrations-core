@@ -33,6 +33,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here](https://dev.mysql.com/doc/refman/5.7/en/adding-users.html)
 
+
 Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
 
 ```
@@ -77,7 +78,7 @@ Query OK, 0 rows affected (0.00 sec)
   init_config:
 
   instances:
-    - server: localhost
+    - server: 127.0.0.1
       user: datadog
       pass: <YOUR_CHOSEN_PASSWORD> # from the CREATE USER step earlier
       port: <YOUR_MYSQL_PORT> # e.g. 3306
@@ -92,6 +93,8 @@ Query OK, 0 rows affected (0.00 sec)
   ```
   In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.  
   See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
+
+The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MySQL metrics to Datadog.
 
