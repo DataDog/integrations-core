@@ -39,7 +39,7 @@ Optionally, provide a `db_whitelist` and `db_blacklist` to control which databas
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `couch` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `couch` under the Checks section:
 
 ```
   Checks

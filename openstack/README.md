@@ -77,7 +77,7 @@ You may need to restart your Keystone, Neutron and Nova API services to ensure t
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `openstack` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `openstack` under the Checks section:
 
     Checks
     ======
@@ -107,7 +107,7 @@ Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 ## Further Reading
 To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/openstack-monitoring-nova/) about it.
 
-See also our blog posts: 
+See also our blog posts:
 
 * [Install OpenStack in two commands for dev and test](https://www.datadoghq.com/blog/install-openstack-in-two-commands/)
 * [OpenStack: host aggregates, flavors, and availability zones](https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/)

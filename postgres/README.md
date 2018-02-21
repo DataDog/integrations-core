@@ -113,7 +113,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postgres` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postgres` under the Checks section:
 
 ```
 Checks
@@ -199,7 +199,7 @@ custom_metrics:
 
 ##### Debugging
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
 ```
 postgres

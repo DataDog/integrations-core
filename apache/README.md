@@ -31,21 +31,21 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
   #   apache_password: example_password
   #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
   ```
-  Change the `apache_status_url` parameter value and configure it for your environment.  
+  Change the `apache_status_url` parameter value and configure it for your environment.
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
 *  [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
 #### Log Collection
 
-**Available for Agent >6.0** 
+**Available for Agent >6.0**
 
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
   log_enabled: true
   ```
-   
+
 * Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
 
   ```
@@ -62,17 +62,17 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
           sourcecategory: http_web_access
           service: apache
   ```
-  
-  Change the `path` and `service` parameter values and configure them for your environment.  
+
+  Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**  
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
 ```
 Checks

@@ -29,7 +29,7 @@ Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample sp
 init_config:
 
 instances:
-  - spark_url: http://localhost:8088 # Spark master web UI 
+  - spark_url: http://localhost:8088 # Spark master web UI
 #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
 #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
@@ -49,7 +49,7 @@ Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `spark` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `spark` under the Checks section:
 
 ```
   Checks

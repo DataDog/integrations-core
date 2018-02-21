@@ -7,7 +7,7 @@ This check lets you collect SNMP metrics from your network devices.
 ## Setup
 ### Installation
 
-The SNMP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host where you want to run the check.  
+The SNMP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host where you want to run the check.
 
 If you need the newest version of the SNMP check, install the `dd-check-snmp` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -90,7 +90,7 @@ Put all your pysnmp MIBs into any directory and point the SNMP check to this dir
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `snmp` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `snmp` under the Checks section:
 
 ```
   Checks
@@ -130,7 +130,7 @@ Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 ### Datadog Blog
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
-### Knowledge Base 
+### Knowledge Base
 
 * [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ](https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids)
 

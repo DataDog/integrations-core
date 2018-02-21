@@ -95,7 +95,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `docker_daemon` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `docker_daemon` under the Checks section:
 
     Checks
     ======

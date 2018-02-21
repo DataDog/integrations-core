@@ -7,7 +7,7 @@ This check lets you monitor SSH connectivity to remote hosts and SFTP response t
 ## Setup
 ### Installation
 
-The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere from which you'd like to test SSH connectivity.  
+The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere from which you'd like to test SSH connectivity.
 
 If you need the newest version of the SSH check, install the `dd-check-ssh-check` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -23,7 +23,7 @@ instances:
     username: <SOME_USERNAME> # required
     password: <SOME_PASSWORD> # or use private_key_file
 #   private_key_file: <PATH_TO_PRIVATE_KEY>
-#   private_key_type:         # rsa or ecdsa; default is rsa      
+#   private_key_type:         # rsa or ecdsa; default is rsa
 #   port: 22                  # default is port 22
 #   sftp_check: False         # set False to disable SFTP check; default is True
 #   add_missing_keys: True    # default is False
@@ -33,7 +33,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ssh_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ssh_check` under the Checks section:
 
 ```
   Checks

@@ -22,7 +22,7 @@ Finally, in addition to metrics, the Datadog Agent also sends a service check fo
 ## Setup
 ### Installation
 
-The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Consul nodes.  
+The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Consul nodes.
 
 If you need the newest version of the Consul check, install the `dd-check-consul` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -75,7 +75,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 #### Datadog Agent to Consul Agent
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `consul` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `consul` under the Checks section:
 
 ```
   Checks
@@ -128,7 +128,7 @@ See [Consul's Network Coordinates doc](https://www.consul.io/docs/internals/coor
 
 `consul.new_leader`:
 
-The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`. 
+The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`.
 
 ### Service Checks
 

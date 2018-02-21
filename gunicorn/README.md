@@ -14,7 +14,7 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 ## Setup
 ### Installation
 
-The Datadog Agent's Gunicorn check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gunicorn servers.  
+The Datadog Agent's Gunicorn check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gunicorn servers.
 
 If you need the newest version of the Gunicorn check, install the `dd-check-gunicorn` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -29,7 +29,7 @@ Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sam
 init_config:
 
 instances:
-  # as set 
+  # as set
   # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
   # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
   - proc_name: <YOUR_APP_NAME>
@@ -43,7 +43,7 @@ Since version 19.1, Gunicorn [provides an option](http://docs.gunicorn.org/en/st
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `gunicorn` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `gunicorn` under the Checks section:
 
 ```
   Checks
@@ -91,7 +91,7 @@ Returns CRITICAL if the Agent cannot find a Gunicorn master process, or if canno
 ```
   Checks
   ======
-  
+
     gunicorn (5.12.1)
     -----------------
       - instance #0 [ERROR]: 'Found no master process with name: gunicorn: master [my_web_app]'

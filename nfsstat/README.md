@@ -7,7 +7,7 @@ nfsiostat is a tool that gets metrics from NFS mounts. This check grabs these me
 ## Setup
 ### Installation
 
-The NFSstat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+The NFSstat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 If you need the newest version of the NFSstat check, install the `dd-check-nfsstat` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -17,7 +17,7 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nfsstat` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nfsstat` under the Checks section:
 
     Checks
     ======

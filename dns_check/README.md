@@ -33,7 +33,7 @@ If you omit the `nameserver` option, the check will use whichever nameserver is 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `dns_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `dns_check` under the Checks section:
 
 ```
   Checks
@@ -66,7 +66,7 @@ This agent check tags all service checks it collects with:
 
   * `nameserver:<nameserver_in_yaml>`
   * `resolved_hostname:<hostname_in_yaml>`
-  
+
 `dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.

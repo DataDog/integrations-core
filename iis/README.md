@@ -12,7 +12,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. If you need the newest version of the IIS check, install the `dd-check-iis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
-2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.  
+2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:
   ```
   Get-WmiObject -List -Namespace root\cimv2 | select -Property name | where name -like "*Win32_PerfFormattedData_W3SVC*"
@@ -33,7 +33,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
   [X] HTTP Errors                    Web-Http-Errors        Installed
   [X] Static Content                 Web-Static-Content     Installed
   ```
-  
+
   You can add the missing features with `install-windowsfeature web-common-http`. This requires a restart of the system to work properly.
 
 ### Configuration
@@ -101,7 +101,7 @@ Here's an example of configuration that would check the current machine and a re
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `iis` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `iis` under the Checks section:
 
 ```
   Checks

@@ -7,7 +7,7 @@ This check monitors the size of all your Postfix queues.
 ## Setup
 ### Installation
 
-The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers.  
+The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers.
 
 If you need the newest version of the Postfix check, install the `dd-check-postfix` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -70,7 +70,7 @@ Postfix allows `anyone` to view the queue. On production systems where the Postf
 may be configured with stricter access controls, you may need to grant the dd-agent user access to view
 the mail queue.
 
-    postconf -e "authorized_mailq_users = dd-agent"        
+    postconf -e "authorized_mailq_users = dd-agent"
 
 http://www.postfix.org/postqueue.1.html
 
@@ -82,7 +82,7 @@ http://www.postfix.org/postqueue.1.html
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postfix` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postfix` under the Checks section:
 
 ```
   Checks

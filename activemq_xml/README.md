@@ -10,7 +10,7 @@ Get metrics from activemq_xml service in real time to:
 ## Setup
 ### Installation
 
-The Activemq XML check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+The Activemq XML check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 If you need the newest version of the ActiveMQ XML check, install the `dd-check-activemq_xml` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -20,7 +20,7 @@ Edit the `activemq_xml.yaml` file to point to your server and port, set the mast
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `activemq_xml` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `activemq_xml` under the Checks section:
 
     Checks
     ======

@@ -34,7 +34,7 @@ The function of `user` and `password` depends on whether or not you configure `a
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `marathon` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `marathon` under the Checks section:
 
 ```
   Checks
