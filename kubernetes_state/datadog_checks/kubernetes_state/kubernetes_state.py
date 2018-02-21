@@ -76,7 +76,8 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
             'kube_pod_container_resource_requests_memory_bytes': 'container.memory_requested',
             'kube_pod_container_status_ready': 'container.ready',
-            'kube_pod_container_status_restarts': 'container.restarts',
+            'kube_pod_container_status_restarts': 'container.restarts', # up to kube-state-metrics 1.1.x
+            'kube_pod_container_status_restarts_total': 'container.restarts', # from kube-state-metrics 1.2.0
             'kube_pod_container_status_running': 'container.running',
             'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
             'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
