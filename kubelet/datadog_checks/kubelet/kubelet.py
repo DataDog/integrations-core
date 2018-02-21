@@ -318,19 +318,73 @@ class KubeletCheck(PrometheusCheck):
             if label.name == 'id':
                 return label.value.split('/')[-1]
 
-    def _get_pod_uid(self, labels):
+    @staticmethod
+    def _get_pod_uid(labels):
         for label in labels:
             if label.name == 'id':
-                parts = label.value.split('/')
-                for part in parts:
+                for part in label.value.split('/'):
                     if part.startswith('pod'):
-                        return part.lstrip('pod')
+                        return part[3:]
 
     def _is_pod_host_networked(self, pod_uid):
         for pod in self.pod_list['items']:
             if pod.get('metadata', {}).get('uid', '') == pod_uid:
                 return pod.get('spec', {}).get('hostNetwork', False)
         return False
+
+    def _get_pod_by_metric_label(self, labels):
+        """
+        :param labels: metric labels: iterable
+        :return:
+        """
+        pod_uid = self._get_pod_uid(labels)
+        for pod in self.pod_list["items"]:
+            try:
+                if pod["metadata"]["uid"] == pod_uid:
+                    return pod
+            except KeyError:
+                continue
+
+        return None
+
+    @staticmethod
+    def _is_static_pending_pod(pod):
+        """
+        Return if the pod is a static pending pod
+        See https://github.com/kubernetes/kubernetes/pull/57106
+        :param pod: dict
+        :return: bool
+        """
+        try:
+            if pod["metadata"]["annotations"]["kubernetes.io/config.source"] == "api":
+                return False
+
+            pod_status = pod["status"]
+            if pod_status["phase"] != "Pending":
+                return False
+
+            return "containerStatuses" not in pod_status
+        except KeyError:
+            return False
+
+    @staticmethod
+    def _get_tags_from_labels(labels):
+        """
+        Get extra tags from metric labels
+        label {
+          name: "container_name"
+          value: "kube-proxy"
+        }
+        :param labels: metric labels: iterable
+        :return: list
+        """
+        tags = []
+        for label in labels:
+            if label.name == "container_name":
+                tags.append("kube_container_name:%s" % label.value)
+                return tags
+
+        return tags
 
     def _process_container_rate(self, metric_name, message):
         """Takes a simple metric about a container, reports it as a rate."""
@@ -342,6 +396,15 @@ class KubeletCheck(PrometheusCheck):
             if self._is_container_metric(metric):
                 c_id = self._get_container_id(metric.label)
                 tags = get_tags('docker://%s' % c_id, True)
+
+                # FIXME we are forced to do that because the Kubelet PodList isn't updated
+                # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
+                pod = self._get_pod_by_metric_label(metric.label)
+                if pod is not None and self._is_static_pending_pod(pod):
+                    tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                    tags += self._get_tags_from_labels(metric.label)
+                    tags = list(set(tags))
+
                 val = getattr(metric, METRIC_TYPES[message.type]).value
                 self.rate(metric_name, val, tags)
 
@@ -375,6 +438,15 @@ class KubeletCheck(PrometheusCheck):
                 if not c_name:
                     continue
                 tags = get_tags('docker://%s' % c_id, True)
+
+                # FIXME we are forced to do that because the Kubelet PodList isn't updated
+                # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
+                pod = self._get_pod_by_metric_label(metric.label)
+                if pod is not None and self._is_static_pending_pod(pod):
+                    tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                    tags += self._get_tags_from_labels(metric.label)
+                    tags = list(set(tags))
+
                 val = getattr(metric, METRIC_TYPES[message.type]).value
                 cache[c_name] = (val, tags)
                 seen_keys[c_name] = True
@@ -401,7 +473,6 @@ class KubeletCheck(PrometheusCheck):
                     self.gauge(m_name, limit, tags)
 
                 if pct_m_name and limit > 0:
-                    usage = None
                     c_name = self._get_container_label(metric.label, 'name')
                     if not c_name:
                         continue
