@@ -1,12 +1,17 @@
 # CHANGELOG - apache
 
+1.1.2 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] revert metric collection fix for `bytes_per_s` and `request_per_s`. See [#1145][].
+
 1.1.1 / 2018-02-13
 ==================
 ### Changes
 
 * [BUGFIX] fixes metric collection for `bytes_per_s` and `request_per_s`. See [#1071][].
 * [DOC] Adding configuration for log collection in `conf.yaml`
-
 
 1.1.0 / 2017-11-21
 ==================
