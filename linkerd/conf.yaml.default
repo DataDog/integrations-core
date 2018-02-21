@@ -1,17 +1,14 @@
 init_config:
 
 instances:
-    # url of the metrics endpoint of prometheus
-    # - prometheus_endpoint: http://localhost:10055/metrics
+    # ip and port to the linkerd admin interface
+    - admin_ip: localhost
+      admin_port: 9990
     #
-    # prefix for exposed Prometheus metrics (should be the same as what's in your
-    # linkerd config)
+    # Optional prefix for exposed Prometheus metrics (should be the same as
+    # what's in your linkerd config).
     # linkerd_prometheus_prefix: namerd_
 
-    # The histogram buckets can be noisy and generate a lot of tags.
-    # send_histograms_buckets controls whether or not you want to pull them.
-    # send_histograms_buckets: True
-    #
     # Note that like all checks based on the PrometheusCheck class, you can add
     # tags to the instance that will be added to all the metrics of this check
     # instance.

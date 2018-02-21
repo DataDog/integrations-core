@@ -14,7 +14,8 @@ import docker
 PROMETHEUS_ENDPOINT = 'http://127.0.0.1:9990/admin/metrics/prometheus'
 
 INSTANCES = [{
-    'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+    'admin_ip': '127.0.0.1',
+    'admin_port': '9990',
 }]
 
 INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}

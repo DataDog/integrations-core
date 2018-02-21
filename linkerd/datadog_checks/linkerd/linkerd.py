@@ -5,12 +5,17 @@
 # stdlib
 
 # 3rd party
+import requests
 
 # project
 from datadog_checks.checks.prometheus import PrometheusCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'linkerd'
 
+PROMETHEUS_ENDPOINT = '/admin/metrics/prometheus'
+PING_ENDPOINT = '/admin/ping'
+
+SERVICE_CHECK_NAME = 'linkerd.can_connect'
 
 class LinkerdCheck(PrometheusCheck):
     """
@@ -246,16 +251,44 @@ class LinkerdCheck(PrometheusCheck):
             self.type_overrides[prefix + m] = types_map[m]
 
 
+    def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
+        return _tags
+
     def check(self, instance):
-        endpoint = instance.get('prometheus_endpoint')
-        if endpoint is None:
-            raise Exception("Unable to find prometheus_endpoint in config file.")
+        admin_ip = instance.get('admin_ip')
+        admin_port = instance.get('admin_port')
 
-        send_buckets = instance.get('send_histograms_buckets', True)
-        # By default we send the buckets.
-        if send_buckets is not None and str(send_buckets).lower() == 'false':
-            send_buckets = False
-        else:
-            send_buckets = True
+        if admin_ip is None or admin_port is None:
+            raise Exception("Unable to find admin_ip and admin_port in config file.")
 
-        self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+
+        prometheus_url = "http://{}:{}{}".format(
+            admin_ip,
+            admin_port,
+            PROMETHEUS_ENDPOINT
+        )
+
+        ping_url = "http://{}:{}{}".format(
+            admin_ip,
+            admin_port,
+            PING_ENDPOINT
+        )
+
+        tags = ["linkerd_admin_ip:{}".format(admin_ip), "linkerd_admin_port:{}".format(admin_port)]
+
+        try:
+            r = requests.get(ping_url)
+            r.raise_for_status()
+            if r.content == "pong":
+                self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.OK,
+                               tags=tags)
+            else:
+                self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.UNKNOWN,
+                               tags=tags)
+                raise Exception("Error pinging {}. Server responded with: {}".format(PING_ENDPOINT, r.content))
+        except requests.exceptions.HTTPError as e:
+            self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
+                               tags=tags)
+            raise Exception("Error pinging {}. Error: {}".format(PING_ENDPOINT, e))
+
+        self.process(prometheus_url, send_histograms_buckets=True, instance=instance)
