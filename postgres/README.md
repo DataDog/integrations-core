@@ -199,7 +199,7 @@ custom_metrics:
 
 ##### Debugging
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `postgres` under the Checks section:
 
 ```
 postgres
