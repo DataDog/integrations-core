@@ -9,7 +9,7 @@ Get metrics from dotnetclr service in real time to:
 
 ## Installation
 
-The Dotnetclr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
+The Dotnetclr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 If you need the newest version of the Dotnetclr check, install the `dd-check-dotnetclr` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -19,7 +19,7 @@ Edit the `dotnetclr.yaml` file to point to your server and port, set the masters
 
 ## Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
     Checks
     ======

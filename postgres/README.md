@@ -12,7 +12,7 @@ Get metrics from PostgreSQL service in real time to:
 
 ### Installation
 
-The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent).  
+The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent).
 If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
 
 ### Configuration
@@ -44,7 +44,7 @@ When it prompts for a password, enter the one used in the first command.
 #### Metric Collection
 
 * Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options. Configuration Options:
-  
+
   * **`username`** (Optional) - The user account used to collect metrics, set in the [Installation section above](#installation)
   * **`password`** (Optional) - The password for the user account.
   * **`dbname`** (Optional) - The name of the database you want to monitor.
@@ -68,7 +68,7 @@ When it prompts for a password, enter the one used in the first command.
 
 #### Log Collection
 
-PostgreSQL default logging is to stderr and logs do not include detailed information. This is why we suggest to log into a file with additional details specified in the log line prefix.  
+PostgreSQL default logging is to stderr and logs do not include detailed information. This is why we suggest to log into a file with additional details specified in the log line prefix.
 
 * Edit your PostgreSQL configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
 
@@ -105,10 +105,10 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
         #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
         #    name: new_log_start_with_date
   ```
-  Change the `service` and `path` parameter values and configure them for your environment.  
+  Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 ### Validation
@@ -199,7 +199,7 @@ custom_metrics:
 
 ##### Debugging
 
-If your custom metric does not work after an Agent restart, running `sudo /etc/init.d/datadog-agent info` can provide more information. For example:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
 ```
 postgres

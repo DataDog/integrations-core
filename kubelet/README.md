@@ -17,7 +17,7 @@ Edit the `kubelet.yaml` file to point to your server and port, set tags to send 
 
 ## Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
 
     Checks
     ======
