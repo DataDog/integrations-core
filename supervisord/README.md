@@ -7,7 +7,7 @@ This check monitors the uptime, status, and number of processes running under su
 ## Setup
 ### Installation
 
-The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes.  
+The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes.
 
 If you need the newest version of the Supervisor check, install the `dd-check-supervisord` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -26,7 +26,7 @@ username=user  # optional
 password=pass  # optional
 ```
 
-##### UNIX socket 
+##### UNIX socket
 
 Add blocks like these to `/etc/supervisor.conf` (if they're not already there):
 
@@ -54,12 +54,12 @@ init_config:
 
 instances:
   - name: supervisord0 # used to tag service checks and metrics, i.e. supervisor_server:supervisord0
-    host: localhost  
+    host: localhost
     port: 9001
 
 # To collect from the socket instead
 # - name: supervisord0
-#   host: http://127.0.0.1 
+#   host: http://127.0.0.1
 #   socket: unix:///var/run//supervisor.sock
 ```
 
@@ -82,7 +82,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `supervisord` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `supervisord` under the Checks section:
 
 ```
   Checks

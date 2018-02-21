@@ -14,7 +14,7 @@ To collect Kafka consumer metrics, see the [kafka_consumer check](https://docs.d
 ## Setup
 ### Installation
 
-The Agent's Kafka check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.  
+The Agent's Kafka check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.
 
 If you need the newest version of the Kafka check, install the `dd-check-kafka` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -86,7 +86,7 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kafka` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kafka` under the Checks section:
 
 ```
   Checks

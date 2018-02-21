@@ -26,7 +26,7 @@ This minimal file will capture all events from localhost, but you can configure 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `win32_event_log` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `win32_event_log` under the Checks section:
 
 ```
   Checks

@@ -9,7 +9,7 @@ This check does **NOT** forward application metrics from StatsD servers to Datad
 ## Setup
 ### Installation
 
-The StatsD check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that run StatsD.  
+The StatsD check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that run StatsD.
 
 If you need the newest version of the StatsD check, install the `dd-check-statsd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -29,7 +29,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `statsd` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `statsd` under the Checks section:
 
 ```
   Checks

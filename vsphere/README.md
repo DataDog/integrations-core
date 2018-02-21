@@ -7,7 +7,7 @@ This check collects resource usage metrics from your vSphere cluster—CPU, disk
 ## Setup
 ### Installation
 
-The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server.  
+The vSphere check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your vCenter server.
 
 If you need the newest version of the vSphere check, install the `dd-check-vsphere` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -41,7 +41,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `vsphere` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `vsphere` under the Checks section:
 
 ```
   Checks

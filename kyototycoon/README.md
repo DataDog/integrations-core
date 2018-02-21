@@ -7,7 +7,7 @@ The Agent's KyotoTycoon check tracks get, set, and delete operations, and lets y
 ## Setup
 ### Installation
 
-The KyotoTycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your KyotoTycoon servers.  
+The KyotoTycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your KyotoTycoon servers.
 If you need the newest version of the KyotoTycoon check, install the `dd-check-kyototycoon` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
 ### Configuration
@@ -18,7 +18,7 @@ Create a file `kyototycoon.yaml` in the Agent's `conf.d` directory. See the [sam
 init_config:
 
 instances:
-#  Each instance needs a report URL. 
+#  Each instance needs a report URL.
 #  name, and optionally tags keys. The report URL should
 #  be a URL to the Kyoto Tycoon "report" RPC endpoint.
 #
@@ -33,7 +33,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kyototycoon` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kyototycoon` under the Checks section:
 
 ```
   Checks

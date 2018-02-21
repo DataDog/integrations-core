@@ -67,24 +67,24 @@ The Agent collects metrics via a stats endpoint:
   ```
 
 * Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
-  
+
   ```
   logs:
       - type: udp
         port: 514
         service: haproxy
-        source: haproxy  
+        source: haproxy
         sourcecategory: http_web_access
   ```
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.  
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent)
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `haproxy` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `haproxy` under the Checks section:
 
 ```
 Checks

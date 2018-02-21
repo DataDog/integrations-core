@@ -66,7 +66,7 @@ When you have finished configuring `http_check.yaml`, [restart the Agent](https:
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `http_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `http_check` under the Checks section:
 
 ```
   Checks

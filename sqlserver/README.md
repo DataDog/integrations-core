@@ -9,11 +9,11 @@ You can also create your own metrics by having the check run custom queries.
 ## Setup
 ### Installation
 
-The SQL Server check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your SQL Server instances.  
+The SQL Server check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your SQL Server instances.
 
-If you need the newest version of the SQL Server check, install the `dd-check-sqlserver` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).  
+If you need the newest version of the SQL Server check, install the `dd-check-sqlserver` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
-Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties. 
+Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties.
 **Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**
 
 ### Configuration
@@ -46,7 +46,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `sqlserver` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `sqlserver` under the Checks section:
 
 ```
   Checks

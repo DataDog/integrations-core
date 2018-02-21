@@ -10,7 +10,7 @@ Get metrics from btrfs service in real time to:
 ## Setup
 ### Installation
 
-The Btrfs check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on every server that uses at least one Btrfs filesystem.  
+The Btrfs check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on every server that uses at least one Btrfs filesystem.
 
 If you need the newest version of the Btrfs check, install the `dd-check-btrfs` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -21,7 +21,7 @@ If you need the newest version of the Btrfs check, install the `dd-check-btrfs` 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `btrfs` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `btrfs` under the Checks section:
 
 ```
   Checks

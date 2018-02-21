@@ -26,7 +26,7 @@ The Agent just needs one item in `instances` in order to enable the check. The c
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `system_core` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `system_core` under the Checks section:
 
 ```
   Checks

@@ -7,7 +7,7 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 ## Setup
 ### Installation
 
-The Solr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Solr nodes.  
+The Solr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Solr nodes.
 
 If you need the newest version of the Solr check, install the `dd-check-solr` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -206,7 +206,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `solr` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `solr` under the Checks section:
 
 ```
   Checks
@@ -260,10 +260,10 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 ## Knowledge Base
 ### Parsing a string value into a number
-If your jmxfetch returns only string values like **false** and **true** and you want to transform it into a Datadog gauge metric for advanced usages. For instance if you want the following equivalence for your jmxfetch: 
+If your jmxfetch returns only string values like **false** and **true** and you want to transform it into a Datadog gauge metric for advanced usages. For instance if you want the following equivalence for your jmxfetch:
 
 ```
-"myJmxfetch:false" = myJmxfetch:0 
+"myJmxfetch:false" = myJmxfetch:0
 "myJmxfetch:true" = myJmxfetch:1
 ```
 

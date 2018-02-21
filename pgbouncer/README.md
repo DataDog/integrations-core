@@ -7,7 +7,7 @@ The PgBouncer check tracks connection pool metrics and lets you monitor traffic 
 ## Setup
 ### Installation
 
-The PgBouncer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your PgBouncer nodes.  
+The PgBouncer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your PgBouncer nodes.
 
 If you need the newest version of the PgBouncer check, install the `dd-check-pgbouncer` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -44,7 +44,7 @@ stats_users = datadog
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `pgbouncer` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `pgbouncer` under the Checks section:
 
 ```
   Checks

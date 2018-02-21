@@ -46,7 +46,7 @@ If you don't configure a `metrics` list, the Agent will still collect memstat me
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `go_expvar` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `go_expvar` under the Checks section:
 
 ```
   Checks

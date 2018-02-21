@@ -15,7 +15,7 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The Varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Varnish servers.  
+The Varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Varnish servers.
 
 If you need the newest version of the Varnish check, install the `dd-check-varnish` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
 
@@ -30,7 +30,7 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
 #### Metric Collection
 
 * Add this configuration setup to your `varnish.yaml` file to start gathering your [Varnish metrics](#metrics):
-  
+
   ```
   init_config:
 
@@ -69,12 +69,12 @@ LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\"
 
 DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 ```
-  
+
   Restart Varnishncsa to make sure the changes are taken into account.
 
 
 *  Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
-  
+
   ```
   logs_enabled: true
   ```
@@ -86,10 +86,10 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
     - type: file
        path: /var/log/varnish/varnishncsa.log
       source: varnish
-      sourcecategory: http_web_access   
+      sourcecategory: http_web_access
       service: varnish
   ```
-  Change the `path` and `service` parameter value and configure them for your environment.  
+  Change the `path` and `service` parameter value and configure them for your environment.
   See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
@@ -98,7 +98,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `varnish` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `varnish` under the Checks section:
 
 ```
 Checks
