@@ -14,7 +14,7 @@
   "version": "1.5.2",
   "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
   "public_title": "Datadog-MongoDB Integration",
-  "categories":["data store"],
+  "categories":["data store", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/mongo/",
   "is_public": true,

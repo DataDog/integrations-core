@@ -13,7 +13,7 @@
   "version": "1.2.0",
   "guid": "5519c110-5183-438e-85ad-63678c072ac7",
   "public_title": "Datadog-Zookeeper Integration",
-  "categories":["orchestration", "notification"],
+  "categories":["orchestration", "notification", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/zk/",
   "is_public": true,

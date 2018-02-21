@@ -63,7 +63,7 @@ The Agent collects metrics via a stats endpoint:
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
 
 * Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:

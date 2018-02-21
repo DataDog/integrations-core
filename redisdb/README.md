@@ -51,7 +51,7 @@ See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
    
 * Add this configuration setup to your `redisdb.yaml` file to start collecting your Redis Logs:

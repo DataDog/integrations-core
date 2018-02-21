@@ -22,7 +22,7 @@
   },
   "guid": "056bfc7f-4775-4581-9442-502078593d10",
   "public_title": "Datadog-MySQL Integration",
-  "categories":["data store"],
+  "categories":["data store", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/mysql/",
   "is_public": true,

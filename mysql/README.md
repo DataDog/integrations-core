@@ -137,7 +137,7 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```
-    log_enabled: true
+    logs_enabled: true
     ```
 
 3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:

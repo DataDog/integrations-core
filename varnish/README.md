@@ -76,7 +76,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 *  Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
   
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
 
 * Add this configuration setup to your `varnish.yaml` file to start collecting your Varnish logs:
