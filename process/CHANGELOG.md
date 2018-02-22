@@ -1,6 +1,6 @@
 # CHANGELOG - process
 
-1.3.0 / Unreleased
+1.3.0 / 2018-02-15
 ==================
 
 * [FEATURE] Add option to use sudo for privileged process checks on file descriptors. See [#715][], thanks [@pdecat][].

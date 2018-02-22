@@ -1,5 +1,5 @@
 # CHANGELOG - windows_service
-1.1.1 / Unreleased
+1.1.1 / 2018-02-15
 
 * [FEATURE] Allow wildcards for service names 
 * [FEATURE] Allow ALL for service names to report all registered services.
