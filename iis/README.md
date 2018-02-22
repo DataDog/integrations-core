@@ -37,6 +37,9 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
   You can add the missing features with `install-windowsfeature web-common-http`. This requires a restart of the system to work properly.
 
 ### Configuration
+
+Create a file `iis.yaml` in the Agent's `conf.d` directory.
+
 #### Prepare IIS
 
 On your IIS servers, first resync the WMI counters.
@@ -54,9 +57,9 @@ On Windows >= 2008 (or equivalent), instead run:
 C:/> winmgmt /resyncperf
 ```
 
-#### Connect the Agent
+#### Metric Collection
 
-Create a file `iis.yaml` in the Agent's `conf.d` directory. See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options:
+ * Add this configuration setup to your `iis.yaml` file to start gathering your [IIS metrics](#metrics):
 
 ```
 init_config:
@@ -97,7 +100,37 @@ Here's an example of configuration that would check the current machine and a re
 
 * `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending IIS metrics to Datadog.
+* See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
+
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending IIS metrics to Datadog.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Add this configuration setup to your `iis.yaml` file to start collecting your IIS Logs:
+
+```
+logs:
+    
+     - type: file
+       path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
+       service: myservice
+       source: iis
+       sourcecategory: http_web_access
+    
+``` 
+  Change the `path` and `service` parameter values and configure them for your environment.
+  See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
+  
+  * [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+
 
 ### Validation
 
