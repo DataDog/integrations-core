@@ -4,21 +4,30 @@
 
 Extract custom metrics from any prometheus endpoints.
 
+/!\ All the metrics retrieved by this integration will be considered as custom metrics /!\
+
 ## Installation
 
 Install the `dd-check-prometheus` package manually or with your favorite configuration manager
 
 ## Configuration
 
-Edit the `prometheus.yaml` file to point to your prometheus endpoints
+Edit the `prometheus.yaml` file to add your different prometheus instances you want to retrieve metrics from.
 
-/!\ All the metrics retrieved by this integration will be considered as custom metrics /!\
+Each instance is at least composed of:
 
-If you want to submit an official integration based on this, you can see `kube-proxy` for an example
+* a `prometheus_url` that points to the metric route
+* a `namespace` that will be prepended to all metrics (to avoid name collision)
+* a list of `metrics` that you want to retrieve as custom metrics, for each metric you can either
+simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`
+
+There is also a couple of more advanced settings (ssl, labels joining, custom tags,...) that are documented in the [example configuration](conf.yaml.example)
+
+If you are monitoring an off-the-shelf software and you it would deserve an official integration, have a look at `kube-proxy` for an example.
 
 ## Validation
 
-When you run `datadog-agent info` you should see something like the following:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `prometheus` under the Checks section:
 
     Checks
     ======
