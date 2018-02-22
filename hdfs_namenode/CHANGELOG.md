@@ -1,6 +1,6 @@
 # CHANGELOG - hdfs_namenode
 
-1.2.0 / Unreleased
+1.2.0 / 2018-02-15
 ==================
 
 ### Changes
