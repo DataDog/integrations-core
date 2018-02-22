@@ -1,0 +1,12 @@
+init_config:
+  # Any global configurable parameters should be added here
+
+instances:
+  # Change the time to wait on the Fargate metadata API
+  # - timeout: 5
+
+    # Add additional custom tags to the metrics
+    # tags: ['custom:tag']
+
+    # Whitelist some containers label if you want to collect them
+    # label_whitelist: ['']
