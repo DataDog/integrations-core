@@ -17,6 +17,7 @@
   "categories":["data store", "caching", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/redisdb/",
+  "aliases":["/integrations/redis/"]
   "is_public": true,
   "has_logo": true
 }
