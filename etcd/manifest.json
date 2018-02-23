@@ -13,7 +13,7 @@
   ],
   "version": "1.3.0",
   "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73",
-  "public_title": "Datadog-Ceph Integration",
+  "public_title": "Datadog-etcd Integration",
   "categories":["orchestration", "containers", "configuration & deployment", "orchestration"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
