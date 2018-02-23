@@ -26,7 +26,8 @@ instances:
 #     - wmiApSrv
 ```
 
-You must provide service names as they appear in services.msc's properties field (e.g. wmiApSrv), NOT the display name (e.g. WMI Performance Adapter). For names with spaces enclose the whole name in double quotation marks (e.g. "Bonjour Service"). The spaces will be replaced by underscores in Datadog.
+Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").  
+Note: spaces are replaced by underscores in Datadog.
 
 [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start monitoring the services and sending service checks to Datadog.
 
