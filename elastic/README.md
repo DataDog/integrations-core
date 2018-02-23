@@ -36,7 +36,7 @@ instances:
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-Finally [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Elasticsearch metrics to Datadog.
+Finally, [restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Elasticsearch metrics to Datadog.
 
 ### Validation
 
