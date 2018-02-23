@@ -56,9 +56,15 @@ All Windows Event are forwarded to your Datadog application
 The Win32 Event log check does not include any service check at this time.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
+### Knowledge base
+
+* [How to add event log files to the `Win32_NTLogEvent` WMI class](https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/)
+
+### Blog
 
 * [Monitoring Windows Server 2012](https://www.datadoghq.com/blog/monitoring-windows-server-2012/)
 * [How to collect Windows Server 2012 metrics](https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/)
