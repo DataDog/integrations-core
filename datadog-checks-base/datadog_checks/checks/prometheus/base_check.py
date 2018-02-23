@@ -100,6 +100,7 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.ssl_cert = instance.get("ssl_cert", None)
         scraper.ssl_private_key = instance.get("ssl_private_key", None)
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", None)
+        scraper.type_overrides = instance.get("type_overrides", {})
 
         self.scrapers_map[instance["prometheus_url"]] = scraper
 

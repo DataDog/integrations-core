@@ -41,6 +41,11 @@ instances:
   #   labels_mapper:
   #     flavor: origin
 
+  #   Type override allows you to override a type in the prometheus the payload
+  #   or type an untyped metrics (they're ignored by default)
+  #   type_overrides:
+  #     metric_name: gauge
+
   #   Tags to be added to all metrics
   #
   #   tags:
