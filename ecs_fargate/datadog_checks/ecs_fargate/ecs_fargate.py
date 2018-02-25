@@ -43,7 +43,7 @@ class FargateCheck(AgentCheck):
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
             self.log.exception(msg)
             return
-        except request.exceptions.RequestException:
+        except requests.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
             self.log.exception(msg)
@@ -100,7 +100,7 @@ class FargateCheck(AgentCheck):
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
             self.log.warning(msg, exc_info=True)
             return
-        except request.exceptions.RequestException:
+        except requests.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(stats_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
             self.log.warning(msg, exc_info=True)
