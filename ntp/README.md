@@ -8,6 +8,12 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 * Metric delays
 * Gaps in graphs of metrics
 
+Default NTP servers reached:
+
+* `1.datadog.pool.ntp.org`
+* `2.datadog.pool.ntp.org`
+* `3.datadog.pool.ntp.org`
+
 ## Setup
 ### Installation
 
