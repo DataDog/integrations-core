@@ -45,11 +45,15 @@ class ConsulCheckInstanceState(object):
         self.local_config = None
         self.last_config_fetch_time = None
         self.last_known_leader = None
+        self.last_known_nodes = {}
 
 
 class ConsulCheck(AgentCheck):
     CONSUL_CHECK = 'consul.up'
     HEALTH_CHECK = 'consul.check'
+    
+    CONSUL_NODE_CHECK = 'consul.node'
+    SERVICE_HEALTH_CHECK = 'consul.service'
 
     CONSUL_CATALOG_CHECK = 'consul.catalog'
 
@@ -266,10 +270,27 @@ class ConsulCheck(AgentCheck):
                                               self.init_config.get('catalog_checks'))
         perform_network_latency_checks = instance.get('network_latency_checks',
                                                       self.init_config.get('network_latency_checks'))
-
+        node_level_service_checks = instance.get('node_level_service_checks', True)
         try:
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
+
+            # Add all nodes we see to the available list of Nodes:
+            # Health check for the Consul Agent of each node
+            # Keep track of nodes we have seen and report Critical if they are missing now
+            if node_level_service_checks:
+                missing_nodes = instance_state.last_known_nodes
+                for node in health_state:
+                    instance_state.last_known_nodes[node['Node']] = node['Status']
+                    del missing_nodes[node['Node']]
+                    service_check_tags = []
+                    service_check_tags.append("Node:{}".format(node['Node']))
+                    self.service_check(self.CONSUL_NODE_CHECK, self.STATUS_SC.get(node['Status']), tags=service_check_tags)
+
+                for node in missing_nodes:
+                    service_check_tags = []
+                    service_check_tags.append("Node:{}".format(node['Node']))
+                    self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags = service_check_tags)
 
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
@@ -280,7 +301,7 @@ class ConsulCheck(AgentCheck):
                     status = AgentCheck.UNKNOWN
 
                 if sc_id not in sc:
-                    tags = ["check:{0}".format(check["CheckID"])]
+                    tags.append = ["check:{0}".format(check["CheckID"])]
                     if check["ServiceName"]:
                         tags.append("service:{0}".format(check["ServiceName"]))
                     if check["ServiceID"]:
@@ -289,6 +310,7 @@ class ConsulCheck(AgentCheck):
 
                 elif self.STATUS_SEVERITY[status] > self.STATUS_SEVERITY[sc[sc_id]['status']]:
                     sc[sc_id]['status'] = status
+
 
             for s in sc.values():
                 self.service_check(self.HEALTH_CHECK, s['status'], tags=main_tags+s['tags'])
@@ -301,6 +323,8 @@ class ConsulCheck(AgentCheck):
             self.service_check(self.CONSUL_CHECK, AgentCheck.OK,
                                tags=service_check_tags)
 
+        
+
         if perform_catalog_checks:
             # Collect node by service, and service by node counts for a whitelist of services
 
@@ -311,6 +335,7 @@ class ConsulCheck(AgentCheck):
                                         self.init_config.get('max_services', self.MAX_SERVICES))
 
             services = self._cull_services_list(services, service_whitelist, max_services)
+            self.log.debug
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))

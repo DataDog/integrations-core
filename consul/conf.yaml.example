@@ -54,6 +54,9 @@ instances:
       #   - gunicorn
       #   - redis
 
+      # Collect a service check for each node registered to the cluster for the specified url
+      node_level_service_checks: True
+
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
       # on the same agent.

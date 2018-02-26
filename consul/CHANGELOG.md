@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+1.4.0 / Unreleased
+==================
+
+* [FEATURE] Add support for per node service checks. See [][]
+
 1.3.0 / 2018-01-10
 ==================
 
