@@ -33,9 +33,9 @@ instances:
 #   exact_match: True
 ```
 
-Our process check uses the psutil python package to [check processes on your machine](https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/process.py#L117). By default this process check works on exact match and looks at the process names only. By setting `exact_match` to **False** in your yaml file, the agent looks at the command used to launch your process and recognize every process that contains your keywords.  
+Our process check uses the psutil python package to [check processes on your machine](https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/process.py#L117). By default this process check works on exact match and looks at the process names only. By setting `exact_match` to **False** in your yaml file, the agent looks at the command used to launch your process and recognizes every process that contains your keywords.  
 
-You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check will the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).  
+You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check uses the first option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).  
 
 To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent](https://github.com/DataDog/docker-dd-agent)) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check](https://github.com/DataDog/integrations-core/tree/master/docker_daemon) monitors those.  
 
