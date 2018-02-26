@@ -29,9 +29,12 @@ class Apache(AgentCheck):
         'ConnsTotal': 'apache.conns_total',
         'ConnsAsyncWriting': 'apache.conns_async_writing',
         'ConnsAsyncKeepAlive': 'apache.conns_async_keep_alive',
-        'ConnsAsyncClosing' : 'apache.conns_async_closing',
-        'BytesPerSec': 'apache.net.bytes_per_s',
-        'ReqPerSec': 'apache.net.request_per_s'
+        'ConnsAsyncClosing' : 'apache.conns_async_closing'
+    }
+
+    RATES = {
+        'Total kBytes': 'apache.net.bytes_per_s',
+        'Total Accesses': 'apache.net.request_per_s'
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -98,6 +101,12 @@ class Apache(AgentCheck):
                     metric_count += 1
                     metric_name = self.GAUGES[metric]
                     self.gauge(metric_name, value, tags=tags)
+
+                # Send metric as a rate, if applicable
+                if metric in self.RATES:
+                    metric_count += 1
+                    metric_name = self.RATES[metric]
+                    self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
             if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
