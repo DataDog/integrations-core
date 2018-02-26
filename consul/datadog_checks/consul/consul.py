@@ -301,7 +301,7 @@ class ConsulCheck(AgentCheck):
                     status = AgentCheck.UNKNOWN
 
                 if sc_id not in sc:
-                    tags.append = ["check:{0}".format(check["CheckID"])]
+                    tags = ["check:{0}".format(check["CheckID"])]
                     if check["ServiceName"]:
                         tags.append("service:{0}".format(check["ServiceName"]))
                     if check["ServiceID"]:
@@ -323,8 +323,6 @@ class ConsulCheck(AgentCheck):
             self.service_check(self.CONSUL_CHECK, AgentCheck.OK,
                                tags=service_check_tags)
 
-        
-
         if perform_catalog_checks:
             # Collect node by service, and service by node counts for a whitelist of services
 
@@ -335,7 +333,6 @@ class ConsulCheck(AgentCheck):
                                         self.init_config.get('max_services', self.MAX_SERVICES))
 
             services = self._cull_services_list(services, service_whitelist, max_services)
-            self.log.debug
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))

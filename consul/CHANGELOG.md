@@ -3,7 +3,7 @@
 1.4.0 / Unreleased
 ==================
 
-* [FEATURE] Add support for per node service checks. See [][]
+* [FEATURE] Add support for per node service checks. See [#1160][]
 
 1.3.0 / 2018-01-10
 ==================
@@ -38,4 +38,5 @@
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#876]: https://github.com/DataDog/integrations-core/pull/876
 [#968]: https://github.com/DataDog/integrations-core/pull/968
+[#1160]: https://github.com/DataDog/integrations-core/pull/1160
 [@byronwolfman]: https://github.com/byronwolfman
