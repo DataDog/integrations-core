@@ -23,7 +23,7 @@ from .. import AgentCheck
 
 class PrometheusCheck(PrometheusScraper, AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
-        super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances=None)
+        super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 
     def check(self, instance):
         """
