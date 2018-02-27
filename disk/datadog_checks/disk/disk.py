@@ -118,7 +118,7 @@ class Disk(AgentCheck):
             for regex, device_tags in self._device_tag_re:
                 if regex.match(device_name):
                     tags += device_tags
-                    
+
             tags.extend(self._custom_tags)
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():

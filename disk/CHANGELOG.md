@@ -1,5 +1,12 @@
 # CHANGELOG - disk
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds custom tag support
+
 1.1.0 / 2018-02-13
 ==================
 
