@@ -31,3 +31,5 @@ instances:
     # recursive: True
     # countonly: False
     # ignore_missing: False
+    # tags:
+    #   -optional_tag1
