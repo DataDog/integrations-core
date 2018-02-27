@@ -4,7 +4,7 @@
 
 Extract custom metrics from any prometheus endpoints.
 
-/!\ All the metrics retrieved by this integration will be considered as custom metrics /!\
+⚠️ All the metrics retrieved by this integration will be considered as custom metrics
 
 ## Installation
 
@@ -16,7 +16,7 @@ Edit the `prometheus.yaml` file to add your different prometheus instances you w
 
 Each instance is at least composed of:
 
-* a `prometheus_url` that points to the metric route
+* a `prometheus_url` that points to the metric route (⚠️ this has to be unique)
 * a `namespace` that will be prepended to all metrics (to avoid name collision)
 * a list of `metrics` that you want to retrieve as custom metrics, for each metric you can either
 simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`
