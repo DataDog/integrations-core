@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.1",
+  "version": "1.1.0",
   "guid": "54f9329a-8270-4f5a-bd4b-cd169abfc791",
   "public_title": "Datadog-Btrfs Integration",
   "categories":["os & system"],
