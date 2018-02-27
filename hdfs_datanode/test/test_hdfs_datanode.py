@@ -32,7 +32,8 @@ class HDFSDataNode(AgentCheckTest):
     CHECK_NAME = 'hdfs_datanode'
 
     HDFS_DATANODE_CONFIG = {
-        'hdfs_datanode_jmx_uri': 'http://localhost:50075'
+        'hdfs_datanode_jmx_uri': 'http://localhost:50075',
+        'tags': ['optional:tag1']
     }
 
     HDFS_DATANODE_METRICS_VALUES = {
@@ -50,7 +51,8 @@ class HDFSDataNode(AgentCheckTest):
     }
 
     HDFS_DATANODE_METRIC_TAGS = [
-        'datanode_url:' + HDFS_DATANODE_CONFIG['hdfs_datanode_jmx_uri']
+        'datanode_url:' + HDFS_DATANODE_CONFIG['hdfs_datanode_jmx_uri'],
+        'optional:tag1'
     ]
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
