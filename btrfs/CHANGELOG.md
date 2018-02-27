@@ -1,6 +1,6 @@
 # CHANGELOG - btrfs
 
-1.0.1 / Unreleased
+1.1.0 / Unreleased
 ==================
 
 ### Changes
