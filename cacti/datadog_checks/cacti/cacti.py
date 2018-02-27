@@ -63,15 +63,15 @@ class Cacti(AgentCheck):
         patterns = self._get_whitelist_patterns(config.whitelist)
 
         # Fetch the RRD metadata from MySQL
-        rrd_meta = self._fetch_rrd_meta(connection, config.rrd_path, patterns, config.field_names)
+        rrd_meta = self._fetch_rrd_meta(connection, config.rrd_path, patterns, config.field_names, config.tags)
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
         for hostname, device_name, rrd_path in rrd_meta:
-            m_count = self._read_rrd(rrd_path, hostname, device_name)
+            m_count = self._read_rrd(rrd_path, hostname, device_name, config.tags)
             metric_count += m_count
 
-        self.gauge('cacti.metrics.count', metric_count)
+        self.gauge('cacti.metrics.count', metric_count, tags=config.tags)
 
     def _get_whitelist_patterns(self, whitelist):
         patterns = []
@@ -101,6 +101,7 @@ class Cacti(AgentCheck):
         rrd_path = instance.get('rrd_path')
         whitelist = instance.get('rrd_whitelist')
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
+        tags = instance.get('tags', [])
 
         Config = namedtuple('Config', [
             'host',
@@ -109,10 +110,11 @@ class Cacti(AgentCheck):
             'db',
             'rrd_path',
             'whitelist',
-            'field_names']
+            'field_names',
+            'tags']
         )
 
-        return Config(host, user, password, db, rrd_path, whitelist, field_names)
+        return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
 
     def _get_rrd_info(self, rrd_path):
         return rrdtool.info(rrd_path)
@@ -120,7 +122,7 @@ class Cacti(AgentCheck):
     def _get_rrd_fetch(self, rrd_path, c, start):
         return rrdtool.fetch(rrd_path, c, '--start', str(start))
 
-    def _read_rrd(self, rrd_path, hostname, device_name):
+    def _read_rrd(self, rrd_path, hostname, device_name, tags):
         ''' Main metric fetching method '''
         metric_count = 0
 
@@ -165,7 +167,7 @@ class Cacti(AgentCheck):
                     # Save this metric as a gauge
                     val = self._transform_metric(m_name, p[k])
                     self.gauge(m_name, val, hostname=hostname,
-                        device_name=device_name, timestamp=ts)
+                        device_name=device_name, timestamp=ts, tags=tags)
                     metric_count += 1
                     last_ts = (ts + interval)
 
@@ -173,7 +175,7 @@ class Cacti(AgentCheck):
             self.last_ts[last_ts_key] = last_ts
         return metric_count
 
-    def _fetch_rrd_meta(self, connection, rrd_path_root, whitelist, field_names):
+    def _fetch_rrd_meta(self, connection, rrd_path_root, whitelist, field_names, tags):
         ''' Fetch metadata about each RRD in this Cacti DB, returning a list of
             tuples of (hostname, device_name, rrd_path)
         '''
@@ -215,8 +217,8 @@ class Cacti(AgentCheck):
 
         # Collect stats
         num_hosts = len(set([r[0] for r in res]))
-        self.gauge('cacti.rrd.count', len(res))
-        self.gauge('cacti.hosts.count', num_hosts)
+        self.gauge('cacti.rrd.count', len(res), tags=tags)
+        self.gauge('cacti.hosts.count', num_hosts, tags=tags)
 
         return res
 
