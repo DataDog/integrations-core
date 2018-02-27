@@ -119,7 +119,7 @@ class BTRFS(AgentCheck):
     def check(self, instance):
         btrfs_devices = {}
         excluded_devices = instance.get('excluded_devices', [])
-        tags = instance.get('tags', [])
+        custom_tags = instance.get('tags', [])
 
         for p in psutil.disk_partitions():
             if (p.fstype == 'btrfs' and p.device not in btrfs_devices
@@ -132,10 +132,11 @@ class BTRFS(AgentCheck):
         for device, mountpoint in btrfs_devices.iteritems():
             for flags, total_bytes, used_bytes in self.get_usage(mountpoint):
                 replication_type, usage_type = FLAGS_MAPPER[flags]
-                tags.extend([
+                tags = [
                     'usage_type:{0}'.format(usage_type),
                     'replication_type:{0}'.format(replication_type),
-                ])
+                ]
+                tags.extend(custom_tags)
 
                 free = total_bytes - used_bytes
                 usage = float(used_bytes) / float(total_bytes)

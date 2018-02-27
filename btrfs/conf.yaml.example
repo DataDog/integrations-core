@@ -4,5 +4,5 @@ init_config:
 instances:
   - excluded_devices: [] # List of devices to exclude
 # Optional tags to be applied to every emitted metric and service check.
-#    tags:
+#   tags:
 #    - name:optional_tag
