@@ -206,16 +206,17 @@ class DirectoryTestCase(AgentCheckTest):
         self.run_check(config)
 
     def test_tags(self):
-        config = {'instances': [{
-                'directory': self.temp_dir,
-                'tags': ['optional:tag1']
-            }]}
+        config = {
+            'instances': [
+                {'directory': self.temp_dir,
+                'tags': ['optional:tag1']}
+            ]
+        }
 
         self.run_check(config)
 
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', self.temp_dir)
-        filetagname = config.get('filetagname', "filename")
         dir_tags = ['optional:tag1', dirtagname + ":%s" % name]
 
         # Directory metrics
@@ -225,7 +226,7 @@ class DirectoryTestCase(AgentCheckTest):
         # 'recursive' and 'pattern' parameters
         if config.get('pattern') == "*.log":
             # 2 '*.log' files in 'temp_dir'
-           self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=2)
+            self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=2)
         elif config.get('pattern') == "file_*":
             # 10 'file_*' files in 'temp_dir'
             self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=10)
@@ -238,4 +239,3 @@ class DirectoryTestCase(AgentCheckTest):
 
         # Raises when coverage < 100%
         self.coverage_report()
-
