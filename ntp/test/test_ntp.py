@@ -16,7 +16,8 @@ class TestNtp(AgentCheckTest):
 
         config = {'instances': [{
             "host": "foo.com",
-            "port": "bar",
+            "port": "bar",,
+            "tags": ["optional:tag1"]
             "version": 42,
             "timeout": 13.37}],
             'init_config': {}}
@@ -38,6 +39,8 @@ class TestNtp(AgentCheckTest):
         self.assertEqual(ntp_util.args["port"], "bar")
         self.assertEqual(ntp_util.args["version"], 42)
         self.assertEqual(ntp_util.args["timeout"], 13.37)
+
+        self.assertMetric('ntp.offset', tags=['optional:tag1'])
 
         # Clear the singleton to prepare for next config
         NTPUtil._drop()

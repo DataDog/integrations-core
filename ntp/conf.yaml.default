@@ -13,3 +13,5 @@ instances:
     # port: ntp
     # version: 3
     # timeout: 5
+    # tags:
+    #   - optional:tag1

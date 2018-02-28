@@ -19,6 +19,7 @@ class NtpCheck(AgentCheck):
     def check(self, instance):
         service_check_msg = None
         offset_threshold = instance.get('offset_threshold', DEFAULT_OFFSET_THRESHOLD)
+        custom_tags = instance.get('tags', [])
         try:
             offset_threshold = int(offset_threshold)
         except (TypeError, ValueError):
@@ -41,7 +42,7 @@ class NtpCheck(AgentCheck):
             # Use the ntp server's timestamp for the time of the result in
             # case the agent host's clock is messed up.
             ntp_ts = ntp_stats.recv_time
-            self.gauge('ntp.offset', ntp_offset, timestamp=ntp_ts)
+            self.gauge('ntp.offset', ntp_offset, timestamp=ntp_ts, tags=custom_tags)
 
             if abs(ntp_offset) > offset_threshold:
                 status = AgentCheck.CRITICAL
