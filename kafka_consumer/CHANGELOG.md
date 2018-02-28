@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support.
+
 1.2.2 / 2018-02-13
 ==================
 
