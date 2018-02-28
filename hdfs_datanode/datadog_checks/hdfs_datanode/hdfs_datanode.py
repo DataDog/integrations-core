@@ -75,8 +75,8 @@ class HDFSDataNode(AgentCheck):
         Get HDFS data node metrics from JMX
         '''
         response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
-            JMX_PATH,
-            query_params={'qry':HDFS_DATANODE_BEAN_NAME}, tags)
+            JMX_PATH, tags,
+            query_params={'qry':HDFS_DATANODE_BEAN_NAME})
 
         beans = response.get('beans', [])
 
@@ -106,7 +106,7 @@ class HDFSDataNode(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, query_params, tags):
+    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, tags, query_params):
         '''
         Query the given URL and return the JSON response
         '''
