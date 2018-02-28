@@ -34,6 +34,7 @@ zk_instance = {
 kafka_instance = {
     'kafka_connect_str': '172.17.0.1:9092',
     'kafka_consumer_offsets': True,
+    'tags': ['optional:tag1'],
     'consumer_groups': {
         'my_consumer': {
             'marvel': [0]
@@ -322,7 +323,7 @@ class TestKafka(AgentCheckTest):
                 for topic, partitions in consumer_group.iteritems():
                     for partition in partitions:
                         tags = ["topic:{}".format(topic),
-                                "partition:{}".format(partition)]
+                                "partition:{}".format(partition)] + ['optional:tags']
                         for mname in BROKER_METRICS:
                             self.assertMetric(mname, tags=tags, at_least=1)
                         for mname in CONSUMER_METRICS:
