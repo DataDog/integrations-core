@@ -32,4 +32,4 @@ instances:
     # countonly: False
     # ignore_missing: False
     # tags:
-    #   -optional_tag1
+    #   -optional:tag1

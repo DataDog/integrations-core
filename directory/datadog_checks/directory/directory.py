@@ -63,8 +63,7 @@ class DirectoryCheck(AgentCheck):
         self._get_stats(abs_directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly, custom_tags)
 
     def _get_stats(self, directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly, tags):
-        dirtags = [dirtagname + ":%s" % name]
-        dirtags.extend(tags)
+        dirtags = [dirtagname + ":%s" % name] + tags
         directory_bytes = 0
         directory_files = 0
         for root, dirs, files in walk(directory):
