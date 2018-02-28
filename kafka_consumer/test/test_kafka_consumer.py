@@ -323,7 +323,7 @@ class TestKafka(AgentCheckTest):
                 for topic, partitions in consumer_group.iteritems():
                     for partition in partitions:
                         tags = ["topic:{}".format(topic),
-                                "partition:{}".format(partition)] + ['optional:tags']
+                                "partition:{}".format(partition)] + ['optional:tag1']
                         for mname in BROKER_METRICS:
                             self.assertMetric(mname, tags=tags, at_least=1)
                         for mname in CONSUMER_METRICS:
