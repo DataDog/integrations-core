@@ -142,10 +142,10 @@ class KafkaCheck(AgentCheck):
         # Report the consumer group offsets and consumer lag
         if zk_consumer_offsets:
             self._report_consumer_metrics(highwater_offsets, zk_consumer_offsets,
-                                          topic_partitions_without_a_leader, tags=custom_tags+['source:zk'])
+                                          topic_partitions_without_a_leader, tags=custom_tags + ['source:zk'])
         if kafka_consumer_offsets:
             self._report_consumer_metrics(highwater_offsets, kafka_consumer_offsets,
-                                          topic_partitions_without_a_leader, tags=custom_tags+['source:kafka'])
+                                          topic_partitions_without_a_leader, tags=custom_tags + ['source:kafka'])
 
 
     def stop(self):
