@@ -53,7 +53,8 @@ class CheckSSH(AgentCheck):
 
     def check(self, instance):
         conf = self._load_conf(instance)
-        tags = ["instance:{0}-{1}".format(conf.host, conf.port)]
+        tags = instance.get('tags', [])
+        tags.append("instance:{0}-{1}".format(conf.host, conf.port))
 
         private_key = None
 
