@@ -12,7 +12,7 @@
     "windows"
   ],
   "package_deps": false,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9",
   "public_title": "Datadog-Postgres SQL Integration",
   "categories":["data store"],
