@@ -1,5 +1,5 @@
 init_config:
-  # Any global configurable parameters should be added here
+  # Leave empty
 
 instances:
   #   A typical instance configuration might include a hostname and port

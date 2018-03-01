@@ -1,5 +1,5 @@
 init_config:
-  # Any global configurable parameters should be added here
+  # Leave empty
 
 instances:
   # The prometheus endpoint to query
