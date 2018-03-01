@@ -6,6 +6,10 @@
 from tests.checks.common import AgentCheckTest, load_check
 from utils.ntp import NTPUtil
 
+
+metrics = [
+    'ntp.offset'
+]
 class TestNtp(AgentCheckTest):
     """Basic Test for ntp integration."""
     CHECK_NAME = 'ntp'
@@ -17,6 +21,7 @@ class TestNtp(AgentCheckTest):
         config = {'instances': [{
             "host": "foo.com",
             "port": "bar",
+            "tags": ["optional:tag1"],
             "version": 42,
             "timeout": 13.37}],
             'init_config': {}}
@@ -32,12 +37,15 @@ class TestNtp(AgentCheckTest):
 
         # default min collection interval for that check was 20sec
         check = load_check('ntp', config, agentConfig)
-        check.run()
+        #check.run()
+        self.run_check(self.config)
 
         self.assertEqual(ntp_util.args["host"], "foo.com")
         self.assertEqual(ntp_util.args["port"], "bar")
         self.assertEqual(ntp_util.args["version"], 42)
         self.assertEqual(ntp_util.args["timeout"], 13.37)
+        for metric in metrics:
+            self.assertMetric(metric, tags=['optional:tag1'])
 
         # Clear the singleton to prepare for next config
         NTPUtil._drop()
