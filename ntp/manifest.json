@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.2.0",
   "guid": "9d105f8c-7fd3-48d7-a5d1-1cc386ec0367",
   "public_title": "Datadog-NTP Integration",
   "categories":["web", "network"],
