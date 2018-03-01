@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+2.1.0 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Adding support for postgres 10
+
 2.0.0 / 2018-02-13
 ==================
 ### Changes
