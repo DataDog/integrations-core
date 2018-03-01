@@ -10,7 +10,7 @@ This integration lets you monitor your Squid metrics from the Cache Manager dire
 
 The Agent's Squid integration is packaged with the Agent, so simply [install the agent](https://app.datadoghq.com/account/settings#agent) on your Squid server.  
 
-If you need the newest version of the Squid check, install the `dd-check-squid` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+If you need the newest version of the Squid check, install the `dd-check-squid` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ## Configuration
 
@@ -32,7 +32,7 @@ Restart the Agent to start sending metrics and service checks to Datadog.
 
 ## Validation
 
-[Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `squid` under the Checks section:
+[Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `squid` under the Checks section:
 
 ```
     Checks
