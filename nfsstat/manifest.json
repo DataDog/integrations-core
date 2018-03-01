@@ -8,7 +8,7 @@
   "guid": "9f2fe3a7-ae19-4da9-a253-ae817a5557ab",
   "support": "contrib",
   "supported_os": ["linux"],
-  "version": "0.1.1",
+  "version": "0.2.0",
   "public_title": "Datadog-Nfsstat Integration",
   "categories":["os & system"],
   "type":"check",
