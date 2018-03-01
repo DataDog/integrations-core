@@ -30,6 +30,7 @@ class SystemSwapTestCase(AgentCheckTest):
 
     @mock.patch('psutil.swap_memory', side_effect=MOCK_PSUTIL_SWAP_STATS)
     def test_system_swap(self, mock_swap_stats):
-        self.run_check_twice({"instances": [{}]}) # Run check twice, sleeping for 1 sec in between
-        self.assertMetric('system.swap.swapped_in', value=SWAP_IN_INCR, count=1)
-        self.assertMetric('system.swap.swapped_out', value=SWAP_OUT_INCR, count=1)
+        self.run_check_twice({"instances": [{"tags":["optional:tags"]}]}) # Run check twice, sleeping for 1 sec in between\
+        tags = ["optional:tags"]
+        self.assertMetric('system.swap.swapped_in', value=SWAP_IN_INCR, count=1, tags=tags)
+        self.assertMetric('system.swap.swapped_out', value=SWAP_OUT_INCR, count=1, tags=tags)
