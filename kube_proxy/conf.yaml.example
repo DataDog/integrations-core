@@ -7,11 +7,3 @@ instances:
   #   configure the behavior of our check.
   #
   # - prometheus_url: http://127.0.0.1:10249/metrics
-  #   namespace: "kubeproxy"
-  #   metrics:
-  #     - kubeproxy_sync_proxy_rules_latency_microseconds: sync_rules.latency
-  #     - process_cpu_seconds_total: cpu.time
-  #     - process_resident_memory_bytes: mem.resident
-  #     - process_virtual_memory_bytes: mem.virtual
-  #     - rest_client_requests_total: client.requests
-  #   send_histograms_buckets: True

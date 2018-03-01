@@ -45,6 +45,7 @@ class AggregatorStub(object):
                 continue
 
             if tags and sorted(tags) != sorted(metric.tags):
+                print(metric.tags)
                 continue
 
             if hostname and hostname != metric.hostname:

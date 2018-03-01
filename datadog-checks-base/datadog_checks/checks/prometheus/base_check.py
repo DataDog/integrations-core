@@ -50,11 +50,15 @@ class GenericPrometheusCheck(AgentCheck):
         - bar
         - foo
     """
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, agentConfig, instances=None, default_instances={}, default_namespace=""):
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
         self.scrapers_map = {}
+        self.default_instances = default_instances
+        self.default_namespace = default_namespace
         for instance in instances:
             self.get_scraper(instance)
+        if len(instances) != len(self.scrapers_map):
+            raise CheckException("There's a missconfiguration on one of the instances (duplicate namespace?)")
 
     def check(self, instance):
         endpoint = instance["prometheus_url"]
@@ -69,39 +73,57 @@ class GenericPrometheusCheck(AgentCheck):
             ignore_unmapped=True
         )
 
-    def get_scraper(self, instance):
-        endpoint = instance.get("prometheus_url", "")
-        # If we already created the corresponding Scraper, return it
-        if endpoint in self.scrapers_map:
-            return self.scrapers_map[endpoint]
+    def get_default_instance(self, namespace):
+        if namespace in self.default_instances:
+            return self.default_instances[namespace]
+        return {}
 
-        # Otherwise we create the PrometheusCheck
+    def get_scraper(self, instance):
+        namespace = instance.get("namespace", "")
+        # Check if we have a namespace
+        if namespace == "":
+            if self.default_namespace == "":
+                raise CheckException("You have to define a unique namespace for each prometheus check")
+            namespace = self.default_namespace
+
+        # If we already created the corresponding scraper, return it
+        if namespace in self.scrapers_map:
+            return self.scrapers_map[namespace]
+
+        # Otherwise we create the scraper
+        # Retrieve potential default instance settings for the namespace
+        default_instance = self.get_default_instance(namespace)
+        endpoint = instance.get("prometheus_url", default_instance.get("prometheus_url", ""))
         if endpoint == "":
             raise CheckException("Unable to find prometheus URL in config file.")
-        namespace = instance.get("namespace", "")
-        if namespace == "":
-            raise CheckException("You have to define a namespace for each prometheus check")
+
         # Instanciate check
         scraper = Scraper(self)
         scraper.NAMESPACE = namespace
         # Metrics are preprocessed if no mapping
         metrics_mapper = {}
-        for metric in instance.get("metrics", []):
+        # We merge list and dictionnaries from optional defaults & instance settings
+        metrics = default_instance.get("metrics", []) + instance.get("metrics", [])
+        for metric in metrics:
             if isinstance(metric, basestring):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)
         scraper.metrics_mapper = metrics_mapper
-        scraper.labels_mapper = instance.get("labels_mapper", {})
-        scraper.label_joins = instance.get("label_joins", {})
-        scraper.exclude_labels = instance.get("exclude_labels", [])
-        scraper.label_to_hostname = instance.get("label_to_hostname", None)
-        scraper.health_service_check = instance.get("health_service_check", True)
-        scraper.ssl_cert = instance.get("ssl_cert", None)
-        scraper.ssl_private_key = instance.get("ssl_private_key", None)
-        scraper.ssl_ca_cert = instance.get("ssl_ca_cert", None)
-        scraper.type_overrides = instance.get("type_overrides", {})
+        scraper.labels_mapper = default_instance.get("labels_mapper", {})
+        scraper.labels_mapper.update(instance.get("labels_mapper", {}))
+        scraper.label_joins = default_instance.get("label_joins", {})
+        scraper.label_joins.update(instance.get("label_joins", {}))
+        scraper.type_overrides = default_instance.get("type_overrides", {})
+        scraper.type_overrides.update(instance.get("type_overrides", {}))
+        scraper.exclude_labels = default_instance.get("exclude_labels", []) + instance.get("exclude_labels", [])
+        # For simple values instance settings overrides optional defaults
+        scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("prometheus_url", ""))
+        scraper.health_service_check = instance.get("health_service_check", default_instance.get("health_service_check", True))
+        scraper.ssl_cert = instance.get("ssl_cert", default_instance.get("ssl_cert", None))
+        scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
+        scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))
 
-        self.scrapers_map[instance["prometheus_url"]] = scraper
+        self.scrapers_map[namespace] = scraper
 
         return scraper

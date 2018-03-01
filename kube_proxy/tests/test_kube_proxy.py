@@ -13,15 +13,6 @@ from datadog_checks.kube_proxy import KubeProxyCheck
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
-    'namespace': 'kubeproxy',
-    'metrics': [
-        {'kubeproxy_sync_proxy_rules_latency_microseconds': 'sync_rules.latency'},
-        {'process_cpu_seconds_total': 'cpu.time'},
-        {'process_resident_memory_bytes': 'mem.resident'},
-        {'process_virtual_memory_bytes': 'mem.virtual'},
-        {'rest_client_requests_total': 'client.http.requests'}
-    ],
-    'send_histograms_buckets': True
 }
 
 # Constants
@@ -81,7 +72,7 @@ def test_check_iptables(aggregator, mock_iptables):
     Testing Kube_proxy in iptables mode.
     """
 
-    c = KubeProxyCheck('kube_proxy', None, {}, [instance])
+    c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
     for metric in METRICS_COMMON:
         aggregator.assert_metric(metric, tags=[])
@@ -95,7 +86,7 @@ def test_check_userspace(aggregator, mock_userspace):
     """
     Testing Kube_proxy in userspace mode.
     """
-    c = KubeProxyCheck('kube_proxy', None, {}, [instance])
+    c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
     for metric in METRICS_COMMON:
         aggregator.assert_metric(metric, tags=[])
