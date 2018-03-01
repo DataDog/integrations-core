@@ -35,7 +35,6 @@ instances:
     # NOTE: The Agent must be able to access varnishadm as with root
     # privileges. You can configure your sudoers file for this:
     #
-    # NOTE: These service checks only support up to version 4.x of Varnish
     # example /etc/sudoers entry:
     #   dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
     #
@@ -44,6 +43,11 @@ instances:
     # The (optional) path to the varnish secretfile will be used in the
     # varnishadm command, if enabled.
     # secretfile: /etc/varnish/secret
+
+    # The (optional) parameters for specifying the host and port to connect to varnishadm
+    # Defaults to "localhost" and "6082" 
+    # daemon_host: localhost
+    # daemon_port: 6082
     
 ## Log section (Available for Agent >=6.0)
 #logs:
