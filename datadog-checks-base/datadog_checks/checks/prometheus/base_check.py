@@ -73,11 +73,6 @@ class GenericPrometheusCheck(AgentCheck):
             ignore_unmapped=True
         )
 
-    def get_default_instance(self, namespace):
-        if namespace in self.default_instances:
-            return self.default_instances[namespace]
-        return {}
-
     def get_scraper(self, instance):
         namespace = instance.get("namespace", "")
         # Check if we have a namespace
@@ -92,7 +87,7 @@ class GenericPrometheusCheck(AgentCheck):
 
         # Otherwise we create the scraper
         # Retrieve potential default instance settings for the namespace
-        default_instance = self.get_default_instance(namespace)
+        default_instance = self.default_instances.get(namespace, {})
         endpoint = instance.get("prometheus_url", default_instance.get("prometheus_url", ""))
         if endpoint == "":
             raise CheckException("Unable to find prometheus URL in config file.")
