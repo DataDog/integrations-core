@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.3",
+  "version": "1.2.0",
   "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
   "public_title": "Datadog-SSH Check Integration",
   "categories":["network"],
