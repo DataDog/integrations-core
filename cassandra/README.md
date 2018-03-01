@@ -52,7 +52,9 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cass
 The Cassandra check does not include any event at this time.
 
 ### Service Checks
-The Cassandra check does not include any service check at this time.
+**cassandra.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance. Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

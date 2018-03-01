@@ -128,7 +128,21 @@ The events below will be available:
 * Update
 
 ### Service Checks
-The Docker Daemon check does not include any service check at this time.
+**docker.service_up**:
+
+Returns `CRITICAL` if the Agent is unable to collect the list of containers from the Docker daemon.
+Returns `OK` otherwise.
+
+**docker.container_health**:
+
+Returns `CRITICAL` if a container is unhealthy.
+Returns `UNKNOWN` if the health is unknown.
+Returns `OK` otherwise.
+
+**docker.exit**:
+
+Returns `CRITICAL` if a container exited with a non-zero exit code.
+Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

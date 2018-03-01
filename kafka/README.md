@@ -34,7 +34,7 @@ After you've configured `kafka.yaml`, [restart the Agent](https://docs.datadoghq
 
 #### Log Collection
 
-**Available for Agent >6.0** 
+**Available for Agent >6.0**
 
 Kafka uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
 
@@ -61,7 +61,7 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
   ```
   logs_enabled: true
   ```
-   
+
 * Add this configuration setup to your `kafka.yaml` file to start collecting your Kafka Logs:
 
   ```
@@ -76,13 +76,13 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
       #    name: log_start_with_date
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
-  
-  Change the `path` and `service` parameter values and configure them for your environment.  
+
+  Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample kafka.yaml](https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent). 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**  
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
@@ -113,7 +113,10 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafk
 The Kafka check does not include any event at this time.
 
 ### Service Checks
-The Kafka check does not include any service check at this time.
+**kafka.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance.
+Returns `OK` otherwise.
 
 
 

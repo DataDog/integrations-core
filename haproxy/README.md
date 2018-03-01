@@ -111,7 +111,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/hapr
 The Haproxy check does not include any event at this time.
 
 ### Service Checks
-The Haproxy check does not include any service check at this time.
+**haproxy.backend_up**
+
+Converts the HAProxy status page into service checks.
+Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
+Returns `OK` for `maint`, `ok` and any other state.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

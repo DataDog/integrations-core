@@ -80,6 +80,7 @@ The Agent submits one of the following service checks, depending on how you're r
 
 - **spark.standalone_master.can_connect**
 - **spark.mesos_master.can_connect**
+- **spark.application_master.can_connect**
 - **spark.resource_manager.can_connect**
 
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.

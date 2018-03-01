@@ -14,7 +14,7 @@ If you need the newest version of the Zookeeper check, install the `dd-check-zk`
 
 ### Configuration
 
-Create a file `zk.yaml` in the Agent's `conf.d` directory. 
+Create a file `zk.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
@@ -35,7 +35,7 @@ instances:
 
 #### Log Collection
 
-**Available for Agent >6.0** 
+**Available for Agent >6.0**
 
 Zookeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
 
@@ -62,7 +62,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
   ```
   logs_enabled: true
   ```
-   
+
 * Add this configuration setup to your `zk.yaml` file to start collecting your Zookeeper Logs:
 
   ```
@@ -142,11 +142,11 @@ The Zookeeper check does not include any event at this time.
 
 **zookeeper.ruok**:
 
-Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, otherwise OK.
+Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
 
 **zookeeper.mode**:
 
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise CRITICAL.
+The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

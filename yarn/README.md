@@ -64,7 +64,7 @@ The Yarn check does not include any event at this time.
 ### Service Checks
 **yarn.can_connect**:
 
-Returns CRITICAL if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
