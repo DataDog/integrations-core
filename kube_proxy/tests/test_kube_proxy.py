@@ -18,16 +18,6 @@ instance = {
 # Constants
 CHECK_NAME = 'kube_proxy'
 NAMESPACE = 'kubeproxy'
-METRICS_COMMON = [
-    NAMESPACE + '.cpu.time',
-    NAMESPACE + '.mem.resident',
-    NAMESPACE + '.mem.virtual',
-    NAMESPACE + '.client.http.requests'
-]
-METRICS_IPTABLES = [
-    NAMESPACE + '.sync_rules.latency.count',
-    NAMESPACE + '.sync_rules.latency.sum'
-]
 
 @pytest.fixture
 def aggregator():
@@ -74,10 +64,14 @@ def test_check_iptables(aggregator, mock_iptables):
 
     c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
-    for metric in METRICS_COMMON:
-        aggregator.assert_metric(metric, tags=[])
-    for metric in METRICS_IPTABLES:
-        aggregator.assert_metric(metric, tags=[])
+    aggregator.assert_metric(NAMESPACE + '.cpu.time')
+    aggregator.assert_metric(NAMESPACE + '.mem.resident')
+    aggregator.assert_metric(NAMESPACE + '.mem.virtual')
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'code:200', 'host:127.0.0.1:8080'])
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:POST', 'code:201', 'host:127.0.0.1:8080'])
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'code:404', 'host:127.0.0.1:8080'])
+    aggregator.assert_metric(NAMESPACE + '.sync_rules.latency.count')
+    aggregator.assert_metric(NAMESPACE + '.sync_rules.latency.sum')
 
     assert aggregator.metrics_asserted_pct == 100.0
 
@@ -88,7 +82,12 @@ def test_check_userspace(aggregator, mock_userspace):
     """
     c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
     c.check(instance)
-    for metric in METRICS_COMMON:
-        aggregator.assert_metric(metric, tags=[])
+    aggregator.assert_metric(NAMESPACE + '.cpu.time')
+    aggregator.assert_metric(NAMESPACE + '.mem.resident')
+    aggregator.assert_metric(NAMESPACE + '.mem.virtual')
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'host:127.0.0.1:8080', 'code:200'])
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:POST', 'host:127.0.0.1:8080', 'code:201'])
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:GET', 'host:127.0.0.1:8080', 'code:200'])
+    aggregator.assert_metric(NAMESPACE + '.client.http.requests', tags=['method:POST', 'host:127.0.0.1:8080', 'code:201'])
 
     assert aggregator.metrics_asserted_pct == 100.0
