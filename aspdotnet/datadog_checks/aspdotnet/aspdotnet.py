@@ -27,7 +27,7 @@ DEFAULT_COUNTERS = [
     ["ASP.NET Applications", None, "Requests Executing",            "aspdotnet.applications.requests.executing",      "gauge"],
     ["ASP.NET Applications", None, "Requests/Sec",                  "aspdotnet.applications.requests.persec",         "gauge"],
     ["ASP.NET Applications", None, "Forms Authentication Failure", "aspdotnet.applications.forms_authentication.failure",       "gauge"],
-    ["ASP.NET Applications", None, "Forms Authentication Successes", "aspdotnet.applications.forms_authentication.successes",       "gauge"],
+    ["ASP.NET Applications", None, "Forms Authentication Success", "aspdotnet.applications.forms_authentication.successes",       "gauge"],
 ]
 
 class AspdotnetCheck(PDHBaseCheck):
