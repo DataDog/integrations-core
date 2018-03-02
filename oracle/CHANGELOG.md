@@ -1,5 +1,12 @@
 # CHANGELOG - oracle
 
+1.0.1 / Unreleased 
+==================
+
+### Changes
+
+* [BUGFIX] fix metric name to: `gc_cr_block_received`. See #1179
+
 1.0.0 / 2017-10-10
 ==================
 
