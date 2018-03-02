@@ -113,7 +113,7 @@ class IISTestCase(AgentCheckTest):
     WIN_SERVICES_CONFIG = {
         'host': ".",
         'tags': ["mytag1", "mytag2"],
-        'sites': ["Default Web Site", "Working site", "Failing site"]
+        'sites': ["Default Web Site", "Test-Website-1", "Failing site"]
     }
 
     IIS_METRICS = [
@@ -163,58 +163,18 @@ class IISTestCase(AgentCheckTest):
         ok_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", config['instances'][0]['sites'][1])
         fail_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", config['instances'][0]['sites'][2])
 
-        for site_name in [default_site_name, ok_site_name]:
+        for site_name in [default_site_name, ok_site_name, 'Total']:
             for mname in self.IIS_METRICS:
                 self.assertMetric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
             self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                    tags=["site:{0}".format(site_name)], count=1)
+                                    tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
         self.assertServiceCheck('iis.site_up', status=AgentCheck.CRITICAL,
-                                tags=["site:{0}".format(fail_site_name)], count=1)
+                                tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name)], count=1)
 
         # Check completed with no warnings
         self.assertFalse(logger.warning.called)
-
-        self.coverage_report()
-
-    def test_check_2008(self):
-        """
-        Returns the right metrics and service checks for 2008 IIS
-        """
-        # Run check
-        config = {
-            'instances': [self.WIN_SERVICES_CONFIG]
-        }
-        config['instances'][0]['is_2008'] = True
-
-        self.run_check_twice(config)
-
-        # Test metrics
-        query = ("Select ServiceUptime,TotalBytesSent,TotalBytesReceived,TotalBytesTransfered,"
-                 "CurrentConnections,TotalFilesSent,TotalFilesReceived,TotalConnectionAttemptsAllInstances,"
-                 "TotalGetRequests,TotalPostRequests,TotalHeadRequests,TotalPutRequests,TotalDeleteRequests,"
-                 "TotalOptionsRequests,TotalTraceRequests,TotalNotFoundErrors,TotalLockedErrors,TotalAnonymousUsers,"
-                 "TotalNonAnonymousUsers,TotalCGIRequests,TotalISAPIExtensionRequests"
-                 " from Win32_PerfFormattedData_W3SVC_WebService WHERE "
-                 "( Name = 'Failing site' ) OR ( Name = 'Working site' ) OR ( Name = 'Default Web Site' )")
-
-        self.assertWMIQuery(query)
-
-        # Normalize site-names
-        default_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", config['instances'][0]['sites'][0])
-        ok_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", config['instances'][0]['sites'][1])
-        fail_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", config['instances'][0]['sites'][2])
-
-        for site_name in [default_site_name, ok_site_name]:
-            for mname in self.IIS_METRICS:
-                self.assertMetric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
-
-            self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                    tags=["site:{0}".format(site_name)], count=1)
-
-        self.assertServiceCheck('iis.site_up', status=AgentCheck.CRITICAL,
-                                tags=["site:{0}".format(fail_site_name)], count=1)
 
         self.coverage_report()
 
@@ -228,9 +188,12 @@ class IISTestCase(AgentCheckTest):
         }
         self.run_check_twice(config)
 
+        site_tags = ['Default_Web_Site', 'Test_Website_1', 'Total']
         for mname in self.IIS_METRICS:
-            self.assertMetric(mname, tags=["mytag1", "mytag2"], count=1)
+            for site_tag in site_tags:
+                self.assertMetric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_tag)], count=1)
 
-        self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                tags=["site:{0}".format('Total')], count=1)
+        for site_tag in site_tags:
+            self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
+                                tags=["mytag1", "mytag2", "site:{0}".format(site_tag)], count=1)
         self.coverage_report()

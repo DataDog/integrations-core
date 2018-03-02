@@ -80,7 +80,7 @@ class IIS(PDHBaseCheck):
                 for sitename, val in vals.iteritems():
                     tags = []
                     if key in self._tags:
-                        tags = self._tags[key]
+                        tags = list(self._tags[key])
 
                     try:
                         if not counter.is_single_instance():
@@ -106,7 +106,7 @@ class IIS(PDHBaseCheck):
                     if dd_name == "iis.uptime":
                         uptime = int(val)
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
-                        self.service_check(self.SERVICE_CHECK, status, tags=['site:{0}'.format(self.normalize(sitename))])
+                        self.service_check(self.SERVICE_CHECK, status, tags)
                         if sitename in expected_sites:
                             self.log.debug("Removing %s from expected sites" % sitename)
                             expected_sites.remove(sitename)
@@ -119,5 +119,8 @@ class IIS(PDHBaseCheck):
                 pass
 
         for site in expected_sites:
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL,
-                            tags=['site:{0}'.format(self.normalize(site))])
+            tags = []
+            if key in self._tags:
+                tags = list(self._tags[key])
+            tags.append("site:{0}".format(self.normalize(site)))
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
