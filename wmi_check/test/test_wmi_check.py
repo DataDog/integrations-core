@@ -115,7 +115,7 @@ class WMITestCase(AgentCheckTest, TestCommonWMI):
         'metrics': [["AvgDiskBytesPerWrite", "winsys.disk.avgdiskbytesperwrite", "gauge"],
                     ["FreeMegabytes", "winsys.disk.freemegabytes", "gauge"]],
         'tag_by': "Name",
-        'constant_tags': ["foobar"],
+        'tags': ["foobar"],
     }
 
     WMI_NON_DIGIT_PROP = {
