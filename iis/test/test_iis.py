@@ -12,7 +12,6 @@ from mock import Mock
 # project
 from tests.checks.common import AgentCheckTest
 from checks import AgentCheck
-from tests.core.test_wmi import TestCommonWMI
 
 
 MINIMAL_INSTANCE = {
@@ -102,8 +101,8 @@ class IISTest(AgentCheckTest):
         self.coverage_report()
 
 @attr('windows')
-@attr(requires='windows')
-class IISTestCase(AgentCheckTest, TestCommonWMI):
+@attr(requires='iis')
+class IISTestCase(AgentCheckTest):
     CHECK_NAME = 'iis'
 
     WIN_SERVICES_MINIMAL_CONFIG = {

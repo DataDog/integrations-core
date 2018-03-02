@@ -81,9 +81,9 @@ install:
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - bundle exec rake ci:run[default]
-  - bundle exec rake ci:run[sqlserver]
+  #- bundle exec rake ci:run[default]
+  #- bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
-  - bundle exec rake ci:run[windows_service]
-  - bundle exec rake ci:run[wmi_check]
-  - bundle exec rake ci:run[pdh_check]
+  #- bundle exec rake ci:run[windows_service]
+  #- bundle exec rake ci:run[wmi_check]
+  #- bundle exec rake ci:run[pdh_check]
