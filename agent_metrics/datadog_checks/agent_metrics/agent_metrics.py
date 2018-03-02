@@ -68,7 +68,7 @@ class AgentMetrics(AgentCheck):
         stats = AgentCheck._collect_internal_stats(methods)
         return stats, names_to_metric_types
 
-    def _send_single_metric(self, metric_name, metric_value, metric_type, tags):
+    def _send_single_metric(self, metric_name, metric_value, metric_type, tags=[]):
         if metric_type == GAUGE:
             self.gauge(metric_name, metric_value, tags=tags)
         elif metric_type == RATE:
@@ -76,7 +76,7 @@ class AgentMetrics(AgentCheck):
         else:
             raise UnsupportedMetricType(metric_name, metric_type)
 
-    def _register_psutil_metrics(self, stats, names_to_metric_types, tags):
+    def _register_psutil_metrics(self, stats, names_to_metric_types, tags=[]):
         """
         Saves sample metrics from psutil
 

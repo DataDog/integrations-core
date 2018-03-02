@@ -22,7 +22,9 @@ MOCK_CONFIG = {
                 'type': 'rate',
                 'active': 'yes'
             },
-        ]}],
+        ], 'tags': ['optional:tags'],
+        }
+    ],
     'init_config': {}
 }
 
@@ -87,22 +89,22 @@ class AgentMetricsTestCase(AgentCheckTest):
         check.gauge = mock.MagicMock()
         check.rate = mock.MagicMock()
 
-        check._send_single_metric('datadog.agent.collector.memory_info.vms', 16814081, 'gauge')
-        check.gauge.assert_called_with('datadog.agent.collector.memory_info.vms', 16814081)
+        check._send_single_metric('datadog.agent.collector.memory_info.vms', 16814081, 'gauge', tags=['optional:tags'])
+        check.gauge.assert_called_with('datadog.agent.collector.memory_info.vms', 16814081, tags=['optional:tags'])
 
-        check._send_single_metric('datadog.agent.collector.memory_info.vms', 16814081, 'rate')
-        check.rate.assert_called_with('datadog.agent.collector.memory_info.vms', 16814081)
+        check._send_single_metric('datadog.agent.collector.memory_info.vms', 16814081, 'rate', tags=['optional:tags'])
+        check.rate.assert_called_with('datadog.agent.collector.memory_info.vms', 16814081, tags=['optional:tags'])
 
         self.assertRaises(Exception, check._send_single_metric,
                           *('datadog.agent.collector.memory_info.vms', 16814081, 'bogus'))
 
     def test_register_psutil_metrics(self):
         check = load_check(self.CHECK_NAME, MOCK_CONFIG, AGENT_CONFIG_DEV_MODE)
-        check._register_psutil_metrics(MOCK_STATS, MOCK_NAMES_TO_METRIC_TYPES)
+        check._register_psutil_metrics(MOCK_STATS, MOCK_NAMES_TO_METRIC_TYPES, tags=['optional:tags'])
         self.metrics = check.get_metrics()
 
-        self.assertMetric('datadog.agent.collector.memory_info.rss', value=16814080)
-        self.assertMetric('datadog.agent.collector.memory_info.vms', value=74522624)
+        self.assertMetric('datadog.agent.collector.memory_info.rss', value=16814080, tags=['optional:tags'])
+        self.assertMetric('datadog.agent.collector.memory_info.vms', value=74522624, tags=['optional:tags'])
 
     def test_bad_process_metric_check(self):
         ''' Tests that a bad configuration option for `process_metrics` gets ignored '''
