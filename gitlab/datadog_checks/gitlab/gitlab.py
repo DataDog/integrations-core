@@ -43,18 +43,19 @@ class GitlabCheck(PrometheusCheck):
 
         # By default we send the buckets
         send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
+        custom_tags = instance.get('tags', [])
 
         try:
             self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
-            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK, tags=custom_tags)
         except requests.exceptions.ConnectionError as e:
             # Unable to connect to the metrics endpoint
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
-                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message))
+                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message), tags=custom_tags)
 
         #### Service check to check Gitlab's health endpoints
         for check_type in self.ALLOWED_SERVICE_CHECKS:
-            self._check_health_endpoint(instance, check_type)
+            self._check_health_endpoint(instance, check_type, custom_tags)
 
 
     def _verify_ssl(self, instance):
@@ -83,17 +84,19 @@ class GitlabCheck(PrometheusCheck):
     # - /-/liveness
     #
     # https://docs.gitlab.com/ce/user/admin_area/monitoring/health_check.html
-    def _check_health_endpoint(self, instance, check_type):
+    def _check_health_endpoint(self, instance, check_type, tags):
         if check_type not in self.ALLOWED_SERVICE_CHECKS:
             raise CheckException("Health endpoint %s is not a valid endpoint" % check_type)
 
         url = instance.get('gitlab_url')
+
         if url is None:
             # Simply ignore this service check if not configured
             self.log.debug("gitlab_url not configured, service check %s skipped" % check_type)
             return
 
         service_check_tags = self._service_check_tags(url)
+        service_check_tags.extend(tags)
         verify_ssl = self._verify_ssl(instance)
 
         ## Timeout settings

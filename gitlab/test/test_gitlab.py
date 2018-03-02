@@ -29,6 +29,7 @@ class TestGitlab(AgentCheckTest):
         'prometheus_endpoint': 'http://localhost:8088/metrics',
         'gitlab_url': 'http://localhost:8086',
         'disable_ssl_validation': True,
+        'tags': ['optional:tag1']
     }
 
     BASE_CONFIG = {
@@ -50,10 +51,10 @@ class TestGitlab(AgentCheckTest):
         self.run_check(self.BASE_CONFIG)
 
         self.assertServiceCheck('gitlab.readiness', status=PrometheusCheck.OK,
-                                tags=['gitlab_host:localhost', 'gitlab_port:8086'], count=1)
+                                tags=['gitlab_host:localhost', 'gitlab_port:8086', 'optional:tag1'], count=1)
 
         self.assertServiceCheck('gitlab.liveness', status=PrometheusCheck.OK,
-                                tags=['gitlab_host:localhost', 'gitlab_port:8086'], count=1)
+                                tags=['gitlab_host:localhost', 'gitlab_port:8086', 'optional:tag1'], count=1)
 
     def test_connection_failure(self):
         config = copy.deepcopy(self.BASE_CONFIG)
@@ -65,4 +66,4 @@ class TestGitlab(AgentCheckTest):
             lambda: self.run_check(config)
         )
         self.assertServiceCheck('gitlab.readiness', status=PrometheusCheck.CRITICAL,
-                                tags=['gitlab_host:localhost', 'gitlab_port:1234'], count=1)
+                                tags=['gitlab_host:localhost', 'gitlab_port:1234', 'optional:tag1'], count=1)
