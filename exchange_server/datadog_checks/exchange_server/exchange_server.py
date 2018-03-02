@@ -3,7 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # datadog
-from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
+try:
+    from datadog_checks.checks.win import PDHBaseCheck
+except ImportError:
+    class PDHBaseCheck:
+        pass
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
