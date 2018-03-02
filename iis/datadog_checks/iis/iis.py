@@ -8,8 +8,7 @@ Check the performance counters from IIS
 
 # project
 from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
-
+from datadog_checks.checks.win import PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
 
 DEFAULT_COUNTERS = [

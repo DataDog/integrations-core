@@ -3,7 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # datadog
-from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
+try:
+    from datadog_checks.checks.win import PDHBaseCheck
+except ImportError:
+    class PDHBaseCheck:
+        pass
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
 
