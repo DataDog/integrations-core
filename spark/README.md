@@ -85,7 +85,9 @@ The Agent submits one of the following service checks, depending on how you're r
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+### Spark on AWS EMR.
+
+To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html) to install the [Datadog Agent](https://docs.datadoghq.com/agent/) and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with [the proper values on each EMR node](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html).
 
 ## Further Reading
 
