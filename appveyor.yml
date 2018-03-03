@@ -8,7 +8,7 @@ environment:
   NOSE_FILTER: not unix and not fixme and not winfixme
   PYWIN_PATH: C:\projects\integrations-core\.cache\pywin32-py2.7.exe
   SKIP_LINT: true
-  DD_AGENT_BRANCH: db/pdh_tags
+  DD_AGENT_BRANCH: master
   SDK_TESTING: true
   PYTHON: C:\\Python27-x64
   PYTHON_VERSION: 2.7.13
@@ -81,10 +81,11 @@ install:
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  #- bundle exec rake ci:run[default]
-  #- bundle exec rake ci:run[sqlserver]
+  - bundle exec rake ci:run[default]
+  - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
   - bundle exec rake ci:run[aspdotnet]
-  #- bundle exec rake ci:run[windows_service]
-  #- bundle exec rake ci:run[wmi_check]
-  #- bundle exec rake ci:run[pdh_check]
+  - bundle exec rake ci:run[dotnetclr]
+  - bundle exec rake ci:run[windows_service]
+  - bundle exec rake ci:run[wmi_check]
+  - bundle exec rake ci:run[pdh_check]

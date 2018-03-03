@@ -10,16 +10,9 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest
 
-# (C) Datadog, Inc. 2010-2017
-# All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
-import re
 
 # 3p
 from nose.plugins.attrib import attr
-from mock import Mock
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -65,7 +58,7 @@ class ASPDotNetTest(AgentCheckTest):
             self.assertMetric(metric, tags=None, count=1)
 
         for metric in self.ASP_APP_METRICS:
-            self.assertMetric(metric, tags=["instance:__TOTAL__"], count=1)
+            self.assertMetric(metric, tags=["instance:__Total__"], count=1)
 
         self.coverage_report()
 
@@ -76,6 +69,6 @@ class ASPDotNetTest(AgentCheckTest):
             self.assertMetric(metric, tags=['tag1', 'another:tag'], count=1)
 
         for metric in self.ASP_APP_METRICS:
-            self.assertMetric(metric, tags=['tag1', 'another:tag', 'instance:__TOTAL__'], count=1)
+            self.assertMetric(metric, tags=['tag1', 'another:tag', 'instance:__Total__'], count=1)
 
         self.coverage_report()
