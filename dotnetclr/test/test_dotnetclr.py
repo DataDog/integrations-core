@@ -37,6 +37,7 @@ class DotNetCLRTest(AgentCheckTest):
         "sqlservr",
         "Appveyor.BuildAgent.Interactive"
     )
+
     def test_basic_check(self):
         self.run_check_twice({'instances': [MINIMAL_INSTANCE]})
 

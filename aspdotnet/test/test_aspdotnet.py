@@ -11,14 +11,6 @@ from nose.plugins.attrib import attr
 from tests.checks.common import AgentCheckTest
 
 
-# 3p
-from nose.plugins.attrib import attr
-
-# project
-from tests.checks.common import AgentCheckTest
-from checks import AgentCheck
-
-
 MINIMAL_INSTANCE = {
     'host': '.',
 }

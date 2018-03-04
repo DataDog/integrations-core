@@ -2,14 +2,14 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.1",
   "max_agent_version": "6.0.0",
-  "min_agent_version": "5.18.0",
+  "min_agent_version": "5.22.2",
   "name": "iis",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "version": "2.0.1",
+  "version": "2.0.2",
   "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
   "public_title": "Datadog-IIS Integration",
   "categories":["web", "log collection"],
