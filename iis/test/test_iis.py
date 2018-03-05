@@ -16,7 +16,7 @@ from tests.core.test_wmi import TestCommonWMI
 
 
 MINIMAL_INSTANCE = {
-    'host': '.',
+    'host': '.'
 }
 
 INSTANCE = {
@@ -169,10 +169,10 @@ class IISTestCase(AgentCheckTest, TestCommonWMI):
                 self.assertMetric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
             self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                    tags=["site:{0}".format(site_name)], count=1)
+                                    tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
         self.assertServiceCheck('iis.site_up', status=AgentCheck.CRITICAL,
-                                tags=["site:{0}".format(fail_site_name)], count=1)
+                                tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name)], count=1)
 
         # Check completed with no warnings
         self.assertFalse(logger.warning.called)
@@ -212,10 +212,10 @@ class IISTestCase(AgentCheckTest, TestCommonWMI):
                 self.assertMetric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
             self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                    tags=["site:{0}".format(site_name)], count=1)
+                                    tags=["mytag1", "mytag2", "site:{0}".format(site_name)], count=1)
 
         self.assertServiceCheck('iis.site_up', status=AgentCheck.CRITICAL,
-                                tags=["site:{0}".format(fail_site_name)], count=1)
+                                tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name)], count=1)
 
         self.coverage_report()
 
@@ -233,5 +233,5 @@ class IISTestCase(AgentCheckTest, TestCommonWMI):
             self.assertMetric(mname, tags=["mytag1", "mytag2"], count=1)
 
         self.assertServiceCheck('iis.site_up', status=AgentCheck.OK,
-                                tags=["site:{0}".format('Total')], count=1)
+                                tags=["mytag1", "mytag2", "site:{0}".format('Total')], count=1)
         self.coverage_report()
