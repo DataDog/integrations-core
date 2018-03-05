@@ -12,7 +12,7 @@ The process check lets you:
 
 The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check.
 
-If you need the newest version of the Process check, install the `dd-check-process` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+If you need the newest version of the Process check, install the `dd-check-process` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ### Configuration
 
@@ -41,11 +41,11 @@ To have the check search for processes in a path other than `/proc`, set `procfs
 
 See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.  
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending process metrics and service checks to Datadog.  
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending process metrics and service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `process` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `process` under the Checks section:
 
 ```
   Checks

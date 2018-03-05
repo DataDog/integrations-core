@@ -10,7 +10,7 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
 1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
-  If you need the newest version of the Apache check, install the `dd-check-apache` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+  If you need the newest version of the Apache check, install the `dd-check-apache` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
@@ -34,7 +34,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
   Change the `apache_status_url` parameter value and configure it for your environment.
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 #### Log Collection
 
@@ -66,13 +66,13 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `apache` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `apache` under the Checks section:
 
 ```
 Checks
