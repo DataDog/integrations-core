@@ -50,4 +50,4 @@ class NtpCheck(AgentCheck):
             else:
                 status = AgentCheck.OK
 
-        self.service_check('ntp.in_sync', status, timestamp=ntp_ts, message=service_check_msg)
+        self.service_check('ntp.in_sync', status, timestamp=ntp_ts, message=service_check_msg, tags=custom_tags)

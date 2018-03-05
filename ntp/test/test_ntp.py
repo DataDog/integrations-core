@@ -37,15 +37,13 @@ class TestNtp(AgentCheckTest):
 
         # default min collection interval for that check was 20sec
         check = load_check('ntp', config, agentConfig)
-        #check.run()
-        self.run_check(self.config)
+        check.run()
 
         self.assertEqual(ntp_util.args["host"], "foo.com")
         self.assertEqual(ntp_util.args["port"], "bar")
         self.assertEqual(ntp_util.args["version"], 42)
         self.assertEqual(ntp_util.args["timeout"], 13.37)
-        for metric in metrics:
-            self.assertMetric(metric, tags=['optional:tag1'])
+        self.assertTrue(len(ntp_util.args["tags"]) > 0)
 
         # Clear the singleton to prepare for next config
         NTPUtil._drop()
