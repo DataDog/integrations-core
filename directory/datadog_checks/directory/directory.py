@@ -51,6 +51,7 @@ class DirectoryCheck(AgentCheck):
         filegauges = _is_affirmative(instance.get("filegauges", False))
         countonly = _is_affirmative(instance.get("countonly", False))
         ignore_missing = _is_affirmative(instance.get("ignore_missing", False))
+        custom_tags = instance.get("tags", [])
 
         if not exists(abs_directory):
             if ignore_missing:
@@ -59,10 +60,10 @@ class DirectoryCheck(AgentCheck):
 
             raise Exception("DirectoryCheck: the directory (%s) does not exist" % abs_directory)
 
-        self._get_stats(abs_directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly)
+        self._get_stats(abs_directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly, custom_tags)
 
-    def _get_stats(self, directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly):
-        dirtags = [dirtagname + ":%s" % name]
+    def _get_stats(self, directory, name, dirtagname, filetagname, filegauges, pattern, recursive, countonly, tags):
+        dirtags = [dirtagname + ":%s" % name] + tags
         directory_bytes = 0
         directory_files = 0
         for root, dirs, files in walk(directory):

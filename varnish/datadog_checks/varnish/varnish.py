@@ -132,6 +132,9 @@ class Varnish(AgentCheck):
             varnishadm_path = shlex.split(instance.get('varnishadm'))
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
+            daemon_host = instance.get('daemon_host', 'localhost')
+            daemon_port = instance.get('daemon_port', '6082')
+
             cmd = []
             if geteuid() != 0:
                 cmd.append('sudo')
@@ -139,7 +142,7 @@ class Varnish(AgentCheck):
             if version < LooseVersion('4.1.0'):
                 cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend(varnishadm_path + ['-S', secretfile_path, 'backend.list', '-p'])
+                cmd.extend(varnishadm_path + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p'])
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)

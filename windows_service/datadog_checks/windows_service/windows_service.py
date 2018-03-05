@@ -30,10 +30,12 @@ class WindowsService(WinWMICheck):
         user = instance.get('username', "")
         password = instance.get('password', "")
         services = instance.get('services', [])
+        custom_tags = instance.get('tags', [])
 
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.CLASS, instance_hash)
         tags = [] if (host == "localhost" or host == ".") else [u'host:{0}'.format(host)]
+        tags.extend(custom_tags)
 
         if len(services) == 0:
             raise Exception('No services defined in windows_service.yaml')

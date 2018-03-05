@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.2.2",
+  "version": "1.3.0",
   "guid": "74e1ce9c-dee9-4ad5-9b6a-05eeee7f5259",
   "public_title": "Datadog-Kafka Consumer Integration",
   "categories":["processing", "messaging"],

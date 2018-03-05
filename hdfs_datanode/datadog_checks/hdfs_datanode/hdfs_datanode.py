@@ -60,24 +60,28 @@ class HDFSDataNode(AgentCheck):
 
     def check(self, instance):
         jmx_address = instance.get('hdfs_datanode_jmx_uri')
+
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
+
         disable_ssl_validation = instance.get('disable_ssl_validation', False)
+        custom_tags = instance.get('tags', [])
 
         # Get metrics from JMX
-        self._hdfs_datanode_metrics(jmx_address, disable_ssl_validation)
+        self._hdfs_datanode_metrics(jmx_address, disable_ssl_validation, custom_tags)
 
-    def _hdfs_datanode_metrics(self, jmx_uri, disable_ssl_validation):
+    def _hdfs_datanode_metrics(self, jmx_uri, disable_ssl_validation, tags):
         '''
         Get HDFS data node metrics from JMX
         '''
         response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
-            JMX_PATH,
+            JMX_PATH, tags,
             query_params={'qry':HDFS_DATANODE_BEAN_NAME})
 
         beans = response.get('beans', [])
 
-        tags = ['datanode_url:' + jmx_uri]
+        tags.append('datanode_url:' + jmx_uri)
+        tags = list(set(tags))
 
         if beans:
 
@@ -102,13 +106,15 @@ class HDFSDataNode(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, query_params):
+    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, tags, query_params):
         '''
         Query the given URL and return the JSON response
         '''
         response_json = None
 
         service_check_tags = ['datanode_url:' + address]
+        service_check_tags.extend(tags)
+        service_check_tags = list(set(service_check_tags))
 
         url = address
 

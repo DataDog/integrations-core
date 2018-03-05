@@ -68,15 +68,15 @@ class AgentMetrics(AgentCheck):
         stats = AgentCheck._collect_internal_stats(methods)
         return stats, names_to_metric_types
 
-    def _send_single_metric(self, metric_name, metric_value, metric_type):
+    def _send_single_metric(self, metric_name, metric_value, metric_type, tags=[]):
         if metric_type == GAUGE:
-            self.gauge(metric_name, metric_value)
+            self.gauge(metric_name, metric_value, tags=tags)
         elif metric_type == RATE:
-            self.rate(metric_name, metric_value)
+            self.rate(metric_name, metric_value, tags=tags)
         else:
             raise UnsupportedMetricType(metric_name, metric_type)
 
-    def _register_psutil_metrics(self, stats, names_to_metric_types):
+    def _register_psutil_metrics(self, stats, names_to_metric_types, tags=[]):
         """
         Saves sample metrics from psutil
 
@@ -94,7 +94,6 @@ class AgentMetrics(AgentCheck):
          key in `stats`, and key_2 is a nested key.
          E.g. datadog.agent.collector.memory_info.rss
         """
-
         base_metric = 'datadog.agent.collector.{0}.{1}'
         # TODO: May have to call self.normalize(metric_name) to get a compliant name
         for k, v in stats.iteritems():
@@ -102,10 +101,10 @@ class AgentMetrics(AgentCheck):
             if isinstance(v, dict):
                 for _k, _v in v.iteritems():
                     full_metric_name = base_metric.format(k, _k)
-                    self._send_single_metric(full_metric_name, _v, metric_type)
+                    self._send_single_metric(full_metric_name, _v, metric_type, tags)
             else:
                 full_metric_name = 'datadog.agent.collector.{0}'.format(k)
-                self._send_single_metric(full_metric_name, v, metric_type)
+                self._send_single_metric(full_metric_name, v, metric_type, tags)
 
     def set_metric_context(self, payload, context):
         self._collector_payload = payload
@@ -115,10 +114,11 @@ class AgentMetrics(AgentCheck):
         return self._collector_payload, self._metric_context
 
     def check(self, instance):
+        tags = instance.get('tags', [])
 
         if self.in_developer_mode:
             stats, names_to_metric_types = self._psutil_config_to_stats(instance)
-            self._register_psutil_metrics(stats, names_to_metric_types)
+            self._register_psutil_metrics(stats, names_to_metric_types, tags)
 
         payload, context = self.get_metric_context()
         collection_time = context.get('collection_time', None)
@@ -126,14 +126,14 @@ class AgentMetrics(AgentCheck):
         cpu_time = context.get('cpu_time', None)
 
         if threading.activeCount() > MAX_THREADS_COUNT:
-            self.gauge('datadog.agent.collector.threads.count', threading.activeCount())
+            self.gauge('datadog.agent.collector.threads.count', threading.activeCount(), tags=tags)
             self.log.info("Thread count is high: %d" % threading.activeCount())
 
         collect_time_exceeds_threshold = collection_time > MAX_COLLECTION_TIME
         if collection_time is not None and \
                 (collect_time_exceeds_threshold or self.in_developer_mode):
 
-            self.gauge('datadog.agent.collector.collection.time', collection_time)
+            self.gauge('datadog.agent.collector.collection.time', collection_time, tags=tags)
             if collect_time_exceeds_threshold:
                 self.log.info("Collection time (s) is high: %.1f, metrics count: %d, events count: %d",
                               collection_time, len(payload['metrics']), len(payload['events']))
@@ -141,7 +141,7 @@ class AgentMetrics(AgentCheck):
         emit_time_exceeds_threshold = emit_time > MAX_EMIT_TIME
         if emit_time is not None and \
                 (emit_time_exceeds_threshold or self.in_developer_mode):
-            self.gauge('datadog.agent.emitter.emit.time', emit_time)
+            self.gauge('datadog.agent.emitter.emit.time', emit_time, tags=tags)
             if emit_time_exceeds_threshold:
                 self.log.info("Emit time (s) is high: %.1f, metrics count: %d, events count: %d",
                               emit_time, len(payload['metrics']), len(payload['events']))
@@ -150,7 +150,7 @@ class AgentMetrics(AgentCheck):
             try:
                 cpu_used_pct = 100.0 * float(cpu_time)/float(collection_time)
                 if cpu_used_pct > MAX_CPU_PCT:
-                    self.gauge('datadog.agent.collector.cpu.used', cpu_used_pct)
+                    self.gauge('datadog.agent.collector.cpu.used', cpu_used_pct, tags=tags)
                     self.log.info("CPU consumed (%%) is high: %.1f, metrics count: %d, events count: %d",
                                   cpu_used_pct, len(payload['metrics']), len(payload['events']))
             except Exception as e:
