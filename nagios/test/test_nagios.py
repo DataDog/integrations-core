@@ -36,7 +36,8 @@ class NagiosTestCase(AgentCheckTest):
                 'nagios_conf': self.nagios_cfg.name,
                 'collect_events': events,
                 'collect_service_performance_data': service_perf,
-                'collect_host_performance_data': host_perf
+                'collect_host_performance_data': host_perf,
+                'tags': ['optional:tag1']
             }]
         }
 
@@ -225,7 +226,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
 
             values = info.split(";")
             value = float(values[0])
-            expected_tags = []
+            expected_tags = ['optional:tag1']
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
@@ -257,7 +258,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             name, info = metric_data.split("=")
             values = info.split(";")
             value = int(values[0][:-2])
-            expected_tags = ['unit:' + values[0][-2:]]
+            expected_tags = ['unit:' + values[0][-2:], "optional:tag1"]
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
@@ -295,7 +296,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             index = values[0].find("ms") if values[0].find("ms") != -1 else values[0].find("%")
             index = len(values[0]) - index
             value = float(values[0][:-index])
-            expected_tags = ['unit:' + values[0][-index:]]
+            expected_tags = ['unit:' + values[0][-index:], "optional:tag1"]
             if len(values) == 4:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])

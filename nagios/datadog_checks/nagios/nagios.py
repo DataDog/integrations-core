@@ -73,6 +73,7 @@ class Nagios(AgentCheck):
                 tailers = []
                 nagios_conf = {}
                 instance_key = None
+                custom_tag = instance.get('tags', [])
 
                 if 'nagios_conf' in instance:  # conf.d check
                     conf_path = instance['nagios_conf']
@@ -117,7 +118,8 @@ class Nagios(AgentCheck):
                         hostname=self.hostname,
                         event_func=self.event,
                         gauge_func=self.gauge,
-                        freq=check_freq))
+                        freq=check_freq,
+                        tag=custom_tag))
                 if 'service_perfdata_file' in nagios_conf and \
                    'service_perfdata_file_template' in nagios_conf and \
                    instance.get('collect_service_performance_data', False):
@@ -129,7 +131,8 @@ class Nagios(AgentCheck):
                         hostname=self.hostname,
                         event_func=self.event,
                         gauge_func=self.gauge,
-                        freq=check_freq))
+                        freq=check_freq,
+                        tag=custom_tag))
 
                 self.nagios_tails[instance_key] = tailers
 
@@ -179,7 +182,7 @@ class Nagios(AgentCheck):
 
 class NagiosTailer(object):
 
-    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq):
+    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags):
         '''
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
@@ -188,6 +191,7 @@ class NagiosTailer(object):
         :param event_func: function to create event, should accept dict
         :param gauge_func: function to report a gauge
         :param freq: int, size of bucket to aggregate perfdata metrics
+        :param tags: list, list of custom tags
         '''
         self.log_path = log_path
         self.log = logger
@@ -198,6 +202,7 @@ class NagiosTailer(object):
         self._gauge = gauge_func
         self._line_parsed = 0
         self._freq = freq
+        self._tags = tags
 
         if file_template is not None:
             self.compile_file_template(file_template)
@@ -328,7 +333,7 @@ class NagiosPerfDataTailer(NagiosTailer):
     def _get_metric_prefix(self, data):
         raise NotImplementedError()
 
-    def _parse_line(self, line):
+    def _parse_line(self, line, tags):
         matched = self.line_pattern.match(line)
         if matched:
             self.log.debug("Matching line found %s" % line)
@@ -367,7 +372,6 @@ class NagiosPerfDataTailer(NagiosTailer):
                 host_name = data.get('HOSTNAME', self.hostname)
 
                 optional_keys = ['unit', 'warn', 'crit', 'min', 'max']
-                tags = []
                 for key in optional_keys:
                     attr_val = pair_data.get(key, None)
                     if attr_val is not None and attr_val != '':
