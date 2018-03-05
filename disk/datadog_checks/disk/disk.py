@@ -127,7 +127,7 @@ class Disk(AgentCheck):
                 self.gauge(metric_name, metric_value,
                            tags=tags, device_name=device_name)
 
-        self.collect_latency_metrics()
+        self.collect_latency_metrics(tags)
 
     def _exclude_disk_psutil(self, part):
         # skip cd-rom drives with no disk in it; they may raise
@@ -208,7 +208,7 @@ class Disk(AgentCheck):
                 (total - free) / float(total)
         return metrics
 
-    def collect_latency_metrics(self):
+    def collect_latency_metrics(self, tags):
         for disk_name, disk in psutil.disk_io_counters(True).iteritems():
             self.log.debug('IO Counters: {0} -> {1}'.format(disk_name, disk))
             try:
@@ -217,9 +217,9 @@ class Disk(AgentCheck):
                 read_time_pct = disk.read_time * 100.0 / 1000.0
                 write_time_pct = disk.write_time * 100.0 / 1000.0
                 self.rate(self.METRIC_DISK.format('read_time_pct'),
-                      read_time_pct, device_name=disk_name)
+                      read_time_pct, device_name=disk_name, tags=tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'),
-                      write_time_pct, device_name=disk_name)
+                      write_time_pct, device_name=disk_name, tags=tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
