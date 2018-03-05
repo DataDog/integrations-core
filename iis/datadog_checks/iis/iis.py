@@ -58,6 +58,7 @@ class IIS(PDHBaseCheck):
     def check(self, instance):
 
         sites = instance.get('sites')
+        custom_tags = instance.get('tags', [])
         if sites is None:
             expected_sites = set()
         else:
@@ -106,7 +107,7 @@ class IIS(PDHBaseCheck):
                     if dd_name == "iis.uptime":
                         uptime = int(val)
                         status = AgentCheck.CRITICAL if uptime == 0 else AgentCheck.OK
-                        self.service_check(self.SERVICE_CHECK, status, tags=['site:{0}'.format(self.normalize(sitename))])
+                        self.service_check(self.SERVICE_CHECK, status, tags=['site:{0}'.format(self.normalize(sitename))] + custom_tags)
                         if sitename in expected_sites:
                             self.log.debug("Removing %s from expected sites" % sitename)
                             expected_sites.remove(sitename)
@@ -120,4 +121,4 @@ class IIS(PDHBaseCheck):
 
         for site in expected_sites:
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL,
-                            tags=['site:{0}'.format(self.normalize(site))])
+                            tags=['site:{0}'.format(self.normalize(site))] + custom_tags)

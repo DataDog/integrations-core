@@ -1,5 +1,12 @@
 # CHANGELOG - iis
 
+2.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds custom tag support to service check.
+
 2.0.1 / 2018-02-13
 ==================
 ### Changes

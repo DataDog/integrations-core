@@ -9,7 +9,7 @@
   "supported_os": [
     "windows"
   ],
-  "version": "2.0.1",
+  "version": "2.1.0",
   "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
   "public_title": "Datadog-IIS Integration",
   "categories":["web", "log collection"],
