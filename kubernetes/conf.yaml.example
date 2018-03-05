@@ -163,7 +163,7 @@ instances:
   # Prefix to use when converting pod labels to metric tags, can be made empty with ""
   # label_to_tag_prefix: "kube_"
   #
-  # Custom tags that should be applied to kubernetes metrics
+  # Custom tags that should be applied to kubernetes metrics and events
   # tags:
   #   - optional_tag1
   #   - optional_tag2
