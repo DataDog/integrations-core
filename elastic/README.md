@@ -32,7 +32,7 @@ instances:
 
 * If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
 
-* To use the Agent's ElasticSearch integration for the Amazon Elasticsearch service, set the `url` parameter on a remote host to point to wherever your AWS elasticsearch stats url is.
+* To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
