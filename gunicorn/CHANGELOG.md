@@ -1,5 +1,12 @@
 # CHANGELOG - gunicorn
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] add custom tag support.
+
 1.1.0 / 2017-05-23
 ==================
 
