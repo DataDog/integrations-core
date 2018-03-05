@@ -6,10 +6,6 @@
 from tests.checks.common import AgentCheckTest, load_check
 from utils.ntp import NTPUtil
 
-
-metrics = [
-    'ntp.offset'
-]
 class TestNtp(AgentCheckTest):
     """Basic Test for ntp integration."""
     CHECK_NAME = 'ntp'
@@ -21,7 +17,6 @@ class TestNtp(AgentCheckTest):
         config = {'instances': [{
             "host": "foo.com",
             "port": "bar",
-            "tags": ["optional:tag1"],
             "version": 42,
             "timeout": 13.37}],
             'init_config': {}}
@@ -43,7 +38,6 @@ class TestNtp(AgentCheckTest):
         self.assertEqual(ntp_util.args["port"], "bar")
         self.assertEqual(ntp_util.args["version"], 42)
         self.assertEqual(ntp_util.args["timeout"], 13.37)
-        self.assertTrue(len(ntp_util.args["tags"]) > 0)
 
         # Clear the singleton to prepare for next config
         NTPUtil._drop()
