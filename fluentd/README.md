@@ -16,11 +16,11 @@ If you need the newest version of the Fluentd check, install the `dd-check-fluen
 
 ### Configuration
 
-Create a file `fluentd.yaml` in the Agent's `conf.d` directory.
+Create a `fluentd.yaml` file in the Agent's `conf.d` directory.
 
 #### Prepare Fluentd
 
-In your fluentd configuration, add a `monitor_agent` source:
+In your fluentd configuration file, add a `monitor_agent` source:
 
 ```
 <source>
@@ -45,12 +45,13 @@ instances:
     #  - plg2
 ```
 
-See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options.
+See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options.  
+
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Fluentd metrics to Datadog.
 
 #### Log Collection
 
-Follow those [instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to start forwarding logs to Datadog with Fluentd.
+Follow [those instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to start forwarding logs to Datadog with Fluentd.
 
 ### Validation
 
