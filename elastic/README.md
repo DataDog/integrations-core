@@ -16,7 +16,7 @@ If you need the newest version of the Elasticsearch check, install the `dd-check
 
 ### Configuration
 
-1. Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options:
+Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -28,11 +28,16 @@ instances:
     pending_task_stats: true
 ```
 
-If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
+**Note**:
+
+* If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
+
+* To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
 See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Elasticsearch metrics to Datadog.
+Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Elasticsearch metrics to Datadog.
+
 
 ### Validation
 
