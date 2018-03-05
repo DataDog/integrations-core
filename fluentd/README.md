@@ -51,7 +51,7 @@ See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/
 
 #### Log Collection
 
-Follow [those instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to start forwarding logs to Datadog with Fluentd.
+Follow [those instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to forward logs to Datadog with Fluentd.
 
 ### Validation
 
