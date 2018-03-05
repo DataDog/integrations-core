@@ -15,6 +15,9 @@ The Fluentd check is packaged with the Agent, so simply [install the Agent](http
 If you need the newest version of the Fluentd check, install the `dd-check-fluentd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ### Configuration
+
+Create a file `fluentd.yaml` in the Agent's `conf.d` directory.
+
 #### Prepare Fluentd
 
 In your fluentd configuration, add a `monitor_agent` source:
@@ -27,9 +30,9 @@ In your fluentd configuration, add a `monitor_agent` source:
 </source>
 ```
 
-#### Connect the Datadog Agent
+#### Metric Collection
 
-Create a file `fluentd.yaml` in the Agent's `conf.d` directory. See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options:
+ * Add this configuration setup to your `fluentd.yaml` file to start gathering your [Fluentd metrics](#metrics):
 
 ```
 init_config:
@@ -42,7 +45,12 @@ instances:
     #  - plg2
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Fluentd metrics to Datadog.
+See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Fluentd metrics to Datadog.
+
+#### Log Collection
+
+Follow those [instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to start forwarding logs to Datadog with Fluentd.
 
 ### Validation
 
