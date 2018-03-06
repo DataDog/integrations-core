@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.2.0",
+  "manifest_version": "1.0.0",
   "name": "disk",
   "short_description": "The disk check gathers metrics on mounted disks.",
   "support": "core",
