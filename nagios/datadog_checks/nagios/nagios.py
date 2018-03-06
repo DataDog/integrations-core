@@ -335,7 +335,6 @@ class NagiosPerfDataTailer(NagiosTailer):
 
     def _parse_line(self, line):
         matched = self.line_pattern.match(line)
-        tags = self._tags
         if matched:
             self.log.debug("Matching line found %s" % line)
             data = matched.groupdict()
@@ -345,6 +344,7 @@ class NagiosPerfDataTailer(NagiosTailer):
             #   'label'=value[UOM];[warn];[crit];[min];[max]
             perf_data = data.get(self.perfdata_field, '').split(' ')
             for pair in perf_data:
+                tags = self._tags
                 pair_match = self.pair_pattern.match(pair)
                 if not pair_match:
                     continue
