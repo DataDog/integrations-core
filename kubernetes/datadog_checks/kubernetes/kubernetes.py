@@ -106,7 +106,7 @@ class Kubernetes(AgentCheck):
                 raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
 
         if agentConfig.get('service_discovery') and \
-           agentConfig.get('service_discovery_backend') == 'docker':
+                agentConfig.get('service_discovery_backend') == 'docker':
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
