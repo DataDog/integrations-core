@@ -1,20 +1,14 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-'''
-Redis checks
-'''
-# stdlib
 from collections import defaultdict
 import re
 import time
 
-# 3rd party
 import redis
 
-# project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
+
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
 MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
@@ -143,7 +137,8 @@ class Redis(AgentCheck):
                 self.connections[key] = redis.Redis(**connection_params)
 
             except TypeError:
-                raise Exception("You need a redis library that supports authenticated connections. Try sudo easy_install redis.")
+                msg = "You need a redis library that supports authenticated connections. Try sudo easy_install redis."
+                raise Exception(msg)
 
         return self.connections[key]
 
@@ -333,8 +328,7 @@ class Redis(AgentCheck):
         slowlogs = conn.slowlog_get(max_slow_entries)
 
         # Find slowlog entries between last timestamp and now using start_time
-        slowlogs = [s for s in slowlogs if s['start_time'] >
-            self.last_timestamp_seen[ts_key]]
+        slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen[ts_key]]
 
         max_ts = 0
         # Slowlog entry looks like:

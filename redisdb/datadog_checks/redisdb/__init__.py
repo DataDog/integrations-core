@@ -1,7 +1,10 @@
-from . import redisdb
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .redisdb import Redis
+from .__about__ import __version__
 
-Redis = redisdb.Redis
-
-__version__ = "1.4.0"
-
-__all__ = ['redisdb']
+__all__ = [
+    '__version__',
+    'Redis'
+]
