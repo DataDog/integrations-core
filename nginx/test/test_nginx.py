@@ -71,7 +71,8 @@ class TestNginx(unittest.TestCase):
 
         # Checking that 'tags' attribute of some result is equal to 'tags' attribute in config for instance 1
         r = nginx.get_metrics()
-        self.assertEquals(r[0][3].get('tags'), ['first_one'])
+        # ('ssl_disabled',) != ['ssl_disabled'] 
+        self.assertEquals(r, ['first_one'])
 
         # Checking that each 'nginx.can_connect' service check's 'tags' attribute match expected host/port from config
         service_checks = nginx.get_service_checks()
