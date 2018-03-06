@@ -119,7 +119,7 @@ class Nagios(AgentCheck):
                         event_func=self.event,
                         gauge_func=self.gauge,
                         freq=check_freq,
-                        tag=custom_tag))
+                        tags=custom_tag))
                 if 'service_perfdata_file' in nagios_conf and \
                    'service_perfdata_file_template' in nagios_conf and \
                    instance.get('collect_service_performance_data', False):
@@ -132,7 +132,7 @@ class Nagios(AgentCheck):
                         event_func=self.event,
                         gauge_func=self.gauge,
                         freq=check_freq,
-                        tag=custom_tag))
+                        tags=custom_tag))
 
                 self.nagios_tails[instance_key] = tailers
 
@@ -333,8 +333,9 @@ class NagiosPerfDataTailer(NagiosTailer):
     def _get_metric_prefix(self, data):
         raise NotImplementedError()
 
-    def _parse_line(self, line, tags):
+    def _parse_line(self, line):
         matched = self.line_pattern.match(line)
+        tags = self._tags
         if matched:
             self.log.debug("Matching line found %s" % line)
             data = matched.groupdict()
