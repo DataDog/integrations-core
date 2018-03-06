@@ -693,7 +693,7 @@ class OpenStackCheck(AgentCheck):
                     self.gauge("openstack.nova.server.{0}".format(st.replace("-", "_")), server_stats[st], tags=tags, hostname=server_id)
 
 
-    def get_stats_for_single_project(self, project):
+    def get_stats_for_single_project(self, project, tags=[]):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
 
@@ -705,7 +705,7 @@ class OpenStackCheck(AgentCheck):
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
-        tags = ['tenant_id:{0}'.format(project['id'])]
+        tags.append('tenant_id:{0}'.format(project['id']))
 
         if project_name:
             tags.append('project_name:{0}'.format(project['name']))
@@ -715,9 +715,9 @@ class OpenStackCheck(AgentCheck):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
 
-    def get_stats_for_all_projects(self, projects):
+    def get_stats_for_all_projects(self, projects, tags=[]):
         for project in projects:
-            self.get_stats_for_single_project(project)
+            self.get_stats_for_single_project(project, tags)
     ###
 
     ### Cache util
@@ -735,7 +735,7 @@ class OpenStackCheck(AgentCheck):
         return self._aggregate_list
     ###
 
-    def _send_api_service_checks(self, instance_scope):
+    def _send_api_service_checks(self, instance_scope, tags=[]):
         # Nova
         headers = {"X-Auth-Token": instance_scope.auth_token}
 
@@ -743,20 +743,20 @@ class OpenStackCheck(AgentCheck):
             requests.get(instance_scope.service_catalog.nova_endpoint, headers=headers,
                          verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.COMPUTE_API_SC, AgentCheck.OK,
-                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             self.service_check(self.COMPUTE_API_SC, AgentCheck.CRITICAL,
-                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags)
 
         # Neutron
         try:
             requests.get(instance_scope.service_catalog.neutron_endpoint, headers=headers,
                          verify=self._ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             self.service_check(self.NETWORK_API_SC, AgentCheck.OK,
-                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL,
-                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                               tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags)
 
     def ensure_auth_scope(self, instance):
         """
@@ -767,6 +767,8 @@ class OpenStackCheck(AgentCheck):
         """
         instance_scope = None
 
+        custom_tags = instance.get('tags', [])
+
         try:
             instance_scope = self.get_scope_for_instance(instance)
         except KeyError:
@@ -775,30 +777,30 @@ class OpenStackCheck(AgentCheck):
             # Let's populate it now
             try:
                 instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
-                self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["server:%s" % self.init_config.get("keystone_server_url")])
+                self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
             except KeystoneUnreachable as e:
                 self.warning("The agent could not contact the specified identity server at %s . Are you sure it is up at that address?" % self.init_config.get("keystone_server_url"))
                 self.log.debug("Problem grabbing auth token: %s", e)
-                self.service_check(self.IDENTITY_API_SC, AgentCheck.CRITICAL, tags=["server:%s" % self.init_config.get("keystone_server_url")])
+                self.service_check(self.IDENTITY_API_SC, AgentCheck.CRITICAL, tags=["server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
 
                 # If Keystone is down/unreachable, we default the Nova and Neutron APIs to UNKNOWN since we cannot access the service catalog
-                self.service_check(self.NETWORK_API_SC, AgentCheck.UNKNOWN, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
-                self.service_check(self.COMPUTE_API_SC, AgentCheck.UNKNOWN, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                self.service_check(self.NETWORK_API_SC, AgentCheck.UNKNOWN, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
+                self.service_check(self.COMPUTE_API_SC, AgentCheck.UNKNOWN, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
 
             except MissingNovaEndpoint:
                 self.warning("The agent could not find a compatible Nova endpoint in your service catalog!")
-                self.service_check(self.COMPUTE_API_SC, AgentCheck.CRITICAL, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                self.service_check(self.COMPUTE_API_SC, AgentCheck.CRITICAL, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
 
             except MissingNeutronEndpoint:
                 self.warning("The agent could not find a compatible Neutron endpoint in your service catalog!")
-                self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")])
+                self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
             else:
                 self.set_scope_for_instance(instance, instance_scope)
 
         return instance_scope
 
     def check(self, instance):
-
+        custom_tags = instance.get("tags", [])
         try:
             instance_scope = self.ensure_auth_scope(instance)
 
@@ -806,7 +808,7 @@ class OpenStackCheck(AgentCheck):
                 # Fast fail in the absence of an instance_scope
                 return
 
-            self._send_api_service_checks(instance_scope)
+            self._send_api_service_checks(instance_scope, custom_tags)
             # Store the scope on the object so we don't have to keep passing it around
             self._current_scope = instance_scope
 
@@ -842,16 +844,16 @@ class OpenStackCheck(AgentCheck):
                     server_tags.append('project_name:{0}'.format(project['name']))
 
                 self.external_host_tags[sid] = host_tags
-                self.get_stats_for_single_server(sid, tags=server_tags)
+                self.get_stats_for_single_server(sid, tags=server_tags + custom_tags)
 
             if hyp:
-                self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags)
+                self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags + custom_tags)
             else:
                 self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
             if projects and project:
                 # Ensure projects list and scoped project exists
-                self.get_stats_for_all_projects(projects)
+                self.get_stats_for_all_projects(projects, custom_tags)
 
             # For now, monitor all networks
             self.get_network_stats()
