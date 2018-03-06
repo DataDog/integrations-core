@@ -109,7 +109,7 @@ class TestCheckNetwork(AgentCheckTest):
         self.check._collect_cx_state = True
         self.check._check_psutil({})
         state.assert_called_once_with(tags=[])
-        counters.assert_called_once_with()
+        counters.assert_called_once_with(tags=[])
 
     def test_cx_state_psutil(self):
         sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])
