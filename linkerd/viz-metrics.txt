@@ -66,97 +66,96 @@ jvm:heap:max
 jvm:heap:used
 jvm:fd_count
 
-rt:client:connect_latency_ms_count{rt="http", client="#/io.l5d.fs/web"} 17
-rt:client:connect_latency_ms_sum{rt="http", client="#/io.l5d.fs/web"} 156
-rt:client:connect_latency_ms_avg{rt="http", client="#/io.l5d.fs/web"} 9.176470588235293
-rt:client:failed_connect_latency_ms_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:failed_connect_latency_ms_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:failed_connect_latency_ms_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:sent_bytes{rt="http", client="#/io.l5d.fs/web"} 474901932
-rt:client:service_creation:service_acquisition_latency_ms_count{rt="http", client="#/io.l5d.fs/web"} 29967
-rt:client:service_creation:service_acquisition_latency_ms_sum{rt="http", client="#/io.l5d.fs/web"} 1760
-rt:client:service_creation:service_acquisition_latency_ms_avg{rt="http", client="#/io.l5d.fs/web"} 0.05873127106483799
-rt:client:connection_received_bytes_count{rt="http", client="#/io.l5d.fs/web"} 17
-rt:client:connection_received_bytes_sum{rt="http", client="#/io.l5d.fs/web"} 1196576
-rt:client:connection_received_bytes_avg{rt="http", client="#/io.l5d.fs/web"} 70386.82352941176
-rt:client:connection_duration_count{rt="http", client="#/io.l5d.fs/web"} 17
-rt:client:connection_duration_sum{rt="http", client="#/io.l5d.fs/web"} 1309019
-rt:client:connection_duration_avg{rt="http", client="#/io.l5d.fs/web"} 77001.11764705883
-rt:client:failure_accrual:removals{rt="http", client="#/io.l5d.fs/web"} 2
-rt:client:failure_accrual:probes{rt="http", client="#/io.l5d.fs/web"} 2
-rt:client:failure_accrual:removed_for_ms{rt="http", client="#/io.l5d.fs/web"} 10000
-rt:client:failure_accrual:revivals{rt="http", client="#/io.l5d.fs/web"} 2
-rt:client:connects{rt="http", client="#/io.l5d.fs/web"} 1210
-rt:client:pool_num_waited{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:success{rt="http", client="#/io.l5d.fs/web"} 1769110
-rt:client:request_latency_ms_count{rt="http", client="#/io.l5d.fs/web"} 29998
-rt:client:request_latency_ms_sum{rt="http", client="#/io.l5d.fs/web"} 680099
-rt:client:request_latency_ms_avg{rt="http", client="#/io.l5d.fs/web"} 22.671478098539904
-rt:client:pool_waiters{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:retries:requeues_per_request_count{rt="http", client="#/io.l5d.fs/web"} 29998
-rt:client:retries:requeues_per_request_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:retries:requeues_per_request_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:retries:request_limit{rt="http", client="#/io.l5d.fs/web"} 2
-rt:client:retries:budget_exhausted{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:retries:cannot_retry{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:retries:not_open{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:retries:budget{rt="http", client="#/io.l5d.fs/web"} 1012.0
-rt:client:retries:requeues{rt="http", client="#/io.l5d.fs/web"} 429
-rt:client:received_bytes{rt="http", client="#/io.l5d.fs/web"} 215831420
-rt:client:read_timeout{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:write_timeout{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:connection_sent_bytes_count{rt="http", client="#/io.l5d.fs/web"} 17
-rt:client:connection_sent_bytes_sum{rt="http", client="#/io.l5d.fs/web"} 2638352
-rt:client:connection_sent_bytes_avg{rt="http", client="#/io.l5d.fs/web"} 155197.17647058822
-rt:client:connection_requests_count{rt="http", client="#/io.l5d.fs/web"} 17
-rt:client:connection_requests_sum{rt="http", client="#/io.l5d.fs/web"} 9808
-rt:client:connection_requests_avg{rt="http", client="#/io.l5d.fs/web"} 576.9411764705883
-rt:client:service:success{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 1769110
-rt:client:service:request_latency_ms_count{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 29998
-rt:client:service:request_latency_ms_sum{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 680926
-rt:client:service:request_latency_ms_avg{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 22.699046603106872
-rt:client:service:failures{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 435
-rt:client:service:requests{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 1769545
-rt:client:service:pending{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 2.0
-rt:client:pool_num_too_many_waiters{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:socket_unwritable_ms{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:closes{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:pool_cached{rt="http", client="#/io.l5d.fs/web"} 39.0
-rt:client:nack_admission_control:dropped_requests{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:status:1XX{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:status:4XX{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:status:2XX{rt="http", client="#/io.l5d.fs/web"} 1769110
-rt:client:status:error{rt="http", client="#/io.l5d.fs/web"} 435
-rt:client:status:3XX{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:status:5XX{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:status:200{rt="http", client="#/io.l5d.fs/web"} 1769110
-rt:client:failures{rt="http", client="#/io.l5d.fs/web"} 435
-rt:client:pool_size{rt="http", client="#/io.l5d.fs/web"} 21.0
-rt:client:available{rt="http", client="#/io.l5d.fs/web"} 10.0
-rt:client:time:1XX_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:1XX_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:1XX_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:time:4XX_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:4XX_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:4XX_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:time:2XX_count{rt="http", client="#/io.l5d.fs/web"} 29988
-rt:client:time:2XX_sum{rt="http", client="#/io.l5d.fs/web"} 682241
-rt:client:time:2XX_avg{rt="http", client="#/io.l5d.fs/web"} 22.75046685340803
-rt:client:time:error_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:error_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:error_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:time:3XX_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:3XX_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:3XX_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:time:5XX_count{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:5XX_sum{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:time:5XX_avg{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:socket_writable_ms{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:cancelled_connects{rt="http", client="#/io.l5d.fs/web"} 0
-rt:client:pending{rt="http", client="#/io.l5d.fs/web"} 21.0
-rt:client:dispatcher:serial:queue_size{rt="http", client="#/io.l5d.fs/web"} 0.0
-rt:client:dispatcher:stream:failures{rt="http", client="#/io.l5d.fs/web"} 435
-rt:client:connections{rt="http", client="#/io.l5d.fs/web"} 57.0
+rt:client:connect_latency_ms_count
+rt:client:connect_latency_ms_sum
+rt:client:connect_latency_ms_avg
+rt:client:failed_connect_latency_ms_count
+rt:client:failed_connect_latency_ms_sum
+rt:client:failed_connect_latency_ms_avg
+rt:client:sent_bytes
+rt:client:service_creation:service_acquisition_latency_ms_count
+rt:client:service_creation:service_acquisition_latency_ms_sum
+rt:client:service_creation:service_acquisition_latency_ms_avg
+rt:client:connection_received_bytes_count
+rt:client:connection_received_bytes_sum
+rt:client:connection_received_bytes_avg
+rt:client:connection_duration_count
+rt:client:connection_duration_sum
+rt:client:connection_duration_avg
+rt:client:failure_accrual:removals
+rt:client:failure_accrual:probes
+rt:client:failure_accrual:removed_for_ms
+rt:client:failure_accrual:revivals
+rt:client:connects
+rt:client:pool_num_waited
+rt:client:success
+rt:client:request_latency_ms_count
+rt:client:request_latency_ms_sum
+rt:client:request_latency_ms_avg
+rt:client:pool_waiters
+rt:client:retries:requeues_per_request_count
+rt:client:retries:requeues_per_request_sum
+rt:client:retries:requeues_per_request_avg
+rt:client:retries:request_limit
+rt:client:retries:budget_exhausted
+rt:client:retries:cannot_retry
+rt:client:retries:not_open
+rt:client:retries:budget
+rt:client:retries:requeues
+rt:client:received_bytes
+rt:client:read_timeout
+rt:client:write_timeout
+rt:client:connection_sent_bytes_count
+rt:client:connection_sent_bytes_sum
+rt:client:connection_sent_bytes_avg
+rt:client:connection_requests_count
+rt:client:connection_requests_sum
+rt:client:connection_requests_avg
+rt:client:service:success
+rt:client:service:request_latency_ms_count
+rt:client:service:request_latency_ms_sum
+rt:client:service:request_latency_ms_avg
+rt:client:service:failures
+rt:client:service:requests
+rt:client:service:pending
+rt:client:pool_num_too_many_waiters
+rt:client:socket_unwritable_ms
+rt:client:closes
+rt:client:pool_cached
+rt:client:nack_admission_control:dropped_requests
+rt:client:status:1XX
+rt:client:status:4XX
+rt:client:status:2XX
+rt:client:status:error
+rt:client:status:3XX
+rt:client:status:5XX
+rt:client:failures
+rt:client:pool_size
+rt:client:available
+rt:client:time:1XX_count
+rt:client:time:1XX_sum
+rt:client:time:1XX_avg
+rt:client:time:4XX_count
+rt:client:time:4XX_sum
+rt:client:time:4XX_avg
+rt:client:time:2XX_count
+rt:client:time:2XX_sum
+rt:client:time:2XX_avg
+rt:client:time:error_count
+rt:client:time:error_sum
+rt:client:time:error_avg
+rt:client:time:3XX_count
+rt:client:time:3XX_sum
+rt:client:time:3XX_avg
+rt:client:time:5XX_count
+rt:client:time:5XX_sum
+rt:client:time:5XX_avg
+rt:client:socket_writable_ms
+rt:client:cancelled_connects
+rt:client:pending
+rt:client:dispatcher:serial:queue_size
+rt:client:dispatcher:stream:failures
+rt:client:connections
 
 
 ====== HISTOGRAMES =======

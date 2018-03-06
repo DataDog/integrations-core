@@ -11,11 +11,11 @@ from datadog_checks.linkerd import LinkerdCheck
 # 3p
 import docker
 
-PROMETHEUS_ENDPOINT = 'http://127.0.0.1:9990/admin/metrics/prometheus'
+PROMETHEUS_ENDPOINT = 'http://127.0.0.1:19990/admin/metrics/prometheus'
 
 INSTANCES = [{
     'admin_ip': '127.0.0.1',
-    'admin_port': '9990',
+    'admin_port': '19990',
 }]
 
 INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}
@@ -51,7 +51,7 @@ def linkerd(request):
         command="/config.yaml",
         detach=True,
         name="dd-linkerd-test",
-        ports={'9990/tcp': 9990},
+        ports={'9990/tcp': 19990},
         volumes={
             os.path.dirname(os.path.realpath(__file__)) + '/config.yaml': {
                 'bind': '/config.yaml',
@@ -71,5 +71,4 @@ def linkerd(request):
 def test_check(linkerd, aggregator):
     linkerd_check = LinkerdCheck(CHECK_NAME, INIT_CONFIG, {}, INSTANCES)
     linkerd_check.check(INSTANCES[0])
-    for metric in linkerd_check.metrics_mapper.values():
-        aggregator.assert_metric(METRIC_PREFIX + "." + metric)
+    aggregator.assert_metric(METRIC_PREFIX + "." + "jvm.uptime")
