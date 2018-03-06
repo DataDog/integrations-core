@@ -90,7 +90,7 @@ class TestCheckNetwork(AgentCheckTest):
     def test_win_uses_psutil(self, *args):
         self.check._check_psutil = mock.MagicMock()
         self.run_check({})
-        self.check._check_psutil.assert_called_once_with()
+        self.check._check_psutil.assert_called_once_with({'collect_connection_state': True, 'tags': ['optional:tag1']})
 
     @mock.patch('datadog_checks.network.Network._cx_state_psutil')
     @mock.patch('datadog_checks.network.Network._cx_counters_psutil')
@@ -108,7 +108,7 @@ class TestCheckNetwork(AgentCheckTest):
 
         self.check._collect_cx_state = True
         self.check._check_psutil({})
-        state.assert_called_once_with()
+        state.assert_called_once_with(tags=[])
         counters.assert_called_once_with()
 
     def test_cx_state_psutil(self):
