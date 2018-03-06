@@ -651,11 +651,11 @@ class Network(AgentCheck):
         """
         custom_tags = instance.get('tags', [])
         if self._collect_cx_state:
-            self._cx_state_psutil(custom_tags)
+            self._cx_state_psutil(tags=custom_tags)
 
-        self._cx_counters_psutil(custom_tags)
+        self._cx_counters_psutil(tags=custom_tags)
 
-    def _cx_state_psutil(self, tags):
+    def _cx_state_psutil(self, tags=[]):
         """
         Collect metrics about connections state using psutil
         """
@@ -672,7 +672,7 @@ class Network(AgentCheck):
         for metric, value in metrics.iteritems():
             self.gauge(metric, value, tags=tags)
 
-    def _cx_counters_psutil(self, tags):
+    def _cx_counters_psutil(self, tags=[]):
         """
         Collect metrics about interfaces counters using psutil
         """

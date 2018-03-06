@@ -99,15 +99,15 @@ class TestCheckNetwork(AgentCheckTest):
         self.check._cx_counters_psutil = counters
 
         self.check._collect_cx_state = False
-        self.check._check_psutil()
+        self.check._check_psutil({})
         state.assert_not_called()
-        counters.assert_called_once_with()
+        counters.assert_called_once_with(tags=[])
 
         state.reset_mock()
         counters.reset_mock()
 
         self.check._collect_cx_state = True
-        self.check._check_psutil()
+        self.check._check_psutil({})
         state.assert_called_once_with()
         counters.assert_called_once_with()
 
