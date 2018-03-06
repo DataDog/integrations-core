@@ -12,8 +12,8 @@ Edit the `prometheus.yaml` file to add your different prometheus instances you w
 
 Each instance is at least composed of:
 
-* a `prometheus_url` that points to the metric route
-* a `namespace` that will be prepended to all metrics (to avoid name collision, ⚠️ this has to be unique)
+* a `prometheus_url` that points to the metric route (⚠️ this has to be unique)
+* a `namespace` that will be prepended to all metrics (to avoid metrics name collision)
 * a list of `metrics` that you want to retrieve as custom metrics, for each metric you can either
 simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`
 

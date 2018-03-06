@@ -57,8 +57,6 @@ class GenericPrometheusCheck(AgentCheck):
         self.default_namespace = default_namespace
         for instance in instances:
             self.get_scraper(instance)
-        if len(instances) != len(self.scrapers_map):
-            raise CheckException("There's a missconfiguration on one of the instances (duplicate namespace?)")
 
     def check(self, instance):
         endpoint = instance["prometheus_url"]
@@ -78,21 +76,20 @@ class GenericPrometheusCheck(AgentCheck):
         # Check if we have a namespace
         if namespace == "":
             if self.default_namespace == "":
-                raise CheckException("You have to define a unique namespace for each prometheus check")
+                raise CheckException("You have to define a namespace for each prometheus check")
             namespace = self.default_namespace
 
-        # If we already created the corresponding scraper, return it
-        if namespace in self.scrapers_map:
-            return self.scrapers_map[namespace]
-
-        # Otherwise we create the scraper
         # Retrieve potential default instance settings for the namespace
         default_instance = self.default_instances.get(namespace, {})
         endpoint = instance.get("prometheus_url", default_instance.get("prometheus_url", ""))
         if endpoint == "":
             raise CheckException("Unable to find prometheus URL in config file.")
 
-        # Instanciate check
+        # If we already created the corresponding scraper, return it
+        if endpoint in self.scrapers_map:
+            return self.scrapers_map[endpoint]
+
+        # Otherwise we create the scraper
         scraper = Scraper(self)
         scraper.NAMESPACE = namespace
         # Metrics are preprocessed if no mapping
@@ -119,6 +116,6 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))
 
-        self.scrapers_map[namespace] = scraper
+        self.scrapers_map[endpoint] = scraper
 
         return scraper
