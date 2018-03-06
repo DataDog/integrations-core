@@ -40,7 +40,8 @@ class TestCheckNetwork(AgentCheckTest):
         self.config = {
             "instances": [
                 {
-                    "collect_connection_state": True
+                    "collect_connection_state": True,
+                    'tags': ['optional:tag1']
                 }
             ]
         }
@@ -70,7 +71,7 @@ class TestCheckNetwork(AgentCheckTest):
 
         # Assert metrics
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
-            self.assertMetric(metric, value=value)
+            self.assertMetric(metric, value=value, tags=['optional:tag1'])
 
     @attr('unix')
     @mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=netstat_subprocess_mock)
@@ -80,7 +81,7 @@ class TestCheckNetwork(AgentCheckTest):
 
         # Assert metrics
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
-            self.assertMetric(metric, value=value)
+            self.assertMetric(metric, value=value, tags=['optional:tag1'])
 
     @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
     @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
