@@ -149,6 +149,9 @@ class LinkerdCheck(PrometheusCheck):
             'rt:client:dispatcher:serial:queue_size': 'rt.client.dispatcher.serial.queue_size',
             'rt:client:dispatcher:stream:failures': 'rt.client.dispatcher.stream.failures',
             'rt:client:connections': 'rt.client.connections',
+            'rt:client:requests': 'rt.client.requests',
+            'rt:client:service:requests': 'rt.client.service.requests',
+            'rt:server:requests': 'rt.server.requests',
 
             'rt:server:request_latency_ms': 'rt.server.request_latency_ms',
             'rt:client:connect_latency_ms': 'rt.client.connect_latency_ms',
@@ -292,6 +295,8 @@ class LinkerdCheck(PrometheusCheck):
             'rt:client:dispatcher:serial:queue_size': 'gauge',
             'rt:client:dispatcher:stream:failures': 'gauge',
             'rt:client:connections': 'gauge',
+            'rt:client:requests': 'gauge',
+            'rt:server:requests': 'gauge',
 
             'jvm:gc:eden:pause_msec': 'summary',
             'rt:server:request_latency_ms': 'summary',
