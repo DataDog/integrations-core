@@ -47,7 +47,7 @@ class TestGitlabRunner(AgentCheckTest):
         """
         self.run_check(self.BASE_CONFIG)
         for metric in self.ALLOWED_METRICS:
-            if metric.startsWith('ci_runner'):
+            if metric.startswith('ci_runner'):
                 self.assertMetric("gitlab_runner.%s" % metric)
             else:
                 self.assertMetric("gitlab_runner.%s" % metric, tags=['optional:tag1'])
