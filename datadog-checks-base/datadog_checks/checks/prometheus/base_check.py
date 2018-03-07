@@ -95,12 +95,17 @@ class GenericPrometheusCheck(AgentCheck):
         # Metrics are preprocessed if no mapping
         metrics_mapper = {}
         # We merge list and dictionnaries from optional defaults & instance settings
-        metrics = default_instance.get("metrics", []) + instance.get("metrics", [])
-        for metric in metrics:
+        for metric in default_instance.get("metrics", []):
             if isinstance(metric, basestring):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)
+        for metric in instance.get("metrics", []):
+            if isinstance(metric, basestring):
+                metrics_mapper[metric] = metric
+            else:
+                metrics_mapper.update(metric)
+
         scraper.metrics_mapper = metrics_mapper
         scraper.labels_mapper = default_instance.get("labels_mapper", {})
         scraper.labels_mapper.update(instance.get("labels_mapper", {}))
