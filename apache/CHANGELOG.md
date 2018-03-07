@@ -11,7 +11,7 @@
 ### Changes
 
 * [BUGFIX] fixes metric collection for `bytes_per_s` and `request_per_s`. See [#1071][].
-* [DOC] Adding configuration for log collection in `conf.yaml`
+* [DOC] Adding configuration for log collection in `conf.yaml`.
 
 1.1.0 / 2017-11-21
 ==================
