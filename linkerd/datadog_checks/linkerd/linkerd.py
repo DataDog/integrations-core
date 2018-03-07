@@ -8,7 +8,13 @@
 import requests
 
 # project
-from datadog_checks.checks.prometheus import PrometheusCheck
+try:
+    # Agent5 compatibility layer
+    from datadog_checks.errors import CheckException
+    from datadog_checks.checks.prometheus import PrometheusCheck
+except ImportError:
+    from checks import CheckException
+    from checks.prometheus_check import PrometheusCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'linkerd'
 
@@ -335,7 +341,7 @@ class LinkerdCheck(PrometheusCheck):
         admin_port = instance.get('admin_port')
 
         if admin_ip is None or admin_port is None:
-            raise Exception("Unable to find admin_ip and admin_port in config file.")
+            raise CheckException("Unable to find admin_ip and admin_port in config file.")
 
 
         prometheus_url = "http://{}:{}{}".format(
@@ -361,10 +367,10 @@ class LinkerdCheck(PrometheusCheck):
             else:
                 self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.UNKNOWN,
                                tags=tags)
-                raise Exception("Error pinging {}. Server responded with: {}".format(PING_ENDPOINT, r.content))
+                raise CheckException("Error pinging {}. Server responded with: {}".format(PING_ENDPOINT, r.content))
         except requests.exceptions.HTTPError as e:
             self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
                                tags=tags)
-            raise Exception("Error pinging {}. Error: {}".format(PING_ENDPOINT, e))
+            raise CheckException("Error pinging {}. Error: {}".format(PING_ENDPOINT, e))
 
         self.process(prometheus_url, send_histograms_buckets=True, instance=instance)
