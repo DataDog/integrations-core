@@ -414,14 +414,15 @@ class ESCheck(AgentCheck):
 
     def check(self, instance):
         config = self.get_instance_config(instance)
+        admin_forwarder = instance.get("admin_forwarder", False)
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
-        try:
-            version = self._get_es_version(config)
-        except AuthenticationError as e:
-            self.log.exception("The ElasticSearch credentials are incorrect")
-            raise
+        # try:
+        #     version = self._get_es_version(config)
+        # except AuthenticationError as e:
+        #     self.log.exception("The ElasticSearch credentials are incorrect")
+        #     raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url, stats_metrics, \
             pshard_stats_metrics = self._define_params(version, config.cluster_stats)
@@ -430,7 +431,8 @@ class ESCheck(AgentCheck):
         # This must happen before other URL processing as the cluster name
         # is retreived here, and added to the tag list.
 
-        stats_url = urlparse.urljoin(config.url, stats_url)
+        stats_url = self._join_url(config.url, stats_url, admin_forwarder)
+        import pdb; pdb.set_trace()
         stats_data = self._get_data(stats_url, config)
         if stats_data['cluster_name']:
             # retreive the cluster name from the data, and append it to the
@@ -444,7 +446,7 @@ class ESCheck(AgentCheck):
         # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
             send_sc = bubble_ex = not config.pshard_graceful_to
-            pshard_stats_url = urlparse.urljoin(config.url, pshard_stats_url)
+            pshard_stats_url = self._join_url(config.url, pshard_stats_url)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
                 self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
@@ -455,13 +457,13 @@ class ESCheck(AgentCheck):
 
 
         # Load the health data.
-        health_url = urlparse.urljoin(config.url, health_url)
+        health_url = self._join_url(config.url, health_url)
         health_data = self._get_data(health_url, config)
         self._process_health_data(health_data, config)
 
         if config.pending_task_stats:
             # Load the pending_tasks data.
-            pending_tasks_url = urlparse.urljoin(config.url, pending_tasks_url)
+            pending_tasks_url = self._join_url(config.url, pending_tasks_url)
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
 
@@ -495,6 +497,15 @@ class ESCheck(AgentCheck):
         self.service_metadata('version', version)
         self.log.debug("Elasticsearch version is %s" % version)
         return version
+
+    def _join_url(self, base, url, admin_forwarder=False):
+        # overrides `urlparse.urljoin` since it removes base url path
+        # https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
+        if admin_forwarder:
+            return base + url
+        else:
+            return urlparse.urljoin(base, url)
+
 
     def _define_params(self, version, cluster_stats):
         """ Define the set of URLs and METRICS to use depending on the
