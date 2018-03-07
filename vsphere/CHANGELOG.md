@@ -1,6 +1,6 @@
 # CHANGELOG - vsphere
 
-## 2.0.0 / Unreleased
+## 2.0.0 / 2018-02-28
 
  * [FEATURE] Run with Agent versions >= 6.
  * [FEATURE] Add custom tag support.
