@@ -1,0 +1,2 @@
+class UnknownMetric(Exception):
+    pass

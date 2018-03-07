@@ -1,0 +1,20 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "envoy",
+  "short_description": "Gain insight into your distributed systems using Envoy.",
+  "guid": "007f4e6c-ac88-411e-ad81-f0272539b5ff",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "version": "1.0.0",
+  "public_title": "Datadog-Envoy Integration",
+  "categories":["cloud", "web"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/envoy/",
+  "is_public": true,
+  "has_logo": true
+}
