@@ -211,7 +211,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$"]),
             service_perf=True)
 
-        config["instances"][0]["tags"]=['optional:tag1']
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
@@ -247,7 +247,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$",]),
             service_perf=True)
 
-        config["instances"][0]["tags"]=['optional:tag1']
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
@@ -281,8 +281,8 @@ class PerfDataTailerTestCase(NagiosTestCase):
         config = self.get_config(
             '\n'.join(["host_perfdata_file=%s" % self.log_file.name, "host_perfdata_file_template=DATATYPE::HOSTPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tHOSTPERFDATA::$HOSTPERFDATA$\tHOSTCHECKCOMMAND::$HOSTCHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$"]),
             host_perf=True)
-        
-        config["instances"][0]["tags"]=['optional:tag1']
+
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
