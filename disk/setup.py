@@ -21,7 +21,6 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
-
 setup(
     name='datadog-disk',
     version=ABOUT["__version__"],
@@ -55,7 +54,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     # Development dependencies, run with:
