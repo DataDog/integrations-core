@@ -1,6 +1,6 @@
 # CHANGELOG - Aspdotnet
 
-0.1.1 / Unreleased
+0.1.1 / 2018-03-07
 ==================
 ### Changes
 * [Fix] Fixed tag initialization & reporting.
@@ -11,3 +11,4 @@
 ### Changes
 
 * [FEATURE] adds aspdotnet integration.
+
