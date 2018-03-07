@@ -432,7 +432,6 @@ class ESCheck(AgentCheck):
         # is retreived here, and added to the tag list.
 
         stats_url = self._join_url(config.url, stats_url, admin_forwarder)
-        import pdb; pdb.set_trace()
         stats_data = self._get_data(stats_url, config)
         if stats_data['cluster_name']:
             # retreive the cluster name from the data, and append it to the
