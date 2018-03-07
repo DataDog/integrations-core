@@ -368,10 +368,10 @@ class LinkerdCheck(PrometheusCheck):
             else:
                 self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.UNKNOWN,
                                tags=tags)
-                raise CheckException("Error pinging {}. Server responded with: {}".format(PING_ENDPOINT, r.content))
+                raise CheckException("Error pinging {}. Server responded with: {}".format(ping_url, r.content))
         except requests.exceptions.HTTPError as e:
             self.service_check(SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
                                tags=tags)
-            raise CheckException("Error pinging {}. Error: {}".format(PING_ENDPOINT, e))
+            raise CheckException("Error pinging {}. Error: {}".format(ping_url, e))
 
         self.process(prometheus_url, send_histograms_buckets=True, instance=instance)
