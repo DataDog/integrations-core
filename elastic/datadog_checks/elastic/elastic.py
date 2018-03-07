@@ -456,7 +456,7 @@ class ESCheck(AgentCheck):
 
 
         # Load the health data.
-        health_url = self._join_url(config.url, health_url)
+        health_url = self._join_url(config.url, health_url, admin_forwarder)
         health_data = self._get_data(health_url, config)
         self._process_health_data(health_data, config)
 
