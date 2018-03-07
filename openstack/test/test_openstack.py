@@ -289,6 +289,7 @@ class TestOpenstack(AgentCheckTest):
 
     def test_ensure_auth_scope(self):
         instance = self.MOCK_CONFIG["instances"][0]
+        instance['tags'] = ['optional:tag1']
 
         self.assertRaises(KeyError, self.check.get_scope_for_instance, instance)
 
@@ -299,12 +300,12 @@ class TestOpenstack(AgentCheckTest):
             self.check._send_api_service_checks(scope)
 
             self.service_checks = self.check.get_service_checks()
-
+            tags = ['optional:tag1']
             # Expect OK, since we've mocked an API response
-            self.assertServiceCheck(self.check.IDENTITY_API_SC, status=AgentCheck.OK, count=1)
+            self.assertServiceCheck(self.check.IDENTITY_API_SC, status=AgentCheck.OK, count=1, tags=tags)
 
             # Expect CRITICAL since URLs are non-existent
-            self.assertServiceCheck(self.check.COMPUTE_API_SC, status=AgentCheck.CRITICAL, count=1)
+            self.assertServiceCheck(self.check.COMPUTE_API_SC, status=AgentCheck.CRITICAL, count=1, tags=tags)
             self.assertServiceCheck(self.check.NETWORK_API_SC, status=AgentCheck.CRITICAL, count=1)
 
             self.check._current_scope = scope
