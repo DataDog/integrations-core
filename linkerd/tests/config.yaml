@@ -9,4 +9,5 @@ routers:
   - port: 8080
 telemetry:
   - kind: io.l5d.prometheus
+    path: "/admin/datadog/metrics"
     prefix: "dd_linkerd_"

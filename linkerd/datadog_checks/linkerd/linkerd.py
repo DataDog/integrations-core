@@ -339,6 +339,7 @@ class LinkerdCheck(PrometheusCheck):
     def check(self, instance):
         admin_ip = instance.get('admin_ip')
         admin_port = instance.get('admin_port')
+        prometheus_endpoint = instance.get('prometheus_endpoint') or PROMETHEUS_ENDPOINT
 
         if admin_ip is None or admin_port is None:
             raise CheckException("Unable to find admin_ip and admin_port in config file.")
@@ -347,7 +348,7 @@ class LinkerdCheck(PrometheusCheck):
         prometheus_url = "http://{}:{}{}".format(
             admin_ip,
             admin_port,
-            PROMETHEUS_ENDPOINT
+            prometheus_endpoint
         )
 
         ping_url = "http://{}:{}{}".format(

@@ -11,11 +11,12 @@ from datadog_checks.linkerd import LinkerdCheck
 # 3p
 import docker
 
-PROMETHEUS_ENDPOINT = 'http://127.0.0.1:19990/admin/metrics/prometheus'
+PROMETHEUS_URL = 'http://127.0.0.1:19990/admin/datadog/metrics'
 
 INSTANCES = [{
     'admin_ip': '127.0.0.1',
     'admin_port': '19990',
+    'prometheus_endpoint': '/admin/datadog/metrics'
 }]
 
 INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}
@@ -64,7 +65,7 @@ def linkerd(request):
         container.remove()
         pass
     request.addfinalizer(teardown)
-    wait_for(PROMETHEUS_ENDPOINT, 30)
+    wait_for(PROMETHEUS_URL, 30)
     return container
 
 
