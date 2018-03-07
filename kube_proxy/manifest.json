@@ -6,7 +6,6 @@
   "name": "kube_proxy",
   "short_description": "kube_proxy description.",
   "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
-  "support": "contrib",
+  "support": "core",
   "supported_os": ["linux","mac_os","windows"],
-  "version": "0.1.0"
 }

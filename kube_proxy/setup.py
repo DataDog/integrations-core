@@ -37,7 +37,7 @@ setup(
     author_email='packages@datadoghq.com',
 
     # License
-    license='MIT',
+    license='New BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -57,14 +57,6 @@ setup(
     install_requires=[
         'datadog-checks-base',
     ],
-
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-        ],
-    },
 
     # Testing setup and dependencies
     setup_requires=['pytest-runner',],
