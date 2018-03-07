@@ -269,6 +269,9 @@ init_config:
           fetch-size-avg:
             metric_type: gauge
             alias: kafka.consumer.fetch_size_avg
+        tags:
+          client: $1
+          topic: $2
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
@@ -276,6 +279,9 @@ init_config:
           fetch-size-max:
             metric_type: gauge
             alias: kafka.consumer.fetch_size_max
+        tags:
+          client: $1
+          topic: $2
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
@@ -283,6 +289,9 @@ init_config:
           bytes-consumed-rate:
             metric_type: gauge
             alias: kafka.consumer.bytes_consumed
+        tags:
+          client: $1
+          topic: $2
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
@@ -290,6 +299,9 @@ init_config:
           records-per-request-avg:
             metric_type: gauge
             alias: kafka.consumer.records_per_request_avg
+        tags:
+          client: $1
+          topic: $2
     - include:
         domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
@@ -297,6 +309,9 @@ init_config:
           records-consumed-rate:
             metric_type: gauge
             alias: kafka.consumer.records_consumed
+        tags:
+          client: $1
+          topic: $2
             
     #
     # Aggregate cluster stats
