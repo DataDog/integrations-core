@@ -1,6 +1,6 @@
 # CHANGELOG - openstack
 
-1.1.0 / Unreleased
+1.1.0 / 2018-02-28
 ==================
 
 ### Changes
@@ -34,3 +34,4 @@
 [#515]: https://github.com/DataDog/integrations-core/issues/515
 [#878]: https://github.com/DataDog/integrations-core/issues/878
 [#1119]: https://github.com/DataDog/integrations-core/issues/1119
+[#1123]: https://github.com/DataDog/integrations-core/issues/1123
