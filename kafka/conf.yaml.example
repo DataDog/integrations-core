@@ -143,7 +143,7 @@ init_config:
     #
     - include:
         domain: 'kafka.producer'
-        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           byte-rate:
             metric_type: gauge
@@ -153,7 +153,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.producer'
-        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           record-send-rate:
             metric_type: gauge
@@ -163,7 +163,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.producer'
-        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           compression-rate:
             metric_type: gauge
@@ -173,7 +173,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.producer'
-        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           record-retry-rate:
             metric_type: gauge
@@ -183,7 +183,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.producer'
-        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           record-error-rate:
             metric_type: gauge
@@ -264,7 +264,7 @@ init_config:
 
     - include:
         domain: 'kafka.consumer'
-        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           fetch-size-avg:
             metric_type: gauge
@@ -274,7 +274,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.consumer'
-        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           fetch-size-max:
             metric_type: gauge
@@ -284,7 +284,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.consumer'
-        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           bytes-consumed-rate:
             metric_type: gauge
@@ -294,7 +294,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.consumer'
-        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           records-per-request-avg:
             metric_type: gauge
@@ -304,7 +304,7 @@ init_config:
           topic: $2
     - include:
         domain: 'kafka.consumer'
-        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),(.*?)'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           records-consumed-rate:
             metric_type: gauge
