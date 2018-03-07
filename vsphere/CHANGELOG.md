@@ -2,8 +2,8 @@
 
 ## 2.0.0 / 2018-02-28
 
- * [FEATURE] Run with Agent versions >= 6.
- * [FEATURE] Add custom tag support.
+ * [FEATURE] Run with Agent versions >= 6. See [#1098][].
+ * [FEATURE] Add custom tag support. See [#1178][].
 
 ## 1.0.4 / 2017-10-10
 
@@ -29,3 +29,5 @@
 [#346]: https://github.com/DataDog/integrations-core/issues/346
 [#484]: https://github.com/DataDog/integrations-core/issues/484
 [#722]: https://github.com/DataDog/integrations-core/issues/722
+[#1098]: https://github.com/DataDog/integrations-core/issues/1098
+[#1178]: https://github.com/DataDog/integrations-core/issues/1178
