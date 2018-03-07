@@ -38,10 +38,8 @@ class WMICheck(WinWMICheck):
         tag_queries = instance.get('tag_queries', [])
 
         constant_tags = instance.get('constant_tags')
-        print 'constant_tags,', constant_tags
         if constant_tags is None:
             constant_tags = instance.get('tags', [])
-            print 'tags', constant_tags
         else:
             self.log.warning("`constant_tags` is being deprecated, please use `tags`")
 
