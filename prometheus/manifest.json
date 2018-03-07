@@ -7,5 +7,5 @@
   "short_description": "prometheus description.",
   "guid": "58e75868-0933-407b-aaa5-469c252bdb2b",
   "support": "core",
-  "supported_os": ["linux","mac_os","windows"],
+  "supported_os": ["linux","mac_os","windows"]
 }
