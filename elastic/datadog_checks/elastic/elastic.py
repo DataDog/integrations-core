@@ -418,11 +418,11 @@ class ESCheck(AgentCheck):
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
-        # try:
-        #     version = self._get_es_version(config)
-        # except AuthenticationError as e:
-        #     self.log.exception("The ElasticSearch credentials are incorrect")
-        #     raise
+        try:
+            version = self._get_es_version(config)
+        except AuthenticationError as e:
+            self.log.exception("The ElasticSearch credentials are incorrect")
+            raise
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url, stats_metrics, \
             pshard_stats_metrics = self._define_params(version, config.cluster_stats)
