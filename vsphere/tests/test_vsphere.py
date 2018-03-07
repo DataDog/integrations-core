@@ -145,9 +145,7 @@ def test__discover_mor(vsphere, instance):
         'vm_include': "vm[^2]",
     }
     include_only_marked = True
-    print "before addition", instance
     instance["tags"] = ["optional:tag1"]
-    print "after addition", instance
 
     # Discover hosts and virtual machines
     vsphere._discover_mor(instance, tags, include_regexes, include_only_marked)
