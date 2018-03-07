@@ -37,6 +37,7 @@ class GitlabRunnerCheck(PrometheusCheck):
     def check(self, instance):
         #### Metrics collection
         endpoint = instance.get('prometheus_endpoint')
+        custom_tags = instance.get('tags', [])
         if endpoint is None:
             raise CheckException("Unable to find prometheus_endpoint in config file.")
 
@@ -45,15 +46,15 @@ class GitlabRunnerCheck(PrometheusCheck):
 
         try:
             self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
-            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.OK, tags=custom_tags)
         except requests.exceptions.ConnectionError as e:
             # Unable to connect to the metrics endpoint
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, PrometheusCheck.CRITICAL,
-                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message))
+                               message="Unable to retrieve Prometheus metrics from endpoint %s: %s" % (endpoint, e.message), tags=custom_tags)
 
 
         #### Service check to check whether the Runner can talk to the Gitlab master
-        self._check_connectivity_to_master(instance)
+        self._check_connectivity_to_master(instance, custom_tags)
 
     # Validates that the runner can connect to Gitlab
     #
@@ -61,7 +62,7 @@ class GitlabRunnerCheck(PrometheusCheck):
     # or IP whitelisting based on the version
     # https://docs.gitlab.com/ce/user/admin_area/monitoring/health_check.html
     # TODO: consider using those endpoints
-    def _check_connectivity_to_master(self, instance):
+    def _check_connectivity_to_master(self, instance, tags):
         url = instance.get('gitlab_url')
         if url is None:
             # Simply ignore this service check if not configured
@@ -71,6 +72,7 @@ class GitlabRunnerCheck(PrometheusCheck):
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         service_check_tags = ['gitlab_host:%s' % gitlab_host, 'gitlab_port:%s' % gitlab_port]
+        service_check_tags.extend(tags)
 
         ## Load the ssl configuration
         ssl_params = {

@@ -31,6 +31,7 @@ class TestGitlabRunner(AgentCheckTest):
         'prometheus_endpoint': 'http://localhost:8087/metrics',
         'gitlab_url': 'http://localhost:8085/ci',
         'disable_ssl_validation': True,
+        'tags': ['optional:tag1']
     }
 
     BASE_CONFIG = {
@@ -46,13 +47,16 @@ class TestGitlabRunner(AgentCheckTest):
         """
         self.run_check(self.BASE_CONFIG)
         for metric in self.ALLOWED_METRICS:
-            self.assertMetric("gitlab_runner.%s" % metric)
+            if metric.startswith('ci_runner'):
+                self.assertMetric("gitlab_runner.%s" % metric)
+            else:
+                self.assertMetric("gitlab_runner.%s" % metric, tags=['optional:tag1'])
 
     def test_connection_success(self):
         self.run_check(self.BASE_CONFIG)
 
         self.assertServiceCheck('gitlab_runner.can_connect', status=PrometheusCheck.OK,
-                                tags=['gitlab_host:localhost', 'gitlab_port:8085'], count=1)
+                                tags=['gitlab_host:localhost', 'gitlab_port:8085', 'optional:tag1'], count=1)
 
     def test_connection_failure(self):
         config = copy.deepcopy(self.BASE_CONFIG)
@@ -64,4 +68,4 @@ class TestGitlabRunner(AgentCheckTest):
             lambda: self.run_check(config)
         )
         self.assertServiceCheck('gitlab_runner.can_connect', status=PrometheusCheck.CRITICAL,
-                                tags=['gitlab_host:localhost', 'gitlab_port:1234'], count=1)
+                                tags=['gitlab_host:localhost', 'gitlab_port:1234', 'optional:tag1'], count=1)
