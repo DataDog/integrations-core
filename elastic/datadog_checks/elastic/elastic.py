@@ -445,7 +445,7 @@ class ESCheck(AgentCheck):
         # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
             send_sc = bubble_ex = not config.pshard_graceful_to
-            pshard_stats_url = self._join_url(config.url, pshard_stats_url)
+            pshard_stats_url = self._join_url(config.url, pshard_stats_url, admin_forwarder)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
                 self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
@@ -462,7 +462,7 @@ class ESCheck(AgentCheck):
 
         if config.pending_task_stats:
             # Load the pending_tasks data.
-            pending_tasks_url = self._join_url(config.url, pending_tasks_url)
+            pending_tasks_url = self._join_url(config.url, pending_tasks_url, admin_forwarder)
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
 
