@@ -3,6 +3,7 @@
 ## 2.0.0 / Unreleased
 
  * [FEATURE] Run with Agent versions >= 6.
+ * [FEATURE] Add custom tag support.
 
 ## 1.0.4 / 2017-10-10
 
