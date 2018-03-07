@@ -139,12 +139,15 @@ def test__discover_mor(vsphere, instance):
         ```
     """
     # Samples
-    tags = ["toto"]
+    tags = ["toto", "optional:tag1"]
     include_regexes = {
         'host_include': "host[2-9]",
         'vm_include': "vm[^2]",
     }
     include_only_marked = True
+    print "before addition", instance
+    instance["tags"] = ["optional:tag1"]
+    print "after addition", instance
 
     # Discover hosts and virtual machines
     vsphere._discover_mor(instance, tags, include_regexes, include_only_marked)
@@ -157,13 +160,13 @@ def test__discover_mor(vsphere, instance):
     tags = [
         "toto", "vsphere_folder:rootFolder", "vsphere_datacenter:datacenter1",
         "vsphere_compute:compute_resource1", "vsphere_cluster:compute_resource1",
-        "vsphere_type:host"
+        "vsphere_type:host", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="host2", spec="host", tags=tags)
     tags = [
         "toto", "vsphere_folder:rootFolder", "vsphere_folder:folder1",
         "vsphere_datacenter:datacenter2", "vsphere_compute:compute_resource2",
-        "vsphere_cluster:compute_resource2", "vsphere_type:host"
+        "vsphere_cluster:compute_resource2", "vsphere_type:host", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="host3", spec="host", tags=tags)
 
@@ -172,7 +175,7 @@ def test__discover_mor(vsphere, instance):
     tags = [
         "toto", "vsphere_folder:folder1", "vsphere_datacenter:datacenter2",
         "vsphere_compute:compute_resource2", "vsphere_cluster:compute_resource2",
-        "vsphere_host:host3", "vsphere_type:vm"
+        "vsphere_host:host3", "vsphere_type:vm", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="vm4", spec="vm", subset=True, tags=tags)
 
