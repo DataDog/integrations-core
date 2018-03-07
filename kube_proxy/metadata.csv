@@ -1,0 +1,7 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+kubeproxy.cpu.time,gauge,,second,,Total user and system CPU time spent in seconds,0,kube_proxy,cpu time
+kubeproxy.mem.resident,gauge,,byte,,Resident memory size in bytes,0,kube_proxy,resident memory
+kubeproxy.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,kube_proxy,virtual memory
+kubeproxy.client.http.requests,gauge,,request,,Number of HTTP requests partitioned by status code method and host,0,kube_proxy,http request
+kubeproxy.sync_rules.latency.count,gauge,,,,SyncProxyRules latency count,0,kube_proxy,rules sync latency count
+kubeproxy.sync_rules.latency.sum,gauge,,microsecond,,SyncProxyRules latency sum,0,kube_proxy,rules sync latency sum

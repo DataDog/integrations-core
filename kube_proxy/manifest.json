@@ -1,0 +1,11 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.1.0",
+  "max_agent_version": "6.0.0",
+  "min_agent_version": "5.6.3",
+  "name": "kube_proxy",
+  "short_description": "kube_proxy description.",
+  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
+  "support": "core",
+  "supported_os": ["linux","mac_os","windows"],
+}

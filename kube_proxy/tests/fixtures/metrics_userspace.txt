@@ -1,0 +1,291 @@
+# HELP apiserver_audit_event_total Counter of audit events generated and sent to the audit backend.
+# TYPE apiserver_audit_event_total counter
+apiserver_audit_event_total 0
+# HELP apiserver_client_certificate_expiration_seconds Distribution of the remaining lifetime on the certificate used to authenticate a request.
+# TYPE apiserver_client_certificate_expiration_seconds histogram
+apiserver_client_certificate_expiration_seconds_bucket{le="0"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="21600"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="43200"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="86400"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="172800"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="345600"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="604800"} 0
+apiserver_client_certificate_expiration_seconds_bucket{le="+Inf"} 0
+apiserver_client_certificate_expiration_seconds_sum 0
+apiserver_client_certificate_expiration_seconds_count 0
+# HELP etcd_helper_cache_entry_count Counter of etcd helper cache entries. This can be different from etcd_helper_cache_miss_count because two concurrent threads can miss the cache and generate the same entry twice.
+# TYPE etcd_helper_cache_entry_count counter
+etcd_helper_cache_entry_count 0
+# HELP etcd_helper_cache_hit_count Counter of etcd helper cache hits.
+# TYPE etcd_helper_cache_hit_count counter
+etcd_helper_cache_hit_count 0
+# HELP etcd_helper_cache_miss_count Counter of etcd helper cache miss.
+# TYPE etcd_helper_cache_miss_count counter
+etcd_helper_cache_miss_count 0
+# HELP etcd_request_cache_add_latencies_summary Latency in microseconds of adding an object to etcd cache
+# TYPE etcd_request_cache_add_latencies_summary summary
+etcd_request_cache_add_latencies_summary{quantile="0.5"} NaN
+etcd_request_cache_add_latencies_summary{quantile="0.9"} NaN
+etcd_request_cache_add_latencies_summary{quantile="0.99"} NaN
+etcd_request_cache_add_latencies_summary_sum 0
+etcd_request_cache_add_latencies_summary_count 0
+# HELP etcd_request_cache_get_latencies_summary Latency in microseconds of getting an object from etcd cache
+# TYPE etcd_request_cache_get_latencies_summary summary
+etcd_request_cache_get_latencies_summary{quantile="0.5"} NaN
+etcd_request_cache_get_latencies_summary{quantile="0.9"} NaN
+etcd_request_cache_get_latencies_summary{quantile="0.99"} NaN
+etcd_request_cache_get_latencies_summary_sum 0
+etcd_request_cache_get_latencies_summary_count 0
+# HELP get_token_count Counter of total Token() requests to the alternate token source
+# TYPE get_token_count counter
+get_token_count 0
+# HELP get_token_fail_count Counter of failed Token() requests to the alternate token source
+# TYPE get_token_fail_count counter
+get_token_fail_count 0
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 6.2228e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000145011
+go_gc_duration_seconds{quantile="0.5"} 0.000258663
+go_gc_duration_seconds{quantile="0.75"} 0.000596393
+go_gc_duration_seconds{quantile="1"} 0.000846459
+go_gc_duration_seconds_sum 0.004083448
+go_gc_duration_seconds_count 11
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 87
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.4197888e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 4.5471448e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.459797e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 275731
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 6.83200171849863e-05
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 919552
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.4197888e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 3.940352e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.5949824e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 69083
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 0
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.9890176e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.5154319454851243e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 2248
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 344814
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 4800
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 187112
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 212992
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 2.1667376e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.079971e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.081344e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.081344e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 2.4660216e+07
+# HELP go_threads Number of OS threads created
+# TYPE go_threads gauge
+go_threads 11
+# HELP http_request_duration_microseconds The HTTP request latencies in microseconds.
+# TYPE http_request_duration_microseconds summary
+http_request_duration_microseconds{handler="prometheus",quantile="0.5"} 1207.65
+http_request_duration_microseconds{handler="prometheus",quantile="0.9"} 4393.327
+http_request_duration_microseconds{handler="prometheus",quantile="0.99"} 4393.327
+http_request_duration_microseconds_sum{handler="prometheus"} 19285.776
+http_request_duration_microseconds_count{handler="prometheus"} 6
+# HELP http_request_size_bytes The HTTP request sizes in bytes.
+# TYPE http_request_size_bytes summary
+http_request_size_bytes{handler="prometheus",quantile="0.5"} 64
+http_request_size_bytes{handler="prometheus",quantile="0.9"} 64
+http_request_size_bytes{handler="prometheus",quantile="0.99"} 64
+http_request_size_bytes_sum{handler="prometheus"} 384
+http_request_size_bytes_count{handler="prometheus"} 6
+# HELP http_requests_total Total number of HTTP requests made.
+# TYPE http_requests_total counter
+http_requests_total{code="200",handler="prometheus",method="get"} 6
+# HELP http_response_size_bytes The HTTP response sizes in bytes.
+# TYPE http_response_size_bytes summary
+http_response_size_bytes{handler="prometheus",quantile="0.5"} 24810
+http_response_size_bytes{handler="prometheus",quantile="0.9"} 24814
+http_response_size_bytes{handler="prometheus",quantile="0.99"} 24814
+http_response_size_bytes_sum{handler="prometheus"} 148676
+http_response_size_bytes_count{handler="prometheus"} 6
+# HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
+# TYPE kubernetes_build_info gauge
+kubernetes_build_info{buildDate="2017-11-08T18:27:48Z",compiler="gc",gitCommit="f0efb3cb883751c5ffdbe6d515f3cb4fbe7b7acd",gitTreeState="clean",gitVersion="v1.8.3",goVersion="go1.8.3",major="1",minor="8",platform="linux/amd64"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 2.5
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 64000
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 16
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 8.7416832e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.51543179411e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 6.1241344e+08
+# HELP reflector_items_per_list How many items an API list returns to the reflectors
+# TYPE reflector_items_per_list summary
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.5"} 6
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.9"} 6
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.99"} 6
+reflector_items_per_list_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 6
+reflector_items_per_list_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 1
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.5"} 6
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.9"} 6
+reflector_items_per_list{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.99"} 6
+reflector_items_per_list_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 6
+reflector_items_per_list_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 1
+# HELP reflector_items_per_watch How many items an API watch returns to the reflectors
+# TYPE reflector_items_per_watch summary
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.5"} NaN
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.9"} NaN
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.99"} NaN
+reflector_items_per_watch_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0
+reflector_items_per_watch_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.5"} NaN
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.9"} NaN
+reflector_items_per_watch{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.99"} NaN
+reflector_items_per_watch_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0
+reflector_items_per_watch_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0
+# HELP reflector_last_resource_version Last resource version seen for the reflectors
+# TYPE reflector_last_resource_version gauge
+reflector_last_resource_version{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 16070
+reflector_last_resource_version{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 16011
+# HELP reflector_list_duration_seconds How long an API list takes to return and decode for the reflectors
+# TYPE reflector_list_duration_seconds summary
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.5"} 0.007075157
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.9"} 0.007075157
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.99"} 0.007075157
+reflector_list_duration_seconds_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0.007075157
+reflector_list_duration_seconds_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 1
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.5"} 0.014113491
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.9"} 0.014113491
+reflector_list_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.99"} 0.014113491
+reflector_list_duration_seconds_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0.014113491
+reflector_list_duration_seconds_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 1
+# HELP reflector_lists_total Total number of API lists done by the reflectors
+# TYPE reflector_lists_total counter
+reflector_lists_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 1
+reflector_lists_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 1
+# HELP reflector_short_watches_total Total number of short API watches done by the reflectors
+# TYPE reflector_short_watches_total counter
+reflector_short_watches_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0
+reflector_short_watches_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0
+# HELP reflector_watch_duration_seconds How long an API watch takes to return and decode for the reflectors
+# TYPE reflector_watch_duration_seconds summary
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.5"} NaN
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.9"} NaN
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940",quantile="0.99"} NaN
+reflector_watch_duration_seconds_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0
+reflector_watch_duration_seconds_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 0
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.5"} NaN
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.9"} NaN
+reflector_watch_duration_seconds{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941",quantile="0.99"} NaN
+reflector_watch_duration_seconds_sum{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0
+reflector_watch_duration_seconds_count{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 0
+# HELP reflector_watches_total Total number of API watches done by the reflectors
+# TYPE reflector_watches_total counter
+reflector_watches_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4940"} 1
+reflector_watches_total{name="reflector_k8s_io_kubernetes_pkg_client_informers_informers_generated_internalversion_factory_go_73_4941"} 1
+# HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_request_latency_seconds histogram
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET"} 0.006686863
+rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api/v1/endpoints?resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.001"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.002"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.004"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.008"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.016"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.032"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.064"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.128"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.256"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.512"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 0.022167926
+rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 0
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET"} 0.013918321
+rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api/v1/services?resourceVersion=%7Bvalue%7D",verb="GET"} 1
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="127.0.0.1:8080",method="GET"} 4
+rest_client_requests_total{code="201",host="127.0.0.1:8080",method="POST"} 1
+# HELP ssh_tunnel_open_count Counter of ssh tunnel total open attempts
+# TYPE ssh_tunnel_open_count counter
+ssh_tunnel_open_count 0
+# HELP ssh_tunnel_open_fail_count Counter of ssh tunnel failed open attempts
+# TYPE ssh_tunnel_open_fail_count counter
+ssh_tunnel_open_fail_count 0
