@@ -3,10 +3,11 @@ from invoke import task
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
-    "datadog-checks-base",
-    "disk",
-    "kubelet",
-    "vsphere",
+    'datadog-checks-base',
+    'disk',
+    'kubelet',
+    'vsphere',
+    'envoy',
 ]
 
 @task(help={
