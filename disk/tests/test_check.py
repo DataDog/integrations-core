@@ -302,16 +302,16 @@ def test_ignore_empty_regex():
     assert check._excluded_disk_re == re.compile('^$')
 
 def test_device_tagging(aggregator, psutil_mocks):
-    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}}]
+    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}, 'tags':["optional:tags1"]}]
     c = Disk('disk', None, {}, instances)
     c.check(instances[0])
 
     # Assert metrics
-    tags = ["type:dev", "tag:two", "device:{}".format(DEFAULT_DEVICE_NAME)]
+    tags = ["type:dev", "tag:two", "device:{}".format(DEFAULT_DEVICE_NAME), "optional:tags1"]
     for name, value in GAUGES_VALUES.iteritems():
         aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in RATES_VALUES.iteritems():
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), "optional:tags1"])
 
     assert aggregator.metrics_asserted_pct == 100.0
