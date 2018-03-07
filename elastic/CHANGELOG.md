@@ -1,5 +1,12 @@
 # CHANGELOG - elastic
 
+1.5.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Ensures base url path isn't removed when admin_forwarder is used. [#1202][].
+
 1.5.0 / 2018-02-13
 ==================
 
@@ -63,3 +70,4 @@
 [#893]: https://github.com/DataDog/integrations-core/issues/893
 [#1026]: https://github.com/DataDog/integrations-core/issues/1026
 [#1050]: https://github.com/DataDog/integrations-core/issues/1050
+[#1202]: https://github.com/DataDog/integrations-core/issues/1202
