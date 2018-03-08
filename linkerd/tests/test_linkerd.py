@@ -14,9 +14,7 @@ import docker
 PROMETHEUS_URL = 'http://127.0.0.1:19990/admin/datadog/metrics'
 
 INSTANCES = [{
-    'admin_ip': '127.0.0.1',
-    'admin_port': '19990',
-    'prometheus_endpoint': '/admin/datadog/metrics'
+    'prometheus_url': PROMETHEUS_URL,
 }]
 
 INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}

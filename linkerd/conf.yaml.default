@@ -1,12 +1,9 @@
 init_config:
 
 instances:
-    # ip and port to the linkerd admin interface
-    - admin_ip: localhost
-      admin_port: 9990
-
-    #  Prometheus endpoint (default : /admin/metrics/prometheus)
-    #  prometheus_endpoint: "/admin/metrics/prometheus"
+    # The linkerd prometheus endpoint
+    #
+    - prometheus_url: http://localhost:9990/admin/metrics/prometheus
     #
     # Optional prefix for exposed Prometheus metrics (should be the same as
     # what's in your linkerd config).
