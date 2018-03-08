@@ -26,7 +26,8 @@ class SshTestCase(unittest.TestCase):
                 'password': 'level1',
                 'sftp_check': False,
                 'private_key_file': '',
-                'add_missing_keys': True
+                'add_missing_keys': True,
+                'tags': ['optional:tag1']
             }, {
                 'host': 'localhost',
                 'port': 22,
@@ -58,7 +59,7 @@ class SshTestCase(unittest.TestCase):
         service = self.check.get_service_checks()
         self.assertEqual(service[0].get('status'), AgentCheck.OK)
         self.assertEqual(service[0].get('message'), "No errors occured")
-        self.assertEqual(service[0].get('tags'), ["instance:io.netgarage.org-22"])
+        self.assertEqual(service[0].get('tags'), ["instance:io.netgarage.org-22", "optional:tag1"])
 
         # Testing that bad authentication will raise exception
         self.assertRaises(Exception, self.check.check, config['instances'][1])

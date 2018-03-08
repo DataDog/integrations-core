@@ -6,6 +6,7 @@ import os
 
 import pytest
 import mock
+import requests
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import parse_metric_family, metrics_pb2
@@ -240,8 +241,7 @@ def test_process(bin_data, mocked_prometheus_check, ref_gauge):
     check.process_metric = mock.MagicMock()
     check.process(endpoint, instance=None)
     check.poll.assert_called_with(endpoint)
-    check.process_metric.assert_called_with(ref_gauge, custom_tags=[], instance=None,
-                                            send_histograms_buckets=True)
+    check.process_metric.assert_called_with(ref_gauge, instance=None)
 
 
 def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_gauge):
@@ -253,8 +253,7 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
     check.process_metric = mock.MagicMock()
     check.process(endpoint, send_histograms_buckets=False, instance=None)
     check.poll.assert_called_with(endpoint)
-    check.process_metric.assert_called_with(ref_gauge, custom_tags=[], instance=None,
-                                            send_histograms_buckets=False)
+    check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
 def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge):
@@ -268,7 +267,7 @@ def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge
     check.process(endpoint, instance=instance)
     check.poll.assert_called_with(endpoint)
     check.process_metric.assert_called_with(ref_gauge, custom_tags=['tag1:tagValue1', 'tag2:tagValue2'],
-                                            instance=instance, send_histograms_buckets=True)
+                                            instance=instance)
 
 
 def test_process_metric_gauge(mocked_prometheus_check, ref_gauge):
@@ -1532,3 +1531,50 @@ def test_label_join_with_hostname(sorted_tags_check):
                 'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z']), hostname='gke-foobar-test-kube-default-pool-9b4ff111-j75z'),
     ], any_order=True)
     p.stop()
+
+@pytest.fixture()
+def mock_get():
+    text_data = None
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'ksm.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    mock_get = mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': "text/plain"}
+        )
+    )
+
+    yield mock_get.start()
+
+    mock_get.stop()
+
+
+def test_health_service_check_ok(mock_get):
+    """ Tests endpoint health service check OK """
+    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check.NAMESPACE = 'ksm'
+    check.health_service_check = True
+    check.service_check = mock.MagicMock()
+    check.process("http://fake.endpoint:10055/metrics")
+    check.service_check.assert_called_with(
+        "ksm.prometheus.health",
+        PrometheusCheck.OK,
+        tags=["endpoint:http://fake.endpoint:10055/metrics"]
+    )
+
+def test_health_service_check_failing():
+    """ Tests endpoint health service check failing """
+    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check.NAMESPACE = 'ksm'
+    check.health_service_check = True
+    check.service_check = mock.MagicMock()
+    with pytest.raises(requests.ConnectionError):
+        check.process("http://fake.endpoint:10055/metrics")
+    check.service_check.assert_called_with(
+        "ksm.prometheus.health",
+        PrometheusCheck.CRITICAL,
+        tags=["endpoint:http://fake.endpoint:10055/metrics"]
+    )

@@ -9,7 +9,7 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 
 The HTTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
-If you need the newest version of the HTTP check, install the `dd-check-http` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+If you need the newest version of the HTTP check, install the `dd-check-http` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ### Configuration
 
@@ -62,11 +62,11 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging](/guides/tagging/) and blog post, [The power of tagged metrics](https://www.datadoghq.com/blog/the-power-of-tagged-metrics/) |
 
 
-When you have finished configuring `http_check.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `http_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section:
 
 ```
   Checks

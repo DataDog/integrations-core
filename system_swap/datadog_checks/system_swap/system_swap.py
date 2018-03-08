@@ -13,5 +13,6 @@ class SystemSwap(AgentCheck):
 
     def check(self, instance):
         swap_mem = psutil.swap_memory()
-        self.rate('system.swap.swapped_in', swap_mem.sin)
-        self.rate('system.swap.swapped_out', swap_mem.sout)
+        tags = instance.get('tags', [])
+        self.rate('system.swap.swapped_in', swap_mem.sin, tags=tags)
+        self.rate('system.swap.swapped_out', swap_mem.sout, tags=tags)

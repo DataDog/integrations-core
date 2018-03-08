@@ -9,7 +9,7 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 The Redis check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Redis servers.
 
-If you need the newest version of the Redis check, install the `dd-check-redis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+If you need the newest version of the Redis check, install the `dd-check-redis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ### Configuration
 
@@ -42,7 +42,7 @@ Configuration Options:
 
 See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Redis metrics to Datadog.
 
 #### Log Collection
 
@@ -68,11 +68,11 @@ See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending Redis logs to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Redis logs to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `redisdb` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `redisdb` under the Checks section:
 
 ```
   Checks

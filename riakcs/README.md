@@ -12,7 +12,7 @@ Capture RiakCS metrics in Datadog to:
 
 The RiakCS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RiakCS nodes.
 
-If you need the newest version of the RiakCS check, install the `dd-check-riakcs` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+If you need the newest version of the RiakCS check, install the `dd-check-riakcs` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 ### Configuration
 
@@ -30,11 +30,11 @@ instances:
 #   s3_root: s3.amazonaws.com #
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending RiakCS metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending RiakCS metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `riakcs` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `riakcs` under the Checks section:
 
 ```
   Checks

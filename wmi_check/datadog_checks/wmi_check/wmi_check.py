@@ -36,7 +36,12 @@ class WMICheck(WinWMICheck):
         filters = instance.get('filters')
         tag_by = instance.get('tag_by', "")
         tag_queries = instance.get('tag_queries', [])
+
         constant_tags = instance.get('constant_tags')
+        if constant_tags is None:
+            constant_tags = instance.get('tags', [])
+        else:
+            self.log.warning("`constant_tags` is being deprecated, please use `tags`")
 
         # Create or retrieve an existing WMISampler
         instance_hash = hash_mutable(instance)

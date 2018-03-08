@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+1.1.3 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Fixes the buffer pool metric to return the aggregated values
+
 1.1.2 / 2018-02-13
 ==================
 ### Changes

@@ -21,8 +21,8 @@ DEFAULT_COUNTERS = [
 
     # .NET Framework counters
     [".NET CLR Memory",     None, "% Time in GC",             "dotnetclr.memory.time_in_gc",           "gauge"],
-    [".NET CLR Memory",     None, "# Total committed Bytes",     "dotnetclr.memory.heap_bytes",        "gauge"],
-    [".NET CLR Memory",     None, "# Total reserved Bytes",     "dotnetclr.memory.heap_bytes",        "gauge"],
+    [".NET CLR Memory",     None, "# Total committed Bytes",  "dotnetclr.memory.committed.heap_bytes", "gauge"],
+    [".NET CLR Memory",     None, "# Total reserved Bytes",   "dotnetclr.memory.reserved.heap_bytes",  "gauge"],
 ]
 
 class DotnetclrCheck(PDHBaseCheck):

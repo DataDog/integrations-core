@@ -1,13 +1,13 @@
 # CHANGELOG - openstack
 
-1.1.0 / Unreleased
+1.1.0 / 2018-02-28
 ==================
 
 ### Changes
 
 * [BUGFIX] Properly disable the Agent's proxy settings when desired. See [#1123][]
 * [IMPROVEMENT] Adds parameter to collect metrics on all projects in a domain. See [#1119][]
-* [IMPROVEMENT] Added support for Agent >= 6.0
+* [IMPROVEMENT] Added support for Agent >= 6.0. See [#1126][]
 
 1.0.2 / 2017-11-21
 ==================
@@ -34,3 +34,5 @@
 [#515]: https://github.com/DataDog/integrations-core/issues/515
 [#878]: https://github.com/DataDog/integrations-core/issues/878
 [#1119]: https://github.com/DataDog/integrations-core/issues/1119
+[#1123]: https://github.com/DataDog/integrations-core/issues/1123
+[#1126]: https://github.com/DataDog/integrations-core/issues/1126

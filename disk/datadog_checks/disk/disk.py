@@ -59,6 +59,7 @@ class Disk(AgentCheck):
         self._all_partitions = _is_affirmative(
             instance.get('all_partitions', False))
         self._device_tag_re = instance.get('device_tag_re', {})
+        self._custom_tags = instance.get('tags', [])
 
         # Force exclusion of CDROM (iso9660) from disk check
         self._excluded_filesystems.append('iso9660')
@@ -118,6 +119,7 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags += device_tags
 
+            tags.extend(self._custom_tags)
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
                 device_name = device_name.strip('\\').lower()
@@ -215,9 +217,9 @@ class Disk(AgentCheck):
                 read_time_pct = disk.read_time * 100.0 / 1000.0
                 write_time_pct = disk.write_time * 100.0 / 1000.0
                 self.rate(self.METRIC_DISK.format('read_time_pct'),
-                      read_time_pct, device_name=disk_name)
+                      read_time_pct, device_name=disk_name, tags=self._custom_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'),
-                      write_time_pct, device_name=disk_name)
+                      write_time_pct, device_name=disk_name, tags=self._custom_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
@@ -230,6 +232,7 @@ class Disk(AgentCheck):
         for device in self._list_devices(df_out):
             self.log.debug("Passed: {0}".format(device))
             tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
+            tags.extend(self._custom_tags)
             device_name = device[-1] if self._use_mount else device[0]
             # apply device/mountpoint specific tags
             for regex, device_tags in self._device_tag_re:

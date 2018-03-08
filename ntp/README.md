@@ -22,31 +22,6 @@ To install the check on the agent:
 /opt/datadog-agent/embedded/bin/pip install .
 ```
 
-## Development
-
-Create a dedicated virtualenv and follow the instructions in this paragraph
-to work with the check.
-
-To install the check in dev mode:
-```
-pip install -e .[dev]
-```
-
-To run the tests:
-```
-python setup.py test
-```
-
-Once installed, the check is available as:
-```
-import check.ntp
-```
-
-To build the wheel package:
-```
-python setup.py bdist_wheel
-```
-
 ### Configuration
 
 The Agent enables the NTP check by default, but if you want to configure the check yourself, create a file `ntp.yaml` in the Agent's `conf.d` directory. See the [sample ntp.yaml](https://github.com/DataDog/integrations-core/blob/master/ntp/conf.yaml.default) for all available configuration options:
@@ -69,11 +44,11 @@ Configuration Options:
 * `version` (Optional) - ntp version
 * `timeout` (Optional) - Response timeout
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to effect any configuration changes.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to effect any configuration changes.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `ntp` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section:
 
 ```
   Checks

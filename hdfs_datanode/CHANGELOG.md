@@ -1,5 +1,12 @@
 # CHANGELOG - hdfs_datanode
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds custom tag support.
+
 1.1.0 / 2018-01-10
 ==================
 

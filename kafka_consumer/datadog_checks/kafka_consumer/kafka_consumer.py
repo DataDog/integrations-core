@@ -79,6 +79,8 @@ class KafkaCheck(AgentCheck):
         get_kafka_consumer_offsets = _is_affirmative(
             instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
 
+        custom_tags = instance.get('tags', [])
+
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         consumer_groups = None
         if instance.get('monitor_unlisted_consumer_groups', False):
@@ -134,16 +136,16 @@ class KafkaCheck(AgentCheck):
 
         # Report the broker highwater offset
         for (topic, partition), highwater_offset in highwater_offsets.iteritems():
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
+            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition] + custom_tags
             self.gauge('kafka.broker_offset', highwater_offset, tags=broker_tags)
 
         # Report the consumer group offsets and consumer lag
         if zk_consumer_offsets:
             self._report_consumer_metrics(highwater_offsets, zk_consumer_offsets,
-                                          topic_partitions_without_a_leader, ['source:zk'])
+                                          topic_partitions_without_a_leader, tags=custom_tags + ['source:zk'])
         if kafka_consumer_offsets:
             self._report_consumer_metrics(highwater_offsets, kafka_consumer_offsets,
-                                          topic_partitions_without_a_leader, ['source:kafka'])
+                                          topic_partitions_without_a_leader, tags=custom_tags + ['source:kafka'])
 
 
     def stop(self):

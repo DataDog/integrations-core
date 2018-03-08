@@ -10,7 +10,7 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. If you need the newest version of the IIS check, install the `dd-check-iis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. If you need the newest version of the IIS check, install the `dd-check-iis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
 
 2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:
@@ -102,7 +102,7 @@ Here's an example of configuration that would check the current machine and a re
 
 * See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending IIS metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending IIS metrics to Datadog.
 
 #### Log Collection
 
@@ -129,12 +129,12 @@ logs:
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
   
-  * [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+  * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `iis` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `iis` under the Checks section:
 
 ```
   Checks

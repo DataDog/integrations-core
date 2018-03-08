@@ -40,6 +40,10 @@ instances:
     #   - collection
     #
     # Collect metrics on specific collections from the database specified
+    # Requires `additional_metrics.collection` to be present
+    # Metrics such as `mongodb.collection.count` will be collected for each named collection and tagged as follows:
+    #   - `db:<dbname>` e.g. `db:my-db`
+    #   - `collection:<collection-name>` e.g. `collection:my_collection`
     # Each collection generates many metrics,
     # up to 8 + the number of indices on the collection for each collection
     # collections:

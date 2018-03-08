@@ -112,7 +112,7 @@ Setting this will cause any instance number to be removed from tag_by values i.e
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `wmi_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `wmi_check` under the Checks section:
 
     Checks
     ======

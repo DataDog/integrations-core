@@ -1,5 +1,12 @@
 # CHANGELOG - Nfsstat
 
+0.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] add custom tag support.
+
 0.1.1 / 2018-02-13
 ==================
 

@@ -76,6 +76,7 @@ COMMON_METRICS = [
 VARNISH_DEFAULT_VERSION = "4.1.7"
 VARNISHADM_PATH = "varnishadm"
 SECRETFILE_PATH = "secretfile"
+DAEMON_ADDRESS = "localhost:6082"
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
 # Varnish < 4.x varnishadm output
@@ -184,7 +185,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
 
 
@@ -210,7 +211,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the Varnishadm output for version >= 5.x
     @mock.patch('datadog_checks.varnish.varnish.geteuid')
@@ -226,7 +227,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], [VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], [VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
         self.assertServiceCheckOK("varnish.backend_healthy", tags=['backend:backend2'], count=1)
 
         mock_version.return_value = LooseVersion('5.0.0'), 'json'
@@ -234,7 +235,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # Test the varnishadm output for Varnish < 4.x
     @mock.patch('datadog_checks.varnish.varnish.geteuid')
@@ -258,7 +259,7 @@ class VarnishCheckTest(AgentCheckTest):
 
         self.run_check(config)
         args, _ = mock_subprocess.call_args
-        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
+        self.assertEquals(args[0], ['sudo', VARNISHADM_PATH, '-T', DAEMON_ADDRESS, '-S', SECRETFILE_PATH, 'backend.list', '-p'])
 
     # This the docker image is in a different repository, we check that the
     # verison requested in the FLAVOR_VERSION is the on running inside the

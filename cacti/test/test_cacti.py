@@ -50,7 +50,8 @@ class TestCacti(AgentCheckTest):
     CACTI_CONFIG = {
         'mysql_host': 'nohost',
         'mysql_user': 'mocked',
-        'rrd_path':   '/rrdtool/is/mocked'
+        'rrd_path':   '/rrdtool/is/mocked',
+        'tags': ['optional:tag1']
     }
 
     def setUp(self):
@@ -74,9 +75,9 @@ class TestCacti(AgentCheckTest):
 
         # We are mocking the MySQL call so we won't have cacti.rrd.count or cacti.hosts.count metrics, check for metrics that
         # are returned from our mock data.
-        self.assertMetric('cacti.metrics.count', value=10)
-        self.assertMetric('system.mem.buffered.max', value=2)
-        self.assertMetric('system.mem.buffered', value=2)
+        self.assertMetric('cacti.metrics.count', value=10, tags=['optional:tag1'])
+        self.assertMetric('system.mem.buffered.max', value=2, tags=['optional:tag1'])
+        self.assertMetric('system.mem.buffered', value=2, tags=['optional:tag1'])
 
     @mock.patch('datadog_checks.cacti.cacti.pymysql')
     @mock.patch('datadog_checks.cacti.cacti.rrdtool')
@@ -87,7 +88,7 @@ class TestCacti(AgentCheckTest):
 
         # We are mocking pymysql, this results in returning only the cacti.* metrics.
         self.run_check(config)
-        self.assertMetric('cacti.metrics.count', value=0)
-        self.assertMetric('cacti.rrd.count', value=0)
-        self.assertMetric('cacti.hosts.count', value=0)
+        self.assertMetric('cacti.metrics.count', value=0, tags=['optional:tag1'])
+        self.assertMetric('cacti.rrd.count', value=0, tags=['optional:tag1'])
+        self.assertMetric('cacti.hosts.count', value=0, tags=['optional:tag1'])
         self.coverage_report()
