@@ -10,4 +10,6 @@ before_script:
 
 test:
   script:
-  - INVOKE_RUN_SHELL="/bin/ash" inv test --changed-only
+  - export DOCKER_HOST="tcp://docker:2375"
+  - export INVOKE_RUN_SHELL="/bin/ash"
+  - inv test --changed-only

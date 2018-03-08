@@ -46,6 +46,8 @@ def redis_auth():
         "-f", os.path.join(HERE, 'compose', 'standalone.compose')
     ]
 
+    print "ENV:", env
+
     subprocess.check_call(args + ["up", "-d"], env=env)
     yield
     subprocess.check_call(args + ["down"], env=env)
