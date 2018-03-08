@@ -1,9 +1,13 @@
-image: python:2.7
+image: docker:git
 
 services:
 - docker:dind
 
+before_script:
+- docker info
+- apk add --no-cache py-pip
+- pip install -q docker-compose tox invoke
+
 test:
   script:
-  - pip install -q docker-compose tox invoke
   - inv test --changed-only
