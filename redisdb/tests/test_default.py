@@ -45,7 +45,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     assert aggregator.metric_names, "No metrics returned"
 
     # check those metrics have the right tags
-    expected = ['foo:bar', 'redis_host:localhost', 'redis_port:6379', 'redis_role:master']
+    expected = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
     expected_db = expected + ['redis_db:db14']
     for name in aggregator.metric_names:
         if name in DB_TAGGED_METRICS:
@@ -71,7 +71,7 @@ def test_service_check(aggregator, redis_auth, redis_instance):
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
-    assert sc.tags == ['foo:bar', 'redis_host:localhost', 'redis_port:6379', 'redis_role:master']
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
 
 
 @pytest.mark.integration
