@@ -12,6 +12,10 @@ from .parser import parse_metric
 class Envoy(AgentCheck):
     SERVICE_CHECK_NAME = 'envoy.can_connect'
 
+    def __init__(self, name, init_config, agent_config, instances=None):
+        super(Envoy, self).__init__(name, init_config, agent_config, instances)
+        self.unknown_metrics = set()
+
     def check(self, instance):
         custom_tags = instance.get('tags', [])
 
@@ -63,7 +67,9 @@ class Envoy(AgentCheck):
             try:
                 metric, tags, method = parse_metric(envoy_metric)
             except UnknownMetric:
-                self.log.warning('Unknown metric `{}`'.format(envoy_metric))
+                if envoy_metric not in self.unknown_metrics:
+                    self.log.debug('Unknown metric `{}`'.format(envoy_metric))
+                    self.unknown_metrics.add(envoy_metric)
                 continue
 
             tags.extend(custom_tags)
