@@ -29,13 +29,14 @@ The Agent collects metrics via a stats endpoint:
 1. Configure one in your `haproxy.conf`:
 
   ```
-  listen stats :9000  # Listen on localhost:9000
+  listen stats # Define a listen section called "stats"
+  bind :9000 # Listen on localhost:9000
   mode http
   stats enable  # Enable stats page
   stats hide-version  # Hide HAProxy version
   stats realm Haproxy\ Statistics  # Title text for popup window
   stats uri /haproxy_stats  # Stats URI
-  stats auth <your_username>:<your_password>  # Authentication credentials
+  stats auth Username:Password  # Authentication credentials
   ```
 
 2. [Restart HAProxy to enable the stats endpoint](https://www.haproxy.org/download/1.7/doc/management.txt).
