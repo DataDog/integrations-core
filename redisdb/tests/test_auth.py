@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.redisdb import Redis
 
-from .common import PORT, PASSWORD
+from .common import PORT, PASSWORD, DOCKER_HOST
 
 
 @pytest.mark.integration
@@ -17,7 +17,7 @@ def test_redis_auth_ok(aggregator, redis_auth):
     """
     redis = Redis('redisdb', {}, {})
     instance = {
-        'host': 'localhost',
+        'host': DOCKER_HOST,
         'port': PORT,
         'password': PASSWORD,
     }
@@ -32,7 +32,7 @@ def test_redis_auth_empty_pass(aggregator, redis_auth):
     """
     redis = Redis('redisdb', {}, {})
     instance = {
-        'host': 'localhost',
+        'host': DOCKER_HOST,
         'port': PORT,
         'password': ''
     }
@@ -53,7 +53,7 @@ def test_redis_auth_wrong_pass(aggregator, redis_auth):
     """
     redis = Redis('redisdb', {}, {})
     instance = {
-        'host': 'localhost',
+        'host': DOCKER_HOST,
         'port': PORT,
         'password': 'badpass'
     }

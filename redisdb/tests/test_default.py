@@ -9,7 +9,7 @@ import pytest
 import mock
 import redis
 
-from .common import PORT, PASSWORD
+from .common import PORT, PASSWORD, DOCKER_HOST
 
 
 # Following metrics are tagged by db
@@ -32,7 +32,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     """
 
     """
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD)
+    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=DOCKER_HOST)
     db.flushdb()
     db.set("key1", "value")
     db.set("key2", "value")
@@ -87,7 +87,7 @@ def test_service_metadata(redis_instance):
 
 @pytest.mark.integration
 def test_redis_command_stats(aggregator, redis_instance):
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD)
+    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=DOCKER_HOST)
     version = db.info().get('redis_version')
     if StrictVersion(version) < StrictVersion('2.6.0'):
         # Command stats only works with Redis >= 2.6.0

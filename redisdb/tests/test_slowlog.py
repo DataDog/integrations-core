@@ -8,7 +8,7 @@ from datadog_checks.redisdb import Redis
 import redis
 import pytest
 
-from .common import PORT, PASSWORD
+from .common import PORT, PASSWORD, DOCKER_HOST
 
 
 TEST_KEY = "testkey"
@@ -16,7 +16,7 @@ TEST_KEY = "testkey"
 
 @pytest.mark.integration
 def test_slowlog(aggregator, redis_instance):
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD)
+    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=DOCKER_HOST)
 
     # Tweaking Redis's config to have the test run faster
     db.config_set('slowlog-log-slower-than', 0)
@@ -40,7 +40,7 @@ def test_slowlog(aggregator, redis_instance):
 def test_custom_slowlog(aggregator, redis_instance):
     redis_instance['slowlog-max-len'] = 1
 
-    db = redis.Redis(port=PORT, db=14, password=PASSWORD)
+    db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=DOCKER_HOST)
 
     # Tweaking Redis's config to have the test run faster
     db.config_set('slowlog-log-slower-than', 0)
