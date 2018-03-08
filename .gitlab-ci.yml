@@ -5,5 +5,5 @@ services:
 
 test:
   script:
-  - pip install -q tox invoke
+  - pip install -q docker-compose tox invoke
   - inv test --changed-only
