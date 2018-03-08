@@ -15,9 +15,8 @@ PROMETHEUS_URL = 'http://127.0.0.1:19990/admin/datadog/metrics'
 
 INSTANCES = [{
     'prometheus_url': PROMETHEUS_URL,
+    'prometheus_metrics_prefix': 'dd_linkerd_',
 }]
-
-INIT_CONFIG = {'linkerd_prometheus_prefix': 'dd_linkerd_'}
 
 CHECK_NAME = METRIC_PREFIX = 'linkerd'
 
@@ -68,6 +67,6 @@ def linkerd(request):
 
 
 def test_check(linkerd, aggregator):
-    linkerd_check = LinkerdCheck(CHECK_NAME, INIT_CONFIG, {}, INSTANCES)
+    linkerd_check = LinkerdCheck(CHECK_NAME, {}, {}, INSTANCES)
     linkerd_check.check(INSTANCES[0])
     aggregator.assert_metric(METRIC_PREFIX + "." + "jvm.uptime")
