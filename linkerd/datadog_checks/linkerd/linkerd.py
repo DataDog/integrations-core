@@ -12,7 +12,7 @@ try:
     from datadog_checks.checks.prometheus import GenericPrometheusCheck
 except ImportError:
     from checks.prometheus_check import GenericPrometheusCheck
-from .metrics import DEFAULT_METRICS, DEFAULT_METRICS_TYPES
+from .metrics import DEFAULT_METRICS, DEFAULT_METRICS_TYPES, TAGS_MAPPER
 
 class LinkerdCheck(GenericPrometheusCheck):
     """
@@ -24,6 +24,7 @@ class LinkerdCheck(GenericPrometheusCheck):
             'linkerd': {
                 'metrics': [],
                 'type_overrides': {},
+                'labels_mapper': TAGS_MAPPER,
             }
         }
 

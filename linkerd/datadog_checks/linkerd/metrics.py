@@ -287,3 +287,9 @@ DEFAULT_METRICS_TYPES = {
     'rt:client:time:5XX': 'summary',
     'rt:client:dtab:size': 'summary',
 }
+
+TAGS_MAPPER = {
+    'rt' : 'linkerd_router',
+    'client': 'linkerd_client',
+    'service': 'linkerd_service',
+}
