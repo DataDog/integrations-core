@@ -139,6 +139,13 @@ The Datadog Agent submits a service check for each of Consul's health checks, ta
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
+`consul.node`
+
+The Datadog Agent submits a service check based on the status of each Node in the cluster tagged with:
+
+* `consul_url:<url>`, the value specified in the configuration yaml
+* `node:<name>`, the name of the Node that is reporting this check
+
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 

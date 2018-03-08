@@ -58,6 +58,15 @@ MOCK_CONFIG_NETWORK_LATENCY_CHECKS = {
     }]
 }
 
+MOCK_CONFIG_NODE_SERVICE_CEHCKS = {
+    'init_config': {},
+    'instances': [{
+        'url': 'http://localhost:8500',
+        'node_level_service_checks': "True",
+        'tags': ['optional:tag']
+    }]
+}
+
 MOCK_BAD_CONFIG = {
     'init_config': {},
     'instances' : [{ # Multiple instances should cause it to fail
@@ -444,6 +453,59 @@ class TestCheckConsul(AgentCheckTest):
             "ServiceName": "server-empty",
         }]
 
+    def mock_get_agent_nodes_in_cluster(self, instance):
+        return [{
+            "Name":"agent-one",
+            "Addr":"172.20.20.10",
+            "Port":8301,
+            "Tags":
+                {
+                    "bootstrap":"1",
+                    "build":"1.0.6:9a494b5f",
+                    "dc":"dc1",
+                    "id":"fb89f932-2fc3-487d-34b2-04e0bf78fa67",
+                    "port":"8300",
+                    "raft_vsn":"3",
+                    "role":"consul",
+                    "segment":"",
+                    "vsn":"2",
+                    "vsn_max":"3",
+                    "vsn_min":"2",
+                    "wan_join_port":"8302"
+                },
+            "Status":1,
+            "ProtocolMin":1,
+            "ProtocolMax":5,
+            "ProtocolCur":2,
+            "DelegateMin":2,
+            "DelegateMax":5,
+            "DelegateCur":4
+        },
+            {
+            "Name":"agent-two",
+            "Addr":"172.20.20.11",
+            "Port":8301,
+            "Tags":
+                {
+                    "build":"1.0.6:9a494b5f",
+                    "dc":"dc1",
+                    "id":"fd3ebcb4-5e03-8225-3b29-92e1917c4197",
+                    "role":"node",
+                    "segment":"",
+                    "vsn":"2",
+                    "vsn_max":"3",
+                    "vsn_min":"2"
+                },
+            "Status":4,
+            "ProtocolMin":1,
+            "ProtocolMax":5,
+            "ProtocolCur":2,
+            "DelegateMin":2,
+            "DelegateMax":5,
+            "DelegateCur":4
+        }]
+
+
     def mock_get_cluster_leader_A(self, instance):
         return '10.0.2.15:8300'
 
@@ -485,6 +547,16 @@ class TestCheckConsul(AgentCheckTest):
         self.assertMetric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_warning', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
         self.assertMetric('consul.catalog.services_critical', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+
+    def test_get_node_service_checks(self):
+        my_mocks = self._get_consul_mocks()
+        my_mocks['get_node_members'] = self.mock_get_agent_nodes_in_cluster
+
+        self.run_check(MOCK_CONFIG_NODE_SERVICE_CEHCKS, mocks=my_mocks)
+
+        self.assertServiceCheckOK('consul.node', tags=['Node:agent-one', 'optional:tag', 'consul_url:http://localhost:8500'], count=1)
+        self.assertServiceCheckCritical('consul.node', tags=['Node:agent-two', 'optional:tag', 'consul_url:http://localhost:8500'], count=1)
+
 
     def test_get_nodes_with_service_critical(self):
         my_mocks = self._get_consul_mocks()

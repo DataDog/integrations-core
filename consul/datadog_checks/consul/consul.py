@@ -54,7 +54,6 @@ class ConsulCheckInstanceState(object):
 class ConsulCheck(AgentCheck):
     CONSUL_CHECK = 'consul.up'
     HEALTH_CHECK = 'consul.check'
-    
     CONSUL_NODE_CHECK = 'consul.node'
     SERVICE_HEALTH_CHECK = 'consul.service'
 
@@ -71,6 +70,14 @@ class ConsulCheck(AgentCheck):
         'passing': AgentCheck.OK,
         'warning': AgentCheck.WARNING,
         'critical': AgentCheck.CRITICAL,
+    }
+
+    # Statuses for Serf are defined here - https://github.com/hashicorp/serf/blob/master/serf/serf.go#L149-L155
+    STATUS_AGENT_MEMBERS = {
+        '1': AgentCheck.OK,       # Status: Alive
+        '2': AgentCheck.CRITICAL, # Status: Leaving
+        '3': AgentCheck.CRITICAL, # Status: Left
+        '4': AgentCheck.CRITICAL, # Status: Failed
     }
 
     STATUS_SEVERITY = {
@@ -221,6 +228,9 @@ class ConsulCheck(AgentCheck):
 
         return self.consul_request(instance, consul_request_url)
 
+    def get_node_members(self, instance):
+        return self.consul_request(instance, '/v1/agent/members')
+
     def _cull_services_list(self, services, service_whitelist, max_services=MAX_SERVICES):
 
         if service_whitelist:
@@ -253,6 +263,7 @@ class ConsulCheck(AgentCheck):
 
         peers = self.get_peers_in_cluster(instance)
         main_tags = []
+        service_check_tags = []
         agent_dc = self._get_agent_datacenter(instance, instance_state)
 
         if agent_dc is not None:
@@ -260,6 +271,7 @@ class ConsulCheck(AgentCheck):
 
         for tag in instance.get('tags', []):
             main_tags.append(tag)
+            service_check_tags.append(tag)
 
         if not self._is_instance_leader(instance, instance_state):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:follower"])
@@ -269,7 +281,7 @@ class ConsulCheck(AgentCheck):
         else:
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:leader"])
 
-        service_check_tags = ['consul_url:{0}'.format(instance.get('url'))]
+        service_check_tags.append('consul_url:{0}'.format(instance.get('url')))
         perform_catalog_checks = instance.get('catalog_checks',
                                               self.init_config.get('catalog_checks'))
         perform_network_latency_checks = instance.get('network_latency_checks',
@@ -278,9 +290,11 @@ class ConsulCheck(AgentCheck):
         try:
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
-            
-            self.submit_node_service_check(instance, instance_state, health_state, service_check_tags)
-            
+
+            # Make service checks for each Consul node in the cluster with the Consul Agent running
+            agent_members = self.get_node_members(instance)
+            self.submit_node_service_check(instance, instance_state, agent_members, service_check_tags)
+
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
@@ -491,11 +505,11 @@ class ConsulCheck(AgentCheck):
                 self.gauge('consul.net.node.latency.p99', latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.max', latencies[-1], hostname=node_name, tags=main_tags)
 
-    def submit_node_service_check(self, instance, instance_state, health_state, service_check_tags):
+    def submit_node_service_check(self, instance, instance_state, agent_members, service_check_tags):
         # Add all nodes we see to the available list of Nodes:
         # Health check for the Consul Agent of each node
-        # Keep track of nodes we have seen and report Critical if they are missing now
-        node_level_service_checks = instance.get('node_level_service_checks', True)
+        # Keep track of nodes we have seen and report Critical if they are missing now or if they are failing
+        node_level_service_checks = instance.get('node_level_service_checks', False)
         node_regexes = instance.get("node_regexes", [])
 
         if not _is_affirmative(node_level_service_checks):
@@ -503,35 +517,29 @@ class ConsulCheck(AgentCheck):
 
         # Recompute the list of nodes based on regex parameters
         if len(node_regexes) > 0:
-            nodes = self._filter_nodes(health_state, node_regexes)
+            nodes = self._filter_nodes(agent_members, node_regexes)
         else:
-            nodes = health_state
+            nodes = agent_members
 
-        if len(nodes) > MAX_NODES:
-            self.log.error("There are too many available nodes to collect. Please use the node regex to reduce the number of nodes from: %s to below %s": len(nodes), MAX_NODES)
+        if len(nodes) > self.MAX_NODES:
+            self.log.error("There are too many available nodes to collect, skipping per node service checks. Please use the node regex to reduce the number of nodes from: %s to below: %s:", len(nodes), self.MAX_NODES)
+            return
 
         self.log.debug("Submitting Node Service check for: %s", nodes)
 
         missing_nodes = instance_state.last_known_nodes
         for node in nodes:
-            instance_state.last_known_nodes[node['Node']] = node['Status']
-            del missing_nodes[node['Node']]
-            service_check_tags = []
-            service_check_tags.append("Node:{}".format(node['Node']))
-            self.service_check(self.CONSUL_NODE_CHECK, self.STATUS_SC.get(node['Status']), tags=service_check_tags)
+            instance_state.last_known_nodes[node['Name']] = node['Status']
+            del missing_nodes[node['Name']]
+            self.service_check(self.CONSUL_NODE_CHECK, self.STATUS_AGENT_MEMBERS.get(str(node['Status'])), tags=service_check_tags+["Node:{}".format(node['Name'])])
 
         for node in missing_nodes:
-            service_check_tags = []
-            service_check_tags.append("Node:{}".format(node['Node']))
-            self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags=service_check_tags+["Node:{}".format(node['Name'])])
 
     def _filter_nodes(self, nodes, regexes):
         filtered_nodes = []
         for node in nodes:
             for regex in regexes:
-                match = False
-                match = re.search(regex, node['Node'])
-                if match: 
+                if re.search(regex, node['Name']):
                     filtered_nodes.append(node)
-
         return filtered_nodes

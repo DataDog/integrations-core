@@ -62,7 +62,6 @@ instances:
       # node_regexes: 
       #   - bla.*
 
-
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
       # on the same agent.
