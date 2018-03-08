@@ -8,7 +8,7 @@ import time
 import pytest
 import redis
 
-from .common import DOCKER_HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
+from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -66,7 +66,7 @@ def redis_cluster():
 
     subprocess.check_call(args + ["up", "-d"])
     # wait for the cluster to be up before yielding
-    wait_for_cluster(redis.Redis(port=MASTER_PORT, db=14, host=DOCKER_HOST))
+    wait_for_cluster(redis.Redis(port=MASTER_PORT, db=14, host=HOST))
     yield
     subprocess.check_call(args + ["down"])
 
@@ -81,7 +81,7 @@ def aggregator():
 @pytest.fixture
 def redis_instance():
     return {
-        'host': DOCKER_HOST,
+        'host': HOST,
         'port': PORT,
         'password': PASSWORD,
         'tags': ["foo:bar"]
@@ -91,7 +91,7 @@ def redis_instance():
 @pytest.fixture
 def replica_instance():
     return {
-        'host': DOCKER_HOST,
+        'host': HOST,
         'port': REPLICA_PORT,
         'tags': ["bar:baz"]
     }
@@ -100,6 +100,6 @@ def replica_instance():
 @pytest.fixture
 def master_instance():
     return {
-        'host': DOCKER_HOST,
+        'host': HOST,
         'port': MASTER_PORT,
     }

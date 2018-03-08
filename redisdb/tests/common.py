@@ -8,4 +8,4 @@ PASSWORD = 'devops-best-friend'
 MASTER_PORT = '6382'
 REPLICA_PORT = '6380'
 UNHEALTHY_REPLICA_PORT = '6381'
-DOCKER_HOST = os.getenv('DOCKER_HOST', 'localhost')
+HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')

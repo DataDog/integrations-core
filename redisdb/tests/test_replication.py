@@ -7,7 +7,7 @@ from datadog_checks.redisdb import Redis
 import pytest
 import redis
 
-from .common import MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT, DOCKER_HOST
+from .common import MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT, HOST
 
 
 REPLICA_METRICS = [
@@ -63,8 +63,8 @@ def test_redis_repl(aggregator, redis_cluster, master_instance):
     We omit watching for 'redis.replication.delay' because it's not immediately
     available at cluster startup and the test would be flaky.
     """
-    master_db = redis.Redis(port=MASTER_PORT, db=14, host=DOCKER_HOST)
-    replica_db = redis.Redis(port=REPLICA_PORT, db=14, host=DOCKER_HOST)
+    master_db = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
+    replica_db = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
     master_db.flushdb()
 
     # Ensure the replication works before running the tests
