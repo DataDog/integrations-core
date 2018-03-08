@@ -64,3 +64,12 @@ class TestEnvoy:
         # The 244 is how many metrics are collected from our
         # particular example fixture in the first release.
         assert metrics_collected >= 244
+
+    def test_unknown(self):
+        instance = self.INSTANCES['main']
+        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+
+        with mock.patch('requests.get', return_value=response('unknown_metrics')):
+            c.check(instance)
+
+        assert len(c.unknown_metrics) == 4
