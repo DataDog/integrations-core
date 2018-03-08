@@ -275,23 +275,8 @@ class ConsulCheck(AgentCheck):
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
 
-            # Add all nodes we see to the available list of Nodes:
-            # Health check for the Consul Agent of each node
-            # Keep track of nodes we have seen and report Critical if they are missing now
-            if node_level_service_checks:
-                missing_nodes = instance_state.last_known_nodes
-                for node in health_state:
-                    instance_state.last_known_nodes[node['Node']] = node['Status']
-                    del missing_nodes[node['Node']]
-                    service_check_tags = []
-                    service_check_tags.append("Node:{}".format(node['Node']))
-                    self.service_check(self.CONSUL_NODE_CHECK, self.STATUS_SC.get(node['Status']), tags=service_check_tags)
-
-                for node in missing_nodes:
-                    service_check_tags = []
-                    service_check_tags.append("Node:{}".format(node['Node']))
-                    self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags = service_check_tags)
-
+            submit_node_service_check(instance, health_state)
+            
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
             for check in health_state:
@@ -501,3 +486,21 @@ class ConsulCheck(AgentCheck):
                 self.gauge('consul.net.node.latency.p95', latencies[ceili(n * 0.95) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.p99', latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.max', latencies[-1], hostname=node_name, tags=main_tags)
+
+def submit_node_service_check(self, health_state):
+    # Add all nodes we see to the available list of Nodes:
+    # Health check for the Consul Agent of each node
+    # Keep track of nodes we have seen and report Critical if they are missing now
+    if node_level_service_checks:
+        missing_nodes = instance_state.last_known_nodes
+        for node in health_state:
+            instance_state.last_known_nodes[node['Node']] = node['Status']
+            del missing_nodes[node['Node']]
+            service_check_tags = []
+            service_check_tags.append("Node:{}".format(node['Node']))
+            self.service_check(self.CONSUL_NODE_CHECK, self.STATUS_SC.get(node['Status']), tags=service_check_tags)
+
+        for node in missing_nodes:
+            service_check_tags = []
+            service_check_tags.append("Node:{}".format(node['Node']))
+            self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags = service_check_tags)
