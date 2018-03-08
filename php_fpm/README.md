@@ -9,7 +9,7 @@ The PHP-FPM check monitors the state of your FPM pool and tracks request perform
 
 The PHP-FPM check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use PHP-FPM.
 
-If you need the newest version of the PHP-FPM check, install the `dd-check-php-fpm` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the PHP-FPM check, install the `dd-check-php-fpm` package; this package's check overrides the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 ### Configuration
 

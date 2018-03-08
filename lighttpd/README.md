@@ -9,7 +9,7 @@ The Agent's lighttpd check tracks uptime, bytes served, requests per second, res
 
 The lighttpd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your lighttpd servers.
 
-If you need the newest version of the Lighttpd check, install the `dd-check-lighttpd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the Lighttpd check, install the `dd-check-lighttpd` package; this package's check overrides the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 You'll also need to install `mod_status` on your Lighttpd servers.
 

@@ -19,7 +19,7 @@ The Spark check is packaged with the Agent, so simply [install the Agent](https:
 - Spark master (if you're running Standalone Spark)
 
 
-If you need the newest version of the Spark check, install the `dd-check-spark` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the Spark check, install the `dd-check-spark` package; this package's check overrides the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 ### Configuration
 

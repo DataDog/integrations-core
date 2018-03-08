@@ -9,7 +9,7 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 
 The Solr check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Solr nodes.
 
-If you need the newest version of the Solr check, install the `dd-check-solr` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the Solr check, install the `dd-check-solr` package; this package's check overrides the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Read the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for more information on that.
 

@@ -16,7 +16,7 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 
 The Datadog Agent's Gunicorn check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gunicorn servers.
 
-If you need the newest version of the Gunicorn check, install the `dd-check-gunicorn` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the Gunicorn check, install the `dd-check-gunicorn` package; this package's check will override the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 The Gunicorn check requires your Gunicorn app's Python environment to have the [`setproctitle`](https://pypi.python.org/pypi/setproctitle) package; without it, the Datadog Agent will always report that it cannot find a `gunicorn` master process (and hence, cannot find workers, either). Install the `setproctitle` package in your app's Python environment if you want to collect the `gunicorn.workers` metric.
 

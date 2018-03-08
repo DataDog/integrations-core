@@ -11,7 +11,7 @@ This check does **NOT** forward application metrics from StatsD servers to Datad
 
 The StatsD check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that run StatsD.
 
-If you need the newest version of the StatsD check, install the `dd-check-statsd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the StatsD check, install the `dd-check-statsd` package; this package's check overrides the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 ### Configuration
 

@@ -9,7 +9,7 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 
 The HTTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
-If you need the newest version of the HTTP check, install the `dd-check-http` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+If you need the newest version of the HTTP check, install the `dd-check-http` package; this package's check will override the one packaged with the Agent. See the [Installing Core & Extra Integrations documentation page](https://docs.datadoghq.com/agent/faq/install-core-extra/) for more details.
 
 ### Configuration
 
