@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from fnmatch import fnmatchcase
 import requests
 from collections import defaultdict
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
@@ -393,7 +394,14 @@ class PrometheusScraper(object):
                     self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets, custom_tags)
                 except KeyError:
                     if not ignore_unmapped:
+                        # call magic method (non-generic check)
                         getattr(self, message.name)(message, **kwargs)
+                    else:
+                        # try matching wildcard (generic check)
+                        for metric in self.metrics_mapper.keys():
+                            if '*' in metric and fnmatchcase(message.name, metric):
+                                self._submit(message.name, message, send_histograms_buckets, custom_tags)
+
         except AttributeError as err:
             self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
 

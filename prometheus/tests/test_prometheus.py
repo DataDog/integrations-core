@@ -62,6 +62,19 @@ def test_prometheus_check(aggregator, poll_mock):
     aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'])
     assert aggregator.metrics_asserted_pct == 100.0
 
+def test_prometheus_wildcard(aggregator, poll_mock):
+    instance_wildcard = {
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'prometheus',
+        'metrics': ['metric*'],
+    }
+
+    c = PrometheusCheck('prometheus', None, {}, [instance_wildcard])
+    c.check(instance)
+    aggregator.assert_metric(CHECK_NAME + '.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'])
+    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'])
+    assert aggregator.metrics_asserted_pct == 100.0
+
 def test_prometheus_default_instance(aggregator, poll_mock):
     """
     Testing prometheus with default instance
