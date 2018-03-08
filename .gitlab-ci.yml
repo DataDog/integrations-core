@@ -10,4 +10,4 @@ before_script:
 
 test:
   script:
-  - inv test --changed-only
+  - INVOKE_RUN_SHELL="/bin/ash" inv test --changed-only
