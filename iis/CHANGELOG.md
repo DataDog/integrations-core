@@ -1,5 +1,5 @@
 # CHANGELOG - iis
-2.0.2 / Unreleased
+2.0.2 / 2018-03-08
 ==================
 ### Changes
 * [Fix] Fixed tag initialization & reporting.

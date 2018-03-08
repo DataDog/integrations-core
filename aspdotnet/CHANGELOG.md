@@ -1,6 +1,6 @@
 # CHANGELOG - Aspdotnet
 
-0.1.1 / Unreleased
+0.1.1 / 2018-03-08
 ==================
 
 ### Changes
