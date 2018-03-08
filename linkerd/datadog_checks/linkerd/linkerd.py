@@ -20,28 +20,27 @@ class LinkerdCheck(GenericPrometheusCheck):
     """
     def __init__(self, name, init_config, agentConfig, instances=None):
 
+        # Linkerd allows you to add a prefix for the metrics ingit the configuration
+        prefix = init_config.get("linkerd_prometheus_prefix", '')
+
+        metrics_mapper = self.prefix_metrics(DEFAULT_METRICS, prefix)
+        type_overrides = self.prefix_metrics(DEFAULT_METRICS_TYPES, prefix)
+
         default_config = {
             'linkerd': {
-                'metrics': [],
-                'type_overrides': {},
+                'metrics': [metrics_mapper],
+                'type_overrides': type_overrides,
                 'labels_mapper': TAGS_MAPPER,
             }
         }
-
-        metrics_mapper = {}
-        type_overrides = {}
-
-        # Linkerd allows you to add a prefix for the metrics ingit the configuration
-        prefix = init_config.get("linkerd_prometheus_prefix", '')
-        for m in DEFAULT_METRICS:
-            metrics_mapper[prefix + m] = DEFAULT_METRICS[m]
-        for m in DEFAULT_METRICS_TYPES:
-            type_overrides[prefix + m] = DEFAULT_METRICS_TYPES[m]
-
-        default_config['linkerd']['metrics'].append(metrics_mapper)
-        default_config['linkerd']['type_overrides'] = type_overrides
 
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
 
     def check(self, instance):
         GenericPrometheusCheck.check(self, instance)
+
+    def prefix_metrics(self, metrics, prefix):
+        prefixed_metrics = {}
+        for m in metrics:
+            prefixed_metrics[prefix + m] = metrics[m]
+        return prefixed_metrics
