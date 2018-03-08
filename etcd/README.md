@@ -13,8 +13,6 @@ Collect etcd metrics to:
 
 The etcd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your etcd instance(s).
 
-If you need the newest version of the etcd check, install the `dd-check-etcd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Create a file `etcd.yaml` in the Agent's `conf.d` directory. See the [sample etcd.yaml](https://github.com/DataDog/integrations-core/blob/master/etcd/conf.yaml.example) for all available configuration options:

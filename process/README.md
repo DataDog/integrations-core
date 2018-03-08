@@ -12,8 +12,6 @@ The process check lets you:
 
 The process check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere you want to use the check.
 
-If you need the newest version of the Process check, install the `dd-check-process` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.

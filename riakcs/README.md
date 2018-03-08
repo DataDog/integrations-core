@@ -12,8 +12,6 @@ Capture RiakCS metrics in Datadog to:
 
 The RiakCS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RiakCS nodes.
 
-If you need the newest version of the RiakCS check, install the `dd-check-riakcs` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Create a file `riakcs.yaml` in the Agent's `conf.d` directory. See the [sample riakcs.yaml](https://github.com/DataDog/integrations-core/blob/master/riakcs/conf.yaml.example) for all available configuration options:

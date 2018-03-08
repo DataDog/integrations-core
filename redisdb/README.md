@@ -9,8 +9,6 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 The Redis check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Redis servers.
 
-If you need the newest version of the Redis check, install the `dd-check-redis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory.

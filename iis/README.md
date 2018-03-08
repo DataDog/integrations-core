@@ -10,7 +10,7 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. If you need the newest version of the IIS check, install the `dd-check-iis` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. 
 
 2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:

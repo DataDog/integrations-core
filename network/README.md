@@ -9,8 +9,6 @@ The network check collects TCP/IP stats from the host operating system.
 
 The network check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host.
 
-If you need the newest version of the Network check, install the `dd-check-network` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory. See the [sample network.yaml](https://github.com/DataDog/integrations-core/blob/master/network/conf.yaml.default) for all available configuration options:

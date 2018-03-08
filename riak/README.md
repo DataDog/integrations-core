@@ -10,8 +10,6 @@ This check lets you track node, vnode and ring performance metrics from RiakKV o
 
 The Riak check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Riak servers.
 
-If you need the newest version of the Riak check, install the `dd-check-riak` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml](https://github.com/DataDog/integrations-core/blob/master/riak/conf.yaml.example) for all available configuration options:

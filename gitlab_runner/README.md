@@ -15,8 +15,6 @@ more information about Gitlab Runner and its integration with Prometheus
 
 The Gitlab Runner check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Gitlab servers.
 
-If you need the newest version of the Gitlab Runner check, install the `dd-check-gitlab_runner` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Edit the `gitlab_runner.yaml` file to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check.
