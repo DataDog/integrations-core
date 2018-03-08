@@ -8,10 +8,13 @@ from datetime import datetime, timedelta
 from itertools import islice
 from math import ceil, floor, sqrt
 from urlparse import urljoin
+import re
 
 # project
 from checks import AgentCheck
 from utils.containers import hash_mutable
+from config import _is_affirmative
+
 
 # 3p
 import requests
@@ -61,6 +64,7 @@ class ConsulCheck(AgentCheck):
 
     MAX_CONFIG_TTL = 300 # seconds
     MAX_SERVICES = 50 # cap on distinct Consul ServiceIDs to interrogate
+    MAX_NODES = 200 # cap on number of available nodes to send a service check for
 
     STATUS_SC = {
         'up': AgentCheck.OK,
@@ -270,12 +274,12 @@ class ConsulCheck(AgentCheck):
                                               self.init_config.get('catalog_checks'))
         perform_network_latency_checks = instance.get('network_latency_checks',
                                                       self.init_config.get('network_latency_checks'))
-        node_level_service_checks = instance.get('node_level_service_checks', True)
+
         try:
             # Make service checks from health checks for all services in catalog
             health_state = self.consul_request(instance, '/v1/health/state/any')
-
-            submit_node_service_check(instance, health_state)
+            
+            self.submit_node_service_check(instance, instance_state, health_state, service_check_tags)
             
             sc = {}
             # compute the highest status level (OK < WARNING < CRITICAL) a a check among all the nodes is running on.
@@ -487,13 +491,29 @@ class ConsulCheck(AgentCheck):
                 self.gauge('consul.net.node.latency.p99', latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.max', latencies[-1], hostname=node_name, tags=main_tags)
 
-def submit_node_service_check(self, health_state):
-    # Add all nodes we see to the available list of Nodes:
-    # Health check for the Consul Agent of each node
-    # Keep track of nodes we have seen and report Critical if they are missing now
-    if node_level_service_checks:
+    def submit_node_service_check(self, instance, instance_state, health_state, service_check_tags):
+        # Add all nodes we see to the available list of Nodes:
+        # Health check for the Consul Agent of each node
+        # Keep track of nodes we have seen and report Critical if they are missing now
+        node_level_service_checks = instance.get('node_level_service_checks', True)
+        node_regexes = instance.get("node_regexes", [])
+
+        if not _is_affirmative(node_level_service_checks):
+            return
+
+        # Recompute the list of nodes based on regex parameters
+        if len(node_regexes) > 0:
+            nodes = self._filter_nodes(health_state, node_regexes)
+        else:
+            nodes = health_state
+
+        if len(nodes) > MAX_NODES:
+            self.log.error("There are too many available nodes to collect. Please use the node regex to reduce the number of nodes from: %s to below %s": len(nodes), MAX_NODES)
+
+        self.log.debug("Submitting Node Service check for: %s", nodes)
+
         missing_nodes = instance_state.last_known_nodes
-        for node in health_state:
+        for node in nodes:
             instance_state.last_known_nodes[node['Node']] = node['Status']
             del missing_nodes[node['Node']]
             service_check_tags = []
@@ -503,4 +523,15 @@ def submit_node_service_check(self, health_state):
         for node in missing_nodes:
             service_check_tags = []
             service_check_tags.append("Node:{}".format(node['Node']))
-            self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags = service_check_tags)
+            self.service_check(self.CONSUL_NODE_CHECK, AgentCheck.CRITICAL, tags=service_check_tags)
+
+    def _filter_nodes(self, nodes, regexes):
+        filtered_nodes = []
+        for node in nodes:
+            for regex in regexes:
+                match = False
+                match = re.search(regex, node['Node'])
+                if match: 
+                    filtered_nodes.append(node)
+
+        return filtered_nodes

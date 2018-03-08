@@ -55,7 +55,13 @@ instances:
       #   - redis
 
       # Collect a service check for each node registered to the cluster for the specified url
-      node_level_service_checks: True
+      # node_level_service_checks: False
+
+      # Limit the number of Nodes to collect a service check for using a regex or list of regexes
+      # This is inclusive and a service check will be collected for every Node matching this regex
+      # node_regexes: 
+      #   - bla.*
+
 
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
