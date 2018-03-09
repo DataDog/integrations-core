@@ -70,10 +70,10 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg)
             return
 
-        common_tags = instance.get('tags', [])
-        common_tags.append('ecs_cluster:' + metadata['Cluster'])
-        common_tags.append('ecs_task_family:' + metadata['Family'])
-        common_tags.append('ecs_task_version:' + metadata['Version'])
+        custom_tags = instance.get('tags', [])
+        common_tags = ['ecs_cluster:' + metadata['Cluster'], 'ecs_task_family:' + metadata['Family'],
+            'ecs_task_version:' + metadata['Version']]
+        common_tags.extend(custom_tags)
         label_whitelist = instance.get('label_whitelist', [])
 
         container_tags = {}
@@ -97,18 +97,18 @@ class FargateCheck(AgentCheck):
             request = requests.get(stats_endpoint, timeout=timeout)
         except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, timeout)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return
         except requests.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(stats_endpoint)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return
 
         if request.status_code != 200:
             msg = 'Fargate {} endpoint responded with {} HTTP code'.format(stats_endpoint, request.status_code)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg)
             return
 
@@ -117,7 +117,7 @@ class FargateCheck(AgentCheck):
             stats = request.json()
         except ValueError:
             msg = 'Cannot decode Fargate {} endpoint response'.format(stats_endpoint)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
@@ -147,4 +147,4 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
 
-        self.service_check('fargate_check', AgentCheck.OK)
+        self.service_check('fargate_check', AgentCheck.OK, tags=custom_tags)

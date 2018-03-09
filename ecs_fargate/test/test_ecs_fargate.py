@@ -19,7 +19,7 @@ FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 instance = {
     'timeout': '2',
     'tags': ['foo:bar'],
-    'label_whitelist': ['com.amazonaws.ecs.container-name']
+    'label_whitelist': ['com.amazonaws.ecs.container-name'],
 }
 
 check_config = {
@@ -55,7 +55,7 @@ class TestFargate(AgentCheckTest):
         Testing fargate metadata endpoint error.
         """
         self.run_check(check_config)
-        self.assertServiceCheck("fargate_check", status=AgentCheck.CRITICAL, tags=None, count=1)
+        self.assertServiceCheck("fargate_check", status=AgentCheck.CRITICAL, tags=['foo:bar'], count=1)
 
     @mock.patch('requests.get', return_value=MockResponse("{}", 200))
     def test_invalid_response_check(self, *args):
@@ -63,7 +63,7 @@ class TestFargate(AgentCheckTest):
         Testing invalid fargate metadata payload.
         """
         self.run_check(check_config)
-        self.assertServiceCheck("fargate_check", status=AgentCheck.WARNING, tags=None, count=1)
+        self.assertServiceCheck("fargate_check", status=AgentCheck.WARNING, tags=['foo:bar'], count=1)
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def test_successful_check(self, *args):
@@ -73,7 +73,7 @@ class TestFargate(AgentCheckTest):
         # to have rates we run the check twice
         self.run_check_twice(check_config)
 
-        self.assertServiceCheck("fargate_check", status=AgentCheck.OK, tags=None, count=1)
+        self.assertServiceCheck("fargate_check", status=AgentCheck.OK, tags=['foo:bar'], count=1)
 
         common_tags = ['foo:bar', 'ecs_cluster:pierrem-test-fargate', 'ecs_task_family:redis-datadog', 'ecs_task_version:1']
         container_tags = [
