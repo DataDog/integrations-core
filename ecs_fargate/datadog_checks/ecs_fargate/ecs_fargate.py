@@ -35,23 +35,24 @@ class FargateCheck(AgentCheck):
         timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
         metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
         stats_endpoint = API_ENDPOINT + STATS_ROUTE
+        custom_tags = instance.get('tags', [])
 
         try:
             request = requests.get(metadata_endpoint, timeout=timeout)
         except requests.exceptions.Timeout:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(metadata_endpoint, timeout)
-            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
+            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
             return
         except requests.exceptions.RequestException:
             msg = 'Error fetching Fargate {} endpoint'.format(metadata_endpoint)
-            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
+            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
             return
 
         if request.status_code != 200:
             msg = 'Fargate {} endpoint responded with {} HTTP code'.format(metadata_endpoint, request.status_code)
-            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg)
+            self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.warning(msg)
             return
 
@@ -60,17 +61,16 @@ class FargateCheck(AgentCheck):
             metadata = request.json()
         except ValueError:
             msg = 'Cannot decode Fargate {} endpoint response'.format(metadata_endpoint)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return
 
         if not all(k in metadata for k in ["Cluster","Containers"]):
             msg = 'Missing critical metadata in {} endpoint response'.format(metadata_endpoint)
-            self.service_check('fargate_check', AgentCheck.WARNING, message=msg)
+            self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg)
             return
 
-        custom_tags = instance.get('tags', [])
         common_tags = ['ecs_cluster:' + metadata['Cluster'], 'ecs_task_family:' + metadata['Family'],
             'ecs_task_version:' + metadata['Version']]
         common_tags.extend(custom_tags)
