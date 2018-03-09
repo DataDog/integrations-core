@@ -78,7 +78,7 @@ class TestKong(AgentCheckTest):
 
             # Assert service checks
             self.assertServiceCheck('kong.can_connect', status=AgentCheck.OK,
-                                tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=2)
+                                tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1)
 
         self.coverage_report()
 
