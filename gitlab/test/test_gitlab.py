@@ -8,7 +8,11 @@ from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest
-from checks.prometheus_check import PrometheusCheck
+try:
+    # Agent5 compatibility layer
+    from datadog_checks.checks.prometheus import PrometheusCheck
+except ImportError:
+    from checks.prometheus_check import PrometheusCheck
 
 @attr(requires='gitlab')
 class TestGitlab(AgentCheckTest):
