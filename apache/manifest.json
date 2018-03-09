@@ -2,7 +2,7 @@
   "manifest_version": "0.1.1",
   "name": "Apache",
   "display_name": "Apache",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "support": "core",
   "supported_os": [
     "linux",

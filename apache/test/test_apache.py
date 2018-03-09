@@ -63,7 +63,7 @@ class TestCheckApache(AgentCheckTest):
 
         # Assert service checks
         self.assertServiceCheck('apache.can_connect', status=AgentCheck.OK,
-                                tags=['host:localhost', 'port:8180'], count=2)
+                                tags=['host:localhost', 'port:8180', 'instance:second'], count=2)
 
         self.coverage_report()
 
