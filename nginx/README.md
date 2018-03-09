@@ -112,7 +112,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
   ```
   logs:
-     - type: file
+    - type: file
       path: /var/log/nginx/access.log
       service: nginx
       source: nginx
