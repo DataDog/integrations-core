@@ -24,9 +24,13 @@ def wait_for_cluster(master, replica):
             return False
 
         try:
-            if master.ping() and replica.ping() and \
-                    master.info().get('connected_slaves') and replica.info().get('master_link_status'):
+            up = master.ping() and replica.ping() and \
+                 master.info().get('connected_slaves') and replica.info().get('master_link_status')
+
+            if up:
+                print replica.info()
                 return True
+
         except redis.ConnectionError:
             attempts += 1
             time.sleep(1)
@@ -69,7 +73,8 @@ def redis_cluster():
     # wait for the cluster to be up before yielding
     master = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
     replica = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
-    wait_for_cluster(master, replica)
+    if not wait_for_cluster(master, replica):
+        raise Exception("Redis cluster boot timed out!")
     yield
     subprocess.check_call(args + ["down"])
 
