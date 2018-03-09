@@ -81,9 +81,9 @@ DEFAULT_METRICS_TYPES = {
     'rt:client:pool_size': 'gauge',
     'rt:client:pool_waiters': 'gauge',
 
-    'rt:server:request_latency_ms': 'gauge',
-    'rt:client:request_latency_ms': 'gauge',
-    'jvm:gc:eden:pause_msec': 'gauge',
+    'rt:server:request_latency_ms': 'summary',
+    'rt:client:request_latency_ms': 'summary',
+    'jvm:gc:eden:pause_msec': 'summary',
 
 }
 
