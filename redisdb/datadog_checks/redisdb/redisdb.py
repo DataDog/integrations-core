@@ -272,9 +272,9 @@ class Redis(AgentCheck):
         # Save the replication delay for each slave
         for key in info:
             if self.slave_key_pattern.match(key) and isinstance(info[key], dict):
-                slave_offset = info[key].get('offset')
-                master_offset = info.get('master_repl_offset')
-                if slave_offset and master_offset and master_offset - slave_offset >= 0:
+                slave_offset = info[key].get('offset', 0)
+                master_offset = info.get('master_repl_offset', 0)
+                if master_offset - slave_offset >= 0:
                     delay = master_offset - slave_offset
                     # Add id, ip, and port tags for the slave
                     slave_tags = tags[:]

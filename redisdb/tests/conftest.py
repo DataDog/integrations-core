@@ -25,8 +25,6 @@ def wait_for_cluster(conn):
 
         try:
             if conn.ping() and conn.info().get('connected_slaves'):
-                # Wait 5 more seconds so the replication metrics get populated
-                time.sleep(5)
                 return True
         except redis.ConnectionError:
             attempts += 1
