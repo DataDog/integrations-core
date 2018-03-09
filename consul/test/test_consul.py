@@ -67,6 +67,16 @@ MOCK_CONFIG_NODE_SERVICE_CEHCKS = {
     }]
 }
 
+MOCK_CONFIG_NODE_SERVICE_CEHCKS_REGEX = {
+    'init_config': {},
+    'instances': [{
+        'url': 'http://localhost:8500',
+        'node_level_service_checks': "True",
+        'tags': ['optional:tag'],
+        'node_regexes': ['agent-o+']
+    }]
+}
+
 MOCK_BAD_CONFIG = {
     'init_config': {},
     'instances' : [{ # Multiple instances should cause it to fail
@@ -556,6 +566,15 @@ class TestCheckConsul(AgentCheckTest):
 
         self.assertServiceCheckOK('consul.node', tags=['Node:agent-one', 'optional:tag', 'consul_url:http://localhost:8500'], count=1)
         self.assertServiceCheckCritical('consul.node', tags=['Node:agent-two', 'optional:tag', 'consul_url:http://localhost:8500'], count=1)
+        self.assertServiceCheck('consul.node', count=2)
+
+    def test_node_regex(self):
+        my_mocks = self._get_consul_mocks()
+        my_mocks['get_node_members'] = self.mock_get_agent_nodes_in_cluster
+
+        self.run_check(MOCK_CONFIG_NODE_SERVICE_CEHCKS_REGEX, mocks=my_mocks)
+        self.assertServiceCheckOK('consul.node', tags=['Node:agent-one', 'optional:tag', 'consul_url:http://localhost:8500'], count=1)
+        self.assertServiceCheck('consul.node', count=1)
 
 
     def test_get_nodes_with_service_critical(self):

@@ -269,9 +269,8 @@ class ConsulCheck(AgentCheck):
         if agent_dc is not None:
             main_tags.append('consul_datacenter:{0}'.format(agent_dc))
 
-        for tag in instance.get('tags', []):
-            main_tags.append(tag)
-            service_check_tags.append(tag)
+        service_check_tags.extend(instance.get('tags',[]))
+        main_tags.extend(instance.get('tags',[]))
 
         if not self._is_instance_leader(instance, instance_state):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:follower"])
@@ -522,7 +521,7 @@ class ConsulCheck(AgentCheck):
             nodes = agent_members
 
         if len(nodes) > self.MAX_NODES:
-            self.log.error("There are too many available nodes to collect, skipping per node service checks. Please use the node regex to reduce the number of nodes from: %s to below: %s:", len(nodes), self.MAX_NODES)
+            self.log.error("There are too many available nodes to collect, skipping per node service checks. Please use the node regex to reduce the number of nodes from: %s to below: %s", len(nodes), self.MAX_NODES)
             return
 
         self.log.debug("Submitting Node Service check for: %s", nodes)
@@ -540,6 +539,7 @@ class ConsulCheck(AgentCheck):
         filtered_nodes = []
         for node in nodes:
             for regex in regexes:
-                if re.search(regex, node['Name']):
+                match = re.search(regex, node['Name'])
+                if match:
                     filtered_nodes.append(node)
         return filtered_nodes
