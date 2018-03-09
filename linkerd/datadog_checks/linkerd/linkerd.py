@@ -12,18 +12,21 @@ try:
     from datadog_checks.checks.prometheus import GenericPrometheusCheck
 except ImportError:
     from checks.prometheus_check import GenericPrometheusCheck
-from .metrics import DEFAULT_METRICS, DEFAULT_METRICS_TYPES, TAGS_MAPPER
 
 class LinkerdCheck(GenericPrometheusCheck):
     """
     Collect linkerd metrics from Prometheus
     """
     def __init__(self, name, init_config, agentConfig, instances=None):
+        labels_mapper = {
+            'rt' : 'linkerd_router',
+            'client': 'linkerd_client',
+            'service': 'linkerd_service',
+        }
+
         default_config = {
             'linkerd': {
-                'metrics': [DEFAULT_METRICS],
-                'type_overrides': DEFAULT_METRICS_TYPES,
-                'labels_mapper': TAGS_MAPPER,
+                'labels_mapper': labels_mapper,
             }
         }
 
