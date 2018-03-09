@@ -263,6 +263,7 @@ class Ceph(AgentCheck):
                 return None, None
 
     def _perform_service_checks(self, raw, tags, health_checks):
+        print "THESE ARE THE TAGS!", tags
         if 'status' in raw:
             # In ceph luminous, the field name is now `status`
             s_status = raw['status']['health'].get('status', None)
