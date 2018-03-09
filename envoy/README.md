@@ -12,6 +12,17 @@ If you need the newest version of the Envoy check, install the `dd-check-envoy` 
 
 ### Configuration
 
+Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin). Here's an example Envoy admin configuration: 
+
+```yaml
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8001
+```
+
 Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options:
 
 ### Validation
