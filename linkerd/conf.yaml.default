@@ -59,6 +59,8 @@ instances:
 
     # Type of the metrics
     # /!\ All untyped metric will be ignored /!\
+    # Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
+    # Metrics with "quantile" tags are of type summary
     type_overrides:
     # linkerd jvm metrics
       "jvm:start_time": "gauge"
