@@ -64,13 +64,14 @@ class TestCeph(AgentCheckTest):
             'instances': [{
                 'host': 'foo',
                 'collect_service_check_for': ['OSD_NEARFULL', 'OSD_FULL'],
+                'tags': ['optional:tag1, tag2:sample']
             }]
         }
 
         self.run_check(config, mocks=mocks, force_reload=True)
-        self.assertServiceCheck('ceph.overall_status', status=AgentCheck.CRITICAL)
-        self.assertServiceCheck('ceph.osd_nearfull', status=AgentCheck.WARNING)
-        self.assertServiceCheck('ceph.osd_full', status=AgentCheck.CRITICAL)
+        self.assertServiceCheck('ceph.overall_status', status=AgentCheck.CRITICAL, tags=['optional:tag1, tag2:sample'])
+        self.assertServiceCheck('ceph.osd_nearfull', status=AgentCheck.WARNING, tags=['optional:tag1, tag2:sample'])
+        self.assertServiceCheck('ceph.osd_full', status=AgentCheck.CRITICAL, tags=['optional:tag1, tag2:sample']
 
     def test_luminous_ok_health(self):
         mocks = {
