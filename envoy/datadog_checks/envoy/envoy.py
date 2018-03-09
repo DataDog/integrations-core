@@ -12,8 +12,8 @@ from .parser import parse_metric
 class Envoy(AgentCheck):
     SERVICE_CHECK_NAME = 'envoy.can_connect'
 
-    def __init__(self, name, init_config, agent_config, instances=None):
-        super(Envoy, self).__init__(name, init_config, agent_config, instances)
+    def __init__(self, name, init_config, agentConfig, instances=None):
+        super(Envoy, self).__init__(name, init_config, agentConfig, instances)
         self.unknown_metrics = set()
 
     def check(self, instance):
