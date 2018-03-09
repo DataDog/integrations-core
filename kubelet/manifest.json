@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
+  "manifest_version": "1.1.0",
   "max_agent_version": "7.0.0",
   "min_agent_version": "6.0.0",
   "name": "kubelet",
