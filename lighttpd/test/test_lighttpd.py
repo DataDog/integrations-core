@@ -36,7 +36,7 @@ class TestLighttpd(AgentCheckTest):
         self.run_check_twice(self.config)
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.OK,
-                                tags=['host:localhost', 'port:9449'])
+                                tags=['host:localhost', 'port:9449', 'instance:first'])
 
         for gauge in self.CHECK_GAUGES:
             self.assertMetric(gauge, tags=['instance:first'], count=1)
@@ -46,9 +46,9 @@ class TestLighttpd(AgentCheckTest):
         self.assertRaises(
             Exception,
             lambda: self.run_check({"instances": [{'lighttpd_status_url': 'http://localhost:1337',
-                                                   'tags': ['instance: first']}]})
+                                                   'tags': ['instance:first']}]})
         )
         self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                 status=AgentCheck.CRITICAL,
-                                tags=['host:localhost', 'port:1337'],
+                                tags=['host:localhost', 'port:1337', 'instance:first'],
                                 count=1)
