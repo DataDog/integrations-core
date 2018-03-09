@@ -5,7 +5,7 @@ services:
 
 before_script:
 - docker info
-- apk add --no-cache py-pip py-psutil
+- apk add --no-cache gcc musl-dev python2-dev py-pip
 - pip install -q docker-compose tox invoke
 
 test:
