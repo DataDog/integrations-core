@@ -3,9 +3,15 @@
 1.0.1 / Unreleased 
 ==================
 
+### Notes
+
+The metric `oracle.gc_cr_receive_time` has been renamed to `oracle.gc_cr_block_received` 
+to address an erroneous metric name. Please update your dashboards and monitors. 
+
 ### Changes
 
 * [BUGFIX] fix metric name to: `gc_cr_block_received`. See #1179
+
 
 1.0.0 / 2017-10-10
 ==================
