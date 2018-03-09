@@ -293,8 +293,8 @@ class Ceph(AgentCheck):
         ceph_cmd = instance.get('ceph_cmd') or self.DEFAULT_CEPH_CMD
         ceph_cluster = instance.get('ceph_cluster') or self.DEFAULT_CEPH_CLUSTER
         ceph_health_checks = instance.get('collect_service_check_for') or self.DEFAULT_HEALTH_CHECKS
+        custom_tags = instance.get('tags', [])
         raw = self._collect_raw(ceph_cmd, ceph_cluster, instance)
         tags = self._extract_tags(raw, instance)
-        custom_tags = instance.get('tags', [])
         self._extract_metrics(raw, tags)
         self._perform_service_checks(raw, custom_tags, ceph_health_checks)
