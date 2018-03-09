@@ -1,5 +1,12 @@
 # CHANGELOG - ceph
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support for service checks.
+
 1.2.0 / 2018-01-10
 ==================
 

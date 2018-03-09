@@ -22,13 +22,14 @@ class TestCeph(AgentCheckTest):
             '_collect_raw': lambda x,y,z: json.loads(Fixtures.read_file('raw.json', sdk_dir=self.FIXTURE_DIR)),
         }
         config = {
-            'instances': [{'host': 'foo'}]
+            'instances': [{'host': 'foo', 'tags': ['optional:tag1']}]
         }
 
         self.run_check_twice(config, mocks=mocks, force_reload=True)
         expected_tags = ['ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a',
                          'ceph_mon_state:peon']
         expected_metrics = ['ceph.num_mons', 'ceph.total_objects', 'ceph.pgstate.active_clean']
+        expected_service_tags = ['optional:tag1']
 
         for metric in expected_metrics:
             self.assertMetric(metric, count=1, tags=expected_tags)
