@@ -344,7 +344,6 @@ class NagiosPerfDataTailer(NagiosTailer):
             #   'label'=value[UOM];[warn];[crit];[min];[max]
             perf_data = data.get(self.perfdata_field, '').split(' ')
             for pair in perf_data:
-                tags = self._tags
                 pair_match = self.pair_pattern.match(pair)
                 if not pair_match:
                     continue
@@ -373,12 +372,13 @@ class NagiosPerfDataTailer(NagiosTailer):
                 host_name = data.get('HOSTNAME', self.hostname)
 
                 optional_keys = ['unit', 'warn', 'crit', 'min', 'max']
+                tags = []
                 for key in optional_keys:
                     attr_val = pair_data.get(key, None)
                     if attr_val is not None and attr_val != '':
                         tags.append("{0}:{1}".format(key, attr_val))
 
-                self._gauge(metric, value, tags, host_name, device_name, timestamp)
+                self._gauge(metric, value, tags + self._tags, host_name, device_name, timestamp)
 
 
 class NagiosHostPerfDataTailer(NagiosPerfDataTailer):
