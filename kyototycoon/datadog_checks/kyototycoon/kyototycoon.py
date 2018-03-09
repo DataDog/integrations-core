@@ -59,13 +59,14 @@ class KyotoTycoonCheck(AgentCheck):
 
         tags = instance.get('tags', {})
         name = instance.get('name')
-
+        service_check_tags = []
         # generate the formatted list of tags
         tags = ['%s:%s' % (k, v) for k, v in tags.items()]
+        service_check_tags.extend(tags)
+
         if name is not None:
             tags.append('instance:%s' % name)
 
-        service_check_tags = []
         if name is not None:
             service_check_tags.append('instance:%s' % name)
 

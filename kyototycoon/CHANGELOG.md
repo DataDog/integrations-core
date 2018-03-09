@@ -1,4 +1,10 @@
 # CHANGELOG - kyototycoon
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds custom tag support for sericce checks.
 
 1.1.0 / 2017-11-21
 ==================

@@ -14,7 +14,8 @@ from tests.checks.common import AgentCheckTest
 
 config = {
     'instances': [{
-        'report_url': 'http://localhost:1978/rpc/report'
+        'report_url': 'http://localhost:1978/rpc/report',
+        'tags': ['optional:tag1']
     }]
 }
 
@@ -62,8 +63,8 @@ class TestKyototycoon(AgentCheckTest):
         self.run_check_twice(config)
 
         for mname in METRICS:
-            self.assertMetric(mname, count=1, at_least=0)
+            self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1'])
 
-        self.assertServiceCheck('kyototycoon.can_connect', status=AgentCheck.OK, at_least=1)
+        self.assertServiceCheck('kyototycoon.can_connect', status=AgentCheck.OK, tags=['optional:tag1'], at_least=1)
 
         self.coverage_report()
