@@ -132,11 +132,11 @@ class MapReduceCheck(AgentCheck):
         collect_task_metrics = _is_affirmative(instance.get('collect_task_metrics', False))
 
         # Get additional tags from the conf file
-        tags = instance.get('tags', [])
+        custom_tags = instance.get('tags', [])
         if tags is None:
             tags = []
         else:
-            tags = list(set(tags))
+            tags = list(set(custom_tags))
 
         # Get the cluster name from the conf file
         cluster_name = instance.get('cluster_name')
@@ -152,7 +152,7 @@ class MapReduceCheck(AgentCheck):
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % rm_address],
+            tags=['url:%s' % rm_address] + custom_tags,
             message='Connection to ResourceManager "%s" was successful' % rm_address)
 
         # Get the applications from the application master
@@ -172,7 +172,7 @@ class MapReduceCheck(AgentCheck):
 
             self.service_check(MAPREDUCE_SERVICE_CHECK,
                 AgentCheck.OK,
-                tags=['url:%s' % am_address],
+                tags=['url:%s' % am_address] + custom_tags,
                 message='Connection to ApplicationManager "%s" was successful' % am_address)
 
     def _parse_general_counters(self, init_config):
@@ -353,7 +353,7 @@ class MapReduceCheck(AgentCheck):
 
                 metrics_json = self._rest_request_to_json(job_metrics['tracking_url'],
                     'counters',
-                    MAPREDUCE_SERVICE_CHECK)
+                    MAPREDUCE_SERVICE_CHECK, tags=addl_tags)
 
                 if metrics_json.get('jobCounters'):
                     if metrics_json['jobCounters'].get('counterGroup'):
@@ -401,7 +401,7 @@ class MapReduceCheck(AgentCheck):
 
             metrics_json = self._rest_request_to_json(job_stats['tracking_url'],
                     'tasks',
-                    MAPREDUCE_SERVICE_CHECK)
+                    MAPREDUCE_SERVICE_CHECK, tags=addl_tags)
 
             if metrics_json.get('tasks'):
                 if metrics_json['tasks'].get('task'):
@@ -447,13 +447,13 @@ class MapReduceCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, object_path, service_name, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, service_name, tags=[], *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
         response_json = None
 
-        service_check_tags = ['url:%s' % self._get_url_base(address)]
+        service_check_tags = ['url:%s' % self._get_url_base(address)] + tags
 
         url = address
 

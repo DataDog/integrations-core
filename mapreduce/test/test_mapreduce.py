@@ -91,7 +91,8 @@ class MapReduceCheck(AgentCheckTest):
     MR_CONFIG = {
         'resourcemanager_uri': 'http://localhost:8088',
         'cluster_name': CLUSTER_NAME,
-        'collect_task_metrics': 'true'
+        'collect_task_metrics': 'true',
+        'tags': ['optional:tag1']
     }
 
     INIT_CONFIG = {
