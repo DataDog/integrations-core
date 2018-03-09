@@ -52,7 +52,7 @@ setup(
         'datadog-checks-base',
     ],
     setup_requires=['pytest-runner', ],
-    tests_require=get_requirements(path.join('tests', 'requirements.txt')),
+    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.redisdb': ['conf.yaml.default']},

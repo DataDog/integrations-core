@@ -14,7 +14,7 @@ from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 
-def wait_for_cluster(conn):
+def wait_for_cluster(master, replica):
     """
     Wait for the slave to connect to the master
     """
@@ -24,7 +24,8 @@ def wait_for_cluster(conn):
             return False
 
         try:
-            if conn.ping() and conn.info().get('connected_slaves'):
+            if master.ping() and replica.ping() and \
+                    master.info().get('connected_slaves') and replica.info().get('master_link_status'):
                 return True
         except redis.ConnectionError:
             attempts += 1
@@ -66,7 +67,9 @@ def redis_cluster():
 
     subprocess.check_call(args + ["up", "-d"])
     # wait for the cluster to be up before yielding
-    wait_for_cluster(redis.Redis(port=MASTER_PORT, db=14, host=HOST))
+    master = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
+    replica = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
+    wait_for_cluster(master, replica)
     yield
     subprocess.check_call(args + ["down"])
 
