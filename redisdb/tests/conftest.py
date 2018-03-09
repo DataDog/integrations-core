@@ -20,7 +20,7 @@ def wait_for_cluster(master, replica):
     """
     attempts = 0
     while True:
-        if attempts > 5:
+        if attempts > 10:
             return False
 
         try:
