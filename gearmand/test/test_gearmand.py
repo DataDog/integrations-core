@@ -31,21 +31,21 @@ class GearmanTestCase(AgentCheckTest):
         self.assertMetric('gearman.workers', value=0.0, tags=assert_tags, count=1)
 
         self.assertServiceCheck("gearman.can_connect", status=AgentCheck.OK,
-            tags=service_checks_tags, count=1)
+            tags=assert_tags, count=1)
         self.coverage_report()
 
 
     def test_service_checks(self):
         config = {
             'instances': [
-                {'server': 'localhost', 'port': 15440},
-                {'server': 'localhost', 'port': 4731}
+                {'server': 'localhost', 'port': 15440, 'tags': ['optional:tag1']},
+                {'server': 'localhost', 'port': 4731, 'tags': ['foo:bar']}
             ]
         }
 
         self.assertRaises(Exception, self.run_check, config)
-        service_checks_tags_ok = ['server:localhost', 'port:15440']
-        service_checks_tags_not_ok = ['server:localhost', 'port:4731']
+        service_checks_tags_ok = ['server:localhost', 'port:15440', 'optional:tag1']
+        service_checks_tags_not_ok = ['server:localhost', 'port:4731', 'foo:bar']
 
         tags = service_checks_tags_ok
 
@@ -54,7 +54,7 @@ class GearmanTestCase(AgentCheckTest):
         self.assertMetric('gearman.queued', value=0.0, tags=tags, count=1)
         self.assertMetric('gearman.workers', value=0.0, tags=tags, count=1)
         self.assertServiceCheck("gearman.can_connect", status=AgentCheck.OK,
-            tags=service_checks_tags_ok, count=1)
+            tags=tags, count=1)
         self.assertServiceCheck("gearman.can_connect", status=AgentCheck.CRITICAL,
             tags=service_checks_tags_not_ok, count=1)
 
