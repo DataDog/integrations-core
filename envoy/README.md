@@ -12,6 +12,16 @@ If you need the newest version of the Envoy check, install the `dd-check-envoy` 
 
 ### Configuration
 
+Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options:
+
+There are 2 ways to setup the `/stats` endpoint:
+
+#### Secured stats endpoint
+
+See [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8).
+
+#### Unsecured stats endpoint
+
 Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin). Here's an example Envoy admin configuration: 
 
 ```yaml
@@ -22,8 +32,6 @@ admin:
       address: 0.0.0.0
       port_value: 8001
 ```
-
-Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options:
 
 ### Validation
 

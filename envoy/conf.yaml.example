@@ -16,6 +16,8 @@ instances:
 
   #   <<<Note>>> The Envoy admin endpoint does not support auth until:
   #   https://github.com/envoyproxy/envoy/issues/2763
+  #   For an alternative, see:
+  #   https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
   #
   #   If the stats page is behind basic auth:
   #   username: USERNAME
