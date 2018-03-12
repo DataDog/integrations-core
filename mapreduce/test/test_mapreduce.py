@@ -256,6 +256,6 @@ class MapReduceCheck(AgentCheckTest):
 
         # Check the service tests
         self.assertServiceCheckOK(YARN_SERVICE_CHECK,
-            tags=['url:http://localhost:8088'])
+            tags=['url:http://localhost:8088', 'optional:tag1'])
         self.assertServiceCheckOK(MAPREDUCE_SERVICE_CHECK,
-            tags=['url:http://localhost:8088'])
+            tags=['url:http://localhost:8088', 'optional:tag1'])
