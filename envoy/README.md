@@ -16,10 +16,6 @@ Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [s
 
 There are 2 ways to setup the `/stats` endpoint:
 
-#### Secured stats endpoint
-
-See [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8).
-
 #### Unsecured stats endpoint
 
 Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin). Here's an example Envoy admin configuration: 
@@ -31,6 +27,73 @@ admin:
     socket_address:
       address: 0.0.0.0
       port_value: 8001
+```
+
+#### Secured stats endpoint
+
+Create a listener/vhost that routes to the admin endpoint (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
+
+Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
+
+```json
+{
+  "listeners": [
+    {
+      "address": "tcp://0.0.0.0:80",
+      "filters": [
+        {
+          "type": "read",
+          "name": "http_connection_manager",
+          "config": {
+            "codec_type": "auto",
+            "stat_prefix": "ingress_http",
+            "route_config": {
+              "virtual_hosts": [
+                {
+                  "name": "backend",
+                  "domains": ["*"],
+                  "routes": [
+                    {
+                      "timeout_ms": 0,
+                      "prefix": "/stats",
+                      "cluster": "service_stats"
+                    }
+                  ]
+                }
+              ]
+            },
+            "filters": [
+              {
+                "type": "decoder",
+                "name": "router",
+                "config": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "admin": {
+    "access_log_path": "/dev/null",
+    "address": "tcp://0.0.0.0:8001"
+  },
+  "cluster_manager": {
+    "clusters": [
+      {
+        "name": "service_stats",
+        "connect_timeout_ms": 250,
+        "type": "logical_dns",
+        "lb_type": "round_robin",
+        "hosts": [
+          {
+            "url": "tcp://127.0.0.1:8001"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
 ### Validation
