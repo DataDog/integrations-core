@@ -63,7 +63,10 @@ class TestKyototycoon(AgentCheckTest):
         self.run_check_twice(config)
 
         for mname in METRICS:
-            self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1'])
+            if mname == 'kyototycoon.records' or 'kyototycoon.size':
+                self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1', 'db:0'])
+            else:
+                self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1'])
 
         self.assertServiceCheck('kyototycoon.can_connect', status=AgentCheck.OK, tags=['optional:tag1'], at_least=1)
 
