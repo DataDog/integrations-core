@@ -60,3 +60,6 @@ instances:
     # While this is convenient, it can also put a lot of load on zookeeper, so
     # use judiciously.
     monitor_unlisted_consumer_groups: False
+    # Setting tags will allow custom tags to be sent with metrics.
+    # tags:
+    #   - optional:tag1

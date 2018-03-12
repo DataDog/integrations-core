@@ -39,7 +39,10 @@ class TestCheckApache(AgentCheckTest):
         'apache.conns_total',
         'apache.conns_async_writing',
         'apache.conns_async_keep_alive',
-        'apache.conns_async_closing',
+        'apache.conns_async_closing'
+    ]
+
+    APACHE_RATES = [
         'apache.net.bytes_per_s',
         'apache.net.request_per_s'
     ]
@@ -55,7 +58,7 @@ class TestCheckApache(AgentCheckTest):
         for stub in self.CONFIG_STUBS:
             expected_tags = stub['tags']
 
-            for mname in self.APACHE_GAUGES:
+            for mname in self.APACHE_GAUGES + self.APACHE_RATES:
                 self.assertMetric(mname, tags=expected_tags, count=1)
 
         # Assert service checks

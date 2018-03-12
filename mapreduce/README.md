@@ -18,7 +18,7 @@ Edit the `mapreduce.yaml` file to point to your server and port, set the masters
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mapreduce` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mapreduce` under the Checks section:
 
     Checks
     ======

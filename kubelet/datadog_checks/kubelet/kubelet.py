@@ -135,12 +135,19 @@ class KubeletCheck(PrometheusCheck):
         cert = (self.kubelet_conn_info.get('client_crt'), self.kubelet_conn_info.get('client_key'))
         if not cert[0] or not cert[1]:
             cert = None
+        else:
+            self.ssl_cert = cert  # prometheus check setting
 
-        verify = self.kubelet_conn_info.get('ca_cert') or self.kubelet_conn_info.get('verify_tls')
+        if self.kubelet_conn_info.get('verify_tls') == 'false':
+            verify = False
+        else:
+            verify = self.kubelet_conn_info.get('ca_cert')
+        self.ssl_ca_cert = verify  # prometheus check setting
 
         # if cert-based auth is enabled, don't use the token.
         if not cert and url.lower().startswith('https') and 'token' in self.kubelet_conn_info:
             headers = {'Authorization': 'Bearer {}'.format(self.kubelet_conn_info['token'])}
+            self.extra_headers = headers  # prometheus check setting
 
         return requests.get(url, timeout=timeout, verify=verify,
                             cert=cert, headers=headers, params={'verbose': verbose})

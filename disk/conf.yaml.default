@@ -50,3 +50,8 @@ instances:
     #  /san/.*: device_type:san
     #  /dev/sda3: role:db,disk_size:large
     #  "c:": volume:boot
+    #
+    # The (optional) tags parameter allows you to customize tags for the instance
+    # tags:
+    #   - optional_tag1
+    #   - optional_tag2

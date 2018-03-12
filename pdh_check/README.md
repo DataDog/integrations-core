@@ -17,7 +17,7 @@ Edit the `pdh_check.yaml` file to collect Windows performance data. See the [sam
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `pdh_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `pdh_check` under the Checks section:
 
     Checks
     ======

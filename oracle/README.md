@@ -5,6 +5,7 @@
 Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
 
 ## Setup
+
 ### Installation
 
 In order to use the Oracle integration, install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
@@ -68,7 +69,7 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `oracle` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `oracle` under the Checks section:
 
     Checks
     ======
@@ -83,6 +84,7 @@ Configuration Options:
 The Oracle check is currently compatible with Linux and macOS.
 
 ## Data Collected
+
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv) for a list of metrics provided by this integration.
 

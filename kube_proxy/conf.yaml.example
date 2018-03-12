@@ -1,0 +1,9 @@
+init_config:
+  # Leave empty
+
+instances:
+  #   A typical instance configuration might include a hostname and port
+  #   a set of customizable tags and other parameters we might need to
+  #   configure the behavior of our check.
+  #
+  # - prometheus_url: http://127.0.0.1:10249/metrics

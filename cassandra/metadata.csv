@@ -49,6 +49,8 @@ cassandra.ss_tables_per_read_histogram.75th_percentile,gauge,10,file,read,The nu
 cassandra.ss_tables_per_read_histogram.95th_percentile,gauge,10,file,read,The number of SSTable data files accessed per read - p95.,-1,cassandra,sstables per read p95
 cassandra.tombstone_scanned_histogram.75th_percentile,gauge,10,record,read,Number of tombstones scanned per read - p75.,-1,cassandra,tombstones per read p75
 cassandra.tombstone_scanned_histogram.95th_percentile,gauge,10,record,read,Number of tombstones scanned per read - p95.,-1,cassandra,tombstones per read p95
+cassandra.total_blocked_tasks,gauge,10,task,,Total blocked tasks,0,cassandra,total blocked tasks
+cassandra.total_blocked_tasks.count,count,10,task,,Total count of blocked tasks,0,cassandra,total count blocked tasks
 cassandra.total_commit_log_size,gauge,10,byte,,The size used on disk by commit logs.,0,cassandra,commit logs size
 cassandra.total_disk_space_used.count,gauge,10,byte,,Total disk space used by SSTables including obsolete ones waiting to be GC’d.,0,cassandra,total sstable
 cassandra.view_lock_acquire_time.75th_percentile,gauge,10,microsecond,,The time taken acquiring a partition lock for materialized view updates - p75.,-1,cassandra,MV lock acquire time p75

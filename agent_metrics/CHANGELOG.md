@@ -1,5 +1,12 @@
 # CHANGELOG - agent_metrics
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support.
+
 1.0.1 / 2017-07-18
 ==================
 

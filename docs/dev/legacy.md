@@ -22,4 +22,4 @@ a Python environment:
 
 This is a quick setup but from that point you should be able to run the default
 test suit `rake ci:run`.
-To go beyond we advise you to read the full documentation [here](http://docs.datadoghq.com/guides/integration_sdk/).
+To go beyond we advise you to read the full documentation [here](https://docs.datadoghq.com/developers/integrations/integration_sdk/).

@@ -41,3 +41,5 @@ instances:
     #   - dskDevice
     #   - ifIndex
     rrd_whitelist: /path/to/rrd_whitelist.txt
+    # tags:
+    #   - name:optional1

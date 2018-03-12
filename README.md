@@ -5,7 +5,7 @@
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
 officially develops and supports. To add a new integration, please see the [Integrations Extras](https://github.com/DataDog/integrations-extras)
-repository and the [accompanying documentation](http://docs.datadoghq.com/guides/integration_sdk/).
+repository and the [accompanying documentation](https://docs.datadoghq.com/developers/integrations/integration_sdk/).
 
 The [Datadog Agent](https://github.com/DataDog/datadog-agent) packages are equipped
 with all the checks from this repository, so to get started using them, you can

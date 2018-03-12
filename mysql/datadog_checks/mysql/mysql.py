@@ -961,13 +961,15 @@ class MySql(AgentCheck):
 
         innodb_status = cursor.fetchone()
         innodb_status_text = innodb_status[2]
+
         results = defaultdict(int)
 
         # Here we now parse InnoDB STATUS one line at a time
         # This is heavily inspired by the Percona monitoring plugins work
         txn_seen = False
         prev_line = ''
-
+        # Only return aggregated buffer pool metrics
+        buffer_id = -1
         for line in innodb_status_text.splitlines():
             line = line.strip()
             row = re.split(" +", line)
@@ -975,6 +977,9 @@ class MySql(AgentCheck):
             row = [item.strip(';') for item in row]
             row = [item.strip('[') for item in row]
             row = [item.strip(']') for item in row]
+
+            if line.startswith('---BUFFER POOL'):
+                buffer_id = long(row[2])
 
             # SEMAPHORES
             if line.find('Mutex spin waits') == 0:
@@ -1197,16 +1202,21 @@ class MySql(AgentCheck):
                 # The " " after size is necessary to avoid matching the wrong line:
                 # Buffer pool size        1769471
                 # Buffer pool size, bytes 28991012864
-                results['Innodb_buffer_pool_pages_total'] = long(row[3])
+                if buffer_id == -1:
+                    results['Innodb_buffer_pool_pages_total'] = long(row[3])
             elif line.find("Free buffers") == 0:
                 # Free buffers            0
-                results['Innodb_buffer_pool_pages_free'] = long(row[2])
+                if buffer_id == -1:
+                    results['Innodb_buffer_pool_pages_free'] = long(row[2])
             elif line.find("Database pages") == 0:
                 # Database pages          1696503
-                results['Innodb_buffer_pool_pages_data'] = long(row[2])
+                if buffer_id == -1:
+                    results['Innodb_buffer_pool_pages_data'] = long(row[2])
+
             elif line.find("Modified db pages") == 0:
                 # Modified db pages       160602
-                results['Innodb_buffer_pool_pages_dirty'] = long(row[3])
+                if buffer_id == -1:
+                    results['Innodb_buffer_pool_pages_dirty'] = long(row[3])
             elif line.find("Pages read ahead") == 0:
                 # Must do this BEFORE the next test, otherwise it'll get fooled by this
                 # line from the new plugin:
@@ -1214,9 +1224,10 @@ class MySql(AgentCheck):
                 pass
             elif line.find("Pages read") == 0:
                 # Pages read 15240822, created 1770238, written 21705836
-                results['Innodb_pages_read'] = long(row[2])
-                results['Innodb_pages_created'] = long(row[4])
-                results['Innodb_pages_written'] = long(row[6])
+                if buffer_id == -1:
+                    results['Innodb_pages_read'] = long(row[2])
+                    results['Innodb_pages_created'] = long(row[4])
+                    results['Innodb_pages_written'] = long(row[6])
 
             # ROW OPERATIONS
             elif line.find('Number of rows inserted') == 0:

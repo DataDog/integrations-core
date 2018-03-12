@@ -10,29 +10,48 @@ from nose.plugins.attrib import attr
 # project
 from tests.checks.common import AgentCheckTest
 
+MINIMAL_INSTANCE = {
+    'host': '.',
+}
 
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
+INSTANCE_WITH_TAGS = {
+    'host': '.',
+    'tags': ['tag1', 'another:tag']
 }
 
 
-# NOTE: Feel free to declare multiple test classes if needed
-
+@attr('windows')
 @attr(requires='dotnetclr')
-class TestDotnetclr(AgentCheckTest):
-    """Basic Test for dotnetclr integration."""
+class DotNetCLRTest(AgentCheckTest):
     CHECK_NAME = 'dotnetclr'
 
-    def test_check(self):
-        """
-        Testing Dotnetclr check.
-        """
-        self.load_check({}, {})
+    CLR_METRICS = (
+        "dotnetclr.exceptions.thrown_persec",
+        "dotnetclr.memory.time_in_gc",
+        "dotnetclr.memory.committed.heap_bytes",
+        "dotnetclr.memory.reserved.heap_bytes",
+    )
 
-        # run your actual tests...
+    EXPECTED_INSTANCES = (
+        "_Global_",
+        "sqlservr",
+        "Appveyor.BuildAgent.Interactive"
+    )
 
-        self.assertTrue(True)
-        # Raises when COVERAGE=true and coverage < 100%
+    def test_basic_check(self):
+        self.run_check_twice({'instances': [MINIMAL_INSTANCE]})
+
+        for metric in self.CLR_METRICS:
+            for inst in self.EXPECTED_INSTANCES:
+                self.assertMetric(metric, tags=["instance:{0}".format(inst)], count=1)
+
+        self.coverage_report()
+
+    def test_with_tags(self):
+        self.run_check_twice({'instances': [INSTANCE_WITH_TAGS]})
+
+        for metric in self.CLR_METRICS:
+            for inst in self.EXPECTED_INSTANCES:
+                self.assertMetric(metric, tags=['tag1', 'another:tag', "instance:{0}".format(inst)], count=1)
+
         self.coverage_report()

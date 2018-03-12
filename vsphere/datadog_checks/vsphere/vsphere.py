@@ -573,6 +573,7 @@ class VSphereCheck(AgentCheck):
         self.log.info("Warming metrics metadata cache for instance {0}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
 
         new_metadata = {}
         for counter in perfManager.perfCounter:
@@ -589,7 +590,7 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata[i_key] = new_metadata
 
         # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total())
+        self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
     def _transform_value(self, instance, counter_id, value):
@@ -616,6 +617,7 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
 
         query = vim.PerformanceManager.QuerySpec(maxSample=1,
                                                  entity=mor['mor'],
@@ -656,7 +658,7 @@ class VSphereCheck(AgentCheck):
                     "vsphere.%s" % metric_name,
                     value,
                     hostname=mor['hostname'],
-                    tags=['instance:%s' % instance_name]
+                    tags=['instance:%s' % instance_name] + custom_tags
                 )
 
         # ## <TEST-INSTRUMENTATION>
@@ -677,6 +679,8 @@ class VSphereCheck(AgentCheck):
 
         vm_count = 0
 
+        custom_tags = instance.get('tags', [])
+
         for mor_name, mor in mors:
             if mor['mor_type'] == 'vm':
                 vm_count += 1
@@ -685,13 +689,16 @@ class VSphereCheck(AgentCheck):
 
             self.pool.apply_async(self._collect_metrics_atomic, args=(instance, mor))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')])
+        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
     def check(self, instance):
         if not self.pool_started:
             self.start_pool()
+
+        custom_tags = instance.get('tags', [])
+
         # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'])
+        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
         # First part: make sure our object repository is neat & clean
@@ -726,5 +733,5 @@ class VSphereCheck(AgentCheck):
             set_external_tags(self.get_external_host_tags())
 
         # ## <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'])
+        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
         # ## </TEST-INSTRUMENTATION>

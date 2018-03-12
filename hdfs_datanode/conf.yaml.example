@@ -14,3 +14,5 @@ instances:
   # Optionally disable SSL validation. Sometimes when using proxies or self-signed certs
   # we'll want to override validation.
   # disable_ssl_validation: false
+  # tags:
+  #   - optional:tags1
