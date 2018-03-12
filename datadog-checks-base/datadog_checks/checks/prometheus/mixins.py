@@ -52,6 +52,9 @@ class PrometheusScraper(object):
         # overloaded/hardcoded in the final check not to be counted as custom metric.
         self.metrics_mapper = {}
 
+        # `rate_metrics` contains the metrics that should be sent as rates
+        self.rate_metrics = []
+
         # `_metrics_wildcards` holds the potential wildcards to match for metrics
         self._metrics_wildcards = None
 
@@ -514,7 +517,10 @@ class PrometheusScraper(object):
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
                 else:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                    if message.name in self.rate_metrics:
+                        self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
+                    else:
+                        self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
 
         else:
             self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))
