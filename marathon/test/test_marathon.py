@@ -61,7 +61,7 @@ class MarathonCheckTest(AgentCheckTest):
     def test_default_configuration(self):
         ci_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ci")
 
-        def side_effect(url, timeout, auth, acs_url, verify):
+        def side_effect(url, timeout, auth, acs_url, verify, tags):
             if "v2/apps" in url:
                 return Fixtures.read_json_file("apps.json", sdk_dir=ci_dir)
             elif "v2/deployments" in url:
@@ -82,7 +82,7 @@ class MarathonCheckTest(AgentCheckTest):
         self.assertServiceCheck('marathon.can_connect', tags=['url:http://localhost:8080', 'optional:tag1'])
 
     def test_empty_responses(self):
-        def side_effect(url, timeout, auth, acs_url, verify):
+        def side_effect(url, timeout, auth, acs_url, verify, tags):
             if "v2/apps" in url:
                 return {"apps": []}
             elif "v2/deployments" in url:
