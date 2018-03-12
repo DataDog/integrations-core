@@ -57,11 +57,9 @@ class KyotoTycoonCheck(AgentCheck):
         if not url:
             raise Exception('Invalid Kyoto Tycoon report url %r' % url)
 
-        tags = instance.get('tags', {})
+        tags = instance.get('tags', [])
         name = instance.get('name')
         service_check_tags = []
-        # generate the formatted list of tags
-        tags = ['%s:%s' % (k, v) for k, v in tags.items()]
         service_check_tags.extend(tags)
 
         if name is not None:
