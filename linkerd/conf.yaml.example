@@ -6,7 +6,7 @@ instances:
 
     # Set (optional) custom tags for each metric
     # tags:
-    #   - 'mytag1:myValue1'
+    #   - "mytag1:myValue1"
 
     # Set (optional) prefix for exposed Prometheus metrics (should be the same
     # as what's in your linkerd config).
@@ -36,15 +36,15 @@ instances:
       - "jvm:mem:current:CMS_Old_Gen:used": "jvm.mem.current.CMS_Old_Gen.used"
       - "jvm:gc:eden:pause_msec": "jvm.gc.eden.pause_msec"
 
-      - "rt:client:requests": "rt.client.requests"
-      - "rt:client:success": "rt.client.success"
-      - "rt:client:connections": "rt.client.connections"
-      - "rt:client:connects": "rt.client.connects"
-      - "rt:client:status:1XX": "rt.client.status.1XX"
-      - "rt:client:status:2XX": "rt.client.status.2XX"
-      - "rt:client:status:3XX": "rt.client.status.3XX"
-      - "rt:client:status:4XX": "rt.client.status.4XX"
-      - "rt:client:status:5XX": "rt.client.status.5XX"
+      - "rt:client:requests": "rt.client.requests_s"
+      - "rt:client:success": "rt.client.success_s"
+      - "rt:client:connections": "rt.client.connections_s"
+      - "rt:client:connects": "rt.client.connects_s"
+      - "rt:client:status:1XX": "rt.client.status.1XX_s"
+      - "rt:client:status:2XX": "rt.client.status.2XX_s"
+      - "rt:client:status:3XX": "rt.client.status.3XX_s"
+      - "rt:client:status:4XX": "rt.client.status.4XX_s"
+      - "rt:client:status:5XX": "rt.client.status.5XX_s"
       - "rt:client:pool_cached": "rt.client.pool_cached"
       - "rt:client:pool_num_too_many_waiters": "rt.client.pool_num_too_many_waiters"
       - "rt:client:pool_num_waited": "rt.client.pool_num_waited"
@@ -52,8 +52,8 @@ instances:
       - "rt:client:pool_waiters": "rt.client.pool_waiters"
       - "rt:client:request_latency_ms": "rt.client.request_latency_ms"
 
-      - "rt:server:connections": "rt.server.connections"
-      - "rt:server:connects": "rt.server.connects"
+      - "rt:server:connections": "rt.server.connections_s"
+      - "rt:server:connects": "rt.server.connects_s"
       - "rt:server:request_latency_ms": "rt.server.request_latency_ms"
 
 
@@ -85,23 +85,23 @@ instances:
       "jvm:mem:current:CMS_Old_Gen:used": "gauge"
       "jvm:gc:eden:pause_msec": "summary"
     # client metrics
-      "rt:client:requests": "gauge"
-      "rt:client:success": "gauge"
-      "rt:client:connections": "gauge"
-      "rt:client:connects": "gauge"
-      "rt:client:status:1XX": "gauge"
-      "rt:client:status:2XX": "gauge"
-      "rt:client:status:3XX": "gauge"
-      "rt:client:status:4XX": "gauge"
+      "rt:client:requests": "rate"
+      "rt:client:success": "rate"
+      "rt:client:connections": "rate"
+      "rt:client:connects": "rate"
+      "rt:client:status:1XX": "rate"
+      "rt:client:status:2XX": "rate"
+      "rt:client:status:3XX": "rate"
+      "rt:client:status:4XX": "rate"
       "rt:client:status:5XX": "gauge"
-      "rt:client:pool_cached": "gauge"
+      "rt:client:pool_cached": "rate"
       "rt:client:pool_num_too_many_waiters": "gauge"
       "rt:client:pool_num_waited": "gauge"
       "rt:client:pool_size": "gauge"
       "rt:client:pool_waiters": "gauge"
       "rt:client:request_latency_ms": "summary"
     # server metrics
-      "rt:server:connections": "gauge"
-      "rt:server:connects": "gauge"
+      "rt:server:connections": "rate"
+      "rt:server:connects": "rate"
       "rt:server:request_latency_ms": "summary"
 
