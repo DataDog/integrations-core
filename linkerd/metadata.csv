@@ -1,143 +1,42 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-linkerd.jvm.start_time,gauge,,millisecond
-linkerd.jvm.application_time_millis,gauge,,millisecond
-linkerd.jvm.classes.total_loaded,gauge,,unit
-linkerd.jvm.classes.current_loaded,gauge,,unit
-linkerd.jvm.classes.total_unloaded,gauge,,unit
-linkerd.jvm.postGC.Par_Survivor_Space.max,gauge,,unit
-linkerd.jvm.postGC.Par_Survivor_Space.used,gauge,,unit
-linkerd.jvm.postGC.CMS_Old_Gen.max,gauge,,unit
-linkerd.jvm.postGC.CMS_Old_Gen.used,gauge,,unit
-linkerd.jvm.postGC.Par_Eden_Space.max,gauge,,unit
-linkerd.jvm.postGC.Par_Eden_Space.used,gauge,,unit
-linkerd.jvm.postGC.used,gauge,,unit
-linkerd.jvm.nonheap.committed,gauge,,unit
-linkerd.jvm.nonheap.max,gauge,,unit
-linkerd.jvm.nonheap.used,gauge,,unit
-linkerd.jvm.tenuring_threshold,gauge,,unit
-linkerd.jvm.thread.count,gauge,,unit
-linkerd.jvm.mem.postGC.Par_Survivor_Space.max,gauge,,unit
-linkerd.jvm.mem.postGC.Par_Survivor_Space.used,gauge,,unit
-linkerd.jvm.mem.postGC.CMS_Old_Gen.max,gauge,,unit
-linkerd.jvm.mem.postGC.CMS_Old_Gen.used,gauge,,unit
-linkerd.jvm.mem.postGC.Par_Eden_Space.max,gauge,,unit
-linkerd.jvm.mem.postGC.Par_Eden_Space.used,gauge,,unit
-linkerd.jvm.mem.postGC.used,gauge,,unit
-linkerd.jvm.mem.metaspace.max_capacity,gauge,,unit
-linkerd.jvm.mem.buffer.direct.max,gauge,,unit
-linkerd.jvm.mem.buffer.direct.count,gauge,,unit
-linkerd.jvm.mem.buffer.direct.used,gauge,,unit
-linkerd.jvm.mem.buffer.mapped.max,gauge,,unit
-linkerd.jvm.mem.buffer.mapped.count,gauge,,unit
-linkerd.jvm.mem.buffer.mapped.used,gauge,,unit
-linkerd.jvm.mem.allocations.eden.bytes,gauge,,byte
-linkerd.jvm.mem.current.used,gauge,,
-linkerd.jvm.mem.current.CMS_Old_Gen.max,gauge,,
-linkerd.jvm.mem.current.CMS_Old_Gen.used,gauge,,
-linkerd.jvm.mem.current.Metaspace.max,gauge,,
-linkerd.jvm.mem.current.Metaspace.used,gauge,,
-linkerd.jvm.mem.current.Par_Eden_Space.max,gauge,,
-linkerd.jvm.mem.current.Par_Eden_Space.used,gauge,,
-linkerd.jvm.mem.current.Par_Survivor_Space.max,gauge,,
-linkerd.jvm.mem.current.Par_Survivor_Space.used,gauge,,
-linkerd.jvm.mem.current.Compressed_Class_Space.max,gauge,,
-linkerd.jvm.mem.current.Compressed_Class_Space.used,gauge,,
-linkerd.jvm.mem.current.Code_Cache.max,gauge,,
-linkerd.jvm.mem.current.Code_Cache.used,gauge,,
-linkerd.jvm.num_cpus,gauge,,
-linkerd.jvm.gc.msec,gauge,,
-linkerd.jvm.gc.eden.pause_msec_avg,gauge,,
-linkerd.jvm.gc.ParNew.msec,gauge,,
-linkerd.jvm.gc.ParNew.cycles,gauge,,
-linkerd.jvm.gc.ConcurrentMarkSweep.msec,gauge,,
-linkerd.jvm.gc.ConcurrentMarkSweep.cycles,gauge,,
-linkerd.jvm.gc.cycles,gauge,,
-linkerd.jvm.fd_limit,gauge,,
-linkerd.jvm.compilation.time_msec,gauge,,
-linkerd.jvm.uptime,gauge,,
-linkerd.jvm.safepoint.sync_time_millis,gauge,,
-linkerd.jvm.safepoint.total_time_millis,gauge,,
-linkerd.jvm.safepoint.count,gauge,,
-linkerd.jvm.heap.committed,gauge,,
-linkerd.jvm.heap.max,gauge,,
-linkerd.jvm.heap.used,gauge,,
-linkerd.rt.client.connect_latency_ms_avg,gauge,,
-linkerd.rt.client.failed_connect_latency_ms_avg,gauge,,
-linkerd.rt.client.sent_bytes,gauge,,
-linkerd.rt.client.service_creation.service_acquisition_latency_ms_avg,gauge,,
-linkerd.rt.client.connection_received_bytes_avg,gauge,,
-linkerd.rt.client.connection_duration_avg,gauge,,
-linkerd.rt.client.failure_accrual.removals,gauge,,
-linkerd.rt.client.failure_accrual.probes,gauge,,
-linkerd.rt.client.failure_accrual.removed_for_ms,gauge,,
-linkerd.rt.client.failure_accrual.revivals,gauge,,
-linkerd.rt.client.connects,gauge,,
-linkerd.rt.client.pool_num_waited,gauge,,
-linkerd.rt.client.success,gauge,,
-linkerd.rt.client.request_latency_ms_avg,gauge,,
-linkerd.rt.client.pool_waiters,gauge,,
-linkerd.rt.client.retries.requeues_per_request_avg,gauge,,
-linkerd.rt.client.retries.request_limit,gauge,,
-linkerd.rt.client.retries.budget_exhausted,gauge,,
-linkerd.rt.client.retries.cannot_retry,gauge,,
-linkerd.rt.client.retries.not_open,gauge,,
-linkerd.rt.client.retries.budget,gauge,,
-linkerd.rt.client.retries.requeues,gauge,,
-linkerd.rt.client.received_bytes,gauge,,
-linkerd.rt.client.read_timeout,gauge,,
-linkerd.rt.client.write_timeout,gauge,,
-linkerd.rt.client.connection_sent_bytes_avg,gauge,,
-linkerd.rt.client.connection_requests_avg,gauge,,
-linkerd.rt.client.service.success,gauge,,
-linkerd.rt.client.service.request_latency_ms_avg,gauge,,
-linkerd.rt.client.service.failures,gauge,,
-linkerd.rt.client.service.requests,gauge,,
-linkerd.rt.client.service.pending,gauge,,
-linkerd.rt.client.pool_num_too_many_waiters,gauge,,
-linkerd.rt.client.socket_unwritable_ms,gauge,,
-linkerd.rt.client.closes,gauge,,
-linkerd.rt.client.pool_cached,gauge,,
-linkerd.rt.client.nack_admission_control.dropped_requests,gauge,,
-linkerd.rt.client.status.1XX,gauge,,
-linkerd.rt.client.status.4XX,gauge,,
-linkerd.rt.client.status.2XX,gauge,,
-linkerd.rt.client.status.error,gauge,,
-linkerd.rt.client.status.3XX,gauge,,
-linkerd.rt.client.status.5XX,gauge,,
-linkerd.rt.client.failures,gauge,,
-linkerd.rt.client.pool_size,gauge,,
-linkerd.rt.client.available,gauge,,
-linkerd.rt.client.time.1XX_avg,gauge,,
-linkerd.rt.client.time.4XX_avg,gauge,,
-linkerd.rt.client.time.2XX_avg,gauge,,
-linkerd.rt.client.time.error_avg,gauge,,
-linkerd.rt.client.time.3XX_avg,gauge,,
-linkerd.rt.client.time.5XX_avg,gauge,,
-linkerd.rt.client.socket_writable_ms,gauge,,
-linkerd.rt.client.cancelled_connects,gauge,,
-linkerd.rt.client.pending,gauge,,
-linkerd.rt.client.dispatcher.serial.queue_size,gauge,,
-linkerd.rt.client.dispatcher.stream.failures,gauge,,
-linkerd.rt.client.connections,gauge,,
-linkerd.rt.client.requests,gauge,,
-linkerd.rt.server.requests,gauge,,
+jvm.start_time,gauge,,millisecond,,"A gauge of the start time of the Java virtual machine in milliseconds since the epoch",,,,
+jvm.thread.count,gauge,,thread,,"A gauge of the number of live threads including both daemon and non-daemon threads",,,,
+jvm.nonheap.committed,gauge,,byte,,"For the non-heap memory, a gauge of the amount of memory, in bytes, committed for the JVM to use",,,,
+jvm.nonheap.max,gauge,,byte,,"For the non-heap memory, a gauge of the maximum amount of memory, in bytes, that can be used by the JVM",,,,
+jvm.nonheap.used,gauge,,byte,,"For the non-heap memory, a gauge of the current amount of memory used, in bytes",,,,
+jvm.gc.cycles,gauge,,unit,,"A gauge of the number of the total number of collections that have occurred",,,,
+jvm.gc.msec,gauge,,millisecond,,"A gauge of the total elapsed time doing collections, in milliseconds",,,,
+jvm.heap.committed,gauge,,byte,,"For the heap used for object allocation, a gauge of the amount of memory, in bytes, committed for the JVM to use",,,,
+jvm.heap.max,gauge,,byte,,"For the heap used for object allocation, a gauge of the maximum amount of memory, in bytes, that can be used by the JVM",,,,
+jvm.heap.used,gauge,,byte,,"For the heap used for object allocation, a gauge of the current amount of memory used, in bytes",,,,
+jvm.uptime,gauge,,millisecond,,"A gauge of the uptime of the Java virtual machine in milliseconds",,,,
+jvm.num_cpus,gauge,,core,,"A gauge of the number of processors available to the JVM",,,,
+jvm.gc.ParNew.cycles,gauge,,unit,,"A gauge for ParNew of the total number of collections that have occurred",,,,
+jvm.gc.ConcurrentMarkSweep.cycles,gauge,,unit,,"A gauge for ConcurrentMarkSweep of the total number of collections that have occurred",,,,
+jvm.fd_count,gauge,,unit,,"(only available on Unix-based OS) A gauge of the number of open file descriptors."
+jvm.gc.ConcurrentMarkSweep.msec,gauge,,millisecond,,"A gauge for ConcurrentMarkSweep of the total elapsed time garbage collection pool doing collections, in milliseconds",,,,
+jvm.gc.ParNew.msec,gauge,,millisecond,,"A gauge for ParNew of the total elapsed time garbage collection pool doing collections, in milliseconds",,,,
+jvm.mem.current.Par_Eden_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Eden_Space memory pool.",,,,
+jvm.mem.current.Par_Survivor_Space.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for Par_Survivor_Space memory pool.",,,,
+jvm.mem.current.CMS_Old_Gen.used,gauge,,byte,,"A gauge of the of the current memory used, in bytes, for CMS_Old_Gen memory pool.",,,,
+jvm.gc.eden.pause_msec.quantile,gauge,,millisecond,,"Stats of the durations, in millseconds, of the eden collection pauses.",,,,
 
-linkerd.jvm.gc.eden.pause_msec,gauge,,
-linkerd.rt.server.request_latency_ms,gauge,,
-linkerd.rt.client.connect_latency_ms,gauge,,
-linkerd.rt.client.failed_connect_latency_ms,gauge,,
-linkerd.rt.client.service_creation.service_acquisition_latency_ms,gauge,,
-linkerd.rt.client.connection_received_bytes,gauge,,
-linkerd.rt.client.connection_duration,gauge,,
-linkerd.rt.client.request_latency_ms,gauge,,
-linkerd.rt.client.retries.requeues_per_request,gauge,,
-linkerd.rt.client.connection_sent_bytes,gauge,,
-linkerd.rt.client.connection_requests,gauge,,
-linkerd.rt.client.service.request_latency_ms,gauge,,
-linkerd.rt.client.time.1XX,gauge,,
-linkerd.rt.client.time.4XX,gauge,,
-linkerd.rt.client.time.2XX,gauge,,
-linkerd.rt.client.time.error,gauge,,
-linkerd.rt.client.time.3XX,gauge,,
-linkerd.rt.client.time.5XX,gauge,,
-linkerd.rt.client.dtab.size,gauge,,
+rt.client.requests_s
+rt.client.success
+rt.client.connections
+rt.client.connects
+rt.client.status.1XX
+rt.client.status.2XX
+rt.client.status.3XX
+rt.client.status.4XX
+rt.client.status.5XX
+rt.client.pool_cached
+rt.client.pool_num_too_many_waiters
+rt.client.pool_num_waited
+rt.client.pool_size
+rt.client.pool_waiters
+rt.client.request_latency_ms,TODO
+
+rt.server.connections
+rt.server.connects
+rt.server.request_latency_ms,TODO
