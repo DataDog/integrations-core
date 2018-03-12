@@ -6,7 +6,7 @@ This Agent check only collects metrics for message offsets. If you want to colle
 
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets for old-style consumers that store their offsets in zookeeper, and the calculated consumer lag (which is the difference between those two metrics).
 
-This check does NOT support Kafka versions > 0.8—it can't collect consumer offsets for new-style consumer groups which store their offsets in Kafka. If run such a version of Kafka, track [this issue on GitHub](https://github.com/DataDog/integrations-core/issues/457).
+This check also supports newer versions of Kafka that store their offsets directly in Kafka. 
 
 ## Setup
 ### Installation
