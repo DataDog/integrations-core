@@ -26,7 +26,8 @@ DEFAULT_CONFIG = {
     },
     'instances': [
         {
-            'url': 'http://localhost:8080'
+            'url': 'http://localhost:8080',
+            'tags': ['optional:tag1']
         }
     ]
 }
@@ -73,11 +74,12 @@ class MarathonCheckTest(AgentCheckTest):
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=2)
         for metric in APP_METRICS:
-            self.assertMetric(metric, count=1, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z'])
-            self.assertMetric(metric, count=1, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z'])
+            self.assertMetric(metric, count=1, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z', 'optional:tag1'])
+            self.assertMetric(metric, count=1, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z', 'optional:tag1'])
         self.assertMetric('marathon.deployments', value=1)
         for metric in Q_METRICS:
             self.assertMetric(metric, at_least=1)
+        self.assertServiceCheck('marathon.can_connect', tags=['url:http://localhost:8080', 'optional:tag1'])
 
     def test_empty_responses(self):
         def side_effect(url, timeout, auth, acs_url, verify):
