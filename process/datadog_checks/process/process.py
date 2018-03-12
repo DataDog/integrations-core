@@ -13,16 +13,17 @@ import sys
 import psutil
 
 
+# project
+from checks import AgentCheck
+from config import _is_affirmative
+from utils.platform import Platform
+
+
 # Main entry point is meant for checks needing privilege escalation with sudo
 if __name__ == "__main__":
     if sys.argv[1] == "num_fds":
         print psutil.Process(int(sys.argv[2])).num_fds()
     sys.exit(0)
-
-# project
-from checks import AgentCheck
-from config import _is_affirmative
-from utils.platform import Platform
 
 
 DEFAULT_AD_CACHE_DURATION = 120
