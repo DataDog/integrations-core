@@ -22,8 +22,8 @@ rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages publi
 rabbitmq.exchange.messages.publish.rate,gauge,,message,,Rate of messages published per second,0,rabbitmq,xchng msgs pub rate
 rabbitmq.exchange.messages.publish_in.count,gauge,,message,,Count of messages published from channels into this exchange,0,rabbitmq,xchng msgs pub in
 rabbitmq.exchange.messages.publish_in.rate,gauge,,message,,Rate of messages published from channels into this exchange per sec,0,rabbitmq,xchng msgs pub in rate
-rabbitmq.exchange.messages.publish_out.count,gauge,,message,,Count of messages published from this exchange into queues,0,rabbitmq,xchng msgs pub out
-rabbitmq.exchange.messages.publish_out.rate,gauge,,message,,Rate of messages published from this exchange into queues per second,rabbitmq,xchng msgs pub out rate
+rabbitmq.exchange.messages.publish_out.count,gauge,,message,,"Count of messages published from this exchange into queues",0,rabbitmq,xchng msgs pub out
+rabbitmq.exchange.messages.publish_out.rate,gauge,,message,,"Rate of messages published from this exchange into queues per second",0,rabbitmq,xchng msgs pub out rate
 rabbitmq.queue.active_consumers,gauge,,consumer,,"Number of active consumers, consumers that can immediately receive any messages sent to the queue",0,rabbitmq,act cons
 rabbitmq.queue.bindings.count,gauge,,bind,,"Number of bindings for a specific queue",0,rabbitmq,queue bind
 rabbitmq.queue.consumers,gauge,,consumer,,Number of consumers,0,rabbitmq,cons
