@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/DataDog/integrations-core.svg?branch=master)](https://travis-ci.org/DataDog/integrations-core)
 [![Build status](https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true)](https://ci.appveyor.com/project/Datadog/integrations-core)
+[![Open Source Helpers](https://www.codetriage.com/datadog/integrations-core/badges/users.svg)](https://www.codetriage.com/datadog/integrations-core)
 
 # Datadog Agent Integrations - Core
 
