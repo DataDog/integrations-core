@@ -137,7 +137,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/post
 The PostgreSQL check does not include any event at this time.
 
 ### Service Checks
-The PostgreSQL check does not include any service check at this time.
+
+**postgres.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance. Returns `OK` otherwise.
+
 
 ## Troubleshooting
 

@@ -40,7 +40,15 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mapr
 The Mapreduce check does not include any event at this time.
 
 ### Service Checks
-The Mapreduce check does not include any service check at this time.
+**mapreduce.resource_manager.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to the Resource Manager.
+Returns `OK` otherwise.
+
+**mapreduce.application_master.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to the Application Master.
+Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

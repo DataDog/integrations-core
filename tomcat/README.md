@@ -231,7 +231,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tomc
 The Tomcat check does not include any event at this time.
 
 ### Service Checks
-The Tomcat check does not include any service check at this time.
+
+**tomcat.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance. Returns `OK` otherwise.
+
 
 ## Troubleshooting
 ### Commands to view the metrics that are available:

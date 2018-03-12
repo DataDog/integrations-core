@@ -99,7 +99,25 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/open
 The Openstack check does not include any event at this time.
 
 ### Service Checks
-The Openstack check does not include any service check at this time.
+**openstack.neutron.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.keystone.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.hypervisor.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
+
+**openstack.neutron.network.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

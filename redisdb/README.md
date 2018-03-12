@@ -101,9 +101,14 @@ The Redis check does not include any event at this time.
 
 ### Service Checks
 
-`redis.can_connect`:
+**redis.can_connect**:
 
 Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
+
+**redis.replication.master_link_status**
+
+Returns `CRITICAL` if this Redis instance is unable to connect to its master instance. Returns `OK` otherwise.
+
 
 ## Troubleshooting
 

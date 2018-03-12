@@ -125,7 +125,9 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/acti
 The Activemq check does not include any event at this time.
 
 ### Service Checks
-The Activemq check does not include any service check at this time.
+**activemq.can_connect**:
+
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
