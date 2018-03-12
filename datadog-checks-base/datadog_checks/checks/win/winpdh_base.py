@@ -9,13 +9,24 @@ from ..checks import AgentCheck
 # project
 from utils.containers import hash_mutable
 
-# datadog
+#  datadog
 try:
-    from .winpdh import WinPDHCounter
+    from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 except ImportError:
-    from .winpdh_stub import WinPDHCounter
+    from .winpdh_stub import WinPDHCounter,DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
 import win32wnet
+
+int_types = [
+    "int",
+    "long",
+    "uint",
+]
+
+double_types = [
+    "double",
+    "float",
+]
 
 class PDHBaseCheck(AgentCheck):
     """
@@ -60,13 +71,37 @@ class PDHBaseCheck(AgentCheck):
                         self.log.error("Failed to make remote connection %s" % str(e))
                         return
 
+                datatypes = {}
+                precisions = instance.get('counter_data_types')
+                if precisions is not None:
+                    if not isinstance(precisions, list):
+                        self.log.warning("incorrect type for counter_data_type %s" % str(precisions))
+                    else:
+                        for p in precisions:
+                            k, v = p.split(",")
+                            v = v.lower().strip()
+                            if v in int_types:
+                                self.log.info("Setting datatype for %s to integer" % k)
+                                datatypes[k] = DATA_TYPE_INT
+                            elif v in double_types:
+                                self.log.info("Setting datatype for %s to double" % k)
+                                datatypes[k] = DATA_TYPE_DOUBLE
+                            else:
+                                self.log.warning("Unknown data type %s" % str(v))
+
                 # list of the metrics.  Each entry is itself an entry,
                 # which is the pdh name, datadog metric name, type, and the
                 # pdh counter object
 
                 for counterset, inst_name, counter_name, dd_name, mtype in counter_list:
                     m = getattr(self, mtype.lower())
-                    obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine)
+
+                    precision = None
+                    if dd_name in datatypes:
+                        precision = datatypes[dd_name]
+
+                    obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision=precision)
+
                     entry = [inst_name, dd_name, m, obj]
                     self.log.debug("entry: %s" % str(entry))
                     self._metrics[key].append(entry)
@@ -78,7 +113,12 @@ class PDHBaseCheck(AgentCheck):
                         if inst_name.lower() == "none" or len(inst_name) == 0 or inst_name == "*" or inst_name.lower() == "all":
                             inst_name = None
                         m = getattr(self, mtype.lower())
-                        obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine)
+
+                        precision = None
+                        if dd_name in datatypes:
+                            precision = datatypes[dd_name]
+
+                        obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision = precision)
                         entry = [inst_name, dd_name, m, obj]
                         self.log.debug("additional metric entry: %s" % str(entry))
                         self._metrics[key].append(entry)
