@@ -34,6 +34,13 @@ def parse_metric(metric):
 
 
 def reassemble_addresses(seq):
+    """Takes a sequence of strings and combines any sub-sequence that looks
+    like an IPv4 address into a single string.
+
+    Example:
+        ['listener', '0', '0', '0', '0_80', downstream_cx_total'] ->
+        ['listener', '0.0.0.0:80', 'downstream_cx_total']
+    """
     reassembled = []
     prev = ''
 
