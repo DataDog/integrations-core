@@ -133,7 +133,7 @@ class MapReduceCheck(AgentCheck):
 
         # Get additional tags from the conf file
         custom_tags = instance.get('tags', [])
-        if tags is None:
+        if custom_tags is None:
             tags = []
         else:
             tags = list(set(custom_tags))
