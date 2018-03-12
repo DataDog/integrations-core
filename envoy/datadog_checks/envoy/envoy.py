@@ -55,7 +55,9 @@ class Envoy(AgentCheck):
             self.log.warning(msg)
             return
 
+        # Avoid repeated global lookups.
         get_method = getattr
+
         for line in request.content.decode().splitlines():
             try:
                 envoy_metric, value = line.split(': ')
