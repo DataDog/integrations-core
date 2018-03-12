@@ -3,6 +3,14 @@ from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
 
 
 def parse_metric(metric):
+    """Takes a metric formatted by Envoy and splits it into a unique
+    metric name. Returns the unique metric name, a list of tags, and
+    the name of the submission method.
+
+    Example:
+        'listener.0.0.0.0_80.downstream_cx_total' ->
+        ('listener.downstream_cx_total', ['address:0.0.0.0:80'], 'count')
+    """
     metric_parts = []
     tag_values = []
     mapping = METRIC_TREE
