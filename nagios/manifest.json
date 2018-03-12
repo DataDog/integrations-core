@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "f7629918-751c-4a05-87e7-0e3de34e51e7",
   "public_title": "Datadog-Nagios Integration",
   "categories":["monitoring", "notification"],

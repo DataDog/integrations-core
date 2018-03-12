@@ -36,7 +36,7 @@ class NagiosTestCase(AgentCheckTest):
                 'nagios_conf': self.nagios_cfg.name,
                 'collect_events': events,
                 'collect_service_performance_data': service_perf,
-                'collect_host_performance_data': host_perf
+                'collect_host_performance_data': host_perf,
             }]
         }
 
@@ -210,6 +210,8 @@ class PerfDataTailerTestCase(NagiosTestCase):
         config = self.get_config(
             '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$"]),
             service_perf=True)
+
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
@@ -225,7 +227,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
 
             values = info.split(";")
             value = float(values[0])
-            expected_tags = []
+            expected_tags = ['optional:tag1']
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
@@ -244,6 +246,8 @@ class PerfDataTailerTestCase(NagiosTestCase):
         config = self.get_config(
             '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$",]),
             service_perf=True)
+
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
@@ -257,7 +261,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             name, info = metric_data.split("=")
             values = info.split(";")
             value = int(values[0][:-2])
-            expected_tags = ['unit:' + values[0][-2:]]
+            expected_tags = ['unit:' + values[0][-2:], "optional:tag1"]
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
@@ -277,6 +281,8 @@ class PerfDataTailerTestCase(NagiosTestCase):
         config = self.get_config(
             '\n'.join(["host_perfdata_file=%s" % self.log_file.name, "host_perfdata_file_template=DATATYPE::HOSTPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tHOSTPERFDATA::$HOSTPERFDATA$\tHOSTCHECKCOMMAND::$HOSTCHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$"]),
             host_perf=True)
+
+        config["instances"][0]["tags"] = ['optional:tag1']
         self.run_check(config)
 
         # Write content to log file and run check
@@ -295,7 +301,7 @@ class PerfDataTailerTestCase(NagiosTestCase):
             index = values[0].find("ms") if values[0].find("ms") != -1 else values[0].find("%")
             index = len(values[0]) - index
             value = float(values[0][:-index])
-            expected_tags = ['unit:' + values[0][-index:]]
+            expected_tags = ['unit:' + values[0][-index:], "optional:tag1"]
             if len(values) == 4:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
