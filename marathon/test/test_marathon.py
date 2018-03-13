@@ -6,7 +6,6 @@
 import os
 
 # project
-from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, Fixtures
 
 DEPLOYMENT_METRICS_CONFIG = {
@@ -80,8 +79,6 @@ class MarathonCheckTest(AgentCheckTest):
         self.assertMetric('marathon.deployments', value=1)
         for metric in Q_METRICS:
             self.assertMetric(metric, at_least=1)
-        
-        self.assertServiceCheck('marathon.can_connect', status=AgentCheck.OK, tags=['url:http://localhost:8080', 'optional:tag1'])
 
     def test_empty_responses(self):
         def side_effect(url, timeout, auth, acs_url, verify, tags):
@@ -96,3 +93,5 @@ class MarathonCheckTest(AgentCheckTest):
 
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=0)
+        self.assertServiceCheck('marathon.can_connect', tags=['url:http://localhost:8080', 'optional:tag1'])
+
