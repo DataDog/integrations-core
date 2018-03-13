@@ -4,6 +4,7 @@
 ==================
 
 * [BUGFIX] Fix fetching kubernetes_state.container.restarts with kube-state-metrics v1.2.0 [#1137][]
+* [BUGFIX] Fix rows with mismatch columns in metadata.csv [#1195][]
 
 2.2.0 / 2018-02-13
 ==================

@@ -5,8 +5,8 @@ kubernetes_state.container.terminated,gauge,,,,Whether the container is currentl
 kubernetes_state.container.status_report.count.terminated,count,,,,Count of the containers currently reporting a in terminated state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.term
 kubernetes_state.container.waiting,gauge,,,,Whether the container is currently in waiting state,0,kubernetes,k8s_state.container.wait
 kubernetes_state.container.status_report.count.waiting,count,,,,Count of the containers currently reporting a in waiting state with the reason as a tag,-1,kubernetes,k8s_state.container.status_report.count.wait
-kubernetes_state.container.gpu.request,gauge,,,The number of requested gpu devices by a container,0,kubernetes,k8s_state.container.gpu.request
-kubernetes_state.container.gpu.limit,gauge,,,The limit on gpu devices to be used by a container,0,kubernetes,k8s_state.container.gpu.limit
+kubernetes_state.container.gpu.request,gauge,,,,The number of requested gpu devices by a container,0,kubernetes,k8s_state.container.gpu.request
+kubernetes_state.container.gpu.limit,gauge,,,,The limit on gpu devices to be used by a container,0,kubernetes,k8s_state.container.gpu.limit
 kubernetes_state.container.restarts,gauge,,,,The number of restarts per container,-1,kubernetes,k8s_state.container.restarts
 kubernetes_state.container.cpu_requested,gauge,,cpu,,The number of requested cpu cores by a container,0,kubernetes,k8s_state.container.cpu_req
 kubernetes_state.container.memory_requested,gauge,,byte,,The number of requested memory bytes by a container,0,kubernetes,k8s_state.container.mem_req
@@ -38,9 +38,9 @@ kubernetes_state.limitrange.memory.max_limit_request_ratio,gauge,,,,Maximum memo
 kubernetes_state.node.cpu_capacity,gauge,,cpu,,The total CPU resources of the node,0,kubernetes,k8s_state.node.cpu_capacity
 kubernetes_state.node.memory_capacity,gauge,,byte,,The total memory resources of the node,0,kubernetes,k8s_state.node.memory_capacity
 kubernetes_state.node.pods_capacity,gauge,,,,The total pod resources of the node,0,kubernetes,k8s_state.node.pods_capacity
-kubernetes_state.node.gpu.cards_allocatable,gauge,,,The GPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.gpu.cards_allocatable
-kubernetes_state.node.gpu.cards_capacity,gauge,,,The total GPU resources of the node,0,kubernetes,k8s_state.node.gpu.cards_capacity
-kubernetes_state.persistentvolumeclaim.status,gauge,,,The phase the persistent volume claim is currently in,-1,kubernetes,k8s_state.persistentvolumeclaim.status
+kubernetes_state.node.gpu.cards_allocatable,gauge,,,,The GPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.gpu.cards_allocatable
+kubernetes_state.node.gpu.cards_capacity,gauge,,,,The total GPU resources of the node,0,kubernetes,k8s_state.node.gpu.cards_capacity
+kubernetes_state.persistentvolumeclaim.status,gauge,,,,The phase the persistent volume claim is currently in,-1,kubernetes,k8s_state.persistentvolumeclaim.status
 kubernetes_state.node.cpu_allocatable,gauge,,cpu,,The CPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.cpu_allocatable
 kubernetes_state.node.memory_allocatable,gauge,,byte,,The memory resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.memory_allocatable
 kubernetes_state.node.pods_allocatable,gauge,,,,The pod resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.pods_allocatable
