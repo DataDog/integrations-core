@@ -208,7 +208,7 @@ class MesosMaster(AgentCheck):
         timeout = float(instance.get('timeout', default_timeout))
         ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
 
-        state_metrics = self._check_leadership(url, timeout, ssl_verify)
+        state_metrics = self._check_leadership(url, timeout, ssl_verify, instance_tags)
         if state_metrics:
             tags = [
                 'mesos_pid:{0}'.format(state_metrics['pid']),
