@@ -14,6 +14,7 @@ import docker
 PROMETHEUS_URL = 'http://127.0.0.1:19990/admin/datadog/metrics'
 
 INSTANCES = [{
+    'name': 'linkerd',
     'prometheus_url': PROMETHEUS_URL,
     'prometheus_metrics_prefix': 'dd_linkerd_',
     'metrics': [{'jvm:start_time': 'jvm.start_time'}],

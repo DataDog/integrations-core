@@ -6,7 +6,7 @@
   "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
   "support": "contrib",
   "type":"check",
-  "doc_link": "link/to/the/dedicated/documentation/page",
+  "doc_link": "https://docs.datadoghq.com/integrations/linkerd/",
   "supported_os": ["linux","mac_os","windows"],
   "categories":["list of categories","a complete list can be found on our documentation"],
   "version": "1.0.0",
