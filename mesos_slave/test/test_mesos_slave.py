@@ -17,7 +17,8 @@ class TestMesosSlave(AgentCheckTest):
             'instances': [
                 {
                     'url': 'http://localhost:5051',
-                    'tasks': ['hello']
+                    'tasks': ['hello'],
+                    'tags': ['instance:mytag1']
                 }
             ]
         }
@@ -38,4 +39,4 @@ class TestMesosSlave(AgentCheckTest):
             metrics.update(d)
         [self.assertMetric(v[0]) for k, v in check.TASK_METRICS.iteritems()]
         [self.assertMetric(v[0]) for k, v in metrics.iteritems()]
-        self.assertServiceCheck('hello.ok', count=1, status=AgentCheck.OK)
+        self.assertServiceCheck('hello.ok', tags=['url:http://localhost:5051', 'instance:mytag1'], count=1, status=AgentCheck.OK)
