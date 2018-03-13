@@ -125,7 +125,7 @@ class TestPowerDNSRecursorCheck(AgentCheckTest):
 
     # Really a basic check to see if all metrics are there
     def test_check(self):
-        service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082']
+        service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082', 'optional:tag1']
 
         # get version and test v3 first.
         version = self._get_pdns_version()
@@ -188,7 +188,7 @@ class TestPowerDNSRecursorCheck(AgentCheckTest):
             for metric in self.RATE_METRICS + self.RATE_METRICS_V4:
                 self.assertMetric(self.METRIC_FORMAT.format(metric), tags=tags)
 
-        service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082']
+        service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082', 'foo:bar']
         self.assertServiceCheckOK('powerdns.recursor.can_connect', tags=service_check_tags)
 
         self.coverage_report()
