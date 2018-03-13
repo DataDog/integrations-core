@@ -1,6 +1,13 @@
 # CHANGELOG - rabbitmq
 
-1.5.0 / Unreleased
+1.5.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] URL encode queue names that might have special characters like '#'. See [#1100][], thanks [@sylr][].
+
+1.5.0 / 2018-02-13
 ==================
 
 ### Changes
@@ -69,6 +76,8 @@
 [#924]: https://github.com/DataDog/integrations-core/issues/924
 [#909]: https://github.com/DataDog/integrations-core/issues/909
 [#910]: https://github.com/DataDog/integrations-core/issues/910
+[#1100]: https://github.com/DataDog/integrations-core/issues/1100
 [@dnavre]: https://github.com/dnavre
 [@ian28223]: https://github.com/ian28223
 [@jamescarr]: https://github.com/jamescarr
+[@sylr]: https://github.com/sylr

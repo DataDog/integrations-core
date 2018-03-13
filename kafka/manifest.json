@@ -14,7 +14,7 @@
   "version": "1.0.2",
   "guid": "f201c0b7-4b31-4528-9955-ae756a4580b8",
   "public_title": "Datadog-Kafka Integration",
-  "categories":["processing", "messaging"],
+  "categories":["processing", "messaging", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/kafka/",
   "is_public": true,

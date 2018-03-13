@@ -10,19 +10,20 @@ instances:
     # This will prevent aggregating metrics matchingly named clusters in distinct environments.
     #
     # The 'datacenter' tag should be the name of the Cassandra data center the node belongs to.
-    tags:
-      environment: default_environment
-      datacenter: default_datacenter
-  #   user: username
-  #   password: password
-  #   process_name_regex: .*process_name.* # Instead of specifying a host, and port. The agent can connect using the attach api.
-  #                                        # This requires the JDK to be installed and the path to tools.jar to be set below.
-  #   tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar # To be set when process_name_regex is set
-  #   name: cassandra_instance
-  #   # java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
-  #   # java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
-  #   # trust_store_path: /path/to/trustStore.jks # Optional, should be set if ssl is enabled
-  #   # trust_store_password: password
+    # tags:
+    #   environment: default_environment
+    #   datacenter: default_datacenter
+    
+    # user: username
+    # password: password
+    # process_name_regex: .*process_name.* # Instead of specifying a host, and port. The agent can connect using the attach api.
+                                           # This requires the JDK to be installed and the path to tools.jar to be set below.
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar # To be set when process_name_regex is set
+    # name: cassandra_instance
+    # java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
+    # java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
+    # trust_store_path: /path/to/trustStore.jks # Optional, should be set if ssl is enabled
+    # trust_store_password: password
 
 init_config:
   is_jmx: true

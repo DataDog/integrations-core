@@ -14,9 +14,7 @@ And many more. You can also invent your own metrics using custom SQL queries.
 ## Setup
 ### Installation
 
-The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers.  
-
-If you need the newest version of the MySQL check, install the `dd-check-mysql` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers.
 
 ### Configuration
 
@@ -32,6 +30,7 @@ Query OK, 0 rows affected (0.00 sec)
 ```
 
 Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here](https://dev.mysql.com/doc/refman/5.7/en/adding-users.html)
+
 
 Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
 
@@ -77,7 +76,7 @@ Query OK, 0 rows affected (0.00 sec)
   init_config:
 
   instances:
-    - server: localhost
+    - server: 127.0.0.1
       user: datadog
       pass: <YOUR_CHOSEN_PASSWORD> # from the CREATE USER step earlier
       port: <YOUR_MYSQL_PORT> # e.g. 3306
@@ -90,10 +89,12 @@ Query OK, 0 rows affected (0.00 sec)
           schema_size_metrics: false
           disable_innodb_metrics: false
   ```
-  In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.  
+  In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.
   See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MySQL metrics to Datadog.
+The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
+
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending MySQL metrics to Datadog.
 
 #### Log Collection
 
@@ -116,10 +117,10 @@ Query OK, 0 rows affected (0.00 sec)
     long_query_time = 2
     ```
 
-  - Save the file and restart MySQL using following commands:  
+  - Save the file and restart MySQL using following commands:
     `service mysql restart`
   - Make sure the Agent has read access on those files (and the `/var/log/mysql` directory) and double check your logrotate configuration to make sure those files are taken into account and permissions are correctly set as well.
-  - In `/etc/logrotate.d/mysql-serverthere` should be something similar to: 
+  - In `/etc/logrotate.d/mysql-serverthere` should be something similar to:
 
     ```
     /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
@@ -134,7 +135,7 @@ Query OK, 0 rows affected (0.00 sec)
 2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```
-    log_enabled: true
+    logs_enabled: true
     ```
 
 3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:
@@ -166,13 +167,13 @@ Query OK, 0 rows affected (0.00 sec)
     ```
     See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mysql` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mysql` under the Checks section:
 
 ```
 Checks

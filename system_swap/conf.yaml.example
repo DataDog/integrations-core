@@ -2,4 +2,7 @@
 init_config:
 
 instances:
-    [{}]
+    [{
+    # - tags
+    #     - optional:tags
+    }]

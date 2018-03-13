@@ -40,7 +40,8 @@ class TestCheckNetwork(AgentCheckTest):
         self.config = {
             "instances": [
                 {
-                    "collect_connection_state": True
+                    "collect_connection_state": True,
+                    'tags': ['optional:tag1']
                 }
             ]
         }
@@ -70,7 +71,7 @@ class TestCheckNetwork(AgentCheckTest):
 
         # Assert metrics
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
-            self.assertMetric(metric, value=value)
+            self.assertMetric(metric, value=value, tags=['optional:tag1'])
 
     @attr('unix')
     @mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=netstat_subprocess_mock)
@@ -80,7 +81,7 @@ class TestCheckNetwork(AgentCheckTest):
 
         # Assert metrics
         for metric, value in self.CX_STATE_GAUGES_VALUES.iteritems():
-            self.assertMetric(metric, value=value)
+            self.assertMetric(metric, value=value, tags=['optional:tag1'])
 
     @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
     @mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
@@ -89,7 +90,7 @@ class TestCheckNetwork(AgentCheckTest):
     def test_win_uses_psutil(self, *args):
         self.check._check_psutil = mock.MagicMock()
         self.run_check({})
-        self.check._check_psutil.assert_called_once_with()
+        self.check._check_psutil.assert_called_once_with({'collect_connection_state': True, 'tags': ['optional:tag1']})
 
     @mock.patch('datadog_checks.network.Network._cx_state_psutil')
     @mock.patch('datadog_checks.network.Network._cx_counters_psutil')
@@ -98,17 +99,17 @@ class TestCheckNetwork(AgentCheckTest):
         self.check._cx_counters_psutil = counters
 
         self.check._collect_cx_state = False
-        self.check._check_psutil()
+        self.check._check_psutil({})
         state.assert_not_called()
-        counters.assert_called_once_with()
+        counters.assert_called_once_with(tags=[])
 
         state.reset_mock()
         counters.reset_mock()
 
         self.check._collect_cx_state = True
-        self.check._check_psutil()
-        state.assert_called_once_with()
-        counters.assert_called_once_with()
+        self.check._check_psutil({})
+        state.assert_called_once_with(tags=[])
+        counters.assert_called_once_with(tags=[])
 
     def test_cx_state_psutil(self):
         sconn = namedtuple('sconn', ['fd', 'family', 'type', 'laddr', 'raddr', 'status', 'pid'])

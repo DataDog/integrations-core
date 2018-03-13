@@ -1,6 +1,12 @@
 # CHANGELOG - kubernetes_state
 
-2.2.0 / Unreleased
+2.3.0 / 2018-02-28
+==================
+
+* [BUGFIX] Fix fetching kubernetes_state.container.restarts with kube-state-metrics v1.2.0 [#1137][]
+* [BUGFIX] Fix rows with mismatch columns in metadata.csv [#1195][]
+
+2.2.0 / 2018-02-13
 ==================
 ### Changes
 
@@ -66,3 +72,6 @@
 [#874]: https://github.com/DataDog/integrations-core/issues/874
 [#936]: https://github.com/DataDog/integrations-core/issues/936
 [#965]: https://github.com/DataDog/integrations-core/issues/965
+[#1000]: https://github.com/DataDog/integrations-core/issues/1000
+[#1040]: https://github.com/DataDog/integrations-core/issues/1040
+[#1137]: https://github.com/DataDog/integrations-core/issues/1137

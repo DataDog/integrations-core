@@ -20,9 +20,7 @@ And many more.
 ## Setup
 ### Installation
 
-The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers.  
-
-If you need the newest version of the NGINX check, install the `dd-check-nginx` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The NGINX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your NGINX servers.
 
 #### NGINX status module
 
@@ -96,7 +94,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
   ```
   See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending NGINX metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending NGINX metrics to Datadog.
 
 #### Log Collection
 
@@ -105,35 +103,35 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
 
 *  Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
 
   ```
   logs:
-     - type: file
+    - type: file
       path: /var/log/nginx/access.log
       service: nginx
       source: nginx
       sourcecategory: http_web_access
-    
+
     - type: file
       path: /var/log/nginx/error.log
       service: nginx
       source: nginx
-      sourcecategory: http_web_access   
+      sourcecategory: http_web_access
   ```
-  Change the `service` and `path` parameter values and configure them for your environment.  
+  Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `nginx` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nginx` under the Checks section:
 
 ```
   Checks

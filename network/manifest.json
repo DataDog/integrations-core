@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.4.0",
+  "version": "1.5.0",
   "guid": "43631795-8a1f-404d-83ae-397639a84050",
   "public_title": "Datadog-Network Integration",
   "categories":["web", "network"],

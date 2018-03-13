@@ -38,7 +38,7 @@ class Kong(AgentCheck):
         host = parsed_url.hostname
         port = parsed_url.port or 80
         service_check_name = 'kong.can_connect'
-        service_check_tags = ['kong_host:%s' % host, 'kong_port:%s' % port]
+        service_check_tags = ['kong_host:%s' % host, 'kong_port:%s' % port] + tags
 
         try:
             self.log.debug(u"Querying URL: {0}".format(url))

@@ -18,7 +18,7 @@ Edit the `mapreduce.yaml` file to point to your server and port, set the masters
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mapreduce` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mapreduce` under the Checks section:
 
     Checks
     ======
@@ -40,7 +40,15 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mapr
 The Mapreduce check does not include any event at this time.
 
 ### Service Checks
-The Mapreduce check does not include any service check at this time.
+**mapreduce.resource_manager.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to the Resource Manager.
+Returns `OK` otherwise.
+
+**mapreduce.application_master.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to the Application Master.
+Returns `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

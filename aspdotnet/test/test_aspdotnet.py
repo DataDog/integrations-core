@@ -11,28 +11,56 @@ from nose.plugins.attrib import attr
 from tests.checks.common import AgentCheckTest
 
 
-instance = {
-    'host': 'localhost',
-    'port': 26379,
-    'password': 'datadog-is-devops-best-friend'
+MINIMAL_INSTANCE = {
+    'host': '.',
+}
+
+INSTANCE_WITH_TAGS = {
+    'host': '.',
+    'tags': ['tag1', 'another:tag']
 }
 
 
-# NOTE: Feel free to declare multiple test classes if needed
-
+@attr('windows')
 @attr(requires='aspdotnet')
-class TestAspdotnet(AgentCheckTest):
-    """Basic Test for aspdotnet integration."""
+class ASPDotNetTest(AgentCheckTest):
     CHECK_NAME = 'aspdotnet'
 
-    def test_check(self):
-        """
-        Testing Aspdotnet check.
-        """
-        self.load_check({}, {})
+    # these metrics are single-instance, so they won't have per-instance tags
+    ASP_METRICS = (
+        "aspdotnet.application_restarts",
+        "aspdotnet.worker_process_restarts",
+        "aspdotnet.request.wait_time",
+    )
 
-        # run your actual tests...
+    # these metrics are multi-instance.
+    ASP_APP_METRICS = (
+        # ASP.Net Applications
+        "aspdotnet.applications.requests.in_queue",
+        "aspdotnet.applications.requests.executing",
+        "aspdotnet.applications.requests.persec",
+        "aspdotnet.applications.forms_authentication.failure",
+        "aspdotnet.applications.forms_authentication.successes",
+    )
 
-        self.assertTrue(True)
-        # Raises when COVERAGE=true and coverage < 100%
+    def test_basic_check(self):
+        self.run_check_twice({'instances': [MINIMAL_INSTANCE]})
+
+        for metric in self.ASP_METRICS:
+            self.assertMetric(metric, tags=None, count=1)
+
+        for metric in self.ASP_APP_METRICS:
+            self.assertMetric(metric, tags=["instance:__Total__"], count=1)
+
+        self.coverage_report()
+
+    def test_with_tags(self):
+        self.run_check_twice({'instances': [INSTANCE_WITH_TAGS]})
+
+        for metric in self.ASP_METRICS:
+            self.assertMetric(metric, tags=['tag1', 'another:tag'], count=1)
+
+        for metric in self.ASP_APP_METRICS:
+            self.assertMetric(metric, tags=['tag1', 'another:tag', 'instance:__Total__'], count=1)
+
         self.coverage_report()

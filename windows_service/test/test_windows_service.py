@@ -13,6 +13,7 @@ from tests.core.test_wmi import TestCommonWMI
 INSTANCE = {
     'host': '.',
     'services': ['EventLog', 'Dnscache', 'NonExistingService'],
+    'tags': ['optional:tag1']
 }
 
 INVALID_HOST_INSTANCE = {
@@ -40,9 +41,9 @@ class TestWindowsService(AgentCheckTest):
 
     def test_basic_check(self):
         self.run_check({'instances': [INSTANCE]})
-        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventLog'], count=1)
-        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:Dnscache'], count=1)
-        self.assertServiceCheckCritical(self.SERVICE_CHECK_NAME, tags=['service:NonExistingService'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:EventLog', 'optional:tag1'], count=1)
+        self.assertServiceCheckOK(self.SERVICE_CHECK_NAME, tags=['service:Dnscache', 'optional:tag1'], count=1)
+        self.assertServiceCheckCritical(self.SERVICE_CHECK_NAME, tags=['service:NonExistingService', 'optional:tag1'], count=1)
         self.coverage_report()
 
     def test_invalid_host(self):

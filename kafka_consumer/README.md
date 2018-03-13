@@ -6,14 +6,12 @@ This Agent check only collects metrics for message offsets. If you want to colle
 
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets for old-style consumers that store their offsets in zookeeper, and the calculated consumer lag (which is the difference between those two metrics).
 
-This check does NOT support Kafka versions > 0.8—it can't collect consumer offsets for new-style consumer groups which store their offsets in Kafka. If run such a version of Kafka, track [this issue on GitHub](https://github.com/DataDog/integrations-core/issues/457).
+This check also supports newer versions of Kafka that store their offsets directly in Kafka. 
 
 ## Setup
 ### Installation
 
-The Agent's Kafka consumer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.  
-
-If you need the newest version of the Kafka consumer check, install the `dd-check-kafka-consumer` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The Agent's Kafka consumer check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kafka nodes.
 
 ### Configuration
 
@@ -21,7 +19,7 @@ Create a `kafka_consumer.yaml` file using [this sample conf file](https://github
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kafka_consumer` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka_consumer` under the Checks section:
 
 ```
   Checks

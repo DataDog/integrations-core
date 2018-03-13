@@ -58,3 +58,7 @@ instances:
     # which will send as events the alarms set in vCenter
     # event_config:
     #   collect_vcenter_alarms: true # defaults to false
+
+    # Set (optional) custom tags for each metric
+    # tags:
+    #   - optional:tag1

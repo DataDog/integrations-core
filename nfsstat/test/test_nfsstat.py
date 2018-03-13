@@ -44,7 +44,7 @@ class TestNfsstat(AgentCheckTest):
         'init_config': {
             'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat'
         },
-        'instances': [{}]
+        'instances': [{'tags': ['optional:tag1']}]
     }
 
     def setUp(self):
@@ -71,7 +71,7 @@ class TestNfsstat(AgentCheckTest):
 
         for metric in metrics:
             for folder in folder_names:
-                tags = []
+                tags = ['optional:tag1']
                 tags.append(nfs_server_tag)
                 tags.append(nfs_export_tag.format(folder))
                 tags.append(nfs_mount_tag.format(folder))

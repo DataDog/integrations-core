@@ -21,7 +21,7 @@ Edit the `kubernetes.yaml` file to point to your server and port, set the master
 As the 5.17.0 release, Datadog Agent now supports built in leader election option for the Kubernetes event collector. Agents coordinate by performing a leader election among members of the Datadog DaemonSet through kubernetes to ensure only one leader agent instance is gathering events at a given time.
 If the leader agent instance fails, a re-election occurs and another cluster agent will take over collection.
 
-**This functionality is disabled by default**. 
+**This functionality is disabled by default**.
 
 To enable leader election you need to set the variable `leader_candidate` to true in your kubernetes.yaml file.
 
@@ -80,12 +80,12 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-In your `kubernetes.yaml` file you will see the [leader_lease_duration](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L118) parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**. 
+In your `kubernetes.yaml` file you will see the [leader_lease_duration](https://github.com/DataDog/integrations-core/blob/master/kubernetes/conf.yaml.example#L118) parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**.
 The longer it is, the less hard your agent hits the apiserver with requests, but it also means that if the leader dies (and under certain conditions) there can be an event blackout until the lease expires and a new leader takes over.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kubernetes` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubernetes` under the Checks section:
 
     Checks
     ======
@@ -144,7 +144,7 @@ Yes, since Kubernetes 1.6, the concept of [Taints and tolerations](http://blog.k
 Add the following lines to your Deployment (or Daemonset if you are running a multi-master setup):
 ```
 spec:
- tolerations: 
+ tolerations:
  - key: node-role.kubernetes.io/master
    effect: NoSchedule
 ```
@@ -160,7 +160,7 @@ The agent assumes that the kubelet API is available at the default gateway of th
 See [this PR](https://github.com/DataDog/dd-agent/pull/3051)
 
 ###  Why is there a container in each Kubernetes pod with 0% CPU and minimal disk/ram?
-These are pause containers (docker_image:gcr.io/google_containers/pause.*) that K8s injects into every pod to keep it populated even if the "real” container is restarting/stopped. 
+These are pause containers (docker_image:gcr.io/google_containers/pause.*) that K8s injects into every pod to keep it populated even if the "real” container is restarting/stopped.
 
 The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like *kubernetes.cpu.usage.total* and *kubernetes.filesystem.usage*.
 

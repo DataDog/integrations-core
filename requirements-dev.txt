@@ -1,0 +1,4 @@
+./datadog-checks-base
+mock==2.0.0
+pytest
+tox

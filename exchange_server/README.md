@@ -9,9 +9,7 @@ Get metrics from Microsoft Exchange Server
 ## Setup
 ### Installation
 
-The Exchange check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.  
-
-If you need the newest version of the Exchange check, install the `dd-check-exchange_server` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The Exchange check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 
@@ -19,7 +17,7 @@ Edit the `exchange_server.yaml` file to collect Exchange Server performance data
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `exchange_server` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section:
 
     Checks
     ======

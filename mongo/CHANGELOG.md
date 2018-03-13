@@ -1,16 +1,17 @@
 # CHANGELOG - mongo
 
-1.5.2 / Unreleased
+1.5.2 / 2018-02-13
 ==================
 ### Changes
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
+* [BUGFIX] Pass replica set metric collection if `replSetGetStatus` command not available. See [#1092][]
 
 1.5.1 / 2018-01-10
 ==================
 ### Changes
 
-* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception See [#915][]
+* [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception. See [#915][]
 
 1.5.0 / 2017-11-21
 ==================
@@ -73,6 +74,7 @@
 [#769]: https://github.com/DataDog/integrations-core/issues/769
 [#823]: https://github.com/DataDog/integrations-core/issues/823
 [#915]: https://github.com/DataDog/integrations-core/issues/915
+[#1092]: https://github.com/DataDog/integrations-core/issues/1092
 [@dnavre]: https://github.com/dnavre
 [@dtbartle]: https://github.com/dtbartle
 [@hindmanj]: https://github.com/hindmanj

@@ -1,5 +1,11 @@
 # CHANGELOG - gearmand
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support to service check.
 
 1.0.1 / 2017-07-18
 ==================

@@ -18,9 +18,6 @@ The Spark check is packaged with the Agent, so simply [install the Agent](https:
 - YARN ResourceManager (if you're running Spark on YARN), or
 - Spark master (if you're running Standalone Spark)
 
-
-If you need the newest version of the Spark check, install the `dd-check-spark` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
-
 ### Configuration
 
 Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample spark.yaml](https://github.com/DataDog/integrations-core/blob/master/spark/conf.yaml.example) for all available configuration options:
@@ -29,7 +26,7 @@ Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample sp
 init_config:
 
 instances:
-  - spark_url: http://localhost:8088 # Spark master web UI 
+  - spark_url: http://localhost:8088 # Spark master web UI
 #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
 #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
@@ -45,11 +42,11 @@ instances:
 
 Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Spark metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Spark metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `spark` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `spark` under the Checks section:
 
 ```
   Checks
@@ -80,12 +77,15 @@ The Agent submits one of the following service checks, depending on how you're r
 
 - **spark.standalone_master.can_connect**
 - **spark.mesos_master.can_connect**
+- **spark.application_master.can_connect**
 - **spark.resource_manager.can_connect**
 
 The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+### Spark on AWS EMR.
+
+To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html) to install the [Datadog Agent](https://docs.datadoghq.com/agent/) and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with [the proper values on each EMR node](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html).
 
 ## Further Reading
 

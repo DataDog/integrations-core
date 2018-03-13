@@ -9,8 +9,6 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 
 The DNS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your DNS servers. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
-If you need the newest version of the DNS check, install the `dd-check-dns` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
-
 ### Configuration
 
 Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example) for all available configuration options:
@@ -29,11 +27,11 @@ instances:
 
 If you omit the `nameserver` option, the check will use whichever nameserver is configured in local network settings.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to begin sending DNS service checks and response times to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending DNS service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `dns_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `dns_check` under the Checks section:
 
 ```
   Checks
@@ -66,7 +64,7 @@ This agent check tags all service checks it collects with:
 
   * `nameserver:<nameserver_in_yaml>`
   * `resolved_hostname:<hostname_in_yaml>`
-  
+
 `dns.can_resolve`:
 
 Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP.

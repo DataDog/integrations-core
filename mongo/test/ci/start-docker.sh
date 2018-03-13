@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 PORT=47017
 PORT1=$(( $PORT + 1 ))
@@ -45,40 +45,34 @@ do
     sleep 2
 done
 
-echo 'docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT'
-docker exec -it $NAME mongo --eval "rs.initiate();" localhost:$PORT
+docker exec -it $NAME mongo --eval "rs.initiate();" --host localhost --port $PORT
 
-echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
-echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
-docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
+docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" --host localhost --port $PORT
 
 sleep 2
 
-echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD01_IP:$PORT1\\')); printjson(rs.status());" localhost:$PORT'
-docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD01_IP:$PORT1')); printjson(rs.status());" localhost:$PORT
-
-echo 'docker exec -it $NAME mongo --eval "printjson(rs.add(\'$SHARD02_IP:$PORT2\\')); printjson(rs.status());" localhost:$PORT'
-docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD02_IP:$PORT2')); printjson(rs.status());" localhost:$PORT
-
-docker exec -it $NAME mongo --eval "db.getMongo().getDBNames()" localhost:$PORT/test
-docker exec -it $NAME mongo --eval "db.getCollectionNames()" localhost:$PORT/test
+docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD01_IP:$PORT1')); printjson(rs.status());" --host localhost --port $PORT
+docker exec -it $NAME mongo --eval "printjson(rs.add('$SHARD02_IP:$PORT2')); printjson(rs.status());" --host localhost --port $PORT
+docker exec -it $NAME bash -l -c "mongo --eval 'db.getMongo().getDBNames()' --port $PORT --host localhost test"
+docker exec -it $NAME bash -l -c "mongo --eval 'db.getCollectionNames()' --port $PORT --host localhost test"
 
 sleep 2
 
+# Don't print the commands within the loop, there's too much output.
+set +x
 echo "Checking if shards are initialized and then waiting until they are initialized"
-until docker exec -it $NAME mongo --eval "printjson(rs.status());" localhost:$PORT | grep '"stateStr" : "SECONDARY"' >/dev/null;
+until docker exec -it $NAME mongo --eval "printjson(rs.status());" --host localhost --port $PORT | grep '"stateStr" : "SECONDARY"' >/dev/null;
 do
     sleep 2
 done
+set -x
 
 echo "The shards have been initialized"
 
-echo 'docker exec -it $NAME mongo --eval cfg = rs.conf(); cfg.members[0].host = "localhost:$PORT"; rs.reconfig(cfg); printjson(rs.conf()); localhost:$PORT'
-echo "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());"
-docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" localhost:$PORT
+docker exec -it $NAME mongo --eval "cfg = rs.conf(); cfg.members[0].host = '$SHARD00_IP:$PORT'; rs.reconfig(cfg); printjson(rs.conf());" --host localhost --port $PORT
 
 echo "Setting test user"
-docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser", pwd: "testPass", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/authDB
+docker exec -it $NAME mongo --eval "db.createUser({ user: 'testUser', pwd: 'testPass', roles: [ { role: 'read', db: 'test' } ] })" --host localhost --port $PORT authDB
 
 echo "Setting test user"
-docker exec -it $NAME mongo --eval 'db.createUser({ user: "testUser2", pwd: "testPass2", roles: [ { role: "read", db: "test" } ] })' localhost:$PORT/test
+docker exec -it $NAME mongo --eval "db.createUser({ user: 'testUser2', pwd: 'testPass2', roles: [ { role: 'read', db: 'test' } ] })" --host localhost --port $PORT test

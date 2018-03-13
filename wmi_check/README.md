@@ -55,7 +55,7 @@ If the metric isn't showing up in WMI, try running `winmgmt /resyncperf` to forc
 The default configuration uses the filter clause to limit the metrics pulled. Either set the filters to valid values or remove them as shown above to collect the metrics.
 </div>
 
-The metrics definitions include three components: 
+The metrics definitions include three components:
 
 * Class property in WMI
 * Metric name as it appears in Datadog
@@ -112,7 +112,7 @@ Setting this will cause any instance number to be removed from tag_by values i.e
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `wmi_check` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `wmi_check` under the Checks section:
 
     Checks
     ======

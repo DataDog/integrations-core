@@ -1,5 +1,12 @@
 # CHANGELOG - spark
 
+1.2.0 / 2018-02-13
+==================
+
+### Changes
+
+* [IMPROVEMENT] Add configuration options `ssl_verify`, `ssl_cert` and `ssl_key` to allow SSL configuration. See [#1064][].
+
 1.1.0 / [2018-01-10]
 ==================
 

@@ -10,9 +10,7 @@ Connect MongoDB to Datadog in order to:
 ## Setup
 ### Installation
 
-The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters. 
-
-If you need the newest version of the MongoDB check, install the `dd-check-mongo` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The MongoDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MongoDB masters.
 
 ### Configuration
 
@@ -52,13 +50,13 @@ db.createUser({
     - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017/admin
       additional_metrics:
         - collection       # collect metrics for each collection
-        - metrics.commands 
+        - metrics.commands
         - tcmalloc
         - top
   ```
   See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending MongoDB metrics to Datadog.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending MongoDB metrics to Datadog.
 
 #### Log Collection
 
@@ -67,7 +65,7 @@ db.createUser({
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
 
 * Add this configuration setup to your `mongodb.yaml` file to start collecting your MongoDB Logs:
@@ -79,16 +77,16 @@ db.createUser({
         service: mongo
         source: mongodb
   ```
-  Change the `service` and `path` parameter values and configure them for your environment.  
+  Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample mongodb.yaml](https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example) for all available configuration options
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `mongo` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mongo` under the Checks section:
 
 ```
 Checks

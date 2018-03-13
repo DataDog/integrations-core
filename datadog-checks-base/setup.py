@@ -17,6 +17,13 @@ LONG_DESC = ""
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
+
+# Parse requirements
+def get_requirements(fpath):
+    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+        return f.readlines()
+
+
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
@@ -42,15 +49,8 @@ setup(
 
     packages=find_packages(),
 
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest<4',],
-    install_requires=[
-        # 'requests==2.11.1',
-        # 'pyyaml==3.11',
-        # 'simplejson==3.6.5',
-        # 'docker-py==1.10.6',
-        # 'python-etcd==0.4.5',
-        # 'python-consul==0.4.7',
-        # 'kazoo==2.2.1',
-    ],
+    install_requires=get_requirements('requirements.in'),
+
+    setup_requires=['pytest-runner', ],
+    tests_require=['pytest<4', ],
 )

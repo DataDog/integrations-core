@@ -61,9 +61,9 @@ class TestCheckApache(AgentCheckTest):
             for mname in self.APACHE_GAUGES + self.APACHE_RATES:
                 self.assertMetric(mname, tags=expected_tags, count=1)
 
-        # Assert service checks
-        self.assertServiceCheck('apache.can_connect', status=AgentCheck.OK,
-                                tags=['host:localhost', 'port:8180'], count=2)
+            # Assert service checks
+            self.assertServiceCheck('apache.can_connect', status=AgentCheck.OK,
+                                tags=['host:localhost', 'port:8180'] + expected_tags, count=1)
 
         self.coverage_report()
 

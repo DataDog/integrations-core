@@ -20,3 +20,5 @@ instances:
     # For some people, this is fine, but others need more granular data
     # enable this option to get more granular data
     # combine_connection_states: no
+    # tags:
+    #   - optional:tag1

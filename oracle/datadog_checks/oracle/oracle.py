@@ -27,7 +27,7 @@ class Oracle(AgentCheck):
         'Physical Reads Per Sec':           'oracle.physical_reads',
         'Physical Writes Per Sec':          'oracle.physical_writes',
         'Enqueue Timeouts Per Sec':         'oracle.enqueue_timeouts',
-        'GC CR Block Received Per Second':  'oracle.gc_cr_receive_time',
+        'GC CR Block Received Per Second':  'oracle.gc_cr_block_received',
         'Global Cache Blocks Corrupted':    'oracle.cache_blocks_corrupt',
         'Global Cache Blocks Lost':         'oracle.cache_blocks_lost',
         'Logons Per Sec':                   'oracle.logons',

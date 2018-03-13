@@ -1,12 +1,18 @@
 # CHANGELOG - mysql
 
-1.1.2 / Unreleased
+1.1.3 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Fixes the buffer pool metric to return the aggregated values
+
+1.1.2 / 2018-02-13
 ==================
 ### Changes
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 
-1.1.1 / Unreleased
+1.1.1 / 2018-02-13
 ==================
 
 ### Changes

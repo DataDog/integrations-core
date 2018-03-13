@@ -6,4 +6,6 @@ init_config:
 
 instances:
   # Only once instance should be used per box
-  - {}
+  # Use the tags field to add custom tags to metrics
+  # - tags:
+  #     - optional:tag1

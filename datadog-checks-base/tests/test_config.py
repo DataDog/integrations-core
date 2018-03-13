@@ -11,6 +11,7 @@ def test_alias():
     """
     assert getattr(config, "_is_affirmative")
 
+
 def test_is_affirmative():
     assert config.is_affirmative(None) is False
     assert config.is_affirmative(0) is False

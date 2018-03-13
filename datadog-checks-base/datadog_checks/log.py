@@ -42,6 +42,20 @@ def _get_py_loglevel(lvl):
     return LOG_LEVEL_MAP.get(lvl.upper(), logging.DEBUG)
 
 
-rootLogger = logging.getLogger()
-rootLogger.addHandler(AgentLogHandler())
-rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))
+def init_logging():
+    """
+    Initialize logging (set up forwarding to Go backend and sane defaults)
+    """
+    # Forward to Go backend
+    rootLogger = logging.getLogger()
+    rootLogger.addHandler(AgentLogHandler())
+    rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))
+
+    # `requests` (used in a lot of checks) imports `urllib3`, which logs a bunch of stuff at the info level
+    # Therefore, pre-emptively increase the default level of that logger to `WARN`
+    urllib_logger = logging.getLogger("requests.packages.urllib3")
+    urllib_logger.setLevel(logging.WARN)
+    urllib_logger.propagate = True
+
+
+init_logging()

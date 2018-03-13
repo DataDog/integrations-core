@@ -40,10 +40,11 @@ class WMICheckTest(AgentCheckTest):
     def test_basic_check(self):
         instance = copy.deepcopy(INSTANCE)
         instance['filters'] = [{'Name': 'svchost'}]
+        instance['tags'] = ["optional:tag1"]
         self.run_check({'instances': [instance]})
 
         for metric in INSTANCE_METRICS:
-            self.assertMetric(metric, tags=['name:svchost'], count=1)
+            self.assertMetric(metric, tags=['name:svchost', 'optional:tag1'], count=1)
 
         self.coverage_report()
 

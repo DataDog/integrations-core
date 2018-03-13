@@ -1,13 +1,19 @@
 # CHANGELOG - postgres
 
-2.0.0 / Unreleased
+2.1.0 / 2018-03-07
+==================
+### Changes
+
+* [BUGFIX] Adding support for postgres 10. See [#1172][].
+
+2.0.0 / 2018-02-13
 ==================
 ### Changes
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 * [DEPRECATING] Starting with agent6 the postgres check no longer tag server wide metrics with instance tags. See [#1073][]
 
-1.2.1 / Unreleased
+1.2.1 / 2018-02-13
 ==================
 
 ### Changes
@@ -68,5 +74,8 @@
 [#699]: https://github.com/DataDog/integrations-core/issues/699
 [#740]: https://github.com/DataDog/integrations-core/issues/740
 [#776]: https://github.com/DataDog/integrations-core/issues/776
+[#1042]: https://github.com/DataDog/integrations-core/issues/1042
+[#1073]: https://github.com/DataDog/integrations-core/issues/1073
+[#1172]: https://github.com/DataDog/integrations-core/issues/1172
 [@Erouan50]: https://github.com/Erouan50
 [@infothrill]: https://github.com/infothrill

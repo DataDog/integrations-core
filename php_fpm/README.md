@@ -7,9 +7,7 @@ The PHP-FPM check monitors the state of your FPM pool and tracks request perform
 ## Setup
 ### Installation
 
-The PHP-FPM check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use PHP-FPM.  
-
-If you need the newest version of the PHP-FPM check, install the `dd-check-php-fpm` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+The PHP-FPM check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use PHP-FPM.
 
 ### Configuration
 
@@ -18,13 +16,13 @@ Create a file `php_fpm.yaml` in the Agent's `conf.d` directory. See the [sample 
 ```
 init_config:
 
-instances: 
+instances:
   - status_url: http://localhost/status # or whatever pm.status_path is set to in your PHP INI
     ping_url: http://localhost/ping     # or whatever ping.path is set to in your PHP INI
     ping_reply: pong                    # the reply to expect from ping; default is 'pong'
 #   user: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
 #   password: <YOUR_PASSWORD> # if the status and ping URLs require HTTP basic auth
-#   http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost 
+#   http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost
 #   tags:
 #     - instance:foo
 ```
@@ -37,11 +35,11 @@ Configuration Options:
 * `user` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending PHP-FPM metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `php_fpm` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `php_fpm` under the Checks section:
 
 ```
   Checks
@@ -61,7 +59,7 @@ Configuration Options:
 The php_fpm check is compatible with all major platforms.
 
 ## Data Collected
-### Metrics 
+### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv) for a list of metrics provided by this check.
 

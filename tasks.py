@@ -3,8 +3,14 @@ from invoke import task
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
-    "datadog-checks-base",
-    "disk",
+    'datadog-checks-base',
+    'disk',
+    'envoy',
+    'istio',
+    'kube_proxy',
+    'kubelet',
+    'prometheus',
+    'vsphere',
 ]
 
 @task(help={

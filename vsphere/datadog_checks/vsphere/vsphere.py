@@ -1,31 +1,35 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
-from datetime import datetime, timedelta
-from hashlib import md5
+from __future__ import unicode_literals
+from datetime import timedelta
 from Queue import Empty, Queue
 import re
 import ssl
 import time
 import traceback
 
-# 3p
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 
-# project
-from config import _is_affirmative
-from checks import AgentCheck
-from checks.libs.thread_pool import Pool
-from checks.libs.vmware.basic_metrics import BASIC_METRICS
-from checks.libs.vmware.all_metrics import ALL_METRICS
-from utils.timer import Timer
+from datadog_checks.config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
+from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
+from datadog_checks.checks.libs.thread_pool import Pool
+from datadog_checks.checks.libs.timer import Timer
+from .common import SOURCE_TYPE
+from .event import VSphereEvent
+try:
+    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
+    from datadog_agent import set_external_tags
+except ImportError:
+    # Agent < 6.0: the Agent pulls tags invoking `VSphereCheck.get_external_host_tags`
+    set_external_tags = None
 
-SOURCE_TYPE = 'vsphere'
-REAL_TIME_INTERVAL = 20  # Default vCenter sampling interval
 
+# Default vCenter sampling interval
+REAL_TIME_INTERVAL = 20
 # Metrics are only collected on vSphere VMs marked by custom field value
 VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
@@ -49,253 +53,10 @@ RESOURCE_TYPE_MAP = {
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
 JOB_TIMEOUT = 10
-
-EXCLUDE_FILTERS = {
-    'AlarmStatusChangedEvent': [r'Gray'],
-    'TaskEvent': [
-        r'Initialize powering On',
-        r'Power Off virtual machine',
-        r'Power On virtual machine',
-        r'Reconfigure virtual machine',
-        r'Relocate virtual machine',
-        r'Suspend virtual machine',
-        r'Migrate virtual machine',
-    ],
-    'VmBeingHotMigratedEvent': [],
-    'VmMessageEvent': [],
-    'VmMigratedEvent': [],
-    'VmPoweredOnEvent': [],
-    'VmPoweredOffEvent': [],
-    'VmReconfiguredEvent': [],
-    'VmResumedEvent': [],
-    'VmSuspendedEvent': [],
-}
-
 MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
-
-
-class VSphereEvent(object):
-    UNKNOWN = 'unknown'
-
-    def __init__(self, raw_event, event_config=None):
-        self.raw_event = raw_event
-        if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
-            self.event_type = self.raw_event.__class__.__name__[10:]
-        else:
-            self.event_type = VSphereEvent.UNKNOWN
-
-        self.timestamp = int((self.raw_event.createdTime.replace(tzinfo=None) - datetime(1970, 1, 1)).total_seconds())
-        self.payload = {
-            "timestamp": self.timestamp,
-            "event_type": SOURCE_TYPE,
-            "source_type_name": SOURCE_TYPE,
-        }
-        if event_config is None:
-            self.event_config = {}
-        else:
-            self.event_config = event_config
-
-    def _is_filtered(self):
-        # Filter the unwanted types
-        if self.event_type not in EXCLUDE_FILTERS:
-            return True
-
-        filters = EXCLUDE_FILTERS[self.event_type]
-        for f in filters:
-            if re.search(f, self.raw_event.fullFormattedMessage):
-                return True
-
-        return False
-
-    def get_datadog_payload(self):
-        if self._is_filtered():
-            return None
-
-        transform_method = getattr(self, 'transform_%s' % self.event_type.lower(), None)
-        if callable(transform_method):
-            return transform_method()
-
-        # Default event transformation
-        self.payload["msg_title"] = u"{0}".format(self.event_type)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
-
-        return self.payload
-
-    def transform_vmbeinghotmigratedevent(self):
-        self.payload["msg_title"] = u"VM {0} is being migrated".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"{user} has launched a hot migration of this virtual machine:\n".format(user=self.raw_event.userName)
-        changes = []
-        pre_host = self.raw_event.host.name
-        new_host = self.raw_event.destHost.name
-        pre_dc = self.raw_event.datacenter.name
-        new_dc = self.raw_event.destDatacenter.name
-        pre_ds = self.raw_event.ds.name
-        new_ds = self.raw_event.destDatastore.name
-        if pre_host == new_host:
-            changes.append(u"- No host migration: still {0}".format(new_host))
-        else:
-            # Insert in front if it's a change
-            changes = [u"- Host MIGRATION: from {0} to {1}".format(pre_host, new_host)] + changes
-        if pre_dc == new_dc:
-            changes.append(u"- No datacenter migration: still {0}".format(new_dc))
-        else:
-            # Insert in front if it's a change
-            changes = [u"- Datacenter MIGRATION: from {0} to {1}".format(pre_dc, new_dc)] + changes
-        if pre_ds == new_ds:
-            changes.append(u"- No datastore migration: still {0}".format(new_ds))
-        else:
-            # Insert in front if it's a change
-            changes = [u"- Datastore MIGRATION: from {0} to {1}".format(pre_ds, new_ds)] + changes
-
-        self.payload["msg_text"] += "\n".join(changes)
-
-        self.payload['host'] = self.raw_event.vm.name
-        self.payload['tags'] = [
-            'vsphere_host:%s' % pre_host,
-            'vsphere_host:%s' % new_host,
-            'vsphere_datacenter:%s' % pre_dc,
-            'vsphere_datacenter:%s' % new_dc,
-        ]
-        return self.payload
-
-    def transform_alarmstatuschangedevent(self):
-        if self.event_config.get('collect_vcenter_alarms') is None:
-            return None
-
-        def get_transition(before, after):
-            vals = {
-                'gray': -1,
-                'green': 0,
-                'yellow': 1,
-                'red': 2
-            }
-            before = before.lower()
-            after = after.lower()
-            if before not in vals or after not in vals:
-                return None
-            if vals[before] < vals[after]:
-                return 'Triggered'
-            else:
-                return 'Recovered'
-
-        TO_ALERT_TYPE = {
-            'green': 'success',
-            'yellow': 'warning',
-            'red': 'error'
-        }
-
-        def get_agg_key(alarm_event):
-            return 'h:{0}|dc:{1}|a:{2}'.format(
-                md5(alarm_event.entity.name).hexdigest()[:10],
-                md5(alarm_event.datacenter.name).hexdigest()[:10],
-                md5(alarm_event.alarm.name).hexdigest()[:10]
-            )
-
-        # Get the entity type/name
-        if self.raw_event.entity.entity.__class__ == vim.VirtualMachine:
-            host_type = 'VM'
-        elif self.raw_event.entity.entity.__class__ == vim.HostSystem:
-            host_type = 'host'
-        else:
-            return None
-        host_name = self.raw_event.entity.name
-
-        # Need a getattr because from is a reserved keyword...
-        trans_before = getattr(self.raw_event, 'from')
-        trans_after = self.raw_event.to
-        transition = get_transition(trans_before, trans_after)
-        # Bad transition, we shouldn't have got this transition
-        if transition is None:
-            return None
-
-        self.payload['msg_title'] = u"[{transition}] {monitor} on {host_type} {host_name} is now {status}".format(
-            transition=transition,
-            monitor=self.raw_event.alarm.name,
-            host_type=host_type,
-            host_name=host_name,
-            status=trans_after
-        )
-        self.payload['alert_type'] = TO_ALERT_TYPE[trans_after]
-        self.payload['event_object'] = get_agg_key(self.raw_event)
-        self.payload['msg_text'] = u"""vCenter monitor status changed on this alarm, it was {before} and it's now {after}.""".format(
-            before=trans_before,
-            after=trans_after
-        )
-        self.payload['host'] = host_name
-        return self.payload
-
-    def transform_vmmessageevent(self):
-        self.payload["msg_title"] = u"VM {0} is reporting".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmmigratedevent(self):
-        self.payload["msg_title"] = u"VM {0} has been migrated".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"@@@\n{0}\n@@@".format(self.raw_event.fullFormattedMessage)
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmpoweredoffevent(self):
-        self.payload["msg_title"] = u"VM {0} has been powered OFF".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has powered off this virtual machine. It was running on:
-- datacenter: {dc}
-- host: {host}
-""".format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
-        )
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmpoweredonevent(self):
-        self.payload["msg_title"] = u"VM {0} has been powered ON".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has powered on this virtual machine. It is running on:
-- datacenter: {dc}
-- host: {host}
-""".format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
-        )
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmresumingevent(self):
-        self.payload["msg_title"] = u"VM {0} is RESUMING".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has resumed {vm}. It will soon be powered on.""".format(
-            user=self.raw_event.userName,
-            vm=self.raw_event.vm.name
-        )
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmsuspendedevent(self):
-        self.payload["msg_title"] = u"VM {0} has been SUSPENDED".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"""{user} has suspended this virtual machine. It was running on:
-- datacenter: {dc}
-- host: {host}
-""".format(
-            user=self.raw_event.userName,
-            dc=self.raw_event.datacenter.name,
-            host=self.raw_event.host.name
-        )
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
-
-    def transform_vmreconfiguredevent(self):
-        self.payload["msg_title"] = u"VM {0} configuration has been changed".format(self.raw_event.vm.name)
-        self.payload["msg_text"] = u"{user} saved the new configuration:\n@@@\n".format(user=self.raw_event.userName)
-        # Add lines for configuration change don't show unset, that's hacky...
-        config_change_lines = [line for line in self.raw_event.configSpec.__repr__().splitlines() if 'unset' not in line]
-        self.payload["msg_text"] += u"\n".join(config_change_lines)
-        self.payload["msg_text"] += u"\n@@@"
-        self.payload['host'] = self.raw_event.vm.name
-        return self.payload
 
 
 def atomic_method(method):
@@ -326,6 +87,7 @@ class VSphereCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.time_started = time.time()
         self.pool_started = False
+        self.jobs_status = {}
         self.exceptionq = Queue()
 
         # Connections open to vCenter instances
@@ -341,12 +103,12 @@ class VSphereCheck(AgentCheck):
                 MORLIST: {
                     LAST: 0,
                     INTERVAL: init_config.get('refresh_morlist_interval',
-                                    REFRESH_MORLIST_INTERVAL)
+                                              REFRESH_MORLIST_INTERVAL)
                 },
                 METRICS_METADATA: {
                     LAST: 0,
                     INTERVAL: init_config.get('refresh_metrics_metadata_interval',
-                                    REFRESH_METRICS_METADATA_INTERVAL)
+                                              REFRESH_METRICS_METADATA_INTERVAL)
                 }
             }
 
@@ -360,7 +122,6 @@ class VSphereCheck(AgentCheck):
         self.morlist = {}
         # Metrics metadata, basically perfCounterId -> {name, group, description}
         self.metrics_metadata = {}
-
         self.latest_event_query = {}
 
     def stop(self):
@@ -406,11 +167,11 @@ class VSphereCheck(AgentCheck):
 
         # Be sure we don't duplicate any event, never query the "past"
         if not last_time:
-            last_time = self.latest_event_query[i_key] = \
-                event_manager.latestEvent.createdTime + timedelta(seconds=1)
+            last_time = event_manager.latestEvent.createdTime + timedelta(seconds=1)
+            self.latest_event_query[i_key] = last_time
 
         query_filter = vim.event.EventFilterSpec()
-        time_filter = vim.event.EventFilterSpec.ByTime(beginTime=self.latest_event_query[i_key])
+        time_filter = vim.event.EventFilterSpec.ByTime(beginTime=last_time)
         query_filter.time = time_filter
 
         try:
@@ -473,15 +234,15 @@ class VSphereCheck(AgentCheck):
                 # Object returned by SmartConnect is a ServerInstance
                 #   https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
                 server_instance = connect.SmartConnect(
-                    host = instance.get('host'),
-                    user = instance.get('username'),
-                    pwd = instance.get('password'),
-                    sslContext = context if not ssl_verify or ssl_capath else None
+                    host=instance.get('host'),
+                    user=instance.get('username'),
+                    pwd=instance.get('password'),
+                    sslContext=context if not ssl_verify or ssl_capath else None
                 )
             except Exception as e:
                 err_msg = "Connection to %s failed: %s" % (instance.get('host'), e)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                        tags=service_check_tags, message=err_msg)
+                                   tags=service_check_tags, message=err_msg)
                 raise Exception(err_msg)
 
             self.server_instances[i_key] = server_instance
@@ -490,11 +251,11 @@ class VSphereCheck(AgentCheck):
         try:
             self.server_instances[i_key].RetrieveContent()
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                    tags=service_check_tags)
+                               tags=service_check_tags)
         except Exception as e:
             err_msg = "Connection to %s died unexpectedly: %s" % (instance.get('host'), e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                    tags=service_check_tags, message=err_msg)
+                               tags=service_check_tags, message=err_msg)
             raise Exception(err_msg)
 
         return self.server_instances[i_key]
@@ -520,9 +281,11 @@ class VSphereCheck(AgentCheck):
         return wanted_metrics
 
     def get_external_host_tags(self):
-        """ Returns a list of tags for every host that is detected by the vSphere
+        """
+        Returns a list of tags for every host that is detected by the vSphere
         integration.
-        List of pairs (hostname, list_of_tags)
+
+        Returns a list of pairs (hostname, {'SOURCE_TYPE: list_of_tags},)
         """
         self.log.debug(u"Sending external_host_tags now")
         external_host_tags = []
@@ -538,11 +301,10 @@ class VSphereCheck(AgentCheck):
                 continue
 
             for mor in mor_by_mor_name.itervalues():
-                if mor['hostname']: # some mor's have a None hostname
+                if mor['hostname']:  # some mor's have a None hostname
                     external_host_tags.append((mor['hostname'], {SOURCE_TYPE: mor['tags']}))
 
         return external_host_tags
-
 
     def _discover_mor(self, instance, tags, regexes=None, include_only_marked=False):
         """
@@ -590,7 +352,6 @@ class VSphereCheck(AgentCheck):
                     tags.extend(tag)
 
             return tags
-
 
         def _get_all_objs(content, vimtype, regexes=None, include_only_marked=False, tags=[]):
             """
@@ -727,9 +488,9 @@ class VSphereCheck(AgentCheck):
         """ Process one item of the self.morlist_raw list by querying the available
         metrics for this MOR and then putting it in self.morlist
         """
-        ### <TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
         t = Timer()
-        ### </TEST-INSTRUMENTATION>
+        # ## </TEST-INSTRUMENTATION>
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
@@ -755,9 +516,9 @@ class VSphereCheck(AgentCheck):
 
         self.morlist[i_key][mor_name]['last_seen'] = time.time()
 
-        ### <TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total())
-        ### </TEST-INSTRUMENTATION>
+        # ## </TEST-INSTRUMENTATION>
 
     def _cache_morlist_process(self, instance):
         """ Empties the self.morlist_raw by popping items and running asynchronously
@@ -804,21 +565,22 @@ class VSphereCheck(AgentCheck):
         """ Get from the server instance, all the performance counters metadata
         meaning name/group/description... attached with the corresponding ID
         """
-        ### <TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
         t = Timer()
-        ### </TEST-INSTRUMENTATION>
+        # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
         self.log.info("Warming metrics metadata cache for instance {0}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
 
         new_metadata = {}
         for counter in perfManager.perfCounter:
             d = dict(
-                name = "%s.%s" % (counter.groupInfo.key, counter.nameInfo.key),
-                unit = counter.unitInfo.key,
-                instance_tag = 'instance'  # FIXME: replace by what we want to tag!
+                name="%s.%s" % (counter.groupInfo.key, counter.nameInfo.key),
+                unit=counter.unitInfo.key,
+                instance_tag='instance'  # FIXME: replace by what we want to tag!
             )
             new_metadata[counter.key] = d
         self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
@@ -827,9 +589,9 @@ class VSphereCheck(AgentCheck):
         # Reset metadata
         self.metrics_metadata[i_key] = new_metadata
 
-        ### <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total())
-        ### </TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
+        self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
+        # ## </TEST-INSTRUMENTATION>
 
     def _transform_value(self, instance, counter_id, value):
         """ Given the counter_id, look up for the metrics metadata to check the vsphere
@@ -848,13 +610,14 @@ class VSphereCheck(AgentCheck):
     def _collect_metrics_atomic(self, instance, mor):
         """ Task that collects the metrics listed in the morlist for one MOR
         """
-        ### <TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
         t = Timer()
-        ### </TEST-INSTRUMENTATION>
+        # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
 
         query = vim.PerformanceManager.QuerySpec(maxSample=1,
                                                  entity=mor['mor'],
@@ -886,7 +649,7 @@ class VSphereCheck(AgentCheck):
                 value = self._transform_value(instance, result.id.counterId, result.value[0])
 
                 tags = ['instance:%s' % instance_name]
-                if not mor['hostname']: # no host tags available
+                if not mor['hostname']:  # no host tags available
                     tags.extend(mor['tags'])
 
                 # vsphere "rates" should be submitted as gauges (rate is
@@ -895,12 +658,12 @@ class VSphereCheck(AgentCheck):
                     "vsphere.%s" % metric_name,
                     value,
                     hostname=mor['hostname'],
-                    tags=['instance:%s' % instance_name]
+                    tags=['instance:%s' % instance_name] + custom_tags
                 )
 
-        ### <TEST-INSTRUMENTATION>
+        # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total())
-        ### </TEST-INSTRUMENTATION>
+        # ## </TEST-INSTRUMENTATION>
 
     def collect_metrics(self, instance):
         """ Calls asynchronously _collect_metrics_atomic on all MORs, as the
@@ -916,23 +679,27 @@ class VSphereCheck(AgentCheck):
 
         vm_count = 0
 
+        custom_tags = instance.get('tags', [])
+
         for mor_name, mor in mors:
             if mor['mor_type'] == 'vm':
                 vm_count += 1
             if 'metrics' not in mor or not mor['metrics']:
-                # self.log.debug("Skipping entity %s collection because we didn't cache its metrics yet" % mor['hostname'])
                 continue
 
             self.pool.apply_async(self._collect_metrics_atomic, args=(instance, mor))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')])
+        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
     def check(self, instance):
         if not self.pool_started:
             self.start_pool()
-        ### <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'])
-        ### </TEST-INSTRUMENTATION>
+
+        custom_tags = instance.get('tags', [])
+
+        # ## <TEST-INSTRUMENTATION>
+        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:initial'] + custom_tags)
+        # ## </TEST-INSTRUMENTATION>
 
         # First part: make sure our object repository is neat & clean
         if self._should_cache(instance, METRICS_METADATA):
@@ -957,10 +724,14 @@ class VSphereCheck(AgentCheck):
                 thread_crashed = True
         except Empty:
             pass
+
         if thread_crashed:
             self.stop_pool()
             raise Exception("One thread in the pool crashed, check the logs")
 
-        ### <TEST-INSTRUMENTATION>
-        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'])
-        ### </TEST-INSTRUMENTATION>
+        if set_external_tags is not None:
+            set_external_tags(self.get_external_host_tags())
+
+        # ## <TEST-INSTRUMENTATION>
+        self.gauge('datadog.agent.vsphere.queue_size', self.pool._workq.qsize(), tags=['instant:final'] + custom_tags)
+        # ## </TEST-INSTRUMENTATION>

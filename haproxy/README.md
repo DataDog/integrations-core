@@ -14,7 +14,7 @@ Capture HAProxy activity in Datadog to:
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your HAProxy servers. If you need the newest version of the HAProxy check, install the `dd-check-haproxy` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://github.com/DataDog/integrations-core#installing-the-integrations).
+1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your HAProxy servers. 
 
 2. Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/).
 
@@ -29,13 +29,14 @@ The Agent collects metrics via a stats endpoint:
 1. Configure one in your `haproxy.conf`:
 
   ```
-  listen stats :9000  # Listen on localhost:9000
+  listen stats # Define a listen section called "stats"
+  bind :9000 # Listen on localhost:9000
   mode http
   stats enable  # Enable stats page
   stats hide-version  # Hide HAProxy version
   stats realm Haproxy\ Statistics  # Title text for popup window
   stats uri /haproxy_stats  # Stats URI
-  stats auth <your_username>:<your_password>  # Authentication credentials
+  stats auth Username:Password  # Authentication credentials
   ```
 
 2. [Restart HAProxy to enable the stats endpoint](https://www.haproxy.org/download/1.7/doc/management.txt).
@@ -54,7 +55,7 @@ The Agent collects metrics via a stats endpoint:
   ```
   See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent).
+*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 #### Log Collection
 
@@ -63,28 +64,28 @@ The Agent collects metrics via a stats endpoint:
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
   ```
-  log_enabled: true
+  logs_enabled: true
   ```
 
 * Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
-  
+
   ```
   logs:
       - type: udp
         port: 514
         service: haproxy
-        source: haproxy  
+        source: haproxy
         sourcecategory: http_web_access
   ```
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.  
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) 
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `haproxy` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `haproxy` under the Checks section:
 
 ```
 Checks
@@ -111,7 +112,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/hapr
 The Haproxy check does not include any event at this time.
 
 ### Service Checks
-The Haproxy check does not include any service check at this time.
+**haproxy.backend_up**
+
+Converts the HAProxy status page into service checks.
+Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
+Returns `OK` for `maint`, `ok` and any other state.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

@@ -1,13 +1,14 @@
 # CHANGELOG - kafka_consumer
 
-1.2.3 / Unreleased
+1.3.0 / Unreleased
 ==================
 
 ### Changes
 
 * [FEATURE] Add SSL as a connect option.
+* [FEATURE] Add custom tag support.
 
-1.2.2 / Unreleased
+1.2.2 / 2018-02-13
 ==================
 
 ### Changes

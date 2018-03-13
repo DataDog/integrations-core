@@ -12,7 +12,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "public_title": "Datadog-Gitlab Integration",
   "categories":["web", "network"],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",

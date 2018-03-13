@@ -117,11 +117,4 @@ setup(
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.openstack': ['conf.yaml.example']},
     include_package_data=True,
-
-    # The entrypoint to run the check manually without an agent
-    entry_points={
-        'console_scripts': [
-            'openstack=datadog_checks.openstack:main',
-        ],
-    },
 )

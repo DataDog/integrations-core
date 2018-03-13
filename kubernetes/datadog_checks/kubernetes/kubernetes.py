@@ -86,7 +86,7 @@ QUANTITY_EXP = re.compile(r'[-+]?\d+[\.]?\d*[numkMGTPE]?i?')
 
 
 class Kubernetes(AgentCheck):
-    """ Collect metrics and events from kubelet """
+    """ Collect metrics and events from Kubernetes """
 
     pod_names_by_container = {}
 
@@ -106,7 +106,7 @@ class Kubernetes(AgentCheck):
                 raise Exception('Unable to initialize Kubelet client. Try setting the host parameter. The Kubernetes check failed permanently.')
 
         if agentConfig.get('service_discovery') and \
-           agentConfig.get('service_discovery_backend') == 'docker':
+                agentConfig.get('service_discovery_backend') == 'docker':
             self._sd_backend = get_sd_backend(agentConfig)
         else:
             self._sd_backend = None
@@ -138,7 +138,7 @@ class Kubernetes(AgentCheck):
                 if line.find('hostname') != -1:
                     continue
 
-                matches = re.match('\[(.)\]([^\s]+) (.*)?', line)
+                matches = re.match(r'\[(.)\]([^\s]+) (.*)?', line)
                 if not matches or len(matches.groups()) < 2:
                     continue
 
@@ -228,7 +228,7 @@ class Kubernetes(AgentCheck):
             except Exception as err:
                 self.log.warning("Error while getting performance metrics: %s" % str(err))
 
-        # kubelet events
+        # kubernetes events
         if self.event_retriever is not None:
             try:
                 events = self.event_retriever.get_event_array()
@@ -484,7 +484,7 @@ class Kubernetes(AgentCheck):
 
     def _update_pods_metrics(self, instance, pods):
         """
-        Reports the number of running pods, tagged by service and creator
+        Reports the number of running pods on this node, tagged by service and creator
 
         We go though all the pods, extract tags then count them by tag list, sorted and
         serialized in a pipe-separated string (it is an illegar character for tags)

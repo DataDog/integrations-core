@@ -16,7 +16,7 @@
   "description": "The HAProxy integration helps to collect performance and avaialbility metrics from HAProxy instances.",
   "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b",
   "public_title": "Datadog-HAProxy Integration",
-  "categories":["web"],
+  "categories":["web", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/haproxy/",
   "is_public": true,

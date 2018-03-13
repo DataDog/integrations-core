@@ -9,7 +9,7 @@
   "supported_os": [
     "windows"
   ],
-  "version": "1.1.0",
+  "version": "1.1.1",
   "guid": "d70f5c68-873d-436e-bddb-dbb3e107e3b5",
   "public_title": "Datadog-WMI Check Integration",
   "categories":["monitoring"],

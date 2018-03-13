@@ -49,7 +49,7 @@ METRICS = [
     'oracle.physical_reads',
     'oracle.physical_writes',
     'oracle.enqueue_timeouts',
-    'oracle.gc_cr_receive_time',
+    'oracle.gc_cr_block_received',
     'oracle.cache_blocks_corrupt',
     'oracle.cache_blocks_lost',
     'oracle.logons',
@@ -67,6 +67,7 @@ METRICS = [
     'oracle.session_count',
     'oracle.temp_space_used',
 ]
+
 
 @attr(requires='oracle')
 class TestOracle(AgentCheckTest):

@@ -42,8 +42,16 @@ instances:
     # collecting empty device names) when using this option.
     # all_partitions: no
     #
-    # The (optional) device_tag_re parameter will instruct the check to apply additional tags
-    # to volumes/mountpoints matching these regexes. Multiple comma-separated tags are supported.
+    # The (optional) device_tag_re parameter will instruct the check to apply additional tags to
+    # volumes/mountpoints matching these regexes. Multiple comma-separated tags are supported.
+    # You must properly quote the string if the pattern contains special characters e.g. colons.
+    # Character casing is ignored on Windows.
     # device_tag_re:
     #  /san/.*: device_type:san
     #  /dev/sda3: role:db,disk_size:large
+    #  "c:": volume:boot
+    #
+    # The (optional) tags parameter allows you to customize tags for the instance
+    # tags:
+    #   - optional_tag1
+    #   - optional_tag2

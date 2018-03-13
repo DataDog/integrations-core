@@ -92,7 +92,7 @@ class HDFSNameNode(AgentCheck):
     def check(self, instance):
         jmx_address = instance.get('hdfs_namenode_jmx_uri')
         disable_ssl_validation = instance.get('disable_ssl_validation', False)
-        tags = instance.get('tags')
+        tags = instance.get('tags', [])
         if jmx_address is None:
             raise Exception('The JMX URL must be specified in the instance configuration')
 
@@ -119,7 +119,7 @@ class HDFSNameNode(AgentCheck):
         '''
         response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
             JMX_PATH,
-            query_params={'qry':bean_name})
+            query_params={'qry':bean_name}, tags=tags)
 
         beans = response.get('beans', [])
 
@@ -150,13 +150,11 @@ class HDFSNameNode(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, query_params):
+    def _rest_request_to_json(self, address, disable_ssl_validation, object_path, query_params, tags=None):
         '''
         Query the given URL and return the JSON response
         '''
         response_json = None
-
-        service_check_tags = ['namenode_url:' + address]
 
         url = address
 
@@ -178,7 +176,7 @@ class HDFSNameNode(AgentCheck):
         except Timeout as e:
             self.service_check(JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
-                tags=service_check_tags,
+                tags=tags,
                 message="Request timeout: {0}, {1}".format(url, e))
             raise
 
@@ -187,21 +185,21 @@ class HDFSNameNode(AgentCheck):
                 ConnectionError) as e:
             self.service_check(JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
-                tags=service_check_tags,
+                tags=tags,
                 message="Request failed: {0}, {1}".format(url, e))
             raise
 
         except JSONDecodeError as e:
             self.service_check(JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
-                tags=service_check_tags,
+                tags=tags,
                 message='JSON Parse failed: {0}, {1}'.format(url, e))
             raise
 
         except ValueError as e:
             self.service_check(JMX_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
-                tags=service_check_tags,
+                tags=tags,
                 message=str(e))
             raise
 

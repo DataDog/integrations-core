@@ -36,6 +36,8 @@ class NfsStatCheck(AgentCheck):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
         all_devices = []
         this_device = []
+        custom_tags = instance.get("tags", [])
+
         for l in stat_out.splitlines():
             if not l:
                 continue
@@ -55,7 +57,7 @@ class NfsStatCheck(AgentCheck):
         all_devices = all_devices[len(all_devices) // 2:]
 
         for device in all_devices:
-            device.send_metrics(self.gauge)
+            device.send_metrics(self.gauge, custom_tags)
 
 class Device(object):
 
@@ -111,8 +113,9 @@ class Device(object):
         self.tags.append('nfs_export:{0}'.format(self.nfs_export))
         self.tags.append('nfs_mount:{0}'.format(self.mount))
 
-    def send_metrics(self, gauge):
+    def send_metrics(self, gauge, tags):
         metric_prefix = 'system.nfs.'
+        self.tags.extend(tags)
         gauge(metric_prefix + 'ops', self.ops, tags=self.tags)
         gauge(metric_prefix + 'rpc_bklog', self.rpc_bklog, tags=self.tags)
 

@@ -11,10 +11,10 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.1",
+  "version": "1.1.2",
   "guid": "d2052eae-89b8-4cb1-b631-f373010da4b8",
   "public_title": "Datadog-Varnish Integration",
-  "categories":["web", "caching"],
+  "categories":["web", "caching", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/varnish/",
   "is_public": true,

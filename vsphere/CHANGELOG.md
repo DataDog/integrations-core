@@ -1,37 +1,27 @@
 # CHANGELOG - vsphere
 
-1.0.4 / 2017-10-10
-==================
+## 2.0.0 / 2018-02-28
 
-### Changes
+ * [FEATURE] Run with Agent versions >= 6. See [#1098][].
+ * [FEATURE] Add custom tag support. See [#1178][].
+
+## 1.0.4 / 2017-10-10
 
 * [BUGFIX] Fix a possible leak of the vSphere password in the collector logs. See [#722][].
 
-1.0.3 / 2017-08-28
-==================
-
-### Changes
+## 1.0.3 / 2017-08-28
 
 * [BUGFIX] Fix case where metrics metadata don't contain what we expect.
 
-1.0.2 / 2017-07-18
-==================
-
-### Changes
+## 1.0.2 / 2017-07-18
 
 * [SANITY] Import `Timer` helper from `utils.timer` instead of deprecated `util`. See [#484][]
 
-1.0.1 / 2017-06-05
-==================
-
-### Changes
+## 1.0.1 / 2017-06-05
 
 * [BUGFIX] Fix case where returned data series are empty. See [#346][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds vsphere integration.
 
@@ -39,3 +29,5 @@
 [#346]: https://github.com/DataDog/integrations-core/issues/346
 [#484]: https://github.com/DataDog/integrations-core/issues/484
 [#722]: https://github.com/DataDog/integrations-core/issues/722
+[#1098]: https://github.com/DataDog/integrations-core/issues/1098
+[#1178]: https://github.com/DataDog/integrations-core/issues/1178

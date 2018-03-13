@@ -50,6 +50,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.pytest_cache/
 
 # Translations
 *.mo
@@ -98,3 +99,5 @@ tmp
 # wheels
 wheelhouse/
 *.whl
+
+.pytest_cache

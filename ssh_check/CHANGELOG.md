@@ -1,5 +1,12 @@
 # CHANGELOG - ssh_check
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support.
+
 1.1.3 / 2018-01-10 
 ==================
 

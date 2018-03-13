@@ -20,7 +20,11 @@ DISK_GAUGES = [
     'system.disk.free',
     'system.disk.in_use',
     'system.disk.total',
-    'system.disk.used'
+    'system.disk.used',
+]
+DISK_RATES = [
+    'system.disk.write_time_pct',
+    'system.disk.read_time_pct',
 ]
 INODE_GAUGES = [
     'system.fs.inodes.total',
@@ -38,6 +42,10 @@ GAUGES_VALUES = {
     'system.fs.inodes.free': 9,
     'system.fs.inodes.in_use': .10
 }
+RATES_VALUES = {
+    'system.disk.write_time_pct': 9.0,
+    'system.disk.read_time_pct': 5.0,
+}
 
 
 class MockPart(object):
@@ -52,6 +60,14 @@ class MockDiskMetrics(object):
     used = 4 * 1024
     free = 1 * 1024
     percent = 80
+    read_time = 50
+    write_time = 90
+
+
+class MockDiskIOMetrics(dict):
+    def __init__(self, device=DEFAULT_DEVICE_NAME):
+        super(MockDiskIOMetrics, self).__init__()
+        self[device] = MockDiskMetrics()
 
 
 class MockInodesMetrics(object):
@@ -78,12 +94,14 @@ def psutil_mocks():
                     __name__="disk_usage")
     p3 = mock.patch('os.statvfs', return_value=MockInodesMetrics(),
                     __name__="statvfs")
+    p4 = mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics())
 
-    yield p1.start(), p2.start(), p3.start()
+    yield p1.start(), p2.start(), p3.start(), p4.start()
 
     p1.stop()
     p2.stop()
     p3.stop()
+    p4.stop()
 
 def test_bad_config():
     """
@@ -110,7 +128,7 @@ def test_disk_check(aggregator):
     """
     c = Disk('disk', None, {}, [{'use_mount': 'no'}])
     c.check({'use_mount': 'no'})
-    for name in DISK_GAUGES + INODE_GAUGES:
+    for name in DISK_GAUGES + INODE_GAUGES + DISK_RATES:
         aggregator.assert_metric(name, tags=[])
 
     assert aggregator.metrics_asserted_pct == 100.0
@@ -184,6 +202,10 @@ def test_psutil(aggregator, psutil_mocks):
 
         for name, value in GAUGES_VALUES.iteritems():
             aggregator.assert_metric(name, value=value, tags=tags)
+
+        for name, value in RATES_VALUES.iteritems():
+            aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+
     assert aggregator.metrics_asserted_pct == 100.0
 
 def test_use_mount(aggregator, psutil_mocks):
@@ -196,6 +218,10 @@ def test_use_mount(aggregator, psutil_mocks):
 
     for name, value in GAUGES_VALUES.iteritems():
         aggregator.assert_metric(name, value=value, tags=['device:/'])
+
+    for name, value in RATES_VALUES.iteritems():
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+
     assert aggregator.metrics_asserted_pct == 100.0
 
 def mock_df_output(fname):
@@ -276,12 +302,16 @@ def test_ignore_empty_regex():
     assert check._excluded_disk_re == re.compile('^$')
 
 def test_device_tagging(aggregator, psutil_mocks):
-    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}}]
+    instances = [{'use_mount': 'no', 'device_tag_re': {"/dev/sda.*": "type:dev,tag:two"}, 'tags':["optional:tags1"]}]
     c = Disk('disk', None, {}, instances)
     c.check(instances[0])
 
     # Assert metrics
-    tags = ["type:dev", "tag:two", "device:{}".format(DEFAULT_DEVICE_NAME)]
+    tags = ["type:dev", "tag:two", "device:{}".format(DEFAULT_DEVICE_NAME), "optional:tags1"]
     for name, value in GAUGES_VALUES.iteritems():
         aggregator.assert_metric(name, value=value, tags=tags)
+
+    for name, value in RATES_VALUES.iteritems():
+        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), "optional:tags1"])
+
     assert aggregator.metrics_asserted_pct == 100.0

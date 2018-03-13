@@ -1,13 +1,13 @@
 # CHANGELOG - couch
 
-2.4.0 / Unreleased
+2.4.0 / 2018-02-13
 ==================
 
 ### Changes
 
 * [FEATURE] reduces by db and by dd amplification by distributing the dbs to report on the running agents
 
-2.3.0 / Unreleased
+2.3.0 / 2018-02-13
 ==================
 
 ### Changes

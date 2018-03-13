@@ -6,8 +6,10 @@
 def get_hostname():
     return "stubbed.hostname"
 
+
 def log(*args, **kwargs):
     pass
+
 
 def get_config(*args, **kwargs):
     return ""

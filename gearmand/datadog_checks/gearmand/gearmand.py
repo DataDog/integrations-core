@@ -105,8 +105,8 @@ class Gearman(AgentCheck):
             self._get_per_task_metrics(tasks, task_filter, tags)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                 message="Connection to %s:%s succeeded." % (host, port),
-                tags=service_check_tags)
+                tags=tags)
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                message=str(e), tags=service_check_tags)
+                message=str(e), tags=tags)
             raise

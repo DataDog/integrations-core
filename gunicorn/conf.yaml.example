@@ -11,3 +11,5 @@ instances:
   #  ... we'd use the name `my_web_app`.
   #
   # - proc_name: my_web_app
+  #   tags:
+  #     - optional:tag1

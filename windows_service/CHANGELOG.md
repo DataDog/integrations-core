@@ -1,5 +1,16 @@
 # CHANGELOG - windows_service
-1.1.1 / Unreleased
+
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds custom tag support
+
+1.1.1 / 2018-02-13
+==================
+
+### Changes
 
 * [FEATURE] Allow wildcards for service names 
 * [FEATURE] Allow ALL for service names to report all registered services.

@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "01dcfe7a-7a56-4388-a388-799ee6daaaab",
   "public_title": "Datadog-Lighttpd Integration",
   "categories":["web"],

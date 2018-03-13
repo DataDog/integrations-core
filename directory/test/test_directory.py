@@ -204,3 +204,38 @@ class DirectoryTestCase(AgentCheckTest):
             ]
         }
         self.run_check(config)
+
+    def test_tags(self):
+        config = {
+            'instances': [
+                {'directory': self.temp_dir,
+                'tags': ['optional:tag1']}
+            ]
+        }
+
+        self.run_check(config)
+
+        dirtagname = config.get('dirtagname', "name")
+        name = config.get('name', self.temp_dir)
+        dir_tags = ['optional:tag1', dirtagname + ":%s" % name]
+
+        # Directory metrics
+        for mname in (self.DIRECTORY_METRICS + self.COMMON_METRICS):
+            self.assertMetric(mname, tags=dir_tags, count=1)
+
+        # 'recursive' and 'pattern' parameters
+        if config.get('pattern') == "*.log":
+            # 2 '*.log' files in 'temp_dir'
+            self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=2)
+        elif config.get('pattern') == "file_*":
+            # 10 'file_*' files in 'temp_dir'
+            self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=10)
+        elif config.get('recursive'):
+            # 12 files in 'temp_dir' + 5 files in 'tempdir/subfolder'
+            self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=17)
+        else:
+            # 12 files in 'temp_dir'
+            self.assertMetric("system.disk.directory.files", tags=dir_tags, count=1, value=12)
+
+        # Raises when coverage < 100%
+        self.coverage_report()

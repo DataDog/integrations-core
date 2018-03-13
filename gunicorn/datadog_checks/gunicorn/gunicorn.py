@@ -36,6 +36,7 @@ class GUnicornCheck(AgentCheck):
     def check(self, instance):
         """ Collect metrics for the given gunicorn instance. """
         self.log.debug("Running instance: %s", instance)
+        custom_tags = instance.get('tags', [])
 
         # Validate the config.
         if not instance or self.PROC_NAME not in instance:
@@ -43,7 +44,7 @@ class GUnicornCheck(AgentCheck):
 
         # Load the gunicorn master procedure.
         proc_name = instance.get(self.PROC_NAME)
-        master_proc = self._get_master_proc_by_name(proc_name)
+        master_proc = self._get_master_proc_by_name(proc_name, custom_tags)
 
         # Fetch the worker procs and count their states.
         worker_procs = master_proc.children()
@@ -52,7 +53,7 @@ class GUnicornCheck(AgentCheck):
         # if no workers are running, alert CRITICAL, otherwise OK
         msg = "%s working and %s idle workers for %s" % (working, idle, proc_name)
         status = AgentCheck.CRITICAL if working == 0 and idle == 0 else AgentCheck.OK
-        tags = ['app:' + proc_name]
+        tags = ['app:' + proc_name] + custom_tags
 
         self.service_check(self.SVC_NAME, status, tags=tags, message=msg)
 
@@ -100,13 +101,13 @@ class GUnicornCheck(AgentCheck):
 
         return working, idle
 
-    def _get_master_proc_by_name(self, name):
+    def _get_master_proc_by_name(self, name, tags):
         """ Return a psutil process for the master gunicorn process with the given name. """
         master_name = GUnicornCheck._get_master_proc_name(name)
         master_procs = [p for p in psutil.process_iter() if p.cmdline() and p.cmdline()[0] == master_name]
         if len(master_procs) == 0:
             # process not found, it's dead.
-            self.service_check(self.SVC_NAME, AgentCheck.CRITICAL, tags=['app:' + name],
+            self.service_check(self.SVC_NAME, AgentCheck.CRITICAL, tags=['app:' + name] + tags,
                                message="No gunicorn process with name %s found" % name)
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         elif len(master_procs) > 1:

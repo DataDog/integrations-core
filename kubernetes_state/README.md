@@ -18,7 +18,7 @@ Edit the `kubernetes_state.yaml` file to point to your server and port, set the 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kubernetes_state` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubernetes_state` under the Checks section:
 
     Checks
     ======
@@ -40,7 +40,34 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kube
 The Kubernetes-state check does not include any event at this time.
 
 ### Service Checks
-The Kubernetes-state check does not include any service check at this time.
+**kubernetes_state.node.ready**
+
+Returns `CRITICAL` if a cluster node is not ready.
+Returns `OK` otherwise.
+
+**kubernetes_state.node.out_of_disk**
+
+Returns `CRITICAL` if a cluster node is out of disk space.
+Returns `OK` otherwise.
+
+**kubernetes_state.node.disk_pressure**
+
+Returns `CRITICAL` if a cluster node is in a disk pressure state.
+Returns `OK` otherwise.
+
+**kubernetes_state.node.memory_pressure**
+
+Returns `CRITICAL` if a cluster node is in a memory pressure state.
+Returns `OK` otherwise.
+
+**kubernetes_state.node.network_unavailable**
+
+Returns `CRITICAL` if a cluster node is in a network unavailable state.
+Returns `OK` otherwise.
+
+**kubernetes_state.pod.phase**
+
+Returns `CRITICAL` if the pod is in phase `Failed`, `WARNING` if it is `Pending`, `UNKNOWN` if it is `Unknown` or `OK` otherwise.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

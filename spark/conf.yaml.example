@@ -50,3 +50,8 @@ instances:
     # tags:
     #   - key:value
     #   - instance:production
+
+    # SSL configuration.
+    # ssl_verify: false
+    # ssl_cert: /path/to/cert.pem
+    # ssl_key: /path/to/cert.key

@@ -96,7 +96,7 @@ init_config:
 
 See the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/start-stop-restart-the-datadog-agent) to start sending Tomcat metrics to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Tomcat metrics to Datadog.
 
 Configuration Options
 
@@ -204,7 +204,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `tomcat` under the Checks section:
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `tomcat` under the Checks section:
 
 ```
   Checks
@@ -231,7 +231,11 @@ See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tomc
 The Tomcat check does not include any event at this time.
 
 ### Service Checks
-The Tomcat check does not include any service check at this time.
+
+**tomcat.can_connect**
+
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance. Returns `OK` otherwise.
+
 
 ## Troubleshooting
 ### Commands to view the metrics that are available:

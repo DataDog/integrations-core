@@ -17,7 +17,11 @@ namespace :ci do
       sh %(bash #{ENV['SDK_HOME']}/mongo/test/ci/start-docker.sh)
     end
 
-    task before_script: ['ci:common:before_script']
+    task before_script: ['ci:common:before_script'] do
+      # Some of the changes made above will not have propagated.
+      # Wait for an arbitrary time to make sure they do
+      sleep 10
+    end
 
     task script: ['ci:common:script'] do
       this_provides = [
