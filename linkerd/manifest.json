@@ -8,7 +8,7 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/linkerd/",
   "supported_os": ["linux","mac_os","windows"],
-  "categories":["list of categories","a complete list can be found on our documentation"],
+  "categories":["web"],
   "version": "1.0.0",
   "is_public": true,
   "has_logo": true
