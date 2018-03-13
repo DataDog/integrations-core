@@ -12,7 +12,7 @@ If you need the newest version of the Envoy check, install the `dd-check-envoy` 
 
 ### Configuration
 
-Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options:
+Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options.
 
 There are 2 ways to setup the `/stats` endpoint:
 
@@ -76,7 +76,7 @@ Here's an example config (from [this gist](https://gist.github.com/ofek/6051508c
   ],
   "admin": {
     "access_log_path": "/dev/null",
-    "address": "tcp://0.0.0.0:8001"
+    "address": "tcp://127.0.0.1:8001"
   },
   "cluster_manager": {
     "clusters": [
