@@ -6,6 +6,7 @@
 import os
 
 # project
+from checks import AgentCheck
 from tests.checks.common import AgentCheckTest, Fixtures
 
 DEPLOYMENT_METRICS_CONFIG = {
