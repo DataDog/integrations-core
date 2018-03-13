@@ -140,9 +140,17 @@ class TestMemCache(AgentCheckTest):
         good_service_check_tags = ["host:localhost", "port:{0}".format(PORT)]
         bad_service_check_tags = ["host:unix", "port:foo/bar"]
 
-        self.assertServiceCheck(
-            SERVICE_CHECK, status=AgentCheck.OK,
-            tags=good_service_check_tags, count=3)
+        custom_tags = [
+            [],
+            ['instance:mytag'],
+            ['foo'],
+
+        ]
+        for custom_tag in custom_tags:
+            self.assertServiceCheck(
+                SERVICE_CHECK, status=AgentCheck.OK,
+                tags=good_service_check_tags + custom_tags, count=1)
+
         self.assertServiceCheck(
             SERVICE_CHECK, status=AgentCheck.CRITICAL,
             tags=bad_service_check_tags, count=1)
@@ -168,9 +176,10 @@ class TestMemCache(AgentCheckTest):
 
         good_service_check_tags = ["host:localhost", "port:{0}".format(PORT)]
 
-        self.assertServiceCheck(
-            SERVICE_CHECK, status=AgentCheck.OK,
-            tags=good_service_check_tags, count=3)
+        for custom_tag in custom_tags:
+            self.assertServiceCheck(
+                SERVICE_CHECK, status=AgentCheck.OK,
+                tags=good_service_check_tags + custom_tags, count=1)
 
         self.coverage_report()
 
@@ -217,7 +226,7 @@ class TestMemCache(AgentCheckTest):
             self.assertMetric(
                 "memcache.items.{0}_rate".format(m), tags=tags+["slab:1"], count=1)
 
-        self.assertServiceCheck(SERVICE_CHECK, status=AgentCheck.OK, tags=['host:localhost', 'port:11212'], count=1)
+        self.assertServiceCheck(SERVICE_CHECK, status=AgentCheck.OK, tags=['host:localhost', 'port:11212', 'instance:mytag'], count=1)
 
         self.coverage_report()
 
@@ -246,7 +255,7 @@ class TestMemCache(AgentCheckTest):
             self.assertMetric(
                 "memcache.slabs.{0}_rate".format(m), tags=tags+["slab:1"], count=1)
 
-        self.assertServiceCheck(SERVICE_CHECK, status=AgentCheck.OK, tags=['host:localhost', 'port:11212'], count=1)
+        self.assertServiceCheck(SERVICE_CHECK, status=AgentCheck.OK, tags=['host:localhost', 'port:11212', 'instance:mytag'], count=1)
 
         self.coverage_report()
 
