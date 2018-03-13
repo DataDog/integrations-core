@@ -132,11 +132,8 @@ class MapReduceCheck(AgentCheck):
         collect_task_metrics = _is_affirmative(instance.get('collect_task_metrics', False))
 
         # Get additional tags from the conf file
-        custom_tags = instance.get('tags', [])
-        if custom_tags is None:
-            tags = []
-        else:
-            tags = list(set(custom_tags))
+        custom_tags = instance.get('tags') or []  # this handles the case when the YAML `tags` key has an empty value
+        tags = list(set(custom_tags)) if custom_tags else []
 
         # Get the cluster name from the conf file
         cluster_name = instance.get('cluster_name')
