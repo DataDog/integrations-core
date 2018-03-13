@@ -10,6 +10,8 @@ except ImportError:
     from checks import CheckException
     from checks.prometheus_check import GenericPrometheusCheck
 
+from .metrics import METRIC_MAP, TYPE_OVERRIDES
+
 class LinkerdCheck(GenericPrometheusCheck):
     """
     Collect linkerd metrics from Prometheus
@@ -24,6 +26,8 @@ class LinkerdCheck(GenericPrometheusCheck):
         default_config = {
             'linkerd': {
                 'labels_mapper': labels_mapper,
+                'metrics': [METRIC_MAP],
+                'type_overrides': TYPE_OVERRIDES,
             }
         }
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
