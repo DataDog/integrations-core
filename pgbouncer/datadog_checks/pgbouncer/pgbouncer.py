@@ -75,7 +75,7 @@ class PgBouncer(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
 
-    def _get_service_checks_tags(self, host, port, database_url):
+    def _get_service_checks_tags(self, host, port, database_url, tags):
         if database_url:
             parsed_url = urlparse.urlparse(database_url)
             host = parsed_url.hostname
@@ -85,7 +85,7 @@ class PgBouncer(AgentCheck):
             "host:%s" % host,
             "port:%s" % port,
             "db:%s" % self.DB_NAME
-        ]
+        ] + tags
         return service_checks_tags
 
     def _collect_stats(self, db, instance_tags):
@@ -161,11 +161,12 @@ class PgBouncer(AgentCheck):
                 'database': self.DB_NAME}
 
     def _get_connection(self, key, host='', port='', user='',
-                        password='', database_url='', use_cached=True):
+                        password='', database_url='', tags=None, use_cached=True):
         "Get and memoize connections to instances"
         if key in self.dbs and use_cached:
             return self.dbs[key]
-
+        if tags is None:
+            tags = []
         try:
             connect_kwargs = self._get_connect_kwargs(
                 host=host, port=port, user=user,
@@ -185,7 +186,7 @@ class PgBouncer(AgentCheck):
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=self._get_service_checks_tags(host, port, database_url),
+                               tags=self._get_service_checks_tags(host, port, database_url, tags),
                                message=message)
             raise
 
@@ -220,17 +221,17 @@ class PgBouncer(AgentCheck):
             tags = list(set(tags))
 
         try:
-            db = self._get_connection(key, host, port, user, password,
+            db = self._get_connection(key, host, port, user, password, tags=tags,
                                       database_url=database_url)
             self._collect_stats(db, tags)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self._get_connection(key, host, port, user, password, use_cached=False)
+            db = self._get_connection(key, host, port, user, password, tags=tags, use_cached=False)
             self._collect_stats(db, tags)
 
         redacted_dsn = self._get_redacted_dsn(host, port, user, database_url)
         message = u'Established connection to {}'.format(redacted_dsn)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                           tags=self._get_service_checks_tags(host, port, database_url),
+                           tags=self._get_service_checks_tags(host, port, database_url, tags),
                            message=message)

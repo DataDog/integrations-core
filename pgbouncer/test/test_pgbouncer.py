@@ -33,7 +33,8 @@ class TestPgbouncer(AgentCheckTest):
                     'host': 'localhost',
                     'port': 16432,
                     'username': 'datadog',
-                    'password': 'datadog'
+                    'password': 'datadog',
+                    'tags': ['optional:tag1']
                 },
                 {
                     'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
@@ -107,5 +108,5 @@ class TestPgbouncer(AgentCheckTest):
         self.assertTrue(service_checks_count > 0)
         self.assertServiceCheckOK(
             'pgbouncer.can_connect',
-            tags=['host:localhost', 'port:16432', 'db:pgbouncer'],
+            tags=['host:localhost', 'port:16432', 'db:pgbouncer', 'optional:tag1'],
             count=service_checks_count)
