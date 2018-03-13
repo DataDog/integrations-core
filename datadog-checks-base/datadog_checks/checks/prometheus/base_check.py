@@ -18,7 +18,7 @@ class Scraper(PrometheusScraper):
         the ones from the label provided via the metrics object.
 
         `custom_tags` is an array of 'tag:value' that will be added to the
-        metric when sending the gauge to Datadog.
+        metric when sending the rate to Datadog.
         """
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
         self.check.rate('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
