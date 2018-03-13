@@ -91,7 +91,7 @@ class Lighttpd(AgentCheck):
         parsed_url = urlparse.urlparse(url)
         lighttpd_url = parsed_url.hostname
         lighttpd_port = parsed_url.port or 80
-        service_check_tags = ['host:%s' % lighttpd_url, 'port:%s' % lighttpd_port]
+        service_check_tags = ['host:%s' % lighttpd_url, 'port:%s' % lighttpd_port] + tags
         try:
             r = requests.get(url, auth=auth, headers=headers(self.agentConfig))
             r.raise_for_status()
