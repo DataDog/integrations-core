@@ -63,7 +63,7 @@ class TestKyototycoon(AgentCheckTest):
         self.run_check_twice(config)
 
         for mname in METRICS:
-            if mname == 'kyototycoon.records' or mname =='kyototycoon.size':
+            if mname == 'kyototycoon.records' or mname == 'kyototycoon.size':
                 self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1', 'db:0'])
             else:
                 self.assertMetric(mname, count=1, at_least=0, tags=['optional:tag1'])
