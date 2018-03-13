@@ -23,11 +23,11 @@ class TestMesosMaster(AgentCheckTest):
         }
 
         mocks = {
-            '_get_master_roles': lambda x, y, z: json.loads(
+            '_get_master_roles': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('roles.json', sdk_dir=self.FIXTURE_DIR)),
-            '_get_master_stats': lambda x, y, z: json.loads(
+            '_get_master_stats': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('stats.json', sdk_dir=self.FIXTURE_DIR)),
-            '_get_master_state': lambda x, y, z: json.loads(
+            '_get_master_state': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('state.json', sdk_dir=self.FIXTURE_DIR)),
         }
 
@@ -46,4 +46,3 @@ class TestMesosMaster(AgentCheckTest):
         self.assertMetric('mesos.framework.total_tasks')
         self.assertMetric('mesos.role.frameworks.count')
         self.assertMetric('mesos.role.weight')
-        self.assertServiceCheck("mesos_master.can_connect", tags=['url:http://localhost:5050', 'instance:mytag1'])
