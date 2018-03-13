@@ -139,8 +139,9 @@ class Nginx(AgentCheck):
         parsed_url = urlparse.urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
+        custom_tags = instance.get('tags', [])
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port]
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
             r = self._perform_request(instance, url, ssl_validation, auth)
