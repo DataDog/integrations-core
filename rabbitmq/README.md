@@ -15,13 +15,16 @@ And more.
 The RabbitMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RabbitMQ servers.
 
 ### Configuration
+
+Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory.
+
 #### Prepare RabbitMQ
 
 You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](https://www.rabbitmq.com/management.html) to enable it.
 
-#### Connect the Agent
+#### Metric Collection
 
-Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory. See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options:
+* Add this configuration setup to your `rabbitmq.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
 
 ```
 init_config:
@@ -54,7 +57,44 @@ Configuration Options
 * `queues` or `queues_regexes` - **optional** - Use the `queues` or `queues_regexes` parameters to specify the queues you'd like to collect metrics on (up to 200 queues). If you have less than 200 queues, you don't have to set this parameter, the metrics will be collected on all the queues by. default. If you have set up vhosts, set the queue names as `vhost_name/queue_name`. If you have `tag_families` enabled, the first captured group in the regex will be used as the queue_family tag.  See the link to the example YAML below for more.
 * `vhosts` - **optional** - By default a list of all vhosts is fetched and each one will be checked using the aliveness API. If you prefer only certain vhosts to be monitored, list the vhosts you care about.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+ See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options.
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
+
+```
+log.dir = /var/log/rabbit
+log.file = rabbit.log
+```
+
+2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```
+    logs_enabled: true
+    ```
+    
+3. Add this configuration setup to your `rabbitmq.yaml` file to start collecting your RabbitMQ logs:
+
+```
+logs:
+    
+    - type: file
+      path: /var/log/rabbit/*.log
+      source: rabbitmq
+      service: myservice
+      log_processing_rules:
+        - type: multi_line
+          name: logs_starts_with_equal_sign
+          pattern: =
+```
+
+See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options.
+
+4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 ### Validation
 
