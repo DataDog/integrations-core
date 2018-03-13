@@ -79,8 +79,8 @@ class MarathonCheckTest(AgentCheckTest):
         self.assertMetric('marathon.deployments', value=1)
         for metric in Q_METRICS:
             self.assertMetric(metric, at_least=1)
-        if self.serviceCheck is not None:
-            self.assertServiceCheck('marathon.can_connect', tags=['url:http://localhost:8080', 'optional:tag1'])
+        
+        self.assertServiceCheck('marathon.can_connect', status=AgentCheck.OK, tags=['url:http://localhost:8080', 'optional:tag1'])
 
     def test_empty_responses(self):
         def side_effect(url, timeout, auth, acs_url, verify, tags):
