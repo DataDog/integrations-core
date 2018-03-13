@@ -2,11 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-
-# 3rd party
-
-# project
 try:
     # Agent5 compatibility layer
     from datadog_checks.checks.prometheus import GenericPrometheusCheck

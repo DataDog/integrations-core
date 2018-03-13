@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import os
 import requests

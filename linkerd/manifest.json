@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "linkerd",
   "short_description": "Monitor your services health with metrics from linkerd.",
   "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
@@ -11,7 +9,7 @@
   "doc_link": "link/to/the/dedicated/documentation/page",
   "supported_os": ["linux","mac_os","windows"],
   "categories":["list of categories","a complete list can be found on our documentation"],
-  "version": "0.1.0",
+  "version": "1.0.0",
   "is_public": true,
   "has_logo": true
 }
