@@ -74,7 +74,7 @@ class Network(AgentCheck):
         elif Platform.is_solaris():
             self._check_solaris(instance)
         elif Platform.is_windows():
-            self._check_psutil()
+            self._check_psutil(instance)
 
     def _setup_metrics(self, instance):
         self._combine_connection_states = instance.get('combine_connection_states', True)
@@ -212,7 +212,7 @@ class Network(AgentCheck):
                 }
             }
 
-    def _submit_devicemetrics(self, iface, vals_by_metric):
+    def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
             return False
@@ -231,7 +231,7 @@ class Network(AgentCheck):
 
         count = 0
         for metric, val in vals_by_metric.iteritems():
-            self.rate('system.net.%s' % metric, val, device_name=iface)
+            self.rate('system.net.%s' % metric, val, device_name=iface, tags=tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s" % (count, iface))
 
@@ -241,13 +241,13 @@ class Network(AgentCheck):
         except ValueError:
             return 0
 
-    def _submit_regexed_values(self, output, regex_list):
+    def _submit_regexed_values(self, output, regex_list, tags):
         lines = output.splitlines()
         for line in lines:
             for regex, metric in regex_list:
                 value = re.match(regex, line)
                 if value:
-                    self.rate(metric, self._parse_value(value.group(1)))
+                    self.rate(metric, self._parse_value(value.group(1)), tags=tags)
 
     def _is_collect_cx_state_runnable(self, proc_location):
         """
@@ -273,6 +273,7 @@ class Network(AgentCheck):
         When a custom procfs_path is set, the collect_connection_state option is ignored
         """
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        custom_tags = instance.get('tags', [])
 
         if Platform.is_containerized() and proc_location != "/proc":
             proc_location = "%s/1" % proc_location
@@ -304,7 +305,7 @@ class Network(AgentCheck):
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in self.cx_state_gauge.iteritems():
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
-                                self.gauge(metric, metrics.get(metric))
+                                self.gauge(metric, metrics.get(metric), tags=custom_tags)
 
             except OSError:
                 self.log.info("`ss` not found: using `netstat` as a fallback")
@@ -322,7 +323,7 @@ class Network(AgentCheck):
 
                 metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in metrics.iteritems():
-                    self.gauge(metric, value)
+                    self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection stats.")
 
@@ -348,7 +349,7 @@ class Network(AgentCheck):
                     'packets_out.count': self._parse_value(x[9]),
                     'packets_out.error': self._parse_value(x[10]) + self._parse_value(x[11]),
                 }
-                self._submit_devicemetrics(iface, metrics)
+                self._submit_devicemetrics(iface, metrics, custom_tags)
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
@@ -399,7 +400,7 @@ class Network(AgentCheck):
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]))
+                    self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags)
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
@@ -423,6 +424,8 @@ class Network(AgentCheck):
 
     def _check_bsd(self, instance):
         netstat_flags = ['-i', '-b']
+
+        custom_tags = instance.get('tags', [])
 
         # FreeBSD's netstat truncates device names unless you pass '-W'
         if Platform.is_freebsd():
@@ -490,7 +493,7 @@ class Network(AgentCheck):
                         'packets_out.count': self._parse_value(x[-4]),
                         'packets_out.error': self._parse_value(x[-3]),
                     }
-                    self._submit_devicemetrics(iface, metrics)
+                    self._submit_devicemetrics(iface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting connection stats.")
 
@@ -514,18 +517,19 @@ class Network(AgentCheck):
             #        165400 duplicate acks
             #        ...
 
-            self._submit_regexed_values(netstat, BSD_TCP_METRICS)
+            self._submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
     def _check_solaris(self, instance):
         # Can't get bytes sent and received via netstat
         # Default to kstat -p link:0:
+        custom_tags = instance.get('tags', [])
         try:
             netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
             for interface, metrics in metrics_by_interface.iteritems():
-                self._submit_devicemetrics(interface, metrics)
+                self._submit_devicemetrics(interface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting kstat stats.")
 
@@ -540,7 +544,7 @@ class Network(AgentCheck):
             # tcpRetransSegs      =     0 tcpRetransBytes     =     0
             # tcpOutAck           =   185 tcpOutAckDelayed    =     4
             # ...
-            self._submit_regexed_values(netstat, SOLARIS_TCP_METRICS)
+            self._submit_regexed_values(netstat, SOLARIS_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting TCP stats.")
 
@@ -640,17 +644,18 @@ class Network(AgentCheck):
 
         return metrics_by_interface
 
-    def _check_psutil(self):
+    def _check_psutil(self, instance):
         """
         Gather metrics about connections states and interfaces counters
         using psutil facilities
         """
+        custom_tags = instance.get('tags', [])
         if self._collect_cx_state:
-            self._cx_state_psutil()
+            self._cx_state_psutil(tags=custom_tags)
 
-        self._cx_counters_psutil()
+        self._cx_counters_psutil(tags=custom_tags)
 
-    def _cx_state_psutil(self):
+    def _cx_state_psutil(self, tags=[]):
         """
         Collect metrics about connections state using psutil
         """
@@ -665,9 +670,9 @@ class Network(AgentCheck):
                 metrics[metric] += 1
 
         for metric, value in metrics.iteritems():
-            self.gauge(metric, value)
+            self.gauge(metric, value, tags=tags)
 
-    def _cx_counters_psutil(self):
+    def _cx_counters_psutil(self, tags=[]):
         """
         Collect metrics about interfaces counters using psutil
         """
@@ -680,7 +685,7 @@ class Network(AgentCheck):
                 'packets_out.count': counters.packets_sent,
                 'packets_out.error': counters.errout,
             }
-            self._submit_devicemetrics(iface, metrics)
+            self._submit_devicemetrics(iface, metrics, tags)
 
     def _parse_protocol_psutil(self, conn):
         """
