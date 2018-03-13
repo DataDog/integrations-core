@@ -1,8 +1,11 @@
 init_config:
 
 instances:
+    # The name of the instance. Will appear as tag "linkerd_instance" on datadog.
+  - name: "linkerd-1"
+
     # The linkerd prometheus endpoint
-  - prometheus_url: http://localhost:9990/admin/metrics/prometheus
+    prometheus_url: http://localhost:9990/admin/metrics/prometheus
 
     # Set (optional) custom tags for each metric
     # tags:
@@ -60,7 +63,7 @@ instances:
     # Type of the metrics
     # /!\ All untyped metric will be ignored /!\
     # Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
-    # Metrics with "quantile" tags are of type summary
+    # You can use 'rate' if you want to get the derivative of a counter/gauge
     type_overrides:
     # linkerd jvm metrics
       "jvm:start_time": "gauge"
