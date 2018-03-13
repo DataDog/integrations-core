@@ -1,0 +1,14 @@
+init_config:
+
+instances:
+  # To enable Istio metrics you must specify the url exposing the API
+  #
+  # Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
+  # the CPP extension to process Protocol buffer messages coming from the api. Depending
+  # on the metrics volume, the check may run very slowly.
+  - istio_mesh_endpoint: http://localhost:42422/metrics
+    mixer_endpoint: http://localhost:9093/metrics
+    send_histograms_buckets: true
+    # tags:
+    #   - optional_tag1
+    #   - optional_tag2
