@@ -71,4 +71,4 @@ def linkerd(request):
 def test_check(linkerd, aggregator):
     linkerd_check = LinkerdCheck(CHECK_NAME, {}, {}, INSTANCES)
     linkerd_check.check(INSTANCES[0])
-    aggregator.assert_metric(METRIC_PREFIX + "." + "jvm.start_time")
+    aggregator.assert_metric("{}.jvm.start_time".format(METRIC_PREFIX))
