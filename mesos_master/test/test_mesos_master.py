@@ -8,6 +8,7 @@ from tests.checks.common import AgentCheckTest, Fixtures, get_check_class
 
 class TestMesosMaster(AgentCheckTest):
     CHECK_NAME = 'mesos_master'
+    SERVICE_CHECK_NAME = "mesos_master.can_connect"
     FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
     def test_checks(self):
@@ -15,7 +16,8 @@ class TestMesosMaster(AgentCheckTest):
             'init_config': {},
             'instances': [
                 {
-                    'url': 'http://localhost:5050'
+                    'url': 'http://localhost:5050',
+                    'tags': ['instance:mytag1']
                 }
             ]
         }
@@ -44,3 +46,4 @@ class TestMesosMaster(AgentCheckTest):
         self.assertMetric('mesos.framework.total_tasks')
         self.assertMetric('mesos.role.frameworks.count')
         self.assertMetric('mesos.role.weight')
+        self.assertServiceCheck("mesos_master.can_connect", tags=['url:http://localhost:5050', 'instance:mytag1'])

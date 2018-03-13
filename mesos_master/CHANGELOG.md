@@ -1,5 +1,12 @@
 # CHANGELOG - mesos_master
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds custom tag support for service checks.
+
 1.1.0 / 2017-08-21
 ==================
 
