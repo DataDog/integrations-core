@@ -35,14 +35,20 @@ The linkerd check is compatible with all major platforms
 ## Data Collected
 ### Metrics
 
-For this check, the maximum number of metrics sent by run is fixed to 1000.
-
 See [metadata.csv](hhttps://github.com/DataDog/integrations-core/blob/master/linkerd/metadata.csv) for a list of default metrics provided by this integration.
-See [finagle metrics docs](https://twitter.github.io/finagle/guide/Metrics.html) for a detailed description of most available metrics.
+See [finagle metrics docs](https://twitter.github.io/finagle/guide/Metrics.html) for a detailed description of some of the available metrics.
 See [this gist](https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt) for an example of metrics exposed by linkerd.
 
-If you need to use a metrics that is not provided by default, you can add an entry to `linkerd.yaml`.
-Simply follow the examples present in that file.
+Attention: Depending on your linkerd configuration, some metrics might not be exposed by linkerd.
+
+To list the metrics exposed by your current configuration, please run
+```bash
+curl <linkerd_prometheus_endpoint>
+```
+Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
+
+If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
+Simply follow the examples present in the [default configuration](https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example).
 
 ### Service Checks
 
