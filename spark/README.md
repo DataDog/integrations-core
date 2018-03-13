@@ -18,9 +18,6 @@ The Spark check is packaged with the Agent, so simply [install the Agent](https:
 - YARN ResourceManager (if you're running Spark on YARN), or
 - Spark master (if you're running Standalone Spark)
 
-
-If you need the newest version of the Spark check, install the `dd-check-spark` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample spark.yaml](https://github.com/DataDog/integrations-core/blob/master/spark/conf.yaml.example) for all available configuration options:

@@ -10,7 +10,7 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
 1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
-  If you need the newest version of the Apache check, install the `dd-check-apache` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+  
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 

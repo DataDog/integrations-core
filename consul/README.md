@@ -24,8 +24,6 @@ Finally, in addition to metrics, the Datadog Agent also sends a service check fo
 
 The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Consul nodes.
 
-If you need the newest version of the Consul check, install the `dd-check-consul` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
-
 ### Configuration
 
 #### Connect Datadog Agent to Consul Agent
