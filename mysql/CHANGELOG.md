@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Add custom tag support to service checks.
+
 1.1.3 / 2018-03-23
 ==================
 ### Changes
