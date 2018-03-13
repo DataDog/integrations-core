@@ -1,5 +1,11 @@
 # CHANGELOG - docker_daemon
 
+1.9.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] add the new `exec_die` event type to default exclusion list. See [#1240][]
+
 1.8.0 / 2018-02-13
 ==================
 ### Changes

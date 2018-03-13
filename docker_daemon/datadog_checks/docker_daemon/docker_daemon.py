@@ -151,6 +151,7 @@ DEFAULT_FILTERED_EVENT_TYPES = [
     'top',
     'exec_create',
     'exec_start',
+    'exec_die',
 ]
 
 CONTAINER = "container"
