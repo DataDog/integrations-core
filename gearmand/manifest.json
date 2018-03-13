@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.1",
+  "version": "1.1.0",
   "guid": "bdd65394-92ff-4d51-bbe3-ba732663fdb2",
   "public_title": "Datadog-Gearman Integration",
   "categories":["processing"],
