@@ -14,7 +14,7 @@ If you need the newest version of the Linkerd check, install the `dd-check-linke
 ### Configuration
 
 Edit the `linkerd.yaml` file located in your configuration directory.
-See [sample linkerd.yaml](https://github.com/DataDog/integrations-core/blob/master/riakcs/conf.yaml.example) for all available configuration options.
+See [sample linkerd.yaml](https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
