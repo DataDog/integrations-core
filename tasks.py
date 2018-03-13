@@ -7,6 +7,7 @@ AGENT_BASED_INTEGRATIONS = [
     'disk',
     'envoy',
     'kube_proxy',
+    'linkerd',
     'kubelet',
     'prometheus',
     'vsphere',
