@@ -6,7 +6,9 @@ AGENT_BASED_INTEGRATIONS = [
     'datadog-checks-base',
     'disk',
     'envoy',
+    'kube_proxy',
     'kubelet',
+    'prometheus',
     'vsphere',
 ]
 
