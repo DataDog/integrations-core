@@ -39,4 +39,9 @@ class TestMesosSlave(AgentCheckTest):
             metrics.update(d)
         [self.assertMetric(v[0]) for k, v in check.TASK_METRICS.iteritems()]
         [self.assertMetric(v[0]) for k, v in metrics.iteritems()]
-        self.assertServiceCheck('hello.ok', tags=['url:http://localhost:5051', 'instance:mytag1'], count=1, status=AgentCheck.OK)
+        service_check_tags = ['instance:mytag1',
+            'mesos_cluster:test',
+            'mesos_node:slave',
+            'mesos_pid:slave(1)@127.0.0.1:5051',
+            'task_name:hello']
+        self.assertServiceCheck('hello.ok', tags=service_check_tags, count=1, status=AgentCheck.OK)
