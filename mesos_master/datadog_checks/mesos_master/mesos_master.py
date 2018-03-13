@@ -141,7 +141,7 @@ class MesosMaster(AgentCheck):
                 self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
 
     def _get_json(self, url, timeout, verify=True, tags=None):
-        tags = tags + ["url:%s" % url] if tags else ["url:%s" % url] 
+        tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
         try:
