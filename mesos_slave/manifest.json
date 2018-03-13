@@ -10,7 +10,7 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.1.1",
+  "version": "1.2.1",
   "guid": "14d0267e-9989-4d09-8362-9319958e858e",
   "public_title": "Datadog-Mesos Slave Integration",
   "categories":["configuration & deployment", "containers", "orchestration"],

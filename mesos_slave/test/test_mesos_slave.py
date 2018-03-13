@@ -24,9 +24,9 @@ class TestMesosSlave(AgentCheckTest):
         }
 
         mocks = {
-            '_get_stats': lambda x, y, z: json.loads(
+            '_get_stats': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('stats.json', sdk_dir=self.FIXTURE_DIR)),
-            '_get_state': lambda x, y, z: json.loads(
+            '_get_state': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('state.json', sdk_dir=self.FIXTURE_DIR))
         }
 
