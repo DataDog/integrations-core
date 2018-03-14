@@ -124,8 +124,10 @@ class Twemproxy(AgentCheck):
     def _get_data(self, instance):
         host = instance.get('host')
         port = int(instance.get('port', 2222)) # 2222 is default
+        tags = instance.get('tags', [])
 
-        service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
+        service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)] + tags
+        service_check_tags = list(set(service_check_tags))
 
         try:
             addrs = socket.getaddrinfo(host, port, 0, 0, socket.IPPROTO_TCP)

@@ -1,5 +1,12 @@
 # CHANGELOG - twemproxy
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support for service checks.
+
 1.1.0 / 2017-07-18
 ==================
 
