@@ -112,7 +112,7 @@ class TestSqlserver(AgentCheckTest):
             self.assertMetric(metric, count=1)
 
         self.assertServiceCheckOK('sqlserver.can_connect',
-                                  tags=['host:{}'.format(config['instances'][0]['host']), 'db:master'] + config['instances'][0].get('tags', [])
+                                tags=['host:{}'.format(config['instances'][0]['host']), 'db:master'] + config['instances'][0].get('tags', []))
 
         self.coverage_report()
 
