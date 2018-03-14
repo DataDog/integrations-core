@@ -25,6 +25,3 @@ class LinkerdCheck(GenericPrometheusCheck):
             }
         }
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
-
-    def check(self, instance):
-        pass
