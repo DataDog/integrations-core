@@ -58,8 +58,8 @@ class Marathon(AgentCheck):
         self.process_queues(url, timeout, auth, acs_url, ssl_verify, instance_tags)
 
     def refresh_acs_token(self, auth, acs_url, tags=None):
-        if tag is None:
-            tag = []
+        if tags is None:
+            tags = []
 
         try:
             auth_body = {
@@ -78,8 +78,8 @@ class Marathon(AgentCheck):
             raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
 
     def get_json(self, url, timeout, auth, acs_url, verify, tags=None):
-        if tag is None:
-            tag = []
+        if tags is None:
+            tags = []
 
         params = {
             'timeout': timeout,
