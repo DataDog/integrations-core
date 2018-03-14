@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.checks.prometheus import GenericPrometheusCheck
-from datadog_checks.errors import CheckException
 
 from .metrics import METRIC_MAP, TYPE_OVERRIDES
 
