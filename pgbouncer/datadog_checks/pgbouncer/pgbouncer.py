@@ -75,7 +75,10 @@ class PgBouncer(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
 
-    def _get_service_checks_tags(self, host, port, database_url, tags):
+    def _get_service_checks_tags(self, host, port, database_url, tags=None):
+        if tags = None:
+            tags = []
+
         if database_url:
             parsed_url = urlparse.urlparse(database_url)
             host = parsed_url.hostname
@@ -86,6 +89,8 @@ class PgBouncer(AgentCheck):
             "port:%s" % port,
             "db:%s" % self.DB_NAME
         ] + tags
+
+        service_checks_tags = list(set(service_checks_tags))
         return service_checks_tags
 
     def _collect_stats(self, db, instance_tags):
@@ -165,8 +170,6 @@ class PgBouncer(AgentCheck):
         "Get and memoize connections to instances"
         if key in self.dbs and use_cached:
             return self.dbs[key]
-        if tags is None:
-            tags = []
         try:
             connect_kwargs = self._get_connect_kwargs(
                 host=host, port=port, user=user,
@@ -180,7 +183,7 @@ class PgBouncer(AgentCheck):
         # re-raise the CheckExceptions raised by _get_connect_kwargs()
         except CheckException:
             raise
-        print "_GET_CONNETION TAGS:", tags
+
         except Exception:
             redacted_url = self._get_redacted_dsn(host, port, user, database_url)
             message = u'Cannot establish connection to {}'.format(redacted_url)
@@ -231,7 +234,6 @@ class PgBouncer(AgentCheck):
 
         redacted_dsn = self._get_redacted_dsn(host, port, user, database_url)
         message = u'Established connection to {}'.format(redacted_dsn)
-        print "CHECK TAGS", tags
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                            tags=self._get_service_checks_tags(host, port, database_url, tags),
                            message=message)
