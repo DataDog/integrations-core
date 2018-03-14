@@ -265,7 +265,7 @@ class YarnCheck(AgentCheck):
         '''
         Get metrics related to YARN cluster
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH, addl_tags)
 
         if metrics_json:
 
@@ -281,6 +281,7 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(
             rm_address,
             YARN_APPS_PATH,
+            addl_tags
             states=YARN_APPLICATION_STATES
         )
 
@@ -308,7 +309,7 @@ class YarnCheck(AgentCheck):
         '''
         Get metrics related to YARN nodes
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
 
         if (metrics_json and metrics_json['nodes'] is not None and
                 metrics_json['nodes']['node'] is not None):
@@ -325,7 +326,7 @@ class YarnCheck(AgentCheck):
         '''
         Get metrics from YARN scheduler
         '''
-        metrics_json = self._rest_request_to_json(rm_address, YARN_SCHEDULER_PATH)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_SCHEDULER_PATH, addl_tags)
 
         try:
             metrics_json = metrics_json['scheduler']['schedulerInfo']
@@ -403,13 +404,14 @@ class YarnCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown', metric_type)
 
-    def _rest_request_to_json(self, address, object_path, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, tags, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
         response_json = None
 
-        service_check_tags = ['url:%s' % self._get_url_base(address)]
+        service_check_tags = ['url:%s' % self._get_url_base(address)] + tags
+        service_check_tags = list(set(service_check_tags))
 
         url = address
 
