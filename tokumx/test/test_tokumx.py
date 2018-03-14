@@ -199,7 +199,8 @@ class TestTokuMXTest(AgentCheckTest):
         mongo_server = 'mongodb://localhost:37017/test'
         config = {
             'instances': [{
-                'server': mongo_server
+                'server': mongo_server,
+                'tags': ["optional:tag1"]
             }]
         }
 
@@ -209,7 +210,7 @@ class TestTokuMXTest(AgentCheckTest):
 
         # TODO: assert more tags
         for mname in GAUGES:
-            self.assertMetric(mname, count=1, tags=[server_tag])
+            self.assertMetric(mname, count=1, tags=[server_tag, "optional:tag1"])
         for mname in RATES:
             self.assertMetric(mname, count=1)
         for msuff in IDX_HISTS:
@@ -223,8 +224,9 @@ class TestTokuMXTest(AgentCheckTest):
                 self.assertMetric('tokumx.stats.coll.%s.%s' % (msuff, hsuff), count=1)
         for msuff in DB_STATS:
             for dbname in ('admin', 'local', 'test'):
-                self.assertMetric('tokumx.stats.db.%s' % (msuff), count=1, tags=[server_tag, 'db:%s' % dbname])
+                self.assertMetric('tokumx.stats.db.%s' % (msuff), count=1, tags=[server_tag, 'db:%s' % dbname, "optional:tag1"])
 
-        self.assertServiceCheck('tokumx.can_connect', count=1, status=AgentCheck.OK, tags=['db:test', 'host:localhost', 'port:37017'])
+        self.assertServiceCheck('tokumx.can_connect', count=1, status=AgentCheck.OK, 
+            tags=['db:test', 'host:localhost', 'port:37017', "optional:tag1"])
 
         self.coverage_report()
