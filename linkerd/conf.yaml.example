@@ -6,11 +6,6 @@ instances:
     #
   - prometheus_url: http://localhost:9990/admin/metrics/prometheus
 
-    # Set (optional) name of the instance. Will appear as tag "linkerd_instance"
-    # on datadog
-    #
-    # name: "linkerd"
-
     # Set (optional) custom tags for each metric
     #
     # tags:

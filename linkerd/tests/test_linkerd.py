@@ -343,9 +343,7 @@ LINKERD_FIXTURE_TYPES = {
 }
 
 MOCK_INSTANCE = {
-    'name': 'linkerd',
     'prometheus_url': 'http://fake.tld/prometheus',
-    #'prometheus_metrics_prefix': 'dd_linkerd_',
     'metrics': [LINKERD_FIXTURE_METRICS],
     'type_overrides': LINKERD_FIXTURE_TYPES,
 }

@@ -27,10 +27,4 @@ class LinkerdCheck(GenericPrometheusCheck):
         super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
 
     def check(self, instance):
-        instance_name = instance.get('name')
-        if instance_name is not None:
-            tags = instance.get('tags', [])
-            tags.append("linkerd_instance:{}".format(instance_name))
-            instance['tags'] = tags
-
-        GenericPrometheusCheck.check(self, instance)
+        pass
