@@ -281,7 +281,7 @@ class YarnCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(
             rm_address,
             YARN_APPS_PATH,
-            addl_tags
+            addl_tags,
             states=YARN_APPLICATION_STATES
         )
 
