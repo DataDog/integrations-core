@@ -138,9 +138,15 @@ class SparkCheck(AgentCheck):
     def check(self, instance):
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
-        tags = list(set(tags)) if tags is not None else []
-
+        if tags is None:
+            tags = []
+        else:
+            tags = list(set(tags))
         ssl_config = self._get_ssl_config(instance)
+        cluster_name = instance.get('cluster_name')
+        if cluster_name is None:
+            raise Exception('The cluster_name must be specified in the instance configuration')
+        tags.append('cluster_name:%s' % cluster_name)
 
         spark_apps = self._get_running_apps(instance, tags, ssl_config)
 
@@ -215,14 +221,12 @@ class SparkCheck(AgentCheck):
         '''
 
         master_address = self._get_master_address(instance)
-
         # Get the cluster name from the instance configuration
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             raise Exception('The cluster_name must be specified in the instance configuration')
-
         tags.append('cluster_name:%s' % cluster_name)
-
+        tags = list(set(tags))
         # Determine the cluster mode
         cluster_mode = instance.get(SPARK_CLUSTER_MODE)
         if cluster_mode is None:
@@ -237,7 +241,7 @@ class SparkCheck(AgentCheck):
             return self._standalone_init(master_address, pre20, ssl_config, tags)
 
         elif cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(instance, master_address, ssl_config)
+            running_apps = self._mesos_init(instance, master_address, ssl_config, tags)
             return self._get_spark_app_ids(running_apps, ssl_config, tags)
 
         elif cluster_mode == SPARK_YARN_MODE:
@@ -266,7 +270,7 @@ class SparkCheck(AgentCheck):
 
                 # Parse through the HTML to grab the application driver's link
                 try:
-                    app_url = self._get_standalone_app_url(app_id, spark_master_address, ssl_config)
+                    app_url = self._get_standalone_app_url(app_id, spark_master_address, ssl_config, tags)
 
                     if app_id and app_name and app_url:
                         if pre_20_mode:
@@ -295,12 +299,11 @@ class SparkCheck(AgentCheck):
         self.log.info("Returning running apps %s" % running_apps)
         return running_apps
 
-    def _mesos_init(self, instance, master_address, ssl_config):
+    def _mesos_init(self, instance, master_address, ssl_config, tags):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
         running_apps = {}
-        tags = instance.get('tags', [])
 
         metrics_json = self._rest_request_to_json(
             master_address,
@@ -349,7 +352,7 @@ class SparkCheck(AgentCheck):
 
         return running_apps
 
-    def _get_standalone_app_url(self, app_id, spark_master_address, ssl_config):
+    def _get_standalone_app_url(self, app_id, spark_master_address, ssl_config, tags):
         '''
         Return the application URL from the app info page on the Spark master.
         Due to a bug, we need to parse the HTML manually because we cannot
@@ -360,6 +363,7 @@ class SparkCheck(AgentCheck):
             SPARK_MASTER_APP_PATH,
             SPARK_STANDALONE_SERVICE_CHECK,
             ssl_config,
+            tags,
             appId=app_id)
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
