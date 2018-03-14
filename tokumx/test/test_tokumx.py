@@ -226,7 +226,7 @@ class TestTokuMXTest(AgentCheckTest):
             for dbname in ('admin', 'local', 'test'):
                 self.assertMetric('tokumx.stats.db.%s' % (msuff), count=1, tags=[server_tag, 'db:%s' % dbname, "optional:tag1"])
 
-        self.assertServiceCheck('tokumx.can_connect', count=1, status=AgentCheck.OK, 
+        self.assertServiceCheck('tokumx.can_connect', count=1, status=AgentCheck.OK,
             tags=['db:test', 'host:localhost', 'port:37017', "optional:tag1"])
 
         self.coverage_report()
