@@ -88,9 +88,10 @@ class PgBouncer(AgentCheck):
             "host:%s" % host,
             "port:%s" % port,
             "db:%s" % self.DB_NAME
-        ] + tags
-
+        ]
+        service_checks_tags.extend(tags)
         service_checks_tags = list(set(service_checks_tags))
+
         return service_checks_tags
 
     def _collect_stats(self, db, instance_tags):

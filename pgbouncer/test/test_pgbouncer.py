@@ -38,6 +38,7 @@ class TestPgbouncer(AgentCheckTest):
                 },
                 {
                     'database_url': 'postgresql://datadog:datadog@localhost:16432/datadog_test',
+                    'tags': ['optional:tag1']
                 }
             ]
         }
