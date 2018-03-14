@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 2.1.0 / Unreleased
+
+ * [FEATURE] Add custom tag support for service checks.
+
 ## 2.0.0 / 2018-02-28
 
  * [FEATURE] Run with Agent versions >= 6. See [#1098][].
