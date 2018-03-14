@@ -54,7 +54,9 @@ setup(
     packages=['datadog_checks.linkerd'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in'),
+    install_requires=get_requirements('requirements.in')+[
+        'datadog-checks-base',
+    ],
 
     # Development dependencies, run with:
     # $ pip install -e .[dev]
