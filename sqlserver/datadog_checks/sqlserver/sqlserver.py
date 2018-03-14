@@ -586,10 +586,13 @@ class SQLServer(AgentCheck):
 
         dsn, host, username, password, database, driver = self._get_access_info(
             instance, db_key, db_name)
+        custom_tags = instance.get("tags", [])
         service_check_tags = [
             'host:%s' % host,
             'db:%s' % database
         ]
+        service_check_tags.extend(custom_tags)
+        service_check_tags = list(set(service_check_tags))
 
         cs = instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
