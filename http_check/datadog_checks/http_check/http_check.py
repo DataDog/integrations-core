@@ -131,7 +131,13 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    ca_certs = ['/opt/datadog-agent/embedded/ssl/certs/cacert.pem']
+    """
+    check is installed via pip to embedded/lib/site-packages/datadog_checks/http_check
+    certificate is installed to   embedded/ssl/certs/cacert.pem
+
+    walk up to embedded, and back down to ssl/certs to find the certificate file
+    """
+    ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../..', 'ssl/certs', 'cacert.pem'))]
 
     try:
         import tornado
