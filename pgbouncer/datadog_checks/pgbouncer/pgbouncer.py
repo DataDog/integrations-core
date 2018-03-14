@@ -76,7 +76,7 @@ class PgBouncer(AgentCheck):
         self.dbs = {}
 
     def _get_service_checks_tags(self, host, port, database_url, tags=None):
-        if tags = None:
+        if tags is None:
             tags = []
 
         if database_url:
