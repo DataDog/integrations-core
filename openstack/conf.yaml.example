@@ -44,6 +44,10 @@ instances:
       # The authorization scope that will be used to request a token from Identity API v3
       # The auth scope must resolve to 1 of the following structures:
       # {'project': {'name': 'my_project', 'domain': 'my_domain} OR {'project': {'id': 'my_project_id'}}
+      #
+      # ALPHA: DO NOT ADD an auth_scope if you wish to have unscoped access
+      #        Simply add the relevant user credentials.
+      #
       auth_scope:
           project:
               id: my_project_id
