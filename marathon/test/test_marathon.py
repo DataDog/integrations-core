@@ -93,4 +93,3 @@ class MarathonCheckTest(AgentCheckTest):
 
         self.run_check(DEFAULT_CONFIG, mocks={"get_json": side_effect})
         self.assertMetric('marathon.apps', value=0)
-        self.assertServiceCheck('marathon.can_connect', tags=['url:http://localhost:8080/v2/apps', 'optional:tag1'])
