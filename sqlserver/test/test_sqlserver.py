@@ -139,8 +139,8 @@ class TestSqlserver(AgentCheckTest):
             'host': '(local)\SQL2012SP1',
             'username': 'sa',
             'password': 'InvalidPassword',
-            'timeout': 1,,
-            'tags': ['optional:tag1']
+            'timeout': 1,
+            'tags': ['optional:tag1'],
         }]
 
         with self.assertRaisesRegexp(Exception, 'Unable to connect to SQL Server'):
