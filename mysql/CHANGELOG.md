@@ -5,6 +5,7 @@
 ### Changes
 
 * [BUGFIX] Fixes the buffer pool metric to return the aggregated values
+* [DEPENDENCY] Bump the pymysql version from 0.6.6 to 0.8.0
 
 1.1.2 / 2018-02-13
 ==================
