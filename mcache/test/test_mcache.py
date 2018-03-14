@@ -149,7 +149,7 @@ class TestMemCache(AgentCheckTest):
         for custom_tag in custom_tags:
             self.assertServiceCheck(
                 SERVICE_CHECK, status=AgentCheck.OK,
-                tags=good_service_check_tags + custom_tags, count=1)
+                tags=good_service_check_tags + custom_tag, count=1)
 
         self.assertServiceCheck(
             SERVICE_CHECK, status=AgentCheck.CRITICAL,
