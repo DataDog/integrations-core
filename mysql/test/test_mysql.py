@@ -38,7 +38,7 @@ class TestMySql(AgentCheckTest):
         'pass': 'dog',
         'port': '13306',
         'options': {
-            'replication': True, 
+            'replication': True,
             'extra_status_metrics': True,
             'extra_innodb_metrics': True,
             'extra_performance_metrics': True,
