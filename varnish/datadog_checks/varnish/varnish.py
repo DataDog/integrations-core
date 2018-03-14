@@ -83,11 +83,11 @@ class Varnish(AgentCheck):
         # Not configured? Not a problem.
         if instance.get("varnishstat", None) is None:
             raise Exception("varnishstat is not configured")
-        tags = instance.get('tags', [])
-        if tags is None:
-            tags = []
+        custom_tags = instance.get('tags', [])
+        if custom_tags is None:
+            custom_tags = []
         else:
-            tags = list(set(tags))
+            custom_tags = list(set(tags))
         # Split the varnishstat command so that additional arguments can be passed in
         # In order to support monitoring a Varnish instance which is running as a Docker
         # container we need to wrap commands (varnishstat, varnishadm) with scripts which
@@ -111,9 +111,9 @@ class Varnish(AgentCheck):
 
         if name is not None:
             cmd.extend(['-n', name])
-            tags += [u'varnish_name:%s' % name]
+            tags = custom_tags + [u'varnish_name:%s' % name]
         else:
-            tags += [u'varnish_name:default']
+            tags = custom_tags + [u'varnish_name:default']
 
         output, _, _ = get_subprocess_output(cmd, self.log)
 
@@ -153,7 +153,7 @@ class Varnish(AgentCheck):
                 self.log.error('Error getting service check from varnishadm: %s', err)
 
             if output:
-                self._parse_varnishadm(output)
+                self._parse_varnishadm(output, custom_tags)
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
@@ -242,7 +242,7 @@ class Varnish(AgentCheck):
                     self.log.debug("Varnish (rate) %s %d" % (metric_name, int(gauge_val)))
                     self.rate(metric_name, float(gauge_val), tags=tags)
 
-    def _parse_varnishadm(self, output):
+    def _parse_varnishadm(self, output, tags):
         """ Parse out service checks from varnishadm.
 
         Example output:
@@ -318,6 +318,6 @@ class Varnish(AgentCheck):
         for status, backends in backends_by_status.iteritems():
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
-                tags = ['backend:%s' % backend]
+                service_checks_tags = ['backend:%s' % backend] + tags
                 self.service_check(self.SERVICE_CHECK_NAME, check_status,
-                                   tags=tags, message=message)
+                                   tags=service_checks_tags, message=message)

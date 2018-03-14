@@ -1,10 +1,11 @@
 # CHANGELOG - varnish
 
-1.1.2 / Unreleased
+1.2.0 / Unreleased
 ==================
 ### Changes
 
 * [IMPROVEMENT] Add support for collecting varnishadm service checks for Varnish 5. See [#1130][].
+* [FEATURE] Add custom tag support for service checks.
 
 1.1.1 / 2018-02-13
 ==================
