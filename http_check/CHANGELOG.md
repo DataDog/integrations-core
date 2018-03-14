@@ -1,5 +1,14 @@
 # CHANGELOG - http_check
 
+1.4.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Make import of default certificate file relative rather than absolute
+  Fixes loading problem on Windows, and/or allows check to be installed in other
+  location
+
 1.4.0 / 2018-02-13
 ==================
 
