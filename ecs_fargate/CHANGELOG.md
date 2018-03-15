@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] adds custom tag support to service checks.
+* [FEATURE] make the fargate conf file docker friendly.
 
 1.0.0/ 2018-02-28
 ==================
