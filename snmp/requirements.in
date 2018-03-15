@@ -1,0 +1,6 @@
+pysnmp-mibs==0.1.6
+pyasn1==0.4.2
+pysnmp==4.4.3
+pycryptodomex==3.4.7
+pysmi==0.2.2
+ply==3.10
