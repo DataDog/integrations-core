@@ -92,7 +92,7 @@ def main():
 
             if verbose:
                 print('    New: `{}`'.format(lines[i].strip()))
-                print('Locking dependencies...')
+                print('    Locking dependencies...')
 
             compile_check_deps(check_dir)
 
