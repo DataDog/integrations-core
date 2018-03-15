@@ -9,6 +9,7 @@ AGENT_BASED_INTEGRATIONS = [
     'istio',
     'kube_proxy',
     'kubelet',
+    'linkerd',
     'prometheus',
     'vsphere',
 ]
