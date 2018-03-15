@@ -26,6 +26,10 @@
                 "responses": 623773,
                 "responses_written": 96
             },
+            "revalidated": {
+                "bytes": 0,
+                "responses": 0
+            },
             "size": 4096,
             "stale": {
                 "bytes": 0,
@@ -61,6 +65,10 @@
                 "responses": 0,
                 "responses_written": 0
             },
+            "revalidated": {
+                "bytes": 0,
+                "responses": 0
+            },
             "size": 0,
             "stale": {
                 "bytes": 0,
@@ -78,14 +86,22 @@
         "dropped": 0,
         "idle": 8
     },
+    "generation": 14,
     "load_timestamp": 1395056701959,
-    "nginx_version": "1.5.7",
+    "nginx_build": "nginx-plus-r14",
+    "nginx_version": "1.13.7",
+    "pid": 93515,
+    "ppid": 3657,
+    "processes": {
+        "respawned": 0
+    },
     "requests": {
         "current": 4,
         "total": 2400748
     },
     "server_zones": {
         "one": {
+            "discarded": 0,
             "processing": 1,
             "received": 310670778,
             "requests": 842176,
@@ -100,6 +116,7 @@
             "sent": 3605571014
         },
         "three": {
+            "discarded": 0,
             "processing": 0,
             "received": 0,
             "requests": 0,
@@ -114,6 +131,7 @@
             "sent": 0
         },
         "two": {
+            "discarded": 0,
             "processing": 2,
             "received": 271752104,
             "requests": 851747,
@@ -128,7 +146,81 @@
             "sent": 3612434328
         }
     },
-    "timestamp": 1395333371522,
+    "slabs": {
+        "ssl": {
+            "pages": {
+                "free": 12621,
+                "used": 104
+            },
+            "slots": {
+                "1024": {
+                    "fails": 0,
+                    "free": 0,
+                    "reqs": 18,
+                    "used": 0
+                },
+                "128": {
+                    "fails": 0,
+                    "free": 56,
+                    "reqs": 857437,
+                    "used": 1032
+                }
+            }
+        }
+    },
+    "ssl": {
+        "handshakes": 5792087,
+        "handshakes_failed": 409880,
+        "session_reuses": 3173116
+    },
+    "stream": {
+        "server_zones": {
+            "postgresql_loadbalancer": {
+                "connections": 196813,
+                "discarded": 0,
+                "processing": 0,
+                "received": 530,
+                "sent": 71285,
+                "sessions": {
+                    "2xx": 5,
+                    "4xx": 0,
+                    "5xx": 196808,
+                    "total": 196813
+                }
+            }
+        },
+        "upstreams": {
+            "postgresql_backends": {
+                "peers": [
+                    {
+                        "active": 0,
+                        "backup": false,
+                        "connections": 0,
+                        "downstart": 0,
+                        "downtime": 0,
+                        "fails": 0,
+                        "health_checks": {
+                            "checks": 0,
+                            "fails": 0,
+                            "unhealthy": 0
+                        },
+                        "id": 3,
+                        "name": "10.0.0.2:15435",
+                        "received": 0,
+                        "selected": 0,
+                        "sent": 0,
+                        "server": "10.0.0.2:15435",
+                        "state": "down",
+                        "unavail": 0,
+                        "weight": 1
+                    }
+                ],
+                "zombies": 0,
+                "zone": "dynamic"
+            }
+        }
+    },
+    "timestamp": 1516639535584,
     "upstreams": {
         "appservers": [
             {
@@ -450,5 +542,5 @@
             }
         ]
     },
-    "version": 2
+    "version": 8
 }
