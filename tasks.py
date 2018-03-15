@@ -14,6 +14,7 @@ AGENT_BASED_INTEGRATIONS = [
     'vsphere',
 ]
 
+
 @task(help={
     'targets': "Comma separated names of the checks that will be tested",
     'changed-only': "Whether to only test checks that were changed in a PR",
@@ -43,6 +44,7 @@ def test(ctx, targets=None, changed_only=False, dry_run=False):
             print("\nRunning tox in '{}'\n".format(check))
             ctx.run('tox')
 
+
 def integrations_changed(ctx):
     """
     Find out which checks were changed in the current branch
@@ -53,3 +55,10 @@ def integrations_changed(ctx):
         if line:
             checks.add(line.split('/')[0])
     return checks
+
+
+@task(help={
+    'targets': "Comma separated names of the checks that will be tested",
+    'changed-only': "Whether to only test checks that were changed in a PR",
+})
+def test(ctx, package, changed_only):
