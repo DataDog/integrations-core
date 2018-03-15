@@ -218,10 +218,7 @@ class Nginx(AgentCheck):
             parsed = json.loads(raw)
         metric_base = 'nginx'
 
-        output = []
-        output.extend(cls._flatten_json(metric_base, parsed, tags))
-
-        return output
+        return cls._flatten_json(metric_base, parsed, tags)
 
     @classmethod
     def _flatten_json(cls, metric_base, val, tags):
