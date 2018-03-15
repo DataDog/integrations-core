@@ -87,7 +87,7 @@ class Varnish(AgentCheck):
         if custom_tags is None:
             custom_tags = []
         else:
-            custom_tags = list(set(tags))
+            custom_tags = list(set(custom_tags))
         # Split the varnishstat command so that additional arguments can be passed in
         # In order to support monitoring a Varnish instance which is running as a Docker
         # container we need to wrap commands (varnishstat, varnishadm) with scripts which
