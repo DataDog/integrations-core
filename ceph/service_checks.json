@@ -1,0 +1,174 @@
+
+[
+    {
+        "agent_version": "5.0.0",
+        "integration":"ceph",
+        "check": "ceph.overall_status",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Status",
+        "description": "Returns `OK` if your ceph cluster status is HEALTH_OK, `WARNING` if it's HEALTH_WARNING, `CRITICAL` otherwise."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.osd_down",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph OSD Down",
+        "description": "Returns `OK` if you have no down OSD. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.osd_orphan",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph OSD Orphan",
+        "description": "Returns `OK` if you have no orphan OSD. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.osd_full",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph OSD Orphan",
+        "description": "Returns `OK` if your OSDs are not full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.osd_nearfull",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph OSD Near Full",
+        "description": "Returns `OK` if your OSDs are not near full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pool_full",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Pool Full",
+        "description": "Returns `OK` if your pools have not reached their quota. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pool_near_full",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Pool Near Full",
+        "description": "Returns `OK` if your pools are not near reaching their quota. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_availability",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Availability",
+        "description": "Returns `OK` if there is full data availability. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_degraded",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Degraded",
+        "description": "Returns `OK` if there is full data redundancy. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_degraded_full",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Degraded Full",
+        "description": "Returns `OK` if there is enough space in the cluster for data redundancy. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_damaged",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Damaged",
+        "description": "Returns `OK` if there are no inconsistencies after data scrubing. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_not_scrubbed",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Not Scrubbed",
+        "description": "Returns `OK` if the PGs were scrubbed recently. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.pg_not_deep_scrubbed",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph PG Not Deep Scrubbed",
+        "description": "Returns `OK` if the PGs were deep scrubbed recently. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.cache_pool_near_full",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Cache Pool Near Full",
+        "description": "Returns `OK` if the cache pools are not near full. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.too_few_pgs",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Too Few PGs",
+        "description": "Returns `OK` if the number of PGs is above the min threshold. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.too_many_pgs",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Too Many PGs",
+        "description": "Returns `OK` if the number of PGs is below the max threshold. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.object_unfound",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Object Unfound",
+        "description": "Returns `OK` if all objects can be found. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.request_slow",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Request Slow",
+        "description": "Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    },
+    {
+        "agent_version": "5.21.0",
+        "integration":"ceph",
+        "check": "ceph.request_stuck",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host"],
+        "name": "Ceph Request Stuck",
+        "description": "Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`."
+    }
+]

@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"memcached",
+        "check": "memcache.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "port"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored Memcached instance. Returns `OK` otherwise."
+    }
+]

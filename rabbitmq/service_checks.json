@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"rabbitmq",
+        "check": "rabbitmq.aliveness",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "vhost"],
+        "name": "Aliveness",
+        "description": "Returns the status of a vhost based on the RabbitMQ [Aliveness API](https://github.com/rabbitmq/rabbitmq-management/blob/rabbitmq_v3_6_8/priv/www/api/index.html). The Aliveness API will create a test queue, then publish and consume a message from that queue. Returns `OK` if the status code from the API is 200 and `CRITICAL` otherwise."
+    },
+    {
+        "agent_version": "5.9.0",
+        "integration":"rabbitmq",
+        "check": "rabbitmq.status",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Status",
+        "description": "Returns the status of the RabbitMQ server. Returns `OK` if the agent was able to contact the API and `CRITICAL` otherwise."
+    }
+]

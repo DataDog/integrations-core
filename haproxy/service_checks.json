@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"haproxy",
+        "check": "haproxy.backend_up",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["service", "backend"],
+        "name": "Backend Up",
+        "description": "Converts the HAProxy status page into service checks. Returns `CRITICAL` for a given service if HAProxy is reporting it `down`. `maint`, `ok` and any other state will result in `OK`."
+    }
+]

@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"riak",
+        "check": "riak.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "url"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored Riak instance. Returns `OK` otherwise."
+    }
+]
