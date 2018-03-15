@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [FEATURE] Add SSL as a connect option.
 * [FEATURE] Add custom tag support.
 
 1.2.2 / 2018-02-13
