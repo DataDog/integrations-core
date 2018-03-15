@@ -27,7 +27,7 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
     match_hostname
 
 # project
-from checks.network_checks import EventType, NetworkCheck, Status
+from checks.network_checks import NetworkCheck, Status
 from config import _is_affirmative
 from util import headers as agent_headers
 
