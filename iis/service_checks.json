@@ -6,6 +6,6 @@
         "statuses": ["ok", "critical"],
         "groups": ["host", "site"],
         "name": "Site Up",
-        "description": "Returns `CRITICAL` if the uptime for a site is 0 and `OK` otherwise. The site uptime is collected via WMI using the [Win32_PerfFormattedData_W3SVC_WebService class](http://msdn.microsoft.com/en-us/library/aa394298%28v=vs.85%29.aspx)"
+        "description": "Returns `CRITICAL` if the uptime for a site is 0 and `OK` otherwise. The site uptime is collected via Windows Performance Data Helper using the 'Web Service(*)\\Service Uptime' counter"
     }
 ]
