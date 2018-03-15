@@ -82,7 +82,7 @@ def main():
                 continue
 
             if verbose:
-                print('Check `{}:'.format(check_name))
+                print('Check `{}`:'.format(check_name))
                 print('    Old: `{}`'.format(lines[i].strip()))
 
             lines[i] = '{}=={}\n'.format(package, version)
