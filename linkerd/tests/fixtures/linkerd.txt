@@ -1,0 +1,163 @@
+jvm:start_time 1.52103079E12
+jvm:application_time_millis 52340.887
+jvm:classes:total_loaded 8842.0
+jvm:classes:current_loaded 8815.0
+jvm:classes:total_unloaded 27.0
+jvm:postGC:Par_Survivor_Space:max 1.7432576E7
+jvm:postGC:Par_Survivor_Space:used 200736.0
+jvm:postGC:CMS_Old_Gen:max 8.9928499E8
+jvm:postGC:CMS_Old_Gen:used 2.0269128E7
+jvm:postGC:Par_Eden_Space:max 1.3959168E8
+jvm:postGC:Par_Eden_Space:used 0.0
+jvm:postGC:used 2.0469864E7
+jvm:nonheap:committed 7.122944E7
+jvm:nonheap:max -1.0
+jvm:nonheap:used 6.564336E7
+jvm:tenuring_threshold 6.0
+jvm:thread:daemon_count 22.0
+jvm:thread:count 23.0
+jvm:thread:peak_count 24.0
+jvm:mem:postGC:Par_Survivor_Space:max 1.7432576E7
+jvm:mem:postGC:Par_Survivor_Space:used 200736.0
+jvm:mem:postGC:CMS_Old_Gen:max 8.9928499E8
+jvm:mem:postGC:CMS_Old_Gen:used 2.0269128E7
+jvm:mem:postGC:Par_Eden_Space:max 1.3959168E8
+jvm:mem:postGC:Par_Eden_Space:used 0.0
+jvm:mem:postGC:used 2.0469864E7
+jvm:mem:metaspace:max_capacity 1.10729626E9
+jvm:mem:buffer:direct:max 0.0
+jvm:mem:buffer:direct:count 1.0
+jvm:mem:buffer:direct:used 1.0
+jvm:mem:buffer:mapped:max 0.0
+jvm:mem:buffer:mapped:count 0.0
+jvm:mem:buffer:mapped:used 0.0
+jvm:mem:allocations:eden:bytes 1.22551552E9
+jvm:mem:current:used 9.0179664E7
+jvm:mem:current:CMS_Old_Gen:max 8.9928499E8
+jvm:mem:current:CMS_Old_Gen:used 2.2799416E7
+jvm:mem:current:Metaspace:max -1.0
+jvm:mem:current:Metaspace:used 5.1355408E7
+jvm:mem:current:Par_Eden_Space:max 1.3959168E8
+jvm:mem:current:Par_Eden_Space:used 1586640.0
+jvm:mem:current:Par_Survivor_Space:max 1.7432576E7
+jvm:mem:current:Par_Survivor_Space:used 200736.0
+jvm:mem:current:Compressed_Class_Space:max 1.07374182E9
+jvm:mem:current:Compressed_Class_Space:used 8188496.0
+jvm:mem:current:Code_Cache:max 5.0331648E7
+jvm:mem:current:Code_Cache:used 6099456.0
+jvm:num_cpus 2.0
+jvm:gc:msec 674.0
+jvm:gc:ParNew:msec 561.0
+jvm:gc:ParNew:cycles 163.0
+jvm:gc:ConcurrentMarkSweep:msec 113.0
+jvm:gc:ConcurrentMarkSweep:cycles 6.0
+jvm:gc:cycles 169.0
+jvm:fd_limit 1048576.0
+jvm:compilation:time_msec 18540.0
+jvm:uptime 53922.0
+jvm:safepoint:sync_time_millis 557.0
+jvm:safepoint:total_time_millis 1295.0
+jvm:safepoint:count 592.0
+jvm:heap:committed 4.3810816E7
+jvm:heap:max 1.05630925E9
+jvm:heap:used 2.5757896E7
+jvm:fd_count 165.0
+rt:server:sent_bytes{rt="http", server="0.0.0.0/4140"} 2901160
+rt:server:connects{rt="http", server="0.0.0.0/4140"} 50
+rt:server:success{rt="http", server="0.0.0.0/4140"} 17694
+rt:server:received_bytes{rt="http", server="0.0.0.0/4140"} 1565173
+rt:server:read_timeout{rt="http", server="0.0.0.0/4140"} 0
+rt:server:write_timeout{rt="http", server="0.0.0.0/4140"} 0
+rt:server:nacks{rt="http", server="0.0.0.0/4140"} 0
+rt:server:thread_usage:requests:mean{rt="http", server="0.0.0.0/4140"} 0.0
+rt:server:thread_usage:requests:relative_stddev{rt="http", server="0.0.0.0/4140"} 0.0
+rt:server:thread_usage:requests:stddev{rt="http", server="0.0.0.0/4140"} 0.0
+rt:server:socket_unwritable_ms{rt="http", server="0.0.0.0/4140"} 0
+rt:server:closes{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:1XX{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:4XX{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:2XX{rt="http", server="0.0.0.0/4140"} 17697
+rt:server:status:error{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:3XX{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:5XX{rt="http", server="0.0.0.0/4140"} 0
+rt:server:status:200{rt="http", server="0.0.0.0/4140"} 17697
+rt:server:nonretryable_nacks{rt="http", server="0.0.0.0/4140"} 0
+rt:server:socket_writable_ms{rt="http", server="0.0.0.0/4140"} 0
+rt:server:requests{rt="http", server="0.0.0.0/4140"} 17700
+rt:server:pending{rt="http", server="0.0.0.0/4140"} 12.0
+rt:server:connections{rt="http", server="0.0.0.0/4140"} 50.0
+rt:service:success{rt="http", service="svc/web"} 17700
+rt:service:retries:total{rt="http", service="svc/web"} 0
+rt:service:retries:budget_exhausted{rt="http", service="svc/web"} 0
+rt:service:retries:budget{rt="http", service="svc/web"} 1081.0
+rt:service:requests{rt="http", service="svc/web"} 17700
+rt:service:pending{rt="http", service="svc/web"} 12.0
+rt:client:sent_bytes{rt="http", client="#/io.l5d.fs/web"} 4715595
+rt:client:failure_accrual:removals{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:failure_accrual:probes{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:failure_accrual:removed_for_ms{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:failure_accrual:revivals{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:connects{rt="http", client="#/io.l5d.fs/web"} 65
+rt:client:pool_num_waited{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:success{rt="http", client="#/io.l5d.fs/web"} 17703
+rt:client:pool_waiters{rt="http", client="#/io.l5d.fs/web"} 0.0
+rt:client:retries:request_limit{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:retries:budget_exhausted{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:retries:cannot_retry{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:retries:not_open{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:retries:budget{rt="http", client="#/io.l5d.fs/web"} 944.0
+rt:client:retries:requeues{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:received_bytes{rt="http", client="#/io.l5d.fs/web"} 2159766
+rt:client:read_timeout{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:write_timeout{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:service:success{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 17703
+rt:client:service:pending{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 1.0
+rt:client:service:requests{rt="http", client="#/io.l5d.fs/web", service="svc/web"} 17703
+rt:client:pool_num_too_many_waiters{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:socket_unwritable_ms{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:closes{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:pool_cached{rt="http", client="#/io.l5d.fs/web"} 50.0
+rt:client:nack_admission_control:dropped_requests{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:1XX{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:4XX{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:2XX{rt="http", client="#/io.l5d.fs/web"} 17703
+rt:client:status:error{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:3XX{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:5XX{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:status:200{rt="http", client="#/io.l5d.fs/web"} 17703
+rt:client:pool_size{rt="http", client="#/io.l5d.fs/web"} 10.0
+rt:client:available{rt="http", client="#/io.l5d.fs/web"} 10.0
+rt:client:socket_writable_ms{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:cancelled_connects{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:requests{rt="http", client="#/io.l5d.fs/web"} 17703
+rt:client:loadbalancer:size{rt="http", client="#/io.l5d.fs/web"} 10.0
+rt:client:loadbalancer:rebuilds{rt="http", client="#/io.l5d.fs/web"} 1
+rt:client:loadbalancer:closed{rt="http", client="#/io.l5d.fs/web"} 0.0
+rt:client:loadbalancer:load{rt="http", client="#/io.l5d.fs/web"} 11.0
+rt:client:loadbalancer:meanweight{rt="http", client="#/io.l5d.fs/web"} 1.0
+rt:client:loadbalancer:adds{rt="http", client="#/io.l5d.fs/web"} 10
+rt:client:loadbalancer:updates{rt="http", client="#/io.l5d.fs/web"} 1
+rt:client:loadbalancer:algorithm:p2c_least_loaded{rt="http", client="#/io.l5d.fs/web"} 1.0
+rt:client:loadbalancer:available{rt="http", client="#/io.l5d.fs/web"} 10.0
+rt:client:loadbalancer:max_effort_exhausted{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:loadbalancer:busy{rt="http", client="#/io.l5d.fs/web"} 0.0
+rt:client:loadbalancer:removes{rt="http", client="#/io.l5d.fs/web"} 0
+rt:client:pending{rt="http", client="#/io.l5d.fs/web"} 10.0
+rt:client:dispatcher:serial:queue_size{rt="http", client="#/io.l5d.fs/web"} 0.0
+rt:client:connections{rt="http", client="#/io.l5d.fs/web"} 52.0
+rt:bindcache:path:expires{rt="http"} 0
+rt:bindcache:path:evicts{rt="http"} 0
+rt:bindcache:path:misses{rt="http"} 1
+rt:bindcache:path:oneshots{rt="http"} 0
+rt:bindcache:bound:expires{rt="http"} 0
+rt:bindcache:bound:evicts{rt="http"} 0
+rt:bindcache:bound:misses{rt="http"} 1
+rt:bindcache:bound:oneshots{rt="http"} 0
+rt:bindcache:tree:expires{rt="http"} 0
+rt:bindcache:tree:evicts{rt="http"} 0
+rt:bindcache:tree:misses{rt="http"} 1
+rt:bindcache:tree:oneshots{rt="http"} 0
+rt:bindcache:client:expires{rt="http"} 0
+rt:bindcache:client:evicts{rt="http"} 0
+rt:bindcache:client:misses{rt="http"} 1
+rt:bindcache:client:oneshots{rt="http"} 0

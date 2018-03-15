@@ -48,6 +48,7 @@ class SortedTagsPrometheusCheck(PrometheusCheck):
 def mocked_prometheus_check():
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.gauge = mock.MagicMock()
+    check.rate = mock.MagicMock()
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     check.metrics_mapper = {'process_virtual_memory_bytes': 'process.vm.bytes'}
@@ -504,6 +505,17 @@ def test_submit_histogram(mocked_prometheus_check):
         mock.call('prometheus.custom.histogram.count', 666, ['upper_bound:18.2'], hostname=None)
     ])
 
+def test_submit_rate(mocked_prometheus_check):
+    _rate = metrics_pb2.MetricFamily()
+    _rate.name = 'my_rate'
+    _rate.help = 'Random rate'
+    _rate.type = 1  # GAUGE
+    _met = _rate.metric.add()
+    _met.gauge.value = 42
+    check = mocked_prometheus_check
+    check.rate_metrics = ["my_rate"]
+    check._submit('custom.rate', _rate)
+    check.rate.assert_called_with('prometheus.custom.rate', 42, [], hostname=None)
 
 def test_parse_one_gauge(p_check):
     """

@@ -1,0 +1,31 @@
+init_config:
+
+instances:
+
+    # The linkerd prometheus endpoint
+    #
+  - prometheus_url: http://localhost:9990/admin/metrics/prometheus
+
+    # Set (optional) custom tags for each metric
+    #
+    # tags:
+    #   - "mytag1:myValue1"
+
+    # Set (optional) prefix for exposed Prometheus metrics (should be the same
+    # as what's in your linkerd config)
+    #
+    # prometheus_metrics_prefix: namerd_
+
+    # Metrics to be extracted from linkerd
+    #
+    #  metrics:
+    #    - "jvm:start_time": "jvm.start_time"
+
+
+    # Type of the metrics
+    # /!\ All untyped metric will be ignored /!\
+    # Valid prometheus types are : ['counter', 'gauge', 'summary', 'histogram']
+    # You can use 'rate' if you want to get the derivative of a counter/gauge
+    #
+    # type_overrides:
+    #   "jvm:start_time": "gauge"
