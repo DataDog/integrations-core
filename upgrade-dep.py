@@ -47,7 +47,7 @@ def compile_check_deps(check_dir):
 def main():
     args = sys.argv[1:]
     if '--help' in args:
-        print('You must specify deps like `upgrage-dep.py requests 2.18.4`.')
+        print('You must specify deps like `upgrade-dep.py requests 2.18.4`.')
         sys.exit()
 
     verbose = '-v' in args
@@ -55,7 +55,7 @@ def main():
         args.remove('-v')
 
     if len(args) < 2:
-        print('You must specify deps like `upgrage-dep.py requests 2.18.4`.')
+        print('You must specify deps like `upgrade-dep.py requests 2.18.4`.')
         sys.exit(1)
 
     package, version = args[:2]
