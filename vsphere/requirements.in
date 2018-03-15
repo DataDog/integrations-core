@@ -2,7 +2,4 @@
 pyvmomi==6.0.0
 six==1.11.0
 requests==2.18.4
-certifi==2017.11.5
 chardet==3.0.4
-idna==2.6
-urllib3==1.22
