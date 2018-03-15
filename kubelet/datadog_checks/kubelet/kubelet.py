@@ -155,7 +155,7 @@ class KubeletCheck(PrometheusCheck):
     def retrieve_pod_list(self):
         return self.perform_kubelet_query(self.pod_list_url).json()
 
-    def retrieve_node_spec(self):
+    def _retrieve_node_spec(self):
         """
         Retrieve node spec from kubelet.
         """
@@ -165,7 +165,7 @@ class KubeletCheck(PrometheusCheck):
         return node_spec
 
     def _report_node_metrics(self, instance_tags):
-        node_spec = self.retrieve_node_spec()
+        node_spec = self._retrieve_node_spec()
         num_cores = node_spec.get('num_cores', 0)
         memory_capacity = node_spec.get('memory_capacity', 0)
 

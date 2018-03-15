@@ -104,7 +104,7 @@ def test_parse_quantity():
 def test_kubelet_check(monkeypatch, aggregator):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.txt'))))
-    monkeypatch.setattr(check, 'retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check',  mock.Mock(return_value=None))
     attrs = {
         'close.return_value': True,
@@ -115,7 +115,7 @@ def test_kubelet_check(monkeypatch, aggregator):
     check.check({})
 
     check.retrieve_pod_list.assert_called_once()
-    check.retrieve_node_spec.assert_called_once()
+    check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.poll.assert_called_once()
     # called twice so pct metrics are guaranteed to be there
@@ -191,3 +191,15 @@ def test_is_pod_metric():
 
     for metric in true_metrics:
         assert check._is_pod_metric(metric) is True
+
+
+def test_report_node_metrics(monkeypatch):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value={'num_cores': 4, 'memory_capacity': 512}))
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+    check._report_node_metrics(['foo:bar'])
+    calls = [
+        mock.call('kubernetes.cpu.capacity', 4.0, ['foo:bar']),
+        mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar'])
+    ]
+    check.gauge.assert_has_calls(calls, any_order=False)
