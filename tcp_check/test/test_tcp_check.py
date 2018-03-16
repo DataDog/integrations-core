@@ -9,7 +9,7 @@ import time
 # project
 from tests.checks.common import AgentCheckTest
 
-RESULTS_TIMEOUT = 25
+RESULTS_TIMEOUT = 100
 
 CONFIG = {
     'init_config': {},
