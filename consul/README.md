@@ -116,7 +116,7 @@ The Consul check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by this integration.
 
 See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) for a description of metrics the Consul Agent sends to DogStatsD.
 
