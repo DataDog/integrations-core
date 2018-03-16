@@ -4,6 +4,7 @@
 
 # 3p
 from nose.plugins.attrib import attr
+import time
 
 # project
 from tests.checks.common import AgentCheckTest
@@ -84,8 +85,13 @@ class TCPCheckTest(AgentCheckTest):
         """
         Check coverage.
         """
+
+        time.sleep(2)
+
         # Run the check
         self.run_check(CONFIG)
+
+        time.sleep(2)
 
         # Overrides self.service_checks attribute when values are available
         self.service_checks = self.wait_for_async('get_service_checks', 'service_checks', len(CONFIG['instances']), RESULTS_TIMEOUT)
