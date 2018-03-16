@@ -58,7 +58,12 @@ def integrations_changed(ctx):
 
 
 @task(help={
-    'targets': "Comma separated names of the checks that will be tested",
-    'changed-only': "Whether to only test checks that were changed in a PR",
+    'package': 'The package to upgrade throughout the integrations',
+    'version': 'The version of the package to pin',
+    'verbose': 'Whether or not to produce output',
 })
-def test(ctx, package, changed_only):
+def upgrade(ctx, package, version, verbose=False):
+    cmd = 'python upgrade-dep.py {} {}'.format(package, version)
+    if verbose:
+        cmd += ' -v'
+    ctx.run(cmd)
