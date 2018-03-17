@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-1.4.1 / Unreleased
+2.0.0 / Unreleased
 ==================
 
 ### Changes
@@ -8,6 +8,7 @@
 * [BUGFIX] Make import of default certificate file relative rather than absolute
   Fixes loading problem on Windows, and/or allows check to be installed in other
   location
+* [DEPRECATION] Remove the `skip_event` option from the check. See [#1054][]
 
 1.4.0 / 2018-02-13
 ==================
@@ -78,3 +79,4 @@
 [#758]: https://github.com/DataDog/integrations-core/issues/758
 [@xkrt]: https://github.com/xkrt
 [#905]:https://github.com/DataDog/integrations-core/pull/905
+[#1054]:https://github.com/DataDog/integrations-core/pull/1054
