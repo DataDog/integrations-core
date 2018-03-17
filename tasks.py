@@ -1,4 +1,11 @@
 from __future__ import print_function, unicode_literals
+
+import os
+import subprocess
+import sys
+from contextlib import contextmanager
+from io import open
+
 from invoke import task
 
 # Note: these are the names of the folder containing the check
@@ -13,6 +20,33 @@ AGENT_BASED_INTEGRATIONS = [
     'prometheus',
     'vsphere',
 ]
+
+
+@contextmanager
+def chdir(d, cwd=None):
+    origin = cwd or os.getcwd()
+    os.chdir(d)
+
+    try:
+        yield
+    finally:
+        os.chdir(origin)
+
+
+def ensure_deps_declared(reqs_txt, reqs_in):
+    if os.path.isfile(reqs_txt) and not os.path.isfile(reqs_in):
+        declacred_lines = []
+
+        with open(reqs_txt, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        for line in lines:
+            line = line.split('--hash')[0].strip('\r\n \\')
+            if line and not line.startswith('#'):
+                declacred_lines.append(line + '\n')
+
+        with open(reqs_in, 'w', encoding='utf-8', newline='\n') as f:
+            f.writelines(declacred_lines)
 
 
 @task(help={
@@ -63,7 +97,47 @@ def integrations_changed(ctx):
     'verbose': 'Whether or not to produce output',
 })
 def upgrade(ctx, package, version, verbose=False):
-    cmd = 'python upgrade-dep.py {} {}'.format(package, version)
-    if verbose:
-        cmd += ' -v'
-    ctx.run(cmd)
+    here = os.path.dirname(os.path.abspath(__file__))
+
+    for check_name in sorted(os.listdir(here)):
+        check_dir = os.path.join(here, check_name)
+        reqs_in = os.path.join(check_dir, 'requirements.in')
+        reqs_txt = os.path.join(check_dir, 'requirements.txt')
+
+        ensure_deps_declared(reqs_txt, reqs_in)
+
+        if os.path.isfile(reqs_in):
+            with open(reqs_in, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+            for i, line in enumerate(lines):
+                try:
+                    pkg = line.split('=')[0].strip()
+                    if pkg == package:
+                        break
+                except IndexError:
+                    continue
+            else:
+                continue
+
+            if verbose:
+                print('Check `{}`:'.format(check_name))
+                print('    Old: `{}`'.format(lines[i].strip()))
+
+            lines[i] = '{}=={}\n'.format(package, version)
+
+            with open(reqs_in, 'w', encoding='utf-8', newline='\n') as f:
+                f.writelines(lines)
+
+            if verbose:
+                print('    New: `{}`'.format(lines[i].strip()))
+                print('    Locking dependencies...')
+
+            with chdir(check_dir):
+                ctx.run(
+                    'pip-compile '
+                    '--generate-hashes '
+                    '--output-file requirements.txt '
+                    'requirements.in',
+                    hide='both'
+                )
