@@ -34,7 +34,7 @@ def ensure_deps_declared(reqs_txt, reqs_in):
             if line and not line.startswith('#'):
                 declacred_lines.append(line + '\n')
 
-        with open(reqs_in, 'w', encoding='utf-8', newline='\n') as f:
+        with open(reqs_in, 'w', encoding='utf-8') as f:
             f.writelines(declacred_lines)
 
 
@@ -123,7 +123,7 @@ def upgrade(ctx, package=None, version=None, verbose=False):
 
             lines[i] = '{}=={}\n'.format(package, version)
 
-            with open(reqs_in, 'w', encoding='utf-8', newline='\n') as f:
+            with open(reqs_in, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
 
             if verbose:
