@@ -1,7 +1,6 @@
 from __future__ import print_function, unicode_literals
 
 import os
-from contextlib import contextmanager
 from io import open
 
 from invoke import task
@@ -18,17 +17,6 @@ AGENT_BASED_INTEGRATIONS = [
     'prometheus',
     'vsphere',
 ]
-
-
-@contextmanager
-def chdir(d, cwd=None):
-    origin = cwd or os.getcwd()
-    os.chdir(d)
-
-    try:
-        yield
-    finally:
-        os.chdir(origin)
 
 
 def ensure_deps_declared(reqs_txt, reqs_in):
@@ -131,7 +119,7 @@ def upgrade(ctx, package, version, verbose=False):
                 print('    New: `{}`'.format(lines[i].strip()))
                 print('    Locking dependencies...')
 
-            with chdir(check_dir):
+            with ctx.cd(check_dir):
                 ctx.run(
                     'pip-compile '
                     '--generate-hashes '
