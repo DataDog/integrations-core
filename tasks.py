@@ -4,6 +4,9 @@ import os
 from io import open
 
 from invoke import task
+from invoke.exceptions import Exit
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
@@ -82,11 +85,18 @@ def integrations_changed(ctx):
     'version': 'The version of the package to pin',
     'verbose': 'Whether or not to produce output',
 })
-def upgrade(ctx, package, version, verbose=False):
-    here = os.path.dirname(os.path.abspath(__file__))
+def upgrade(ctx, package=None, version=None, verbose=False):
+    """Upgrade a dependency for all integrations that require it.
+    ``pip-compile`` must be in PATH.
 
-    for check_name in sorted(os.listdir(here)):
-        check_dir = os.path.join(here, check_name)
+    Example invocation:
+        inv upgrade --verbose requests 2.18.4
+    """
+    if not (package and version):
+        raise Exit('`package` and `version` are required arguments.')
+
+    for check_name in sorted(os.listdir(HERE)):
+        check_dir = os.path.join(HERE, check_name)
         reqs_in = os.path.join(check_dir, 'requirements.in')
         reqs_txt = os.path.join(check_dir, 'requirements.txt')
 
@@ -103,6 +113,7 @@ def upgrade(ctx, package, version, verbose=False):
                         break
                 except IndexError:
                     continue
+            # Skip integrations that don't require the package.
             else:
                 continue
 
