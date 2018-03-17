@@ -90,7 +90,7 @@ def upgrade(ctx, package=None, version=None, verbose=False):
     ``pip-compile`` must be in PATH.
 
     Example invocation:
-        inv upgrade --verbose requests 2.18.4
+        inv upgrade --verbose -p=requests -v=2.18.4
     """
     if not (package and version):
         raise Exit('`package` and `version` are required arguments.')
