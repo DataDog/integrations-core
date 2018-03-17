@@ -44,7 +44,7 @@ def test(ctx, targets=None, changed_only=False, dry_run=False):
     """
     Run the tests for Agent-based checks
 
-    Example invokation:
+    Example invocation:
         inv test --targets=disk,redisdb
     """
     if targets is None:
