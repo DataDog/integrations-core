@@ -13,7 +13,7 @@
   ],
   "version": "1.9.0",
   "public_title": "Datadog-Docker Integration",
-  "categories":["containers"],
+  "categories":["containers"," log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/docker_daemon/",
   "is_public": true,
