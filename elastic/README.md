@@ -14,7 +14,11 @@ The Elasticsearch check is packaged with the Datadog Agent, so simply [install t
 
 ### Configuration
 
-Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options:
+Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. 
+
+#### Metric Collection
+
+*  Add this configuration setup to your `elastic.yaml` file to start gathering your [ElasticSearch Metrics](#metrics):
 
 ```
 init_config:
@@ -36,7 +40,32 @@ See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/
 
 Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Elasticsearch metrics to Datadog.
 
+#### Log Collection
 
+**Available for Agent >6.0**
+
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Add this configuration setup to your `apache.yaml` file to start collecting your Elasticsearch Logs:
+
+  ```
+    logs:
+        - type: file
+          path: /var/log/elasticsearch/*.log
+          source: elasticsearch
+          service: myservice
+  ```
+
+  Change the `path` and `service` parameter values and configure them for your environment.
+  
+  * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Elasticsearch logs to Datadog.
+  
+  **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+  
 ### Validation
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `elastic` under the Checks section:
