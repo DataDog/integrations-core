@@ -39,6 +39,8 @@ install:
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
+  # Use latest version of pip to prevent the warning
+  - ps: (& "$env:PYTHON/python.exe" -m pip install -U pip)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
   - cd datadog-checks-base
