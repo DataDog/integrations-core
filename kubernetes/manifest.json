@@ -13,7 +13,7 @@
   ],
   "version": "1.5.0",
   "public_title": "Datadog-Kubernetes Integration",
-  "categories":["orchestration", "containers"],
+  "categories":["orchestration", "containers", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/kubernetes/",
   "is_public": true,
