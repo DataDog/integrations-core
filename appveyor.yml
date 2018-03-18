@@ -34,13 +34,13 @@ install:
   - ps: If (-Not (Test-Path $env:PYWIN_PATH)) {(new-object net.webclient).DownloadFile("$env:PYWIN32_URL", "$env:PYWIN_PATH")}
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
   - ps: mkdir -p $(python -m site --user-site)
+  # Use latest version of pip to prevent the warning
+  - ps: (& "$env:PYTHON/python.exe" -m pip install -U pip)
   - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
   - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  # Use latest version of pip to prevent the warning
-  - ps: (& "$env:PYTHON/python.exe" -m pip install -U pip)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
   - cd datadog-checks-base
