@@ -1,5 +1,12 @@
 # CHANGELOG - openstack
 
+1.2.0 / Unreleased 
+==================
+
+### Changes
+
+* [FEATURE] adding support for unscoped access. See [#1276][]
+
 1.1.0 / 2018-02-28
 ==================
 
@@ -36,3 +43,4 @@
 [#1119]: https://github.com/DataDog/integrations-core/issues/1119
 [#1123]: https://github.com/DataDog/integrations-core/issues/1123
 [#1126]: https://github.com/DataDog/integrations-core/issues/1126
+[#1276]: https://github.com/DataDog/integrations-core/issues/1276
