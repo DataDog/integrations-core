@@ -254,7 +254,7 @@ log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/hos
   INFO, HOST-MANAGER
 ```
 
-Check Tomcat [logging documentation](http://tomcat.apache.org/tomcat-7.0-doc/logging.html)For more information about Tomcat logging capabilities.
+Check Tomcat [logging documentation](http://tomcat.apache.org/tomcat-7.0-doc/logging.html) for more information about Tomcat logging capabilities.
 
 By default, our integration pipeline support the following conversion patterns:
 
