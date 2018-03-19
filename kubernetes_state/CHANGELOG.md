@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+2.4.0 / unrelease
+==================
+
+* [IMPROVEMENT] Add kubernetes_state.nodes.by_condition count metric [#1277][]
+
 2.3.0 / 2018-02-28
 ==================
 
