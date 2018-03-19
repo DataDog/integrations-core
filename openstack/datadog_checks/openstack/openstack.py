@@ -462,7 +462,7 @@ class OpenStackCheck(AgentCheck):
 
         return self.get_scope_for_instance(instance).service_catalog.neutron_endpoint
 
-    def get_network_stats(self):
+    def get_network_stats(self, tags):
         """
         Collect stats for all reachable networks
         """
@@ -484,7 +484,7 @@ class OpenStackCheck(AgentCheck):
                          "Please list `network_ids` under your init_config")
 
         for nid in network_ids:
-            self.get_stats_for_single_network(nid)
+            self.get_stats_for_single_network(nid, tags)
 
     def get_all_network_ids(self):
         url = '{0}/{1}/networks'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION)
@@ -499,12 +499,12 @@ class OpenStackCheck(AgentCheck):
             self.warning('Unable to get the list of all network ids: {0}'.format(str(e)))
         return network_ids
 
-    def get_stats_for_single_network(self, network_id):
+    def get_stats_for_single_network(self, network_id, tags):
         url = '{0}/{1}/networks/{2}'.format(self.get_neutron_endpoint(), DEFAULT_NEUTRON_API_VERSION, network_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         net_details = self._make_request_with_auth_fallback(url, headers)
 
-        service_check_tags = ['network:{0}'.format(network_id)]
+        service_check_tags = ['network:{0}'.format(network_id)] + tags
 
         network_name = net_details.get('network', {}).get('name')
         if network_name is not None:
@@ -593,18 +593,21 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_single_hypervisor(self, hyp_id, host_tags=None):
+    def get_stats_for_single_hypervisor(self, hyp_id, host_tags=None, custom_tags=None):
         url = '{0}/os-hypervisors/{1}'.format(self.get_nova_endpoint(), hyp_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
         hyp = resp['hypervisor']
         host_tags = host_tags or []
+        custom_tags = custom_tags or []
         tags = [
+
             'hypervisor:{0}'.format(hyp['hypervisor_hostname']),
             'hypervisor_id:{0}'.format(hyp['id']),
             'virt_type:{0}'.format(hyp['hypervisor_type'])
         ]
         tags.extend(host_tags)
+        service_check_tags = list(custom_tags)
 
         try:
             uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
@@ -626,13 +629,13 @@ class OpenStackCheck(AgentCheck):
 
         if hyp_state is None:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN,
-                               tags=tags)
+                               tags=service_check_tags)
         elif hyp_state != self.HYPERVISOR_STATE_UP:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL,
-                               tags=tags)
+                               tags=service_check_tags)
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK,
-                               tags=tags)
+                               tags=service_check_tags)
 
         for label, val in hyp.iteritems():
             if label in NOVA_HYPERVISOR_METRICS:
@@ -693,9 +696,12 @@ class OpenStackCheck(AgentCheck):
                     self.gauge("openstack.nova.server.{0}".format(st.replace("-", "_")), server_stats[st], tags=tags, hostname=server_id)
 
 
-    def get_stats_for_single_project(self, project, tags=[]):
+    def get_stats_for_single_project(self, project, tags=None):
         def _is_valid_metric(label):
             return label in PROJECT_METRICS
+
+        if tags is None:
+            tags = []
 
         project_name = project.get('name')
 
@@ -715,7 +721,9 @@ class OpenStackCheck(AgentCheck):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
 
-    def get_stats_for_all_projects(self, projects, tags=[]):
+    def get_stats_for_all_projects(self, projects, tags=None):
+        if tags is None:
+            tags = []
         for project in projects:
             self.get_stats_for_single_project(project, tags)
     ###
@@ -735,7 +743,7 @@ class OpenStackCheck(AgentCheck):
         return self._aggregate_list
     ###
 
-    def _send_api_service_checks(self, instance_scope, tags=[]):
+    def _send_api_service_checks(self, instance_scope, tags):
         # Nova
         headers = {"X-Auth-Token": instance_scope.auth_token}
 
@@ -847,7 +855,7 @@ class OpenStackCheck(AgentCheck):
                 self.get_stats_for_single_server(sid, tags=server_tags + custom_tags)
 
             if hyp:
-                self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags + custom_tags)
+                self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags, custom_tags=custom_tags)
             else:
                 self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
@@ -856,7 +864,7 @@ class OpenStackCheck(AgentCheck):
                 self.get_stats_for_all_projects(projects, custom_tags)
 
             # For now, monitor all networks
-            self.get_network_stats()
+            self.get_network_stats(custom_tags)
 
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
