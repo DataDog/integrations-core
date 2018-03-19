@@ -49,7 +49,7 @@ kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods th
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas
 kubernetes_state.hpa.target_cpu,gauge,,,,Target CPU percentage of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.target_cpu
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas
-kubernetes_state.pod.ready,gauge,,,,Whether the pod is ready to serve requests,1,kubernetes,k8s_state.pod.ready
+kubernetes_state.pod.ready,gauge,,,,"Whether the pod is ready to serve requests, add the tag `condition:true` to have the correct number of pod in ready state ",1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
 kubernetes_state.replicaset.replicas,gauge,,,,The number of replicas per ReplicaSet,0,kubernetes,k8s_state.rs.replicas
 kubernetes_state.replicaset.fully_labeled_replicas,gauge,,,,The number of fully labeled replicas per ReplicaSet,0,kubernetes,k8s_state.rs.fully_labeled
