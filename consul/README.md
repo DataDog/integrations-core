@@ -75,7 +75,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+* Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
 
   ```
   logs_enabled: true
