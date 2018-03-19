@@ -258,10 +258,11 @@ Check Tomcat [logging documentation](http://tomcat.apache.org/tomcat-7.0-doc/log
 
 By default, our integration pipeline support the following conversion patterns:
 
-  ```
+   ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
-  ```
+  %d [%t] %-5p %c - %m%n
+  
+  ```
 
 Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.com/logs/processing/#integration-pipelines) if you have a different format.
 
