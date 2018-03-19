@@ -34,6 +34,8 @@ install:
   - ps: If (-Not (Test-Path $env:PYWIN_PATH)) {(new-object net.webclient).DownloadFile("$env:PYWIN32_URL", "$env:PYWIN_PATH")}
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
   - ps: mkdir -p $(python -m site --user-site)
+  # Use latest version of pip to prevent the warning
+  - ps: (& "$env:PYTHON/python.exe" -m pip install -U pip)
   - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
   - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
   - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
