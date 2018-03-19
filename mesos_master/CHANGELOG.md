@@ -1,5 +1,12 @@
 # CHANGELOG - mesos_master
 
+1.1.1 / 2018-03-18
+==================
+
+### Changes
+
+* [BUGFIX] Add debug logs and a noisier error message.
+
 1.1.0 / 2017-08-21
 ==================
 
