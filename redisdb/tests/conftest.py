@@ -11,7 +11,7 @@ import redis
 from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def wait_for_cluster(master, replica):

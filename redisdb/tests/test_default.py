@@ -103,9 +103,11 @@ def test_redis_command_stats(aggregator, redis_instance):
         aggregator.assert_metric(name)
 
     # Check the command stats for INFO, since we know we've called it
-    found = False
     for m in aggregator.metrics('redis.command.calls'):
         if 'command:info' in m.tags:
             found = True
             break
+    else:
+        found = False
+
     assert found

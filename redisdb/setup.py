@@ -32,7 +32,7 @@ setup(
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
-    license='New BSD',
+    license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -55,6 +55,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.redisdb': ['conf.yaml.default']},
+    package_data={'datadog_checks.redisdb': ['conf.yaml.example']},
     include_package_data=True,
 )
