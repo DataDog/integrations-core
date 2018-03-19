@@ -13,7 +13,7 @@ namespace :ci do
     task before_install: ['ci:common:before_install']
 
     task :install do
-      Rake::Task['ci:common:install'].invoke('exchange_check')
+      Rake::Task['ci:common:install'].invoke('active_directory')
       # sample docker usage
       # sh %(docker create -p XXX:YYY --name pdh_check source/pdh_check:pdh_check_version)
       # sh %(docker start pdh_check)

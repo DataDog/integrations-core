@@ -1,4 +1,4 @@
-# CHANGELOG - wmi_check
+# CHANGELOG - active_directory
 
 1.0.0 / 2017-12-15
 ==================
