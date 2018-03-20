@@ -23,7 +23,7 @@ Create a file `tomcat.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
-*  Add this configuration setup to your `tomcat.yaml` file to start gathering your [Tomcat Metrics](#metrics):
+*  Add this configuration setup to your `tomcat.yaml` file to start gathering your [Tomcat metrics](#metrics):
 
 ```
 instances:
@@ -211,7 +211,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 **Available for Agent >6.0**
 
-Tomcat uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
+Tomcat uses by default the `log4j` logger. To activate the logging into a file and customize the log format edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
 
 ```
 log4j.rootLogger = INFO, CATALINA
