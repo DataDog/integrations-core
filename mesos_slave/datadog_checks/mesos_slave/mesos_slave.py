@@ -112,21 +112,18 @@ class MesosSlave(AgentCheck):
             if r.status_code != 200:
                 status = AgentCheck.CRITICAL
                 msg = "Got %s when hitting %s" % (r.status_code, url)
-                self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at %s " % url
-                self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
         except requests.exceptions.Timeout as e:
             # If there's a timeout
             msg = "%s seconds timeout when hitting %s" % (timeout, url)
-            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             status = AgentCheck.CRITICAL
         except Exception as e:
             msg = str(e)
-            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             status = AgentCheck.CRITICAL
         finally:
+            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             if self.service_check_needed:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
