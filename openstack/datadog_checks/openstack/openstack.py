@@ -4,6 +4,8 @@
 from datetime import datetime, timedelta
 from urlparse import urljoin
 import re
+import time
+import random
 
 import requests
 import simplejson as json
@@ -93,6 +95,9 @@ DIAGNOSTICABLE_STATES = [
 ]
 
 UNSCOPED_AUTH = 'unscoped'
+
+BASE_BACKOFF_SECS = 15
+MAX_BACKOFF_SECS = 300
 
 
 class OpenStackAuthFailure(Exception):
@@ -542,6 +547,9 @@ class OpenStackCheck(AgentCheck):
         skip_proxy = not init_config.get('use_agent_proxy', True)
         self.proxy_config = None if skip_proxy else self.proxies
 
+        self.backoff = {}
+        random.seed()
+
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
         Generic request handler for OpenStack API requests
@@ -577,6 +585,38 @@ class OpenStackCheck(AgentCheck):
             if scope is scope_to_delete:
                 self.log.debug("Deleting current scope: %s", i_key)
                 del self.instance_map[i_key]
+
+    def should_run(self, instance):
+        i_key = self._instance_key(instance)
+        if i_key not in self.backoff:
+            self.backoff[i_key] = {
+                'retries': 0,
+                'scheduled': time.time(),
+            }
+
+        if self.backoff[i_key]['scheduled'] <= time.time():
+            return True
+
+        return False
+ 
+    def do_backoff(self, instance):
+        i_key = self._instance_key(instance)
+        tracker = self.backoff[i_key]
+
+        self.backoff[i_key]['retries'] += 1
+        jitter = min(MAX_BACKOFF_SECS, BASE_BACKOFF_SECS * 2 ** self.backoff[i_key]['retries'])
+
+        # let's add some jitter  (half jitter)
+        backoff_interval = jitter / 2
+        backoff_interval += random.randint(0, backoff_interval)
+
+        tracker['scheduled'] = time.time() + backoff_interval
+
+    def reset_backoff(self, instance):
+        i_key = self._instance_key(instance)
+        tracker = self.backoff[i_key]
+        self.backoff[i_key]['retries'] = 0
+        self.backoff[i_key]['scheduled'] = time.time()
 
     def get_scope_for_instance(self, instance):
         i_key = self._instance_key(instance)
@@ -643,6 +683,8 @@ class OpenStackCheck(AgentCheck):
                 network_ids.append(network['id'])
         except Exception as e:
             self.warning('Unable to get the list of all network ids: {0}'.format(str(e)))
+            raise e
+
         return network_ids
 
     def get_stats_for_single_network(self, network_id):
@@ -701,6 +743,7 @@ class OpenStackCheck(AgentCheck):
                     hypervisor_ids.append(hv['id'])
             except Exception as e:
                 self.warning('Unable to get the list of all hypervisors: {0}'.format(str(e)))
+                raise e
 
             return hypervisor_ids
         else:
@@ -726,6 +769,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get the list of aggregates: {0}'.format(str(e)))
+            raise e
 
         return hypervisor_aggregate_map
 
@@ -804,6 +848,7 @@ class OpenStackCheck(AgentCheck):
             server_ids = [s['id'] for s in resp['servers']]
         except Exception as e:
             self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
+            raise e
 
         return server_ids
 
@@ -818,6 +863,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get project name: {0}'.format(str(e)))
+            raise e
 
     def get_stats_for_single_server(self, server_id, tags=None):
         def _is_valid_metric(label):
@@ -839,6 +885,7 @@ class OpenStackCheck(AgentCheck):
             project_name = self.get_project_name_from_id(tenant_id)
         except Exception as e:
             self.warning("Unable to collect details for server %s : %s" % (server_id, e))
+            raise e
 
         server_stats = {}
         if state and state.upper() in DIAGNOSTICABLE_STATES:
@@ -849,6 +896,7 @@ class OpenStackCheck(AgentCheck):
                 self.warning("Server %s is powered off and cannot be monitored" % server_id)
             except Exception as e:
                 self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
+                raise e
 
         if server_stats:
             tags = tags or []
@@ -975,6 +1023,11 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
 
+        # have we been backed off 
+        if not self.should_run(instance):
+            self.log.info('Skipping run due to exponential backoff in effect')
+            return
+
         try:
             instance_scope = self.ensure_auth_scope(instance)
 
@@ -1048,6 +1101,10 @@ class OpenStackCheck(AgentCheck):
                 if set_external_tags is not None:
                     set_external_tags(self.get_external_host_tags())
 
+            if projects:
+                # Ensure projects list and scoped project exists
+                self.get_stats_for_all_projects(projects)
+
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):
                 self.warning("""Please specify the auth scope via the `auth_scope` variable in your init_config.\n
@@ -1062,10 +1119,22 @@ class OpenStackCheck(AgentCheck):
                              "The user should look like: {'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}")
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code >= 500:
+                # exponential backoff
+                self.do_backoff(instance)
+                self.warning("There were some problems reaching the nova API - applying exponential backoff")
+            else:
+                self.warning("Error reaching nova API: %s", e)
 
-        if projects:
-            # Ensure projects list and scoped project exists
-            self.get_stats_for_all_projects(projects)
+            return
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            # exponential backoff
+            self.do_backoff(instance)
+            self.warning("There were some problems reaching the nova API - applying exponential backoff")
+            return
+
+        self.reset_backoff(instance)
 
     # Local Info accessors
     def get_local_hypervisor(self):
@@ -1090,6 +1159,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get projects: {0}'.format(str(e)))
+            raise e
 
         return None
 
@@ -1130,6 +1200,7 @@ class OpenStackCheck(AgentCheck):
 
         except Exception as e:
             self.warning('Unable to get the project details: {0}'.format(str(e)))
+            raise e
 
         return None
 
