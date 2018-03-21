@@ -14,7 +14,7 @@
   "version": "1.5.1",
   "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b",
   "public_title": "Datadog-RabbitMQ Integration",
-  "categories":["processing"],
+  "categories":["processing", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/rabbitmq/",
   "is_public": true,
