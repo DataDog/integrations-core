@@ -18,7 +18,7 @@ Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory.
 
 #### Metric Collection
 
-*  Add this configuration setup to your `elastic.yaml` file to start gathering your [ElasticSearch Metrics](#metrics):
+*  Add this configuration setup to your `elastic.yaml` file to start gathering your [ElasticSearch metrics](#metrics):
 
 ```
 init_config:
@@ -44,13 +44,13 @@ Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+* Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
 
   ```
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `apache.yaml` file to start collecting your Elasticsearch Logs:
+* Then add this configuration setup to your `apache.yaml` file to start collecting your Elasticsearch Logs:
 
   ```
     logs:
