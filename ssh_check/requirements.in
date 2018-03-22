@@ -1,5 +1,5 @@
 cryptography==2.1.4
-paramiko==2.1.2
+paramiko==2.4.1
 pyasn1==0.4.2
 cffi==1.11.2
 pycparser==2.18
