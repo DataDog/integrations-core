@@ -494,6 +494,7 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
+        custom_tags = instance.get('tags', [])
 
         self.log.debug(
             "job_atomic: Querying available metrics"
@@ -517,7 +518,7 @@ class VSphereCheck(AgentCheck):
         self.morlist[i_key][mor_name]['last_seen'] = time.time()
 
         # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total())
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
     def _cache_morlist_process(self, instance):
@@ -662,7 +663,7 @@ class VSphereCheck(AgentCheck):
                 )
 
         # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.metric_colection.time', t.total())
+        self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
     def collect_metrics(self, instance):
