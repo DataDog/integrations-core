@@ -1,6 +1,8 @@
 from __future__ import print_function, unicode_literals
 
+import json
 import os
+from collections import OrderedDict, defaultdict
 from io import open
 
 from invoke import task
@@ -141,18 +143,72 @@ def upgrade(ctx, package=None, version=None, verbose=False):
 
 
 @task(help={
-    'upgrade': 'Upgrade every `manifest_version`',
+    'update': 'Update every `manifest_version`',
     'alter': 'Attempt making manifests valid',
 })
-def manifest(ctx, upgrade=None, alter=False):
+def manifest(ctx, update=None, alter=False):
     """Validate all `manifest.json` files.
 
     Example invocation:
-        inv manifest --upgrade 1.0.0
+        inv manifest --update 1.0.0
     """
+    guids = defaultdict(list)
+    failed = 0
+    output = ''
+
     for check_name in sorted(os.listdir(HERE)):
         check_dir = os.path.join(HERE, check_name)
         manifest_file = os.path.join(check_dir, 'manifest.json')
+
+        if os.path.isfile(manifest_file):
+            check_output = '{} ->\n'.format(check_name)
+
+            try:
+                with open(manifest_file, 'r') as f:
+                    decoded = json.loads(f.read().strip(), object_pairs_hook=OrderedDict)
+            except json.JSONDecodeError:
+                check_output += '  invalid json: {}\n'.format(manifest_file)
+                output += check_output
+                failed += 1
+                continue
+
+            # maintainer
+            correct_maintainer = 'help@datadoghq.com'
+            maintainer = decoded.get('maintainer')
+            if maintainer != correct_maintainer:
+                check_output += '  incorrect `maintainer`: {}\n'.format(maintainer)
+                failed += 1
+                if alter:
+                    decoded['maintainer'] = correct_maintainer
+                    check_output += '  new `maintainer`: {}\n'.format(correct_maintainer)
+                    failed -= 1
+
+            # manifest_version
+            if update:
+                decoded['manifest_version'] = update
+                check_output += '  new `manifest_version`: {}\n'.format(update)
+
+            correct_manifest_version = '1.0.0'
+            manifest_version = decoded.get('manifest_version')
+            if not isinstance(manifest_version, str) or len([v for v in manifest_version.split('.') if v]) != 3:
+                check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
+                failed += 1
+                if alter:
+                    decoded['manifest_version'] = correct_manifest_version
+                    check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
+                    failed -= 1
+
+            if len(check_output.splitlines()) > 1:
+                output += check_output
+                if alter or update:
+                    with open(manifest_file, 'w') as f:
+                        f.write('{}\n'.format(json.dumps(decoded, indent=2)))
+
+    if output:
+        # Don't print trailing new line
+        print(output[:-1])
+
+    raise Exit(int(failed > 0))
 
 
 
