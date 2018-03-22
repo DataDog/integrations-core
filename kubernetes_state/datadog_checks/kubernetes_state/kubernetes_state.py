@@ -422,42 +422,52 @@ class KubernetesState(PrometheusCheck):
             self.job_succeeded_count[frozenset(tags)] += metric.gauge.value
 
     def kube_node_status_condition(self, message, **kwargs):
-        """ The ready status of a cluster node. >v1.0.0"""
+        """ The ready status of a cluster node. v1.0+"""
         base_check_name = self.NAMESPACE + '.node'
+        metric_name = self.NAMESPACE + '.nodes.by_condition'
+
         for metric in message.metric:
             self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
                                          tags=[self._label_to_tag("node", metric.label)])
 
+            # Counts aggregated cluster-wide to avoid no-data issues on node churn,
+            # node granularity available in the service checks
+            tags = [
+                self._label_to_tag("condition", metric.label),
+                self._label_to_tag("status", metric.label)
+            ]
+            self.count(metric_name, metric.gauge.value, tags)
+
     def kube_node_status_ready(self, message, **kwargs):
-        """ The ready status of a cluster node."""
+        """ The ready status of a cluster node (legacy)"""
         service_check_name = self.NAMESPACE + '.node.ready'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_positive,
                                              tags=[self._label_to_tag("node", metric.label)])
 
     def kube_node_status_out_of_disk(self, message, **kwargs):
-        """ Whether the node is out of disk space. """
+        """ Whether the node is out of disk space (legacy)"""
         service_check_name = self.NAMESPACE + '.node.out_of_disk'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
                                              tags=[self._label_to_tag("node", metric.label)])
 
     def kube_node_status_memory_pressure(self, message, **kwargs):
-        """ Whether the node is in a memory pressure state. """
+        """ Whether the node is in a memory pressure state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.memory_pressure'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
                                              tags=[self._label_to_tag("node", metric.label)])
 
     def kube_node_status_disk_pressure(self, message, **kwargs):
-        """ Whether the node is in a disk pressure state. """
+        """ Whether the node is in a disk pressure state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.disk_pressure'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
                                              tags=[self._label_to_tag("node", metric.label)])
 
     def kube_node_status_network_unavailable(self, message, **kwargs):
-        """ Whether the node is in a network unavailable state. """
+        """ Whether the node is in a network unavailable state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.network_unavailable'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,

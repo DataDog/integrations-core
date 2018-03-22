@@ -35,7 +35,8 @@ The linkerd check is compatible with all major platforms
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](hhttps://github.com/DataDog/integrations-core/blob/master/linkerd/metadata.csv) for a list of default metrics provided by this integration.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/linkerd/metadata.csv) for a list of default metrics provided by this integration.
+
 See [finagle metrics docs](https://twitter.github.io/finagle/guide/Metrics.html) for a detailed description of some of the available metrics.
 See [this gist](https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt) for an example of metrics exposed by linkerd.
 
