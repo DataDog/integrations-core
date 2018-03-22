@@ -127,7 +127,7 @@ class WinPDHCounter(object):
 
         try:
             val, t = _winreg.QueryValueEx(_winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
-        except:
+        except OSError:
             raise
 
         # val is an array of strings.  The underlying win32 API returns a list of strings
