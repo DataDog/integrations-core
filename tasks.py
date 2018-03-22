@@ -138,3 +138,31 @@ def upgrade(ctx, package=None, version=None, verbose=False):
                     'requirements.in',
                     hide='both'
                 )
+
+
+@task(help={
+    'upgrade': 'Upgrade every `manifest_version`',
+    'alter': 'Attempt making manifests valid',
+})
+def manifest(ctx, upgrade=None, alter=False):
+    """Validate all `manifest.json` files.
+
+    Example invocation:
+        inv manifest --upgrade 1.0.0
+    """
+    for check_name in sorted(os.listdir(HERE)):
+        check_dir = os.path.join(HERE, check_name)
+        manifest_file = os.path.join(check_dir, 'manifest.json')
+
+
+
+
+
+
+
+
+
+
+
+
+
