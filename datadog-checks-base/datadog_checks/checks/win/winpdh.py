@@ -127,7 +127,8 @@ class WinPDHCounter(object):
 
         try:
             val, t = _winreg.QueryValueEx(_winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
-        except:
+        except: # noqa: E722
+            self.logger.error("Windows error; performance counters not found in registry")
             raise
 
         # val is an array of strings.  The underlying win32 API returns a list of strings
