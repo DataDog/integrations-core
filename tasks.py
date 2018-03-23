@@ -24,6 +24,13 @@ AGENT_BASED_INTEGRATIONS = [
 ]
 
 
+def parse_version_parts(version):
+    return (
+        [int(v) for v in version.split('.') if v.isdigit()]
+        if isinstance(version, str) else []
+    )
+
+
 def ensure_deps_declared(reqs_txt, reqs_in):
     if os.path.isfile(reqs_txt) and not os.path.isfile(reqs_in):
         declacred_lines = []
@@ -172,6 +179,40 @@ def manifest(ctx, update=None, alter=False):
                 failed += 1
                 continue
 
+            # manifest_version
+            if update:
+                decoded['manifest_version'] = update
+                check_output += '  new `manifest_version`: {}\n'.format(update)
+
+            correct_manifest_version = '1.0.0'
+            manifest_version = decoded.get('manifest_version')
+            version_parts = parse_version_parts(manifest_version)
+            if len(version_parts) != 3:
+                check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
+                failed += 1
+                if alter:
+                    version_parts = parse_version_parts(correct_manifest_version)
+                    decoded['manifest_version'] = correct_manifest_version
+                    check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
+                    failed -= 1
+
+            if len(version_parts) == 3 and version_parts >= [1, 0, 0]:
+                if 'max_agent_version' in decoded:
+                    check_output += '  outdated field: max_agent_version\n'
+                    failed += 1
+                    if alter:
+                        del decoded['max_agent_version']
+                        check_output += '  removed field: max_agent_version\n'
+                        failed -= 1
+
+                if 'min_agent_version' in decoded:
+                    check_output += '  outdated field: min_agent_version\n'
+                    failed += 1
+                    if alter:
+                        del decoded['max_agent_version']
+                        check_output += '  removed field: min_agent_version\n'
+                        failed -= 1
+
             # maintainer
             correct_maintainer = 'help@datadoghq.com'
             maintainer = decoded.get('maintainer')
@@ -181,21 +222,6 @@ def manifest(ctx, update=None, alter=False):
                 if alter:
                     decoded['maintainer'] = correct_maintainer
                     check_output += '  new `maintainer`: {}\n'.format(correct_maintainer)
-                    failed -= 1
-
-            # manifest_version
-            if update:
-                decoded['manifest_version'] = update
-                check_output += '  new `manifest_version`: {}\n'.format(update)
-
-            correct_manifest_version = '1.0.0'
-            manifest_version = decoded.get('manifest_version')
-            if not isinstance(manifest_version, str) or len([v for v in manifest_version.split('.') if v]) != 3:
-                check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
-                failed += 1
-                if alter:
-                    decoded['manifest_version'] = correct_manifest_version
-                    check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
                     failed -= 1
 
             if len(check_output.splitlines()) > 1:
