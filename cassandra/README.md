@@ -18,8 +18,40 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 ### Configuration
 
-1. Configure the Agent to connect to Cassandra, just edit `conf.d/cassandra.yaml`. See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
+Create a file `cassandra.yaml` in the Agent's `conf.d` directory.
+
+#### Metric Collection
+
+*  The default configuration of your `cassandra.yaml` file activate the collection of your [Cassandra Metrics](#metrics):
+ See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
+ 
 2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Add this configuration setup to your `cassandra.yaml` file to start collecting your Cassandra Logs:
+
+  ```
+    logs:
+        - type: file
+          path: /var/log/cassandra/*.log
+          source: cassandra
+          sourcecategory: database
+          service: myapplication
+  ```
+
+  Change the `path` and `service` parameter values and configure them for your environment.
+See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
+   
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 ### Validation
 
