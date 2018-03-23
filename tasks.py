@@ -269,9 +269,9 @@ def manifest(ctx, update=None, fix=False):
             if len(check_output.splitlines()) > 1:
                 output += check_output
                 if fix or update:
-                    new_manifest = json.dumps(decoded, indent=2)
+                    new_manifest = '{}\n'.format(json.dumps(decoded, indent=2))
                     with open(manifest_file, 'w') as f:
-                        f.write('{}\n'.format(new_manifest))
+                        f.write(new_manifest)
 
     if output:
         # Don't print trailing new line
