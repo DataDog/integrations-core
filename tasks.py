@@ -2,7 +2,8 @@ from __future__ import print_function, unicode_literals
 
 import json
 import os
-from collections import OrderedDict, defaultdict
+import uuid
+from collections import OrderedDict
 from io import open
 
 from invoke import task
@@ -151,15 +152,15 @@ def upgrade(ctx, package=None, version=None, verbose=False):
 
 @task(help={
     'update': 'Update every `manifest_version`',
-    'alter': 'Attempt making manifests valid',
+    'fix': 'Attempt making manifests valid',
 })
-def manifest(ctx, update=None, alter=False):
+def manifest(ctx, update=None, fix=False):
     """Validate all `manifest.json` files.
 
     Example invocation:
         inv manifest --update 1.0.0
     """
-    guids = defaultdict(list)
+    all_guids = {}
     failed = 0
     output = ''
 
@@ -190,7 +191,7 @@ def manifest(ctx, update=None, alter=False):
             if len(version_parts) != 3:
                 check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
                 failed += 1
-                if alter:
+                if fix:
                     version_parts = parse_version_parts(correct_manifest_version)
                     decoded['manifest_version'] = correct_manifest_version
                     check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
@@ -200,7 +201,7 @@ def manifest(ctx, update=None, alter=False):
                 if 'max_agent_version' in decoded:
                     check_output += '  outdated field: max_agent_version\n'
                     failed += 1
-                    if alter:
+                    if fix:
                         del decoded['max_agent_version']
                         check_output += '  removed field: max_agent_version\n'
                         failed -= 1
@@ -208,7 +209,7 @@ def manifest(ctx, update=None, alter=False):
                 if 'min_agent_version' in decoded:
                     check_output += '  outdated field: min_agent_version\n'
                     failed += 1
-                    if alter:
+                    if fix:
                         del decoded['max_agent_version']
                         check_output += '  removed field: min_agent_version\n'
                         failed -= 1
@@ -219,14 +220,55 @@ def manifest(ctx, update=None, alter=False):
             if maintainer != correct_maintainer:
                 check_output += '  incorrect `maintainer`: {}\n'.format(maintainer)
                 failed += 1
-                if alter:
+                if fix:
                     decoded['maintainer'] = correct_maintainer
                     check_output += '  new `maintainer`: {}\n'.format(correct_maintainer)
                     failed -= 1
 
+            # name
+            correct_name = check_name
+            name = decoded.get('name')
+            if not isinstance(name, str) or name.lower() != correct_name.lower():
+                check_output += '  incorrect `name`: {}\n'.format(name)
+                failed += 1
+                if fix:
+                    decoded['name'] = correct_name
+                    check_output += '  new `name`: {}\n'.format(correct_name)
+                    failed -= 1
+
+            # short_description
+            short_description = decoded.get('short_description')
+            if not short_description or not isinstance(short_description, str):
+                check_output += '  required non-null string: short_description\n'
+                failed += 1
+
+            # guid
+            guid = decoded.get('guid')
+            if guid in all_guids:
+                check_output += '  duplicate `guid`: `{}` from `{}`\n'.format(guid, all_guids[guid])
+                failed += 1
+                if fix:
+                    new_guid = uuid.uuid4()
+                    all_guids[new_guid] = check_name
+                    decoded['guid'] = new_guid
+                    check_output += '  new `guid`: {}\n'.format(new_guid)
+                    failed -= 1
+            elif not guid or not isinstance(guid, str):
+                check_output += '  required non-null string: guid\n'
+                failed += 1
+                if fix:
+                    new_guid = uuid.uuid4()
+                    all_guids[new_guid] = check_name
+                    decoded['guid'] = new_guid
+                    check_output += '  new `guid`: {}\n'.format(new_guid)
+                    failed -= 1
+            else:
+                all_guids[guid] = check_name
+
+            # See if anything happened
             if len(check_output.splitlines()) > 1:
                 output += check_output
-                if alter or update:
+                if fix or update:
                     with open(manifest_file, 'w') as f:
                         f.write('{}\n'.format(json.dumps(decoded, indent=2)))
 
