@@ -276,6 +276,18 @@ def manifest(ctx, update=None, fix=False):
                         check_output += '  new `support`: {}\n'.format(correct_support)
                         failed -= 1
 
+                # supported_os
+                supported_os = decoded.get('supported_os')
+                if not supported_os or not isinstance(supported_os, list):
+                    check_output += '  required non-null sequence: supported_os\n'
+                    failed += 1
+                else:
+                    known_systems = {'linux', 'mac_os', 'windows'}
+                    unknown_systems = sorted(set(supported_os) - known_systems)
+                    if unknown_systems:
+                        check_output += '  unknown `supported_os`: {}\n'.format(', '.join(unknown_systems))
+                        failed += 1
+
             # See if anything happened
             if len(check_output.splitlines()) > 1:
                 output += check_output
