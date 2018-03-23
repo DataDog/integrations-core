@@ -9,7 +9,7 @@ from io import open
 from invoke import task
 from invoke.exceptions import Exit
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
@@ -105,8 +105,8 @@ def upgrade(ctx, package=None, version=None, verbose=False):
     if not (package and version):
         raise Exit('`package` and `version` are required arguments.')
 
-    for check_name in sorted(os.listdir(HERE)):
-        check_dir = os.path.join(HERE, check_name)
+    for check_name in sorted(os.listdir(ROOT)):
+        check_dir = os.path.join(ROOT, check_name)
         reqs_in = os.path.join(check_dir, 'requirements.in')
         reqs_txt = os.path.join(check_dir, 'requirements.txt')
 
@@ -164,8 +164,8 @@ def manifest(ctx, update=None, fix=False):
     failed = 0
     output = ''
 
-    for check_name in sorted(os.listdir(HERE)):
-        check_dir = os.path.join(HERE, check_name)
+    for check_name in sorted(os.listdir(ROOT)):
+        check_dir = os.path.join(ROOT, check_name)
         manifest_file = os.path.join(check_dir, 'manifest.json')
 
         if os.path.isfile(manifest_file):
@@ -184,6 +184,29 @@ def manifest(ctx, update=None, fix=False):
                 decoded['manifest_version'] = update
                 check_output += '  new `manifest_version`: {}\n'.format(update)
             else:
+                # guid
+                guid = decoded.get('guid')
+                if guid in all_guids:
+                    check_output += '  duplicate `guid`: `{}` from `{}`\n'.format(guid, all_guids[guid])
+                    failed += 1
+                    if fix:
+                        new_guid = uuid.uuid4()
+                        all_guids[new_guid] = check_name
+                        decoded['guid'] = new_guid
+                        check_output += '  new `guid`: {}\n'.format(new_guid)
+                        failed -= 1
+                elif not guid or not isinstance(guid, str):
+                    check_output += '  required non-null string: guid\n'
+                    failed += 1
+                    if fix:
+                        new_guid = uuid.uuid4()
+                        all_guids[new_guid] = check_name
+                        decoded['guid'] = new_guid
+                        check_output += '  new `guid`: {}\n'.format(new_guid)
+                        failed -= 1
+                else:
+                    all_guids[guid] = check_name
+
                 # manifest_version
                 correct_manifest_version = '1.0.0'
                 manifest_version = decoded.get('manifest_version')
@@ -242,28 +265,16 @@ def manifest(ctx, update=None, fix=False):
                     check_output += '  required non-null string: short_description\n'
                     failed += 1
 
-                # guid
-                guid = decoded.get('guid')
-                if guid in all_guids:
-                    check_output += '  duplicate `guid`: `{}` from `{}`\n'.format(guid, all_guids[guid])
+                # support
+                correct_support = 'contrib' if os.path.basename(ROOT) == 'extras' else 'core'
+                support = decoded.get('support')
+                if support not in ('core', 'contrib'):
+                    check_output += '  invalid `support`: {}\n'.format(support)
                     failed += 1
                     if fix:
-                        new_guid = uuid.uuid4()
-                        all_guids[new_guid] = check_name
-                        decoded['guid'] = new_guid
-                        check_output += '  new `guid`: {}\n'.format(new_guid)
+                        decoded['support'] = correct_support
+                        check_output += '  new `support`: {}\n'.format(correct_support)
                         failed -= 1
-                elif not guid or not isinstance(guid, str):
-                    check_output += '  required non-null string: guid\n'
-                    failed += 1
-                    if fix:
-                        new_guid = uuid.uuid4()
-                        all_guids[new_guid] = check_name
-                        decoded['guid'] = new_guid
-                        check_output += '  new `guid`: {}\n'.format(new_guid)
-                        failed -= 1
-                else:
-                    all_guids[guid] = check_name
 
             # See if anything happened
             if len(check_output.splitlines()) > 1:
