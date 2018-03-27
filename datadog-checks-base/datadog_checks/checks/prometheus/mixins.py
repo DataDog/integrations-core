@@ -4,9 +4,8 @@
 
 from fnmatch import fnmatchcase
 import requests
-import urllib3
+from urllib3 import disable_warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
 from collections import defaultdict
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from ...utils.prometheus import metrics_pb2
@@ -467,7 +466,7 @@ class PrometheusScraper(object):
         if isinstance(self.ssl_ca_cert, basestring):
             verify = self.ssl_ca_cert
         elif self.ssl_ca_cert is False:
-            urllib3.disable_warnings(InsecureRequestWarning)
+            disable_warnings(InsecureRequestWarning)
             verify = False
         try:
             response = requests.get(endpoint, headers=headers, stream=True, timeout=1, cert=cert, verify=verify)
