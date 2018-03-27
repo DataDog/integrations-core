@@ -790,7 +790,7 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_single_hypervisor(self, hyp_id, host_tags=None, instance):
+    def get_stats_for_single_hypervisor(self, hyp_id, instance, host_tags=None):
         url = '{0}/os-hypervisors/{1}'.format(self.get_nova_endpoint(), hyp_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
