@@ -6,8 +6,7 @@
 #
 certifi==2018.1.18 \
     --hash=sha256:14131608ad2fd56836d33a71ee60fa1c82bc9d2c8d98b7bdbc631fe1b3cd1296 \
-    --hash=sha256:edbc3f203427eef571f79a7692bb160a2b0f7ccaa31953e99bd17e307cf63f7d \
-    # via requests
+    --hash=sha256:edbc3f203427eef571f79a7692bb160a2b0f7ccaa31953e99bd17e307cf63f7d
 chardet==3.0.4 \
     --hash=sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae \
     --hash=sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691 \
@@ -34,3 +33,8 @@ urllib3==1.22 \
     --hash=sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b \
     --hash=sha256:cc44da8e1145637334317feebd728bd869a35285b93cbb4cca2577da7e62db4f \
     # via requests
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==39.0.1 \
+    --hash=sha256:8010754433e3211b9cdbbf784b50f30e80bf40fc6b05eb5f865fab83300599b8 \
+    --hash=sha256:bec7badf0f60e7fc8153fac47836edc41b74e5d541d7692e614e635720d6a7c7

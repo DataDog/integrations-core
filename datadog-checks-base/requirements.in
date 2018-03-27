@@ -1,3 +1,5 @@
 prometheus-client==0.1.0
 requests==2.18.4
+certifi>=2017.4.17
 protobuf==3.5.1
+setuptools==39.0.1
