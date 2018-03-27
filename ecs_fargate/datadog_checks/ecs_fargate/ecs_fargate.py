@@ -72,7 +72,7 @@ class FargateCheck(AgentCheck):
             return
 
         common_tags = ['ecs_cluster:' + metadata['Cluster'], 'ecs_task_family:' + metadata['Family'],
-            'ecs_task_version:' + metadata['Version']]
+            'ecs_task_version:' + metadata['Revision']]
         common_tags.extend(custom_tags)
         label_whitelist = instance.get('label_whitelist', [])
 
