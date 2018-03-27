@@ -1,6 +1,11 @@
 # CHANGELOG - kubernetes_state
 
-2.4.0 / unrelease
+2.4.1 / Unreleased
+==================
+
+* [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
+
+2.4.0 / 2018-03-23
 ==================
 
 * [IMPROVEMENT] Add kubernetes_state.nodes.by_condition count metric [#1277][]
