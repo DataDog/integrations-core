@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"couchbase",
+        "check": "couchbase.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns status after pinging your Couchbase instance. Additional information about response status at the time of collection is included in the check message."
+    }
+]

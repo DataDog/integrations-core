@@ -1,0 +1,21 @@
+[
+    {
+        "agent_version": "5.3.0",
+        "integration":"supervisord",
+        "check": "supervisord.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["supervisord_server", "host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent check is unable to connect to the supervisor daemon. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.3.0",
+        "integration":"supervisord",
+        "groups": ["supervisord_server", "supervisord_process", "host"],
+        "check": "supervisord.process.status",
+        "statuses": ["ok", "critical", "unknown"],
+        "name": "Process Status",
+        "description": "Returns `CRITICAL` if the process is not running or stopping, `UNKNOWN` if starting or unknown, `OK` otherwise."
+    }
+
+]

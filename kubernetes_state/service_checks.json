@@ -1,0 +1,56 @@
+[
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.node.ready",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "node"],
+        "name": "Node Ready",
+        "description": "Returns `CRITICAL` if a cluster node is not ready. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.node.out_of_disk",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "node"],
+        "name": "Node Out Of Disk",
+        "description": "Returns `CRITICAL` if a cluster node is out of disk space. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.node.disk_pressure",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "node"],
+        "name": "Node Disk Pressure",
+        "description": "Returns `CRITICAL` if a cluster node is in a disk pressure state. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.node.memory_pressure",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "node"],
+        "name": "Node Memory Pressure",
+        "description": "Returns `CRITICAL` if a cluster node is in a memory pressure state. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.node.network_unavailable",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "node"],
+        "name": "Node Network Unavailable",
+        "description": "Returns `CRITICAL` if a cluster node is in a network unavailable state. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.6.0",
+        "integration":"kubernetes",
+        "check": "kubernetes_state.pod.phase",
+        "statuses": ["ok", "critical", "warning", "unknown"],
+        "groups": ["host", "pod"],
+        "name": "Pod Phase",
+        "description": "Returns `CRITICAL` if the pod is in phase `Failed`, `WARNING` if it is `Pending`, `UNKNOWN` if it is `Unknown` or `OK` otherwise."
+    }
+]

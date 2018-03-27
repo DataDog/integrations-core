@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.3.0",
+        "integration":"system",
+        "check": "ntp.in_sync",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "Clock in Sync",
+        "description": "Returns CRITICAL if the host clock is more than the configured threshold away from the NTP time. Returns UNKNOWN if the Agent can not connect to the NTP server. Returns OK otherwise."
+    }
+]

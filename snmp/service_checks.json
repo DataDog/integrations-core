@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"snmp",
+        "check": "snmp.can_check",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "snmp_device"],
+        "name": "Can check",
+        "description": "Returns `CRITICAL` if the Agent check is unable to collect metrics from SNMP. Returns `OK` otherwise."
+    }
+]
