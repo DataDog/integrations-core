@@ -1101,7 +1101,7 @@ class OpenStackCheck(AgentCheck):
                     self.get_stats_for_single_server(sid, tags=server_tags)
 
                 if hyp:
-                    self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags, instance)
+                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
                 else:
                     self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
