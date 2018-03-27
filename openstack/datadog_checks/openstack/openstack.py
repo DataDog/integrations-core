@@ -521,7 +521,7 @@ class OpenStackCheck(AgentCheck):
         self._ssl_verify = init_config.get("ssl_verify", True)
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
-        
+
         if not self.keystone_server_url:
             raise IncompleteConfig()
 
@@ -613,7 +613,7 @@ class OpenStackCheck(AgentCheck):
         backoff_interval += random.randint(0, backoff_interval)
 
         tags = instance.get('tags', [])
-        hypervisor_name = self._hypervisor_name_cache[i_key]
+        hypervisor_name = self._hypervisor_name_cache.get(i_key)
         if hypervisor_name is not None:
             tags.extend("hypervisor:{}".format(hypervisor_name))
 
