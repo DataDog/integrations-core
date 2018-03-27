@@ -1,6 +1,6 @@
 # CHANGELOG - nginx
 
-2.0.0 / Unreleased
+2.0.0 / 2018-03-23
 ==================
 
 ### Changes
