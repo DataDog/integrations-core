@@ -1,0 +1,32 @@
+version: '3.5'
+
+services:
+  redis-master:
+    image: "redis:${REDIS_VERSION}"
+    ports:
+      - "6382:6382"
+    networks:
+      - network1
+    command: redis-server --port 6382
+
+  redis-slave:
+    image: "redis:${REDIS_VERSION}"
+    ports:
+      - "6380:6380"
+    depends_on:
+      - "redis-master"
+    networks:
+      - network1
+    command: redis-server --port 6380 --slaveof redis-master 6382
+
+  redis-slave-unhealthy:
+    image: "redis:${REDIS_VERSION}"
+    ports:
+      - "6381:6381"
+    networks:
+      - network1
+    command: redis-server --port 6381 --slaveof redis-master 1234
+
+networks:
+  network1:
+    name: 1m-2s_default

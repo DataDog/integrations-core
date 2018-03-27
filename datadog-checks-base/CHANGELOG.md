@@ -7,6 +7,7 @@
 ## 1.2.1 / 2018-03-23
 
 * [BUG] Correctly handle internationalized versions of Windows in the PDH library.
+* [FEATURE] Keep track of Service Checks in the Aggregator stub.
 
 ## 1.1.0 / 2018-03-23
 

@@ -12,6 +12,8 @@ with all the checks from this repository, so to get started using them, you can
 simply [install the Agent](https://docs.datadoghq.com/agent/) for your operating
 system.
 
+General documentation about the project can be [found here](docs/index.md)
+
 ## Integrations as Python wheels
 
 When working with an integration, you will now be dealing with a more structured
@@ -47,47 +49,54 @@ general.
 
 ### Prerequisites
 
- * Python 2.7, see [this page](docs/dev/python.md) for more details.
+* Python 2.7, see [this page](docs/dev/python.md) for more details.
 
 ### Quickstart
 
 The project comes with a requirements file you can pass to `pip` to install all
 the dependencies needed to work with any check. From the root of the repo, run:
-```
+
+```shell
 pip install -r requirements-dev.txt
 ```
 
 To work with a specific check you need to install its own dependencies. The easiest
 way to iterate on a check development is installing the wheel itself in editable mode.
 For example, if you want to do this for the `disk` check run the following:
-```
+
+```shell
 cd disk && pip install -e .
 ```
 
 To double check everything is working as expected you can run:
-```
+
+```shell
 python -c"from datadog_checks.disk import Disk"
 ```
+
 if the commands ends without errors, you're good to go!
 
 ### Testing
 
 To run the testsuite for a given check you can either use `tox`, like:
-```
-cd disk && tox
+
+```shell
+cd {integration} && tox
 ```
 
 or invoke [Pytest](https://docs.pytest.org/en/latest/) directly:
-```
-cd disk && py.test
+
+```shell
+cd {integration} && py.test
 ```
 
 **Note:** only a subset of the checks can be tested like this. Porting all the
 checks to Pytest is a work in progress, this is the list of the checks supporting
 the new testing approach:
 
- * [disk](disk)
- * [vsphere](vsphere)
+* [disk](disk)
+* [redisdb](redisdb)
+* [vsphere](vsphere)
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
 
@@ -98,7 +107,8 @@ build the wheel. If you wish to learn more about python packaging please take a
 look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
 
 Once your setup.py is ready, creating a wheel is a easy as:
-```
+
+```shell
 cd {integration}
 python setup.py bdist_wheel
 ```

@@ -18,6 +18,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kubelet',
     'linkerd',
     'prometheus',
+    'redisdb',
     'vsphere',
 ]
 
