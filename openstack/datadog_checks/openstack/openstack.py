@@ -520,6 +520,8 @@ class OpenStackCheck(AgentCheck):
 
         self._ssl_verify = init_config.get("ssl_verify", True)
         self.keystone_server_url = init_config.get("keystone_server_url")
+        self._hypervisor_name_cache = {}
+        
         if not self.keystone_server_url:
             raise IncompleteConfig()
 
@@ -599,7 +601,7 @@ class OpenStackCheck(AgentCheck):
 
         return False
  
-    def do_backoff(self, instance, tags=tags):
+    def do_backoff(self, instance):
         i_key = self._instance_key(instance)
         tracker = self.backoff[i_key]
 
@@ -1130,7 +1132,7 @@ class OpenStackCheck(AgentCheck):
         except requests.exceptions.HTTPError as e:
             if e.response.status_code >= 500:
                 # exponential backoff
-                self.do_backoff(instance, tags=tags)
+                self.do_backoff(instance)
                 self.warning("There were some problems reaching the nova API - applying exponential backoff")
             else:
                 self.warning("Error reaching nova API: %s", e)
@@ -1138,7 +1140,7 @@ class OpenStackCheck(AgentCheck):
             return
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # exponential backoff
-            self.do_backoff(instance, tags=tags)
+            self.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")
             return
 
