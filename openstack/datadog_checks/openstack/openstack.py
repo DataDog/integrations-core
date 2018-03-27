@@ -520,6 +520,8 @@ class OpenStackCheck(AgentCheck):
 
         self._ssl_verify = init_config.get("ssl_verify", True)
         self.keystone_server_url = init_config.get("keystone_server_url")
+        self._hypervisor_name_cache = {}
+
         if not self.keystone_server_url:
             raise IncompleteConfig()
 
@@ -609,6 +611,13 @@ class OpenStackCheck(AgentCheck):
         # let's add some jitter  (half jitter)
         backoff_interval = jitter / 2
         backoff_interval += random.randint(0, backoff_interval)
+
+        tags = instance.get('tags', [])
+        hypervisor_name = self._hypervisor_name_cache.get(i_key)
+        if hypervisor_name:
+            tags.extend("hypervisor:{}".format(hypervisor_name))
+
+        self.gauge("openstack.exponential_backoff_time", jitter, tags=tags)
 
         tracker['scheduled'] = time.time() + backoff_interval
 
@@ -781,12 +790,13 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_single_hypervisor(self, hyp_id, host_tags=None):
+    def get_stats_for_single_hypervisor(self, hyp_id, instance, host_tags=None):
         url = '{0}/os-hypervisors/{1}'.format(self.get_nova_endpoint(), hyp_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
         hyp = resp['hypervisor']
         host_tags = host_tags or []
+        self._hypervisor_name_cache[self._instance_key(instance)] = hyp['hypervisor_hostname']
         tags = [
             'hypervisor:{0}'.format(hyp['hypervisor_hostname']),
             'hypervisor_id:{0}'.format(hyp['id']),
@@ -1091,7 +1101,7 @@ class OpenStackCheck(AgentCheck):
                     self.get_stats_for_single_server(sid, tags=server_tags)
 
                 if hyp:
-                    self.get_stats_for_single_hypervisor(hyp, host_tags=host_tags)
+                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
                 else:
                     self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
 
