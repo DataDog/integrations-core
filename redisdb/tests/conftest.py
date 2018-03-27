@@ -25,7 +25,7 @@ def wait_for_cluster(master, replica):
 
         try:
             up = master.ping() and replica.ping() and \
-                 master.info().get('connected_slaves') and replica.info().get('master_link_status')
+                 master.info().get('connected_slaves') and replica.info().get('master_link_status') != "down"
 
             if up:
                 print replica.info()
