@@ -1,6 +1,6 @@
 # CHANGELOG - oracle
 
-1.0.1 / Unreleased 
+1.0.1 / 2018-03-23 
 ==================
 
 ### Notes
