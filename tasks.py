@@ -153,8 +153,9 @@ def upgrade(ctx, package=None, version=None, verbose=False):
 @task(help={
     'update': 'Update every `manifest_version`',
     'fix': 'Attempt making manifests valid',
+    'include_extras': 'Include optional fields',
 })
-def manifest(ctx, update=None, fix=False):
+def manifest(ctx, update=None, fix=False, include_extras=False):
     """Validate all `manifest.json` files.
 
     Example invocation:
@@ -212,7 +213,10 @@ def manifest(ctx, update=None, fix=False):
                 manifest_version = decoded.get('manifest_version')
                 version_parts = parse_version_parts(manifest_version)
                 if len(version_parts) != 3:
-                    check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
+                    if not manifest_version:
+                        check_output += '  required non-null string: manifest_version\n'
+                    else:
+                        check_output += '  invalid `manifest_version`: {}\n'.format(manifest_version)
                     failed += 1
                     if fix:
                         version_parts = parse_version_parts(correct_manifest_version)
@@ -276,17 +280,48 @@ def manifest(ctx, update=None, fix=False):
                         check_output += '  new `support`: {}\n'.format(correct_support)
                         failed -= 1
 
-                # supported_os
-                supported_os = decoded.get('supported_os')
-                if not supported_os or not isinstance(supported_os, list):
-                    check_output += '  required non-null sequence: supported_os\n'
+                # version
+                version = decoded.get('version')
+                version_parts = parse_version_parts(version)
+                if len(version_parts) != 3:
+                    if not version:
+                        check_output += '  required non-null string: version\n'
+                    else:
+                        check_output += '  invalid `version`: {}\n'.format(version)
                     failed += 1
-                else:
-                    known_systems = {'linux', 'mac_os', 'windows'}
-                    unknown_systems = sorted(set(supported_os) - known_systems)
-                    if unknown_systems:
-                        check_output += '  unknown `supported_os`: {}\n'.format(', '.join(unknown_systems))
+
+                if include_extras:
+                    # supported_os
+                    supported_os = decoded.get('supported_os')
+                    if not supported_os or not isinstance(supported_os, list):
+                        check_output += '  required non-null sequence: supported_os\n'
                         failed += 1
+                    else:
+                        known_systems = {'linux', 'mac_os', 'windows'}
+                        unknown_systems = sorted(set(supported_os) - known_systems)
+                        if unknown_systems:
+                            check_output += '  unknown `supported_os`: {}\n'.format(', '.join(unknown_systems))
+                            failed += 1
+
+                    # public_title
+                    public_title = decoded.get('public_title')
+                    if not public_title or not isinstance(public_title, str):
+                        check_output += '  required non-null string: public_title\n'
+                        failed += 1
+                    else:
+                        title_start = 'Datadog-'
+                        title_end = ' Integration'
+                        section_char_set = set(public_title[len(title_start):-len(title_end)].lower())
+                        check_name_char_set = set(check_name.lower())
+                        character_overlap = check_name_char_set & section_char_set
+
+                        correct_start = public_title.startswith(title_start)
+                        correct_end = public_title.endswith(title_end)
+                        overlap_enough = len(character_overlap) > int(len(check_name_char_set) * 0.5)
+
+                        if not (correct_start and correct_end and overlap_enough):
+                            check_output += '  invalid `public_title`: {}\n'.format(public_title)
+                            failed += 1
 
             # See if anything happened
             if len(check_output.splitlines()) > 1:
