@@ -614,7 +614,7 @@ class OpenStackCheck(AgentCheck):
 
         tags = instance.get('tags', [])
         hypervisor_name = self._hypervisor_name_cache.get(i_key)
-        if hypervisor_name is not None:
+        if hypervisor_name:
             tags.extend("hypervisor:{}".format(hypervisor_name))
 
         self.gauge("openstack.exponential_backoff_time", jitter, tags=tags)
