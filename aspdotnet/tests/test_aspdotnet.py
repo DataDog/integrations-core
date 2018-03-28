@@ -1,15 +1,10 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-from nose.plugins.attrib import attr
-
-# 3p
-
-# project
-from tests.checks.common import AgentCheckTest
-
+import pytest
+from datadog_checks.stubs import aggregator as _aggregator
+from datadog_checks.aspdotnet import AspdotnetCheck
 
 MINIMAL_INSTANCE = {
     'host': '.',
@@ -21,9 +16,13 @@ INSTANCE_WITH_TAGS = {
 }
 
 
-@attr('windows')
-@attr(requires='aspdotnet')
-class ASPDotNetTest(AgentCheckTest):
+@pytest.fixture
+def aggregator():
+    _aggregator.reset()
+    return _aggregator
+
+
+class ASPDotNetTest:
     CHECK_NAME = 'aspdotnet'
 
     # these metrics are single-instance, so they won't have per-instance tags
@@ -44,23 +43,27 @@ class ASPDotNetTest(AgentCheckTest):
     )
 
     def test_basic_check(self):
-        self.run_check_twice({'instances': [MINIMAL_INSTANCE]})
+        instance = MINIMAL_INSTANCE
+        c = AspdotnetCheck(self.CHECK_NAME, {}, {}, [instance])
+        c.check(instance)
 
         for metric in self.ASP_METRICS:
-            self.assertMetric(metric, tags=None, count=1)
+            aggregator.assert_metric(metric, tags=None, count=1)
 
         for metric in self.ASP_APP_METRICS:
-            self.assertMetric(metric, tags=["instance:__Total__"], count=1)
+            aggregator.assert_metric(metric, tags=["instance:__Total__"], count=1)
 
-        self.coverage_report()
+        assert aggregator.metrics_asserted_pct == 100.0
 
     def test_with_tags(self):
-        self.run_check_twice({'instances': [INSTANCE_WITH_TAGS]})
+        instance = INSTANCE_WITH_TAGS
+        c = AspdotnetCheck(self.CHECK_NAME, {}, {}, [instance])
+        c.check(instance)
 
         for metric in self.ASP_METRICS:
-            self.assertMetric(metric, tags=['tag1', 'another:tag'], count=1)
+            aggregator.assert_metric(metric, tags=['tag1', 'another:tag'], count=1)
 
         for metric in self.ASP_APP_METRICS:
-            self.assertMetric(metric, tags=['tag1', 'another:tag', 'instance:__Total__'], count=1)
+            aggregator.assert_metric(metric, tags=['tag1', 'another:tag', 'instance:__Total__'], count=1)
 
-        self.coverage_report()
+        assert aggregator.metrics_asserted_pct == 100.0
