@@ -84,8 +84,8 @@ from simplejson import JSONDecodeError
 from bs4 import BeautifulSoup
 
 # Project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'
@@ -240,7 +240,8 @@ class SparkCheck(AgentCheck):
             base_url = self._get_request_url(instance, tracking_url)
             am_address = self._get_url_base(base_url)
 
-            self.service_check(SPARK_SERVICE_CHECK,
+            self.service_check(
+                SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
                 tags=['url:%s' % am_address],
                 message='Connection to ApplicationMaster "%s" was successful' % am_address)
@@ -262,11 +263,12 @@ class SparkCheck(AgentCheck):
             master_address = instance.get(DEPRECATED_MASTER_ADDRESS)
 
             if master_address:
-                self.log.warning('The use of `%s` is deprecated. Please use `%s` instead.' %
+                self.log.warning(
+                    'The use of `%s` is deprecated. Please use `%s` instead.' %
                     (DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS))
             else:
-                raise Exception('A URL for `%s` must be specified in the instance '
-                    'configuration' % MASTER_ADDRESS)
+                raise Exception(
+                    'URL for `%s` must be specified in the instance configuration' % MASTER_ADDRESS)
 
         return master_address
 
@@ -302,7 +304,8 @@ class SparkCheck(AgentCheck):
         # Determine the cluster mode
         cluster_mode = instance.get(SPARK_CLUSTER_MODE)
         if cluster_mode is None:
-            self.log.warning('The value for `spark_cluster_mode` was not set in the configuration. '
+            self.log.warning(
+                'The value for `spark_cluster_mode` was not set in the configuration. '
                 'Defaulting to "%s"' % SPARK_YARN_MODE)
             cluster_mode = SPARK_YARN_MODE
 
@@ -315,20 +318,20 @@ class SparkCheck(AgentCheck):
             running_apps = self._mesos_init(instance, master_address, ssl_config)
             return self._get_spark_app_ids(running_apps, ssl_config)
 
-
         elif cluster_mode == SPARK_YARN_MODE:
             running_apps = self._yarn_init(master_address, ssl_config)
             return self._get_spark_app_ids(running_apps, ssl_config)
 
         else:
-            raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE,
-                cluster_mode))
+            raise Exception(
+                'Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
     def _standalone_init(self, spark_master_address, pre_20_mode, ssl_config):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         '''
-        metrics_json = self._rest_request_to_json(spark_master_address,
+        metrics_json = self._rest_request_to_json(
+            spark_master_address,
             SPARK_MASTER_STATE_PATH,
             SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
 
@@ -346,7 +349,8 @@ class SparkCheck(AgentCheck):
                     if app_id and app_name and app_url:
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
-                            applist = self._rest_request_to_json(app_url,
+                            applist = self._rest_request_to_json(
+                                app_url,
                                 SPARK_APPS_PATH,
                                 SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
                             for appl in applist:
@@ -355,13 +359,14 @@ class SparkCheck(AgentCheck):
                                 running_apps[aid] = (aname, app_url)
                         else:
                             running_apps[app_id] = (app_name, app_url)
-                except:
+                except Exception:
                     # it's possible for the requests to fail if the job
                     # completed since we got the list of apps.  Just continue
                     pass
 
         # Report success after gathering metrics from Spark master
-        self.service_check(SPARK_STANDALONE_SERVICE_CHECK,
+        self.service_check(
+            SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % spark_master_address],
             message='Connection to Spark master "%s" was successful' % spark_master_address)
@@ -374,7 +379,8 @@ class SparkCheck(AgentCheck):
         '''
         running_apps = {}
 
-        metrics_json = self._rest_request_to_json(master_address,
+        metrics_json = self._rest_request_to_json(
+            master_address,
             MESOS_MASTER_APP_PATH,
             MESOS_SERVICE_CHECK, ssl_config)
 
@@ -396,7 +402,8 @@ class SparkCheck(AgentCheck):
                             running_apps[app_id] = (app_name, tracking_url)
 
         # Report success after gathering all metrics from ResourceManaager
-        self.service_check(MESOS_SERVICE_CHECK,
+        self.service_check(
+            MESOS_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % master_address],
             message='Connection to ResourceManager "%s" was successful' % master_address)
@@ -411,7 +418,8 @@ class SparkCheck(AgentCheck):
         running_apps = self._yarn_get_running_spark_apps(rm_address, ssl_config)
 
         # Report success after gathering all metrics from ResourceManaager
-        self.service_check(YARN_SERVICE_CHECK,
+        self.service_check(
+            YARN_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % rm_address],
             message='Connection to ResourceManager "%s" was successful' % rm_address)
@@ -424,7 +432,8 @@ class SparkCheck(AgentCheck):
         Due to a bug, we need to parse the HTML manually because we cannot
         fetch JSON data from HTTP interface.
         '''
-        app_page = self._rest_request(spark_master_address,
+        app_page = self._rest_request(
+            spark_master_address,
             SPARK_MASTER_APP_PATH,
             SPARK_STANDALONE_SERVICE_CHECK,
             ssl_config,
@@ -443,7 +452,8 @@ class SparkCheck(AgentCheck):
         The `app_id` returned is that of the YARN application. This will eventually be mapped into
         a Spark application ID.
         '''
-        metrics_json = self._rest_request_to_json(rm_address,
+        metrics_json = self._rest_request_to_json(
+            rm_address,
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
             ssl_config,
@@ -473,7 +483,8 @@ class SparkCheck(AgentCheck):
         '''
         spark_apps = {}
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
-            response = self._rest_request_to_json(tracking_url,
+            response = self._rest_request_to_json(
+                tracking_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, ssl_config)
 
@@ -493,7 +504,8 @@ class SparkCheck(AgentCheck):
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
             base_url = self._get_request_url(instance, tracking_url)
-            response = self._rest_request_to_json(base_url,
+            response = self._rest_request_to_json(
+                base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, ssl_config, app_id, 'jobs')
 
@@ -515,7 +527,8 @@ class SparkCheck(AgentCheck):
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
             base_url = self._get_request_url(instance, tracking_url)
-            response = self._rest_request_to_json(base_url,
+            response = self._rest_request_to_json(
+                base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, ssl_config, app_id, 'stages')
 
@@ -537,7 +550,8 @@ class SparkCheck(AgentCheck):
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
             base_url = self._get_request_url(instance, tracking_url)
-            response = self._rest_request_to_json(base_url,
+            response = self._rest_request_to_json(
+                base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, ssl_config, app_id, 'executors')
 
@@ -560,7 +574,8 @@ class SparkCheck(AgentCheck):
         for app_id, (app_name, tracking_url) in running_apps.iteritems():
 
             base_url = self._get_request_url(instance, tracking_url)
-            response = self._rest_request_to_json(base_url,
+            response = self._rest_request_to_json(
+                base_url,
                 SPARK_APPS_PATH,
                 SPARK_SERVICE_CHECK, ssl_config, app_id, 'storage/rdd')
 
@@ -581,7 +596,8 @@ class SparkCheck(AgentCheck):
             metric_status = metrics_json.get(status)
 
             if metric_status is not None:
-                self._set_metric(metric_name,
+                self._set_metric(
+                    metric_name,
                     metric_type,
                     metric_status,
                     tags)
@@ -608,7 +624,8 @@ class SparkCheck(AgentCheck):
             url = self._join_url_dir(url, object_path)
 
         # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        # ssl_verify can be a bool or a string
+        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
         if isinstance(ssl_config.verify, bool) or isinstance(ssl_config.verify, str):
             verify = ssl_config.verify
         else:
@@ -641,23 +658,24 @@ class SparkCheck(AgentCheck):
             response.raise_for_status()
 
         except Timeout as e:
-            self.service_check(service_name,
+            self.service_check(
+                service_name,
                 AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message='Request timeout: {0}, {1}'.format(url, e))
             raise
 
-        except (HTTPError,
-                InvalidURL,
-                ConnectionError) as e:
-            self.service_check(service_name,
+        except (HTTPError, InvalidURL, ConnectionError) as e:
+            self.service_check(
+                service_name,
                 AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message='Request failed: {0}, {1}'.format(url, e))
             raise
 
         except ValueError as e:
-            self.service_check(service_name,
+            self.service_check(
+                service_name,
                 AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message=str(e))
@@ -675,7 +693,8 @@ class SparkCheck(AgentCheck):
             response_json = response.json()
 
         except JSONDecodeError as e:
-            self.service_check(service_name,
+            self.service_check(
+                service_name,
                 AgentCheck.CRITICAL,
                 tags=['url:%s' % self._get_url_base(address)],
                 message='JSON Parse failed: {0}'.format(e))

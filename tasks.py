@@ -19,6 +19,7 @@ AGENT_BASED_INTEGRATIONS = [
     'linkerd',
     'prometheus',
     'redisdb',
+    'spark',
     'vsphere',
 ]
 
