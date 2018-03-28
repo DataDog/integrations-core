@@ -51,7 +51,7 @@ class TestNfsstat:
 
     def test_check(self, aggregator):
         instance = self.INSTANCES['main']
-        c = NfsStatCheck(self.CHECK_NAME, None, {}, [instance])
+        c = NfsStatCheck(self.CHECK_NAME, {}, {}, [instance])
 
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = f.read()

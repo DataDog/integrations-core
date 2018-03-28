@@ -8,6 +8,7 @@ from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
+
 class NfsStatCheck(AgentCheck):
 
     metric_prefix = 'system.nfs.'
@@ -25,7 +26,10 @@ class NfsStatCheck(AgentCheck):
             elif os.path.exists('/usr/local/sbin/nfsiostat'):
                 self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
             else:
-                raise Exception('nfsstat check requires nfsiostat be installed, please install it (through nfs-utils) or set the path to the installed version')
+                raise Exception(
+                    'nfsstat check requires nfsiostat be installed, please install it '
+                    '(through nfs-utils) or set the path to the installed version'
+                )
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
@@ -53,6 +57,7 @@ class NfsStatCheck(AgentCheck):
 
         for device in all_devices:
             device.send_metrics(self.gauge, custom_tags)
+
 
 class Device(object):
 
