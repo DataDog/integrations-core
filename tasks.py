@@ -159,8 +159,16 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
     """Validate all `manifest.json` files.
 
     Example invocation:
-        inv manifest --update 1.0.0
+        inv manifest --update manifest_version=1.0.0
     """
+    if update:
+        try:
+            key, value = update.split('=')
+        except ValueError:
+            raise Exit('Unable to parse `{}`'.format(update))
+    else:
+        key, value = None, None
+
     all_guids = {}
     failed = 0
     output = ''
@@ -182,8 +190,8 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                 continue
 
             if update:
-                decoded['manifest_version'] = update
-                check_output += '  new `manifest_version`: {}\n'.format(update)
+                decoded[key] = value
+                check_output += '  new `{}`: {}\n'.format(key, value)
             else:
                 # guid
                 guid = decoded.get('guid')
@@ -323,6 +331,68 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                             check_output += '  invalid `public_title`: {}\n'.format(public_title)
                             failed += 1
 
+                    # categories
+                    categories = decoded.get('categories')
+                    if not categories or not isinstance(categories, list):
+                        check_output += '  required non-null sequence: categories\n'
+                        failed += 1
+
+                    # type
+                    correct_integration_type = 'check'
+                    integration_type = decoded.get('type')
+                    if not integration_type or not isinstance(integration_type, str):
+                        check_output += '  required non-null string: type\n'
+                        failed += 1
+                        if fix:
+                            decoded['type'] = correct_integration_type
+                            check_output += '  new `type`: {}\n'.format(correct_integration_type)
+                            failed -= 1
+                    elif integration_type != correct_integration_type:
+                        check_output += '  invalid `type`: {}\n'.format(integration_type)
+                        failed += 1
+                        if fix:
+                            decoded['type'] = correct_integration_type
+                            check_output += '  new `type`: {}\n'.format(correct_integration_type)
+                            failed -= 1
+
+                    # is_public
+                    correct_is_public = True
+                    is_public = decoded.get('is_public')
+                    if not isinstance(is_public, bool):
+                        check_output += '  required boolean: is_public\n'
+                        failed += 1
+                        if fix:
+                            decoded['is_public'] = correct_is_public
+                            check_output += '  new `is_public`: {}\n'.format(correct_is_public)
+                            failed -= 1
+                    elif is_public != correct_is_public:
+                        check_output += '  invalid `is_public`: {}\n'.format(is_public)
+                        failed += 1
+                        if fix:
+                            decoded['is_public'] = correct_is_public
+                            check_output += '  new `is_public`: {}\n'.format(correct_is_public)
+                            failed -= 1
+
+                    # has_logo
+                    default_has_logo = True
+                    has_logo = decoded.get('has_logo')
+                    if not isinstance(has_logo, bool):
+                        check_output += '  required boolean: has_logo\n'
+                        failed += 1
+                        if fix:
+                            decoded['has_logo'] = default_has_logo
+                            check_output += '  new `has_logo`: {}\n'.format(default_has_logo)
+                            failed -= 1
+
+                    # doc_link
+                    doc_link = decoded.get('doc_link')
+                    if not doc_link or not isinstance(doc_link, str):
+                        check_output += '  required non-null string: doc_link\n'
+                        failed += 1
+                    elif not doc_link.startswith('https://docs.datadoghq.com/integrations/'):
+                        check_output += '  invalid `doc_link`: {}\n'.format(doc_link)
+                        failed += 1
+
             # See if anything happened
             if len(check_output.splitlines()) > 1:
                 output += check_output
@@ -336,16 +406,3 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
         print(output[:-1])
 
     raise Exit(int(failed > 0))
-
-
-
-
-
-
-
-
-
-
-
-
-
