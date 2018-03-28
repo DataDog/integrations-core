@@ -1,5 +1,12 @@
 # CHANGELOG - mcache
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support for service check.
+
 1.1.0 / 2017-11-21
 ==================
 ### Changes

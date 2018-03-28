@@ -326,7 +326,7 @@ class Memcache(AgentCheck):
 
         mc = None  # client
         tags = ["url:{0}:{1}".format(server, port)] + custom_tags
-        service_check_tags = ["host:%s" % server, "port:%s" % port]
+        service_check_tags = ["host:%s" % server, "port:%s" % port] + custom_tags
 
         try:
             self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
