@@ -22,10 +22,10 @@ Create a file `cassandra.yaml` in the Agent's `conf.d` directory.
 
 #### Metric Collection
 
-*  The default configuration of your `cassandra.yaml` file activate the collection of your [Cassandra Metrics](#metrics):
+*  The default configuration of your `cassandra.yaml` file activate the collection of your [Cassandra Metrics](#metrics).
  See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
  
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
+2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 #### Log Collection
 
