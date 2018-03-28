@@ -7,7 +7,7 @@ services:
     ports:
       - "2181:2181"
   kafka:
-    image: "wurstmeister/kafka:${FLAVOR_VERSION}"
+    image: "wurstmeister/kafka:${KAFKA_VERSION}"
     ports:
       - "${EXTERNAL_PORT}:9092"
       - "${EXTERNAL_JMX_PORT}:9999"
