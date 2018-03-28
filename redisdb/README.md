@@ -138,8 +138,7 @@ Configure a `password` in `redisdb.yaml`.
 
 ## Development
 
-Please refer to the [main documentation](../docs/index.md) for more details about
-how to test and develop Agent based integrations.
+Please refer to the [main documentation](https://github.com/DataDog/integrations-core/blob/master/docs/index.md) for more details about how to test and develop Agent based integrations.
 
 ### Testing Guidelines
 
