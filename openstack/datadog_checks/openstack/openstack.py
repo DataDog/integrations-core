@@ -6,6 +6,7 @@ from urlparse import urljoin
 import re
 import time
 import random
+import copy
 
 import requests
 import simplejson as json
@@ -600,7 +601,7 @@ class OpenStackCheck(AgentCheck):
             return True
 
         return False
- 
+
     def do_backoff(self, instance):
         i_key = self._instance_key(instance)
         tracker = self.backoff[i_key]
@@ -617,13 +618,13 @@ class OpenStackCheck(AgentCheck):
         if hypervisor_name:
             tags.extend("hypervisor:{}".format(hypervisor_name))
 
-        self.gauge("openstack.exponential_backoff_time", jitter, tags=tags)
+        self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
+        self.gauge("openstack.backoff.retries", self.backoff[i_key]['retries'], tags=tags)
 
         tracker['scheduled'] = time.time() + backoff_interval
 
     def reset_backoff(self, instance):
         i_key = self._instance_key(instance)
-        tracker = self.backoff[i_key]
         self.backoff[i_key]['retries'] = 0
         self.backoff[i_key]['scheduled'] = time.time()
 
@@ -1033,7 +1034,7 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
 
-        # have we been backed off 
+        # have we been backed off
         if not self.should_run(instance):
             self.log.info('Skipping run due to exponential backoff in effect')
             return
@@ -1090,7 +1091,8 @@ class OpenStackCheck(AgentCheck):
                 host_tags = self._get_tags_for_host()
 
                 for sid in server_ids:
-                    server_tags = ["nova_managed_server"]
+                    server_tags = copy.copy(instance.get('server_tags', []))
+                    server_tags.append("nova_managed_server")
 
                     if scope.tenant_id:
                         server_tags.append("tenant_id:%s" % scope.tenant_id)
