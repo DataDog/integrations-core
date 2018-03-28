@@ -1,14 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import os
 
-# 3rd party
-
-# project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 from utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
