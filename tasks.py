@@ -17,6 +17,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kube_proxy',
     'kubelet',
     'linkerd',
+    'nginx',
     'prometheus',
     'redisdb',
     'vsphere',
