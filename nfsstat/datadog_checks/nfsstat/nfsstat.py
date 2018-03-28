@@ -33,6 +33,8 @@ class NfsStatCheck(AgentCheck):
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
+        print(stat_out, err, _)
+        raise 
         all_devices = []
         this_device = []
         custom_tags = instance.get("tags", [])
