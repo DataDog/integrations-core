@@ -41,7 +41,7 @@ class TestNfsstat:
     CHECK_NAME = 'nfsstat'
     INSTANCES = {
         'main': {
-            'stats_url': 'http://localhost:80/stats',
+            'tags': ['optional:tag1'],
         },
     }
 
@@ -60,20 +60,14 @@ class TestNfsstat:
                         return_value=(mock_output, '', 0)):
             c.check(instance)
 
-        nfs_server_tag = 'nfs_server:192.168.34.1'
-        nfs_export_tag = 'nfs_export:/exports/nfs/datadog/{0}'
-        nfs_mount_tag = 'nfs_mount:/mnt/datadog/{0}'
-
-        folder_names = ['two']
+        tags = list(instance['tags'])
+        tags.extend([
+            'nfs_server:192.168.34.1',
+            'nfs_export:/exports/nfs/datadog/two',
+            'nfs_mount:/mnt/datadog/two'
+        ])
 
         for metric in metrics:
-            for folder in folder_names:
-                tags = [
-                    'optional:tag1',
-                    nfs_server_tag,
-                    nfs_export_tag.format(folder),
-                    nfs_mount_tag.format(folder)
-                ]
-                aggregator.assert_metric(metric, tags=tags)
+            aggregator.assert_metric(metric, tags=tags)
 
         assert aggregator.metrics_asserted_pct == 100.0
