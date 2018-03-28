@@ -5,7 +5,7 @@ import os
 
 import mock
 import pytest
-from datadog_checks.stubs import aggregator as _aggregator
+from datadog_checks.stubs import aggregator
 
 from datadog_checks.nfsstat import NfsStatCheck
 
@@ -32,9 +32,9 @@ FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures
 
 
 @pytest.fixture
-def aggregator():
-    _aggregator.reset()
-    return _aggregator
+def Aggregator():
+    aggregator.reset()
+    return aggregator
 
 
 class TestNfsstat:
@@ -49,7 +49,7 @@ class TestNfsstat:
         'nfsiostat_path': '/opt/datadog-agent/embedded/sbin/nfsiostat',
     }
 
-    def test_check(self, aggregator):
+    def test_check(self, Aggregator):
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
 
@@ -68,6 +68,6 @@ class TestNfsstat:
         ])
 
         for metric in metrics:
-            aggregator.assert_metric(metric, tags=tags)
+            Aggregator.assert_metric(metric, tags=tags)
 
-        assert aggregator.metrics_asserted_pct == 100.0
+        assert Aggregator.metrics_asserted_pct == 100.0
