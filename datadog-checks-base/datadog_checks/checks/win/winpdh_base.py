@@ -4,10 +4,10 @@
 # Copyright 2017 Datadog, Inc.
 
 # toolkit
-from ..checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # project
-from utils.containers import hash_mutable
+from datadog_checks.utils.containers import hash_mutable
 
 #  datadog
 try:
