@@ -6,7 +6,7 @@ try:
     # Agent5 compatibility layer
     from checks.libs.win.pdhbasecheck import PDHBaseCheck
 except ImportError:
-    from .winpdb_base import PDHBaseCheck
+    from .winpdh_base import PDHBaseCheck
 
 __all__ = [
     'PDHBaseCheck',
