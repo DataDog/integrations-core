@@ -10,8 +10,11 @@ import requests
 import simplejson as json
 
 from datadog_checks.checks import AgentCheck
-from util import headers
-
+# Compatability layer
+try:
+    from util import headers
+except:  # noqa: E722
+    from datadog_checks.utils.headers import headers
 
 UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
