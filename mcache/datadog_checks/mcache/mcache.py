@@ -1,15 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# 3rd party
 import memcache
 
-# project
-try:
-    from datadog_checks.checks import AgentCheck
-except ImportError:
-    from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # Ref: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
 # Name              Type     Meaning

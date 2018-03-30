@@ -213,6 +213,8 @@ def test_metrics(client, check, aggregator, memcached):
 
 def test_connections_leaks(check):
     """
+    This test was ported from the old test suite but the leak might not be a
+    problem anymore.
     """
     # Start state, connections should be 0
     assert count_connections(PORT) == 0
