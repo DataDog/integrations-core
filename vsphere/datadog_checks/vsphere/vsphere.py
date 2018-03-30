@@ -205,11 +205,13 @@ class VSphereCheck(AgentCheck):
 
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
+        tags = instance.get('tags', [])
 
         service_check_tags = [
             'vcenter_server:{0}'.format(instance.get('name')),
             'vcenter_host:{0}'.format(instance.get('host')),
-        ]
+        ] + tags
+        service_check_tags = list(set(service_check_tags))
 
         # Check for ssl configs and generate an appropriate ssl context object
         ssl_verify = instance.get('ssl_verify', True)
