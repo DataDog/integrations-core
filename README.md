@@ -95,6 +95,7 @@ checks to Pytest is a work in progress, this is the list of the checks supportin
 the new testing approach:
 
 * [disk](disk)
+* [mcache](mcache)
 * [redisdb](redisdb)
 * [vsphere](vsphere)
 
