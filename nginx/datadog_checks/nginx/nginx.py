@@ -13,7 +13,7 @@ from datadog_checks.checks import AgentCheck
 # Compatability layer
 try:
     from util import headers
-except:  # noqa: E722
+except ImportError:  # noqa: E722
     from datadog_checks.utils.headers import headers
 
 UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [

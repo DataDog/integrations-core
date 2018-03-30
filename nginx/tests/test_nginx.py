@@ -5,12 +5,25 @@ import os
 # import mock
 # import json
 import pytest
+import subprocess
 # import requests
+import time
 from datadog_checks.stubs import aggregator as _aggregator
 
 from datadog_checks.nginx import Nginx
 
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+@pytest.fixture(scope="session")
+def spin_up_nginx():
+    env = os.environ
+    env['NGINX_CONFIG'] = os.path.join(HERE, 'config', 'nginx.conf')
+    args = ["docker-compose",
+            "-f", os.path.join(HERE, 'compose', 'nginx.yaml')
+            ]
+    subprocess.check_call(args + ["up", "-d"], env=env)
 
 
 @pytest.fixture
@@ -22,52 +35,48 @@ def aggregator():
 class TestNginx:
     CHECK_NAME = 'nginx'
 
-    INSTANCES = {
-        'instances': [
-            {'nginx_status_url': 'http://localhost:44441/nginx_status/'},
-            {
-                'nginx_status_url': 'http://localhost:44441/nginx_status/',
-                'tags': ['first_one'],
-            },
-            {
-                'nginx_status_url': 'http://dummyurl:44441/nginx_status/',
-                'tags': ['dummy'],
-            },
-            {
-                'nginx_status_url': 'http://localhost:44441/nginx_status/',
-                'tags': ['second'],
-            },
-            {
-                'nginx_status_url': 'https://localhost:44442/https_nginx_status/',
-                'tags': ['ssl_enabled'],
-                'ssl_validation': True,
-            },
-            {
-                'nginx_status_url': 'https://localhost:44442/https_nginx_status/',
-                'tags': ['ssl_disabled'],
-                'ssl_validation': False,
-            },
-        ]
-    }
+    CONFIG_STUBS = [
+        {'nginx_status_url': 'http://localhost:44441/nginx_status/'},
+        {
+            'nginx_status_url': 'http://localhost:44441/nginx_status/',
+            'tags': ['first_one'],
+        },
+        {
+            'nginx_status_url': 'http://dummyurl:44441/nginx_status/',
+            'tags': ['dummy'],
+        },
+        {
+            'nginx_status_url': 'http://localhost:44441/nginx_status/',
+            'tags': ['second'],
+        },
+        {
+            'nginx_status_url': 'https://localhost:44441/https_nginx_status/',
+            'tags': ['ssl_enabled'],
+            'ssl_validation': True,
+        },
+        {
+            'nginx_status_url': 'https://localhost:44441/https_nginx_status/',
+            'tags': ['ssl_disabled'],
+            'ssl_validation': False,
+        },
+    ]
 
     AGENT_CONFIG = {
         'version': '0.1',
         'api_key': 'toto'
     }
 
-    def test_nginx_one_connection(self, aggregator):
+    def test_nginx_one_connection(self, aggregator, spin_up_nginx):
         # Testing that connection will work with instance 0
-        instance = self.INSTANCES['instances'][0]
-        c = Nginx(self.CHECK_NAME, self.AGENT_CONFIG, {}, [instance])
-
-        # with open(os.path.join(FIXTURE_DIR, 'nginx'), 'rb') as f:
-        #     mock_output = f.read()
-
-        c.check(instance)
-
-        # Checking that only one metric is of type 'nginx.net.connections'
-        r = c.get_metrics()
-        self.assertEquals(len([t for t in r if t[0] == "nginx.net.connections"]), 1, r)
+        c = Nginx(self.CHECK_NAME, {}, {})
+        for config in self.CONFIG_STUBS:
+            time.sleep(30)
+            c.check(config)
+            tags = config["tags"]
+            # Checking that only one metric is of type 'nginx.net.connections'
+            aggregator.assert_metric("nginx.net.connections", tags=tags, count=1)
+            aggregator.reset()
+            # self.assertEquals(len([t for t in r if t[0] == "nginx.net.connections"]), 1, r)
 
 #     def test_nginx_tags(self):
 #         nginx = load_check('nginx', INSTANCES, AGENT_CONFIG)
@@ -83,7 +92,7 @@ class TestNginx:
 #         service_checks = nginx.get_service_checks()
 #         can_connect = [sc for sc in service_checks if sc['check'] == 'nginx.can_connect']
 #         for i in range(len(can_connect)):
-#             self.assertEquals(set(can_connect[i]['tags']), set(['host:localhost', 'port:44441']), service_checks)
+#             self.assertEquals(set(can_connect[i]['tags']), set(['host:localhost', 'port:8180']), service_checks)
 
 #     def test_nginx_ssl_validation_enabled(self):
 #         # Note: Throws an SSLError, because we're attempting to connect to an https endpoint with a self-signed
@@ -109,7 +118,7 @@ class TestNginx:
 #         service_checks = nginx.get_service_checks()
 #         can_connect = [sc for sc in service_checks if sc['check'] == 'nginx.can_connect']
 #         for i in range(len(can_connect)):
-#             self.assertEquals(set(can_connect[i]['tags']), set(['host:localhost', 'port:44442']), service_checks)
+#             self.assertEquals(set(can_connect[i]['tags']), set(['host:localhost', 'port:8180']), service_checks)
 
 #     def test_nginx_plus(self):
 #         test_data = Fixtures.read_file('nginx_plus_in.json', sdk_dir=FIXTURE_DIR)

@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  nginx:
+    image: 'nginx:${NGINX_VERSION}'
+    volumes:
+      - ${NGINX_CONFIG}:/etc/nginx/nginx.conf
+    ports:
+      - "44441"
+    networks:
+      - network1
+
+
+networks:
+  network1:
+    name: nginx_default
