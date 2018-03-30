@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# 3rd party
 import memcache
 
-# project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # Ref: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
 # Name              Type     Meaning
@@ -175,7 +172,6 @@ class Memcache(AgentCheck):
             assert len(raw_stats) == 1 and len(raw_stats[0]) == 2,\
                 "Malformed response: %s" % raw_stats
 
-
             # Access the dict
             stats = raw_stats[0][1]
             for metric in stats:
@@ -228,7 +224,6 @@ class Memcache(AgentCheck):
                 message="Server has been up for %s seconds" % uptime)
         except AssertionError:
             raise
-
 
     def _get_optional_metrics(self, client, tags, options=None):
         for arg, metrics_args in self.OPTIONAL_STATS.iteritems():
