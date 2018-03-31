@@ -147,7 +147,7 @@ class WinPDHCounter(object):
 
         # create a table of the keys to the counter index, because we want to look up
         # by counter name.
-        
+
         idx = 0
         idx_max = len(val)
         while idx < idx_max:
