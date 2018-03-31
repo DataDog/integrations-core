@@ -85,7 +85,6 @@ test_script:
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
-  - bundle exec rake ci:run[aspdotnet]
   - bundle exec rake ci:run[dotnetclr]
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
