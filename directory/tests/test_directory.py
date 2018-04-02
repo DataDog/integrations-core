@@ -114,7 +114,6 @@ def tearDown_module(module):
     shutil.rmtree(temp_dir)
 
 
-@pytest.mark.integration
 def test_directory_metrics(aggregator):
     """
     Directory metric coverage
@@ -163,7 +162,6 @@ def test_directory_metrics(aggregator):
     aggregator.metrics_asserted_pct == 100.0
 
 
-@pytest.mark.integration
 def test_file_metrics(aggregator):
     """
     File metric coverage
@@ -229,7 +227,6 @@ def test_file_metrics(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-@pytest.mark.integration
 def test_non_existent_directory(aggregator):
     """
     Missing or inaccessible directory coverage.
@@ -239,7 +236,6 @@ def test_non_existent_directory(aggregator):
         dir_check.check(config)
 
 
-@pytest.mark.integration
 def test_non_existent_directory_ignore_missing(aggregator):
     config = {'directory': '/non-existent/directory',
               'ignore_missing': True}
