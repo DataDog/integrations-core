@@ -6,6 +6,62 @@ from .utils import make_metric_tree
 METRIC_PREFIX = 'envoy.'
 
 METRICS = {
+    'stats.overflow': {
+        'tags': (),
+        'method': 'count',
+    },
+    'server.uptime': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.memory_allocated': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.memory_heap_size': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.live': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.parent_connections': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.total_connections': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.version': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'server.days_until_first_cert_expiring': {
+        'tags': (),
+        'method': 'gauge',
+    },
+    'filesystem.write_buffered': {
+        'tags': (),
+        'method': 'count',
+    },
+    'filesystem.write_completed': {
+        'tags': (),
+        'method': 'count',
+    },
+    'filesystem.flushed_by_timer': {
+        'tags': (),
+        'method': 'count',
+    },
+    'filesystem.reopen_failed': {
+        'tags': (),
+        'method': 'count',
+    },
+    'filesystem.write_total_buffered': {
+        'tags': (),
+        'method': 'gauge',
+    },
     'runtime.load_error': {
         'tags': (),
         'method': 'count',
