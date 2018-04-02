@@ -6,24 +6,51 @@ import os
 # import json
 import pytest
 import subprocess
-# import requests
+import requests
+import logging
 import time
 from datadog_checks.stubs import aggregator as _aggregator
 
 from datadog_checks.nginx import Nginx
-
+log = logging.getLogger('test_nginx')
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def wait_for_nginx():
+    env = os.environ
+    docker_ps = [
+        "docker", "ps", "-a"
+    ]
+    for _ in xrange(0, 100):
+        res = None
+        try:
+            res = requests.get('http://localhost:44441/nginx_status')
+            log.info("res: ".format(res))
+            log.info("sc: {0} text: {1}".format(res.status_code, res.text))
+            res.raise_for_status
+            return
+        except Exception as e:
+            log.info("exception: {0} res: {1}".format(e, res))
+            subprocess.check_call(docker_ps, env=env)
+            time.sleep(2)
 
 
 @pytest.fixture(scope="session")
 def spin_up_nginx():
     env = os.environ
     env['NGINX_CONFIG'] = os.path.join(HERE, 'config', 'nginx.conf')
+    print 'NGINX_CONFIG', env['NGINX_CONFIG']
     args = ["docker-compose",
             "-f", os.path.join(HERE, 'compose', 'nginx.yaml')
             ]
     subprocess.check_call(args + ["up", "-d"], env=env)
+
+    wait_for_nginx()
+    # for _ in xrange(0, 100):
+    #    requests.get('http://localhost:44441')
+    yield
+    subprocess.check_call(args + ["down"], env=env)
 
 
 @pytest.fixture
@@ -70,7 +97,6 @@ class TestNginx:
         # Testing that connection will work with instance 0
         c = Nginx(self.CHECK_NAME, {}, {})
         for config in self.CONFIG_STUBS:
-            time.sleep(30)
             c.check(config)
             tags = config["tags"]
             # Checking that only one metric is of type 'nginx.net.connections'
