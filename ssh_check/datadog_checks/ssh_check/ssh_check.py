@@ -1,16 +1,12 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 import time
 
-# 3p
 import paramiko
 
-# project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class CheckSSH(AgentCheck):
