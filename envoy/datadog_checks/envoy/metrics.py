@@ -58,6 +58,10 @@ METRICS = {
         'tags': ('stat_prefix', ),
         'method': 'count',
     },
+    'http.rq_direct_response': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
     'http.rq_total': {
         'tags': ('stat_prefix', ),
         'method': 'count',

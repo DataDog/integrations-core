@@ -312,7 +312,7 @@ envoy.http.tracing.service_forced,count,,occurrence,,Total number of traceable d
 envoy.http.tracing.client_enabled,count,,occurrence,,Total number of traceable decisions by request header x-envoy-force-trace,0,envoy,
 envoy.http.tracing.not_traceable,count,,occurrence,,Total number of non-traceable decisions by request id,0,envoy,
 envoy.http.tracing.health_check,count,,occurrence,,Total number of non-traceable decisions by health check,0,envoy,
-envoy.,,,,,,,envoy,
+envoy.http.rq_direct_response,count,,request,,Total requests that resulted in a direct response,0,envoy,
 envoy.,,,,,,,envoy,
 envoy.,,,,,,,envoy,
 envoy.,,,,,,,envoy,
