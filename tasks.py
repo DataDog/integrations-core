@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 AGENT_BASED_INTEGRATIONS = [
     'datadog-checks-base',
     'disk',
+    'directory',
     'envoy',
     'istio',
     'kube_proxy',
