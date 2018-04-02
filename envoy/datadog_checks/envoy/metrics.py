@@ -762,6 +762,26 @@ METRICS = {
         'tags': (),
         'method': 'count',
     },
+    'http.tracing.random_sampling': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
+    'http.tracing.service_forced': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
+    'http.tracing.client_enabled': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
+    'http.tracing.not_traceable': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
+    'http.tracing.health_check': {
+        'tags': ('stat_prefix', ),
+        'method': 'count',
+    },
     'cluster_manager.cluster_added': {
         'tags': (),
         'method': 'count',
@@ -982,6 +1002,10 @@ METRICS = {
         'tags': ('cluster_name', ),
         'method': 'count',
     },
+    'cluster.update_empty': {
+        'tags': ('cluster_name', ),
+        'method': 'count',
+    },
     'cluster.version': {
         'tags': ('cluster_name', ),
         'method': 'gauge',
@@ -1178,6 +1202,10 @@ METRICS = {
         'tags': ('cluster_name', 'from_zone', 'to_zone', ),
         'method': 'histogram',
     },
+    'cluster.lb_recalculate_zone_structures': {
+        'tags': ('cluster_name', ),
+        'method': 'count',
+    },
     'cluster.lb_healthy_panic': {
         'tags': ('cluster_name', ),
         'method': 'count',
@@ -1203,6 +1231,10 @@ METRICS = {
         'method': 'count',
     },
     'cluster.lb_zone_number_differs': {
+        'tags': ('cluster_name', ),
+        'method': 'count',
+    },
+    'cluster.lb_zone_no_capacity_left': {
         'tags': ('cluster_name', ),
         'method': 'count',
     },
