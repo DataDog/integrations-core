@@ -188,7 +188,7 @@ def test_file_metrics(aggregator):
                     file_tag = [
                         filetagname + ":%s" % os.path.normpath(
                             temp_dir + "/log_" + str(i) + ".log")
-                        ]
+                               ]
                     aggregator.assert_metric(
                         mname,
                         tags=dir_tags + file_tag,
@@ -200,7 +200,7 @@ def test_file_metrics(aggregator):
                     file_tag = [
                         filetagname + ":%s" % os.path.normpath(
                             temp_dir + "/file_" + str(i))
-                        ]
+                               ]
                     aggregator.assert_metric(
                         mname,
                         tags=dir_tags + file_tag,
@@ -213,7 +213,7 @@ def test_file_metrics(aggregator):
                         file_tag = [
                             filetagname + ":%s" % os.path.normpath(
                                 temp_dir + "/subfolder" + "/file_" + str(i))
-                            ]
+                                   ]
                         aggregator.assert_metric(
                             mname,
                             tags=dir_tags + file_tag,
