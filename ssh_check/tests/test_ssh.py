@@ -47,27 +47,34 @@ class TestSshCheck:
         },
     }
 
-    def test_check(self, Aggregator):
+    def test_ssh(self, Aggregator):
         c = CheckSSH('ssh_check', {}, {}, list(self.INSTANCES.values()))
-
-        with pytest.raises(Exception):
-            c.check(self.INSTANCES['bad_auth'])
-
-        with pytest.raises(Exception):
-            c.check(self.INSTANCES['bad_auth'])
 
         nb_threads = threading.active_count()
 
-        # Testing that connection will work
         c.check(self.INSTANCES['main'])
 
-        service = self.check.get_service_checks()
-        self.assertEqual(service[0].get('status'), AgentCheck.OK)
-        self.assertEqual(service[0].get('message'), "No errors occured")
-        self.assertEqual(service[0].get('tags'), ["instance:io.netgarage.org-22", "optional:tag1"])
+        for sc in Aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
+            assert sc.status == CheckSSH.OK
+            for tag in sc.tags:
+                assert tag in ('instance:io.netgarage.org-22', 'optional:tag1')
 
-        service_fail = self.check.get_service_checks()
-        # Check failure status
-        self.assertEqual(service_fail[0].get('status'), AgentCheck.CRITICAL)
         # Check that we've closed all connections, if not we're leaking threads
-        self.assertEqual(nb_threads, threading.active_count())
+        assert nb_threads == threading.active_count()
+
+    def test_ssh_bad_config(self, Aggregator):
+        c = CheckSSH('ssh_check', {}, {}, list(self.INSTANCES.values()))
+
+        nb_threads = threading.active_count()
+
+        with pytest.raises(Exception):
+            c.check(self.INSTANCES['bad_auth'])
+
+        with pytest.raises(Exception):
+            c.check(self.INSTANCES['bad_hostname'])
+
+        for sc in Aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
+            assert sc.status == CheckSSH.CRITICAL
+
+        # Check that we've closed all connections, if not we're leaking threads
+        assert nb_threads == threading.active_count()
