@@ -10,6 +10,8 @@ from datadog_checks.checks import AgentCheck
 
 
 class CheckSSH(AgentCheck):
+    SSH_SERVICE_CHECK_NAME = 'ssh.can_connect'
+    SFTP_SERVICE_CHECK_NAME = 'sftp.can_connect'
 
     OPTIONS = [
         ('host', True, None, str),
@@ -78,16 +80,16 @@ class CheckSSH(AgentCheck):
             try:
                 client.connect(conf.host, port=conf.port, username=conf.username,
                     password=conf.password, pkey=private_key)
-                self.service_check('ssh.can_connect', AgentCheck.OK, tags=tags,
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags,
                     message=exception_message)
 
             except Exception as e:
                 exception_message = str(e)
                 status = AgentCheck.CRITICAL
-                self.service_check('ssh.can_connect', status, tags=tags,
+                self.service_check(self.SSH_SERVICE_CHECK_NAME, status, tags=tags,
                     message=exception_message)
                 if conf.sftp_check:
-                    self.service_check('sftp.can_connect', status, tags=tags,
+                    self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags,
                         message=exception_message)
                 raise
 
@@ -110,7 +112,7 @@ class CheckSSH(AgentCheck):
                 if exception_message is None:
                     exception_message = "No errors occured"
 
-                self.service_check('sftp.can_connect', status, tags=tags,
+                self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags,
                     message=exception_message)
         finally:
             # Always close the client, failure to do so leaks one thread per connection left open
