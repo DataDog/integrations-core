@@ -176,16 +176,16 @@ def cleanup(ctx):
 
     for path, dirnames, filenames in os.walk('.'):
         for filename in fnmatch.filter(filenames, '*.pyc'):
-            file_path = os.path.join(HERE, path, filename)
+            file_path = os.path.join(ROOT, path, filename)
             os.remove(file_path)
         for dirname in dirnames:
             if dirname in should_delete_directories:
-                dir_path = os.path.join(HERE, path, dirname)
+                dir_path = os.path.join(ROOT, path, dirname)
                 shutil.rmtree(dir_path)
 
         for dir_glob in should_delete_directories_globs:
             for dirname in fnmatch.filter(dirnames, dir_glob):
-                dir_path = os.path.join(HERE, path, dirname)
+                dir_path = os.path.join(ROOT, path, dirname)
                 shutil.rmtree(dir_path)
 
 
