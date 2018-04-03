@@ -60,9 +60,21 @@ def aggregator():
     return aggregator
 
 
+def _get_pdns_version(self):
+    headers = {"X-API-Key": CONFIG['api_key']}
+    url = "http://{}:{}/api/v1/servers/localhost/statistics".format(HOST, PORT)
+    request = requests.get(url, headers=headers)
+    if request.status_code == 404:
+        return 3
+    else:
+        return 4
+
+
 def test_check(aggregator, spin_up_powerdns):
     assert True
-    service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082']
+    host_tag = "recursor_host:{0}".format(HOST)
+    port_tag = "recursor_port:{0}".format(PORT)
+    service_check_tags = [host_tag, port_tag]
 
     # get version and test v3 first.
     version = _get_pdns_version()
