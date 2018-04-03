@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  apache:
+    image: "${POWERDNS_IMAGE}"
+    volumes:
+      - ${APACHE_CONFIG}:/usr/local/apache2/conf/httpd.conf
+    ports:
+      - "8082:8082"
+      - "5353:5353/udp"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: pdns_network
