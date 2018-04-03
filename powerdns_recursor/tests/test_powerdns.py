@@ -60,7 +60,7 @@ def aggregator():
     return aggregator
 
 
-def _get_pdns_version(self):
+def _get_pdns_version():
     headers = {"X-API-Key": CONFIG['api_key']}
     url = "http://{}:{}/api/v1/servers/localhost/statistics".format(HOST, PORT)
     request = requests.get(url, headers=headers)
