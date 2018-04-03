@@ -3,11 +3,8 @@ version: '3.5'
 services:
   apache:
     image: "httpd:${APACHE_VERSION}"
-    # volumes:
-    #   - ${APACHE_CONFIG}:/usr/local/apache2/conf/httpd.conf
-    build:
-      context: .
-      # dockerfile: ${APACHE_DOCKERFILE}
+    volumes:
+      - ${APACHE_CONFIG}:/usr/local/apache2/conf/httpd.conf
     ports:
       - "18180:18180"
     networks:
