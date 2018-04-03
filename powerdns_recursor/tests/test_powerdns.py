@@ -11,7 +11,7 @@ import logging
 
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
-from .common import HOST, PORT, CONFIG, HERE
+from .common import HOST, PORT, CONFIG, CONFIG_V4, HERE
 from .metrics import GAUGE_METRICS, RATE_METRICS, GAUGE_METRICS_V4, RATE_METRICS_V4, METRIC_FORMAT
 
 CHECK_NAME = 'powerdns_recursor'
@@ -41,7 +41,7 @@ def spin_up_powerdns():
     powerdns_image = "datadog/docker-library:{0}".format(pdns_tag)
     env['POWERDNS_IMAGE'] = powerdns_image
 
-    env['APACHE_CONFIG'] = os.path.join(HERE, 'compose', 'recursor.conf')
+    env['POWERDNS_CONFIG'] = os.path.join(HERE, 'compose', 'recursor.conf')
     args = [
         "docker-compose",
         "-f", os.path.join(HERE, 'compose', 'powerdns.yaml')
@@ -62,45 +62,57 @@ def aggregator():
 
 def test_check(aggregator, spin_up_powerdns):
     assert True
+    service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082']
 
-# def test_check(self):
-#     service_check_tags = ['recursor_host:127.0.0.1', 'recursor_port:8082']
-#
-#     # get version and test v3 first.
-#     version = _get_pdns_version()
-#     if version == 3:
-#         run_check_twice(CONFIG)
-#
-#         # Assert metrics
-#         for metric in GAUGE_METRICS:
-#             assertMetric(METRIC_FORMAT.format(metric), tags=[])
-#
-#         for metric in self.RATE_METRICS:
-#             assertMetric(METRIC_FORMAT.format(metric), tags=[])
-#
-#         self.assertServiceCheckOK('powerdns.recursor.can_connect', tags=service_check_tags)
-#         self.coverage_report()
-#
-#     elif version == 4:
-#         # copy the configuration and set the version to 4
-#         config = self.config.copy()
-#         config['instances'][0]['version'] = 4
-#         self.run_check_twice(config)
-#
-#         # Assert metrics
-#         for metric in self.GAUGE_METRICS + self.GAUGE_METRICS_V4:
-#             self.assertMetric(self.METRIC_FORMAT.format(metric), tags=[])
-#
-#         for metric in self.RATE_METRICS + self.RATE_METRICS_V4:
-#             self.assertMetric(self.METRIC_FORMAT.format(metric), tags=[])
-#
-#         self.assertServiceCheckOK('powerdns.recursor.can_connect', tags=service_check_tags)
-#
-#         self.coverage_report()
-#     else:
-#         print("powerdns_recursor unknown version.")
-#         self.assertServiceCheckCritical('powerdns.recursor.can_connect', tags=service_check_tags)
-#
+    # get version and test v3 first.
+    version = _get_pdns_version()
+    pdns_check = PowerDNSRecursorCheck(CHECK_NAME, {}, {})
+    if version == 3:
+        pdns_check.check(CONFIG)
+
+        # Assert metrics
+        for metric in GAUGE_METRICS:
+            aggregator.assert_metric(METRIC_FORMAT.format(metric), tags=[], count=1)
+
+        for metric in RATE_METRICS:
+            aggregator.assert_metric(METRIC_FORMAT.format(metric), tags=[], count=1)
+
+        s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
+        s_check_status = s_check.status
+
+        assert s_check_status == PowerDNSRecursorCheck.OK
+        for sc in aggregator.service_checks('powerdns.recursor.can_connect'):
+            for tag in sc.tags:
+                assert tag in service_check_tags
+        assert aggregator.metrics_asserted_pct == 100.0
+
+    elif version == 4:
+        pdns_check(CONFIG_V4)
+        self.run_check_twice(config)
+
+        # Assert metrics
+        for metric in self.GAUGE_METRICS + GAUGE_METRICS_V4:
+            aggregator.assert_metric(METRIC_FORMAT.format(metric), tags=[], count=1)
+
+
+        for metric in self.RATE_METRICS + RATE_METRICS_V4:
+            aggregator.assert_metric(METRIC_FORMAT.format(metric), tags=[], count=1)
+
+
+        s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
+        s_check_status = s_check.status
+
+        assert s_check_status == PowerDNSRecursorCheck.OK
+        for sc in aggregator.service_checks('powerdns.recursor.can_connect'):
+            for tag in sc.tags:
+                assert tag in service_check_tags
+        assert aggregator.metrics_asserted_pct == 100.0
+    else:
+        print("powerdns_recursor unknown version.")
+        s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
+        s_check_status = s_check.status
+        assert s_check_status == PowerDNSRecursorCheck.CRITICAL
+
 # def test_tags(self):
 #     version = self._get_pdns_version()
 #     config = self.config.copy()

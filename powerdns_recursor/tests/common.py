@@ -13,3 +13,10 @@ CONFIG = {
     "port": PORT,
     "api_key": "pdns_api_key"
 }
+
+CONFIG_V4 = {
+    "host": HOST,
+    "port": PORT,
+    "version": 4,
+    "api_key": "pdns_api_key"
+}
