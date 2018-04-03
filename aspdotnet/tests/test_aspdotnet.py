@@ -6,7 +6,10 @@ import os
 import pytest
 from datadog_checks.stubs import aggregator
 from datadog_checks.aspdotnet import AspdotnetCheck
-from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests
+
+# for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
+# it's used below.  noqa to suppress that error.
+from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 MINIMAL_INSTANCE = {
@@ -66,7 +69,8 @@ ASP_APP_INSTANCES = (
 )
 
 
-@pytest.mark.usefixtures("pdh_mocks_fixture")
+# flake8 then says this is a redefinition of unused, which it's not.
+@pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
 def test_basic_check(Aggregator, pdh_mocks_fixture):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
@@ -83,7 +87,8 @@ def test_basic_check(Aggregator, pdh_mocks_fixture):
     assert Aggregator.metrics_asserted_pct == 100.0
 
 
-def test_with_tags(Aggregator, pdh_mocks_fixture):
+# flake8 then says this is a redefinition of unused, which it's not.
+def test_with_tags(Aggregator, pdh_mocks_fixture):  # noqa: F811
     initialize_pdh_tests()
     instance = INSTANCE_WITH_TAGS
     c = AspdotnetCheck(CHECK_NAME, {}, {}, [instance])

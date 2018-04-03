@@ -20,7 +20,7 @@ counters_index = defaultdict(list)
 
 @pytest.fixture
 def pdh_mocks_fixture():
-    regqueryvalueex =  mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+    regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
     pdhmakecounterpath = mock.patch('win32pdh.MakeCounterPath', mock_MakeCounterPath)
@@ -30,7 +30,7 @@ def pdh_mocks_fixture():
 
     yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(),  pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
 
-    regqueryvalueex.stop() 
+    regqueryvalueex.stop()
     pdhlookupbyindex.stop()
     pdhenumobjectitems.stop()
     pdhmakecounterpath.stop()
