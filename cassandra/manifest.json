@@ -14,7 +14,7 @@
   "version": "1.2.1",
   "guid": "03ba454d-425c-4f61-9e9c-54682c3ebce5",
   "public_title": "Datadog-Cassandra Integration",
-  "categories":["data store"],
+  "categories":["data store", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/cassandra/",
   "is_public": true,
