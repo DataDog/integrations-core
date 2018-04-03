@@ -16,11 +16,11 @@ The RabbitMQ check is packaged with the Agent, so simply [install the Agent](htt
 
 ### Configuration
 
-Create a file `rabbitmq.yaml` in the Agent's `conf.d` directory.
+Create a `rabbitmq.yaml` file in the Agent's `conf.d` directory.
 
 #### Prepare RabbitMQ
 
-You must enable the RabbitMQ management plugin. See [RabbitMQ's documentation](https://www.rabbitmq.com/management.html) to enable it.
+Enable the RabbitMQ management plugin. See [RabbitMQ's documentation](https://www.rabbitmq.com/management.html) to enable it.
 
 #### Metric Collection
 
@@ -71,7 +71,7 @@ log.dir = /var/log/rabbit
 log.file = rabbit.log
 ```
 
-2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```
     logs_enabled: true
