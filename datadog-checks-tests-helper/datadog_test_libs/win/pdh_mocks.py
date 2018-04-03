@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import pytest
+import mock
 import re
 import string
 import _winreg
@@ -15,6 +17,26 @@ instances_by_class = defaultdict(set)
 index_array = []
 counters_index = defaultdict(list)
 
+
+@pytest.fixture
+def pdh_mocks_fixture():
+    regqueryvalueex =  mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+    pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
+    pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
+    pdhmakecounterpath = mock.patch('win32pdh.MakeCounterPath', mock_MakeCounterPath)
+    pdhaddcounter = mock.patch('win32pdh.AddCounter', mock_AddCounter)
+    pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
+    pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
+
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(),  pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+
+    regqueryvalueex.stop() 
+    pdhlookupbyindex.stop()
+    pdhenumobjectitems.stop()
+    pdhmakecounterpath.stop()
+    pdhaddcounter.stop()
+    pdhgetformattedcountervalue.stop()
+    pdhcollectquerydata.stop()
 
 def initialize_pdh_tests(regdata = None, counterdata = None):
     """
