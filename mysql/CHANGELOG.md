@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-1.1.3 / Unreleased
+1.1.3 / 2018-03-23
 ==================
 ### Changes
 

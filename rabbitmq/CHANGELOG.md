@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-1.5.1 / Unreleased
+1.5.1 / 2018-03-23
 ==================
 
 ### Changes

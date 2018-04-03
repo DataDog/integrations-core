@@ -1,6 +1,13 @@
 # CHANGELOG - ECS Fargate
 
-1.1.0/ Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FIX] update the metadata collected from Version to Revision.
+
+1.1.0/ 2018-03-23
 ==================
 
 ### Changes

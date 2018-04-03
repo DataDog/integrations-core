@@ -4,6 +4,7 @@
 from collections import defaultdict, namedtuple
 
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
+ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
 
 
 class AggregatorStub(object):
@@ -20,8 +21,8 @@ class AggregatorStub(object):
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
 
-    def submit_service_check(self, *args, **kwargs):
-        pass
+    def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, *args, **kwargs):
         pass
@@ -31,6 +32,12 @@ class AggregatorStub(object):
         Return the metrics received under the given name
         """
         return self._metrics.get(name, [])
+
+    def service_checks(self, name):
+        """
+        Return the service checks received under the given name
+        """
+        return self._service_checks.get(name, [])
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
@@ -68,6 +75,7 @@ class AggregatorStub(object):
         """
         self._metrics = defaultdict(list)
         self._asserted = set()
+        self._service_checks = defaultdict(list)
 
     @property
     def metrics_asserted_pct(self):
@@ -82,6 +90,13 @@ class AggregatorStub(object):
         Return all the metric names we've seen so far
         """
         return self._metrics.keys()
+
+    @property
+    def service_check_names(self):
+        """
+        Return all the service checks names seen so far
+        """
+        return self._service_checks.keys()
 
 
 # Use the stub as a singleton

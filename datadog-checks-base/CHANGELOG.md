@@ -1,13 +1,17 @@
 # CHANGELOG - datadog_checks
 
-## 1.2.1 / Unreleased
+## 1.2.2 / Unreleased
+
+* [BUG] Prometheus requests can use an insecure option
+
+## 1.2.1 / 2018-03-23
 
 * [BUG] Correctly handle internationalized versions of Windows in the PDH library.
+* [FEATURE] Keep track of Service Checks in the Aggregator stub.
 
-## 1.1.0 / Unreleased
+## 1.1.0 / 2018-03-23
 
 * [FEATURE] Add a generic prometheus check base class & rework prometheus check using a mixin
-
 
 ## 1.0.0 / 2017-03-22
 

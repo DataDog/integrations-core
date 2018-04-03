@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"iis",
+        "check": "iis.site_up",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "site"],
+        "name": "Site Up",
+        "description": "Returns `CRITICAL` if the uptime for a site is 0 and `OK` otherwise. The site uptime is collected via Windows Performance Data Helper using the 'Web Service(*)\\Service Uptime' counter"
+    }
+]

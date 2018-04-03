@@ -1,6 +1,6 @@
 # CHANGELOG - kafka_consumer
 
-1.3.0 / Unreleased
+1.3.0 / 2018-03-23
 ==================
 
 ### Changes

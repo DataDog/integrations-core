@@ -1,6 +1,6 @@
 # CHANGELOG - Nfsstat
 
-0.2.0 / Unreleased
+0.2.0 / 2018-03-23
 ==================
 
 ### Changes
