@@ -154,7 +154,7 @@ def upgrade(ctx, package=None, version=None, verbose=False):
                     hide='both'
                 )
 
-                
+
 @task(help={})
 def cleanup(ctx):
     """
