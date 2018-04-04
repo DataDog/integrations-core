@@ -26,6 +26,7 @@ AGENT_BASED_INTEGRATIONS = [
     'redisdb',
     'spark',
     'vsphere',
+    'postgres',
 ]
 
 
