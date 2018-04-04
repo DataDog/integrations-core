@@ -11,24 +11,36 @@ import socket
 from collections import defaultdict
 
 # project
-from checks import AgentCheck
-from utils.platform import Platform
-from utils.subprocess_output import (
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.platform import Platform
+from datadog_checks.utils.subprocess_output import (
     get_subprocess_output,
     SubprocessOutputEmptyError,
 )
 import psutil
 
 BSD_TCP_METRICS = [
-    (re.compile("^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"), 'system.net.tcp.retrans_packs'),
-    (re.compile("^\s*(\d+) packets sent\s*$"), 'system.net.tcp.sent_packs'),
-    (re.compile("^\s*(\d+) packets received\s*$"), 'system.net.tcp.rcv_packs')
+    (re.compile(
+        "^\s*(\d+) data packets \(\d+ bytes\) retransmitted\s*$"
+    ), 'system.net.tcp.retrans_packs'),
+    (re.compile(
+        "^\s*(\d+) packets sent\s*$"
+    ), 'system.net.tcp.sent_packs'),
+    (re.compile(
+        "^\s*(\d+) packets received\s*$"
+    ), 'system.net.tcp.rcv_packs')
 ]
 
 SOLARIS_TCP_METRICS = [
-    (re.compile("\s*tcpRetransSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.retrans_segs'),
-    (re.compile("\s*tcpOutDataSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.in_segs'),
-    (re.compile("\s*tcpInSegs\s*=\s*(\d+)\s*"), 'system.net.tcp.out_segs')
+    (re.compile(
+        "\s*tcpRetransSegs\s*=\s*(\d+)\s*"
+    ), 'system.net.tcp.retrans_segs'),
+    (re.compile(
+        "\s*tcpOutDataSegs\s*=\s*(\d+)\s*"
+    ), 'system.net.tcp.in_segs'),
+    (re.compile(
+        "\s*tcpInSegs\s*=\s*(\d+)\s*"
+    ), 'system.net.tcp.out_segs')
 ]
 
 
@@ -47,7 +59,9 @@ class Network(AgentCheck):
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
+        AgentCheck.__init__(
+            self, name, init_config,
+            agentConfig, instances=instances)
         if instances is not None and len(instances) > 1:
             raise Exception("Network check only supports one configured instance.")
 
@@ -56,9 +70,11 @@ class Network(AgentCheck):
             instance = {}
 
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
-        self._collect_cx_state = instance.get('collect_connection_state', False)
+        self._collect_cx_state = instance.get(
+            'collect_connection_state', False)
 
-        # This decides whether we should split or combine connection states, along with a few other things
+        # This decides whether we should split or combine connection states,
+        # along with a few other things
         self._setup_metrics(instance)
 
         self._exclude_iface_re = None
@@ -499,23 +515,23 @@ class Network(AgentCheck):
 
         try:
             netstat, _, _ = get_subprocess_output(["netstat", "-s", "-p" "tcp"], self.log)
-            #3651535 packets sent
-            #        972097 data packets (615753248 bytes)
-            #        5009 data packets (2832232 bytes) retransmitted
-            #        0 resends initiated by MTU discovery
-            #        2086952 ack-only packets (471 delayed)
-            #        0 URG only packets
-            #        0 window probe packets
-            #        310851 window update packets
-            #        336829 control packets
-            #        0 data packets sent after flow control
-            #        3058232 checksummed in software
-            #        3058232 segments (571218834 bytes) over IPv4
-            #        0 segments (0 bytes) over IPv6
-            #4807551 packets received
-            #        1143534 acks (for 616095538 bytes)
-            #        165400 duplicate acks
-            #        ...
+            # 3651535 packets sent
+            #         972097 data packets (615753248 bytes)
+            #         5009 data packets (2832232 bytes) retransmitted
+            #         0 resends initiated by MTU discovery
+            #         2086952 ack-only packets (471 delayed)
+            #         0 URG only packets
+            #         0 window probe packets
+            #         310851 window update packets
+            #         336829 control packets
+            #         0 data packets sent after flow control
+            #         3058232 checksummed in software
+            #         3058232 segments (571218834 bytes) over IPv4
+            #         0 segments (0 bytes) over IPv6
+            # 4807551 packets received
+            #         1143534 acks (for 616095538 bytes)
+            #         165400 duplicate acks
+            #         ...
 
             self._submit_regexed_values(netstat, BSD_TCP_METRICS, custom_tags)
         except SubprocessOutputEmptyError:
@@ -649,6 +665,7 @@ class Network(AgentCheck):
         Gather metrics about connections states and interfaces counters
         using psutil facilities
         """
+        # import pdb; pdb.set_trace()
         custom_tags = instance.get('tags', [])
         if self._collect_cx_state:
             self._cx_state_psutil(tags=custom_tags)
