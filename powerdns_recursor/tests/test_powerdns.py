@@ -53,7 +53,7 @@ def spin_up_powerdns():
     wait_for_powerdns()
     time.sleep(20)
     yield
-    # subprocess.check_call(args + ["down"], env=env)
+    subprocess.check_call(args + ["down"], env=env)
 
 
 @pytest.fixture
@@ -89,9 +89,6 @@ def test_check(aggregator, spin_up_powerdns):
         for metric in metrics.RATE_METRICS:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
 
-        s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
-        s_check_status = s_check.status
-
         aggregator.assert_service_check('powerdns.recursor.can_connect',
                                         status=PowerDNSRecursorCheck.OK,
                                         tags=service_check_tags)
@@ -106,9 +103,6 @@ def test_check(aggregator, spin_up_powerdns):
 
         for metric in metrics.RATE_METRICS + metrics.RATE_METRICS_V4:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
-
-        s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
-        s_check_status = s_check.status
 
         aggregator.assert_service_check('powerdns.recursor.can_connect',
                                         status=PowerDNSRecursorCheck.OK,
@@ -182,7 +176,8 @@ def test_bad_api_key(aggregator, spin_up_powerdns):
     assert len(aggregator._metrics) == 0
 
 
-def test_very_bad_config(self):
+def test_very_bad_config(aggregator):
+    pdns_check = PowerDNSRecursorCheck(CHECK_NAME, {}, {})
     for config in [{}, {"host": "localhost"}, {"port": 1000}, {"host": "localhost", "port": 1000}]:
         with pytest.raises(Exception):
             pdns_check.check(common.BAD_API_KEY_CONFIG)
