@@ -24,8 +24,8 @@ class AggregatorStub(object):
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
-    def submit_event(self, *args, **kwargs):
-        pass
+    def submit_event(self, check, check_id, event):
+        self._events.append(event)
 
     def metrics(self, name):
         """
@@ -38,6 +38,13 @@ class AggregatorStub(object):
         Return the service checks received under the given name
         """
         return self._service_checks.get(name, [])
+
+    @property
+    def events(self):
+        """
+        Return all events
+        """
+        return self._events
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
@@ -79,6 +86,7 @@ class AggregatorStub(object):
         self._metrics = defaultdict(list)
         self._asserted = set()
         self._service_checks = defaultdict(list)
+        self._events = []
 
     @property
     def metrics_asserted_pct(self):
