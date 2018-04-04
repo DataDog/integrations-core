@@ -31,7 +31,7 @@ with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
 if ABOUT["__version__"] != manifest_version:
     raise Exception(
         "Inconsistent versioning in module and manifest - aborting wheel build"
-        )
+    )
 
 setup(
     name='datadog-directory',
