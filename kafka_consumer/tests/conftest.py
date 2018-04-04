@@ -137,20 +137,23 @@ class KConsumer(StoppableThread):
 
 
 # might block indefinitely - watchout
-def wait_for_logs(container_id, pattern, timeout=None):
+def wait_for_logs(container_id, pattern, timeout=30):
     container = docker_client.containers.get(container_id)
     if not container:
         return False
 
     regex = re.compile(pattern)
     now = time.time()
-    for line in container.logs(stream=True):
-        result = regex.match(line)
-        if result:
-            return True
+    while time.time() < (now + timeout):
+        loglines =  container.logs().splitlines()
+        for line in loglines:
+            result = regex.match(line)
+            if result:
+                return True
 
-        if timeout and time.time() > (now + timeout):
-            return False
+        time.sleep(1)
+
+    return False
 
 
 @pytest.fixture(scope="session")
@@ -158,6 +161,7 @@ def kafka_producer():
     producer = Producer()
     yield producer
     if producer.is_alive():
+        producer.send_shutdown()
         producer.join(5)
 
 
@@ -166,6 +170,7 @@ def kafka_consumer():
     consumer = KConsumer(TOPICS)
     yield consumer
     if consumer.is_alive():
+        consumer.send_shutdown()
         consumer.join(5)
 
 
@@ -174,6 +179,7 @@ def zk_consumer():
     consumer = ZKConsumer(TOPICS, PARTITIONS)
     yield consumer
     if consumer.is_alive():
+        consumer.send_shutdown()
         consumer.join(5)
 
 
@@ -189,19 +195,21 @@ def kafka_cluster():
     ]
 
     subprocess.check_call(args + ["up", "-d"], env=env)
-    clean = True
-    clean &= wait_for_logs('compose_kafka_1', 'started (kafka.server.KafkaServer)', timeout=20)
-    clean &= wait_for_logs('compose_zookeeper_1', 'NoNode for /brokers', timeout=20)
-    if LooseVersion(env.get('KAFKA_VERSION')) > KAFKA_LEGACY:
-        clean &= wait_for_logs('compose_kafka_1', 'Created topic "marvel"', timeout=20)
-        clean &= wait_for_logs('compose_kafka_1', 'Created topic "dc"', timeout=20)
 
-    env['EXTERNAL_JMX_PORT'] = 9998
-    env['EXTERNAL_PORT'] = 9091
+    clean = True
+    clean &= wait_for_logs('compose_kafka_1', '.*started \(kafka.server.KafkaServer\).*', timeout=20)
+    clean &= wait_for_logs('compose_zookeeper_1', '.*NoNode for \/brokers.*', timeout=20)
+    if LooseVersion(env.get('KAFKA_VERSION')) > KAFKA_LEGACY:
+        clean &= wait_for_logs('compose_kafka_1', '.*Created topic "marvel".*', timeout=20)
+        clean &= wait_for_logs('compose_kafka_1', '.*Created topic "dc".*', timeout=20)
+
+    env['EXTERNAL_JMX_PORT'] = '9998'
+    env['EXTERNAL_PORT'] = '9091'
     subprocess.check_call(args + ["scale", "kafka=2"], env=env)
-    clean &= wait_for_logs('compose_kafka_2', 'started (kafka.server.KafkaServer)', timeout=20)
+    clean &= wait_for_logs('compose_kafka_2', '.*started \(kafka.server.KafkaServer\).*', timeout=20)
     yield clean
 
+    pdb.set_trace()
     subprocess.check_call(args + ["down"], env=env)
 
 

@@ -6,7 +6,7 @@ import os
 import time
 from distutils.version import LooseVersion
 
-from docker import client
+import docker
 from datadog_checks.kafka_consumer import KafkaCheck
 
 
@@ -74,12 +74,10 @@ def cluster_ready(expected=None):
     start = time.time()
 
     try:
-        cli = client(base_url='unix://var/run/docker.sock',
-                     timeout=DOCKER_TO)
-        containers = cli.containers()
+        cli = docker.from_env()
 
         nodes = []
-        for c in containers:
+        for c in cli.containers:
             if KAFKA_IMAGE_NAME in c.get('Image'):
                 nodes.append(c)
 
