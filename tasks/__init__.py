@@ -21,3 +21,11 @@ root.add_task(cleanup)
 root.add_task(manifest)
 root.add_task(upgrade)
 root.add_task(test)
+
+root.configure({
+    'run': {
+        # set the encoding explicitly so invoke doesn't freak out if a command
+        # outputs unicode chars.
+        'encoding': 'utf-8',
+    }
+})
