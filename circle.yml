@@ -41,7 +41,6 @@ test:
         - rake ci:run[mysql]
         - rake ci:run[twemproxy]
         - rake ci:run[tokumx]
-        - rake ci:run[postgres]
         - rake ci:run[supervisord]
         - rake ci:run[mongo]
         - rake ci:run[fluentd]

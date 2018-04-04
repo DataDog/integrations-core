@@ -1,5 +1,12 @@
 # CHANGELOG - Envoy
 
+1.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] add newly-documented metrics. See #1326
+
 1.0.0 / 2018-03-23
 ==================
 
