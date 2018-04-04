@@ -42,12 +42,10 @@ def spin_up_powerdns():
     powerdns_image = "datadog/docker-library:{0}".format(pdns_tag)
     env['POWERDNS_IMAGE'] = powerdns_image
 
-    compose_file_name = "powerdns_{0}.yaml".format(pdns_underscore_version)
-
     env['POWERDNS_CONFIG'] = os.path.join(common.HERE, 'compose', 'recursor.conf')
     args = [
         "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', compose_file_name)
+        "-f", os.path.join(common.HERE, 'compose', 'powerdns.yaml')
     ]
     subprocess.check_call(args + ["up", "-d", "--build"], env=env)
     wait_for_powerdns()
