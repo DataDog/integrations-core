@@ -28,7 +28,6 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
 
 # project
 from checks.network_checks import NetworkCheck, Status
-from datadog_checks.utils.platform import Platform
 from config import _is_affirmative
 from util import headers as agent_headers
 
@@ -140,10 +139,18 @@ def get_ca_certs_path():
 
     walk up to embedded, and back down to ssl/certs to find the certificate file
     """
-    if Platform.is_windows():
-        ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../..', 'ssl/certs', 'cacert.pem'))]
+
+    ca_certs = []
+
+    embedded_root = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(10):
+        if os.path.basename(embedded_root) == 'embedded':
+            ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
+            break
+        embedded_root = os.path.dirname(embedded_root)
     else:
-        ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../../..', 'ssl/certs', 'cacert.pem'))]
+        self.log.debug("Unable to locate the Agent's embedded CACERT. Please specify a ca_certs section in your yaml configuration")
+        raise OSError('Unable to locate `embedded` directory')
 
     try:
         import tornado
