@@ -149,8 +149,7 @@ def get_ca_certs_path():
             break
         embedded_root = os.path.dirname(embedded_root)
     else:
-        self.log.debug("Unable to locate the Agent's embedded CACERT. Please specify a ca_certs section in your yaml configuration")
-        raise OSError('Unable to locate `embedded` directory')
+        raise OSError('Unable to locate `embedded` directory. Please specify ca_certs in your http yaml configuration file.')
 
     try:
         import tornado
