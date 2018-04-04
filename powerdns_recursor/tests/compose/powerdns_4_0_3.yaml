@@ -1,13 +1,13 @@
 version: '3.5'
 
 services:
-  apache:
+  powerdns_4_0_3:
     image: "${POWERDNS_IMAGE}"
     volumes:
       - ${POWERDNS_CONFIG}:/usr/local/apache2/conf/httpd.conf
     ports:
-      - "8082:8082"
-      - "5353:5353/udp"
+      - "${POWERDNS_HOST_PORT_0}:8082"
+      - "${POWERDNS_HOST_PORT_1}:5353/udp"
     networks:
       - network1
 

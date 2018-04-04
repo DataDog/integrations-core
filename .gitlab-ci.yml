@@ -1,4 +1,4 @@
-image: docker:git
+image: gmmeyer/integrations-core-test
 
 services:
 - docker:dind
