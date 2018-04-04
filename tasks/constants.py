@@ -5,8 +5,8 @@ from __future__ import print_function, unicode_literals
 
 import os
 
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
+# the root of the repo
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
