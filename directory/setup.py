@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 # Always prefer setuptools over distutils
 from setuptools import setup
 # To use a consistent encoding
@@ -65,26 +69,13 @@ setup(
     packages=['datadog_checks.directory'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
+    install_requires=get_requirements('requirements.in') + [
         'datadog-checks-base',
     ],
 
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'datadog_agent_tk>=5.15',
-        ],
-    },
-
     # Testing setup and dependencies
-    tests_require=[
-        'nose',
-        'coverage',
-        'datadog_agent_tk>=5.15',
-    ],
-    test_suite='nose.collector',
+    setup_requires=['pytest-runner', ],
+    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.directory': ['conf.yaml.example']},

@@ -73,7 +73,7 @@ def aggregator():
                     reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=ss_subprocess_mock)
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_ss(aggregator, mock_subprocess):
+def test_cx_state_linux_ss(mock_is_linux, mock_get_subprocess_output, aggregator):
     network_check.check({})
 
     # Assert metrics
@@ -85,7 +85,7 @@ def test_cx_state_linux_ss(aggregator, mock_subprocess):
                     reason="Only runs on Unix systems")
 @mock.patch('datadog_checks.network.network.get_subprocess_output', side_effect=netstat_subprocess_mock)
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
-def test_cx_state_linux_netstat(self, *args):
+def test_cx_state_linux_netstat(mock_is_linux, mock_get_subprocess_output, aggregator):
     network_check.run_check({})
 
     # Assert metrics
