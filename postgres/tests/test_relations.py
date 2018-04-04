@@ -63,6 +63,7 @@ def test_relations_metrics(aggregator, postgres_standalone, pg_instance):
     for name in RELATION_SIZE_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_size_tags)
 
+
 @pytest.mark.integration
 def test_index_metrics(aggregator, postgres_standalone, pg_instance):
     pg_instance['relations'] = ['breed']

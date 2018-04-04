@@ -6,6 +6,7 @@ import pytest
 
 from datadog_checks.postgres import PostgreSql
 
+
 @pytest.mark.integration
 def test_custom_metrics(aggregator, postgres_standalone, pg_instance):
     pg_instance.update({

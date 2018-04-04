@@ -54,6 +54,7 @@ def check_common_metrics(aggregator, expected_tags):
     for name in COMMON_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
+
 def check_bgw_metrics(aggregator, expected_tags):
     for name in COMMON_BGW_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
@@ -61,6 +62,7 @@ def check_bgw_metrics(aggregator, expected_tags):
     if float(os.environ['POSTGRES_VERSION']) >= 9.4:
         for name in COMMON_BGW_METRICS_PG_ABOVE_94:
             aggregator.assert_metric(name, count=1, tags=expected_tags)
+
 
 # Agent5 add instance_tag tag to the COMMON_METRICS
 @mock.patch("datadog_checks.postgres.postgres.add_instance_tags_to_server_metrics", return_value=True)
@@ -73,6 +75,7 @@ def test_common_metrics_with_agent5(instance_tag, aggregator, postgres_standalon
     check_common_metrics(aggregator, expected_tags)
     check_bgw_metrics(aggregator, pg_instance['tags'])
 
+
 # Agent6 does NOT add instance_tag tag to the COMMON_METRICS
 @mock.patch("datadog_checks.postgres.postgres.add_instance_tags_to_server_metrics", return_value=False)
 @pytest.mark.integration
@@ -84,6 +87,7 @@ def test_common_metrics_with_agent6(instance_tag, aggregator, postgres_standalon
     check_common_metrics(aggregator, expected_tags)
     check_bgw_metrics(aggregator, [])
 
+
 @pytest.mark.integration
 def test_common_metrics_without_size(aggregator, postgres_standalone, pg_instance):
     posgres_check = PostgreSql('postgres', {}, {})
@@ -92,6 +96,7 @@ def test_common_metrics_without_size(aggregator, postgres_standalone, pg_instanc
     posgres_check.check(pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
 
+
 @pytest.mark.integration
 def test_can_connect_service_check(aggregator, postgres_standalone, pg_instance):
     return
@@ -99,9 +104,9 @@ def test_can_connect_service_check(aggregator, postgres_standalone, pg_instance)
     posgres_check.check(pg_instance)
 
     aggregator.assert_service_check('postgres.can_connect',
-        count=1, status=PostgreSql.OK,
-        tags=['host:localhost', 'port:15432', 'db:datadog_test', pg_instance['tags']]
-    )
+                                    count=1, status=PostgreSql.OK,
+                                    tags=['host:localhost', 'port:15432', 'db:datadog_test', pg_instance['tags']])
+
 
 @pytest.mark.integration
 def test_schema_metrics(aggregator, postgres_standalone, pg_instance):
@@ -109,8 +114,9 @@ def test_schema_metrics(aggregator, postgres_standalone, pg_instance):
     posgres_check.check(pg_instance)
 
     aggregator.assert_metric('postgresql.table.count', value=1, count=1,
-            tags=pg_instance['tags']+['schema:public'])
+                             tags=pg_instance['tags']+['schema:public'])
     aggregator.assert_metric('postgresql.db.count', value=2, count=1)
+
 
 @pytest.mark.integration
 def test_connections_metrics(aggregator, postgres_standalone, pg_instance):

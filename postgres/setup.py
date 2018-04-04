@@ -18,6 +18,7 @@ with open(path.join(HERE, "datadog_checks", "postgres", "__about__.py")) as f:
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+
 # Parse requirements
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:

@@ -12,6 +12,7 @@ from .common import HOST, PORT, USER, PASSWORD, DB_NAME
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+
 @pytest.fixture(scope="session")
 def postgres_standalone():
     """
@@ -35,7 +36,8 @@ def postgres_standalone():
             subprocess.check_call(args + ["down"], env=env)
             raise Exception("PostgreSQL boot timed out!")
 
-        output = subprocess.check_output(["docker",
+        output = subprocess.check_output([
+            "docker",
             "inspect",
             "--format='{{json .State.Health.Status}}'",
             "compose_postgres_1"])
@@ -49,11 +51,13 @@ def postgres_standalone():
     yield
     subprocess.check_call(args + ["down"], env=env)
 
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
 
 @pytest.fixture
 def pg_instance():
