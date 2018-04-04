@@ -1,6 +1,12 @@
 # CHANGELOG - Kube-dns
 
-1.2.0 / 2018-01-10 
+1.3.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add metric `kubedns.request_duration.seconds.count`. See [#1341][]
+
+1.2.0 / 2018-01-10
 ==================
 ### Changes
 
@@ -24,4 +30,5 @@
 [#451]: https://github.com/DataDog/integrations-core/issues/451
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#965]: https://github.com/DataDog/integrations-core/issues/965
+[#1341]: https://github.com/DataDog/integrations-core/issues/1341
 [@aerostitch]: https://github.com/aerostitch

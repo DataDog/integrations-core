@@ -44,6 +44,7 @@ class TestKubeDNS(AgentCheckTest):
         NAMESPACE + '.request_duration.seconds.count',
         NAMESPACE + '.request_duration.seconds.sum',
         NAMESPACE + '.request_count',
+        NAMESPACE + '.request_count.count',
         NAMESPACE + '.error_count',
         NAMESPACE + '.cachemiss_count',
     ]

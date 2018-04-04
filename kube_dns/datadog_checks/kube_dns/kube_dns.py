@@ -20,13 +20,13 @@ class KubeDNSCheck(PrometheusCheck):
             # metrics have been renamed to kubedns in kubernetes 1.6.0
             'kubedns_kubedns_dns_response_size_bytes': 'response_size.bytes',
             'kubedns_kubedns_dns_request_duration_seconds': 'request_duration.seconds',
-            'kubedns_kubedns_dns_request_count_total': 'request_count',
+            # 'kubedns_kubedns_dns_request_count_total': 'request_count',
             'kubedns_kubedns_dns_error_count_total': 'error_count',
             'kubedns_kubedns_dns_cachemiss_count_total': 'cachemiss_count',
             # metrics names for kubernetes < 1.6.0
             'skydns_skydns_dns_response_size_bytes': 'response_size.bytes',
             'skydns_skydns_dns_request_duration_seconds': 'request_duration.seconds',
-            'skydns_skydns_dns_request_count_total': 'request_count',
+            # 'skydns_skydns_dns_request_count_total': 'request_count',
             'skydns_skydns_dns_error_count_total': 'error_count',
             'skydns_skydns_dns_cachemiss_count_total': 'cachemiss_count',
         }
@@ -45,3 +45,15 @@ class KubeDNSCheck(PrometheusCheck):
             send_buckets = True
 
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
+
+    def kubedns_kubedns_dns_request_count_total(self, message, **kwargs):
+        metric_name = self.NAMESPACE + '.request_count'
+        for metric in message.metric:
+            tags = []
+            # submit raw metric
+            self.gauge(metric_name, metric.counter.value, tags)
+            # submit rate metric
+            self.monotonic_count(metric_name + '.count', metric.counter.value, tags)
+
+    def skydns_skydns_dns_request_count_total(self, message, **kwargs):
+        self.kubedns_kubedns_dns_request_count_total(message, **kwargs)
