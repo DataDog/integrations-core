@@ -104,10 +104,8 @@ def test_check(aggregator, spin_up_powerdns):
         for metric in metrics.GAUGE_METRICS + metrics.GAUGE_METRICS_V4:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
 
-
         for metric in metrics.RATE_METRICS + metrics.RATE_METRICS_V4:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[], count=1)
-
 
         s_check = aggregator.service_checks('powerdns.recursor.can_connect')[0]
         s_check_status = s_check.status
@@ -121,6 +119,7 @@ def test_check(aggregator, spin_up_powerdns):
         aggregator.assert_service_check('powerdns.recursor.can_connect',
                                         status=PowerDNSRecursorCheck.CRITICAL,
                                         tags=service_check_tags)
+
 
 def test_tags(aggregator, spin_up_powerdns):
     version = _get_pdns_version()
@@ -171,12 +170,12 @@ def test_bad_config(aggregator):
     assert len(aggregator._metrics) == 0
 
 
-def test_bad_api_key(aggregator):
+def test_bad_api_key(aggregator, spin_up_powerdns):
     pdns_check = PowerDNSRecursorCheck(CHECK_NAME, {}, {})
     with pytest.raises(Exception):
         pdns_check.check(common.BAD_API_KEY_CONFIG)
 
-    service_check_tags = common._config_sc_tags(common.BAD_CONFIG)
+    service_check_tags = common._config_sc_tags(common.BAD_API_KEY_CONFIG)
     aggregator.assert_service_check('powerdns.recursor.can_connect',
                                     status=PowerDNSRecursorCheck.CRITICAL,
                                     tags=service_check_tags)
@@ -188,5 +187,4 @@ def test_very_bad_config(self):
         with pytest.raises(Exception):
             pdns_check.check(common.BAD_API_KEY_CONFIG)
 
-        )
     assert len(aggregator._metrics) == 0

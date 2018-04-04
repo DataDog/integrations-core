@@ -33,6 +33,7 @@ BAD_API_KEY_CONFIG = {
     "api_key": "pdns_api_key"
 }
 
+
 def _config_sc_tags(config):
     host_tag = "recursor_host:{0}".format(config['host'])
     port_tag = "recursor_port:{0}".format(config['port'])
