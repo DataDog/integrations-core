@@ -37,7 +37,6 @@ env:
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
-    - TRAVIS_FLAVOR=apache FLAVOR_VERSION=2.4.12
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.2.10

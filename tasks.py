@@ -1,6 +1,8 @@
 from __future__ import print_function, unicode_literals
 
 import os
+import fnmatch
+import shutil
 from io import open
 
 from invoke import task
@@ -10,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
+    'apache',
     'datadog-checks-base',
     'disk',
     'directory',
@@ -19,6 +22,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kubelet',
     'linkerd',
     'network',
+    'nfsstat',
     'prometheus',
     'redisdb',
     'vsphere',
@@ -141,3 +145,36 @@ def upgrade(ctx, package=None, version=None, verbose=False):
                     'requirements.in',
                     hide='both'
                 )
+
+@task(help={})
+def cleanup(ctx):
+    """
+    Cleanup all temporary files and directories
+
+    Example invocation:
+        inv cleanup
+    """
+
+    should_delete_directories = [
+        ".eggs",
+        ".pytest_cache",
+        ".tox",
+        "__pycache__"
+    ]
+    should_delete_directories_globs = [
+        "*.egg-info"
+    ]
+
+    for path, dirnames, filenames in os.walk('.'):
+        for filename in fnmatch.filter(filenames, '*.pyc'):
+            file_path = os.path.join(HERE, path, filename)
+            os.remove(file_path)
+        for dirname in dirnames:
+            if dirname in should_delete_directories:
+                dir_path = os.path.join(HERE, path, dirname)
+                shutil.rmtree(dir_path)
+
+        for dir_glob in should_delete_directories_globs:
+            for dirname in fnmatch.filter(dirnames, dir_glob):
+                dir_path = os.path.join(HERE, path, dirname)
+                shutil.rmtree(dir_path)
