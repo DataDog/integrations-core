@@ -3,6 +3,7 @@ from setuptools import setup
 # To use a consistent encoding
 from codecs import open
 from os import path
+import json
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -21,6 +22,16 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
+
+manifest_version = None
+with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
+    manifest = json.load(f)
+    manifest_version = manifest.get('version')
+
+if ABOUT["__version__"] != manifest_version:
+    raise Exception(
+        "Inconsistent versioning in module and manifest - aborting wheel build"
+        )
 
 setup(
     name='datadog-directory',
