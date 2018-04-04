@@ -28,6 +28,7 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
 
 # project
 from checks.network_checks import NetworkCheck, Status
+from datadog_checks.utils.platform import Platform
 from config import _is_affirmative
 from util import headers as agent_headers
 
@@ -132,12 +133,17 @@ def get_ca_certs_path():
     Get a path to the trusted certificates of the system
     """
     """
-    check is installed via pip to embedded/lib/site-packages/datadog_checks/http_check
+    check is installed via pip to:
+    Windows: embedded/lib/site-packages/datadog_checks/http_check
+    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
     certificate is installed to   embedded/ssl/certs/cacert.pem
 
     walk up to embedded, and back down to ssl/certs to find the certificate file
     """
-    ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../..', 'ssl/certs', 'cacert.pem'))]
+    if Platform.is_windows():
+        ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../..', 'ssl/certs', 'cacert.pem'))]
+    else:
+        ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../../..', 'ssl/certs', 'cacert.pem'))]
 
     try:
         import tornado
