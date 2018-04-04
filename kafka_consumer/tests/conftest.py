@@ -209,7 +209,6 @@ def kafka_cluster():
     clean &= wait_for_logs('compose_kafka_2', '.*started \(kafka.server.KafkaServer\).*', timeout=20)
     yield clean
 
-    pdb.set_trace()
     subprocess.check_call(args + ["down"], env=env)
 
 
