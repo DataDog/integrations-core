@@ -9,7 +9,7 @@ HERE = path.abspath(path.dirname(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "disk", "__about__.py")) as f:
+with open(path.join(HERE, "datadog_checks", "kafka_consumer", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file

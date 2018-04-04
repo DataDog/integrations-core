@@ -1,3 +1,4 @@
+# integration pip requirements
 kafka-python==1.3.4
 kazoo==2.4.0
 six==1.11.0
