@@ -1,91 +1,16 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-'''
-Spark Job Metrics
------------------
-spark.job.count
-spark.job.num_tasks
-spark.job.num_active_tasks
-spark.job.num_completed_tasks
-spark.job.num_skipped_tasks
-spark.job.num_failed_tasks
-spark.job.num_active_stages
-spark.job.num_completed_stages
-spark.job.num_skipped_stages
-spark.job.num_failed_stages
-
-Spark Stage Metrics
--------------------
-spark.stage.count
-spark.stage.num_active_tasks
-spark.stage.num_complete_tasks
-spark.stage.num_failed_tasks
-spark.stage.executor_run_time
-spark.stage.input_bytes
-spark.stage.input_records
-spark.stage.output_bytes
-spark.stage.output_records
-spark.stage.shuffle_read_bytes
-spark.stage.shuffle_read_records
-spark.stage.shuffle_write_bytes
-spark.stage.shuffle_write_records
-spark.stage.memory_bytes_spilled
-spark.stage.disk_bytes_spilled
-
-Spark Driver Metrics
-----------------------
-spark.driver.rdd_blocks
-spark.driver.memory_used
-spark.driver.disk_used
-spark.driver.active_tasks
-spark.driver.failed_tasks
-spark.driver.completed_tasks
-spark.driver.total_tasks
-spark.driver.total_duration
-spark.driver.total_input_bytes
-spark.driver.total_shuffle_read
-spark.driver.total_shuffle_write
-spark.driver.max_memory
-
-Spark Executor Metrics
-----------------------
-spark.executor.count
-spark.executor.rdd_blocks
-spark.executor.memory_used
-spark.executor.disk_used
-spark.executor.active_tasks
-spark.executor.failed_tasks
-spark.executor.completed_tasks
-spark.executor.total_tasks
-spark.executor.total_duration
-spark.executor.total_input_bytes
-spark.executor.total_shuffle_read
-spark.executor.total_shuffle_write
-spark.executor.max_memory
-
-Spark RDD Metrics
------------------
-spark.rdd.count
-spark.rdd.num_partitions
-spark.rdd.num_cached_partitions
-spark.rdd.memory_used
-spark.rdd.disk_used
-'''
-
-# stdlib
 from urlparse import urljoin, urlsplit, urlunsplit, urlparse
 from collections import namedtuple
 
-# 3rd party
 import requests
 from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
 from bs4 import BeautifulSoup
 
-# Project
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.config import is_affirmative
 
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'
@@ -280,7 +205,7 @@ class SparkCheck(AgentCheck):
 
         _url = url
         if not (parsed.netloc and parsed.scheme) and \
-                _is_affirmative(instance.get('spark_proxy_enabled', False)):
+                is_affirmative(instance.get('spark_proxy_enabled', False)):
             master_address = self._get_master_address(instance)
             _url = urljoin(master_address, parsed.path)
 
@@ -311,7 +236,7 @@ class SparkCheck(AgentCheck):
 
         if cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
-            pre20 = _is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
+            pre20 = is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
             return self._standalone_init(master_address, pre20, ssl_config)
 
         elif cluster_mode == SPARK_MESOS_MODE:

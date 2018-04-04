@@ -1,12 +1,15 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+spark.job.count,rate,,task,,Number of jobs,0,spark,jb count
 spark.job.num_tasks,rate,,task,second,Number of tasks in the application,0,spark,jb nm tsk
 spark.job.num_active_tasks,rate,,task,second,Number of active tasks in the application,0,spark,jb nm act tsk
 spark.job.num_skipped_tasks,rate,,task,second,Number of skipped tasks in the application,0,spark,jb nm skp tsk
 spark.job.num_failed_tasks,rate,,task,second,Number of failed tasks in the application,0,spark,jb nm fld tsk
+spark.job.num_completed_tasks,rate,,task,second,Number of completed tasks in the application,0,spark,jb nm completed tsk
 spark.job.num_active_stages,rate,,stage,second,Number of active stages in the application,0,spark,jb act stg
 spark.job.num_completed_stages,rate,,stage,second,Number of completed stages in the application,0,spark,jb nm cmp stg
 spark.job.num_skipped_stages,rate,,stage,second,Number of skipped stages in the application,0,spark,jb nm skp stg
 spark.job.num_failed_stages,rate,,stage,second,Number of failed stages in the application,0,spark,jb nm fld stg
+spark.stage.count,rate,,task,,Number of stages,0,spark,stg count
 spark.stage.num_active_tasks,rate,,task,second,Number of active tasks in the application's stages,0,spark,stg nm act tsk
 spark.stage.num_complete_tasks,rate,,task,second,Number of complete tasks in the application's stages,0,spark,stg nm cmp tsk
 spark.stage.num_failed_tasks,rate,,task,second,Number of failed tasks in the application's stages,0,spark,stg nm fld tsk
@@ -33,8 +36,10 @@ spark.driver.total_input_bytes,rate,,byte,second,Number of input bytes in the dr
 spark.driver.total_shuffle_read,rate,,byte,second,Number of bytes read during a shuffle in the driver,0,spark,dvr tot shfl rd
 spark.driver.total_shuffle_write,rate,,byte,second,Number of shuffled bytes in the driver,0,spark,dvr tot shfl wrt
 spark.driver.max_memory,rate,,byte,second,Maximum memory used in the driver,0,spark,dvr max mem
+spark.executor.count,rate,,task,,Number of executors,0,spark,exe count
 spark.executor.rdd_blocks,rate,,block,second,Number of persisted RDD blocks in the application's executors,0,spark,exe rdd blk
 spark.executor.memory_used,rate,,byte,second,Amount of memory used for cached RDDs in the application's executors,0,spark,exe mem usd
+spark.executor.max_memory,rate,,byte,second,Amount of memory used for cached RDDs in the application's executors,0,spark,exe mem max
 spark.executor.disk_used,rate,,byte,second,Amount of disk space used by persisted RDDs in the application's executors,0,spark,exe dsk usd
 spark.executor.active_tasks,rate,,task,second,Number of active tasks in the application's executors,0,spark,exe act tsk
 spark.executor.failed_tasks,rate,,task,second,Number of failed tasks in the application's executors,0,spark,exe fld tsk
@@ -45,6 +50,7 @@ spark.executor.total_input_bytes,rate,,byte,second,Total number of input bytes i
 spark.executor.total_shuffle_read,rate,,byte,second,Total number of bytes read during a shuffle in the application's executors,0,spark,exe tot shfl rd
 spark.executor.total_shuffle_write,rate,,byte,second,Total number of shuffled bytes in the application's executors,0,spark,exe tot shfl wrt
 spark.executor_memory,rate,,byte,second,Maximum memory available for caching RDD blocks in the application's executors,0,spark,exe max mem
+spark.rdd.count,rate,,,,Number of RDDs,0,spark,rdd count
 spark.rdd.num_partitions,rate,,,second,Number of persisted RDD partitions in the application,0,spark,rdd num part
 spark.rdd.num_cached_partitions,rate,,,second,Number of in-memory cached RDD partitions in the application,0,spark,rdd num ch part
 spark.rdd.memory_used,rate,,byte,second,Amount of memory used in the application's persisted RDDs,0,spark,rdd mem usd
