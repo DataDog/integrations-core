@@ -78,8 +78,8 @@ class TestSystemCore:
 
         psutil_mock = mock.MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
         with mock.patch('datadog_checks.system_core.system_core.psutil.cpu_times', psutil_mock):
-            c.check()
-            c.check()
+            c.check({})
+            c.check({})
 
         aggregator.assert_metric('system.core.count', value=4, count=1)
 
