@@ -1,7 +1,8 @@
-from . import btrfs
+from .btrfs import BTRFS
+from .__about__ import __version__
 
-BTRFS = btrfs.BTRFS
 
-__version__ = "1.1.0"
-
-__all__ = ['btrfs']
+__all__ = [
+    '__version__',
+    'BTRFS'
+    ]
