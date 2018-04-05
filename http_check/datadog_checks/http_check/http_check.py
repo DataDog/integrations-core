@@ -132,12 +132,24 @@ def get_ca_certs_path():
     Get a path to the trusted certificates of the system
     """
     """
-    check is installed via pip to embedded/lib/site-packages/datadog_checks/http_check
+    check is installed via pip to:
+    Windows: embedded/lib/site-packages/datadog_checks/http_check
+    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
     certificate is installed to   embedded/ssl/certs/cacert.pem
 
     walk up to embedded, and back down to ssl/certs to find the certificate file
     """
-    ca_certs = [os.path.normpath(os.path.join(os.path.dirname(__file__), '../../../..', 'ssl/certs', 'cacert.pem'))]
+
+    ca_certs = []
+
+    embedded_root = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(10):
+        if os.path.basename(embedded_root) == 'embedded':
+            ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
+            break
+        embedded_root = os.path.dirname(embedded_root)
+    else:
+        raise OSError('Unable to locate `embedded` directory. Please specify ca_certs in your http yaml configuration file.')
 
     try:
         import tornado
