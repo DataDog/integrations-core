@@ -429,7 +429,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], obj.name)
+                match = re.search(regexes['host_include'], obj.name, re.IGNORECASE)
                 if not match:
                     return True
 
@@ -437,7 +437,7 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], obj.name)
+                match = re.search(regexes['vm_include'], obj.name, re.IGNORECASE)
                 if not match:
                     return True
 
