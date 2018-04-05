@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import platform
 import os
 import sys
 
@@ -30,7 +31,7 @@ class Platform(object):
     @staticmethod
     def is_darwin(name=None):
         name = name or sys.platform
-        return 'darwin' in name
+        return platform.system() == 'Darwin' or 'darwin' in name
 
     @staticmethod
     def is_mac(name=None):
@@ -44,7 +45,7 @@ class Platform(object):
     @staticmethod
     def is_linux(name=None):
         name = name or sys.platform
-        return 'linux' in name
+        return platform.system() == 'Linux' or 'linux' in name
 
     @staticmethod
     def is_bsd(name=None):
@@ -62,15 +63,15 @@ class Platform(object):
         """ Return true if the platform is a unix, False otherwise. """
         name = name or sys.platform
         return (
-            Platform.is_darwin()
-            or Platform.is_linux()
-            or Platform.is_freebsd()
+            Platform.is_darwin(name)
+            or Platform.is_linux(name)
+            or Platform.is_freebsd(name)
         )
 
     @staticmethod
     def is_win32(name=None):
         name = name or sys.platform
-        return name == "win32"
+        return platform.system() == 'Windows' or name == 'win32'
 
     @staticmethod
     def is_windows(name=None):
