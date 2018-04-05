@@ -105,13 +105,15 @@ def test_win_uses_psutil(*args):
 
 
 def test_check_psutil(aggregator):
-    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
+    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, \
+            mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
         network_check._collect_cx_state = False
         network_check._check_psutil({})
         _cx_state_psutil.assert_not_called()
         _cx_counters_psutil.assert_called_once_with(tags=[])
 
-    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
+    with mock.patch.object(network_check, '_cx_state_psutil') as _cx_state_psutil, \
+            mock.patch.object(network_check, '_cx_counters_psutil') as _cx_counters_psutil:
         network_check._collect_cx_state = True
         network_check._check_psutil({})
         _cx_state_psutil.assert_called_once_with(tags=[])

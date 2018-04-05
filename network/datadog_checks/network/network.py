@@ -347,10 +347,10 @@ class Network(AgentCheck):
         with open(proc_dev_path, 'r') as proc:
             lines = proc.readlines()
         # Inter-|   Receive                                                 |  Transmit
-        #  face |bytes     packets errs drop fifo frame compressed multicast|bytes       packets errs drop fifo colls carrier compressed
-        #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0
-        #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0
-        #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0
+        #  face |bytes     packets errs drop fifo frame compressed multicast|bytes       packets errs drop fifo colls carrier compressed # noqa: E501
+        #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0 # noqa: E501
+        #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0 # noqa: E501
+        #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0 # noqa: E501
         for l in lines[2:]:
             cols = l.split(':', 1)
             x = cols[1].split()
