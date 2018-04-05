@@ -29,7 +29,7 @@ CONSUMER_METRICS = [
 ]
 
 
-@pytest.mark.integration
+@pytest.mark.zookeeper
 def test_check_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggregator):
     """
     Testing Kafka_consumer check.

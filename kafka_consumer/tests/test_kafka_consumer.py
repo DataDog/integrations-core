@@ -26,7 +26,7 @@ CONSUMER_METRICS = [
 ]
 
 
-@pytest.mark.integration
+@pytest.mark.kafka
 def test_check_kafka(kafka_cluster, kafka_producer, kafka_consumer, kafka_instance, aggregator):
     """
     Testing Kafka_consumer check.
