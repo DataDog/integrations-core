@@ -1,3 +1,2 @@
-backports.functools_lru_cache==1.5.0
 mock==2.0.0
 pytest
