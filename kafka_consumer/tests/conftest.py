@@ -90,7 +90,7 @@ class ZKConsumer(StoppableThread):
                     zk_conn.ensure_path(node_path)
                     zk_conn.set(node_path, str(0))
 
-        consumer = KafkaConsumer(bootstrap_servers=self.kafka_connect_str,
+        consumer = KafkaConsumer(bootstrap_servers=[self.kafka_connect_str],
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest',
                                  enable_auto_commit=False)
@@ -127,7 +127,7 @@ class KConsumer(StoppableThread):
         super(KConsumer, self).__init__()
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=self.kafka_connect_str,
+        consumer = KafkaConsumer(bootstrap_servers=[self.kafka_connect_str],
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest')
         consumer.subscribe(self.topics)
