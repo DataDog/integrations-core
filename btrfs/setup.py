@@ -48,7 +48,7 @@ setup(
     author_email='packages@datadoghq.com',
 
     # License
-    license='MIT',
+    license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -56,7 +56,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -68,23 +68,8 @@ setup(
     install_requires=get_requirements('requirements.in') + [
         'datadog-checks-base',
     ],
-
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'datadog_agent_tk>=5.15',
-        ],
-    },
-
-    # Testing setup and dependencies
-    tests_require=[
-        'nose',
-        'coverage',
-        'datadog_agent_tk>=5.15',
-    ],
-    test_suite='nose.collector',
+    setup_requires=['pytest-runner', ],
+    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     package_data={b'datadog_checks.btrfs': ['conf.yaml.example']},
