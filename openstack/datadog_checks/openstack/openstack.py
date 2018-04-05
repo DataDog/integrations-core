@@ -847,8 +847,7 @@ class OpenStackCheck(AgentCheck):
             for i, avg in enumerate([1, 5, 15]):
                 self.gauge('openstack.nova.hypervisor_load.{0}'.format(avg), load_averages[i], tags=tags)
 
-    def get_all_server_ids(self, filter_by_host=None):
-        i_key = self._instance_key(instance)
+    def get_all_server_ids(self, filter_by_host=None, i_key):
         if i_key not in self.changes_since:
             self.changes_since[i_key] = None
 
@@ -1097,7 +1096,7 @@ class OpenStackCheck(AgentCheck):
                     projects.append(project)
 
                 # Restrict monitoring to non-excluded servers
-                server_ids = self.get_servers_managed_by_hypervisor()
+                server_ids = self.get_servers_managed_by_hypervisor(instance)
 
                 host_tags = self._get_tags_for_host()
 
@@ -1233,8 +1232,9 @@ class OpenStackCheck(AgentCheck):
         """
         return self.init_config.get("os_host") or self.hostname
 
-    def get_servers_managed_by_hypervisor(self):
-        server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname())
+    def get_servers_managed_by_hypervisor(self, instance):
+        instance_key = self._instance_key(instance)
+        server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname(), instance_key)
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             server_ids = [
