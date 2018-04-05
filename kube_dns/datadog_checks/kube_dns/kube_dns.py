@@ -23,7 +23,7 @@ class KubeDNSCheck(PrometheusCheck):
             # metrics names for kubernetes < 1.6.0
             'skydns_skydns_dns_response_size_bytes': 'response_size.bytes',
             'skydns_skydns_dns_request_duration_seconds': 'request_duration.seconds',
-            # Note: count metrics were moved to specific function to be also submitted as monotonic_counts
+            # Note: the count metrics were moved to specific functions below to be submitted as both gauges and monotonic_counts
         }
 
 
@@ -53,6 +53,7 @@ class KubeDNSCheck(PrometheusCheck):
             # submit rate metric
             self.monotonic_count(metric_name + '.count', metric.counter.value, tags)
 
+    # metrics names for kubernetes >= 1.6.0
     def kubedns_kubedns_dns_request_count_total(self, message, **kwargs):
         submit_as_gauge_and_monotonic_count('.request_count', message, **kwargs)
 
