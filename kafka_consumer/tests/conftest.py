@@ -145,7 +145,7 @@ def wait_for_logs(container_id, pattern, timeout=30):
     regex = re.compile(pattern)
     now = time.time()
     while time.time() < (now + timeout):
-        loglines =  container.logs().splitlines()
+        loglines = container.logs().splitlines()
         for line in loglines:
             result = regex.match(line)
             if result:

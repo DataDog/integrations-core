@@ -14,6 +14,7 @@ services:
     environment:
       - KAFKA_ADVERTISED_HOST_NAME
       - KAFKA_OFFSETS_STORAGE
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE
       - KAFKA_CREATE_TOPICS
       - KAFKA_HEAP_OPTS
       - JMX_PORT
