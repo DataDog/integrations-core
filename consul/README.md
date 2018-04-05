@@ -26,9 +26,11 @@ The Datadog Agent's Consul Check is included in the Agent package, so simply [in
 
 ### Configuration
 
-#### Connect Datadog Agent to Consul Agent
+Create a `consul.yaml` in the Datadog Agent's `conf.d` directory.
 
-Create a `consul.yaml` in the Datadog Agent's `conf.d` directory. See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options:
+#### Metric Collection
+
+*  Add this configuration setup to your `consul.yaml` file to start gathering your [Consul Metrics](#metrics):
 
 ```
 init_config:
@@ -68,6 +70,32 @@ In the main Consul configuration file, add your `dogstatsd_addr` nested under th
 ```
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+* Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Add this configuration setup to your `consul.yaml` file to start collecting your Consul Logs:
+
+  ```
+    logs:
+        - type: file
+          path: /var/log/consul_server.log
+          source: consul
+          service: myservice
+  ```
+Change the `path` and `service` parameter values and configure them for your environment.
+  See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options.
+
+* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+
+**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 
 ### Validation
 
@@ -116,7 +144,7 @@ The Consul check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by the Datadog Agent's Consul check.
+See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv) for a list of metrics provided by this integration.
 
 See [Consul's Telemetry doc](https://www.consul.io/docs/agent/telemetry.html) for a description of metrics the Consul Agent sends to DogStatsD.
 

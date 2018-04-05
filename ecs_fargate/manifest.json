@@ -8,7 +8,7 @@
   "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "support": "contrib",
   "supported_os": ["linux","mac_os","windows"],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "public_title": "Datadog-ECS-Fargate Integration",
   "category": ["aws","containers","orchestration"],
   "type": "check",

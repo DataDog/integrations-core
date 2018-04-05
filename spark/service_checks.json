@@ -1,0 +1,38 @@
+[
+    {
+        "agent_version": "5.8.0",
+        "integration":"spark",
+        "check": "spark.resource_manager.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.8.0",
+        "integration":"spark",
+        "check": "spark.application_master.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ApplicationMaster. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.8.0",
+        "integration":"spark",
+        "check": "spark.standalone_master.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Standalone Master. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.8.0",
+        "integration":"spark",
+        "check": "spark.mesos_master.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Mesos Master. Returns `OK` otherwise."
+    }
+]

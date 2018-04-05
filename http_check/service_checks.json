@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "5.0.0",
+        "integration":"system",
+        "check": "http.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "instance", "url"],
+        "name": "HTTP",
+        "description": "Returns CRITICAL if the Agent cannot establish an HTTP connection to the URL. Returns OK if the connection is successful."
+    },
+    {
+        "agent_version": "5.0.0",
+        "integration":"system",
+        "check": "http.ssl_cert",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host", "instance", "url"],
+        "name": "HTTP - SSL",
+        "description": "Returns CRITICAL if the SSL certificate has expired. Returns WARNING if the SSL certificate will expire in less than the configured threshold. Returns OK otherwise."
+    }
+]

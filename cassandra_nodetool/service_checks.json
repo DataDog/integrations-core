@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.17.0",
+        "integration":"cassandra",
+        "groups": ["host", "instance"],
+        "check": "cassandra.nodetool.node_up",
+        "statuses": ["ok", "critical"],
+        "name": "Node Up",
+        "description": "The agent sends this service check for each node of the monitored cluster. Returns CRITICAL if the node is down, otherwise OK."
+    }
+]

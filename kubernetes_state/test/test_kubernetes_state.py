@@ -45,6 +45,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.node.pods_allocatable',
         NAMESPACE + '.node.gpu.cards_capacity',
         NAMESPACE + '.node.gpu.cards_allocatable',
+        NAMESPACE + '.nodes.by_condition',
         # deployments
         NAMESPACE + '.deployment.replicas',
         NAMESPACE + '.deployment.replicas_available',
@@ -95,7 +96,12 @@ class TestKubernetesState(AgentCheckTest):
 
     TAGS = {
         NAMESPACE + '.pod.ready': ['node:minikube'],
-        NAMESPACE + '.pod.scheduled': ['node:minikube']
+        NAMESPACE + '.pod.scheduled': ['node:minikube'],
+        NAMESPACE + '.nodes.by_condition': [
+            'condition:MemoryPressure', 'condition:DiskPressure',
+            'condition:OutOfDisk', 'condition:Ready',
+            'status:true', 'status:false', 'status:unknown',
+        ]
     }
 
     JOINED_METRICS = {
@@ -159,6 +165,11 @@ class TestKubernetesState(AgentCheckTest):
                                 tags=['namespace:default', 'pod:should-run-once'])  # Failed
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,
                                 tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
+
+        # Make sure we send counts for all statuses to avoid no-data graphing issues
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:true'], value=1)
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:false'], value=0)
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:unknown'], value=0)
 
         for metric in self.METRICS:
             self.assertMetric(

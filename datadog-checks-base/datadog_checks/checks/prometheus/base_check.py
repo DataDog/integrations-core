@@ -12,6 +12,18 @@ class Scraper(PrometheusScraper):
         super(Scraper, self).__init__()
         self.check = check
 
+    def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
+        """
+        Submit a metric as a rate, additional tags provided will be added to
+        the ones from the label provided via the metrics object.
+
+        `custom_tags` is an array of 'tag:value' that will be added to the
+        metric when sending the rate to Datadog.
+        """
+        _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
+        self.check.rate('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
+
+
     def _submit_gauge(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """
         Submit a metric as a gauge, additional tags provided will be added to
@@ -20,6 +32,10 @@ class Scraper(PrometheusScraper):
         `custom_tags` is an array of 'tag:value' that will be added to the
         metric when sending the gauge to Datadog.
         """
+        _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
+        self.check.gauge('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
+
+    def _metric_tags(self, metric_name, val, metric, custom_tags=None, hostname=None):
         _tags = []
         if custom_tags is not None:
             _tags += custom_tags
@@ -29,8 +45,7 @@ class Scraper(PrometheusScraper):
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
                 _tags.append('{}:{}'.format(tag_name, label.value))
-        _tags = self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname)
-        self.check.gauge('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
+        return self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname)
 
     def _submit_service_check(self, *args, **kwargs):
         self.check.service_check(*args, **kwargs)
@@ -71,6 +86,15 @@ class GenericPrometheusCheck(AgentCheck):
             ignore_unmapped=True
         )
 
+    def _extract_rate_metrics(self, type_overrides):
+        rate_metrics = []
+        for metric in type_overrides:
+            if type_overrides[metric] == "rate":
+                rate_metrics.append(metric)
+                type_overrides[metric] = "gauge"
+        return rate_metrics
+
+
     def get_scraper(self, instance):
         namespace = instance.get("namespace", "")
         # Check if we have a namespace
@@ -101,17 +125,21 @@ class GenericPrometheusCheck(AgentCheck):
                 metrics_mapper[metric] = metric
             else:
                 metrics_mapper.update(metric)
+
         scraper.metrics_mapper = metrics_mapper
         scraper.labels_mapper = default_instance.get("labels_mapper", {})
         scraper.labels_mapper.update(instance.get("labels_mapper", {}))
         scraper.label_joins = default_instance.get("label_joins", {})
         scraper.label_joins.update(instance.get("label_joins", {}))
+        scraper.rate_metrics = self._extract_rate_metrics(default_instance.get("type_overrides", {}))
+        scraper.rate_metrics.extend(self._extract_rate_metrics(instance.get("type_overrides", {})))
         scraper.type_overrides = default_instance.get("type_overrides", {})
         scraper.type_overrides.update(instance.get("type_overrides", {}))
         scraper.exclude_labels = default_instance.get("exclude_labels", []) + instance.get("exclude_labels", [])
         scraper.extra_headers = default_instance.get("extra_headers", {})
         scraper.extra_headers.update(instance.get("extra_headers", {}))
         # For simple values instance settings overrides optional defaults
+        scraper.prometheus_metrics_prefix = instance.get("prometheus_metrics_prefix", default_instance.get("prometheus_metrics_prefix", ''))
         scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("prometheus_url", ""))
         scraper.health_service_check = instance.get("health_service_check", default_instance.get("health_service_check", True))
         scraper.ssl_cert = instance.get("ssl_cert", default_instance.get("ssl_cert", None))

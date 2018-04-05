@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"gunicorn",
+        "check": "gunicorn.is_running",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "app"],
+        "name": "Master process running",
+        "description": "Returns `CRITICAL` if the Agent is unable to find the Gunicorn master process. Returns `OK` otherwise."
+    }
+]

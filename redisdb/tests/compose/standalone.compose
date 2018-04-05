@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  redis-standalone:
+    image: "redis:${REDIS_VERSION}"
+    volumes:
+      - ${REDIS_CONFIG}:/etc/redis.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - network1
+    command: redis-server /etc/redis.conf
+
+networks:
+  network1:
+    name: standalone_default

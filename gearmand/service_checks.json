@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"gearman",
+        "check": "gearman.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "server", "port"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent check is unable to connect to the monitored Gearman instance. Returns `OK` otherwise."
+    }
+]

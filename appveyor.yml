@@ -35,47 +35,38 @@ install:
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
   - ps: mkdir -p $(python -m site --user-site)
   - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
+  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
   - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
   - cd datadog-checks-base
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd iis
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd windows_service
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd pdh_check
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd aspdotnet 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd dotnetclr 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd exchange_server 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
 build: off

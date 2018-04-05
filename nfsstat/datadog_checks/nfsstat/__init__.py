@@ -1,7 +1,10 @@
-from . import nfsstat
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .nfsstat import NfsStatCheck
 
-NfsStatCheck = nfsstat.NfsStatCheck
-
-__version__ = "0.2.0"
-
-__all__ = ['nfsstat']
+__all__ = [
+    '__version__',
+    'NfsStatCheck'
+]
