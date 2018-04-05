@@ -97,6 +97,8 @@ the new testing approach:
 * [disk](disk)
 * [mcache](mcache)
 * [redisdb](redisdb)
+* [ssh_check](ssh_check)
+* [system_core](system_core)
 * [teamcity](teamcity)
 * [vsphere](vsphere)
 

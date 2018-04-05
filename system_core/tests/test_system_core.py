@@ -1,8 +1,9 @@
-from mock import patch, MagicMock
+import mock
 import psutil
+import pytest
 
-from tests.checks.common import AgentCheckTest, load_check
-from utils.platform import Platform
+from datadog_checks.system_core import SystemCore
+from datadog_checks.utils.platform import Platform
 
 if Platform.is_mac():
     CHECK_RATES = [
@@ -63,25 +64,24 @@ else:  # windows
                                     interrupt=0.05, dpc=0.0)
     ]
 
-class SystemCoreTestCase(AgentCheckTest):
 
-    CHECK_NAME = 'system_core'
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
 
-    def __init__(self, *args, **kwargs):
-        super(SystemCoreTestCase, self).__init__(*args, **kwargs)
 
-        self.config = {"instances": [{}]}
-        self.check = load_check(self.CHECK_NAME, self.config, {})
+class TestSystemCore:
+    def test_system_core(self, aggregator):
+        c = SystemCore('system_core', {}, {}, [{}])
 
-    def test_system_core(self):
-        psutil_mock = MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
-        with patch('datadog_checks.system_core.system_core.psutil.cpu_times', psutil_mock):
-            self.run_check_twice(self.config)
+        psutil_mock = mock.MagicMock(return_value=MOCK_PSUTIL_CPU_TIMES)
+        with mock.patch('datadog_checks.system_core.system_core.psutil.cpu_times', psutil_mock):
+            c.check({})
 
-        self.assertMetric('system.core.count', value=4, count=1)
+        aggregator.assert_metric('system.core.count', value=4, count=1)
 
         for i in range(4):
             for rate in CHECK_RATES:
-                self.assertMetric(rate, count=1, tags=['core:{0}'.format(i)])
-
-        self.coverage_report()
+                aggregator.assert_metric(rate, count=1, tags=['core:{0}'.format(i)])
