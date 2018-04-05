@@ -27,6 +27,7 @@ AGENT_BASED_INTEGRATIONS = [
     'redisdb',
     'spark',
     'ssh_check',
+    'system_core',
     'vsphere',
     'postgres',
 ]
