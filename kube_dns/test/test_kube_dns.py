@@ -46,7 +46,9 @@ class TestKubeDNS(AgentCheckTest):
         NAMESPACE + '.request_count',
         NAMESPACE + '.request_count.count',
         NAMESPACE + '.error_count',
+        NAMESPACE + '.error_count.count',
         NAMESPACE + '.cachemiss_count',
+        NAMESPACE + '.cachemiss_count.count',
     ]
 
     def test_check(self):
