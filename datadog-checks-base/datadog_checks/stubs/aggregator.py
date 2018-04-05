@@ -4,6 +4,7 @@
 from collections import defaultdict, namedtuple
 
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
+ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
 
 
 class AggregatorStub(object):
@@ -20,17 +21,30 @@ class AggregatorStub(object):
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
 
-    def submit_service_check(self, *args, **kwargs):
-        pass
+    def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
+        self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
-    def submit_event(self, *args, **kwargs):
-        pass
+    def submit_event(self, check, check_id, event):
+        self._events.append(event)
 
     def metrics(self, name):
         """
         Return the metrics received under the given name
         """
         return self._metrics.get(name, [])
+
+    def service_checks(self, name):
+        """
+        Return the service checks received under the given name
+        """
+        return self._service_checks.get(name, [])
+
+    @property
+    def events(self):
+        """
+        Return all events
+        """
+        return self._events
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
@@ -41,7 +55,7 @@ class AggregatorStub(object):
 
         candidates = []
         for metric in self._metrics.get(name, []):
-            if value is not None and value != metric.value:
+            if value is not None and metric.type != self.COUNTER and value != metric.value:
                 continue
 
             if tags and sorted(tags) != sorted(metric.tags):
@@ -55,6 +69,9 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
+        if value is not None and all(m.type == self.COUNTER for m in candidates):
+            assert value == sum(map(lambda m : m.value, candidates))
+
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
             assert len(candidates) == count, msg
@@ -62,18 +79,49 @@ class AggregatorStub(object):
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             assert len(candidates) >= at_least, msg
 
+    def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None):
+        """
+        Assert a service check was processed by this stub
+        """
+
+        candidates = []
+        for sc in aggregator.service_checks('powerdns.recursor.can_connect'):
+            if status is not None and status != sc.status:
+                continue
+
+            if tags and sorted(tags) != sorted(sc.tags):
+                continue
+
+            candidates.append(sc)
+
+        if count is not None:
+            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            assert len(candidates) == count, msg
+        else:
+            msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
+            assert len(candidates) >= at_least, msg
+
+
+    def all_metrics_asserted(self):
+        assert aggregator.metrics_asserted_pct == 100.0
+
+
     def reset(self):
         """
         Set the stub to its initial state
         """
         self._metrics = defaultdict(list)
         self._asserted = set()
+        self._service_checks = defaultdict(list)
+        self._events = []
 
     @property
     def metrics_asserted_pct(self):
         """
         Return the metrics assertion coverage
         """
+        if len(self._metrics) == 0:
+            return 100.0
         return len(self._asserted) / float(len(self._metrics)) * 100.0
 
     @property
@@ -82,6 +130,13 @@ class AggregatorStub(object):
         Return all the metric names we've seen so far
         """
         return self._metrics.keys()
+
+    @property
+    def service_check_names(self):
+        """
+        Return all the service checks names seen so far
+        """
+        return self._service_checks.keys()
 
 
 # Use the stub as a singleton

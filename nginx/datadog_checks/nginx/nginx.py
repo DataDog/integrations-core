@@ -39,6 +39,14 @@ PLUS_API_ENDPOINTS = {
     "stream/upstreams": ["stream", "upstreams"],
 }
 
+TAGGED_KEYS = {
+    'caches': 'cache',
+    'server_zones': 'server_zone',
+    'upstreams': 'upstream',
+    'slabs': 'slab',
+    'slots': 'slot'
+}
+
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
     * number of connections
@@ -209,27 +217,8 @@ class Nginx(AgentCheck):
         else:
             parsed = json.loads(raw)
         metric_base = 'nginx'
-        output = []
-        all_keys = parsed.keys()
 
-        tagged_keys = [('caches', 'cache'), ('server_zones', 'server_zone'),
-                       ('upstreams', 'upstream')]
-
-        # Process the special keys that should turn into tags instead of
-        # getting concatenated to the metric name
-        for key, tag_name in tagged_keys:
-            metric_name = '%s.%s' % (metric_base, tag_name)
-            for tag_val, data in parsed.get(key, {}).iteritems():
-                tag = '%s:%s' % (tag_name, tag_val)
-                output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
-
-        # Process the rest of the keys
-        rest = set(all_keys) - set([k for k, _ in tagged_keys])
-        for key in rest:
-            metric_name = '%s.%s' % (metric_base, key)
-            output.extend(cls._flatten_json(metric_name, parsed[key], tags))
-
-        return output
+        return cls._flatten_json(metric_base, parsed, tags)
 
     @classmethod
     def _flatten_json(cls, metric_base, val, tags):
@@ -237,6 +226,7 @@ class Nginx(AgentCheck):
             [(metric_name, value, tags)]
         '''
         output = []
+
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
             if 'server' in val and val['server']:
@@ -246,8 +236,14 @@ class Nginx(AgentCheck):
                 else:
                     tags = tags + [server]
             for key, val2 in val.iteritems():
-                metric_name = '%s.%s' % (metric_base, key)
-                output.extend(cls._flatten_json(metric_name, val2, tags))
+                if key in TAGGED_KEYS:
+                    metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
+                    for tag_val, data in val2.iteritems():
+                        tag = '%s:%s' % (TAGGED_KEYS[key], tag_val)
+                        output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
+                else:
+                    metric_name = '%s.%s' % (metric_base, key)
+                    output.extend(cls._flatten_json(metric_name, val2, tags))
 
         elif isinstance(val, list):
             for val2 in val:

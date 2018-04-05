@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.8.0",
+        "integration":"powerdns_recursor",
+        "check": "powerdns.recursor.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "port"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent check is unable to connect to the monitored Gearman instance. Returns `OK` otherwise."
+    }
+]

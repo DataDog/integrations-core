@@ -1,0 +1,5 @@
+adodbapi==2.6.0.7
+pyro4==4.36
+testfixtures==4.14.3
+serpent==1.23
+pyodbc==4.0.13

@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"riakcs",
+        "check": "riakcs.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "aggregation_key"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored KyotoTycoon instance. Returns `OK` otherwise."
+    }
+]

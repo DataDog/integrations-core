@@ -19,13 +19,12 @@ instances:
     # The sample configuration will monitor the WMI Performance Adapter service,
     # named "wmiApSrv" in the service properties.
     #
-    -   host: . # "." means the current host
-        services:
-          - wmiApSrv
-
-    # The optional tag field allows custom tagging for each metric
-    #   tags:
-    #     - optional:tag1
+    - host: . # "." means the current host
+      services:
+        - wmiApSrv
+      # The optional tag field allows custom tagging for each metric
+      # tags:
+      #   - optional:tag1
 
     # NOTE when using wildcards or the "ALL" option, the check will NOT report
     # services that are not registered with the SCM.  When a service is explicitly

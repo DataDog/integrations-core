@@ -14,7 +14,7 @@
   "version": "1.0.3",
   "guid": "33557f7a-5f24-43f3-9551-78432894e539",
   "public_title": "Datadog-Go-Expvar Integration",
-  "categories":["languages"],
+  "categories":["languages", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/go_expvar/",
   "is_public": true,

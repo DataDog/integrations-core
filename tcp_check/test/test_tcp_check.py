@@ -16,41 +16,26 @@ CONFIG = {
         'host': '127.0.0.1',
         'port': 65530,
         'timeout': 1.5,
-        'name': 'DownService',
-        'skip_event': True
+        'name': 'DownService'
     }, {
         'host': '126.0.0.1',
         'port': 65530,
         'timeout': 1.5,
         'name': 'DownService2',
-        'tags': ['test1'],
-        'skip_event': True
+        'tags': ['test1']
     }, {
         'host': 'datadoghq.com',
         'port': 80,
         'timeout': 1.5,
         'name': 'UpService',
-        'tags': ['test2'],
-        'skip_event': True
+        'tags': ['test2']
     }, {
         'host': 'datadoghq.com',
         'port': 80,
         'timeout': 1,
         'name': 'response_time',
         'tags': ['test3'],
-        'collect_response_time': True,
-        'skip_event': True
-    }]
-}
-
-CONFIG_EVENTS = {
-    'init_config': {},
-    'instances': [{
-        'host': '127.0.0.1',
-        'port': 65530,
-        'timeout': 1.5,
-        'name': 'DownService',
-        'skip_event': False
+        'collect_response_time': True
     }]
 }
 
@@ -61,24 +46,6 @@ class TCPCheckTest(AgentCheckTest):
 
     def tearDown(self):
         self.check.stop()
-
-    def test_event_deprecation(self):
-        """
-        Deprecate events usage for service checks.
-        """
-        # Run the check
-        self.run_check(CONFIG_EVENTS)
-
-        # Overrides self.service_checks attribute when values are available
-        self.warnings = self.wait_for_async('get_warnings', 'warnings', len(CONFIG_EVENTS['instances']), RESULTS_TIMEOUT)
-
-        # Assess warnings
-        self.assertWarning(
-            "Using events for service checks is deprecated in "
-            "favor of monitors and will be removed in future versions of the "
-            "Datadog Agent.",
-            count=len(CONFIG_EVENTS['instances'])
-        )
 
     def test_check(self):
         """

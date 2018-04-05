@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"varnish",
+        "check": "varnish.backend_healthy",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "backend"],
+        "name": "Backend Health Check",
+        "description": "Checks the status of your different backends parsed from `varnishadm`. Additional information about backend status at the time of collection is included in the check message."
+    }
+]
