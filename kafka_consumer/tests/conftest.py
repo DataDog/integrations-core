@@ -28,6 +28,8 @@ from .common import (
 )
 
 
+MAX_ITERATIONS = 60
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 docker_client = docker.from_env()
@@ -48,7 +50,8 @@ class Producer(StoppableThread):
     def run(self):
         producer = KafkaProducer(bootstrap_servers=ZK_INSTANCE['kafka_connect_str'])
 
-        while not self._shutdown_event.is_set():
+        iteration = 0
+        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
             for partition in PARTITIONS:
                 try:
                     producer.send('marvel', b"Peter Parker", partition=partition)
@@ -61,9 +64,11 @@ class Producer(StoppableThread):
                     producer.send('dc', b"Clark Kent", partition=partition)
                     producer.send('dc', b"Arthur Curry", partition=partition)
                     producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
-                    time.sleep(1)
                 except Exception:
                     pass
+
+            iteration += 1
+            time.sleep(1)
 
 
 class ZKConsumer(StoppableThread):
@@ -96,7 +101,8 @@ class ZKConsumer(StoppableThread):
                                  enable_auto_commit=False)
         consumer.subscribe(self.topics)
 
-        while not self._shutdown_event.is_set():
+        iteration = 0
+        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
             response = consumer.poll(timeout_ms=500, max_records=10)
             zk_trans = zk_conn.transaction()
             for tp, records in response.iteritems():
@@ -115,6 +121,7 @@ class ZKConsumer(StoppableThread):
                     )
 
             zk_trans.commit()
+            iteration += 1
 
         zk_conn.stop()
 
@@ -122,7 +129,7 @@ class ZKConsumer(StoppableThread):
 class KConsumer(StoppableThread):
 
     def __init__(self, topics):
-        self.kafka_connect_str = None
+        self.kafka_connect_str = KAFKA_CONNECT_STR
         self.topics = topics
         super(KConsumer, self).__init__()
 
@@ -132,8 +139,10 @@ class KConsumer(StoppableThread):
                                  auto_offset_reset='earliest')
         consumer.subscribe(self.topics)
 
-        while not self._shutdown_event.is_set():
+        iteration = 0
+        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
             consumer.poll(timeout_ms=500, max_records=10)
+            iteration += 1
 
 
 # might block indefinitely - watchout
@@ -154,33 +163,6 @@ def wait_for_logs(container_id, pattern, timeout=30):
         time.sleep(1)
 
     return False
-
-
-@pytest.fixture(scope="session")
-def kafka_producer():
-    producer = Producer()
-    yield producer
-    if producer.is_alive():
-        producer.send_shutdown()
-        producer.join(5)
-
-
-@pytest.fixture(scope="session")
-def kafka_consumer():
-    consumer = KConsumer(TOPICS)
-    yield consumer
-    if consumer.is_alive():
-        consumer.send_shutdown()
-        consumer.join(5)
-
-
-@pytest.fixture(scope="session")
-def zk_consumer():
-    consumer = ZKConsumer(TOPICS, PARTITIONS)
-    yield consumer
-    if consumer.is_alive():
-        consumer.send_shutdown()
-        consumer.join(5)
 
 
 @pytest.fixture(scope="session")
@@ -210,6 +192,33 @@ def kafka_cluster():
     yield clean
 
     subprocess.check_call(args + ["down"], env=env)
+
+
+@pytest.fixture(scope="session")
+def kafka_producer(kafka_cluster):
+    producer = Producer()
+    yield producer
+    if producer.is_alive():
+        producer.send_shutdown()
+        producer.join(5)
+
+
+@pytest.fixture(scope="session")
+def kafka_consumer(kafka_producer):
+    consumer = KConsumer(TOPICS)
+    yield consumer
+    if consumer.is_alive():
+        consumer.send_shutdown()
+        consumer.join(5)
+
+
+@pytest.fixture(scope="session")
+def zk_consumer(kafka_producer):
+    consumer = ZKConsumer(TOPICS, PARTITIONS)
+    yield consumer
+    if consumer.is_alive():
+        consumer.send_shutdown()
+        consumer.join(5)
 
 
 @pytest.fixture
