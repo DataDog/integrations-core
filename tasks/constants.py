@@ -28,6 +28,7 @@ AGENT_BASED_INTEGRATIONS = [
     'spark',
     'ssh_check',
     'system_core',
+    'teamcity',
     'vsphere',
     'postgres',
 ]
