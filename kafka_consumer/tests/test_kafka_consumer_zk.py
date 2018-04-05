@@ -41,7 +41,7 @@ def test_check_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggre
         time.sleep(5)
 
     if not zk_consumer.is_alive():
-        zk_consumer.start()
+        zk_consumer.run()
         time.sleep(5)
 
     if not cluster_ready():

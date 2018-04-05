@@ -17,7 +17,7 @@ CLUSTER_READY = 'Stabilized group my_consumer'
 DOCKER_TO = 10
 MAX_SETUP_WAIT = 60
 
-KAFKA_CONNECT_STR = '172.17.0.1:9092'
+KAFKA_CONNECT_STR = '172.19.0.1:9092'
 ZK_CONNECT_STR = 'localhost:2181'
 
 TOPICS = ['marvel', 'dc', '__consumer_offsets']

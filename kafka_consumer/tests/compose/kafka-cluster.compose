@@ -12,12 +12,11 @@ services:
       - "${EXTERNAL_PORT}:9092"
       - "${EXTERNAL_JMX_PORT}:9999"
     environment:
-      # - HOSTNAME_COMMAND=route -n | awk '/UG[ \t]/{print $$2}'
+      - KAFKA_ADVERTISED_HOST_NAME
       - KAFKA_OFFSETS_STORAGE
       - KAFKA_CREATE_TOPICS
       - KAFKA_HEAP_OPTS
       - JMX_PORT
       - KAFKA_ZOOKEEPER_CONNECT
-      - KAFKA_ADVERTISED_HOST_NAME
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
