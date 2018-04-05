@@ -554,7 +554,7 @@ class OpenStackCheck(AgentCheck):
         random.seed()
 
         # Timestamp used to filter the call to get the list of nova servers
-        self.changes_since = None
+        self.changes_since = {}
 
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
@@ -847,7 +847,11 @@ class OpenStackCheck(AgentCheck):
             for i, avg in enumerate([1, 5, 15]):
                 self.gauge('openstack.nova.hypervisor_load.{0}'.format(avg), load_averages[i], tags=tags)
 
-    def get_all_server_ids(self, filter_by_host=None, changes_since=None):
+    def get_all_server_ids(self, filter_by_host=None):
+        i_key = self._instance_key(instance)
+        if i_key not in self.changes_since:
+            self.changes_since[i_key] = None
+
         query_params = {}
         if filter_by_host:
             query_params["host"] = filter_by_host
@@ -859,7 +863,7 @@ class OpenStackCheck(AgentCheck):
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         server_ids = []
-        self.changes_since = datetime.utcnow().isoformat()
+        self.changes_since[i_key] = datetime.utcnow().isoformat()
         try:
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
 
@@ -1230,7 +1234,7 @@ class OpenStackCheck(AgentCheck):
         return self.init_config.get("os_host") or self.hostname
 
     def get_servers_managed_by_hypervisor(self):
-        server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname(), changes_since=self.changes_since)
+        server_ids = self.get_all_server_ids(filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             server_ids = [
