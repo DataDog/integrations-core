@@ -79,6 +79,33 @@ class AggregatorStub(object):
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             assert len(candidates) >= at_least, msg
 
+    def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None):
+        """
+        Assert a service check was processed by this stub
+        """
+
+        candidates = []
+        for sc in aggregator.service_checks('powerdns.recursor.can_connect'):
+            if status is not None and status != sc.status:
+                continue
+
+            if tags and sorted(tags) != sorted(sc.tags):
+                continue
+
+            candidates.append(sc)
+
+        if count is not None:
+            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            assert len(candidates) == count, msg
+        else:
+            msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
+            assert len(candidates) >= at_least, msg
+
+
+    def all_metrics_asserted(self):
+        assert aggregator.metrics_asserted_pct == 100.0
+
+
     def reset(self):
         """
         Set the stub to its initial state

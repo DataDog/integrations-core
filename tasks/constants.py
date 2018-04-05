@@ -21,6 +21,7 @@ AGENT_BASED_INTEGRATIONS = [
     'linkerd',
     'nfsstat',
     'network',
+    'powerdns_recursor',
     'prometheus',
     'redisdb',
     'spark',
