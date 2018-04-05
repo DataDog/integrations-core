@@ -57,7 +57,10 @@ class Marathon(AgentCheck):
         self.process_deployments(url, timeout, auth, acs_url, ssl_verify, instance_tags)
         self.process_queues(url, timeout, auth, acs_url, ssl_verify, instance_tags)
 
-    def refresh_acs_token(self, auth, acs_url):
+    def refresh_acs_token(self, auth, acs_url, tags=None):
+        if tags is None:
+            tags = []
+
         try:
             auth_body = {
                 'uid': auth[0],
@@ -71,10 +74,13 @@ class Marathon(AgentCheck):
         except requests.exceptions.HTTPError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message='acs auth url %s returned a status of %s' % (acs_url, r.status_code),
-                               tags = ["url:{0}".format(acs_url)])
+                               tags = ["url:{0}".format(acs_url)] + tags)
             raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
 
-    def get_json(self, url, timeout, auth, acs_url, verify):
+    def get_json(self, url, timeout, auth, acs_url, verify, tags=None):
+        if tags is None:
+            tags = []
+
         params = {
             'timeout': timeout,
             'headers': {},
@@ -84,7 +90,7 @@ class Marathon(AgentCheck):
         if acs_url:
             # If the ACS token has not been set, go get it
             if not self.ACS_TOKEN:
-                self.refresh_acs_token(auth, acs_url)
+                self.refresh_acs_token(auth, acs_url, tags)
             params['headers']['authorization'] = 'token=%s' % self.ACS_TOKEN
             del params['auth']
 
@@ -92,31 +98,31 @@ class Marathon(AgentCheck):
             r = requests.get(url, **params)
             # If got unauthorized and using acs auth, refresh the token and try again
             if r.status_code == 401 and acs_url:
-                self.refresh_acs_token(auth, acs_url)
+                self.refresh_acs_token(auth, acs_url, tags)
                 r = requests.get(url, **params)
             r.raise_for_status()
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message='%s timed out after %s seconds.' % (url, timeout),
-                               tags = ["url:{0}".format(url)])
+                               tags = ["url:{0}".format(url)] + tags)
             raise Exception("Timeout when hitting %s" % url)
 
         except requests.exceptions.HTTPError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                message='%s returned a status of %s' % (url, r.status_code),
-                               tags = ["url:{0}".format(url)])
+                               tags = ["url:{0}".format(url)] + tags)
             raise Exception("Got %s when hitting %s" % (r.status_code, url))
 
         except requests.exceptions.ConnectionError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                 message='%s Connection Refused.' % (url),
-                tags = ["url:{0}".format(url)])
+                tags = ["url:{0}".format(url)] + tags)
             raise Exception("Connection refused when hitting %s" % url)
 
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags = ["url:{0}".format(url)])
+                               tags = ["url:{0}".format(url)] + tags)
 
         return r.json()
 
@@ -148,7 +154,7 @@ class Marathon(AgentCheck):
             marathon_path = urljoin(url, "v2/apps")
         else:
             marathon_path = urljoin(url, "v2/groups/{}".format(group))
-        response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify)
+        response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
         if response is not None:
             self.gauge('marathon.apps', len(response['apps']), tags=tags)
             for app in response['apps']:
@@ -159,14 +165,14 @@ class Marathon(AgentCheck):
 
     def process_deployments(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
         # Number of running/pending deployments
-        response = self.get_json(urljoin(url, "v2/deployments"), timeout, auth, acs_url, ssl_verify)
+        response = self.get_json(urljoin(url, "v2/deployments"), timeout, auth, acs_url, ssl_verify, tags)
         if response is not None:
             self.gauge('marathon.deployments', len(response), tags=tags)
 
     def process_queues(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
         # Number of queued applications
         QUEUE_PREFIX = 'marathon.queue'
-        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify)
+        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify, tags)
         if response is None:
             return
 
