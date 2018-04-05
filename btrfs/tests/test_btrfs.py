@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# project
-from datadog_checks.btrfs import BTRFS
-
+import collections
 import mock
 import pytest
+
+# project
+from datadog_checks.btrfs import BTRFS
 
 btrfs_check = BTRFS('btrfs', {}, {})
 
@@ -19,6 +20,7 @@ def aggregator():
 
 
 def mock_get_usage(mountpoint):
+
     return [
         (1, 9672065024, 9093722112),
         (34, 33554432, 16384),
@@ -27,7 +29,24 @@ def mock_get_usage(mountpoint):
     ]
 
 
-def test_check(aggregator):
+# Just return a single device so the psutil portion of the check doesn't fail
+# The real data to check against is in mock_get_usage.
+def get_mock_devices():
+
+    device_tuple = collections.namedtuple('device_tuple', 'device mountpoint fstype opts')
+
+    return [
+        device_tuple(
+            device='/dev/disk1',
+            mountpoint='/',
+            fstype='btrfs',
+            opts='local,multilabel'
+        )
+    ]
+
+
+@mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
+def test_check(mock_device_list, aggregator):
     """
     Testing Btrfs check.
     """
