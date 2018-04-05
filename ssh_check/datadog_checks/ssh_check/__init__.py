@@ -1,7 +1,10 @@
-from . import ssh_check
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .ssh_check import CheckSSH
 
-CheckSSH = ssh_check.CheckSSH
-
-__version__ = "1.2.0"
-
-__all__ = ['ssh_check']
+__all__ = [
+    '__version__',
+    'CheckSSH'
+]

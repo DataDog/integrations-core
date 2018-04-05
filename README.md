@@ -97,6 +97,7 @@ the new testing approach:
 * [disk](disk)
 * [mcache](mcache)
 * [redisdb](redisdb)
+* [ssh_check](ssh_check)
 * [vsphere](vsphere)
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).

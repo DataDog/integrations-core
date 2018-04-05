@@ -25,6 +25,7 @@ AGENT_BASED_INTEGRATIONS = [
     'prometheus',
     'redisdb',
     'spark',
+    'ssh_check',
     'vsphere',
     'postgres',
 ]
