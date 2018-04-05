@@ -556,6 +556,10 @@ class OpenStackCheck(AgentCheck):
         # Timestamp used to filter the call to get the list of nova servers
         self.changes_since = {}
 
+        # Cache the list of servers available on the machine
+        # The key being the instance
+        self.servers = {}
+
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
         Generic request handler for OpenStack API requests
@@ -890,6 +894,9 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
+        query_params = {}
+        query_params['status'] = 'ACTIVE'
+
         url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         state = None
@@ -898,7 +905,7 @@ class OpenStackCheck(AgentCheck):
         tenant_id = None
         project_name = None
         try:
-            server_details = self._make_request_with_auth_fallback(url, headers)
+            server_details = self._make_request_with_auth_fallback(url, headers, params=query_params)
             state = server_details['server'].get('status')
             server_name = server_details['server'].get('name')
             hypervisor_hostname = server_details['server'].get('OS-EXT-SRV-ATTR:hypervisor_hostname')
