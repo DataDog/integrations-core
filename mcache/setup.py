@@ -24,7 +24,7 @@ def get_requirements(fpath):
 
 
 setup(
-    name='datadog-redisdb',
+    name='datadog-mcache',
     version=ABOUT["__version__"],
     description='The Memcache check',
     long_description=long_description,
