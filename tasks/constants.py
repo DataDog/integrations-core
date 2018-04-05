@@ -20,6 +20,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kubelet',
     'linkerd',
     'nfsstat',
+    'network',
     'prometheus',
     'redisdb',
     'spark',
