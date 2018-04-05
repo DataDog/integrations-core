@@ -1,7 +1,8 @@
-from . import network
+from .network import Network
 
-Network = network.Network
+from .__about__ import __version__
 
-__version__ = "1.5.0"
-
-__all__ = ['network']
+__all__ = [
+    '__version__',
+    'Network'
+]
