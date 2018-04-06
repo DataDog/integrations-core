@@ -577,10 +577,16 @@ def test_yarn(aggregator):
 
         for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
 
 
 def test_mesos(aggregator):
@@ -641,10 +647,16 @@ def test_mesos(aggregator):
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:5050', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags = ['url:http://localhost:5050', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
 
         assert aggregator.metrics_asserted_pct == 100.0
 
