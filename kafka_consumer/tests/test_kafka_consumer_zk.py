@@ -66,7 +66,7 @@ def test_check_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggre
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
 
 
-@pytest.mark.integration
+@pytest.mark.zookeeper
 def test_multiple_servers_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggregator):
     """
     Testing Kafka_consumer check.
@@ -105,7 +105,7 @@ def test_multiple_servers_zk(kafka_cluster, kafka_producer, zk_consumer, zk_inst
                                              ["source:zk", "consumer_group:{}".format(name)], at_least=1)
 
 
-@pytest.mark.integration
+@pytest.mark.zookeeper
 def test_check_nogroups_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggregator):
     """
     Testing Kafka_consumer check grabbing groups from ZK
