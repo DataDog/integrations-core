@@ -125,6 +125,8 @@ class Twemproxy(AgentCheck):
         host = instance.get('host')
         port = int(instance.get('port', 2222)) # 2222 is default
         tags = instance.get('tags', [])
+        if tags is None:
+            tags = []
 
         service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)] + tags
         service_check_tags = list(set(service_check_tags))
