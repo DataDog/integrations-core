@@ -852,7 +852,7 @@ class OpenStackCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, filter_by_host=None, i_key):
+    def get_all_servers(self, i_key, filter_by_host=None):
         query_params = {}
         if filter_by_host:
             query_params["host"] = filter_by_host
@@ -1241,7 +1241,7 @@ class OpenStackCheck(AgentCheck):
         return self.init_config.get("os_host") or self.hostname
 
     def get_servers_managed_by_hypervisor(self, instance_key):
-        servers = self.get_all_servers(filter_by_host=self.get_my_hostname(), instance_key)
+        servers = self.get_all_servers(instance_key, filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             servers = [
