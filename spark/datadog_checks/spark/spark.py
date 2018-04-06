@@ -148,7 +148,7 @@ class SparkCheck(AgentCheck):
             raise Exception('The cluster_name must be specified in the instance configuration')
         tags.append('cluster_name:%s' % cluster_name)
 
-        spark_apps = self._get_running_apps(instance, tags, ssl_config)
+        spark_apps = self._get_running_apps(instance, ssl_config)
 
         # Get the job metrics
         self._spark_job_metrics(instance, spark_apps, tags, ssl_config)
@@ -215,11 +215,13 @@ class SparkCheck(AgentCheck):
         self.log.debug('Request URL returned: %s', _url)
         return _url
 
-    def _get_running_apps(self, instance, tags, ssl_config):
+    def _get_running_apps(self, instance, ssl_config):
         '''
         Determine what mode was specified
         '''
-
+        tags = instance.get('tags', [])
+        if tags is None:
+            tags = []
         master_address = self._get_master_address(instance)
         # Get the cluster name from the instance configuration
         cluster_name = instance.get('cluster_name')
@@ -237,7 +239,7 @@ class SparkCheck(AgentCheck):
 
         if cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
-            pre20 = _is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
+            pre20 = is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
             return self._standalone_init(master_address, pre20, ssl_config, tags)
 
         elif cluster_mode == SPARK_MESOS_MODE:
