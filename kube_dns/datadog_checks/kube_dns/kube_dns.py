@@ -42,9 +42,9 @@ class KubeDNSCheck(PrometheusCheck):
         self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, message, **kwargs):
-    """
-    submit a kube_dns metric both as a gauge (for compatibility) and as amonotonic_count
-    """
+        """
+        submit a kube_dns metric both as a gauge (for compatibility) and as amonotonic_count
+        """
         metric_name = self.NAMESPACE + metric_suffix
         for metric in message.metric:
             tags = []
