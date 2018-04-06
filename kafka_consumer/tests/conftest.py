@@ -28,8 +28,6 @@ from .common import (
 )
 
 
-MAX_ITERATIONS = 60
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 docker_client = docker.from_env()
@@ -51,7 +49,7 @@ class Producer(StoppableThread):
         producer = KafkaProducer(bootstrap_servers=ZK_INSTANCE['kafka_connect_str'])
 
         iteration = 0
-        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
+        while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
                 try:
                     producer.send('marvel', b"Peter Parker", partition=partition)
@@ -102,7 +100,7 @@ class ZKConsumer(StoppableThread):
         consumer.subscribe(self.topics)
 
         iteration = 0
-        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
+        while not self._shutdown_event.is_set():
             response = consumer.poll(timeout_ms=500, max_records=10)
             zk_trans = zk_conn.transaction()
             for tp, records in response.iteritems():
@@ -140,7 +138,7 @@ class KConsumer(StoppableThread):
         consumer.subscribe(self.topics)
 
         iteration = 0
-        while not self._shutdown_event.is_set() and iteration < MAX_ITERATIONS:
+        while not self._shutdown_event.is_set():
             consumer.poll(timeout_ms=500, max_records=10)
             iteration += 1
 
