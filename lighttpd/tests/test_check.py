@@ -96,5 +96,4 @@ def test_service_check_ko(instance, aggregator):
     check = Lighttpd("lighttpd", {}, {})
     with pytest.raises(Exception):
         check.check(instance)
-    print(aggregator._service_checks)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
