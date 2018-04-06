@@ -172,6 +172,8 @@ class MesosSlave(AgentCheck):
 
         url = instance['url']
         instance_tags = instance.get('tags', [])
+        if instance_tags is None:
+            instance_tags = []
         tasks = instance.get('tasks', [])
         default_timeout = self.init_config.get('default_timeout', 5)
         timeout = float(instance.get('timeout', default_timeout))
