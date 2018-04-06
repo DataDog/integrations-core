@@ -89,7 +89,8 @@ class RiakCs(AgentCheck):
 
         aggregation_key = s3_settings['proxy'] + ":" + str(s3_settings['proxy_port'])
         tags = instance.get("tags", [])
-
+        if tags is None:
+            tags = []
         try:
             s3 = S3Connection(**s3_settings)
         except Exception as e:
