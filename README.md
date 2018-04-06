@@ -41,58 +41,15 @@ to idiomatic Python package delivery.
 Agent releases starting from version 5.21 bundle the latest wheels for any
 integration, but at the moment you can't upgrade or downgrade between releases.
 
-## Development
+## Quick Start
 
-You can follow these instructions to get a working copy of any check on your
-local Python environment; this is mostly useful to run tests or for tinkering in
-general.
+Working with integrations is easy, the main page of the [development docs](docs/dev/README.md)
+contains all the info you need to get your dev enviroment up and running in minutes
+to run, test and build core Checks.
 
-### Prerequisites
-
-* Python 2.7, see [this page](docs/dev/python.md) for more details.
-
-### Quickstart
-
-The project comes with a requirements file you can pass to `pip` to install all
-the dependencies needed to work with any check. From the root of the repo, run:
-
-```shell
-pip install -r requirements-dev.txt
-```
-
-To work with a specific check you need to install its own dependencies. The easiest
-way to iterate on a check development is installing the wheel itself in editable mode.
-For example, if you want to do this for the `disk` check run the following:
-
-```shell
-cd disk && pip install -e .
-```
-
-To double check everything is working as expected you can run:
-
-```shell
-python -c"from datadog_checks.disk import Disk"
-```
-
-if the commands ends without errors, you're good to go!
-
-### Testing
-
-To run the testsuite for a given check you can either use `tox`, like:
-
-```shell
-cd {integration} && tox
-```
-
-or invoke [Pytest](https://docs.pytest.org/en/latest/) directly:
-
-```shell
-cd {integration} && py.test
-```
-
-**Note:** only a subset of the checks can be tested like this. Porting all the
-checks to Pytest is a work in progress, this is the list of the checks supporting
-the new testing approach:
+**Note:** the instructions are only valid for a subset of the Checks in this
+repository. Making all the checks work with the new build and test strategy is
+a work in progress, this is the list of the supported checks:
 
 * [apache](apache)
 * [btrfs](btrfs)
@@ -117,19 +74,6 @@ the new testing approach:
 * [vsphere](vsphere)
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
-
-### Building
-
-`setup.py` provides the setuptools setup script that will help us package and
-build the wheel. If you wish to learn more about python packaging please take a
-look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
-
-Once your setup.py is ready, creating a wheel is a easy as:
-
-```shell
-cd {integration}
-python setup.py bdist_wheel
-```
 
 # Reporting Issues
 
