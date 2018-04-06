@@ -141,7 +141,8 @@ class PowerDNSRecursorCheck(AgentCheck):
         api_key = instance.get('api_key')
         version = instance.get('version')
         tags = instance.get('tags', [])
-
+        if tags is None:
+            tags = []
         Config = namedtuple('Config', [
             'host',
             'port',
