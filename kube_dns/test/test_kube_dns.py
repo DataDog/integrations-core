@@ -44,10 +44,12 @@ class TestKubeDNS(AgentCheckTest):
         NAMESPACE + '.request_duration.seconds.count',
         NAMESPACE + '.request_duration.seconds.sum',
         NAMESPACE + '.request_count',
-        NAMESPACE + '.request_count.as_count',
         NAMESPACE + '.error_count',
-        NAMESPACE + '.error_count.as_count',
         NAMESPACE + '.cachemiss_count',
+    ]
+    COUNT_METRICS = [
+        NAMESPACE + '.request_count.as_count',
+        NAMESPACE + '.error_count.as_count',
         NAMESPACE + '.cachemiss_count.as_count',
     ]
 
@@ -65,7 +67,14 @@ class TestKubeDNS(AgentCheckTest):
         }
 
         self.run_check({'instances': [instance]}, mocks=mocks)
+        # check that we have gauge metrics
         for metric in self.METRICS:
+            self.assertMetric(metric)
+        self.coverage_report()
+
+        # check that we get then the count metrics
+        self.run_check({'instances': [instance]}, mocks=mocks)
+        for metric in self.METRICS + self.COUNT_METRICS:
             self.assertMetric(metric)
 
         self.coverage_report()
