@@ -534,6 +534,8 @@ class SparkCheck(AgentCheck):
         '''
         Set a metric
         '''
+        if tags is None:
+            tags = []
         if metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags)
         else:
