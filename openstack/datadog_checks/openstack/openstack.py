@@ -866,14 +866,26 @@ class OpenStackCheck(AgentCheck):
 
         # Since we ultimately only perform actions on ACTIVE servers
         # Lets filter to only those to reduce the payload we receive
-        query_params['status'] = 'ACTIVE'
+        active_query_params['status'] = 'ACTIVE'
+        deleted_query_params['status'] = 'DELETED'
+        turned_off_query_params['status'] = ''
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         server_ids = []
         try:
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+            # [TODO] Nick If this is implemented https://specs.openstack.org/openstack/nova-specs/specs/juno/implemented/servers-list-support-multi-status.html
+            # we can combine these three calls into one
+
+            # Get a list of active servers
+            resp = self._make_request_with_auth_fallback(url, headers, params=active_query_params)
+
+            # Get a list of recently deleted
+            resp = self._make_request_with_auth_fallback(url, headers, params=deleted_query_params)
+
+            # Get a list of recently turned off servers
+            resp = self._make_request_with_auth_fallback(url, headers, params=turned_off_query_params)
 
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
             # self.servers[i_key] = {}
@@ -1118,7 +1130,7 @@ class OpenStackCheck(AgentCheck):
                         server_tags.append('project_name:{0}'.format(project['name']))
 
                     self.external_host_tags[sid] = host_tags
-                    self.get_stats_for_single_server(server, tags=server_tags, i_key)
+                    self.get_stats_for_single_server(server, tags=server_tags)
 
                 if hyp:
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
