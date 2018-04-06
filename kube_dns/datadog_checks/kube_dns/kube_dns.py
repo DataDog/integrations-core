@@ -43,7 +43,7 @@ class KubeDNSCheck(PrometheusCheck):
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, message, **kwargs):
         """
-        submit a kube_dns metric both as a gauge (for compatibility) and as amonotonic_count
+        submit a kube_dns metric both as a gauge (for compatibility) and as a monotonic_count
         """
         metric_name = self.NAMESPACE + metric_suffix
         for metric in message.metric:
@@ -51,17 +51,17 @@ class KubeDNSCheck(PrometheusCheck):
             # submit raw metric
             self.gauge(metric_name, metric.counter.value, tags)
             # submit rate metric
-            self.monotonic_count(metric_name + '.count', metric.counter.value, tags)
+            self.monotonic_count(metric_name + '.as_count', metric.counter.value, tags)
 
     # metrics names for kubernetes >= 1.6.0
     def kubedns_kubedns_dns_request_count_total(self, message, **kwargs):
-        submit_as_gauge_and_monotonic_count('.request_count', message, **kwargs)
+        self.submit_as_gauge_and_monotonic_count('.request_count', message, **kwargs)
 
-    def kubedns_kubedns_dns_error_count_total:
-        submit_as_gauge_and_monotonic_count('.error_count', message, **kwargs)
+    def kubedns_kubedns_dns_error_count_total(self, message, **kwargs):
+        self.submit_as_gauge_and_monotonic_count('.error_count', message, **kwargs)
 
-    def kubedns_kubedns_dns_cachemiss_count_total:
-        submit_as_gauge_and_monotonic_count('.cachemiss_count', message, **kwargs)
+    def kubedns_kubedns_dns_cachemiss_count_total(self, message, **kwargs):
+        self.submit_as_gauge_and_monotonic_count('.cachemiss_count', message, **kwargs)
 
     # metrics names for kubernetes < 1.6.0
     def skydns_skydns_dns_request_count_total(self, message, **kwargs):
