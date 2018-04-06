@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from collections import namedtuple
 from datetime import datetime, timedelta
 from urlparse import urljoin
 import re
@@ -93,6 +94,11 @@ PROJECT_METRICS = dict([
 
 DIAGNOSTICABLE_STATES = [
     'ACTIVE'
+]
+
+REMOVED_STATES = [
+    'DELETED',
+    'SHUTOFF'
 ]
 
 UNSCOPED_AUTH = 'unscoped'
@@ -499,7 +505,6 @@ class OpenStackCheck(AgentCheck):
         "aggregates": "_last_aggregate_fetch_time",
         "physical_hosts": "_last_host_fetch_time",
         "hypervisors": "_last_hypervisor_fetch_time"
-
     }
 
     HYPERVISOR_STATE_UP = 'up'
@@ -557,6 +562,7 @@ class OpenStackCheck(AgentCheck):
         self.changes_since_time = {}
 
         # Cache the list of server id's available
+        # This will have a key of instance_id, and a list of servers
         self.servers = {}
 
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
@@ -866,42 +872,35 @@ class OpenStackCheck(AgentCheck):
 
         # Since we ultimately only perform actions on ACTIVE servers
         # Lets filter to only those to reduce the payload we receive
-        active_query_params['status'] = 'ACTIVE'
-        deleted_query_params['status'] = 'DELETED'
-        turned_off_query_params['status'] = ''
+        active_query_params['status'] = 'ACTIVE,DELETED,SHUTOFF'
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
         server_ids = []
         try:
-            # [TODO] Nick If this is implemented https://specs.openstack.org/openstack/nova-specs/specs/juno/implemented/servers-list-support-multi-status.html
-            # we can combine these three calls into one
-
-            # Get a list of active servers
-            resp = self._make_request_with_auth_fallback(url, headers, params=active_query_params)
-
-            # Get a list of recently deleted
-            resp = self._make_request_with_auth_fallback(url, headers, params=deleted_query_params)
-
-            # Get a list of recently turned off servers
-            resp = self._make_request_with_auth_fallback(url, headers, params=turned_off_query_params)
-
+            # Get a list of active/deleted/shut-off servers
+            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
-            # self.servers[i_key] = {}
-            for server in resp['servers']:
-                #[TODO] Remove the server from the cache if its been deleted. 
-                server_id = server.get('id')
-                state = server.get('status')
-                server_name = server.get('name')
-                hypervisor_hostname = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
-                tenant_id = server.get('tenant_id')
-                project_name = self.get_project_name_from_id(tenant_id)
-
-                self.servers[i_key].append(s)
         except Exception as e:
             self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
             raise e
+
+        for server in resp['servers']:
+            new_server = {}
+
+            new_server['server_id'] = server.get('id')
+            new_server['state'] = server.get('status')
+            new_server['server_name'] = server.get('name')
+            new_server['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+            new_server['tenant_id'] = server.get('tenant_id')
+            new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
+
+            for server in self.servers[i_key]:
+                if server_id == server['id'] and state not in DIAGNOSTICABLE_STATES:
+                    self.servers[i_key].append(new_server)
+                elif server_id == server['id'] and state in REMOVED_STATES:
+                    self.servers[i_key][:] = [server for server in self.servers[i_key] if self.servers[i_key]('server_id') != server_id]
 
         return self.servers[i_key]
 
@@ -922,6 +921,7 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
+        server_id = server.get('id')
         state = server.get('status')
         server_name = server.get('name')
         hypervisor_hostname = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
@@ -1253,16 +1253,13 @@ class OpenStackCheck(AgentCheck):
         return self.init_config.get("os_host") or self.hostname
 
     def get_servers_managed_by_hypervisor(self, instance_key):
-        servers = self.get_all_servers(instance_key, filter_by_host=self.get_my_hostname())
+        self.get_all_servers(instance_key, filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
-            servers = [
-                server_id for server in servers
-                if not any([re.match(exclude_id_rule, server.get('id'))
-                            for exclude_id_rule in self.exclude_server_id_rules])
-            ]
+            self.servers[i_key][:] = [server for server in self.servers[i_key] if not any([re.match(exclude_id_rule, server.get('id'))
+                for exclude_id_rule in self.exclude_server_id_rules])]
 
-        return servers
+        return self.servers[i_key]
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
