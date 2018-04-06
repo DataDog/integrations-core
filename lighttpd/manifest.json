@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "lighttpd",
   "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
   "guid": "01dcfe7a-7a56-4388-a388-799ee6daaaab",
   "public_title": "Datadog-Lighttpd Integration",
   "categories":["web"],

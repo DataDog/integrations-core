@@ -102,6 +102,7 @@ the new testing approach:
 * [istio](istio)
 * [kube_proxy](kube_proxy)
 * [kubelet](kubelet)
+* [lighttpd](lighttpd)
 * [linkerd](linkerd)
 * [mcache](mcache)
 * [network](network)
