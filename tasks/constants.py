@@ -17,6 +17,7 @@ AGENT_BASED_INTEGRATIONS = [
     'disk',
     'envoy',
     'istio',
+    'kafka_consumer',
     'kube_proxy',
     'kubelet',
     'linkerd',

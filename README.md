@@ -100,6 +100,7 @@ the new testing approach:
 * [disk](disk)
 * [envoy](envoy)
 * [istio](istio)
+* [kafka_consumer](kafka_consumer)
 * [kube_proxy](kube_proxy)
 * [kubelet](kubelet)
 * [linkerd](linkerd)
