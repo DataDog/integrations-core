@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.3.0",
+        "integration":"hdfs",
+	    "groups": ["host", "instance"],
+	    "check": "hdfs.namenode.jmx.can_connect",
+	    "statuses": ["ok", "critical"],
+	    "name": "Can Connect",
+	    "description": "Returns `CRITICAL` if the Agent cannot connect to the NameNode's JMX interface for any reason. Returns `OK` otherwise."
+	}
+]

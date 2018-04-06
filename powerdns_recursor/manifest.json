@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "powerdns_recursor",
   "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
   "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
   "public_title": "Datadog-Power DNS Recursor Integration",
   "categories":["web", "network"],

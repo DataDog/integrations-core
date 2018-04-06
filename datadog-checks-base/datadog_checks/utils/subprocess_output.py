@@ -16,6 +16,8 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
+class SubprocessOutputEmptyError(Exception):
+    pass
 
 def get_subprocess_output(command, log, raise_on_empty_output=True):
     """

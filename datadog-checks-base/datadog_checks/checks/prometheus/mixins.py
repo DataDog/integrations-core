@@ -4,6 +4,8 @@
 
 from fnmatch import fnmatchcase
 import requests
+from urllib3 import disable_warnings
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import defaultdict
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from ...utils.prometheus import metrics_pb2
@@ -52,8 +54,17 @@ class PrometheusScraper(object):
         # overloaded/hardcoded in the final check not to be counted as custom metric.
         self.metrics_mapper = {}
 
+        # `rate_metrics` contains the metrics that should be sent as rates
+        self.rate_metrics = []
+
         # `_metrics_wildcards` holds the potential wildcards to match for metrics
         self._metrics_wildcards = None
+
+        # `prometheus_metrics_prefix` allows to specify a prefix that all
+        # prometheus metrics should have. This can be used when the prometheus
+        # endpoint we are scrapping allows to add a custom prefix to it's
+        # metrics.
+        self.prometheus_metrics_prefix = ''
 
         # `label_joins` holds the configuration for extracting 1:1 labels from
         # a target metric to all metric matching the label, example:
@@ -158,6 +169,7 @@ class PrometheusScraper(object):
 
                 message = metrics_pb2.MetricFamily()
                 message.ParseFromString(msg_buf)
+                message.name = self.remove_metric_prefix(message.name)
 
                 # Lookup type overrides:
                 if self.type_overrides and message.name in self.type_overrides:
@@ -175,6 +187,7 @@ class PrometheusScraper(object):
             obj_map = {}  # map of the types of each metrics
             obj_help = {}  # help for the metrics
             for metric in text_fd_to_metric_families(response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)):
+                metric.name = self.remove_metric_prefix(metric.name)
                 metric_name = "%s_bucket" % metric.name if metric.type == "histogram" else metric.name
                 metric_type = self.type_overrides.get(metric_name, metric.type)
                 if metric_type == "untyped" or metric_type not in self.METRIC_TYPES:
@@ -196,6 +209,9 @@ class PrometheusScraper(object):
         else:
             raise UnknownFormatError('Unsupported content-type provided: {}'.format(
                 response.headers['Content-Type']))
+
+    def remove_metric_prefix(self, metric):
+        return metric[len(self.prometheus_metrics_prefix):] if metric.startswith(self.prometheus_metrics_prefix) else metric
 
     @staticmethod
     def get_metric_value_by_labels(messages, _metric, _m, metric_suffix):
@@ -381,6 +397,7 @@ class PrometheusScraper(object):
 
         `send_histograms_buckets` is used to specify if yes or no you want to send the buckets as tagged values when dealing with histograms.
         """
+
         # If targeted metric, store labels
         self.store_labels(message)
 
@@ -448,6 +465,9 @@ class PrometheusScraper(object):
         verify = True
         if isinstance(self.ssl_ca_cert, basestring):
             verify = self.ssl_ca_cert
+        elif self.ssl_ca_cert is False:
+            disable_warnings(InsecureRequestWarning)
+            verify = False
         try:
             response = requests.get(endpoint, headers=headers, stream=True, timeout=1, cert=cert, verify=verify)
         except (requests.exceptions.SSLError):
@@ -502,7 +522,10 @@ class PrometheusScraper(object):
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
                 else:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                    if message.name in self.rate_metrics:
+                        self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
+                    else:
+                        self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
 
         else:
             self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))

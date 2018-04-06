@@ -21,15 +21,15 @@ Istio needs to have the built in [prometheus adapter](https://istio.io/docs/task
 
 #### Connect the Agent
 
-Create a basic `istio.yaml` in the Agent's `conf.d` directory to connect it to istio. See the [sample mysql.yaml](https://github.com/DataDog/integrations-core/blob/master/istio/conf.yaml.example) for all available configuration options:
+Create a basic `istio.yaml` in the Agent's `conf.d` directory to connect it to istio. See the [sample istio.yaml](https://github.com/DataDog/integrations-core/blob/master/istio/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
 
 instances:
-  - istio_mesh_endpoint http://localhost:42422/metrics
-    mixer_endpoint http://localhost:9093/metrics
-    send_histograms_buckets true
+  - istio_mesh_endpoint: http://localhost:42422/metrics
+    mixer_endpoint: http://localhost:9093/metrics
+    send_histograms_buckets: true
 ```
 
 Both endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation](https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on).

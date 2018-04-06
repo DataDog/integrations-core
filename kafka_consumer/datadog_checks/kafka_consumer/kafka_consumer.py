@@ -176,8 +176,25 @@ class KafkaCheck(AgentCheck):
 
         instance_key = self._get_instance_key(instance)
         if instance_key not in self.kafka_clients:
-            cli = KafkaClient(bootstrap_servers=kafka_conn_str, client_id='dd-agent')
-            self.kafka_clients[instance_key] = cli
+            conf_security_protocol = instance.get('security_protocol', 'PLAINTEXT')
+            if conf_security_protocol == 'SSL':
+                conf_ssl_cafile = instance.get('ssl_cafile')
+                conf_ssl_check_hostname = instance.get('ssl_check_hostname', True)
+                conf_ssl_certfile = instance.get('ssl_certfile')
+                conf_ssl_keyfile = instance.get('ssl_keyfile')
+                conf_ssl_password = instance.get('ssl_password')
+                cli = KafkaClient(bootstrap_servers=kafka_conn_str,
+                        client_id='dd-agent',
+                        security_protocol=conf_security_protocol,
+                        ssl_cafile=conf_ssl_cafile,
+                        ssl_check_hostname=conf_ssl_check_hostname,
+                        ssl_certfile=conf_ssl_certfile,
+                        ssl_keyfile=conf_ssl_keyfile,
+                        ssl_password=conf_ssl_password)
+                self.kafka_clients[instance_key] = cli
+            else:
+                cli = KafkaClient(bootstrap_servers=kafka_conn_str, client_id='dd-agent')
+                self.kafka_clients[instance_key] = cli
 
         return self.kafka_clients[instance_key]
 

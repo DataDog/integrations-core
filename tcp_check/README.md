@@ -20,7 +20,6 @@ instances:
   - name: SSH check
     host: jumphost.example.com # or an IPv4/IPv6 address
     port: 22
-    skip_event: true # if false, the Agent will emit both events and service checks for this port; recommended true (i.e. only submit service checks)
     collect_response_time: true # to collect network.tcp.response_time. Default is false.
 ```
 
@@ -31,7 +30,6 @@ Configuration Options
 * `port` (Required) - Port to be checked. This will be included as a tag: `url:<host>:<port>`.
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
 * `collect_response_time` (Optional) - Defaults to false. If this is not set to true, no response time metric will be collected. If it is set to true, the metric returned is `network.tcp.response_time`.
-* `skip_event` (Optional) - Defaults to false. Set to true to skip creating an event. This option will be removed in a future version and will default to true.
 * `tags` (Optional) - Tags to be assigned to the metric.
 
 [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending TCP service checks and response times to Datadog.
@@ -70,8 +68,6 @@ The TCP check does not include any event at this time.
 **`tcp.can_connect`**:
 
 Returns DOWN if the Agent cannot connect to the configured `host` and `port`, otherwise UP.
-
-Older versions of the TCP check only emitted events to reflect changes in connectivity. This was eventually deprecated in favor of service checks, but you can still have the check emit events by setting `skip_event: false`.
 
 To create alert conditions on this service check in the Datadog app, click **Network** on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not **Integration**.
 

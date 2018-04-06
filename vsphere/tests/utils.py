@@ -3,8 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import json
+from datetime import datetime
 
-from mock import Mock
+from mock import Mock, MagicMock
 from pyVmomi import vim
 
 
@@ -180,3 +181,33 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
         assert count == len(candidates)
     else:
         assert len(candidates)
+
+
+def disable_thread_pool(check):
+    """
+    Disable the thread pool on the check instance
+    """
+    check.pool = MagicMock(apply_async=lambda func, args: func(*args))
+    check.pool_started = True  # otherwise the mock will be overwritten
+    return check
+
+
+def get_mocked_server():
+    """
+    Return a mocked Server object
+    """
+    # create topology from a fixture file
+    vcenter_topology = create_topology('vsphere_topology.json')
+    # mock pyvmomi stuff
+    view_mock = MockedContainer(topology=vcenter_topology)
+    viewmanager_mock = MagicMock(**{'CreateContainerView.return_value': view_mock})
+    event_mock = MagicMock(createdTime=datetime.now())
+    eventmanager_mock = MagicMock(latestEvent=event_mock)
+    content_mock = MagicMock(viewManager=viewmanager_mock, eventManager=eventmanager_mock)
+    # assemble the mocked server
+    server_mock = MagicMock()
+    server_mock.configure_mock(**{
+        'RetrieveContent.return_value': content_mock,
+        'content': content_mock,
+    })
+    return server_mock

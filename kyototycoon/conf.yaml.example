@@ -11,5 +11,5 @@ instances:
 - report_url: http://localhost:1978/rpc/report
 #   name: my_kyoto_instance
 #   tags:
-#     foo: bar
-#     baz: bat
+#     - "foo:bar"
+#     - "baz:bat"

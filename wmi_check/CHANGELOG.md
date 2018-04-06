@@ -1,6 +1,6 @@
 # CHANGELOG - wmi_check
 
-1.1.1 / Unreleased
+1.1.1 / 2018-03-23
 ==================
 
 ### Changes

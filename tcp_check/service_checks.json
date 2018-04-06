@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.0.0",
+        "integration":"system",
+        "check": "tcp.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "instance", "port", "target_host"],
+        "name": "TCP",
+        "description": "Returns CRITICAL if the Agent cannot establish an TCP connection to the URL. Returns OK if the connection is successful."
+    }
+]

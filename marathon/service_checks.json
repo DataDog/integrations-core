@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"marathon",
+        "check": "marathon.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "url"],
+        "name": "Can Connect",
+        "description": "CRITICAL if either cannot connect to API endpoint or no instances of any application are running. WARN if no applications are detected. Additional information about response status at the time of collection is included in the check message."
+    }
+]
