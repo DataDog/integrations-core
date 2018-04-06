@@ -204,6 +204,8 @@ class MesosMaster(AgentCheck):
 
         url = instance['url']
         instance_tags = instance.get('tags', [])
+        if instance_tags is None:
+            instance_tags = []
         default_timeout = self.init_config.get('default_timeout', 5)
         timeout = float(instance.get('timeout', default_timeout))
         ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
