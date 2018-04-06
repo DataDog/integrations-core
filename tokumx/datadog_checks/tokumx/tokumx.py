@@ -279,6 +279,8 @@ class TokuMX(AgentCheck):
         ssl_params = self._get_ssl_params(instance)
 
         custom_tags = instance.get('tags', [])
+        if custom_tags is None:
+            custom_tags = []
         tags = custom_tags + ['server:%s' % server]
         # de-dupe tags to avoid a memory leak
         tags = list(set(tags))
