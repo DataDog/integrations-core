@@ -1,5 +1,4 @@
 include README.md
 include requirements.in
 include requirements.txt
-include tests/requirements.txt
 graft datadog_test_libs

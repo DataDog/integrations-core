@@ -35,7 +35,7 @@ setup(
     url='https://github.com/DataDog/datadog-agent-tk',
     author='Datadog',
     author_email='packages@datadoghq.com',
-    license='New BSD',
+    license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
