@@ -10,7 +10,12 @@ end
 
 namespace :ci do
   namespace :haproxy do |flavor|
-    task before_install: ['ci:common:before_install']
+    task before_install: ['ci:common:before_install'] do
+      sh %(docker kill dd-haproxy || true)
+      sh %(docker kill dd-haproxy-open || true)
+      sh %(docker rm dd-haproxy || true)
+      sh %(docker rm dd-haproxy-open || true)
+    end
 
     task :install do
       Rake::Task['ci:common:install'].invoke('haproxy')
@@ -41,10 +46,10 @@ namespace :ci do
     task before_cache: ['ci:common:before_cache']
 
     task cleanup: ['ci:common:cleanup'] do
-      sh %(docker kill dd-haproxy)
-      sh %(docker kill dd-haproxy-open)
-      sh %(docker rm dd-haproxy)
-      sh %(docker rm dd-haproxy-open)
+      # sh %(docker kill dd-haproxy)
+      # sh %(docker kill dd-haproxy-open)
+      # sh %(docker rm dd-haproxy)
+      # sh %(docker rm dd-haproxy-open)
     end
 
     task :execute do

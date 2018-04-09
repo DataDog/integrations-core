@@ -4,21 +4,23 @@ services:
   haproxy:
     image: "haproxy:${HAPROXY_VERSION}"
     volumes:
-      - ${HAPROXY_CONFIG_DIR}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ${HAPROXY_CONFIG}:/usr/local/etc/haproxy/haproxy.cfg
       - /tmp/haproxy/:/tmp/
     ports:
-      - "3835:3835"
+      - "13835:13835"
     networks:
       - network1
   haproxy-open:
     image: "haproxy:${HAPROXY_VERSION}"
     volumes:
-      - ${HAPROXY_CONFIG_DIR}/haproxy-open.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ${HAPROXY_CONFIG_OPEN}:/usr/local/etc/haproxy/haproxy.cfg
     ports:
-      - "3836:3836"
+      - "13836:13836"
     networks:
-      - network1
+      - network2
 
 networks:
   network1:
-    name: haproxy_network
+    name: haproxy_network_1
+  network2:
+    name: haproxy_network_2
