@@ -21,4 +21,4 @@ services:
 
 networks:
   network1:
-    name: apache_network
+    name: haproxy_network

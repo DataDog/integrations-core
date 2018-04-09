@@ -49,6 +49,8 @@ AGG_STATUSES = (
     (['status:unavailable'], 4)
 )
 
+CHECK_NAME = 'haproxy'
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
 PORT = '3835'
