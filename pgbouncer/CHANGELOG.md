@@ -1,5 +1,12 @@
 # CHANGELOG - pgbouncer
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Added custom tag support to service check.
+
 1.1.0 / 2018-02-13
 ==================
 

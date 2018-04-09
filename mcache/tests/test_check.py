@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
 import os
+import time
 
 from datadog_checks.mcache import Memcache
 import pytest
 import memcache
 
-from .common import PORT, SERVICE_CHECK
+from .common import PORT, SERVICE_CHECK, HOST
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -110,13 +111,29 @@ def memcached():
     Start a standalone Memcached server.
     """
     subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "up", "-d"])
+    attempts = 0
+    while True:
+        if attempts > 10:
+            raise Exception("Memcached boot timed out!")
+
+        mc = memcache.Client(["{}:{}".format(HOST, PORT)])
+        mc.set("foo", "bar")
+        if not mc.get("foo"):
+            attempts += 1
+            time.sleep(1)
+        else:
+            mc.delete("foo")
+            mc.disconnect_all()
+            break
+
     yield
+
     subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "down"])
 
 
 @pytest.fixture
 def client():
-    return memcache.Client(["localhost:{}".format(PORT)])
+    return memcache.Client(["{}:{}".format(HOST, PORT)])
 
 
 @pytest.fixture
@@ -158,9 +175,9 @@ def test_service_ko(check, aggregator):
     """
     If the service is down, the service check should be sent accordingly
     """
-    tags = ["host:localhost", "port:11211", "foo:bar"]
+    tags = ["host:{}".format(HOST), "port:11211", "foo:bar"]
     with pytest.raises(Exception) as e:
-        check.check({'url': "localhost", 'port': PORT, 'tags': ["foo:bar"]})
+        check.check({'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"]})
         # FIXME: the check should raise a more precise exception and there should be
         # no need to assert the content of the message!
         assert "Unable to retrieve stats from memcache instance" in e.message
@@ -174,8 +191,8 @@ def test_service_ok(check, aggregator, memcached):
     """
     Service is up
     """
-    tags = ["host:localhost", "port:11211", "foo:bar"]
-    check.check({'url': "localhost", 'port': PORT, 'tags': ["foo:bar"]})
+    tags = ["host:{}".format(HOST), "port:11211", "foo:bar"]
+    check.check({'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"]})
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
@@ -191,7 +208,7 @@ def test_metrics(client, check, aggregator, memcached):
     client.get("foo")
 
     instance = {
-        'url': "localhost",
+        'url': "{}".format(HOST),
         'port': PORT,
         'options': {
             'items': True,
@@ -200,11 +217,11 @@ def test_metrics(client, check, aggregator, memcached):
     }
     check.check(instance)
 
-    expected_tags = ["url:localhost:11211"]
+    expected_tags = ["url:{}:11211".format(HOST)]
     for m in GAUGES + RATES + SLABS_AGGREGATES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
-    expected_tags = ["url:localhost:11211", "slab:1"]
+    expected_tags = ["url:{}:11211".format(HOST), "slab:1"]
     for m in ITEMS_GAUGES + ITEMS_RATES + SLABS_RATES + SLABS_GAUGES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
@@ -218,6 +235,6 @@ def test_connections_leaks(check):
     """
     # Start state, connections should be 0
     assert count_connections(PORT) == 0
-    check.check({'url': "localhost", 'port': PORT})
+    check.check({'url': "{}".format(HOST), 'port': PORT})
     # Verify that the count is still 0
     assert count_connections(PORT) == 0
