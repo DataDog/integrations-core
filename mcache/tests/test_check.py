@@ -7,7 +7,7 @@ import time
 
 from datadog_checks.mcache import Memcache
 import pytest
-import memcache
+import bmemcached
 
 from .common import PORT, SERVICE_CHECK, HOST
 
@@ -116,7 +116,7 @@ def memcached():
         if attempts > 10:
             raise Exception("Memcached boot timed out!")
 
-        mc = memcache.Client(["{}:{}".format(HOST, PORT)])
+        mc = bmemcached.Client(["{}:{}".format(HOST, PORT)])
         mc.set("foo", "bar")
         if not mc.get("foo"):
             attempts += 1
@@ -133,7 +133,7 @@ def memcached():
 
 @pytest.fixture
 def client():
-    return memcache.Client(["{}:{}".format(HOST, PORT)])
+    return bmemcached.Client(["{}:{}".format(HOST, PORT)])
 
 
 @pytest.fixture
