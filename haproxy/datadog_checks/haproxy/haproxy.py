@@ -186,7 +186,11 @@ class HAProxy(AgentCheck):
 
         self.log.debug("Fetching haproxy stats from url: %s" % url)
 
-        response = requests.get(url, auth=auth, headers=custom_headers, verify=verify, timeout=self.default_integration_http_timeout)
+        response = requests.get(url,
+                                auth=auth,
+                                headers=custom_headers,
+                                verify=verify,
+                                timeout=self.default_integration_http_timeout)
         response.raise_for_status()
 
         return response.content.splitlines()
@@ -219,8 +223,12 @@ class HAProxy(AgentCheck):
         either save a metric, save an event or both. '''
 
         # Split the first line into an index of fields
-        # The line looks like:
-        # "# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,"
+        # The line looks like (broken up onto multiple lines)
+        # "# pxname,svname,qcur,qmax,scur,smax,slim,
+        # stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,
+        # wredis,status,weight,act,bck,chkfail,chkdown,lastchg,
+        # downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,
+        # type,rate,rate_lim,rate_max,"
         fields = [f.strip() for f in data[0][2:].split(',') if f]
 
         self.hosts_statuses = defaultdict(int)
@@ -299,7 +307,6 @@ class HAProxy(AgentCheck):
 
         return data
 
-
     def _sanitize_lines(self, data):
         sanitized = []
 
@@ -324,7 +331,6 @@ class HAProxy(AgentCheck):
                 clean = ''
 
         return sanitized
-
 
     def _line_to_dict(self, fields, line):
         data_dict = {}
@@ -531,7 +537,8 @@ class HAProxy(AgentCheck):
                 if count_status_by_service:
                     agg_tags.append('service:%s' % service)
                 # An unknown status will be sent as UNAVAILABLE
-                agg_statuses_counter[tuple(agg_tags)][Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)] += count
+                status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
+                agg_statuses_counter[tuple(agg_tags)][status_key] += count
 
         for tags, count_per_status in statuses_counter.iteritems():
             for status, count in count_per_status.iteritems():
