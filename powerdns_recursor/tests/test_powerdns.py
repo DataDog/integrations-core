@@ -147,7 +147,7 @@ def test_tags(aggregator, spin_up_powerdns):
                                     status=PowerDNSRecursorCheck.OK,
                                     tags=service_check_tags)
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_bad_config(aggregator):

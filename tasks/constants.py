@@ -19,6 +19,7 @@ AGENT_BASED_INTEGRATIONS = [
     'istio',
     'kube_proxy',
     'kubelet',
+    'lighttpd',
     'linkerd',
     'mcache',
     'network',

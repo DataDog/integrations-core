@@ -83,9 +83,8 @@ class AggregatorStub(object):
         """
         Assert a service check was processed by this stub
         """
-
         candidates = []
-        for sc in aggregator.service_checks('powerdns.recursor.can_connect'):
+        for sc in aggregator.service_checks(name):
             if status is not None and status != sc.status:
                 continue
 
@@ -101,10 +100,8 @@ class AggregatorStub(object):
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             assert len(candidates) >= at_least, msg
 
-
-    def all_metrics_asserted(self):
+    def assert_all_metrics_covered(self):
         assert aggregator.metrics_asserted_pct == 100.0
-
 
     def reset(self):
         """
