@@ -877,7 +877,6 @@ class OpenStackCheck(AgentCheck):
 
         servers = []
 
-        server_ids = []
         try:
             # Get a list of active servers
             query_params['status'] = 'ACTIVE'
@@ -1274,7 +1273,7 @@ class OpenStackCheck(AgentCheck):
                 for server_id in self.server_details_by_id:
                     if rem.atch(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
-                        
+
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
 
