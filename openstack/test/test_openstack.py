@@ -319,6 +319,10 @@ class TestOpenstack(AgentCheckTest):
 
     # Samples
     # .. server/network
+    ALL_SERVER_DETAILS = {
+        "1":{"id":"1", "name":"server-1", "status":"ACTIVE"},
+        "2":{"id":"2", "name":"server-2", "status":"DELETED"}
+    }
     ALL_IDS = ['server-1', 'server-2', 'other-1', 'other-2']
     EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
     EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
@@ -381,7 +385,7 @@ class TestOpenstack(AgentCheckTest):
             sleep(1.5)
             self.assertTrue(self.check._is_expired('aggregates'))
 
-    @patch('datadog_checks.openstack.OpenStackCheck.get_all_server_ids', return_value=ALL_IDS)
+    @patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=ALL_IDS)
     def test_server_exclusion(self, *args):
         """
         Exclude networks using regular expressions.
