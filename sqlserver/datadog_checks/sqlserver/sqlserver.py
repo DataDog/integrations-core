@@ -455,6 +455,8 @@ class SQLServer(AgentCheck):
         Fetch the metrics from the sys.dm_os_performance_counters table
         """
         custom_tags = instance.get('tags', [])
+        if custom_tags is None:
+            custom_tags = []
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
 
         with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
@@ -586,10 +588,15 @@ class SQLServer(AgentCheck):
 
         dsn, host, username, password, database, driver = self._get_access_info(
             instance, db_key, db_name)
+        custom_tags = instance.get("tags", [])
+        if custom_tags is None:
+            custom_tags = []
         service_check_tags = [
             'host:%s' % host,
             'db:%s' % database
         ]
+        service_check_tags.extend(custom_tags)
+        service_check_tags = list(set(service_check_tags))
 
         cs = instance.get('connection_string', '')
         cs += ';' if cs != '' else ''

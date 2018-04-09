@@ -1,6 +1,6 @@
 # CHANGELOG - directory
 
-1.2.0 / Unreleased
+1.2.0 / 2018-03-23
 ==================
 
 * [FEATURE] adds custom tag support. See [#1165][]

@@ -38,7 +38,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Create a file `iis.yaml` in the Agent's `conf.d` directory.
+Create a file `iis.yaml` in the [Agent's `conf.d` directory](https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure).
 
 #### Prepare IIS
 

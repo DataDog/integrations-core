@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "5.3.0",
+        "integration":"mapreduce",
+        "groups": ["host"],
+        "check": "mapreduce.resource_manager.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Resource Manager Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Resource Manager. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "5.3.0",
+        "integration":"mapreduce",
+        "groups": ["host"],
+        "check": "mapreduce.application_master.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Application Master Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Application Master. Returns `OK` otherwise."
+    }
+]

@@ -14,7 +14,7 @@
   "version": "1.5.0",
   "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a",
   "public_title": "Datadog-ElasticSearch Integration",
-  "categories":["data store"],
+  "categories":["data store", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/elasticsearch/",
   "is_public": true,
