@@ -1,11 +1,14 @@
 # Docker_daemon Integration
 {{< img src="integrations/docker/docker.png" alt="Docker default dashboard" responsive="true" popup="true">}}
+
 ## Overview
 
-Get metrics from docker_daemon service in real time to:
+Configure this Agent check to get metrics from docker_daemon service in real time to:
 
 * Visualize and monitor docker_daemon states
 * Be notified about docker_daemon failovers and events.
+
+**Note**: The Docker check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents <v6**. To learn how to use it with the Agent v6 [Consult our dedicated agent v6 setup](#agent-v6).
 
 ## Setup
 ### Installation
@@ -108,6 +111,23 @@ For more information about building custom Docker containers with the Datadog Ag
 ## Compatibility
 
 The docker_daemon check is compatible with all major platforms
+
+## Agent v6 
+
+The new docker check is named `docker`. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent version 5.x. All features are ported on version >6.0 , excepted the following deprecations:
+
+  * the `url`, `api_version` and `tags*` options are deprecated, direct use of the [standard docker environment variables](https://docs.docker.com/engine/reference/commandline/cli/#environment-variables) is encouraged.
+  * the `ecs_tags`, `performance_tags` and `container_tags` options are deprecated. Every relevant tag is now collected by default.
+  * the `collect_container_count` option to enable the `docker.container.count` metric is not supported. `docker.containers.running` and `.stopped` are to be used.
+
+Some options have moved from `docker_daemon.yaml` to the main `datadog.yaml`:
+
+  * `collect_labels_as_tags` has been renamed `docker_labels_as_tags` and now supports high cardinality tags, see the details in `datadog.yaml.example`
+  * `exclude` and `include` lists have been renamed `ac_include` and `ac_exclude`. In order to make filtering consistent accross all components of the agent, we had to drop filtering on arbitrary tags. The only supported filtering tags are `image` (image name) and `name` (container name). Regexp filtering is still available, see `datadog.yaml.example` for examples
+  * `docker_root` option has been split in two options `container_cgroup_root` and `container_proc_root`
+  * `exclude_pause_container` has been added to exclude pause containers on Kubernetes and Openshift (default to true). This will avoid removing them from the exclude list by error
+
+The [`import`](https://docs.datadoghq.com/agent/#cli) command converts the old `docker_daemon.yaml` to the new `docker.yaml`. The command also moves needed settings from `docker_daemon.yaml` to `datadog.yaml`.
 
 ## Data Collected
 ### Metrics

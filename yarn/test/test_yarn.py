@@ -265,3 +265,4 @@ class YARNCheck(AgentCheckTest):
 
         # Check the YARN Queue Metrics from excluded queues are absent
         self.assertMetric('yarn.queue.absolute_capacity', count=0, tags=self.YARN_QUEUE_NOFOLLOW_METRICS_TAGS)
+        self.assertServiceCheck('yarn.can_connect', tags=['opt_key:opt_value', 'url:http://localhost:8088', 'cluster_name:SparkCluster'])

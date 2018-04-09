@@ -76,11 +76,33 @@ List each SNMP device as a distinct instance, and for each instance, list any SN
 
 This lets you collect metrics on all rows in a table (`symbols`) and specify how to tag each metric (`metric_tags`).
 
+In the above example, the agent would gather the rate of octets received on each interface and tag it with the interface name (found in the ifDescr column), resulting in a tag such as ```interface:eth0```
+
+    metrics:
+      - MIB: IP-MIB
+        table: ipSystemStatsTable
+        symbols:
+          - ipSystemStatsInReceives
+        metric_tags:
+          - tag: ipversion
+        index: 1
+
+You can also gather tags based on the indices of your row, in case they are meaningful. In the above example, the first row index contains the ip version that the row describes (ipv4 vs. ipv6)
+
 #### Use your own MIB
 
-The SNMP check can collect MIB data that is formatted via [pysnmp](https://pypi.python.org/pypi/pysnmp). You can use the `build-pysnmp-mibs` script that ships with pysnmp to generate such data.
+To use your own MIB with the datadog-agent, you need to convert them to the pysnmp format. This can be done using the ```build-pysnmp-mibs``` script that ships with pysnmp.
 
-Put all your pysnmp MIBs into any directory and point the SNMP check to this directory: set `mibs_folder: <your_mibs_folder>` under the `init_config` section of `snmp.yaml`.
+It has a dependency on ```smidump```, from the libsmi2ldbl package so make sure it is installed. Make also sure that you have all the dependencies of your MIB in your mib folder or it won't be able to convert your MIB correctly.
+
+##### Run
+
+    $ build-pysnmp-mib -o YOUR-MIB.py YOUR-MIB.mib
+
+where YOUR-MIB.mib is the MIB you want to convert.
+
+Put all your pysnmp mibs into a folder and specify this folder's path in ```snmp.yaml``` file, in the ```init_config``` section.
+
 
 ---
 
@@ -131,61 +153,3 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 ### Knowledge Base
 
 * [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ](https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids)
-
-Our agent allows you to monitor the SNMP Counters and Gauge of your choice. Specify for each device the metrics that you want to monitor in the ```metrics``` subsection using one of the following methods:
-
-#### Specify a MIB and the symbol that you want to export
-
-    metrics:
-      - MIB: UDP-MIB
-        symbol: udpInDatagrams
-
-#### Specify an OID and the name you want the metric to appear under in Datadog
-
-    metrics:
-      - OID: 1.3.6.1.2.1.6.5
-        name: tcpActiveOpens
-
-*The name here is the one specified in the MIB but you could use any name.*
-
-#### Specify a MIB and a table you want to extract information from
-
-    metrics:
-      - MIB: IF-MIB
-        table: ifTable
-        symbols:
-          - ifInOctets
-        metric_tags:
-          - tag: interface
-        column: ifDescr
-
-This allows you to gather information on all the table's row, as well as to specify tags to gather.
-
-Use the ```symbols``` list to specify the metric to gather and the ```metric_tags``` list to specify the name of the tags and the source to use.
-
-In this example the agent would gather the rate of octets received on each interface and tag it with the interface name (found in the ifDescr column), resulting in a tag such as ```interface:eth0```
-
-    metrics:
-      - MIB: IP-MIB
-        table: ipSystemStatsTable
-        symbols:
-          - ipSystemStatsInReceives
-        metric_tags:
-          - tag: ipversion
-        index: 1
-
-You can also gather tags based on the indices of your row, in case they are meaningful. In this example, the first row index contains the ip version that the row describes (ipv4 vs. ipv6)
-
-#### Use your own Mib
-
-To use your own MIB with the datadog-agent, you need to convert them to the pysnmp format. This can be done using the ```build-pysnmp-mibs``` script that ships with pysnmp.
-
-It has a dependency on ```smidump```, from the libsmi2ldbl package so make sure it is installed. Make also sure that you have all the dependencies of your MIB in your mib folder or it won't be able to convert your MIB correctly.
-
-##### Run
-
-    $ build-pysnmp-mib -o YOUR-MIB.py YOUR-MIB.mib
-
-where YOUR-MIB.mib is the MIB you want to convert.
-
-Put all your pysnmp mibs into a folder and specify this folder's path in ```snmp.yaml``` file, in the ```init_config``` section.

@@ -94,9 +94,26 @@ cd {integration} && py.test
 checks to Pytest is a work in progress, this is the list of the checks supporting
 the new testing approach:
 
+* [apache](apache)
+* [btrfs](btrfs)
+* [directory](directory)
 * [disk](disk)
+* [envoy](envoy)
+* [istio](istio)
+* [kube_proxy](kube_proxy)
+* [kubelet](kubelet)
+* [linkerd](linkerd)
 * [mcache](mcache)
+* [network](network)
+* [nfsstat](nfsstat)
+* [postgres](postgres)
+* [powerdns_recursor](powerdns_recursor)
+* [prometheus](prometheus)
 * [redisdb](redisdb)
+* [spark](spark)
+* [ssh_check](ssh_check)
+* [system_core](system_core)
+* [teamcity](teamcity)
 * [vsphere](vsphere)
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).

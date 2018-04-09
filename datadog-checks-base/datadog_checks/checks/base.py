@@ -289,7 +289,7 @@ class AgentCheck(object):
             self.check(copy.deepcopy(self.instances[0]))
             result = ''
 
-        except Exception, e:
+        except Exception as e:
             result = json.dumps([
                 {
                     "message": str(e),
