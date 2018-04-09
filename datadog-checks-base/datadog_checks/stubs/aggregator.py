@@ -46,6 +46,21 @@ class AggregatorStub(object):
         """
         return self._events
 
+
+    def assert_metric_tag(self, metric_name, tag, count=None, at_least=1):
+        self._asserted.add(metric_name)
+
+        candidates = []
+        for metric in self._metrics.get(metric_name, []):
+            if tag in metric.tags:
+                candidates.append(metric)
+
+        if count:
+            assert len(candidates) == count
+        else:
+            assert len(candidates) > at_least
+
+
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
         """
