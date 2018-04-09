@@ -5,6 +5,9 @@ import requests
 import time
 import logging
 import mock
+import getpass
+
+from datadog_checks.utils.platform import Platform
 
 import common
 
@@ -65,8 +68,18 @@ def spin_up_haproxy():
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
     ]
+    subprocess.check_call(args + ["down"], env=env)
     subprocess.check_call(args + ["up", "-d"], env=env)
     wait_for_haproxy()
+    if Platform.is_linux():
+        args = []
+        user = getpass.getuser()
+        if user != 'root':
+            args += ['sudo']
+        args += [
+            "chown", user, common.UNIXSOCKET_PATH
+        ]
+        subprocess.check_call(args, env=env)
     time.sleep(20)
     yield
-    subprocess.check_call(args + ["down"], env=env)
+    # subprocess.check_call(args + ["down"], env=env)
