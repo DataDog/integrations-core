@@ -557,12 +557,15 @@ class OpenStackCheck(AgentCheck):
         self.backoff = {}
         random.seed()
 
-        # Timestamp used to filter the call to get the list of nova servers
+        # ISO8601 date time: used to filter the call to get the list of nova servers
         self.changes_since_time = {}
 
-        # Cache the list of server id's available
-        # This will have a key of instance_id, and a list of servers
-        self.servers = {}
+        # Ex: server_details_by_id = {
+        #   UUID: {UUID: <value>, etc}
+        #   1: {id: 1, name: hostA},
+        #   2: {id: 2, name: hostB}
+        # }
+        self.server_details_by_id = {}
 
     def _make_request_with_auth_fallback(self, url, headers=None, params=None):
         """
@@ -881,7 +884,7 @@ class OpenStackCheck(AgentCheck):
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
             servers.extend(resp['servers'])
 
-            # Get a list of deleted servers
+            # Get a list of deleted serversTimestamp used to filter the call to get the list
             # Need to have admin perms for this to take affect
             query_params['deleted'] = 'true'
             query_params['status'] = ''
@@ -899,9 +902,6 @@ class OpenStackCheck(AgentCheck):
             self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
             raise e
 
-        if i_key not in self.servers:
-            self.servers[i_key] = {}
-
         for server in servers:
             new_server = {}
 
@@ -912,12 +912,11 @@ class OpenStackCheck(AgentCheck):
             new_server['tenant_id'] = server.get('tenant_id')
             new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
 
-            if new_server['server_id'] not in self.servers[i_key] and new_server['state'] not in DIAGNOSTICABLE_STATES:
-                self.servers[i_key].append(new_server)
-            elif new_server['server_id'] in self.servers[i_key] and new_server['state'] in REMOVED_STATES:
-                self.servers[i_key][:] = [server for server in self.servers[i_key] if self.servers[i_key]('server_id') != server_id]
-
-        return self.servers[i_key]
+            # Update our cached list of servers
+            if new_server['server_id'] not in self.server_details_by_id and new_server['state'] not in DIAGNOSTICABLE_STATES:
+                self.server_details_by_id[new_server['server_id']] = new_server
+            elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
+                del self.server_details_by_id[new_server['server_id']]
 
     def get_project_name_from_id(self, tenant_id):
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
@@ -1131,11 +1130,11 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                servers = self.get_servers_managed_by_hypervisor(i_key)
+                self.get_servers_managed_by_hypervisor(i_key)
 
                 host_tags = self._get_tags_for_host()
 
-                for server in servers:
+                for server in self.server_details_by_id:
                     server_tags = copy.copy(instance.get('server_tags', []))
                     server_tags.append("nova_managed_server")
 
@@ -1180,7 +1179,7 @@ class OpenStackCheck(AgentCheck):
             if e.response.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
-                self.warning("There were some problems reaching the nova API - applying exponential backoff: %s", e)
+                self.warning("There were some problems reaching the nova API - applying exponential backoff")
             else:
                 self.warning("Error reaching nova API")
 
@@ -1188,7 +1187,7 @@ class OpenStackCheck(AgentCheck):
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # exponential backoff
             self.do_backoff(instance)
-            self.warning("There were some problems reaching the nova API - applying exponential backoff: %s", e)
+            self.warning("There were some problems reaching the nova API - applying exponential backoff")
             return
 
         self.reset_backoff(instance)
@@ -1271,11 +1270,11 @@ class OpenStackCheck(AgentCheck):
         self.get_all_servers(i_key, filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
-            self.servers[i_key][:] = [server for server in self.servers[i_key] if not any([re.match(exclude_id_rule, server.get('id'))
-                for exclude_id_rule in self.exclude_server_id_rules])]
-
-        return self.servers[i_key]
-
+            for exclude_id_rule in self.exclude_server_id_rules:
+                for server_id in self.server_details_by_id:
+                    if rem.atch(exclude_id_rule, server_id):
+                        del self.server_details_by_id[server_id]
+                        
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
 
