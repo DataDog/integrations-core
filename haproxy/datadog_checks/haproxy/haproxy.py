@@ -571,10 +571,13 @@ class HAProxy(AgentCheck):
             if HAProxy.METRICS.get(key):
                 suffix = HAProxy.METRICS[key][1]
                 name = "haproxy.%s.%s" % (back_or_front.lower(), suffix)
-                if HAProxy.METRICS[key][0] == 'rate':
-                    self.rate(name, value, tags=tags)
-                else:
-                    self.gauge(name, value, tags=tags)
+                try:
+                    if HAProxy.METRICS[key][0] == 'rate':
+                        self.rate(name, float(value), tags=tags)
+                    else:
+                        self.gauge(name, float(value), tags=tags)
+                except ValueError:
+                    pass
 
     def _process_event(self, data, url, services_incl_filter=None,
                        services_excl_filter=None, custom_tags=[]):

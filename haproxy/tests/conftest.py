@@ -6,9 +6,10 @@ import time
 import logging
 import mock
 
-from datadog_checks.haproxy import HAProxy
-
 import common
+
+log = logging.getLogger('test_haproxy')
+
 
 @pytest.fixture
 def aggregator():
@@ -16,17 +17,26 @@ def aggregator():
     aggregator.reset()
     return aggregator
 
+
 @pytest.fixture(scope="module")
 def haproxy_mock():
-    p = mock.patch('requests.get', return_value=mock.Mock(content=common.MOCK_DATA))
+    filepath = os.path.join(common.HERE, 'fixtures', 'mock_data')
+    with open(filepath, 'r') as f:
+        data = f.read()
+    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
+
 @pytest.fixture(scope="module")
 def haproxy_mock_evil():
-    p = mock.patch('requests.get', return_value=mock.Mock(content=common.MOCK_DATA_EVIL))
+    filepath = os.path.join(common.HERE, 'fixtures', 'mock_data_evil')
+    with open(filepath, 'r') as f:
+        data = f.read()
+    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
+
 
 def wait_for_haproxy():
     for _ in xrange(0, 100):
@@ -42,6 +52,7 @@ def wait_for_haproxy():
             log.info("exception: {0} res: {1} res_open: {2}".format(e, res, res_open))
             time.sleep(2)
     raise Exception("Cannot start up apache")
+
 
 @pytest.fixture(scope="session")
 def spin_up_haproxy():
