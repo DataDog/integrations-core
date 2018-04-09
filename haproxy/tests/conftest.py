@@ -71,6 +71,8 @@ def spin_up_haproxy():
     subprocess.check_call(args + ["down"], env=env)
     subprocess.check_call(args + ["up", "-d"], env=env)
     wait_for_haproxy()
+    subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
+    subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
     if Platform.is_linux():
         # on linux this needs access to the socket
         # it won't work without access
