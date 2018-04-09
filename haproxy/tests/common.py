@@ -21,20 +21,22 @@ PORT = '13835'
 PORT_OPEN = '13836'
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 BASE_URL_OPEN = "http://{0}:{1}".format(HOST, PORT_OPEN)
-STATUS_URL = "{0}/status".format(BASE_URL)
-STATUS_URL_OPEN = "{0}/status".format(BASE_URL_OPEN)
+STATS_URL = "{0}/stats".format(BASE_URL)
+STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
+USERNAME = 'datadog'
+PASSWORD = 'isdevops'
 
 CHECK_CONFIG = {
-    'url': STATUS_URL,
-    'username': 'datadog',
-    'password': 'isdevops',
+    'url': STATS_URL,
+    'username': USERNAME,
+    'password': PASSWORD,
     'status_check': True,
     'collect_aggregates_only': False,
     'tag_service_check_by_host': True,
 }
 
 CHECK_CONFIG_OPEN = {
-    'url': STATUS_URL_OPEN,
+    'url': STATS_URL_OPEN,
     'collect_aggregates_only': False,
 }
 
@@ -107,6 +109,10 @@ BACKEND_CHECK_RATES_POST_1_4 = [
     'haproxy.backend.response.4xx',
     'haproxy.backend.response.5xx',
     'haproxy.backend.response.other',
+]
+
+BACKEND_CHECK_GAUGES_POST_1_7 = [
+    'haproxy.backend.uptime'
 ]
 
 SERVICE_CHECK_NAME = 'haproxy.backend_up'

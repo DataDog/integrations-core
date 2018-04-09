@@ -17,10 +17,8 @@ services:
     ports:
       - "13836:13836"
     networks:
-      - network2
+      - network1
 
 networks:
   network1:
-    name: haproxy_network_1
-  network2:
-    name: haproxy_network_2
+    name: haproxy_network

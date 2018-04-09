@@ -43,9 +43,10 @@ def wait_for_haproxy():
         res = None
         res_open = None
         try:
-            res = requests.get(common.STATUS_URL)
+            auth = (common.USERNAME, common.PASSWORD)
+            res = requests.get(common.STATS_URL, auth=auth)
             res.raise_for_status()
-            res_open = requests.get(common.STATUS_URL_OPEN)
+            res_open = requests.get(common.STATS_URL_OPEN)
             res_open.raise_for_status()
             return
         except Exception as e:
@@ -64,9 +65,8 @@ def spin_up_haproxy():
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
     ]
-    subprocess.check_call(args + ["down"], env=env)
-    subprocess.check_call(args + ["up", "-d", "--build"], env=env)
+    subprocess.check_call(args + ["up", "-d"], env=env)
     wait_for_haproxy()
     time.sleep(20)
     yield
-    # subprocess.check_call(args + ["down"], env=env)
+    subprocess.check_call(args + ["down"], env=env)
