@@ -5,7 +5,7 @@ services:
     image: "haproxy:${HAPROXY_VERSION}"
     volumes:
       - ${HAPROXY_CONFIG}:/usr/local/etc/haproxy/haproxy.cfg
-      - /tmp/haproxy/:/tmp/
+      - /tmp/haproxy:/tmp
     ports:
       - "13835:13835"
     networks:
