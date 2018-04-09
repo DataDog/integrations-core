@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from collections import namedtuple
 from datetime import datetime, timedelta
 from urlparse import urljoin
 import re
@@ -865,28 +864,45 @@ class OpenStackCheck(AgentCheck):
 
         # If we don't have a timestamp for this instance, default to None
         if i_key not in self.changes_since_time:
-            self._changes_since_time[i_key] = None
+            self.changes_since_time[i_key] = None
 
         if self.changes_since_time[i_key]:
-            query_params['changes-since'] = changes_since_time
-
-        # Since we ultimately only perform actions on ACTIVE servers
-        # Lets filter to only those to reduce the payload we receive
-        active_query_params['status'] = 'ACTIVE,DELETED,SHUTOFF'
+            query_params['changes-since'] = self.changes_since_time[i_key]
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
+        servers = []
+
         server_ids = []
         try:
-            # Get a list of active/deleted/shut-off servers
+            # Get a list of active servers
+            query_params['status'] = 'ACTIVE'
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+            servers.extend(resp['servers'])
+
+            # Get a list of deleted servers
+            # Need to have admin perms for this to take affect
+            query_params['deleted'] = 'true'
+            query_params['status'] = ''
+            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+            servers.extend(resp['servers'])
+            query_params['deleted'] = 'false'
+
+            # Get a list of shut off servers
+            query_params['status'] = 'SHUTOFF'
+            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+            servers.extend(resp['servers'])
+
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
         except Exception as e:
             self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
             raise e
 
-        for server in resp['servers']:
+        if i_key not in self.servers:
+            self.servers[i_key] = {}
+
+        for server in servers:
             new_server = {}
 
             new_server['server_id'] = server.get('id')
@@ -896,11 +912,10 @@ class OpenStackCheck(AgentCheck):
             new_server['tenant_id'] = server.get('tenant_id')
             new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
 
-            for server in self.servers[i_key]:
-                if server_id == server['id'] and state not in DIAGNOSTICABLE_STATES:
-                    self.servers[i_key].append(new_server)
-                elif server_id == server['id'] and state in REMOVED_STATES:
-                    self.servers[i_key][:] = [server for server in self.servers[i_key] if self.servers[i_key]('server_id') != server_id]
+            if new_server['server_id'] not in self.servers[i_key] and new_server['state'] not in DIAGNOSTICABLE_STATES:
+                self.servers[i_key].append(new_server)
+            elif new_server['server_id'] in self.servers[i_key] and new_server['state'] in REMOVED_STATES:
+                self.servers[i_key][:] = [server for server in self.servers[i_key] if self.servers[i_key]('server_id') != server_id]
 
         return self.servers[i_key]
 
@@ -921,11 +936,11 @@ class OpenStackCheck(AgentCheck):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
 
-        server_id = server.get('id')
-        state = server.get('status')
-        server_name = server.get('name')
-        hypervisor_hostname = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
-        tenant_id = server.get('tenant_id')
+        server_id = server_details.get('id')
+        state = server_details.get('status')
+        server_name = server_details.get('name')
+        hypervisor_hostname = server_details.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+        tenant_id = server_details.get('tenant_id')
         project_name = self.get_project_name_from_id(tenant_id)
 
         server_stats = {}
@@ -1115,7 +1130,7 @@ class OpenStackCheck(AgentCheck):
                     projects.append(project)
 
                 # Restrict monitoring to non-excluded servers
-                i_key = self_instance_key(instance)
+                i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(i_key)
 
                 host_tags = self._get_tags_for_host()
@@ -1129,7 +1144,7 @@ class OpenStackCheck(AgentCheck):
                     if project and 'name' in project:
                         server_tags.append('project_name:{0}'.format(project['name']))
 
-                    self.external_host_tags[sid] = host_tags
+                    self.external_host_tags[server.get('id')] = host_tags
                     self.get_stats_for_single_server(server, tags=server_tags)
 
                 if hyp:
@@ -1165,15 +1180,15 @@ class OpenStackCheck(AgentCheck):
             if e.response.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
-                self.warning("There were some problems reaching the nova API - applying exponential backoff")
+                self.warning("There were some problems reaching the nova API - applying exponential backoff: %s", e)
             else:
-                self.warning("Error reaching nova API: %s", e)
+                self.warning("Error reaching nova API")
 
             return
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             # exponential backoff
             self.do_backoff(instance)
-            self.warning("There were some problems reaching the nova API - applying exponential backoff")
+            self.warning("There were some problems reaching the nova API - applying exponential backoff: %s", e)
             return
 
         self.reset_backoff(instance)
@@ -1252,8 +1267,8 @@ class OpenStackCheck(AgentCheck):
         """
         return self.init_config.get("os_host") or self.hostname
 
-    def get_servers_managed_by_hypervisor(self, instance_key):
-        self.get_all_servers(instance_key, filter_by_host=self.get_my_hostname())
+    def get_servers_managed_by_hypervisor(self, i_key):
+        self.get_all_servers(i_key, filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             self.servers[i_key][:] = [server for server in self.servers[i_key] if not any([re.match(exclude_id_rule, server.get('id'))
