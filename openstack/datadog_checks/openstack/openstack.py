@@ -785,11 +785,11 @@ class OpenStackCheck(AgentCheck):
             # Let's populate it now
             try:
                 instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
-                self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
+                self.service_check(self.IDENTITY_API_SC, AgentCheck.OK, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
             except KeystoneUnreachable as e:
                 self.warning("The agent could not contact the specified identity server at %s . Are you sure it is up at that address?" % self.init_config.get("keystone_server_url"))
                 self.log.debug("Problem grabbing auth token: %s", e)
-                self.service_check(self.IDENTITY_API_SC, AgentCheck.CRITICAL, tags=["server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
+                self.service_check(self.IDENTITY_API_SC, AgentCheck.CRITICAL, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
 
                 # If Keystone is down/unreachable, we default the Nova and Neutron APIs to UNKNOWN since we cannot access the service catalog
                 self.service_check(self.NETWORK_API_SC, AgentCheck.UNKNOWN, tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + custom_tags)
