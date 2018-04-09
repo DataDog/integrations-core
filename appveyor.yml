@@ -43,6 +43,7 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
   - ps: choco install docker-compose
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
   - cd datadog-checks-base
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
