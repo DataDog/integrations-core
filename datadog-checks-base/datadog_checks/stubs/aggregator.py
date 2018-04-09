@@ -113,18 +113,6 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
-        if aggregator.metrics_asserted_pct != 100.0:
-            print "================"
-            print "All Metrics:"
-            for metric in self._metrics:
-                print metric
-            print "================"
-            print "================"
-            print "Not Asserted:"
-            for metric in self.not_asserted():
-                print metric
-            print "================"
-
         assert aggregator.metrics_asserted_pct == 100.0
 
     def not_asserted(self):
