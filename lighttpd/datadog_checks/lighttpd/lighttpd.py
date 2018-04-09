@@ -92,8 +92,10 @@ class Lighttpd(AgentCheck):
             if 'user' in instance and 'password' in instance:
                 auth = requests.auth.HTTPDigestAuth(instance['user'], instance['password'])
         else:
-            raise Exception("Unsupported value of 'auth_type' variable in Lighttpd config: '%s'" % instance['auth_type'])
+            msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
+            raise Exception(msg)
 
+        print(auth, auth_type)
         self.log.debug("Connecting to %s" % url)
 
         # Submit a service check for status page availability.
