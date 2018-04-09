@@ -49,5 +49,5 @@ kafka.consumer.bytes_in,gauge,10,byte,second,Consumer bytes in rate.,1,kafka,con
 kafka.consumer.messages_in,gauge,10,message,second,Rate of consumer message consumption.,1,kafka,con msg rate
 kafka.consumer.zookeeper_commits,gauge,10,write,second,Rate of offset commits to ZooKeeper.,1,kafka,zoo offset commit
 kafka.consumer.kafka_commits,gauge,10,write,second,Rate of offset commits to Kafka.,1,kafka,kafka offset commit
-kafka.consumer.records_consumed,gauge,10,records,sec,The average number of records consumed per second for a specific topic.,1,con rec consumed
-kafka.consumer.records_per_request_avg,10,records,request,The average number of records in each request for a specific topic.,1,rec per request
+kafka.consumer.records_consumed,gauge,10,records,sec,The average number of records consumed per second for a specific topic.,1,kafka,con rec consumed
+kafka.consumer.records_per_request_avg,gauge,10,records,request,The average number of records in each request for a specific topic.,1,kafka,rec per request
