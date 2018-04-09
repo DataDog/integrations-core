@@ -1,0 +1,24 @@
+version: '3.5'
+
+services:
+  haproxy:
+    image: "haproxy:${HAPROXY_VERSION}"
+    volumes:
+      - ${HAPROXY_CONFIG_DIR}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - /tmp/haproxy/:/tmp/
+    ports:
+      - "3835:3835"
+    networks:
+      - network1
+  haproxy-open:
+    image: "haproxy:${HAPROXY_VERSION}"
+    volumes:
+      - ${HAPROXY_CONFIG_DIR}/haproxy-open.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "3836:3836"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: apache_network
