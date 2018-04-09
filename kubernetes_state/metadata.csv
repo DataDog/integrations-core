@@ -45,7 +45,7 @@ kubernetes_state.node.cpu_allocatable,gauge,,cpu,,The CPU resources of a node th
 kubernetes_state.node.memory_allocatable,gauge,,byte,,The memory resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.memory_allocatable
 kubernetes_state.node.pods_allocatable,gauge,,,,The pod resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.pods_allocatable
 kubernetes_state.node.status,gauge,,,,Submitted with a value of 1 for each node and tagged either 'status:schedulable' or 'status:unschedulable'; Sum this metric by either status to get the number of nodes in that status.,0,kubernetes,k8s_state.node.status
-kubernetes_state.nodes.by_condition,count,,,,To sum by `condition` and `status` to get number of nodes in a given condition.,0,kubernetes,k8s_state.nodes.by_cond
+kubernetes_state.nodes.by_condition,gauge,,,,To sum by `condition` and `status` to get number of nodes in a given condition.,0,kubernetes,k8s_state.nodes.by_cond
 kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.min_replicas
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas
 kubernetes_state.hpa.target_cpu,gauge,,,,Target CPU percentage of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.target_cpu
