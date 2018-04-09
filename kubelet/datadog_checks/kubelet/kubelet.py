@@ -492,6 +492,10 @@ class KubeletCheck(PrometheusCheck):
 
     def container_cpu_usage_seconds_total(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
+        for metric in message.metric:
+            # convert cores in nano cores
+            metric.counter.value *= 10.**9
+
         self._process_container_rate(metric_name, message)
 
     def container_fs_reads_bytes_total(self, message, **kwargs):
