@@ -40,7 +40,7 @@ CHECK_CONFIG_OPEN = {
     'collect_aggregates_only': False,
 }
 
-UNIXSOCKET_PATH = os.path.join('/tmp', 'haproxy/datadog-haproxy-stats.sock')
+UNIXSOCKET_PATH = '/tmp/haproxy/datadog-haproxy-stats.sock'
 UNIXSOCKET_URL = 'unix://{0}'.format(UNIXSOCKET_PATH)
 CONFIG_UNIXSOCKET = {
     'url': UNIXSOCKET_URL,
