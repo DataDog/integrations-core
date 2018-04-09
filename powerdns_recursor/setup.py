@@ -4,7 +4,6 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import json
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -20,23 +19,11 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-def read(*parts):
-    with open(path.join(HERE, *parts), 'r') as fp:
-        return fp.read()
-
-
 # Get version info
 ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "powerdns_recursor", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
-manifest_version = None
-with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if ABOUT["__version__"] != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-powerdns_recursor',
