@@ -41,6 +41,9 @@ install:
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
+  - ps: choco install docker-compose
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
   - cd datadog-checks-base
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
@@ -60,13 +63,13 @@ install:
   - cd pdh_check
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
-  - cd aspdotnet 
+  - cd aspdotnet
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
-  - cd dotnetclr 
+  - cd dotnetclr
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
-  - cd exchange_server 
+  - cd exchange_server
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
 build: off
@@ -75,8 +78,8 @@ test_script:
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
-  - bundle exec rake ci:run[aspdotnet]
   - bundle exec rake ci:run[dotnetclr]
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
+  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet"
