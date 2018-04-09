@@ -142,10 +142,13 @@ class SparkCheck(AgentCheck):
             tags = []
         else:
             tags = list(set(tags))
-
         ssl_config = self._get_ssl_config(instance)
+        cluster_name = instance.get('cluster_name')
+        if cluster_name is None:
+            raise Exception('The cluster_name must be specified in the instance configuration')
+        tags.append('cluster_name:%s' % cluster_name)
 
-        spark_apps = self._get_running_apps(instance, tags, ssl_config)
+        spark_apps = self._get_running_apps(instance, ssl_config)
 
         # Get the job metrics
         self._spark_job_metrics(instance, spark_apps, tags, ssl_config)
@@ -168,7 +171,7 @@ class SparkCheck(AgentCheck):
             self.service_check(
                 SPARK_SERVICE_CHECK,
                 AgentCheck.OK,
-                tags=['url:%s' % am_address],
+                tags=['url:%s' % am_address] + tags,
                 message='Connection to ApplicationMaster "%s" was successful' % am_address)
 
     def _get_ssl_config(self, instance):
@@ -212,20 +215,20 @@ class SparkCheck(AgentCheck):
         self.log.debug('Request URL returned: %s', _url)
         return _url
 
-    def _get_running_apps(self, instance, tags, ssl_config):
+    def _get_running_apps(self, instance, ssl_config):
         '''
         Determine what mode was specified
         '''
-
+        tags = instance.get('tags', [])
+        if tags is None:
+            tags = []
         master_address = self._get_master_address(instance)
-
         # Get the cluster name from the instance configuration
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             raise Exception('The cluster_name must be specified in the instance configuration')
-
         tags.append('cluster_name:%s' % cluster_name)
-
+        tags = list(set(tags))
         # Determine the cluster mode
         cluster_mode = instance.get(SPARK_CLUSTER_MODE)
         if cluster_mode is None:
@@ -237,28 +240,28 @@ class SparkCheck(AgentCheck):
         if cluster_mode == SPARK_STANDALONE_MODE:
             # check for PRE-20
             pre20 = is_affirmative(instance.get(SPARK_PRE_20_MODE, False))
-            return self._standalone_init(master_address, pre20, ssl_config)
+            return self._standalone_init(master_address, pre20, ssl_config, tags)
 
         elif cluster_mode == SPARK_MESOS_MODE:
-            running_apps = self._mesos_init(instance, master_address, ssl_config)
-            return self._get_spark_app_ids(running_apps, ssl_config)
+            running_apps = self._mesos_init(instance, master_address, ssl_config, tags)
+            return self._get_spark_app_ids(running_apps, ssl_config, tags)
 
         elif cluster_mode == SPARK_YARN_MODE:
-            running_apps = self._yarn_init(master_address, ssl_config)
-            return self._get_spark_app_ids(running_apps, ssl_config)
+            running_apps = self._yarn_init(master_address, ssl_config, tags)
+            return self._get_spark_app_ids(running_apps, ssl_config, tags)
 
         else:
             raise Exception(
                 'Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
-    def _standalone_init(self, spark_master_address, pre_20_mode, ssl_config):
+    def _standalone_init(self, spark_master_address, pre_20_mode, ssl_config, tags):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         '''
         metrics_json = self._rest_request_to_json(
             spark_master_address,
             SPARK_MASTER_STATE_PATH,
-            SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
+            SPARK_STANDALONE_SERVICE_CHECK, ssl_config, tags)
 
         running_apps = {}
 
@@ -269,7 +272,7 @@ class SparkCheck(AgentCheck):
 
                 # Parse through the HTML to grab the application driver's link
                 try:
-                    app_url = self._get_standalone_app_url(app_id, spark_master_address, ssl_config)
+                    app_url = self._get_standalone_app_url(app_id, spark_master_address, ssl_config, tags)
 
                     if app_id and app_name and app_url:
                         if pre_20_mode:
@@ -277,7 +280,7 @@ class SparkCheck(AgentCheck):
                             applist = self._rest_request_to_json(
                                 app_url,
                                 SPARK_APPS_PATH,
-                                SPARK_STANDALONE_SERVICE_CHECK, ssl_config)
+                                SPARK_STANDALONE_SERVICE_CHECK, ssl_config, tags)
                             for appl in applist:
                                 aid = appl.get('id')
                                 aname = appl.get('name')
@@ -293,12 +296,12 @@ class SparkCheck(AgentCheck):
         self.service_check(
             SPARK_STANDALONE_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % spark_master_address],
+            tags=['url:%s' % spark_master_address] + tags,
             message='Connection to Spark master "%s" was successful' % spark_master_address)
         self.log.info("Returning running apps %s" % running_apps)
         return running_apps
 
-    def _mesos_init(self, instance, master_address, ssl_config):
+    def _mesos_init(self, instance, master_address, ssl_config, tags):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
@@ -307,7 +310,7 @@ class SparkCheck(AgentCheck):
         metrics_json = self._rest_request_to_json(
             master_address,
             MESOS_MASTER_APP_PATH,
-            MESOS_SERVICE_CHECK, ssl_config)
+            MESOS_SERVICE_CHECK, ssl_config, tags)
 
         if metrics_json.get('frameworks'):
             for app_json in metrics_json.get('frameworks'):
@@ -330,28 +333,28 @@ class SparkCheck(AgentCheck):
         self.service_check(
             MESOS_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % master_address],
+            tags=['url:%s' % master_address] + tags,
             message='Connection to ResourceManager "%s" was successful' % master_address)
 
         return running_apps
 
-    def _yarn_init(self, rm_address, ssl_config):
+    def _yarn_init(self, rm_address, ssl_config, tags):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
         '''
         running_apps = {}
-        running_apps = self._yarn_get_running_spark_apps(rm_address, ssl_config)
+        running_apps = self._yarn_get_running_spark_apps(rm_address, ssl_config, tags)
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(
             YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % rm_address],
+            tags=['url:%s' % rm_address] + tags,
             message='Connection to ResourceManager "%s" was successful' % rm_address)
 
         return running_apps
 
-    def _get_standalone_app_url(self, app_id, spark_master_address, ssl_config):
+    def _get_standalone_app_url(self, app_id, spark_master_address, ssl_config, tags):
         '''
         Return the application URL from the app info page on the Spark master.
         Due to a bug, we need to parse the HTML manually because we cannot
@@ -362,6 +365,7 @@ class SparkCheck(AgentCheck):
             SPARK_MASTER_APP_PATH,
             SPARK_STANDALONE_SERVICE_CHECK,
             ssl_config,
+            tags,
             appId=app_id)
 
         dom = BeautifulSoup(app_page.text, 'html.parser')
@@ -370,7 +374,7 @@ class SparkCheck(AgentCheck):
         if app_detail_ui_links and len(app_detail_ui_links) == 1:
             return app_detail_ui_links[0].attrs['href']
 
-    def _yarn_get_running_spark_apps(self, rm_address, ssl_config):
+    def _yarn_get_running_spark_apps(self, rm_address, ssl_config, tags):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for running Spark applications.
 
@@ -382,6 +386,7 @@ class SparkCheck(AgentCheck):
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
             ssl_config,
+            tags,
             states=APPLICATION_STATES,
             applicationTypes=YARN_APPLICATION_TYPES)
 
@@ -400,7 +405,7 @@ class SparkCheck(AgentCheck):
 
         return running_apps
 
-    def _get_spark_app_ids(self, running_apps, ssl_config):
+    def _get_spark_app_ids(self, running_apps, ssl_config, tags):
         '''
         Traverses the Spark application master in YARN to get a Spark application ID.
 
@@ -411,7 +416,7 @@ class SparkCheck(AgentCheck):
             response = self._rest_request_to_json(
                 tracking_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, ssl_config)
+                SPARK_SERVICE_CHECK, ssl_config, tags)
 
             for app in response:
                 app_id = app.get('id')
@@ -432,7 +437,7 @@ class SparkCheck(AgentCheck):
             response = self._rest_request_to_json(
                 base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, ssl_config, app_id, 'jobs')
+                SPARK_SERVICE_CHECK, ssl_config, addl_tags, app_id, 'jobs')
 
             for job in response:
 
@@ -455,7 +460,7 @@ class SparkCheck(AgentCheck):
             response = self._rest_request_to_json(
                 base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, ssl_config, app_id, 'stages')
+                SPARK_SERVICE_CHECK, ssl_config, addl_tags, app_id, 'stages')
 
             for stage in response:
 
@@ -478,7 +483,7 @@ class SparkCheck(AgentCheck):
             response = self._rest_request_to_json(
                 base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, ssl_config, app_id, 'executors')
+                SPARK_SERVICE_CHECK, ssl_config, addl_tags, app_id, 'executors')
 
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
@@ -502,7 +507,7 @@ class SparkCheck(AgentCheck):
             response = self._rest_request_to_json(
                 base_url,
                 SPARK_APPS_PATH,
-                SPARK_SERVICE_CHECK, ssl_config, app_id, 'storage/rdd')
+                SPARK_SERVICE_CHECK, ssl_config, addl_tags, app_id, 'storage/rdd')
 
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
@@ -531,17 +536,19 @@ class SparkCheck(AgentCheck):
         '''
         Set a metric
         '''
+        if tags is None:
+            tags = []
         if metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags)
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request(self, address, object_path, service_name, ssl_config, *args, **kwargs):
+    def _rest_request(self, address, object_path, service_name, ssl_config, tags, *args, **kwargs):
         '''
         Query the given URL and return the response
         '''
         response = None
-        service_check_tags = ['url:%s' % self._get_url_base(address)]
+        service_check_tags = ['url:%s' % self._get_url_base(address)] + tags
 
         url = address
 
@@ -608,11 +615,11 @@ class SparkCheck(AgentCheck):
 
         return response
 
-    def _rest_request_to_json(self, address, object_path, service_name, ssl_config, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, service_name, ssl_config, tags, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
-        response = self._rest_request(address, object_path, service_name, ssl_config, *args, **kwargs)
+        response = self._rest_request(address, object_path, service_name, ssl_config, tags, *args, **kwargs)
 
         try:
             response_json = response.json()
@@ -621,7 +628,7 @@ class SparkCheck(AgentCheck):
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
-                tags=['url:%s' % self._get_url_base(address)],
+                tags=['url:%s' % self._get_url_base(address)] + tags,
                 message='JSON Parse failed: {0}'.format(e))
             raise
 
