@@ -139,8 +139,12 @@ class Nginx(AgentCheck):
         parsed_url = urlparse.urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
+        custom_tags = instance.get('tags', [])
+        if custom_tags is None:
+            custom_tags = []
+
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port]
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
             r = self._perform_request(instance, url, ssl_validation, auth)
@@ -178,9 +182,11 @@ class Nginx(AgentCheck):
         return payload
 
     @classmethod
-    def parse_text(cls, raw, tags):
+    def parse_text(cls, raw, tags=None):
         # Thanks to http://hostingfu.com/files/nginx/nginxstats.py for this code
         # Connections
+        if tags is None:
+            tags = []
         output = []
         parsed = re.search(r'Active connections:\s+(\d+)', raw)
         if parsed:
