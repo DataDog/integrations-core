@@ -37,6 +37,9 @@ def instance():
     return {
         'lighttpd_status_url': STATUS_URL,
         'tags': ['instance:first'],
+        'user': 'username',
+        'password': 'password',
+        'auth_type': 'digest',
     }
 
 
@@ -55,11 +58,12 @@ def lighttpd():
 
         try:
             urllib2.urlopen(STATUS_URL).read()
-        except Exception:
+        except urllib2.HTTPError:
+            # endpoint is secured, we do expect 401
+            break
+        except urllib2.URLError:
             attempts += 1
             time.sleep(1)
-        else:
-            break
 
     yield
 
