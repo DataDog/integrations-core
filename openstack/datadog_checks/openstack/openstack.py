@@ -942,6 +942,7 @@ class OpenStackCheck(AgentCheck):
         project_name = self.get_project_name_from_id(tenant_id)
 
         server_stats = {}
+        headers = {'X-Auth-Token': self.get_auth_token()}
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
@@ -1271,7 +1272,7 @@ class OpenStackCheck(AgentCheck):
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
                 for server_id in self.server_details_by_id:
-                    if rem.atch(exclude_id_rule, server_id):
+                    if re.match(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
 
     def _get_tags_for_host(self):
