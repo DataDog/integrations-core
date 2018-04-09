@@ -11,6 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'apache',
+    'aspdotnet',
     'btrfs',
     'datadog-checks-base',
     'directory',
