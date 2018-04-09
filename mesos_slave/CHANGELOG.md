@@ -1,5 +1,12 @@
 # CHANGELOG - mesos_slave
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds custom tag support for service check.
+
 1.1.1 / 2018-02-13
 ==================
 
