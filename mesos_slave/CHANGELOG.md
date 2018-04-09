@@ -5,6 +5,7 @@
 
 ### Changes
 
+* [BUGFIX] Add debug logs and a noisier error message.
 * [FEATURE] Adds custom tag support for service check.
 
 1.1.1 / 2018-02-13

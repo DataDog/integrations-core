@@ -123,11 +123,12 @@ class MesosSlave(AgentCheck):
             msg = str(e)
             status = AgentCheck.CRITICAL
         finally:
+            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             if self.service_check_needed:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
             if status is AgentCheck.CRITICAL:
-                raise CheckException("Cannot connect to mesos, please check your configuration.")
+                raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
 
         if r.encoding is None:
             r.encoding = 'UTF8'
