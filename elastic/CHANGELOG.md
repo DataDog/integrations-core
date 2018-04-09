@@ -1,5 +1,12 @@
 # CHANGELOG - elastic
 
+1.6.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds `index_stats` to collect index level metrics.
+
 1.5.0 / 2018-02-13
 ==================
 
