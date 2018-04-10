@@ -265,7 +265,7 @@ class Riak(AgentCheck):
             self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         for k in self.keys:
-            if k in stats:
+            if k in stats and stats[k] != 'undefined':
                 self.gauge("riak." + k, stats[k], tags=tags)
 
         coord_redirs_total = stats["coord_redirs_total"]
