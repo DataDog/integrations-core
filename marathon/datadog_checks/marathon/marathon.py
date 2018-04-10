@@ -151,6 +151,8 @@ class Marathon(AgentCheck):
     def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
         # Marathon apps
         if group is None:
+            # embed=apps.counts is not a required parameter but will be in the future: 
+            # http://mesosphere.github.io/marathon/1.4/docs/rest-api.html#get-v2apps
             marathon_path = urljoin(url, "v2/apps?embed=apps.counts")
         else:
             marathon_path = urljoin(url, "v2/groups/{}?embed=group.apps.counts".format(group))
