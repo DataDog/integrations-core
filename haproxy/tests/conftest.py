@@ -77,7 +77,7 @@ def spin_up_haproxy():
     if Platform.is_linux():
         # on linux this needs access to the socket
         # it won't work without access
-        os.mkdirs(common.UNIXSOCKET_DIR)
+        os.makedirs(common.UNIXSOCKET_DIR)
         args = []
         user = getpass.getuser()
         if user != 'root':
