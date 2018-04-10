@@ -112,6 +112,16 @@ class AggregatorStub(object):
         self._service_checks = defaultdict(list)
         self._events = []
 
+    def all_metrics_asserted(self):
+        assert aggregator.metrics_asserted_pct == 100.0
+
+    def not_asserted(self):
+        not_asserted = []
+        for mname, metric in aggregator._metrics.iteritems():
+            if mname not in aggregator._asserted:
+                not_asserted.append(metric)
+        return not_asserted
+
     @property
     def metrics_asserted_pct(self):
         """

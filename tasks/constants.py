@@ -29,6 +29,7 @@ AGENT_BASED_INTEGRATIONS = [
     'powerdns_recursor',
     'prometheus',
     'redisdb',
+    'riak',
     'spark',
     'ssh_check',
     'system_core',
