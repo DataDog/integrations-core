@@ -81,14 +81,14 @@ def spin_up_haproxy():
         if Platform.is_linux():
             # on linux this needs access to the socket
             # it won't work without access
-            args = []
+            chown_args = []
             user = getpass.getuser()
             if user != 'root':
-                args += ['sudo']
-            args += [
+                chown_args += ['sudo']
+            chown_args += [
                 "chown", user, common.UNIXSOCKET_PATH
             ]
-            subprocess.check_call(args, env=env)
+            subprocess.check_call(chown_args, env=env)
     except CalledProcessError as e:
         # it's not always bad if this fails
         pass
