@@ -9,7 +9,7 @@
   "supported_os": [
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
   "public_title": "Datadog-Active Directory Integration",
   "categories":["os & system"],
