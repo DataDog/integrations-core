@@ -29,21 +29,21 @@ CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
 FACTORS = {
-    'n': float(1)/(1000*1000*1000),
-    'u': float(1)/(1000*1000),
-    'm': float(1)/1000,
+    'n': float(1) / (1000 * 1000 * 1000),
+    'u': float(1) / (1000 * 1000),
+    'm': float(1) / 1000,
     'k': 1000,
-    'M': 1000*1000,
-    'G': 1000*1000*1000,
-    'T': 1000*1000*1000*1000,
-    'P': 1000*1000*1000*1000*1000,
-    'E': 1000*1000*1000*1000*1000*1000,
+    'M': 1000 * 1000,
+    'G': 1000 * 1000 * 1000,
+    'T': 1000 * 1000 * 1000 * 1000,
+    'P': 1000 * 1000 * 1000 * 1000 * 1000,
+    'E': 1000 * 1000 * 1000 * 1000 * 1000 * 1000,
     'Ki': 1024,
-    'Mi': 1024*1024,
-    'Gi': 1024*1024*1024,
-    'Ti': 1024*1024*1024*1024,
-    'Pi': 1024*1024*1024*1024*1024,
-    'Ei': 1024*1024*1024*1024*1024*1024,
+    'Mi': 1024 * 1024,
+    'Gi': 1024 * 1024 * 1024,
+    'Ti': 1024 * 1024 * 1024 * 1024,
+    'Pi': 1024 * 1024 * 1024 * 1024 * 1024,
+    'Ei': 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
 }
 
 log = logging.getLogger('collector')
@@ -53,6 +53,7 @@ class KubeletCheck(PrometheusCheck):
     """
     Collect container metrics from Kubelet.
     """
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubeletCheck, self).__init__(name, init_config, agentConfig, instances)
         self.NAMESPACE = 'kubernetes'
@@ -509,7 +510,7 @@ class KubeletCheck(PrometheusCheck):
                         continue
                     usage, tags = cache.get(c_name, (None, None))
                     if usage:
-                        self.gauge(pct_m_name, float(usage/float(limit)), tags)
+                        self.gauge(pct_m_name, float(usage / float(limit)), tags)
                     else:
                         self.log.debug("No corresponding usage found for metric %s and "
                                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
@@ -518,7 +519,7 @@ class KubeletCheck(PrometheusCheck):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
         for metric in message.metric:
             # convert cores in nano cores
-            metric.counter.value *= 10.**9
+            metric.counter.value *= 10. ** 9
 
         self._process_container_rate(metric_name, message)
 

@@ -201,7 +201,9 @@ def test_get_container_id():
     labels = [
         Label("container_name", value="datadog-agent"),
         Label("id",
-              value="/kubepods/burstable/podc2319815-10d0-11e8-bd5a-42010af00137/a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
+              value="/kubepods/burstable/"
+                    "podc2319815-10d0-11e8-bd5a-42010af00137/"
+                    "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
     ]
     assert KubeletCheck._get_container_id(labels) == "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
     assert KubeletCheck._get_container_id([]) is None
@@ -211,7 +213,9 @@ def test_get_pod_uid():
     labels = [
         Label("container_name", value="POD"),
         Label("id",
-              value="/kubepods/burstable/pod260c2b1d43b094af6d6b4ccba082c2db/0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
+              value="/kubepods/burstable/"
+                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
+                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
     ]
     assert KubeletCheck._get_pod_uid(labels) == "260c2b1d43b094af6d6b4ccba082c2db"
     assert KubeletCheck._get_pod_uid([]) is None
@@ -237,12 +241,16 @@ def test_get_pod_by_metric_label(monkeypatch):
     kube_proxy = check._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
-              value="/kubepods/burstable/pod260c2b1d43b094af6d6b4ccba082c2db/0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
+              value="/kubepods/burstable/"
+                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
+                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
     ])
     fluentd = check._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
-              value="/kubepods/burstable/pod2edfd4d9-10ce-11e8-bd5a-42010af00137/7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
+              value="/kubepods/burstable/"
+                    "pod2edfd4d9-10ce-11e8-bd5a-42010af00137/"
+                    "7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
     ])
     assert kube_proxy["metadata"]["name"] == "kube-proxy-gke-haissam-default-pool-be5066f1-wnvn"
     assert fluentd["metadata"]["name"] == "fluentd-gcp-v2.0.10-9q9t4"
@@ -257,12 +265,16 @@ def test_is_static_pending_pod(monkeypatch):
     static_pod = check._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
-              value="/kubepods/burstable/pod260c2b1d43b094af6d6b4ccba082c2db/0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
+              value="/kubepods/burstable/"
+                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
+                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
     ])
     api_pod = check._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
-              value="/kubepods/burstable/pod2edfd4d9-10ce-11e8-bd5a-42010af00137/7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
+              value="/kubepods/burstable/"
+                    "pod2edfd4d9-10ce-11e8-bd5a-42010af00137/"
+                    "7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
     ])
     assert check._is_static_pending_pod(static_pod) is True
     assert check._is_static_pending_pod(api_pod) is False
@@ -272,7 +284,9 @@ def test_get_kube_container_name():
     tags = KubeletCheck._get_kube_container_name([
         Label("container_name", value="datadog-agent"),
         Label("id",
-              value="/kubepods/burstable/podc2319815-10d0-11e8-bd5a-42010af00137/a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
+              value="/kubepods/burstable/"
+                    "podc2319815-10d0-11e8-bd5a-42010af00137/"
+                    "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
         Label("image",
               value="datadog/agent-dev@sha256:894fb66f89be0332a47388d7219ab8b365520ff0e3bbf597bd0a378b19efa7ee"),
         Label("name", value="k8s_datadog-agent_datadog-agent-jbm2k_default_c2319815-10d0-11e8-bd5a-42010af00137_0"),
@@ -330,7 +344,31 @@ def test_report_container_spec_metrics(monkeypatch):
         mock.call('kubernetes.memory.limits', 536870912.0, []),
         mock.call('kubernetes.cpu.requests', 0.1, []),
     ]
-    check.gauge.assert_has_calls(calls)
+    check.gauge.assert_has_calls(calls, any_order=True)
+
+
+class MockResponse(mock.Mock):
+    @staticmethod
+    def iter_lines():
+        return []
+
+
+def test_perform_kubelet_check(monkeypatch):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.kube_health_url = "http://127.0.0.1:10255/healthz"
+    check.kubelet_conn_info = {}
+    monkeypatch.setattr(check, 'service_check', mock.Mock())
+
+    get = MockResponse()
+    with mock.patch("requests.get", side_effect=get):
+        check._perform_kubelet_check([])
+
+    get.assert_has_calls([
+        mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
+                  verify=None)])
+    check.service_check.assert_has_calls([
+     mock.call('kubernetes.kubelet.check', 0, tags=[])
+    ])
 
 
 def test_report_node_metrics(monkeypatch):
