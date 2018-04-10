@@ -64,19 +64,20 @@ def spin_up_haproxy():
     env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
     env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
+    env['HAPROXY_SOCKET_DIR'] = common.UNIXSOCKET_DIR
     args = [
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
     ]
-    subprocess.check_call(["mkdir", "-p", "/tmp/haproxy"], env=env)
     subprocess.check_call(args + ["down"], env=env)
     subprocess.check_call(args + ["up", "-d"], env=env)
     wait_for_haproxy()
-    subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
-    subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
+    # subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
+    # subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
     if Platform.is_linux():
         # on linux this needs access to the socket
         # it won't work without access
+        os.mkdirs(common.UNIXSOCKET_DIR)
         args = []
         user = getpass.getuser()
         if user != 'root':

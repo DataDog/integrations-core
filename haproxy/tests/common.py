@@ -16,6 +16,7 @@ AGG_STATUSES = (
 CHECK_NAME = 'haproxy'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
 PORT = '13835'
 PORT_OPEN = '13836'
@@ -25,6 +26,16 @@ STATS_URL = "{0}/stats".format(BASE_URL)
 STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
+
+LOCAL_TMP_DIR = os.path.join(ROOT, "tmp")
+UNIXSOCKET_DIR = os.path.join(LOCAL_TMP_DIR, "haproxy")
+UNIXSOCKET_PATH = os.path.join(UNIXSOCKET_DIR, 'datadog-haproxy-stats.sock')
+UNIXSOCKET_URL = 'unix://{0}'.format(UNIXSOCKET_PATH)
+CONFIG_UNIXSOCKET = {
+    'url': UNIXSOCKET_URL,
+    'collect_aggregates_only': False,
+}
+
 
 CHECK_CONFIG = {
     'url': STATS_URL,
@@ -40,12 +51,7 @@ CHECK_CONFIG_OPEN = {
     'collect_aggregates_only': False,
 }
 
-UNIXSOCKET_PATH = '/tmp/haproxy/datadog-haproxy-stats.sock'
-UNIXSOCKET_URL = 'unix://{0}'.format(UNIXSOCKET_PATH)
-CONFIG_UNIXSOCKET = {
-    'url': UNIXSOCKET_URL,
-    'collect_aggregates_only': False,
-}
+
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 
