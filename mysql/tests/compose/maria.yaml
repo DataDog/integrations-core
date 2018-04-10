@@ -2,15 +2,55 @@ version: '3.5'
 
 services:
   mysql-master:
-    image: "${mysql}:${REDIS_VERSION}"
-    volumes:
-      - ${REDIS_CONFIG}:/etc/redis.conf
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MARIADB_ROOT_PASSWORD=master_root_password
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=my_repl_user
+      - MARIADB_REPLICATION_PASSWORD=my_repl_password
+      - MARIADB_USER=my_user
+      - MARIADB_PASSWORD=my_password
+      - MARIADB_DATABASE=my_database
     ports:
-      - "6379:6379"
+      - "${MYSQL_PORT}:3306"
     networks:
       - network1
-    command: redis-server /etc/redis.conf
+
+  mysql-slave:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MASTER_HOST=mysql-master
+      - MASTER_PORT=3306
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=my_repl_user
+      - MARIADB_REPLICATION_PASSWORD=my_repl_password
+      - MARIADB_MASTER_HOST=mysql-master
+      - MARIADB_MASTER_PORT=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=master_root_password
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
+    networks:
+      - network1
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "/app-entrypoint.sh", "/run.sh"]
+    depends_on:
+      - "mysql-master"
+
+  mysql-setup:
+    image: "mysql:latest"
+    networks:
+      - network1
+    volumes:
+      - ${MYSQL_SHELL_SCRIPT}:/usr/local/bin/setup_mysql.sh
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
+    depends_on:
+      - "mysql-slave"
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "setup_mysql.sh"]
+
 
 networks:
   network1:
-    name: standalone_default
+    name: mysql_default

@@ -72,8 +72,41 @@ def spin_up_mysql():
     # wait for the cluster to be up before yielding
     if not wait_for_mysql():
         raise Exception("not working")
+    _seed_data()
     yield
     # subprocess.check_call(args + ["down"], env=env)
+
+
+def _seed_data():
+    # the slave claimed to have no data on query time
+    # this should resolve that issue
+    query = "SELECT * FROM testdb.users ORDER BY name"
+    try:
+        db = pymysql.connect(
+            host=common.HOST,
+            port=common.PORT,
+            user=common.USER,
+            passwd=common.PASS,
+            connect_timeout=2
+        )
+        for i in xrange(0, 10):
+            with closing(db.cursor()) as cursor:
+                cursor.execute(query)
+    except Exception:
+        pass
+    try:
+        db = pymysql.connect(
+            host=common.HOST,
+            port=common.SLAVE_PORT,
+            user=common.USER,
+            passwd=common.PASS,
+            connect_timeout=2
+        )
+        for i in xrange(0, 10):
+            with closing(db.cursor()) as cursor:
+                cursor.execute(query)
+    except Exception:
+        pass
 
 
 @pytest.fixture
@@ -112,7 +145,8 @@ def _mysql_shell_script():
 
 
 def _wait_for_it_script():
-    return os.path.join(common.HERE, 'compose', 'wait-for-it.sh')
+    dir = os.path.join(common.TESTS_HELPER_DIR, 'scripts', 'wait-for-it.sh')
+    return os.path.abspath(dir)
 
 
 def _mysql_docker_repo():
