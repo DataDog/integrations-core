@@ -931,11 +931,10 @@ class OpenStackCheck(AgentCheck):
     def get_stats_for_single_server(self, server_details, tags=None):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
-
-        server_id = server_details.get('id')
-        state = server_details.get('status')
-        server_name = server_details.get('name')
-        hypervisor_hostname = server_details.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+        server_id = server_details.get('server_id')
+        state = server_details.get('state')
+        server_name = server_details.get('server_name')
+        hypervisor_hostname = server_details.get('hypervisor_hostname')
         tenant_id = server_details.get('tenant_id')
         project_name = self.get_project_name_from_id(tenant_id)
 
@@ -1141,8 +1140,8 @@ class OpenStackCheck(AgentCheck):
                     if project and 'name' in project:
                         server_tags.append('project_name:{0}'.format(project['name']))
 
-                    self.external_host_tags[server.get('id')] = host_tags
-                    self.get_stats_for_single_server(server, tags=server_tags)
+                    self.external_host_tags[server] = host_tags
+                    self.get_stats_for_single_server(servers[server], tags=server_tags)
 
                 if hyp:
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
