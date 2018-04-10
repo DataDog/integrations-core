@@ -323,7 +323,7 @@ class TestOpenstack(AgentCheckTest):
     # .. server/network
     ALL_SERVER_DETAILS = {
         "server-1":{"id":"server-1", "name":"server-name-1", "status":"ACTIVE"},
-        "server-2":{"id":"server-2", "name":"server-name-2", "status":"DELETED"},
+        "server-2":{"id":"server-2", "name":"server-name-2", "status":"ACTIVE"},
         "other-1":{"id":"other-1", "name":"server-name-other-1", "status":"ACTIVE"},
         "other-2":{"id":"other-2", "name":"server-name-other-2", "status":"ACTIVE"}
     }
@@ -332,6 +332,80 @@ class TestOpenstack(AgentCheckTest):
     EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
     FILTERED_NETWORK_ID = 'server-2'
     FILTERED_SERVER_ID = 'server-1'
+
+
+    # Example response from - https://developer.openstack.org/api-ref/compute/#list-servers-detailed
+    # ID and server-name values have been changed for test readability
+    MOCK_NOVA_SERVERS = {
+        "servers": [
+            {
+                "OS-DCF:diskConfig": "AUTO",
+                "OS-EXT-AZ:availability_zone": "nova",
+                "OS-EXT-SRV-ATTR:host": "compute",
+                "OS-EXT-SRV-ATTR:hostname": "server-1",
+                "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
+                "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+                "OS-EXT-SRV-ATTR:kernel_id": "",
+                "OS-EXT-SRV-ATTR:launch_index": 0,
+                "OS-EXT-SRV-ATTR:ramdisk_id": "",
+                "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
+                "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
+                "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
+                "OS-EXT-STS:power_state": 1,
+                "OS-EXT-STS:task_state": 'null',
+                "OS-EXT-STS:vm_state": "active",
+                "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
+                "OS-SRV-USG:terminated_at": 'null',
+                "accessIPv4": "1.2.3.4",
+                "accessIPv6": "80fe::",
+                "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+                "host_status": "UP",
+                "id": "server-1",
+                "metadata": {
+                    "My Server Name": "Apache1"
+                },
+                "name": "new-server-test",
+                "status": "DELETED",
+                "tags": [],
+                "tenant_id": "6f70656e737461636b20342065766572",
+                "updated": "2017-02-14T19:24:43Z",
+                "user_id": "fake"
+            },
+            {
+                "OS-DCF:diskConfig": "AUTO",
+                "OS-EXT-AZ:availability_zone": "nova",
+                "OS-EXT-SRV-ATTR:host": "compute",
+                "OS-EXT-SRV-ATTR:hostname": "server-2",
+                "OS-EXT-SRV-ATTR:hypervisor_hostname": "fake-mini",
+                "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+                "OS-EXT-SRV-ATTR:kernel_id": "",
+                "OS-EXT-SRV-ATTR:launch_index": 0,
+                "OS-EXT-SRV-ATTR:ramdisk_id": "",
+                "OS-EXT-SRV-ATTR:reservation_id": "r-iffothgx",
+                "OS-EXT-SRV-ATTR:root_device_name": "/dev/sda",
+                "OS-EXT-SRV-ATTR:user_data": "IyEvYmluL2Jhc2gKL2Jpbi9zdQplY2hvICJJIGFtIGluIHlvdSEiCg==",
+                "OS-EXT-STS:power_state": 1,
+                "OS-EXT-STS:task_state": 'null',
+                "OS-EXT-STS:vm_state": "active",
+                "OS-SRV-USG:launched_at": "2017-02-14T19:24:43.891568",
+                "OS-SRV-USG:terminated_at": 'null',
+                "accessIPv4": "1.2.3.4",
+                "accessIPv6": "80fe::",
+                "hostId": "2091634baaccdc4c5a1d57069c833e402921df696b7f970791b12ec6",
+                "host_status": "UP",
+                "id": "server_newly_added",
+                "metadata": {
+                    "My Server Name": "Apache1"
+                },
+                "name": "newly_added_server",
+                "status": "ACTIVE",
+                "tags": [],
+                "tenant_id": "6f70656e737461636b20342065766572",
+                "updated": "2017-02-14T19:24:43Z",
+                "user_id": "fake"
+            }
+        ]
+    }
 
     # .. config
     MOCK_CONFIG = {
@@ -392,18 +466,18 @@ class TestOpenstack(AgentCheckTest):
     @patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=ALL_SERVER_DETAILS)
     def test_server_exclusion(self, *args):
         """
-        Exclude networks using regular expressions.
+        Exclude servers using regular expressions.
         """
-        A = OpenStackCheck("test", {
+        openstackCheck = OpenStackCheck("test", {
             'keystone_server_url': 'http://10.0.2.15:5000',
             'ssl_verify': False,
             'exclude_server_ids': self.EXCLUDED_SERVER_IDS
         }, {}, instances=self.MOCK_CONFIG)
 
         # Retrieve servers
-        A.server_details_by_id = self.ALL_SERVER_DETAILS
+        openstackCheck.server_details_by_id = copy.deepcopy(self.ALL_SERVER_DETAILS)
         i_key = "test_instance"
-        server_ids = A.get_servers_managed_by_hypervisor(i_key)
+        server_ids = openstackCheck.get_servers_managed_by_hypervisor(i_key)
     
         # Assert
         # .. 1 out of 4 server ids filtered
@@ -436,3 +510,28 @@ class TestOpenstack(AgentCheckTest):
 
             # cleanup
             self.check.exclude_network_id_rules = set([])
+
+    @patch('datadog_checks.openstack.OpenStackCheck._make_request_with_auth_fallback', return_value=MOCK_NOVA_SERVERS)
+    @patch('datadog_checks.openstack.OpenStackCheck.get_nova_endpoint', return_value="http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876")
+    @patch('datadog_checks.openstack.OpenStackCheck.get_auth_token', return_value="test_auth_token")
+    @patch('datadog_checks.openstack.OpenStackCheck.get_project_name_from_id', return_value="tenant-1")
+    def test_cache_between_runs(self, *args):
+        """
+        Ensure the cache contains the expected VMs between check runs.
+        """
+
+        openstackCheck = OpenStackCheck("test", {
+            'keystone_server_url': 'http://10.0.2.15:5000',
+            'ssl_verify': False,
+            'exclude_server_ids': self.EXCLUDED_SERVER_IDS
+        }, {}, instances=self.MOCK_CONFIG)
+
+        # Start off with a list of servers 
+        openstackCheck.server_details_by_id = copy.deepcopy(self.ALL_SERVER_DETAILS)
+        i_key = "test_instance"
+
+        # Update the cached list of servers based on what the endpoint returns
+        cached_servers = openstackCheck.get_all_servers(i_key)
+
+        assert 'server-1' not in cached_servers
+        assert 'server_newly_added' in cached_servers

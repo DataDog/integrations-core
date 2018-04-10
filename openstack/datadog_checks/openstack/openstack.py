@@ -882,7 +882,7 @@ class OpenStackCheck(AgentCheck):
             # Get a list of deleted serversTimestamp used to filter the call to get the list
             # Need to have admin perms for this to take affect
             query_params['deleted'] = 'true'
-            query_params['status'] = ''
+            query_params['status'] = None
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
             servers.extend(resp['servers'])
             query_params['deleted'] = 'false'
@@ -908,7 +908,7 @@ class OpenStackCheck(AgentCheck):
             new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
 
             # Update our cached list of servers
-            if new_server['server_id'] not in self.server_details_by_id and new_server['state'] not in DIAGNOSTICABLE_STATES:
+            if new_server['server_id'] not in self.server_details_by_id and new_server['state'] in DIAGNOSTICABLE_STATES:
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
                 del self.server_details_by_id[new_server['server_id']]
