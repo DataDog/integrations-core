@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
-import variables
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -17,45 +16,3 @@ SLAVE_PORT = 13307
 
 USER = 'dog'
 PASS = 'dog'
-
-MYSQL_MINIMAL_CONFIG = {
-    'server': HOST,
-    'user': USER,
-    'pass': PASS,
-    'port': PORT
-}
-
-MYSQL_COMPLEX_CONFIG = {
-    'server': HOST,
-    'user': USER,
-    'pass': PASS,
-    'port': PORT,
-    'options': {
-        'replication': True,
-        'extra_status_metrics': True,
-        'extra_innodb_metrics': True,
-        'extra_performance_metrics': True,
-        'schema_size_metrics': True,
-    },
-    'tags': variables.METRIC_TAGS,
-    'queries': [
-        {
-            'query': "SELECT * from testdb.users where name='Alice' limit 1;",
-            'metric': 'alice.age',
-            'type': 'gauge',
-            'field': 'age'
-        },
-        {
-            'query': "SELECT * from testdb.users where name='Bob' limit 1;",
-            'metric': 'bob.age',
-            'type': 'gauge',
-            'field': 'age'
-        }
-    ]
-}
-
-CONNECTION_FAILURE = {
-    'server': HOST,
-    'user': 'unknown',
-    'pass': PASS,
-}

@@ -2,13 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-METRIC_TAGS = ['tag1', 'tag2']
-SC_TAGS = ['server:localhost', 'port:13306', 'tag1', 'tag2']
-SC_TAGS_MIN = ['server:localhost', 'port:13306']
-SC_TAGS_REPLICA = ['server:localhost', 'port:13307', 'tag1', 'tag2']
-SC_FAILURE_TAGS = ['server:localhost', 'port:unix_socket']
-
-
 STATUS_VARS = [
     # Command Metrics
     'mysql.performance.slow_queries',
