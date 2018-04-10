@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-import os
 import logging
 import copy
 
@@ -18,17 +17,13 @@ import variables
 log = logging.getLogger('test_mysql')
 
 
-def test_check(aggregator, spin_up_mysql):
-    assert True
-
-
 def test_minimal_config(aggregator, spin_up_mysql):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
     mysql_check.check(common.MYSQL_MINIMAL_CONFIG)
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-        tags=variables.SC_TAGS_MIN, count=1)
+                                    tags=variables.SC_TAGS_MIN, count=1)
 
     # Test metrics
     testable_metrics = (variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS +
@@ -44,10 +39,10 @@ def test_complex_config(aggregator, spin_up_mysql):
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-        tags=variables.SC_TAGS, count=1)
+                                    tags=variables.SC_TAGS, count=1)
 
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK,
-        tags=variables.SC_TAGS, at_least=1)
+                                    tags=variables.SC_TAGS, at_least=1)
 
     ver = map(lambda x: int(x), mysql_check.mysql_version[mysql_check._get_host_key()])
     ver = tuple(ver)
@@ -73,25 +68,25 @@ def test_complex_config(aggregator, spin_up_mysql):
 
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:testdb'],
-                count=1)
+                                     tags=variables.METRIC_TAGS+['schema:testdb'],
+                                     count=1)
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:mysql'],
-                count=1)
+                                     tags=variables.METRIC_TAGS+['schema:mysql'],
+                                     count=1)
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:testdb'],
-                count=1)
+                                     tags=variables.METRIC_TAGS+['schema:testdb'],
+                                     count=1)
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:information_schema'],
-                count=1)
+                                     tags=variables.METRIC_TAGS+['schema:information_schema'],
+                                     count=1)
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:performance_schema'],
-                count=1)
+                                     tags=variables.METRIC_TAGS+['schema:performance_schema'],
+                                     count=1)
         else:
             aggregator.assert_metric(mname,
-            tags=variables.METRIC_TAGS,
-            at_least=0)
+                                     tags=variables.METRIC_TAGS,
+                                     at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -104,9 +99,9 @@ def test_complex_config(aggregator, spin_up_mysql):
 
     # test optional metrics
     optional_metrics = (variables.OPTIONAL_REPLICATION_METRICS +
-        variables.OPTIONAL_INNODB_VARS +
-        variables.OPTIONAL_STATUS_VARS +
-        variables.OPTIONAL_STATUS_VARS_5_6_6)
+                        variables.OPTIONAL_INNODB_VARS +
+                        variables.OPTIONAL_STATUS_VARS +
+                        variables.OPTIONAL_STATUS_VARS_5_6_6)
     _test_optional_metrics(aggregator, optional_metrics, 1)
 
     # Raises when coverage < 100%
@@ -123,10 +118,9 @@ def test_connection_failure(aggregator, spin_up_mysql):
         mysql_check.check(common.CONNECTION_FAILURE)
 
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL,
-        tags=variables.SC_FAILURE_TAGS, count=1)
+                                    tags=variables.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
-
 
 
 def test_complex_config_replica(aggregator, spin_up_mysql):
@@ -139,11 +133,11 @@ def test_complex_config_replica(aggregator, spin_up_mysql):
 
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK,
-        tags=variables.SC_TAGS_REPLICA, count=1)
+                                    tags=variables.SC_TAGS_REPLICA, count=1)
 
     # Travis MySQL not running replication - FIX in flavored test.
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK,
-        tags=variables.SC_TAGS_REPLICA, at_least=1)
+                                    tags=variables.SC_TAGS_REPLICA, at_least=1)
 
     ver = map(lambda x: int(x), mysql_check.mysql_version[mysql_check._get_host_key()])
     ver = tuple(ver)
@@ -166,17 +160,17 @@ def test_complex_config_replica(aggregator, spin_up_mysql):
 
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:testdb'], count=1)
+                                     tags=variables.METRIC_TAGS+['schema:testdb'], count=1)
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:testdb'], count=1)
+                                     tags=variables.METRIC_TAGS+['schema:testdb'], count=1)
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:information_schema'], count=1)
+                                     tags=variables.METRIC_TAGS+['schema:information_schema'], count=1)
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS+['schema:performance_schema'], count=1)
+                                     tags=variables.METRIC_TAGS+['schema:performance_schema'], count=1)
         else:
             aggregator.assert_metric(mname,
-                tags=variables.METRIC_TAGS, at_least=0)
+                                     tags=variables.METRIC_TAGS, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
@@ -184,9 +178,9 @@ def test_complex_config_replica(aggregator, spin_up_mysql):
 
     # test optional metrics
     optional_metrics = (variables.OPTIONAL_REPLICATION_METRICS +
-        variables.OPTIONAL_INNODB_VARS +
-        variables.OPTIONAL_STATUS_VARS +
-        variables.OPTIONAL_STATUS_VARS_5_6_6)
+                        variables.OPTIONAL_INNODB_VARS +
+                        variables.OPTIONAL_STATUS_VARS +
+                        variables.OPTIONAL_STATUS_VARS_5_6_6)
     _test_optional_metrics(aggregator, optional_metrics, 1)
 
     # Raises when coverage < 100%

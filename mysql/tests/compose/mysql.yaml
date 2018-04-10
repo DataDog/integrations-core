@@ -10,16 +10,6 @@ services:
     networks:
       - network1
 
-  # mysql-wait:
-  #   image: "mysql:${MYSQL_VERSION}"
-  #   networks:
-  #     - network1
-  #   volumes:
-  #     - ${WAIT_FOR_IT_SCRIPT_PATH}:/wait-for-it.sh
-  #   depends_on:
-  #     - "mysql-master"
-  #   command: ["./wait-for-it.sh", "mysql-master:3306", "-t", "30"]
-
   mysql-slave:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
@@ -38,6 +28,8 @@ services:
 
   mysql-setup:
     image: "mysql:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_SCRIPT_OPTIONS=${MYSQL_SCRIPT_OPTIONS}
     networks:
       - network1
     volumes:

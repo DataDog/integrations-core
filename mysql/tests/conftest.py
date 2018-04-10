@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import subprocess
-import os
 import time
+import os
 
 import pytest
 import pymysql
@@ -18,7 +18,6 @@ def wait_for_mysql():
     """
     Wait for the slave to connect to the master
     """
-    env = os.environ
     connected = False
     for i in xrange(0, 20):
         try:
@@ -72,41 +71,8 @@ def spin_up_mysql():
     # wait for the cluster to be up before yielding
     if not wait_for_mysql():
         raise Exception("not working")
-    _seed_data()
     yield
-    # subprocess.check_call(args + ["down"], env=env)
-
-
-def _seed_data():
-    # the slave claimed to have no data on query time
-    # this should resolve that issue
-    query = "SELECT * FROM testdb.users ORDER BY name"
-    try:
-        db = pymysql.connect(
-            host=common.HOST,
-            port=common.PORT,
-            user=common.USER,
-            passwd=common.PASS,
-            connect_timeout=2
-        )
-        for i in xrange(0, 10):
-            with closing(db.cursor()) as cursor:
-                cursor.execute(query)
-    except Exception:
-        pass
-    try:
-        db = pymysql.connect(
-            host=common.HOST,
-            port=common.SLAVE_PORT,
-            user=common.USER,
-            passwd=common.PASS,
-            connect_timeout=2
-        )
-        for i in xrange(0, 10):
-            with closing(db.cursor()) as cursor:
-                cursor.execute(query)
-    except Exception:
-        pass
+    subprocess.check_call(args + ["down"], env=env)
 
 
 @pytest.fixture
@@ -138,10 +104,7 @@ def _mysql_version():
 
 
 def _mysql_shell_script():
-    if _mysql_flavor() == 'mysql':
-        return os.path.join(common.HERE, 'compose', 'setup_mysql.sh')
-    elif _mysql_flavor() == 'mariadb':
-        return os.path.join(common.HERE, 'compose', 'setup_maria.sh')
+    return os.path.join(common.HERE, 'compose', 'setup_mysql.sh')
 
 
 def _wait_for_it_script():
