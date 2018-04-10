@@ -18,8 +18,12 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 # project
-from config import _is_affirmative
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
+# compatability layer
+try:
+    from config import _is_affirmative
+except ImportError:
+    from datadog_checks.config import _is_affirmative
 
 GAUGE = "gauge"
 RATE = "rate"

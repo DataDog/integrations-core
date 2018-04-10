@@ -4,22 +4,50 @@ services:
   mysql-master:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
       - network1
-    command: redis-server /etc/redis.conf
+
+  mysql-wait:
+    image: "mysql:${MYSQL_VERSION}"
+    networks:
+      - network1
+    volumes:
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/wait-for-it.sh
+    depends_on:
+      - "mysql-master"
+    command: ["./wait-for-it.sh", "mysql-master:3306", "-t", "30"]
+
   mysql-slave:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MASTER_HOST=mysql-master
+      - MASTER_PORT=3306
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
     networks:
       - network1
-    command: redis-server /etc/redis.conf
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "replication-entrypoint.sh", "mysqld"]
+    depends_on:
+      - "mysql-wait"
+
+  mysql-setup:
+    image: "mysql:${MYSQL_VERSION}"
+    networks:
+      - network1
+    volumes:
+      - ${MYSQL_SHELL_SCRIPT}:/usr/local/bin/setup_mysql.sh
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
+    depends_on:
+      - "mysql-slave"
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "setup_mysql.sh"]
+
 
 networks:
   network1:
-    name: standalone_default
+    name: mysql_default

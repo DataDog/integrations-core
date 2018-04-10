@@ -7,36 +7,47 @@ import time
 
 import pytest
 import pymysql
+import logging
 
 import common
+
+log = logging.getLogger('test_mysql')
 
 
 def wait_for_mysql():
     """
     Wait for the slave to connect to the master
     """
-    connected = True
-    for i in xrange(0, 100):
+    env = os.environ
+    connected = False
+    for i in xrange(0, 20):
         try:
-            db = pymysql.connect(
+            subprocess.check_call(["echo", "1"], env=env)
+            pymysql.connect(
                 host=common.HOST,
                 port=common.PORT,
-                user='root',
-                connect_timeout=10
+                user=common.USER,
+                passwd=common.PASS,
+                connect_timeout=2
             )
-            db = pymysql.connect(
+            subprocess.check_call(["echo", "2"], env=env)
+            pymysql.connect(
                 host=common.HOST,
                 port=common.SLAVE_PORT,
-                user='root',
-                connect_timeout=10
+                user=common.USER,
+                passwd=common.PASS,
+                connect_timeout=2
             )
+            subprocess.check_call(["echo", "3"], env=env)
             connected = True
+            return True
         except Exception as e:
             pass
-            time.sleep(1)
+            log.info("exception: {0}".format(e))
+            subprocess.check_call(["docker", "ps", "-a"], env=env)
+            time.sleep(2)
 
-    if not connected:
-        raise Exception("It didn't work")
+    return connected
 
 
 @pytest.fixture(scope="session")
@@ -50,21 +61,23 @@ def spin_up_mysql():
     env = os.environ
 
     env['MYSQL_DOCKER_REPO'] = _mysql_docker_repo()
-    env['MYSQL_PORT'] = common.PORT
-    env['MYSQL_SLAVE_PORT'] = common.SLAVE_PORT
+    env['MYSQL_PORT'] = str(common.PORT)
+    env['MYSQL_SLAVE_PORT'] = str(common.SLAVE_PORT)
+    env['MYSQL_SHELL_SCRIPT'] = _mysql_shell_script()
+    env['WAIT_FOR_IT_SCRIPT_PATH'] = _wait_for_it_script()
+    env['MYSQL_SCRIPT_OPTIONS'] = _mysql_script_options()
 
     args = [
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', _compose_file())
     ]
-
-    subprocess.check_call(args + ["up", "-d"])
+    subprocess.check_call(args + ["down"], env=env)
+    subprocess.check_call(args + ["up", "-d"], env=env)
     # wait for the cluster to be up before yielding
-    master = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
-    replica = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
-    wait_for_mysql(master, replica):
+    if not wait_for_mysql():
+        raise Exception("not working")
     yield
-    subprocess.check_call(args + ["down"])
+    # subprocess.check_call(args + ["down"], env=env)
 
 
 @pytest.fixture
@@ -74,11 +87,18 @@ def aggregator():
     return aggregator
 
 
+def _mysql_script_options():
+    if _mysql_flavor() == 'mariadb':
+        return '--password=master_root_password'
+    return ''
+
+
 def _compose_file():
     if _mysql_flavor() == 'mysql':
         return 'mysql.yaml'
     elif _mysql_flavor() == 'mariadb':
         return 'maria.yaml'
+
 
 def _mysql_flavor():
     return os.getenv('MYSQL_FLAVOR', 'mysql')
@@ -88,11 +108,22 @@ def _mysql_version():
     return os.getenv('MYSQL_VERSION', 'mysql')
 
 
+def _mysql_shell_script():
+    if _mysql_flavor() == 'mysql':
+        return os.path.join(common.HERE, 'compose', 'setup_mysql.sh')
+    elif _mysql_flavor() == 'mariadb':
+        return os.path.join(common.HERE, 'compose', 'setup_maria.sh')
+
+
+def _wait_for_it_script():
+    return os.path.join(common.HERE, 'compose', 'wait-for-it.sh')
+
+
 def _mysql_docker_repo():
     if _mysql_flavor() == 'mysql':
-        if mysql_version() == '5.5':
+        if _mysql_version() == '5.5':
             return 'jfullaondo/mysql-replication'
         else:
             return 'bergerx/mysql-replication'
-        elif _mysql_flavor() == 'mariadb':
-            return 'bitnami/mariadb'
+    elif _mysql_flavor() == 'mariadb':
+        return 'bitnami/mariadb'
