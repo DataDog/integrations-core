@@ -65,6 +65,9 @@ def spin_up_haproxy():
     env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
     env['HAPROXY_SOCKET_DIR'] = common.UNIXSOCKET_DIR
+    if Platform.is_linux():
+        # make the temp directory on linux
+        os.makedirs(common.UNIXSOCKET_DIR)
     args = [
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
@@ -77,7 +80,6 @@ def spin_up_haproxy():
     if Platform.is_linux():
         # on linux this needs access to the socket
         # it won't work without access
-        os.makedirs(common.UNIXSOCKET_DIR)
         args = []
         user = getpass.getuser()
         if user != 'root':
