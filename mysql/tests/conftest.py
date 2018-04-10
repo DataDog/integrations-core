@@ -19,7 +19,7 @@ def wait_for_mysql():
     Wait for the slave to connect to the master
     """
     connected = False
-    for i in xrange(0, 20):
+    for i in xrange(0, 50):
         try:
             pymysql.connect(
                 host=common.HOST,
