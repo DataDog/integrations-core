@@ -151,9 +151,9 @@ class Marathon(AgentCheck):
     def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
         # Marathon apps
         if group is None:
-            marathon_path = urljoin(url, "v2/apps")
+            marathon_path = urljoin(url, "v2/apps?embed=apps.counts")
         else:
-            marathon_path = urljoin(url, "v2/groups/{}".format(group))
+            marathon_path = urljoin(url, "v2/groups/{}?embed=group.apps.counts".format(group))
         response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
         if response is not None:
             self.gauge('marathon.apps', len(response['apps']), tags=tags)
