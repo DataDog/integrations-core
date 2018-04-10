@@ -65,7 +65,7 @@ def spin_up_haproxy():
     env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
     env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
     env['HAPROXY_SOCKET_DIR'] = common.UNIXSOCKET_DIR
-    if Platform.is_linux():
+    if Platform.is_linux() and not os.path.exists(common.UNIXSOCKET_DIR):
         # make the temp directory on linux
         os.makedirs(common.UNIXSOCKET_DIR)
     args = [
@@ -77,17 +77,24 @@ def spin_up_haproxy():
     wait_for_haproxy()
     # subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
     # subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
-    if Platform.is_linux():
-        # on linux this needs access to the socket
-        # it won't work without access
-        args = []
-        user = getpass.getuser()
-        if user != 'root':
-            args += ['sudo']
-        args += [
-            "chown", user, common.UNIXSOCKET_PATH
-        ]
-        subprocess.check_call(args, env=env)
+    try:
+        if Platform.is_linux():
+            # on linux this needs access to the socket
+            # it won't work without access
+            args = []
+            user = getpass.getuser()
+            if user != 'root':
+                args += ['sudo']
+            args += [
+                "chown", user, common.UNIXSOCKET_PATH
+            ]
+            subprocess.check_call(args, env=env)
+    except CalledProcessError as e:
+        # it's not always bad if this fails
+        pass
     time.sleep(20)
     yield
-    # subprocess.check_call(args + ["down"], env=env)
+    subprocess.check_call(args + ["down"], env=env)
+    if Platform.is_linux():
+        # make the temp directory on linux
+        os.removedirs(common.LOCAL_TMP_DIR)
