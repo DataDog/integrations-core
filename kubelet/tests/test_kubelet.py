@@ -285,14 +285,52 @@ def test_get_kube_container_name():
     assert tags == []
 
 
+def mocked_get_tags(entity, _):
+    tag_store = {
+        "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": [
+            "pod_name:fluentd-gcp-v2.0.10-9q9t4"
+        ],
+        'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
+            'fluentd-gcp-v2.0.10-9q9t4'
+        ]
+    }
+    return tag_store.get(entity, [])
+
+
 def test_report_pods_running(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
-    check._report_pods_running(pod_list, None)
-    calls = []
+
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
+        check._report_pods_running(pod_list, None)
+
+    calls = [mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"])]
     check.gauge.assert_has_calls(calls, any_order=False)
+
+
+def test_report_container_spec_metrics(monkeypatch):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+    pod_list = check.retrieve_pod_list()
+
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
+        check._report_container_spec_metrics(pod_list, None)
+
+    calls = [
+        mock.call('kubernetes.cpu.requests', 0.1, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.memory.requests', 209715200.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.memory.limits', 314572800.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.requests', 0.1, []),
+        mock.call('kubernetes.cpu.requests', 0.1, []),
+        mock.call('kubernetes.memory.requests', 134217728.0, []),
+        mock.call('kubernetes.cpu.limits', 0.25, []),
+        mock.call('kubernetes.memory.limits', 536870912.0, []),
+        mock.call('kubernetes.cpu.requests', 0.1, []),
+    ]
+    check.gauge.assert_has_calls(calls)
 
 
 def test_report_node_metrics(monkeypatch):
