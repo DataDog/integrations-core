@@ -121,7 +121,7 @@ setup(
     # The entrypoint to run the check manually without an agent
     entry_points={
         'console_scripts': [
-            'ntp=datadog_checks.ntp:main',
+            'active_directory=datadog_checks.active_directory:main',
         ],
     },
 )
