@@ -101,7 +101,7 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_all_metrics_covered(self):
-        assert aggregator.metrics_asserted_pct == 100.0
+        assert aggregator.metrics_asserted_pct >= 100.0
 
     def reset(self):
         """
@@ -113,7 +113,7 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
-        assert aggregator.metrics_asserted_pct == 100.0
+        assert aggregator.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
         not_asserted = []

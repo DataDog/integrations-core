@@ -6,6 +6,8 @@ import os
 import variables
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+TESTS_HELPER_DIR = os.path.join(ROOT, 'datadog-checks-tests-helper')
 
 CHECK_NAME = 'mysql'
 

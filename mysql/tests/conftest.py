@@ -22,7 +22,6 @@ def wait_for_mysql():
     connected = False
     for i in xrange(0, 20):
         try:
-            subprocess.check_call(["echo", "1"], env=env)
             pymysql.connect(
                 host=common.HOST,
                 port=common.PORT,
@@ -30,7 +29,6 @@ def wait_for_mysql():
                 passwd=common.PASS,
                 connect_timeout=2
             )
-            subprocess.check_call(["echo", "2"], env=env)
             pymysql.connect(
                 host=common.HOST,
                 port=common.SLAVE_PORT,
@@ -38,13 +36,11 @@ def wait_for_mysql():
                 passwd=common.PASS,
                 connect_timeout=2
             )
-            subprocess.check_call(["echo", "3"], env=env)
             connected = True
             return True
         except Exception as e:
             pass
-            log.info("exception: {0}".format(e))
-            subprocess.check_call(["docker", "ps", "-a"], env=env)
+            log.debug("exception: {0}".format(e))
             time.sleep(2)
 
     return connected
