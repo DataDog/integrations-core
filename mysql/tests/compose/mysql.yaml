@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD=1
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - network1
+    command: redis-server /etc/redis.conf
+  mysql-slave:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD=1
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    networks:
+      - network1
+    command: redis-server /etc/redis.conf
+
+networks:
+  network1:
+    name: standalone_default
