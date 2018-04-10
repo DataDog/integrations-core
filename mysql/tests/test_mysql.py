@@ -115,7 +115,7 @@ def test_connection_failure(aggregator, spin_up_mysql):
     with pytest.raises(Exception):
         mysql_check.check(config)
 
-    aggregator.assert_service_check('mysql.can_connect', status=MySQL.CRITICAL,
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL,
         tags=variables.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
