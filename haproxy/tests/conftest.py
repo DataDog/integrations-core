@@ -68,6 +68,7 @@ def spin_up_haproxy():
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
     ]
+    subprocess.check_call(["mkdir", "-p", "/tmp/haproxy"], env=env)
     subprocess.check_call(args + ["down"], env=env)
     subprocess.check_call(args + ["up", "-d"], env=env)
     wait_for_haproxy()
