@@ -916,6 +916,8 @@ class OpenStackCheck(AgentCheck):
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
                 del self.server_details_by_id[new_server['server_id']]
+        
+        return self.server_details_by_id
 
     def get_project_name_from_id(self, tenant_id):
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
@@ -1130,7 +1132,7 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                self.get_servers_managed_by_hypervisor(i_key)
+                servers = self.get_servers_managed_by_hypervisor(i_key)
 
                 host_tags = self._get_tags_for_host()
 
@@ -1267,13 +1269,15 @@ class OpenStackCheck(AgentCheck):
         return self.init_config.get("os_host") or self.hostname
 
     def get_servers_managed_by_hypervisor(self, i_key):
-        self.get_all_servers(i_key, filter_by_host=self.get_my_hostname())
+        servers = self.get_all_servers(i_key, filter_by_host=self.get_my_hostname())
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
-                for server_id in self.server_details_by_id:
+                for server_id in servers.keys():
                     if re.match(exclude_id_rule, server_id):
                         del self.server_details_by_id[server_id]
+        
+        return self.server_details_by_id
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()

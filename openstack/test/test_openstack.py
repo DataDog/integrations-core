@@ -14,6 +14,8 @@ import copy
 
 # project
 from tests.checks.common import AgentCheckTest, load_class
+from datadog_checks.openstack import OpenStackCheck
+
 from checks import AgentCheck
 
 
@@ -320,8 +322,10 @@ class TestOpenstack(AgentCheckTest):
     # Samples
     # .. server/network
     ALL_SERVER_DETAILS = {
-        "1":{"id":"1", "name":"server-1", "status":"ACTIVE"},
-        "2":{"id":"2", "name":"server-2", "status":"DELETED"}
+        "server-1":{"id":"server-1", "name":"server-name-1", "status":"ACTIVE"},
+        "server-2":{"id":"server-2", "name":"server-name-2", "status":"DELETED"},
+        "other-1":{"id":"other-1", "name":"server-name-other-1", "status":"ACTIVE"},
+        "other-2":{"id":"other-2", "name":"server-name-other-2", "status":"ACTIVE"}
     }
     ALL_IDS = ['server-1', 'server-2', 'other-1', 'other-2']
     EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
@@ -385,24 +389,30 @@ class TestOpenstack(AgentCheckTest):
             sleep(1.5)
             self.assertTrue(self.check._is_expired('aggregates'))
 
-    @patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=ALL_IDS)
+    @patch('datadog_checks.openstack.OpenStackCheck.get_all_servers', return_value=ALL_SERVER_DETAILS)
     def test_server_exclusion(self, *args):
         """
         Exclude networks using regular expressions.
         """
-
-        self.check.exclude_server_id_rules = set([re.compile(rule) for rule in self.EXCLUDED_SERVER_IDS])
+        A = OpenStackCheck("test", {
+            'keystone_server_url': 'http://10.0.2.15:5000',
+            'ssl_verify': False,
+            'exclude_server_ids': self.EXCLUDED_SERVER_IDS
+        }, {}, instances=self.MOCK_CONFIG)
 
         # Retrieve servers
-        server_ids = self.check.get_servers_managed_by_hypervisor()
-
+        A.server_details_by_id = self.ALL_SERVER_DETAILS
+        i_key = "test_instance"
+        server_ids = A.get_servers_managed_by_hypervisor(i_key)
+    
         # Assert
         # .. 1 out of 4 server ids filtered
         self.assertEqual(len(server_ids), 1)
-        self.assertEqual(server_ids[0], self.FILTERED_SERVER_ID)
 
-        # cleanup
-        self.check.exclude_server_id_rules = set([])
+        # Ensure the server IDs filtered are the ones expected
+        for server_id in server_ids:
+            assert server_id in self.FILTERED_SERVER_ID
+
 
     @patch('datadog_checks.openstack.OpenStackCheck.get_all_network_ids', return_value=ALL_IDS)
     def test_network_exclusion(self, *args):
