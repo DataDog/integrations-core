@@ -168,7 +168,7 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
 }
 
 INDEX_STATS_METRICS = { # Metrics for index level
-    "elasticsearch.index.health": ("guage", "health"),
+    "elasticsearch.index.health": ("gauge", "health"),
     "elasticsearch.index.docs.count": ("gauge", "docs_count"),
     "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
     "elasticsearch.index.primary_shards": ("gauge", "primary_shards"),
@@ -585,7 +585,6 @@ class TestElastic(AgentCheckTest):
         # Cleaning up everything won't hurt.
         req = requests.get('http://localhost:9200/_cat/indices?v')
         indices_info = req.text.split('\n')[1::-1]
-        print "HELLOOOO", indices_info
         for index_info in indices_info:
             index_name = index_info.split()[1]
             requests.delete('http://localhost:9200/' + index_name)
@@ -617,8 +616,8 @@ class TestElastic(AgentCheckTest):
             {'url': 'http://localhost:9200', 'index_stats': True}
         ]}
 
-        if get_es_version() >= [1, 3, 0]:
-            index_metrics = INDEX_STATS_METRICS
-            self.run_check(config)
+        index_metrics = dict(INDEX_STATS_METRICS)
+        self.run_check(config)
+        if get_es_version() >= [1, 0, 0]:
             for m_name, desc in index_metrics.iteritems():
                 self.assertMetric(m_name, count=1)

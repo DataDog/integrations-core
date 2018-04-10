@@ -200,7 +200,7 @@ class ESCheck(AgentCheck):
     }
 
     INDEX_STATS_METRICS = { # Metrics for index level
-        "elasticsearch.index.health": ("guage", "health"),
+        "elasticsearch.index.health": ("gauge", "health"),
         "elasticsearch.index.docs.count": ("gauge", "docs_count"),
         "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
         "elasticsearch.index.primary_shards": ("gauge", "primary_shards"),
@@ -477,8 +477,11 @@ class ESCheck(AgentCheck):
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
 
-        if config.index_stats and version >= [1, 3, 0]:
-            self._get_index_metrics(config)
+        if config.index_stats and version >= [1, 0, 0]:
+            try:
+                self._get_index_metrics(config)
+            except requests.ReadTimeout as e:
+                self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # If we're here we did not have any ES conn issues
         self.service_check(
@@ -519,13 +522,13 @@ class ESCheck(AgentCheck):
         for idx in index_resp:
             tags = config.tags + ['index_name:' + idx['index']]
             index_data = {
-                'health':             idx['health'],
                 'docs_count':         idx['docs.count'],
                 'docs_deleted':       idx['docs.deleted'],
                 'primary_shards':     idx['pri'],
                 'replica_shards':     idx['rep'],
                 'primary_store_size': idx['pri.store.size'],
                 'store_size':         idx['store.size'],
+                'health':             idx['health'],
             }
 
             for metric in index_stats_metrics:
