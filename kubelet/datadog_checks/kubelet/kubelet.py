@@ -276,11 +276,14 @@ class KubeletCheck(PrometheusCheck):
                 unit += c
         return float(number) * FACTORS.get(unit, 1)
 
-    def _is_container_metric(self, metric):
+    @staticmethod
+    def _is_container_metric(metric):
         """
         Return whether a metric is about a container or not.
         It can be about pods, or even higher levels in the cgroup hierarchy
         and we don't want to report on that.
+        :param metric:
+        :return: bool
         """
         for lbl in CONTAINER_LABELS:
             if lbl == 'container_name':
@@ -292,11 +295,14 @@ class KubeletCheck(PrometheusCheck):
                 return False
         return True
 
-    def _is_pod_metric(self, metric):
+    @staticmethod
+    def _is_pod_metric(metric):
         """
         Return whether a metric is about a pod or not.
         It can be about containers, pods, or higher levels in the cgroup hierarchy
         and we don't want to report on that.
+        :param metric
+        :return bool
         """
         for ml in metric.label:
             if ml.name == 'container_name' and ml.value == 'POD':
@@ -310,30 +316,51 @@ class KubeletCheck(PrometheusCheck):
                 return True
         return False
 
-    def _get_container_label(self, labels, l_name):
+    @staticmethod
+    def _get_container_label(labels, l_name):
+        """
+        Iter on all labels to find the label.name equal to the l_name
+        :param labels: list of labels
+        :param l_name: str
+        :return: str or None
+        """
         for label in labels:
             if label.name == l_name:
                 return label.value
 
-    def _get_container_id(self, labels):
+    @staticmethod
+    def _get_container_id(labels):
         """
         Should only be called on a container-scoped metric
         as it doesn't do any validation of the container id.
         It simply returns the last part of the cgroup hierarchy.
+        :param labels
+        :return str or None
         """
-        for label in labels:
-            if label.name == 'id':
-                return label.value.split('/')[-1]
+        container_id = KubeletCheck._get_container_label(labels, "id")
+        if container_id:
+            return container_id.split('/')[-1]
 
     @staticmethod
     def _get_pod_uid(labels):
-        for label in labels:
-            if label.name == 'id':
-                for part in label.value.split('/'):
-                    if part.startswith('pod'):
-                        return part[3:]
+        """
+        Return the id of a pod
+        :param labels:
+        :return: str or None
+        """
+        pod_id = KubeletCheck._get_container_label(labels, "id")
+        if pod_id:
+            for part in pod_id.split('/'):
+                if part.startswith('pod'):
+                    return part[3:]
 
     def _is_pod_host_networked(self, pod_uid):
+        """
+        Return if the pod is on host Network
+        Return False if the Pod isn't in the pod list
+        :param pod_uid: str
+        :return: bool
+        """
         for pod in self.pod_list['items']:
             if pod.get('metadata', {}).get('uid', '') == pod_uid:
                 return pod.get('spec', {}).get('hostNetwork', False)
@@ -375,7 +402,7 @@ class KubeletCheck(PrometheusCheck):
             return False
 
     @staticmethod
-    def _get_tags_from_labels(labels):
+    def _get_kube_container_name(labels):
         """
         Get extra tags from metric labels
         label {
@@ -385,13 +412,10 @@ class KubeletCheck(PrometheusCheck):
         :param labels: metric labels: iterable
         :return: list
         """
-        tags = []
-        for label in labels:
-            if label.name == "container_name":
-                tags.append("kube_container_name:%s" % label.value)
-                return tags
-
-        return tags
+        container_name = KubeletCheck._get_container_label(labels, "container_name")
+        if container_name:
+            return ["kube_container_name:%s" % container_name]
+        return []
 
     def _process_container_rate(self, metric_name, message):
         """Takes a simple metric about a container, reports it as a rate."""
@@ -409,7 +433,7 @@ class KubeletCheck(PrometheusCheck):
                 pod = self._get_pod_by_metric_label(metric.label)
                 if pod is not None and self._is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_tags_from_labels(metric.label)
+                    tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
 
                 val = getattr(metric, METRIC_TYPES[message.type]).value
@@ -451,7 +475,7 @@ class KubeletCheck(PrometheusCheck):
                 pod = self._get_pod_by_metric_label(metric.label)
                 if pod is not None and self._is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_tags_from_labels(metric.label)
+                    tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
 
                 val = getattr(metric, METRIC_TYPES[message.type]).value
