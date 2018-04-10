@@ -16,7 +16,7 @@ AGG_STATUSES = (
 CHECK_NAME = 'haproxy'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT =  os.path.dirname(os.path.dirname(HERE))
+ROOT = os.path.dirname(os.path.dirname(HERE))
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
 PORT = '13835'
 PORT_OPEN = '13836'
@@ -50,8 +50,6 @@ CHECK_CONFIG_OPEN = {
     'url': STATS_URL_OPEN,
     'collect_aggregates_only': False,
 }
-
-
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
 

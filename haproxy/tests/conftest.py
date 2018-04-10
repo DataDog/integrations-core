@@ -89,7 +89,7 @@ def spin_up_haproxy():
                 "chown", user, common.UNIXSOCKET_PATH
             ]
             subprocess.check_call(chown_args, env=env)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         # it's not always bad if this fails
         pass
     time.sleep(20)
@@ -99,5 +99,5 @@ def spin_up_haproxy():
         # make the temp directory on linux
         try:
             os.removedirs(common.UNIXSOCKET_DIR)
-        except OSError as e:
+        except OSError:
             pass
