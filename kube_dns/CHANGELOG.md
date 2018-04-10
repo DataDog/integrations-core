@@ -4,7 +4,7 @@
 ==================
 ### Changes
 
-* [IMPROVEMENT] Add metrics `kubedns.request_count.as_count`, `kubedns.error_count.as_count` and `cachemiss_count.as_count`, alternative metrics submitted as monotonic\_counts. See [#1341][]
+* [IMPROVEMENT] Add metrics `kubedns.request_count.count`, `kubedns.error_count.count` and `cachemiss_count.count`, alternative metrics submitted as monotonic\_counts. See [#1341][]
 
 1.2.0 / 2018-01-10
 ==================

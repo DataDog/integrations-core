@@ -53,7 +53,7 @@ class KubeDNSCheck(PrometheusCheck):
             # submit raw metric
             self.gauge(metric_name, metric.counter.value, _tags)
             # submit rate metric
-            self.monotonic_count(metric_name + '.as_count', metric.counter.value, _tags)
+            self.monotonic_count(metric_name + '.count', metric.counter.value, _tags)
 
     # metrics names for kubernetes >= 1.6.0
     def kubedns_kubedns_dns_request_count_total(self, message, **kwargs):
