@@ -107,7 +107,12 @@ class PDHBaseCheck(AgentCheck):
 
                     precision = datatypes.get(dd_name)
 
-                    obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision=precision)
+                    try:
+                        obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision=precision)
+                    except Exception as e:
+                        self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
+                        self.log.warning("Datadog Agent will not report %s" % dd_name)
+                        continue
 
                     entry = [inst_name, dd_name, m, obj]
                     self.log.debug("entry: %s" % str(entry))
@@ -123,15 +128,23 @@ class PDHBaseCheck(AgentCheck):
 
                         precision = datatypes.get(dd_name)
 
-                        obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision = precision)
+                        try:
+                            obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision = precision)
+                        except Exception as e:
+                            self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
+                            self.log.warning("Datadog Agent will not report %s" % dd_name)
+                            continue
+
                         entry = [inst_name, dd_name, m, obj]
                         self.log.debug("additional metric entry: %s" % str(entry))
                         self._metrics[key].append(entry)
 
-
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
+
+        if self._metrics[key] is None or not self._metrics[key]:
+            raise AttributeError('No valid counters to collect')
 
     def check(self, instance):
         self.log.debug("PDHBaseCheck: check()")

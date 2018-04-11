@@ -3,6 +3,7 @@
 ## 1.2.2 / Unreleased
 
 * [BUG] Prometheus requests can use an insecure option
+* [BUG] Correctly handle missing counters/strings in PDH checks when possible
 
 ## 1.2.1 / 2018-03-23
 
