@@ -1,7 +1,10 @@
-from . import active_directory
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .active_directory import ActiveDirectoryCheck
 
-ActiveDirectory = active_directory.ActiveDirectory
-
-__version__ = "1.0.1"
-
-__all__ = ['active_directory']
+__all__ = [
+    '__version__',
+    'ActiveDirectoryCheck'
+]
