@@ -663,6 +663,18 @@ class OpenStackCheck(AgentCheck):
 
         return server_ids
 
+    def get_project_name_from_id(self, tenant_id):
+        url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
+        self.log.debug("Project URL is %s", url)
+        headers = {'X-Auth-Token': self.get_auth_token()}
+        self.log.debug("Headers %s", headers)
+        try:
+            r = self._make_request_with_auth_fallback(url, headers)
+            return r['project']['name']
+
+        except Exception as e:
+            self.warning('Unable to get project name: {0}'.format(str(e)))
+
     def get_stats_for_single_server(self, server_id, tags=None):
         def _is_valid_metric(label):
             return label in NOVA_SERVER_METRICS or any(seg in label for seg in NOVA_SERVER_INTERFACE_SEGMENTS)
@@ -670,9 +682,17 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         state = None
+        server_name = None
+        hypervisor_hostname = None
+        tenant_id = None
+        project_name = None
         try:
             server_details = self._make_request_with_auth_fallback(url, headers)
             state = server_details['server'].get('status')
+            server_name = server_details['server'].get('name')
+            hypervisor_hostname = server_details['server'].get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+            tenant_id = server_details['server'].get('tenant_id')
+            project_name = self.get_project_name_from_id(tenant_id)
         except Exception as e:
             self.warning("Unable to collect details for server %s : %s" % (server_id, e))
 
@@ -691,7 +711,8 @@ class OpenStackCheck(AgentCheck):
             for st in server_stats:
                 if _is_valid_metric(st):
                     self.gauge("openstack.nova.server.{0}".format(st.replace("-", "_")), server_stats[st], tags=tags, hostname=server_id)
-
+        if hypervisor_hostname and project_name and server_name:
+           self.gauge('openstack.nova.project.running', 1, tags=['hypervisor_hostname:{0}'.format(hypervisor_hostname), 'project_name:{0}'.format(project_name), 'server_name:{0}'.format(server_name)])
 
     def get_stats_for_single_project(self, project):
         def _is_valid_metric(label):
@@ -714,10 +735,12 @@ class OpenStackCheck(AgentCheck):
             if _is_valid_metric(st):
                 metric_key = PROJECT_METRICS[st]
                 self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
-
+    
     def get_stats_for_all_projects(self, projects):
         for project in projects:
             self.get_stats_for_single_project(project)
+
+
     ###
 
     ### Cache util
@@ -959,7 +982,7 @@ class OpenStackCheck(AgentCheck):
         return server_ids
 
     def _get_tags_for_host(self):
-        hostname = self.get_my_hostname()
+        hostname = self.get_my_hostname().split('.')[0]  # HACK  we added split('.')[0]
 
         tags = []
         if hostname in self._get_and_set_aggregate_list():
@@ -986,3 +1009,4 @@ class OpenStackCheck(AgentCheck):
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)
         return external_host_tags
+
