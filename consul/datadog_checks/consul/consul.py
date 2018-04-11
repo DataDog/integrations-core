@@ -244,6 +244,7 @@ class ConsulCheck(AgentCheck):
     def check(self, instance):
         # Instance state is mutable, any changes to it will be reflected in self._instance_states
         instance_state = self._instance_states[hash_mutable(instance)]
+        self.log.info("instance_state: {0}, instance_state.local_config: {1}, instance_state.last_config_fetch_time: {2}, instance_state.last_known_leader: {3}".format(instance_state, instance_state.local_config, instance_state.last_config_fetch_time, instance_state.last_known_leader))
 
         self._check_for_leader_change(instance, instance_state)
 
@@ -417,6 +418,7 @@ class ConsulCheck(AgentCheck):
 
         if perform_network_latency_checks:
             self.check_network_latency(instance, agent_dc, main_tags)
+        self.log.info("instance_state end: {0}, instance_state.local_config: {1}, instance_state.last_config_fetch_time: {2}, instance_state.last_known_leader: {3}".format(instance_state, instance_state.local_config, instance_state.last_config_fetch_time, instance_state.last_known_leader))
 
     def _get_coord_datacenters(self, instance):
         return self.consul_request(instance, '/v1/coordinate/datacenters')

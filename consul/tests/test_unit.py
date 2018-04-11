@@ -2,10 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
+
 import common
 import consul_mocks
 
 from datadog_checks.consul import ConsulCheck
+
+log = logging.getLogger(__file__)
 
 
 def test_get_nodes_with_service(aggregator):
@@ -30,38 +34,63 @@ def test_get_nodes_with_service(aggregator):
     aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=expected_tags)
 
 
-def test_get_nodes_with_service_warning(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+def test_get_peers_in_cluster(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, {}, instances=[consul_mocks.MOCK_CONFIG])
     my_mocks = consul_mocks._get_consul_mocks()
-    my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_warning
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.run()
 
-    aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_warning', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+    metrics = aggregator._metrics.get('consul.peers', [])
+    for metric in metrics:
+        log.info("Metrics")
+        log.info(metric)
 
+    # When node is leader
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
 
-def test_get_nodes_with_service_critical(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
-    my_mocks = consul_mocks._get_consul_mocks()
-    my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_critical
+    my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.run()
 
-    aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
-    aggregator.assert_metric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
-    aggregator.assert_metric('consul.catalog.services_critical', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+    metrics = aggregator._metrics.get('consul.peers', [])
+    log.info("Metrics")
+    for metric in metrics:
+        log.info(metric)
+    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:follower'])
+
+
+# def test_get_nodes_with_service_warning(aggregator):
+#     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+#     my_mocks = consul_mocks._get_consul_mocks()
+#     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_warning
+#     consul_mocks.mock_check(consul_check, my_mocks)
+#     consul_check.check(consul_mocks.MOCK_CONFIG)
+#
+#     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_warning', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_warning', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#
+#
+# def test_get_nodes_with_service_critical(aggregator):
+#     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+#     my_mocks = consul_mocks._get_consul_mocks()
+#     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_critical
+#     consul_mocks.mock_check(consul_check, my_mocks)
+#     consul_check.check(consul_mocks.MOCK_CONFIG)
+#
+#     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.nodes_critical', value=1, tags=['consul_datacenter:dc1', 'consul_service_id:service-1', 'consul_service-1_service_tag:az-us-east-1a'])
+#     aggregator.assert_metric('consul.catalog.services_up', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
+#     aggregator.assert_metric('consul.catalog.services_critical', value=6, tags=['consul_datacenter:dc1', 'consul_node_id:node-1'])
 
 
 # def test_service_checks(aggregator):
@@ -78,23 +107,6 @@ def test_get_nodes_with_service_critical(aggregator):
 #     self.assertServiceCheckOK('consul.check', tags=["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"], count=1)
 #     self.assertServiceCheck('consul.check', status=AgentCheck.UNKNOWN, tags=["consul_datacenter:dc1", "check:server-status-empty", "consul_service_id:server-empty", "service:server-empty"], count=1)
 #     self.assertServiceCheck('consul.check', count=5)
-
-
-def test_get_peers_in_cluster(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
-    my_mocks = consul_mocks._get_consul_mocks()
-    consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
-
-
-    # When node is leader
-    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
-
-    my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
-
-    consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
-    aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:follower'])
 
 
 # def test_cull_services_list(aggregator):
