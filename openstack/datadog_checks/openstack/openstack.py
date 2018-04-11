@@ -866,7 +866,8 @@ class OpenStackCheck(AgentCheck):
             query_params["host"] = filter_by_host
 
         # If we don't have a timestamp for this instance, default to None
-        query_params['changes-since'] = self.changes_since_time.get(i_key)
+        if i_key in self.changes_since_time:
+            query_params['changes-since'] = self.changes_since_time.get(i_key)
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
