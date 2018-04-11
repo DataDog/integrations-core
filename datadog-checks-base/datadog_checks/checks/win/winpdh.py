@@ -54,7 +54,7 @@ class WinPDHCounter(object):
         if instance_name is None and len(instances) > 0:
             for inst in instances:
                 path = self._make_counter_path(machine_name, counter_name, inst, counters)
-                if path is None or len(path) == 0:
+                if not path:
                     continue
                 try:
                     self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
@@ -82,7 +82,7 @@ class WinPDHCounter(object):
                     ))
                     raise AttributeError("%s is not an instance of %s" % (instance_name, class_name))
             path = self._make_counter_path(machine_name, counter_name, instance_name, counters)
-            if path is None or len(path) == 0:
+            if not path:
                 self.logger.warning("Empty path returned")
             else:
                 try:

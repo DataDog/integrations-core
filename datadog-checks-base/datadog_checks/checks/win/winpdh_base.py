@@ -143,7 +143,7 @@ class PDHBaseCheck(AgentCheck):
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        if self._metrics[key] is None or not self._metrics[key]:
+        if not self._metrics.get(key):
             raise AttributeError('No valid counters to collect')
 
     def check(self, instance):
