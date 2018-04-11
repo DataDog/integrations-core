@@ -2,7 +2,7 @@
 
 1.0.1 / Unreleased
 ==================
-* [FIX] Update setup.py entry_points console_scripts to use datadog_checks.active_directory
+* [FIX] Remove entry_points in setup.py
 
 1.0.0 / 2017-12-15
 ==================
