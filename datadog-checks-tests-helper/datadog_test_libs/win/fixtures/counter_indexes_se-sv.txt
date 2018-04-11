@@ -1,0 +1,8480 @@
+1
+1847
+2
+System
+4
+Minne
+6
+% processortid
+10
+Filläsning - åtgärder/s
+12
+Filskrivning - åtgärder/s
+14
+Filkontroll - åtgärder/s
+16
+Filläsning - byte/s
+18
+Filskrivning - byte/s
+20
+Filkontroll - byte/s
+24
+Tillgängliga byte
+26
+Dedikerade byte
+28
+Sidfel per sekund
+30
+Dedikationsgräns
+32
+Skrivkopieringar/s
+34
+Övergångsfel/s
+36
+Cachefel/s
+38
+Begärda nollsidor - fel/s
+40
+Sidor/s
+42
+Sidläsningar/s
+44
+Kölängd för processor
+46
+Trådtillstånd
+48
+Utdata - sidor/s
+50
+Sidor - skrivna/s
+52
+Bläddraren
+54
+Servermeddelande/s
+56
+Växlingsbart systemminne - byte
+58
+Icke växlingsbart systemminne - byte
+60
+Växlingsbart systemminne - allokeringar
+64
+Icke växlingsbart systemminne - allokering
+66
+Växlingsbart systemminne - fasta byte
+68
+Totalt antal byte i systemkoden
+70
+Totalt antal fasta byte i systemkoden
+72
+Totalt antal byte i drivrutinen för systemet
+74
+Fasta byte i drivrutinen för systemet
+76
+Fasta byte i systemcache
+78
+Domänmeddelande/s
+80
+Valpaket/s
+82
+Antal mailslot/s
+84
+Förfrågningar till serverlista/s
+86
+Cache
+88
+Dataavbildningar/s
+90
+Synkrona dataavbildningar/s
+92
+Asynkrona dataavbildningar/s
+94
+Dataavbildningar - % träffar
+96
+Låsta dataavbildningar/s
+98
+Låsta läsningar/s
+100
+Synkrona låsta läsningar/s
+102
+Asynkrona låsta läsningar/s
+104
+Låsta läsningar - % träffar
+106
+Kopieringsläsningar/s
+108
+Synkrona kopieringsläsningar/s
+110
+Asynkrona kopieringsläsningar/s
+112
+Kopieringsläsningar med % träffar
+114
+MDL-läsningar/s
+116
+Synkrona MDL-läsningar/s
+118
+Asynkrona MDL-läsningar/s
+120
+MDL-läsningar - % träffar
+122
+Framåtläsningar/s
+124
+Snabbläsningar/s
+126
+Synkrona snabbläsningar/s
+128
+Asynkrona snabbläsningar/s
+130
+Snabbläsningar utan träff pga resursbrist/s
+132
+Snabbläsningar inte möjliga/s
+134
+Lazywrite - tömningar/s
+136
+Lazywrite - sidor/s
+138
+Datatömningar/s
+140
+Datatömning - sidor/s
+142
+Användartid i procent
+144
+Privilegierad tid i procent
+146
+Kontextbyten/s
+148
+Avbrott per sekund
+150
+Systemanrop per sekund
+152
+TLB-fyllningar/s - nivå 1
+154
+TLB-fyllningar/s - nivå 2
+156
+Uppräkningsserver/s
+158
+Uppräkningsdomän/s
+160
+Andra uppräkningar/s
+162
+Missade servermeddelanden
+164
+Missade mailslotsdatagram
+166
+Missade förfrågningar till serverlista
+168
+Misslyckade allokeringar av servermeddelande/s
+170
+Misslyckade allokeringar av Mailslot
+172
+Toppvärde virtuell storlek - byte
+174
+Virtuell storlek - byte
+178
+Toppvärde aktiv sidmängd
+180
+Aktiv sidmängd
+182
+Toppvärde växlingsfiler - byte
+184
+Byte i växlingsfiler
+186
+Privata byte
+188
+Totalt antal meddelanden/s
+190
+Totalt antal uppräkningar/s
+198
+Aktuell diskkölängd
+200
+Disktid i procent
+202
+Disklästid i procent
+204
+Diskskrivtid i procent
+206
+Medel s/disköverföring
+208
+Medel s/diskläsning
+210
+Medel s/diskskrivning
+212
+Disköverföringar/s
+214
+Diskläsningar/s
+216
+Diskskrivningar/s
+218
+Disk - byte/s
+220
+Disk - lästa byte/s
+222
+Disk - skrivna byte/s
+224
+Med. byte/disköverföring
+226
+Med. byte/diskläsning
+228
+Med. byte/diskskrivning
+230
+Process
+232
+Tråd
+234
+Fysisk disk
+236
+Logisk disk
+238
+Processor
+240
+% total processortid
+242
+% total användartid
+244
+% total privilegierad tid
+246
+Antal avbrott/s
+248
+Processer
+250
+Trådar
+252
+Händelser
+254
+Semaforer
+256
+Mutexer
+258
+Sektioner
+260
+Objekt
+262
+Omdirigeraren
+264
+Antal mottagna byte per sekund
+266
+Antal mottagna paket per sekund
+268
+Sidfel - lästa byte/s
+270
+Icke-sidfel - lästa byte/s
+272
+Cache - lästa byte/s
+274
+Nätverk - lästa byte/s
+276
+Antal överförda byte per sekund
+278
+Antal överförda paket per sekund
+280
+Sidfel - skrivna byte/s
+282
+Icke-sidfel - skrivna byte/s
+284
+Cache - skrivna byte/s
+286
+Nätverk - skrivna byte/s
+288
+Läsåtgärder per sekund
+290
+Icke-sekvensiella läsåtgärder/s
+292
+Läspaket/s
+294
+Stora läspaket/s
+296
+Små läspaket/s
+298
+Skrivåtgärder per sekund
+300
+Icke-sekvensiella skrivåtgärder/s
+302
+Skrivpaket/s
+304
+Stora skrivpaket/s
+306
+Små skrivpaket/s
+308
+Nekade läsningar av rådata/s
+310
+Nekade skrivningar av rådata/s
+312
+Nätverksfel/s
+314
+Serversessioner
+316
+Återanslutningar till server
+318
+Standardanslutningar
+320
+Lan Manager 2.0-anslutningar
+322
+Lan Manager 2.1-anslutningar
+324
+Windows NT-anslutningar
+326
+Serverfrånkopplingar
+328
+Avstannade serversessioner
+330
+Server
+336
+Anledning trådväntan
+340
+Sessioner avbrutna pga timeout
+342
+Sessioner avbrutna pga fel
+344
+Utloggade sessioner
+346
+Tvångsutloggade sessioner
+348
+Nekade inloggningsförsök
+350
+Behörighetsfel
+352
+Åtkomstfel
+354
+Systemfel
+356
+Avvisade blockeringsbegäran
+358
+Brist på arbeten
+360
+Totalt antal öppnade filer
+362
+Öppna filer
+366
+Aktiva filsökningar
+370
+Allokeringsfel icke-växlingsbart systemminne
+372
+Toppvärde icke-växlingsbart systemminne
+376
+Allokeringsfel växlingsbart systemminne
+378
+Toppvärde växlingsbart systemminne
+388
+Totalt antal byte/s
+392
+Aktuella kommandon
+398
+NWLink NetBIOS
+400
+Paket/s
+404
+Kontextblock köade/s
+406
+Fildataåtgärder/s
+408
+Ledigt utrymme i procent
+410
+Ledigt utrymme i MB
+412
+Öppna anslutningar
+414
+Anslutningar utan återförsök
+416
+Anslutningar med återförsök
+418
+Frånkopplingar - lokala
+420
+Frånkopplingar - fjärr
+422
+Länkfel
+424
+Kortfel
+426
+Sessioner timeout
+428
+Avbrutna anslutningar
+430
+Resursproblem - fjärr
+432
+Resursproblem - lokalt
+434
+Inte hittade - fel
+436
+Lyssnade inte - fel
+438
+Datagram/s
+440
+Datagram - byte/s
+442
+Skickade datagram/s
+444
+Skickade datagram - byte/s
+446
+Mottagna datagram/s
+448
+Mottagna datagram - byte/s
+452
+Antal skickade paket per sekund
+456
+Ramar/s
+458
+Ramar - byte/s
+460
+Antal skickade ramar per sekund
+462
+Skickade ramar - byte/s
+464
+Antal mottagna ramar per sekund
+466
+Mottagna ramar - byte/s
+468
+Omskickade ramar/s
+470
+Omskickade ramar - byte/s
+472
+Avvisade ramar/s
+474
+Avvisade ramar - byte/s
+476
+Överskridna svarstider
+478
+Överskridna kvittenstider
+480
+Största fönster för utskick
+482
+Genomsnittligt fönster för utskick
+484
+Piggyback-kvittenser - köade/s
+486
+Piggyback-kvittenser - timeout
+488
+NWLink IPX
+490
+NWLink SPX
+492
+NetBEUI
+494
+NetBEUI-resurs
+496
+Maximalt använda
+498
+Resursanvändning
+500
+Antal utmattningar
+502
+NBT-anslutningar
+506
+Antal skickade byte per sekund
+508
+Totalt antal byte/s
+510
+Nätverksgränssnitt
+512
+Byte/s
+520
+Aktuell bandbredd (bit/s)
+524
+Mottagna unicast-paket/s
+526
+Mottagna icke-unicast-paket/s
+528
+Kasserade mottagna paket
+530
+Mottagna paket - fel
+532
+Mottagna paket - okänt protokoll
+536
+Skickade unicast-paket/s
+538
+Skickade icke-unicast-paket/s
+540
+Kasserade utgående paket
+542
+Utgående paket - fel
+544
+Kölängd - utdata
+546
+IPv4
+548
+IPv6
+552
+Mottagna datagram - fel i huvud
+554
+Mottagna datagram - adressfel
+556
+Vidarebefordrade datagram per sekund
+558
+Mottagna datagram - okänt protokoll
+560
+Kasserade mottagna datagram
+562
+Levererade mottagna datagram/s
+566
+Kasserade utgående datagram
+568
+Utgående datagram - vägfel
+570
+Mottagna fragment/s
+572
+Sammansatta fragment/s
+574
+Fragment - sammansättningsfel
+576
+Fragmenterade datagram/s
+578
+Fragmenteringsfel
+580
+Skapade fragment/s
+582
+ICMP
+584
+Meddelanden/s
+586
+Mottagna meddelanden/s
+588
+Mottagna meddelanden - fel
+590
+Mottagna - destination ej nådd
+592
+Mottagna - tid överskriden
+594
+Mottagna - parameterproblem
+596
+Mottagna - källan avstängd
+598
+Mottagna - omdirigerade/s
+600
+Mottagna ekon/s
+602
+Mottagna ekosvar/s
+604
+Mottagna tidsstämplar/s
+606
+Mottagna tidsstämpelsvar/s
+608
+Mottagna adressmaskanrop
+610
+Mottagna adressmasksvar
+612
+Skickade meddelanden/s
+614
+Utgående meddelanden - fel
+616
+Skickade - destination ej nådd
+618
+Skickade - tid överskriden
+620
+Skickade - parameterproblem
+622
+Skickade - källan avstängd
+624
+Skickade - omdirigerade/s
+626
+Skickade ekon/s
+628
+Skickade ekosvar/s
+630
+Skickade tidsstämplar/s
+632
+Skickade tidsstämpelsvar/s
+634
+Skickade adressmaskanrop
+636
+Skickade adressmasksvar
+638
+TCPv4
+640
+Segment/s
+642
+Befintliga anslutningar
+644
+Aktiva anslutningar
+646
+Passiva anslutningar
+648
+Anslutningsfel
+650
+Återställda anslutningar
+652
+Mottagna segment/s
+654
+Skickade segment/s
+656
+Återsända segment/s
+658
+UDPv4
+660
+% Total DPC-tid
+662
+% Total avbrottstid
+664
+Mottagna datagram/s - port saknas
+666
+Mottagna datagram - fel
+670
+Diskenhet
+672
+Allokeringsfel
+674
+Tid sedan systemstart
+676
+Antal systemreferenser
+678
+Lediga PTE (Page Table Entries)
+680
+Antal trådar
+682
+Basprioritet
+684
+Förfluten tid
+686
+Justeringskorrigeringar per sekund
+688
+Undantag sända/s
+690
+Flytande emuleringar/s
+692
+Inloggningar/s
+694
+Aktuell prioritet
+696
+% DPC-tid
+698
+% avbrottstid
+700
+Växlingsfil
+702
+% i användning
+704
+Toppvärde % i användning
+706
+Startadress
+708
+Programräknare (för användare)
+710
+Avbildat minne - fullständigt åtkomstskydd
+712
+Avbildat minne - skrivskydd
+714
+Avbildat minne - läs/skriv
+716
+Avbildat minne - skrivskydd med kopiering
+718
+Avbildat minne - exekverbart
+720
+Avbildat minne - exekverbart/skrivskyddat
+722
+Avbildat minne - exekverbart läs/skriv
+724
+Avbildat minne - exekvera/skriva med kopiering
+726
+Reserverat minne - fullständigt åtkomstskydd
+728
+Reserverat minne - skrivskydd
+730
+Reserverat minne - läs/skriv
+732
+Reserverat minne - skrivskydd med kopiering
+734
+Reserverat minne - exekverbart
+736
+Reserverat minne - exekverbart/skrivskyddat
+738
+Reserverat minne - exekverbart läs/skriv
+740
+Minneskopia
+742
+Reserverat minne - exekvera/skriva med kopiering
+744
+Icke tilldelat minne - fullständigt åtkomstskydd
+746
+Icke tilldelat minne - skrivskydd
+748
+Icke tilldelat minne - läs/skriv
+750
+Icke tilldelat minne - skrivskydd med kopiering
+752
+Icke tilldelat minne - exekverbart
+754
+Icke tilldelat minne - exekverbart/skrivskyddat
+756
+Icke tilldelat minne - exekverbart läs/skriv
+758
+Icke tilldelat minne - exekvera/skriva med kopiering
+760
+Minneskopians utrymme - fullständigt åtkomstskydd
+762
+Minneskopians utrymme - skrivskydd
+764
+Minneskopians utrymme - läs/skriv
+766
+Minneskopians utrymme - skrivskydd med kopiering
+768
+Minneskopians utrymme - exekverbart
+770
+Minneskopians utrymme - exekverbart skrivskyddat
+772
+Minneskopians utrymme - exekverbart läs/skriv
+774
+Minneskopians utrymme - exekvera/skriva med kopiering
+776
+Minneskopia - reserverade byte
+778
+Minneskopia - lediga byte
+780
+Reserverade byte
+782
+Lediga byte
+784
+Process-ID
+786
+Adressutrymme för process
+788
+Fullständigt åtkomstskydd
+790
+Skrivskydd
+792
+Läs/skriv
+794
+Skrivskydd med kopiering
+796
+Exekverbart
+798
+Exekverbart/skrivskyddat
+800
+Exekverbart läs/skriv
+802
+Exekvera/skriva med kopiering
+804
+Tråd-ID
+806
+Misslyckade mottagna mailslot
+808
+Misslyckade skrivna mailslot
+810
+Misslyckade mailslot öppningar/s
+812
+Duplicerat mastermeddelanden
+814
+Felaktiga datagram/s
+816
+Tråddetaljer
+818
+Byte i cache
+820
+Högsta antal byte i cache
+822
+Lästa sidor per sekund
+824
+Ändringar i syfte för övergångssidor per sekund
+872
+Antal skickade byte
+874
+Antal mottagna byte
+876
+Antal skickade ramar
+878
+Antal mottagna ramar
+880
+Komprimering i procent för utgående byte
+882
+Komprimering i procent för inkommande byte
+884
+Antal CRC-fel
+886
+Antal timeout-fel
+888
+Antal seriella dataöverskridningar
+890
+Antal justeringsfel
+892
+Antal buffertöverskridningsfel
+894
+Totalt antal fel
+896
+Antal överförda byte per sekund
+898
+Antal mottagna byte per sekund
+900
+Antal överförda ramar per sekund
+902
+Antal mottagna ramar per sekund
+904
+Totalt antal fel per sekund
+908
+Totalt antal anslutningar
+920
+WINS-server
+922
+Unika registreringar/s
+924
+Gruppregistreringar/s
+926
+Totalt antal registreringar/s
+928
+Unika uppdateringar/s
+930
+Gruppuppdateringar/s
+932
+Totalt antal uppdateringar/s
+934
+Antal frigörningar per sekund
+936
+Förfrågningar/s
+938
+Unika konflikter/s
+940
+Gruppkonflikter/s
+942
+Totalt antal konflikter/s
+944
+Utförda frigörningar per sekund
+946
+Misslyckade frigörningar per sekund
+948
+Utförda förfrågningar/s
+950
+Misslyckade förfrågningar/s
+952
+Antal bindningsreferenser
+1000
+MacFile-server
+1002
+Maximalt växlingsbart minne
+1004
+Aktuellt växlingsbart minne
+1006
+Maximalt icke-växlingsbart minne
+1008
+Aktuellt icke-växlingsbart minne
+1010
+Aktuella sessioner
+1012
+Maximalt antal sessioner
+1014
+Aktuellt öppna filer
+1016
+Maximalt antal öppna filer
+1018
+Misslyckade inloggningar
+1020
+Läst data/s
+1022
+Skriven data/s
+1024
+Mottagen data/s
+1026
+Överförd data/s
+1028
+Aktuell kölängd
+1030
+Maximal kölängd
+1032
+Aktuella trådar
+1034
+Maximalt antal trådar
+1050
+AppleTalk
+1052
+Paket in/s
+1054
+Paket ut/s
+1056
+Byte in/s
+1058
+Byte ut/s
+1060
+Genomsnittstid/DDP-paket
+1062
+DDP-paket/s
+1064
+Genomsnittstid/AARP-paket
+1066
+AARP-paket/s
+1068
+Genomsnittstid/ATP-paket
+1070
+ATP-paket/s
+1072
+Genomsnittstid/NBP-paket
+1074
+NBP-paket/s
+1076
+Genomsnittstid/ZIP-paket
+1078
+ZIP-paket/s
+1080
+Genomsnittstid/RTMP-paket
+1082
+RTMP-paket/s
+1084
+Lokalt återutsända ATP
+1086
+ATP-svar timeout
+1088
+Exakt ett ATP-svar/s
+1090
+Minst ett ATP-svar/s
+1092
+Mottagna ATP-release/s
+1094
+Aktuellt icke-växlingsbart systemminne
+1096
+Dirigerade paket in/s
+1098
+Utelämnade paket
+1100
+Fjärråterutsända ATP
+1102
+Dirigerade packet ut/s
+1110
+Nätverkssegment
+1112
+Antal mottagna ramar per sekund
+1114
+Antal byte mottagna/s
+1116
+Antal mottagna broadcastramar per sekund
+1118
+Antal mottagna multicastramar per sekund
+1120
+% nätverksutnyttjande
+1124
+% broadcastramar
+1126
+% multicastramar
+1150
+Telefoni
+1152
+Linjer
+1154
+Telefonienheter
+1156
+Aktiva linjer
+1158
+Aktiva telefoner
+1160
+Utgående anrop/s
+1162
+Inkommande anrop/s
+1164
+Klientprogram
+1166
+Pågående utgående samtal
+1168
+Pågående inkommande samtal
+1232
+Antalet NCP för Packet Burst-läsning/s
+1234
+Timeout/s för Packet Burst-läsning
+1236
+Antalet NCP för Packet Burst-skrivning/s
+1238
+Timeout/s för Packet Burst-skrivning
+1240
+Packet Burst IO/s
+1260
+Totalt antal inloggningar
+1262
+Antal varaktiga referenser
+1264
+Återanslutna varaktiga referenser
+1266
+Förfrågningar om hash-rubrik i SMB BranchCache
+1268
+Förfrågningar om att skapa hashar i SMB BranchCache
+1270
+Förfrågningar om mottagna hashar i SMB BranchCache
+1272
+Skickade svar om hashar i SMB BranchCache
+1274
+Skickade byte med hashar i SMB BranchCache
+1276
+Totalt antal elastiska referenser
+1278
+Återanslutna elastiska referenser
+1300
+Server-arbetsköer
+1302
+Kölängd
+1304
+Aktiva trådar
+1306
+Tillgängliga trådar
+1308
+Tillgängliga arbeten
+1310
+Lånade arbeten
+1312
+Brist på arbeten
+1314
+Aktuellt antal klienter
+1320
+Antal skickade byte per sekund
+1324
+Lästa byte/s
+1328
+Skrivna byte/s
+1332
+Totalt antal åtgärder/s
+1334
+Köade DPC-anrop per sekund
+1336
+DPC-hastighet
+1342
+Totalt antal köade DPC/s
+1344
+Total DPC-hastighet
+1350
+% Registerkvot i användning
+1360
+VL-minne
+1362
+Använt virtuellt minne (VLM) i procent
+1364
+Storlek för virtuellt minne (VLM)
+1366
+Största storlek för virtuellt minne (VLM)
+1368
+Tillgänglig storlek för virtuellt minne (VLM)
+1370
+Allokerat minne (VLM)
+1372
+Största mängd allokerat minne (VLM)
+1374
+Allokerat systemminne (VLM)
+1376
+Största mängd allokerat systemminne (VLM)
+1378
+Allokerat delat systemminne (VLM)
+1380
+Tillgängliga kilobyte
+1382
+Tillgängliga megabyte
+1400
+Gnm.snittl. längd på disk-kö
+1402
+Gnm.snittl. längd på disk-kö, läsning
+1404
+Gnm.snittl. längd på disk-kö, skrivning
+1406
+% använda dedikerade byte
+1408
+Fullständig avbildning
+1410
+Skaparens process-ID
+1412
+I/O-läsningsåtgärder per sekund
+1414
+I/O-skrivningsåtgärder per sekund
+1416
+I/O-dataåtgärder per sekund
+1418
+Andra I/O-åtgärder per sekund
+1420
+Byte för IO-läsåtgärder/sek
+1422
+Byte för IO-skrivåtgärder/sek
+1424
+Byte i I/O-data per sekund
+1426
+Byte i andra I/O-data per sekund
+1450
+Utskriftskö
+1452
+Totalt antal utskrivna jobb
+1454
+Antal utskrivna byte per sekund
+1456
+Totalt antal utskrivna sidor
+1458
+Utskrifter
+1460
+Referenser
+1462
+Högsta antal referenser
+1464
+Utskriftsbuffringar
+1466
+Högsta antal utskriftsbuffringar
+1468
+Fel pga papper saknas
+1470
+Fel pga inte redo
+1472
+Utskriftsfel
+1474
+Anrop att räkna upp nätverksskrivare
+1476
+Anrop att lägga till nätverksskrivare
+1478
+Privat arbetsminne
+1480
+Delat arbetsminne
+1482
+Ledig tid i procent
+1484
+I/O-delningar per sekund
+1500
+Jobbobjekt
+1502
+Aktuell processortid i procent
+1504
+Aktuell användarlägestid i procent
+1506
+Aktuell kernellägestid i procent
+1508
+Processortid i msek den här perioden
+1510
+Användarlägestid i msek den här perioden
+1512
+Kernellägestid i msek den här perioden
+1514
+Sidor/s
+1516
+Totalt antal processer
+1518
+Antal aktiva processer
+1520
+Antal avslutade processer
+1522
+Total processortid i msek
+1524
+Total användarlägestid i msek
+1526
+Total kernellägestid i msek
+1530
+TCPv6
+1532
+UDPv6
+1534
+ICMPv6
+1536
+Mottagna för stora paket
+1538
+Mottagna medlemskapsfrågor
+1540
+Mottagna medlemskapsrapporter
+1542
+Mottagna medlemskapsminskningar
+1544
+Mottagna routermeddelanden
+1546
+Mottagna routerannonser
+1548
+Information om jobbobjekt
+1550
+Mottagna grannmeddelanden
+1552
+Mottagna grannannonser
+1554
+Skickade för stora paket
+1556
+Skickade medlemskapsfrågor
+1558
+Skickade medlemskapsrapporter
+1560
+Skickade medlemskapsminskningar
+1562
+Skickade routermeddelanden
+1564
+Skickade routerannonser
+1566
+Skickade grannmeddelanden
+1568
+Skickade grannannonser
+1570
+Säkerhetssystem - Bred statistik
+1572
+Antal NTLM-autentiseringar
+1574
+Antal Kerberos-autentiseringar
+1576
+Antal KDC AS-begäranden per sekund
+1578
+Antal KDC TGS-begäranden per sekund
+1580
+Cacheposter för SChannel-sessioner
+1582
+Cacheposter för aktiva SChannel-sessioner
+1584
+Fullständiga SSL-handskakningar på klientsidan
+1586
+SSL-återanslutningshandskakningar på klientsidan
+1588
+Fullständiga SSL-handskakningar på serversidan
+1590
+SSL-återanslutningshandskakningar på serversidan
+1592
+Digest-autentiseringar
+1594
+Vidarebefordrade Kerberos-förfrågningar
+1596
+Avlastade anslutningar
+1598
+Aktiva TCP-RSC-anslutningar
+1600
+Paket/sek. för alla TCP-RSC-anslutningar
+1602
+TCP-RSC-undantag/sek
+1604
+TCP RSC: Genomsnittsstorlek för paket
+1620
+KDC-skyddade AS-begäranden
+1622
+KDC-skyddade TGS-begäranden
+1624
+Anspråksmedvetna AS-begäranden i KDC
+1626
+Anspråksmedvetna TGS-begäranden för identitet kontrollerad av tjänst i KDC
+1628
+TGS-begäranden för begränsad delegering av klassisk typ i KDC
+1630
+TGS-begäranden för begränsad delegering av resurstyp i KDC
+1632
+Anspråksmedvetna TGS-begäranden i KDC
+1670
+Statistik för säkerhet per process
+1672
+Autentiseringsreferenser
+1674
+Omgivningsreferenser
+1676
+Byte för minneslistorna Lediga och Nollställda
+1678
+Byte för listan över ändrade sidor
+1680
+Byte för väntecache
+1682
+Byte för väntecache med normal prioritet
+1684
+Kärnbyte för väntecache
+1686
+Långsiktigt genomsnittlig livslängd för väntecache (s)
+1746
+Ledig tid i procent
+1748
+C1-tid i procent
+1750
+C2-tid i procent
+1752
+C3-tid i procent
+1754
+C1-övergångar per sekund
+1756
+C2-övergångar per sekund
+1758
+C3-övergångar per sekund
+1760
+Heap
+1762
+Dedikerade byte
+1764
+Reserverade byte
+1766
+Virtuell storlek - byte
+1768
+Lediga byte
+1770
+Längd för ledig lista
+1772
+Genomsnittlig allokeringshastighet
+1774
+Genomsnittlig frigörelsehastighet
+1776
+Längd för icke allokerade intervall
+1778
+Allokeringar - frigörelser
+1780
+Cachelagrade allokeringar per sekund
+1782
+Cachelagrade frigörelser per sekund
+1784
+Allokeringar <1 kB per sekund
+1786
+Frigörelser < 1 kB per sekund
+1788
+Allokeringar 1-8 kB per sekund
+1790
+Frigörelser 1-8 kB per sekund
+1792
+Allokeringar över 8 kB per sekund
+1794
+Frigörelser över 8 kB per sekund
+1796
+Sammanlagda allokeringar per sekund
+1798
+Sammanlagda frigörelser per sekund
+1800
+Block i heap-cache
+1802
+Största cachedjup
+1804
+Fragmentering i procent
+1806
+VA-fragmentering i procent
+1808
+Konkurrens om heap-lås
+1810
+Skadade sidor
+1812
+Tröskelvärde för skadade sidor
+1814
+NUMA-nodminne
+1816
+Totalt, MB
+1818
+MB för minneslistorna Lediga och Nollställda
+1820
+Nätverkskort
+1822
+Väntelista, MB
+1824
+Tillgängliga megabyte
+1826
+Förfrågningar om hash-rubrik (V2) i SMB BranchCache
+1828
+Förfrågningar om att skapa hashar (V2) i SMB BranchCache
+1830
+Mottagna förfrågningar om hashar (V2) i SMB BranchCache
+1832
+Skickade svar om hashar (V2) i SMB BranchCache
+1834
+Skickade byte med hashar (V2) i SMB BranchCache
+1836
+SMB BranchCache-hash V2-begäranden behandlade från deduplicering
+1846
+End Marker
+7206
+MSOLAP$DDMASTER:Connection
+7208
+MSOLAP$DDMASTER:Locks
+7210
+MSOLAP$DDMASTER:Threads
+7212
+MSOLAP$DDMASTER:Memory
+7214
+MSOLAP$DDMASTER:Cache
+7216
+MSOLAP$DDMASTER:MDX
+7218
+MSOLAP$DDMASTER:Processing
+7220
+MSOLAP$DDMASTER:Proc Aggregations
+7222
+MSOLAP$DDMASTER:Proc Indexes
+7224
+MSOLAP$DDMASTER:Storage Engine Query
+7226
+MSOLAP$DDMASTER:Data Mining Model Processing
+7228
+MSOLAP$DDMASTER:Data Mining Prediction
+7230
+MSOLAP$DDMASTER:Proactive Caching
+7232
+Current connections
+7234
+Requests/sec
+7236
+Total requests
+7238
+Successes/sec
+7240
+Total successes
+7242
+Failures/sec
+7244
+Total failures
+7246
+Current user sessions
+7248
+Current latch waits
+7250
+Latch waits/sec
+7252
+Current locks
+7254
+Current lock waits
+7256
+Lock requests/sec
+7258
+Lock grants/sec
+7260
+Lock waits/sec
+7262
+Lock denials/sec
+7264
+Unlock requests/sec
+7266
+Total deadlocks detected
+7268
+Short parsing idle threads
+7270
+Short parsing busy threads
+7272
+Short parsing job queue length
+7274
+Short parsing job rate
+7276
+Long parsing idle threads
+7278
+Long parsing busy threads
+7280
+Long parsing job queue length
+7282
+Long parsing job rate
+7284
+Query pool idle threads
+7286
+Query pool busy threads
+7288
+Query pool job queue length
+7290
+Query pool job rate
+7292
+Processing pool idle non-I/O threads
+7294
+Processing pool busy non-I/O threads
+7296
+Processing pool job queue length
+7298
+Processing pool job rate
+7300
+Processing pool idle I/O job threads
+7302
+Processing pool busy I/O job threads
+7304
+Processing pool I/O job queue length
+7306
+Processing pool I/O job completion rate
+7308
+Page Pool 64 Alloc KB
+7310
+Page Pool 64 Lookaside KB
+7312
+Page Pool 8 Alloc KB
+7314
+Page Pool 8 Lookaside KB
+7316
+Page Pool 1 Alloc KB
+7318
+Page Pool 1 Lookaside KB
+7320
+Cleaner Current Price
+7322
+Cleaner Balance/sec
+7324
+Cleaner Memory shrunk KB/sec
+7326
+Cleaner Memory shrinkable KB
+7328
+Cleaner Memory nonshrinkable KB
+7330
+Cleaner Memory KB
+7332
+Memory Usage KB
+7334
+Memory Limit Low KB
+7336
+Memory Limit High KB
+7338
+AggCacheKB
+7340
+Quota KB
+7342
+Quota Blocked
+7344
+Filestore KB
+7346
+Filestore Page Faults/sec
+7348
+Filestore Reads/sec
+7350
+Filestore KB Reads/sec
+7352
+Filestore Writes/sec
+7354
+Filestore KB Write/sec
+7356
+Filestore IO Errors/sec
+7358
+Filestore IO Errors
+7360
+Filestore Clock Pages Examined/sec
+7362
+Filestore Clock Pages HaveRef/sec
+7364
+Filestore Clock Pages Valid/sec
+7366
+Filestore Memory Pinned KB
+7368
+In-memory Dimension Property File KB
+7370
+In-memory Dimension Property File KB/sec
+7372
+Potential In-memory Dimension Property File KB
+7374
+Dimension Property Files
+7376
+In-memory Dimension Index (Hash) File KB
+7378
+In-memory Dimension Index (Hash) File KB/sec
+7380
+Potential In-memory Dimension Index (Hash) File KB
+7382
+Dimension Index (Hash) Files
+7384
+In-memory Dimension String File KB
+7386
+In-memory Dimension String File KB/sec
+7388
+Potential In-memory Dimension String File KB
+7390
+Dimension String Files
+7392
+In-memory Map File KB
+7394
+In-memory Map File KB/sec
+7396
+Potential In-memory Map File KB
+7398
+Map Files
+7400
+In-memory Aggregation Map File KB
+7402
+In-memory Aggregation Map File KB/sec
+7404
+Potential In-memory Aggregation Map File KB
+7406
+Aggregation Map Files
+7408
+In-memory Fact Data File KB
+7410
+In-memory Fact Data File KB/sec
+7412
+Potential In-memory Fact Data File KB
+7414
+Fact Data Files
+7416
+In-memory Fact String File KB
+7418
+In-memory Fact String File KB/sec
+7420
+Potential In-memory Fact String File KB
+7422
+Fact String Files
+7424
+In-memory Fact Aggregation File KB
+7426
+In-memory Fact Aggregation File KB/sec
+7428
+Potential In-memory Fact Aggregation File KB
+7430
+Fact Aggregation Files
+7432
+In-memory Other File KB
+7434
+In-memory Other File KB/sec
+7436
+Potential In-memory Other File KB
+7438
+Other Files
+7440
+VertiPaq Paged KB
+7442
+VertiPaq Nonpaged KB
+7444
+VertiPaq Memory-Mapped KB
+7446
+Memory Limit Hard KB
+7448
+Memory Limit VertiPaq KB
+7450
+Current KB
+7452
+KB added/sec
+7454
+Current entries
+7456
+Inserts/sec
+7458
+Evictions/sec
+7460
+Total inserts
+7462
+Total evictions
+7464
+Direct hits/sec
+7466
+Misses/sec
+7468
+Lookups/sec
+7470
+Total direct hits
+7472
+Total misses
+7474
+Total lookups
+7476
+Direct hit ratio
+7478
+Total filtered iterator cache hits
+7480
+Total filtered iterator cache misses
+7482
+Number of calculation covers
+7484
+Current number of evaluation nodes
+7486
+Number of Storage Engine evaluation nodes
+7488
+Number of cell-by-cell evaluation nodes
+7490
+Number of bulk-mode evaluation nodes
+7492
+Number of evaluation nodes that covered a single cell
+7494
+Number of evaluation nodes with calculations at the same granularity
+7496
+Current number of cached evaluation nodes
+7498
+Number of cached Storage Engine evaluation nodes
+7500
+Number of cached bulk-mode evaluation nodes
+7502
+Number of cached 'other' evaluation nodes
+7504
+Number of evictions of evaluation nodes
+7506
+Number of hash index hits in the cache of evaluation nodes
+7508
+Number of cell-by-cell hits in the cache of evaluation nodes
+7510
+Number of cell-by-cell misses in the cache of evaluation nodes
+7512
+Number of subcube hits in the cache of evaluation nodes
+7514
+Number of subcube misses in the cache of evaluation nodes
+7516
+Total Sonar subcubes
+7518
+Total cells calculated
+7520
+Total recomputes
+7522
+Total flat cache inserts
+7524
+Total calculation cache registered
+7526
+Total NON EMPTY
+7528
+Total NON EMPTY unoptimized
+7530
+Total NON EMPTY for calculated members
+7532
+Total Autoexist
+7534
+Total EXISTING
+7536
+Rows read/sec
+7538
+Total rows read
+7540
+Rows converted/sec
+7542
+Total rows converted
+7544
+Rows written/sec
+7546
+Total rows written
+7548
+Current partitions
+7550
+Total partitions
+7552
+Memory size rows
+7554
+Memory size bytes
+7556
+Rows merged/sec
+7558
+Rows created/sec
+7560
+Temp file rows written/sec
+7562
+Temp file bytes written/sec
+7564
+Current partitions
+7566
+Total partitions
+7568
+Rows/sec
+7570
+Total rows
+7572
+Current measure group queries
+7574
+Measure group queries/sec
+7576
+Total measure group queries
+7578
+Current dimension queries
+7580
+Dimension queries/sec
+7582
+Total dimension queries.
+7584
+Queries answered/sec
+7586
+Total queries answered
+7588
+Bytes sent/sec
+7590
+Total bytes sent
+7592
+Rows sent/sec
+7594
+Total rows sent
+7596
+Queries from cache direct/sec
+7598
+Queries from cache filtered/sec
+7600
+Queries from file/sec
+7602
+Total queries from cache direct
+7604
+Total queries from cache filtered
+7606
+Total queries from file
+7608
+Map reads/sec
+7610
+Map bytes/sec
+7612
+Data reads/sec
+7614
+Data bytes/sec
+7616
+Avg time/query
+7618
+Network round trips/sec
+7620
+Total network round trips
+7622
+Flat cache lookups/sec
+7624
+Flat cache hits/sec
+7626
+Calculation cache lookups/sec
+7628
+Calculation cache hits/sec
+7630
+Persisted cache lookups/sec
+7632
+Persisted cache hits/sec
+7634
+Dimension cache lookups/sec
+7636
+Dimension cache hits/sec
+7638
+Measure group cache lookups/sec
+7640
+Measure group cache hits/sec
+7642
+Aggregation lookups/sec
+7644
+Aggregation hits/sec
+7646
+Cases/sec
+7648
+Current models processing
+7650
+Concurrent DM queries
+7652
+Predictions/sec
+7654
+Rows/sec
+7656
+Queries/sec
+7658
+Total Queries
+7660
+Total Rows
+7662
+Total Predictions
+7664
+Notifications/sec
+7666
+Processing Cancellations/sec
+7668
+Proactive Caching Begin/sec
+7670
+Proactive Caching Completion/sec
+7672
+SQLServer:SSIS Service 12.0
+7674
+SSIS Package Instances
+7676
+SQLServer:SSIS Pipeline 12.0
+7678
+Rows read
+7680
+Rows written
+7682
+Buffers in use
+7684
+Buffer memory
+7686
+Private buffers in use
+7688
+Private buffer memory
+7690
+Flat buffers in use
+7692
+Flat buffer memory
+7694
+Buffers spooled
+7696
+BLOB bytes read
+7698
+BLOB bytes written
+7700
+BLOB files in use
+7816
+MSSQL$DDMASTER:Memory Broker Clerks
+7818
+Periodic evictions (pages)
+7820
+Internal benefit
+7822
+Simulation size
+7824
+Simulation benefit
+7826
+Memory broker clerk size
+7828
+Pressure evictions (pages/sec)
+7830
+MSSQL$DDMASTER:Buffer Manager
+7832
+Buffer cache hit ratio
+7834
+Extension outstanding IO counter
+7836
+Free list stalls/sec
+7838
+Extension page evictions/sec
+7840
+Page writes/sec
+7842
+Database pages
+7844
+Extension page unreferenced time
+7846
+Page life expectancy
+7848
+Background writer pages/sec
+7850
+Buffer cache hit ratio base
+7852
+Extension free pages
+7854
+Readahead time/sec
+7856
+Extension allocated pages
+7858
+Extension in use as percentage
+7860
+Checkpoint pages/sec
+7862
+Lazy writes/sec
+7864
+Extension page reads/sec
+7866
+Page reads/sec
+7868
+Extension page writes/sec
+7870
+Readahead pages/sec
+7872
+Integral Controller Slope
+7874
+Target pages
+7876
+Page lookups/sec
+7878
+MSSQL$DDMASTER:Buffer Node
+7880
+Remote node page lookups/sec
+7882
+Page life expectancy
+7884
+Database pages
+7886
+Local node page lookups/sec
+7888
+MSSQL$DDMASTER:General Statistics
+7890
+Mars Deadlocks
+7892
+SOAP Session Initiate Requests
+7894
+Trace Event Notification Queue
+7896
+SOAP Session Terminate Requests
+7898
+User Connections
+7900
+Processes blocked
+7902
+HTTP Authenticated Requests
+7904
+Temp Tables Creation Rate
+7906
+Connection Reset/sec
+7908
+Transactions
+7910
+Active Temp Tables
+7912
+Tempdb recovery unit id
+7914
+Tempdb rowset id
+7916
+Temp Tables For Destruction
+7918
+Logical Connections
+7920
+SQL Trace IO Provider Lock Waits
+7922
+Non-atomic yield rate
+7924
+SOAP Empty Requests
+7926
+Logins/sec
+7928
+SOAP WSDL Requests
+7930
+SOAP SQL Requests
+7932
+SOAP Method Invocations
+7934
+Logouts/sec
+7936
+Event Notifications Delayed Drop
+7938
+MSSQL$DDMASTER:Locks
+7940
+Lock Requests/sec
+7942
+Lock Timeouts/sec
+7944
+Lock Timeouts (timeout > 0)/sec
+7946
+Lock Wait Time (ms)
+7948
+Number of Deadlocks/sec
+7950
+Average Wait Time Base
+7952
+Lock Waits/sec
+7954
+Average Wait Time (ms)
+7956
+MSSQL$DDMASTER:Databases
+7958
+Write Transactions/sec
+7960
+Partitions
+7962
+Log File(s) Used Size (KB)
+7964
+Log Pool Requests/sec
+7966
+Secondary partitions
+7968
+Forwarder pending partitions
+7970
+Log Pool Disk Reads/sec
+7972
+Waiting replica copies
+7974
+Group Commit Time/sec
+7976
+In-delete partitions
+7978
+Log Flush Write Time (ms)
+7980
+Bulk Copy Rows/sec
+7982
+Log Writer Writes/sec
+7984
+Flush file buffers/sec
+7986
+Forwarder partitions
+7988
+Log Growths
+7990
+Log Truncations
+7992
+Bulk Copy Throughput/sec
+7994
+No Wait Transactions/sec
+7996
+Transactions/sec
+7998
+Data File(s) Size (KB)
+8000
+Repl. Trans. Rate
+8002
+XTP Memory Used (KB)
+8004
+Nothing partitions
+8006
+Repl. Pending Xacts
+8008
+Active Transactions
+8010
+Commit table entries
+8012
+Log Cache Hit Ratio
+8014
+Log Flush Wait Time
+8016
+Log Flush Waits/sec
+8018
+Log Cache Reads/sec
+8020
+Shrink Data Movement Bytes/sec
+8022
+Log Bytes Flushed/sec
+8024
+Percent Log Used
+8026
+Log Writer Queue Time/sec
+8028
+Checkpoint duration
+8030
+Primary partitions
+8032
+Tracked transactions/sec
+8034
+Log Flushes/sec
+8036
+Recovery duration
+8038
+DBCC Logical Scan Bytes/sec
+8040
+Secondary catchup partitions
+8042
+Log File(s) Size (KB)
+8044
+Log Shrinks
+8046
+Secondary in-build partitions
+8048
+Log Pool Cache Misses/sec
+8050
+Backup/Restore Throughput/sec
+8052
+Log Cache Hit Ratio Base
+8054
+MSSQL$DDMASTER:Log Hosting
+8056
+Payload Bytes/sec
+8058
+Defunct Cleanups/sec
+8060
+Queue Wait Time/sec
+8062
+Throttle ms/sec
+8064
+Stored In Data/sec
+8066
+Log Retrieve Micros/sec
+8068
+Read Bytes/sec
+8070
+Mapping Stall Time/sec
+8072
+Read From Log Bytes/sec
+8074
+Map Lookup Micros/sec
+8076
+Writer Writes/sec
+8078
+Writer Stalls/sec
+8080
+Read From Data Bytes/sec
+8082
+Sector Write/sec
+8084
+Write Queue Depth
+8086
+Sectors Cleared During Move/sec
+8088
+Sectors Moved/sec
+8090
+Map Index Reads/sec
+8092
+Map Table Reads/sec
+8094
+Throttles/sec
+8096
+Harden Wait Micros/sec
+8098
+Mapping Update Time/sec
+8100
+MSSQL$DDMASTER:Database Mirroring
+8102
+Sends/sec
+8104
+Log Compressed Bytes Sent/sec
+8106
+Send/Receive Ack Time
+8108
+Redo Queue KB
+8110
+Log Compressed Bytes Rcvd/sec
+8112
+Log Send Queue KB
+8114
+Bytes Sent/sec
+8116
+Log Bytes Sent/sec
+8118
+Log Remaining for Undo KB
+8120
+Receives/sec
+8122
+Log Harden Time (ms)
+8124
+Bytes Received/sec
+8126
+Log Send Flow Control Time (ms)
+8128
+Log Bytes Sent from Cache/sec
+8130
+Log Bytes Redone from Cache/sec
+8132
+Transaction Delay
+8134
+Mirrored Write Transactions/sec
+8136
+Log Bytes Received/sec
+8138
+Log Scanned for Undo KB
+8140
+Redo Bytes/sec
+8142
+Pages Sent/sec
+8144
+MSSQL$DDMASTER:Database Replica
+8146
+Log remaining for undo
+8148
+Database Flow Controls/sec
+8150
+Log Compressions/sec
+8152
+Redone Bytes/sec
+8154
+Log Bytes Compressed/sec
+8156
+Log Bytes Received/sec
+8158
+Recovery Queue
+8160
+Mirrored Write Transactions/sec
+8162
+Redo blocked/sec
+8164
+Group Commit Time
+8166
+File Bytes Received/sec
+8168
+Transaction Delay
+8170
+Redo Bytes Remaining
+8172
+Log Send Queue
+8174
+Database Flow Control Delay
+8176
+Log Compression Cache misses/sec
+8178
+Redones/sec
+8180
+Log Bytes Decompressed/sec
+8182
+Log Compression Cache hits/sec
+8184
+Group Commits/Sec
+8186
+Log Decompressions/sec
+8188
+Total Log requiring undo
+8190
+MSSQL$DDMASTER:Availability Replica
+8192
+Sends to Replica/sec
+8194
+Flow Control/sec
+8196
+Resent Messages/sec
+8198
+Flow Control Time (ms/sec)
+8200
+Bytes Received from Replica/sec
+8202
+Bytes Sent to Transport/sec
+8204
+Sends to Transport/sec
+8206
+Bytes Sent to Replica/sec
+8208
+Receives from Replica/sec
+8210
+MSSQL$DDMASTER:Latches
+8212
+Latch Waits/sec
+8214
+SuperLatch Demotions/sec
+8216
+Total Latch Wait Time (ms)
+8218
+Average Latch Wait Time Base
+8220
+SuperLatch Promotions/sec
+8222
+Number of SuperLatches
+8224
+Average Latch Wait Time (ms)
+8226
+MSSQL$DDMASTER:Access Methods
+8228
+Failed leaf page cookie
+8230
+Skipped Ghosted Records/sec
+8232
+Scan Point Revalidations/sec
+8234
+Dropped rowset cleanups/sec
+8236
+LobHandle Create Count
+8238
+By-reference Lob Create Count
+8240
+Probe Scans/sec
+8242
+Count Lob Readahead
+8244
+Used tree page cookie
+8246
+Worktables From Cache Base
+8248
+Extents Allocated/sec
+8250
+Count Push Off Row
+8252
+Pages compressed/sec
+8254
+AU cleanup batches/sec
+8256
+Worktables From Cache Ratio
+8258
+Range Scans/sec
+8260
+Page compression attempts/sec
+8262
+Count Pull In Row
+8264
+Failed AU cleanup batches/sec
+8266
+FreeSpace Scans/sec
+8268
+Failed tree page cookie
+8270
+Page Deallocations/sec
+8272
+Full Scans/sec
+8274
+Table Lock Escalations/sec
+8276
+Forwarded Records/sec
+8278
+By-reference Lob Use Count
+8280
+Deferred Dropped rowsets
+8282
+Page Splits/sec
+8284
+InSysXact waits/sec
+8286
+LobSS Provider Truncation Count
+8288
+Dropped rowsets skipped/sec
+8290
+Used leaf page cookie
+8292
+FreeSpace Page Fetches/sec
+8294
+Deferred dropped AUs
+8296
+Pages Allocated/sec
+8298
+LobSS Provider Create Count
+8300
+Workfiles Created/sec
+8302
+Extent Deallocations/sec
+8304
+LobHandle Destroy Count
+8306
+Index Searches/sec
+8308
+AU cleanups/sec
+8310
+Mixed page allocations/sec
+8312
+Worktables Created/sec
+8314
+LobSS Provider Destroy Count
+8316
+MSSQL$DDMASTER:SQL Errors
+8318
+Errors/sec
+8320
+MSSQL$DDMASTER:SQL Statistics
+8322
+Failed Auto-Params/sec
+8324
+Unsafe Auto-Params/sec
+8326
+Misguided plan executions/sec
+8328
+SQL Attention rate
+8330
+Forced Parameterizations/sec
+8332
+Safe Auto-Params/sec
+8334
+Batch Requests/sec
+8336
+Guided plan executions/sec
+8338
+SQL Re-Compilations/sec
+8340
+SQL Compilations/sec
+8342
+Auto-Param Attempts/sec
+8344
+MSSQL$DDMASTER:Plan Cache
+8346
+Cache Object Counts
+8348
+Cache Hit Ratio Base
+8350
+Cache Pages
+8352
+Cache Hit Ratio
+8354
+Cache Objects in use
+8356
+MSSQL$DDMASTER:Cursor Manager by Type
+8358
+Cursor memory usage
+8360
+Cache Hit Ratio
+8362
+Cursor Cache Use Counts/sec
+8364
+Number of active cursor plans
+8366
+Cached Cursor Counts
+8368
+Cursor Requests/sec
+8370
+Cache Hit Ratio Base
+8372
+Cursor worktable usage
+8374
+Active cursors
+8376
+MSSQL$DDMASTER:Cursor Manager Total
+8378
+Cursor conversion rate
+8380
+Cursor flushes
+8382
+Async population count
+8384
+MSSQL$DDMASTER:Memory Manager
+8386
+SQL Cache Memory (KB)
+8388
+Maximum Workspace Memory (KB)
+8390
+Log Pool Memory (KB)
+8392
+External benefit of memory
+8394
+Target Server Memory (KB)
+8396
+Free Memory (KB)
+8398
+Lock Owner Blocks Allocated
+8400
+Memory Grants Outstanding
+8402
+Total Server Memory (KB)
+8404
+Lock Blocks
+8406
+Stolen Server Memory (KB)
+8408
+Memory Grants Pending
+8410
+Database Cache Memory (KB)
+8412
+Lock Memory (KB)
+8414
+Lock Owner Blocks
+8416
+Connection Memory (KB)
+8418
+Lock Blocks Allocated
+8420
+Optimizer Memory (KB)
+8422
+Reserved Server Memory (KB)
+8424
+Granted Workspace Memory (KB)
+8426
+MSSQL$DDMASTER:Memory Node
+8428
+Foreign Node Memory (KB)
+8430
+Free Node Memory (KB)
+8432
+Target Node Memory (KB)
+8434
+Database Node Memory (KB)
+8436
+Total Node Memory (KB)
+8438
+Stolen Node Memory (KB)
+8440
+MSSQL$DDMASTER:User Settable
+8442
+Query
+8444
+MSSQL$DDMASTER:Replication Agents
+8446
+Running
+8448
+MSSQL$DDMASTER:Replication Merge
+8450
+Uploaded Changes/sec
+8452
+Conflicts/sec
+8454
+Downloaded Changes/sec
+8456
+MSSQL$DDMASTER:Replication Logreader
+8458
+Logreader:Delivered Cmds/sec
+8460
+Logreader:Delivery Latency
+8462
+Logreader:Delivered Trans/sec
+8464
+MSSQL$DDMASTER:Replication Dist.
+8466
+Dist:Delivered Trans/sec
+8468
+Dist:Delivered Cmds/sec
+8470
+Dist:Delivery Latency
+8472
+MSSQL$DDMASTER:Replication Snapshot
+8474
+Snapshot:Delivered Trans/sec
+8476
+Snapshot:Delivered Cmds/sec
+8478
+MSSQL$DDMASTER:Backup Device
+8480
+Device Throughput Bytes/sec
+8482
+MSSQL$DDMASTER:Transactions
+8484
+Version Store Size (KB)
+8486
+Longest Transaction Running Time
+8488
+Transactions
+8490
+Version Store unit truncation
+8492
+NonSnapshot Version Transactions
+8494
+Snapshot Transactions
+8496
+Update Snapshot Transactions
+8498
+Version Store unit count
+8500
+Version Store unit creation
+8502
+Version Generation rate (KB/s)
+8504
+Version Cleanup rate (KB/s)
+8506
+Free Space in tempdb (KB)
+8508
+Update conflict ratio
+8510
+Update conflict ratio base
+8512
+MSSQL$DDMASTER:Broker Statistics
+8514
+Enqueued P8 Messages/sec
+8516
+Enqueued P3 Messages/sec
+8518
+Enqueued P7 Messages/sec
+8520
+Enqueued Transport Msg Frags/sec
+8522
+Enqueued P4 Messages/sec
+8524
+SQL SEND Total
+8526
+Enqueued Transport Msg Frag Tot
+8528
+SQL RECEIVEs/sec
+8530
+Enqueued Messages Total
+8532
+Enqueued P10 Messages/sec
+8534
+Corrupted Messages Total
+8536
+Dequeued TransmissionQ Msgs/sec
+8538
+Enqueued Messages/sec
+8540
+SQL SENDs/sec
+8542
+Forwarded Msg Discarded Total
+8544
+Dialog Timer Event Count
+8546
+Activation Errors Total
+8548
+Enqueued TransmissionQ Msgs/sec
+8550
+Forwarded Msg Bytes/sec
+8552
+Forwarded Pending Msg Count
+8554
+Dropped Messages Total
+8556
+SQL RECEIVE Total
+8558
+Enqueued Transport Msgs/sec
+8560
+Enqueued Local Messages Total
+8562
+Enqueued P1 Messages/sec
+8564
+Broker Transaction Rollbacks
+8566
+Enqueued P9 Messages/sec
+8568
+Forwarded Pending Msg Bytes
+8570
+Forwarded Messages Total
+8572
+Enqueued P6 Messages/sec
+8574
+Enqueued Local Messages/sec
+8576
+Forwarded Messages/sec
+8578
+Forwarded Msgs Discarded/sec
+8580
+Enqueued P5 Messages/sec
+8582
+Enqueued Transport Msgs Total
+8584
+Forwarded Msg Byte Total
+8586
+Enqueued P2 Messages/sec
+8588
+MSSQL$DDMASTER:Broker/DBM Transport
+8590
+Msg Fragment Recv Size Avg
+8592
+Current Msg Frags for Send I/O
+8594
+Send Flow Control Enters/sec
+8596
+Message Fragment Sends/sec
+8598
+Send I/Os/sec
+8600
+Receive I/O bytes/sec
+8602
+Message Fragment P6 Sends/sec
+8604
+Decrypted I/O bytes/sec
+8606
+Message Fragment P7 Sends/sec
+8608
+Send I/O Len Avg
+8610
+Message Fragment P5 Sends/sec
+8612
+Msg Fragment Send Size Avg
+8614
+Open Connection Count
+8616
+Send I/O bytes/sec
+8618
+Message Fragment P4 Sends/sec
+8620
+Send Flow Control Exits/sec
+8622
+Recv I/O Buffer Copies Count
+8624
+Receive I/O Len Avg
+8626
+Send I/O Len Avg Base
+8628
+Encrypted I/O bytes/sec
+8630
+Msg Fragment Send Size Avg Base
+8632
+Receive Flow Control Enters/sec
+8634
+Receive I/O Len Avg Base
+8636
+Message Fragment P1 Sends/sec
+8638
+Message Fragment P2 Sends/sec
+8640
+Pending Bytes for Recv I/O
+8642
+Msg Fragment Recv Size Avg Base
+8644
+Message Fragment Receives/sec
+8646
+Message Fragment P3 Sends/sec
+8648
+Message Fragment P9 Sends/sec
+8650
+Current Bytes for Send I/O
+8652
+Pending Msg Frags for Recv I/O
+8654
+Message Fragment P8 Sends/sec
+8656
+Receive I/Os/sec
+8658
+Message Fragment P10 Sends/sec
+8660
+Send Flow Control Gate
+8662
+Pending Bytes for Send I/O
+8664
+Encryption I/Os/sec
+8666
+Recv I/O Buffer Copies bytes/sec
+8668
+Pending Msg Frags for Send I/O
+8670
+Receive Flow Control Gate
+8672
+Receive Flow Control Exits/sec
+8674
+Current Bytes for Recv I/O
+8676
+Decryption I/Os/sec
+8678
+MSSQL$DDMASTER:Broker Activation
+8680
+Task Limit Reached/sec
+8682
+Task Limit Reached
+8684
+Tasks Running
+8686
+Stored Procedures Invoked/sec
+8688
+Tasks Aborted/sec
+8690
+Tasks Started/sec
+8692
+MSSQL$DDMASTER:Broker TO Statistics
+8694
+Transmission Obj Writes/Sec
+8696
+Avg. Length of Batched Writes
+8698
+Avg. Time to Write Batch (ms)
+8700
+Avg. Time Between Batches Base
+8702
+Avg. Time Between Batches (ms)
+8704
+Avg. Length of Batched Writes BS
+8706
+Transmission Obj Set Dirty/Sec
+8708
+Transmission Obj Gets/Sec
+8710
+Avg. Time to Write Batch Base
+8712
+MSSQL$DDMASTER:Wait Statistics
+8714
+Workspace synchronization waits
+8716
+Non-Page latch waits
+8718
+Page latch waits
+8720
+Thread-safe memory objects waits
+8722
+Page IO latch waits
+8724
+Wait for the worker
+8726
+Log write waits
+8728
+Transaction ownership waits
+8730
+Lock waits
+8732
+Network IO waits
+8734
+Memory grant queue waits
+8736
+Log buffer waits
+8738
+MSSQL$DDMASTER:Exec Statistics
+8740
+OLEDB calls
+8742
+Distributed Query
+8744
+DTC calls
+8746
+Extended Procedures
+8748
+MSSQL$DDMASTER:CLR
+8750
+CLR Execution
+8752
+MSSQL$DDMASTER:Catalog Metadata
+8754
+Cache Entries Count
+8756
+Cache Hit Ratio
+8758
+Cache Hit Ratio Base
+8760
+Cache Entries Pinned Count
+8762
+MSSQL$DDMASTER:CloudDB Messaging
+8764
+Received messages rate (#/s)
+8766
+Sent messages rate (bytes/s)
+8768
+Sent messages rate (#/s)
+8770
+Received messages rate (bytes/s)
+8772
+MSSQL$DDMASTER:CloudDB Replication
+8774
+Active partition delete scans
+8776
+Combined queues size (bytes)
+8778
+Pending partition copy scans
+8780
+Active partition copy scans
+8782
+Pending partition delete scans
+8784
+Active log catchup scans
+8786
+Secondary committed trans rate
+8788
+Primary committed trans rate
+8790
+MSSQL$DDMASTER:Trace Statistics
+8792
+Dropped events/sec
+8794
+Bytes/sec
+8796
+Events Fired/sec
+8798
+Events Filtered/sec
+8800
+MSSQL$DDMASTER:Trace Event Statistics
+8802
+Events Filtered/sec
+8804
+Events Prefiltered/sec
+8806
+CPU Ticks/sec
+8808
+Bytes/sec
+8810
+Events Fired/sec
+8812
+MSSQL$DDMASTER:Deprecated Features
+8814
+Usage
+8816
+MSSQL$DDMASTER:Workload Group Stats
+8818
+Queued requests
+8820
+Disk msec/Read Base
+8822
+Requests completed/sec
+8824
+Disk Violations/sec
+8826
+Disk Read Bytes/sec
+8828
+Avg Disk msec/Write
+8830
+Suboptimal plans/sec
+8832
+Max request memory grant (KB)
+8834
+CPU usage % base
+8836
+Avg Disk msec/Read
+8838
+Active parallel threads
+8840
+Disk msec/Write Base
+8842
+Disk Write Bytes/sec
+8844
+Active requests
+8846
+Query optimizations/sec
+8848
+Disk Reads/sec
+8850
+CPU usage %
+8852
+Reduced memory grants/sec
+8854
+Disk Writes/sec
+8856
+Blocked tasks
+8858
+Max request cpu time (ms)
+8860
+MSSQL$DDMASTER:Resource Pool Stats
+8862
+Disk Write IO Throttled/sec
+8864
+Max memory (KB)
+8866
+Query exec memory target (KB)
+8868
+Target memory (KB)
+8870
+Memory grants/sec
+8872
+CPU usage %
+8874
+Disk Read IO Throttled/sec
+8876
+Active memory grant amount (KB)
+8878
+Disk Write Bytes/sec
+8880
+Active memory grants count
+8882
+CPU usage target %
+8884
+CPU control effect %
+8886
+Avg Disk Write IO (ms)
+8888
+Avg Disk Read IO (ms) Base
+8890
+Used memory (KB)
+8892
+Disk Read IO Issued/sec
+8894
+Disk Write IO Issued/sec
+8896
+Disk Write IO/sec
+8898
+Avg Disk Read IO (ms)
+8900
+Cache memory target (KB)
+8902
+Pending memory grants count
+8904
+Compile memory target (KB)
+8906
+CPU usage % base
+8908
+Memory grant timeouts/sec
+8910
+Disk Read Bytes/sec
+8912
+Avg Disk Write IO (ms) Base
+8914
+Disk Read IO/sec
+8916
+MSSQL$DDMASTER:Transaction Manager
+8918
+AGE hardening time Base
+8920
+Avg. AGE hardening time
+8922
+AGE responses received/sec
+8924
+Average life of AGE Base
+8926
+Orders broadcast/sec
+8928
+Average life of AGE broadcast
+8930
+Size of AGE Message Base
+8932
+Number of AGE broadcasts/sec
+8934
+Avg. size of AGE Message
+8936
+MSSQL$DDMASTER:TCM Agents
+8938
+Transactions Started/sec
+8940
+Transaction participants/sec
+8942
+Avg. AGE processing time
+8944
+Xaction requests per AGE Base
+8946
+AGE processing time BASE
+8948
+Transactions committed per AGE
+8950
+Transaction requests per AGE
+8952
+Average commit wait time
+8954
+Average tran prepare time
+8956
+Transactions committed/sec
+8958
+Transaction branches/sec
+8960
+Average commit wait time Base
+8962
+Xactions committed per AGE Base
+8964
+Transactions rolled back/sec
+8966
+Average tran prepare time Base
+8968
+MSSQL$DDMASTER:FileTable
+8970
+FileTable enumeration reqs/sec
+8972
+Time per file I/O request BASE
+8974
+Avg time FileTable enumeration
+8976
+Time per file I/O response BASE
+8978
+Avg time rename FileTable item
+8980
+FileTable file I/O response/sec
+8982
+Avg time move FileTable item
+8984
+FileTable table operations/sec
+8986
+FileTable kill handle ops/sec
+8988
+FileTable item rename reqs/sec
+8990
+Time delete FileTable item BASE
+8992
+Time FileTable handle kill BASE
+8994
+Avg time per file I/O request
+8996
+Avg time per file I/O response
+8998
+Time FileTable enumeration BASE
+9000
+Time update FileTable item BASE
+9002
+FileTable item get requests/sec
+9004
+Avg time to get FileTable item
+9006
+FileTable item move reqs/sec
+9008
+FileTable file I/O requests/sec
+9010
+Time move FileTable item BASE
+9012
+Avg time FileTable handle kill
+9014
+Time to get FileTable item BASE
+9016
+FileTable db operations/sec
+9018
+Avg time update FileTable item
+9020
+FileTable item delete reqs/sec
+9022
+FileTable item update reqs/sec
+9024
+Avg time delete FileTable item
+9026
+Time rename FileTable item BASE
+9028
+MSSQL$DDMASTER:Batch Resp Statistics
+9030
+Batches >=000010ms & <000020ms
+9032
+Batches >=000002ms & <000005ms
+9034
+Batches >=100000ms
+9036
+Batches >=050000ms & <100000ms
+9038
+Batches >=005000ms & <010000ms
+9040
+Batches >=000500ms & <001000ms
+9042
+Batches >=000000ms & <000001ms
+9044
+Batches >=000001ms & <000002ms
+9046
+Batches >=000050ms & <000100ms
+9048
+Batches >=000005ms & <000010ms
+9050
+Batches >=020000ms & <050000ms
+9052
+Batches >=000100ms & <000200ms
+9054
+Batches >=002000ms & <005000ms
+9056
+Batches >=010000ms & <020000ms
+9058
+Batches >=000200ms & <000500ms
+9060
+Batches >=000020ms & <000050ms
+9062
+Batches >=001000ms & <002000ms
+9064
+MSSQL$DDMASTER:Throttl Soft Partition
+9066
+Data read IO delay throttling
+9068
+Log write IO delay throttling
+9070
+Data space throttling
+9072
+Busy workers throttling
+9074
+Log space throttling
+9076
+MSSQL$DDMASTER:Throttl Hard Partition
+9078
+Log write IO delay throttling
+9080
+Log space throttling
+9082
+Data space throttling
+9084
+Data read IO delay throttling
+9086
+Busy workers throttling
+9088
+MSSQL$DDMASTER:HTTP Storage
+9090
+Avg. microsec/Read BASE
+9092
+Transfers/Sec
+9094
+Avg. Bytes/Write BASE
+9096
+HTTP Storage IO retry/sec
+9098
+Avg. Bytes/Read
+9100
+Avg. microsec/Write BASE
+9102
+Reads/Sec
+9104
+Avg. microsec/Read
+9106
+Avg. Bytes/Transfer BASE
+9108
+Total Bytes/Sec
+9110
+Avg. microsec/Transfer
+9112
+Read Bytes/Sec
+9114
+Avg. microsec/Write
+9116
+Write Bytes/Sec
+9118
+Writes/Sec
+9120
+Avg. Bytes/Write
+9122
+Avg. Bytes/Read BASE
+9124
+Avg. microsec/Transfer BASE
+9126
+Outstanding HTTP Storage IO
+9128
+Avg. Bytes/Transfer
+9176
+ReportServer$DDMASTER:Service
+9178
+Requests Rejected
+9180
+Bytes Received Total
+9182
+Active Connections
+9184
+Requests Disconnected
+9186
+Requests Not Authorized
+9188
+Logon Successes/sec
+9190
+Tasks Queued
+9192
+Bytes Received/sec
+9194
+Requests Total
+9196
+Errors/sec
+9198
+Logon Attempts/sec
+9200
+Errors Total
+9202
+Logon Successes Total
+9204
+Memory Shrink Notifications/sec
+9206
+Bytes Sent Total
+9208
+Memory Pressure State
+9210
+Logon Attempts Total
+9212
+Bytes Sent/sec
+9214
+Requests/sec
+9216
+Memory Shrink Amount
+9218
+Requests Executing
+9220
+MSRS 2014 Web Service
+9222
+Report Requests
+9224
+Total Reports Executed
+9226
+Reports Executed/Sec
+9228
+Total Processing Failures
+9230
+Total Rejected Threads
+9232
+Active Sessions
+9234
+First Session Requests/Sec
+9236
+Next Session Requests/Sec
+9238
+Total Cache Hits
+9240
+Cache Hits/Sec
+9242
+Total Cache Misses
+9244
+Cache Misses/Sec
+9246
+Total Requests
+9248
+Requests/Sec
+9250
+Total Memory Cache Hits
+9252
+Memory Cache Hits/Sec
+9254
+Total Memory Cache Misses
+9256
+Memory Cache Miss/Sec
+9258
+Total Cache Hits (Semantic Models)
+9260
+Cache Hits/Sec (Semantic Models)
+9262
+Total Cache Misses (Semantic Models)
+9264
+Cache Misses/Sec (Semantic Models)
+9266
+MSRS 2014 Windows Service
+9268
+Report Requests
+9270
+Total Reports Executed
+9272
+Reports Executed/Sec
+9274
+Total Processing Failures
+9276
+Total Rejected Threads
+9278
+Active Sessions
+9280
+First Session Requests/Sec
+9282
+Next Session Requests/Sec
+9284
+Total Cache Hits
+9286
+Cache Hits/Sec
+9288
+Total Cache Misses
+9290
+Cache Misses/Sec
+9292
+Total Requests
+9294
+Requests/Sec
+9296
+Total Memory Cache Hits
+9298
+Memory Cache Hits/Sec
+9300
+Total Memory Cache Misses
+9302
+Memory Cache Miss/Sec
+9304
+Total Cache Hits (Semantic Models)
+9306
+Cache Hits/Sec (Semantic Models)
+9308
+Total Cache Misses (Semantic Models)
+9310
+Cache Misses/Sec (Semantic Models)
+9312
+Total App Domain Recycles
+9314
+Total Deliveries
+9316
+Delivers/Sec
+9318
+Total Events
+9320
+Events/Sec
+9322
+Total Snapshot Updates
+9324
+Snapshot Updates/Sec
+9326
+Total Cache Flushes
+9328
+Cache Flushes/Sec
+9330
+MSRS 2014 Web Service SharePoint Mode
+9332
+Report Requests
+9334
+Total Reports Executed
+9336
+Reports Executed/Sec
+9338
+Total Processing Failures
+9340
+Total Rejected Threads
+9342
+Active Sessions
+9344
+First Session Requests/Sec
+9346
+Next Session Requests/Sec
+9348
+Total Cache Hits
+9350
+Cache Hits/Sec
+9352
+Total Cache Misses
+9354
+Cache Misses/Sec
+9356
+Total Requests
+9358
+Requests/Sec
+9360
+Total Memory Cache Hits
+9362
+Memory Cache Hits/Sec
+9364
+Total Memory Cache Misses
+9366
+Memory Cache Miss/Sec
+9368
+Total Cache Hits (Semantic Models)
+9370
+Cache Hits/Sec (Semantic Models)
+9372
+Total Cache Misses (Semantic Models)
+9374
+Cache Misses/Sec (Semantic Models)
+9376
+MSRS 2014 Windows Service SharePoint Mode
+9378
+Report Requests
+9380
+Total Reports Executed
+9382
+Reports Executed/Sec
+9384
+Total Processing Failures
+9386
+Total Rejected Threads
+9388
+Active Sessions
+9390
+First Session Requests/Sec
+9392
+Next Session Requests/Sec
+9394
+Total Cache Hits
+9396
+Cache Hits/Sec
+9398
+Total Cache Misses
+9400
+Cache Misses/Sec
+9402
+Total Requests
+9404
+Requests/Sec
+9406
+Total Memory Cache Hits
+9408
+Memory Cache Hits/Sec
+9410
+Total Memory Cache Misses
+9412
+Memory Cache Miss/Sec
+9414
+Total Cache Hits (Semantic Models)
+9416
+Cache Hits/Sec (Semantic Models)
+9418
+Total Cache Misses (Semantic Models)
+9420
+Cache Misses/Sec (Semantic Models)
+9422
+Total App Domain Recycles
+9424
+Total Deliveries
+9426
+Delivers/Sec
+9428
+Total Events
+9430
+Events/Sec
+9432
+Total Snapshot Updates
+9434
+Snapshot Updates/Sec
+9436
+Total Cache Flushes
+9438
+Cache Flushes/Sec
+9440
+Alerting: event queue length
+9442
+Alerting: events processed - FireAlert
+9444
+Alerting: events processed - FireSchedule
+9446
+Alerting: events processed - CreateSchedule
+9448
+Alerting: events processed - UpdateSchedule
+9450
+Alerting: events processed - DeleteSchedule
+9452
+Alerting: events processed - GenerateAlert
+9454
+Alerting: events processed - DeliverAlert
+9456
+ReportServerSharePoint:Service
+9458
+Memory Pressure State
+9460
+Memory Shrink Amount
+9462
+Memory Shrink Notifications/Sec
+10926
+SQLAgent$DDMASTER:Jobs
+10928
+Failed jobs
+10930
+Successful jobs
+10932
+Active jobs
+10934
+Queued jobs
+10936
+Jobs activated/minute
+10938
+Successful jobs base
+10940
+Job success rate
+10942
+SQLAgent$DDMASTER:JobSteps
+10944
+Queued steps
+10946
+Active steps
+10948
+Total step retries
+10950
+SQLAgent$DDMASTER:Alerts
+10952
+Activated alerts
+10954
+Alerts activated/minute
+10956
+SQLAgent$DDMASTER:Statistics
+10958
+SQL Server restarted
+10960
+SQLAgent$DDMASTER:SystemJobs
+10962
+Successful system jobs
+10964
+Queued system jobs
+10966
+System Jobs activated/minute
+10968
+Failed system jobs
+10970
+Active system jobs
+11510
+WMI Objects
+11512
+HiPerf Classes
+11514
+HiPerf Validity
+11516
+Battery Status
+11518
+Charge Rate
+11520
+Discharge Rate
+11522
+Remaining Capacity
+11524
+Tag
+11526
+Voltage
+11528
+iSCSI Connections
+11530
+Bytes Received
+11532
+Bytes Sent
+11534
+PDUs Sent
+11536
+PDUs Received
+11538
+iSCSI Initiator Instance
+11540
+Session Cxn Timeout Errors
+11542
+Session Digest Errors
+11544
+Sessions Failed
+11546
+Session Format Errors
+11548
+iSCSI Initiator Login statistics
+11550
+Login Accept Responses
+11552
+Logins  Failed
+11554
+Login Authentication Failed Responses
+11556
+Failed Logins
+11558
+Login Negotiation Failed
+11560
+Login Other Failed Responses
+11562
+Login Redirect Responses
+11564
+Logout Normal
+11566
+Logout Other Codes
+11568
+iSCSI HBA Main Mode IPSEC Statistics
+11570
+AcquireFailures
+11572
+AcquireHeapSize
+11574
+ActiveAcquire
+11576
+ActiveReceive
+11578
+AuthenticationFailures
+11580
+ConnectionListSize
+11582
+GetSPIFailures
+11584
+InvalidCookiesReceived
+11586
+InvalidPackets
+11588
+KeyAdditionFailures
+11590
+KeyAdditions
+11592
+KeyUpdateFailures
+11594
+KeyUpdates
+11596
+NegotiationFailures
+11598
+OakleyMainMode
+11600
+OakleyQuickMode
+11602
+ReceiveFailures
+11604
+ReceiveHeapSize
+11606
+SendFailures
+11608
+SoftAssociations
+11610
+TotalGetSPI
+11612
+MSiSCSI_NICPerformance
+11614
+BytesReceived
+11616
+BytesTransmitted
+11618
+PDUReceived
+11620
+PDUTransmitted
+11622
+iSCSI HBA Quick Mode IPSEC Statistics
+11624
+ActiveSA
+11626
+ActiveTunnels
+11628
+AuthenticatedBytesReceived
+11630
+AuthenticatedBytesSent
+11632
+BadSPIPackets
+11634
+ConfidentialBytesReceived
+11636
+ConfidentialBytesSent
+11638
+KeyAdditions
+11640
+KeyDeletions
+11642
+PacketsNotAuthenticated
+11644
+PacketsNotDecrypted
+11646
+PacketsWithReplayDetection
+11648
+PendingKeyOperations
+11650
+ReKeys
+11652
+TransportBytesReceived
+11654
+TransportBytesSent
+11656
+TunnelBytesReceived
+11658
+TunnelBytesSent
+11660
+iSCSI Request Processing Time
+11662
+Average Request Processing Time
+11664
+Max Request Processing Time
+11666
+iSCSI Sessions
+11668
+Bytes Received
+11670
+Bytes Sent
+11672
+ConnectionTimeout Errors
+11674
+Digest Errors
+11676
+Format Errors
+11678
+PDUs Sent
+11680
+PDUs Received
+11682
+Processor Performance
+11684
+Processor Frequency
+11686
+% of Maximum Frequency
+11688
+Processor State Flags
+1900
+Telefoni
+1902
+Antal linjer
+1904
+Antal telefonenheter
+1906
+Antal aktiva linjer
+1908
+Antal aktiva telefoner
+1910
+Utgående anrop/s
+1912
+Inkommande anrop/s
+1914
+Antal klientprogram
+1916
+Pågående utgående samtal
+1918
+Pågående inkommande samtal
+1928
+Databas
+1930
+Konverterade sidor/sek
+1932
+Konverterade sidor
+1934
+Konverterade poster/sek
+1936
+Konverterade poster
+1938
+Defragmenteringsaktiviteter
+1940
+Väntande defragmenteringsaktiviteter
+1942
+Avvisade defragmenteringsaktiviteter
+1944
+Planerade defragmenteringsaktiviteter/sek
+1946
+Slutförda defragmenteringsaktiviteter/sek
+1948
+Heap-allok./sek
+1950
+Heap-frig./sek
+1952
+Heap-allokeringar
+1954
+Allokerade heap-byte
+1956
+Reserverade sidbyte
+1958
+Dedicerade sidbyte
+1960
+FCB Async Scan/sec
+1962
+FCB Async Purge/sec
+1964
+FCB Async Threshold-Scan/sec
+1966
+FCB Async Threshold-Purge/sec
+1968
+FCB Async Threshold Purge Failures (Conflicts)/sec
+1970
+FCB Async Threshold Purge Failures (In Use)/sec
+1972
+FCB Async Threshold Purge Failures (Sentinel)/sec
+1974
+FCB Async Threshold Purge Failures (Delete Pending)/sec
+1976
+FCB Async Threshold Purge Failures (Outstanding Versions)/sec
+1978
+FCB Async Threshold Purge Failures (LV Outstanding)/sec
+1980
+FCB Async Threshold Purge Failures (Index Outstanding)/sec
+1982
+FCB Async Threshold Purge Failures (Active Tasks)/sec
+1984
+FCB Async Threshold Purge Failures (Callbacks)/sec
+1986
+FCB Async Threshold Purge Failures (Other)/sec
+1988
+FCB Async Purge Failures (Conflicts)/sec
+1990
+FCB Async Purge Failures (In Use)/sec
+1992
+FCB Async Purge Failures (Sentinel)/sec
+1994
+FCB Async Purge Failures (Delete Pending)/sec
+1996
+FCB Async Purge Failures (Outstanding Versions)/sec
+1998
+FCB Async Purge Failures (LV Outstanding)/sec
+2000
+FCB Async Purge Failures (Index Outstanding)/sec
+2002
+FCB Async Purge Failures (Active Tasks)/sec
+2004
+FCB Async Purge Failures (Callbacks)/sec
+2006
+FCB Async Purge Failures (Other)/sec
+2008
+FCB Sync Purge/sec
+2010
+FCB Sync Purge Stalls/sec
+2012
+FCB-allokeringar som väntat på versionsresningar per sekund
+2014
+FCB tömning när pekaren stängs/sek
+2016
+FCB-cache % träffar
+2018
+No name
+2020
+FCB cacheuppehåll/sek
+2022
+Maximal FCB-cache
+2024
+Önskad FCB-cache
+2026
+Allokerad FCB-cache
+2028
+FCB Cache Allocated/sec
+2030
+Tillgänglig FCB-cache
+2032
+FCB Attached RCEs
+2034
+Sessions In Use
+2036
+Sessions % Used
+2038
+No name
+2040
+Resource Manager FCB Allocated
+2042
+Resource Manager FCB Allocated Used
+2044
+Resource Manager FCB Quota
+2046
+Resource Manager FUCB Allocated
+2048
+Resource Manager FUCB Allocated Used
+2050
+Resource Manager FUCB Quota
+2052
+Resource Manager TDB Allocated
+2054
+Resource Manager TDB Allocated Used
+2056
+Resource Manager TDB Quota
+2058
+Resource Manager IDB Allocated
+2060
+Resource Manager IDB Allocated Used
+2062
+Resource Manager IDB Quota
+2064
+Öppnade tabeller från cache, % träffar
+2066
+No name
+2068
+Öppnade tabeller, träffar/sek
+2070
+Öppnade tabeller, missar/sek
+2072
+Table Open Pages Read/sec
+2074
+Table Open Pages Preread/sec
+2076
+Öppnade tabeller/sek
+2078
+Antal tabeller som stängs/sek
+2080
+Tabeller öppnas
+2082
+Log Bytes Write/sec
+2084
+Genererade loggbyte/sek
+2086
+Antal använda byte i loggbuffert
+2088
+Antal lediga byte i loggbuffert
+2090
+Antal byte i loggbuffert
+2092
+Väntande loggtrådar
+2094
+Loggkontrollpunkt i antal byte
+2096
+Loggkontrollpunkt i antal loggfiler
+2098
+Log Checkpoint Maintenance Outstanding IO Max
+2100
+User Read Only Transaction Commits to Level 0/sec
+2102
+User Read/Write Transaction Commits to Level 0 (Durable)/sec
+2104
+User Read/Write Transaction Commits to Level 0 (Lazy)/sec
+2106
+User Wait All Transaction Commits/sec
+2108
+User Wait Last Transaction Commits/sec
+2110
+User Transaction Commits to Level 0/sec
+2112
+User Read Only Transaction Rollbacks to Level 0/sec
+2114
+User Read/Write Transaction Rollbacks to Level 0/sec
+2116
+User Transaction Rollbacks to Level 0/sec
+2118
+System Read Only Transaction Commits to Level 0/sec
+2120
+System Read/Write Transaction Commits to Level 0 (Durable)/sec
+2122
+System Read/Write Transaction Commits to Level 0 (Lazy)/sec
+2124
+System Transaction Commits to Level 0/sec
+2126
+System Read Only Transaction Rollbacks to Level 0/sec
+2128
+System Read/Write Transaction Rollbacks to Level 0/sec
+2130
+System Transaction Rollbacks to Level 0/sec
+2132
+Sidallokering genom utökning av databasfil (asynkron)/sek
+2134
+Database Page Allocation File Extension Stalls/sec
+2136
+Database Page Allocation File Shrink Stalls/sec
+2138
+Log Records/sec
+2140
+Log Buffer Capacity Flushes/sec
+2142
+Log Buffer Commit Flushes/sec
+2144
+Log Buffer Flushes Skipped/sec
+2146
+Log Buffer Flushes Blocked/sec
+2148
+Loggbufferttömningar/sek
+2150
+Loggsparande/sek
+2152
+Antal skrivningar av hela loggsegment/sek
+2154
+Antal skrivningar av partiella loggsegment/sek
+2156
+Kasserade loggbyte/sek
+2158
+Loggpostuppehåll/sek
+2160
+Version Buckets Allocated
+2162
+Version Buckets Allocated for Deletes
+2164
+VER-behållarallokeringar som väntat på versionsrensningar per sekund
+2166
+Version Store Average RCE Bookmark Length
+2168
+Version Store Unnecessary Calls/sec
+2170
+Version Store Cleanup Tasks Asynchronously Dispatched/sec
+2172
+Version Store Cleanup Tasks Synchronously Dispatched/sec
+2174
+Version Store Cleanup Tasks Discarded/sec
+2176
+Version Store Cleanup Tasks Failures/sec
+2178
+Infogade poster/sek
+2180
+Borttagna poster/sek
+2182
+Ersatta poster/sek
+2184
+Onödiga postersättningar/sek
+2186
+Redundanta postersättningar/sek
+2188
+Escrow-uppdateringar av poster/sek
+2190
+Infogningar i sekundärt index/sek
+2192
+Borttagningar i sekundärt index/sek
+2194
+Falska uppdateringar av indexerad kolumn/sek
+2196
+Falska uppdateringar av tuple-indexerad kolumn/sek
+2198
+Uppdaterade inbäddade Long-värden för post/sek
+2200
+Tillagda avgränsade Long-värden för post/sek
+2202
+Framtvingade avgränsade Long-värden för post/sek
+2204
+Alla framtvingade avgränsade Long-värden för post/sek
+2206
+Referering av alla avgränsade Long-värden för post/sek
+2208
+Avreferering av alla avgränsade Long-värden för post/sek
+2210
+Sökningar efter avgränsade Long-värden/sek
+2212
+Hämtningar av avgränsade Long-värden/sek
+2214
+Genereringar av avgränsade Long-värden/sek
+2216
+Long-Value Maximum LID
+2218
+Uppdateringar av avgränsade Long-värden/sek
+2220
+Borttagningar av avgränsade Long-värden/sek
+2222
+Kopior av avgränsade Long-värden/sek
+2224
+Sökningar efter grupper med avgränsade Long-värden/sek
+2226
+Hämtningar av grupper med avgränsade Long-värden/sek
+2228
+Tillägg av grupper med avgränsade Long-värden/sek
+2230
+Ersättningar av grupper med avgränsade Long-värden/sek
+2232
+Borttagningar av grupper med avgränsade Long-värden/sek
+2234
+Kopior av grupper med avgränsade Long-värden/sek
+2236
+B+ Tree Append Splits/sec
+2238
+B+ Tree Right Splits/sec
+2240
+Antal delningar i B+-träd (hotpoint)/sek
+2242
+B+ Tree Vertical Splits/sec
+2244
+B+ Tree Splits/sec
+2246
+B+ Tree Empty Page Merges/sec
+2248
+B+ Tree Right Merges/sec
+2250
+B+ Tree Partial Merges/sec
+2252
+Sammanfogningar åt vänster i B+-träd/sek
+2254
+Sammanfogningar åt vänster i B+-träd/sek
+2256
+Sidflyttningar i B+-träd/sek
+2258
+B+ Tree Merges/sec
+2260
+Misslyckade enkla sidrensningsförsök i B+-träd/sek
+2262
+B+ Tree Seek Short Circuits/sec
+2264
+Opportuna läsningar i förväg i B+-träd/sek
+2266
+B+ Tree Unnecessary Sibling Latches/sec
+2268
+B+ Tree Move Nexts/sec
+2270
+Antal förflyttningar till nästa post i B+-träd (ej synliga noder ignoreras)/sek
+2272
+B+ Tree Move Nexts (Nodes Filtered)/sec
+2274
+B+ Tree Move Prevs/sec
+2276
+Antal förflyttningar till föregående post i B+-träd (ej synliga noder ignoreras)/sek
+2278
+B+ Tree Move Prevs (Nodes Filtered)/sec
+2280
+B+ Tree Seeks/sec
+2282
+B+ Tree Inserts/sec
+2284
+B+ Tree Replaces/sec
+2286
+B+ Tree Flag Deletes/sec
+2288
+B+ Tree Deletes/sec
+2290
+B+ Tree Appends/sec
+2292
+B+ Tree Creates/sec
+2294
+B+ Tree Creates (Total)
+2296
+B+ Tree Destroys/sec
+2298
+B+ Tree Destroys (Total)
+2300
+Trimmade sidor/sek
+2302
+Sidor trimmade (totalt)
+2304
+Ojusterade ej trimmade sidor/sek
+2306
+Ojusterade ej trimmade sidor (totalt)
+2308
+Smutsiga ej trimmade sidor/sek
+2310
+Smutsiga trimmade sidor (totalt)
+2312
+Missar i databascache/sek
+2314
+Databascache % träffar
+2316
+No name
+2318
+Procent databascacheträffar (ej korrelerade)
+2320
+No name
+2322
+Begäranden i databascache/sek
+2324
+Tillgänglig % offline i databascache
+2326
+No name
+2328
+Database Cache % Clean
+2330
+No name
+2332
+Asynkront lästa databassidor/sek
+2334
+Synkront lästa databassidor/sek
+2336
+Modifierade rena databassidor/sek
+2338
+Database Pages Dirtied (Repeatedly)/sec
+2340
+Database Pages Written/sec
+2342
+Utfärdad opportun skrivning i databas (totalt)
+2344
+Database Pages Transferred/sec
+2346
+OS Memory Pages Trimmed/sec
+2348
+Database Pages Trimmed/sec
+2350
+Database Pages Non-Resident Reclaimed (Soft Faulted)/sec
+2352
+Database Pages Non-Resident Reclaimed (Failed)/sec
+2354
+Database Pages Non-Resident Re-read/sec
+2356
+Database Pages Non-Resident Evicted (Normally)/sec
+2358
+Database Pages Non-Resident Faulted In Average Latency
+2360
+No name
+2362
+Spärrar för databassida/sek
+2364
+Snabbspärr för databassida/sek
+2366
+Tips om felaktig spärr för databassida/sek
+2368
+Databascache % snabbspärr
+2370
+No name
+2372
+Database Page Touches (Non-Touch)/sec
+2374
+Database Page Touches (k=1)/sec
+2376
+Database Page Touches (k=2)/sec
+2378
+Database Page Touches (Correlated)/sec
+2380
+Database Pages Colded (Ext)/sec
+2382
+Database Pages Colded (Int)/sec
+2384
+Spärrkonflikter för databassida/sek
+2386
+Spärruppehåll för databassida/sek
+2388
+Databascache % tillgängligt
+2390
+No name
+2392
+Database Page Faults/sec
+2394
+Database Page Evictions/sec
+2396
+Database Page Evictions (Preread Untouched)/sec
+2398
+Database Page Evictions (k=1)/sec
+2400
+Database Page Evictions (k=2)/sec
+2402
+Database Page Evictions (Scavenging)/sec
+2404
+Database Page Evictions (Scavenging.SuperCold.Int)/sec
+2406
+Database Page Evictions (Scavenging.SuperCold.Ext)/sec
+2408
+Database Page Evictions (Shrink)/sec
+2410
+Database Page Evictions (Purge)/sec
+2412
+Database Page Evictions (Patch)/sec
+2414
+Database Page Fault Stalls/sec
+2416
+Cachestorlek för databas (MB)
+2418
+Cachestorlek för databas
+2420
+Effektiv databascachestorlek (MB)
+2422
+Effektiv databascachestorlek
+2424
+Allokerat databascacheminne (MB)
+2426
+Allokerat databascacheminne
+2428
+Reserverat databascacheminne (MB)
+2430
+Reserverat databascacheminne
+2432
+Database Cache Size Target (MB)
+2434
+Database Cache Size Target
+2436
+Minsta cachestorlek för databas
+2438
+Största cachestorlek för databas
+2440
+Fast storlek i databascache
+2442
+Fast storlek i databascache (MB)
+2444
+Database Cache Size Unattached (MB)
+2446
+Databascachestorlek - varaktighet
+2448
+Databascache % min. tillgängligt
+2450
+No name
+2452
+Databascache % max. tillgängligt
+2454
+No name
+2456
+Database Pages Preread/sec
+2458
+Database Page Preread Stalls/sec
+2460
+Database Pages Preread (Unnecessary)/sec
+2462
+Database Pages Dehydrated/sec
+2464
+Database Pages Rehydrated/sec
+2466
+Versioner av databassidor/sek
+2468
+Kopierade sidor i databasversion/sek
+2470
+Databascache % version
+2472
+No name
+2474
+Databassidor som skrivs upprepade gånger/sek
+2476
+Database Pages Flushed (Cache Shrink)/sec
+2478
+Database Pages Flushed (Checkpoint)/sec
+2480
+Database Pages Flushed (Checkpoint Foreground)/sec
+2482
+Database Pages Flushed (Context Flush)/sec
+2484
+Database Pages Flushed (Idle)/sec
+2486
+Database Pages Flushed (Filthy Foreground)/sec
+2488
+Database Pages Flushed (Scavenge)/sec
+2490
+Tömda databassidor (Scavenge.SuperCold.Int)/sek
+2492
+Tömda databassidor (Scavenge.SuperCold.Ext)/sek
+2494
+Database Pages Flushed Opportunely/sec
+2496
+Database Pages Flushed Opportunely Clean/sec
+2498
+Databassidor som skrivs ihop/sek
+2500
+Databassidor som läses ihop/sek
+2502
+Database cache lifetime
+2504
+Database Cache Lifetime (Supercold)
+2506
+Database Cache Lifetime(Longest)
+2508
+Database Cache Lifetime (Normal)
+2510
+Database Cache Lifetime (Low)
+2512
+Database Cache Lifetime Agg Var
+2514
+Databascache - omfång (K1)
+2516
+Databascache - omfång (K2)
+2518
+Genomsökningar av databassida/sek
+2520
+Databascacheskanning - flyttade sidor/sek
+2522
+Database Cache Scan Page Evaluated Out-of-Order/sec
+2524
+No name
+2526
+Databascacheskanning - poster/skanning
+2528
+Databascacheskanning - skannade hinkar/skanna
+2530
+Databascacheskanning - skannade tomma hinkar/skanna
+2532
+Databascache - omfattning av skannings-id/skanna
+2534
+Databascache - skanningstid (ms)/skanna
+2536
+Databascache - skanning hittades till uteslutningsintervall
+2538
+Database Cache Super Colded Resources
+2540
+Database Cache Super Cold Attempts/sec
+2542
+Database Cache Super Cold Successes/sec
+2544
+Historieposter för databassida
+2546
+Database Page History % Hit
+2548
+No name
+2550
+Fast % i databascache
+2552
+No name
+2554
+% komprimerat databascacheminne
+2556
+No name
+2558
+Database Pages Repeatedly Read/sec
+2560
+Lästa sidor för direktuppspelad säkerhetskopiering/sek
+2562
+Refererade sidor vid onlinedefragmentering/sek
+2564
+Lästa sidor vid onlinedefragmentering/sek
+2566
+I förväg lästa sidor vid onlinedefragmentering/sek
+2568
+Modifierade rena sidor vid onlinedefragmentering/sek
+2570
+Ytterligare modifiering av rena sidor vid onlinedefragmentering/sek
+2572
+Frigjorda sidor vid onlinedefragmentering/sek
+2574
+Dataflyttningar vid onlinedefragmentering/sek
+2576
+Dataflyttningar vid onlinedefrag/sek
+2578
+Loggposter vid onlinedefragmentering/sek
+2580
+Genomsnittlig loggstorlek vid onlinedefragmentering
+2582
+No name
+2584
+Databasunderhållets varaktighet
+2586
+Database Maintenance Pages Read
+2588
+Database Maintenance Pages Read/sec
+2590
+Database Maintenance Pages Zeroed
+2592
+Database Maintenance Pages Zeroed/sec
+2594
+Antal felaktiga kontrollsummor för underhåll av databassidor
+2596
+Database Maintenance IO Reads/sec
+2598
+Database Maintenance IO Reads Average Bytes
+2600
+No name
+2602
+Database Maintenance Throttle Setting
+2604
+Database Maintenance IO Re-Reads/sec
+2606
+Database Maintenance IO Re-Reads Average Bytes
+2608
+No name
+2610
+Database Maintenance IO Re-Reads Average Latency
+2612
+No name
+2614
+Refererade sidor vid databasåtgärder/sek
+2616
+Lästa sidor vid databasåtgärder/sek
+2618
+I förväg lästa sidor vid databasåtgärder/sek
+2620
+Modifierade rena sidor vid databasåtgärder/sek
+2622
+Ytterligare modifiering av rena sidor vid databasåtgärder/sek
+2624
+Loggposter vid databasåtgärder/sek
+2626
+Genomsnittlig loggstorlek vid databasåtgärder
+2628
+No name
+2630
+I/O-databasläsningar (anslutna)/sek
+2632
+Genomsnittlig tidsåtgång för I/O-databasläsningar (anslutna)
+2634
+No name
+2636
+I/O Database Reads (Attached) Average Bytes
+2638
+No name
+2640
+I/O Database Reads (Attached) In Heap
+2642
+I/O Database Reads (Attached) Async Pending
+2644
+I/O Database Reads (Attached) Abnormal Latency/sec
+2646
+I/O-databasläsningar (återställning)/sek
+2648
+Genomsnittlig tidsåtgång för I/O-databasläsningar (återställning)
+2650
+No name
+2652
+I/O Database Reads (Recovery) Average Bytes
+2654
+No name
+2656
+I/O Database Reads (Recovery) In Heap
+2658
+I/O Database Reads (Recovery) Async Pending
+2660
+I/O Database Reads (Recovery) Abnormal Latency/sec
+2662
+I/O-databasläsningar/sek
+2664
+Genomsnittlig tidsåtgång för I/O-databasläsningar
+2666
+No name
+2668
+I/O Database Reads Average Bytes
+2670
+No name
+2672
+I/O Database Reads In Heap
+2674
+I/O Database Reads Async Pending
+2676
+I/O Database Reads Abnormal Latency/sec
+2678
+I/O-loggläsningar/sek
+2680
+Genomsnittlig tidsåtgång per I/O-loggläsning
+2682
+No name
+2684
+Genomsnittligt antal byte per I/O-loggläsning
+2686
+No name
+2688
+Antal I/O-loggläsningar i heap
+2690
+Asynkront väntande I/O-loggläsningar
+2692
+Onormalt långsamma I/O-loggläsningar/sek
+2694
+I/O-databasskrivningar (anslutna)/sek
+2696
+Genomsnittlig tidsåtgång för I/O-databasskrivningar (anslutna)
+2698
+No name
+2700
+I/O Database Writes (Attached) Average Bytes
+2702
+No name
+2704
+I/O Database Writes (Attached) In Heap
+2706
+I/O Database Writes (Attached) Async Pending
+2708
+I/O Database Writes (Attached) Abnormal Latency/sec
+2710
+I/O-databasskrivningar (återställning)/sek
+2712
+Genomsnittlig tidsåtgång för I/O-databasskrivningar (återställning)
+2714
+No name
+2716
+I/O Database Writes (Recovery) Average Bytes
+2718
+No name
+2720
+I/O Database Writes (Recovery) In Heap
+2722
+I/O Database Writes (Recovery) Async Pending
+2724
+I/O Database Writes (Recovery) Abnormal Latency/sec
+2726
+I/O-databasskrivningar/sek
+2728
+Genomsnittlig tidsåtgång för I/O-databasskrivningar
+2730
+No name
+2732
+I/O Database Writes Average Bytes
+2734
+No name
+2736
+I/O Database Writes In Heap
+2738
+I/O Database Writes Async Pending
+2740
+I/O Database Writes Abnormal Latency/sec
+2742
+I/O-loggskrivningar/sek
+2744
+Genomsnittlig tidsåtgång per I/O-loggskrivning
+2746
+No name
+2748
+Genomsnittligt antal byte per I/O-loggskrivning
+2750
+No name
+2752
+Antal I/O-loggskrivningar i heap
+2754
+Asynkront väntande I/O-loggskrivningar
+2756
+Onormalt långsamma I/O-loggskrivningar/sek
+2758
+Blockerade trådar/sek
+2760
+Blockerade trådar
+2762
+Byte som inte komprimerats i post/sek
+2764
+Pages Reorganized (Other)/sec
+2766
+Pages Reorganized (Free Space Request)/sec
+2768
+Pages Reorganized (Page Move Logging)/sec
+2770
+Pages Reorganized (Dehydrate Buffer)/sec
+2772
+Programtillverkare
+2774
+Databas ==> TableClasses
+2776
+Infogade poster/sek
+2778
+Borttagna poster/sek
+2780
+Ersatta poster/sek
+2782
+Onödiga postersättningar/sek
+2784
+Redundanta postersättningar/sek
+2786
+Escrow-uppdateringar av poster/sek
+2788
+Infogningar i sekundärt index/sek
+2790
+Borttagningar i sekundärt index/sek
+2792
+Falska uppdateringar av indexerad kolumn/sek
+2794
+Falska uppdateringar av tuple-indexerad kolumn/sek
+2796
+Uppdaterade inbäddade Long-värden för post/sek
+2798
+Tillagda avgränsade Long-värden för post/sek
+2800
+Framtvingade avgränsade Long-värden för post/sek
+2802
+Alla framtvingade avgränsade Long-värden för post/sek
+2804
+Referering av alla avgränsade Long-värden för post/sek
+2806
+Avreferering av alla avgränsade Long-värden för post/sek
+2808
+Sökningar efter avgränsade Long-värden/sek
+2810
+Hämtningar av avgränsade Long-värden/sek
+2812
+Genereringar av avgränsade Long-värden/sek
+2814
+Long-Value Maximum LID
+2816
+Uppdateringar av avgränsade Long-värden/sek
+2818
+Borttagningar av avgränsade Long-värden/sek
+2820
+Kopior av avgränsade Long-värden/sek
+2822
+Sökningar efter grupper med avgränsade Long-värden/sek
+2824
+Hämtningar av grupper med avgränsade Long-värden/sek
+2826
+Tillägg av grupper med avgränsade Long-värden/sek
+2828
+Ersättningar av grupper med avgränsade Long-värden/sek
+2830
+Borttagningar av grupper med avgränsade Long-värden/sek
+2832
+Kopior av grupper med avgränsade Long-värden/sek
+2834
+Antal delningar i B+-träd (tillägg)/sek
+2836
+Antal delningar i B+-träd (höger)/sek
+2838
+Antal delningar i B+-träd (hotpoint)/sek
+2840
+Antal delningar i B+-träd (lodräta)/sek
+2842
+Antal delningar i B+-träd/sek
+2844
+Sammanfogningar av tomma sidor i B+-träd/sek
+2846
+Högersammanfogningar i B+-träd/sek
+2848
+Ofullständiga sammanfogningar i B+-träd/sek
+2850
+Sammanfogningar åt vänster i B+-träd/sek
+2852
+Delsammanfogningar åt vänster i B+-träd/sek
+2854
+Sidflyttningar i B+-träd/sek
+2856
+Sammanfogningar i B+-träd/sek
+2858
+Misslyckade enkla sidrensningsförsök i B+-träd/sek
+2860
+Sökningar efter kortslutningar i B+-träd/sek
+2862
+Opportuna läsningar i förväg i B+-träd/sek
+2864
+Onödiga underordnade spärrar för B+-träd/sek
+2866
+Förflyttningar till nästa post i B+-träd/sek
+2868
+Antal förflyttningar till nästa post i B+-träd (ej synliga noder ignoreras)/sek
+2870
+B+ Tree Move Nexts (Nodes Filtered)/sec
+2872
+Förflyttningar till föregående post i B+-träd/sek
+2874
+Antal förflyttningar till föregående post i B+-träd (ej synliga noder ignoreras)/sek
+2876
+B+ Tree Move Prevs (Nodes Filtered)/sec
+2878
+Sökningar i B+-träd/sek
+2880
+Infogningar i B+-träd/sek
+2882
+Ersättningar i B+-träd/sek
+2884
+Borttagningar av flaggor i B+-träd/sek
+2886
+Borttagningar i B+-träd/sek
+2888
+Tillägg i B+-träd/sek
+2890
+Genereringar i B+-träd/sek
+2892
+Genereringar i B+-träd (totalt)
+2894
+Raderingar i B+-träd/sek
+2896
+Raderingar i B+-träd (totalt)
+2898
+Orörda databassidor som lästs in i förväg/sek
+2900
+Database Page Evictions (k=1)/sec
+2902
+Database Page Evictions (k=2)/sec
+2904
+Database Page Evictions (Scavenging)/sec
+2906
+Database Page Evictions (Shrink)/sec
+2908
+Database Page Evictions (Purge)/sec
+2910
+Database Page Evictions (Patch)/sec
+2912
+Cachestorlek för databas (MB)
+2914
+Databascachestorlek
+2916
+Missar i databascache/sek
+2918
+Databascache % träffar
+2920
+No name
+2922
+Procent databascacheträffar (ej korrelerade)
+2924
+No name
+2926
+Begäranden i databascache/sek
+2928
+Asynkront lästa databassidor/sek
+2930
+Synkront lästa databassidor/sek
+2932
+Database Pages Dirtied/sec
+2934
+Database Pages Dirtied (Repeatedly)/sec
+2936
+Skrivna databassidor/sek
+2938
+Överförda databassidor/sek
+2940
+Database Pages Non-Resident Reclaimed (Soft Faulted)/sec
+2942
+Database Pages Non-Resident Reclaimed (Failed)/sec
+2944
+Database Pages Non-Resident Re-read/sec
+2946
+Database Pages Non-Resident Evicted (Normally)/sec
+2948
+Database Page Touches (Non-Touch)/sec
+2950
+Database Page Touches (k=1)/sec
+2952
+Database Page Touches (k=2)/sec
+2954
+Database Page Touches (Correlated)/sec
+2956
+Database Pages Colded (Ext)/sec
+2958
+Database Pages Colded (Int)/sec
+2960
+Databassidor som lästs in i förväg/sek
+2962
+Database Page Preread Stalls/sec
+2964
+Database Pages Preread (Unnecessary)/sec
+2966
+Database Pages Dehydrated/sec
+2968
+Database Pages Rehydrated/sec
+2970
+Versioner av databassidor/sek
+2972
+Kopierade sidor i databasversion/sek
+2974
+Databassidor som skrivs upprepade gånger/sek
+2976
+Database Pages Flushed (Cache Shrink)/sec
+2978
+Database Pages Flushed (Checkpoint)/sec
+2980
+Database Pages Flushed (Checkpoint Foreground)/sec
+2982
+Database Pages Flushed (Context Flush)/sec
+2984
+Database Pages Flushed (Idle)/sec
+2986
+Database Pages Flushed (Filthy Foreground)/sec
+2988
+Database Pages Flushed (Scavenge)/sec
+2990
+Database Pages Flushed Opportunely/sec
+2992
+Database Pages Flushed Opportunely Clean/sec
+2994
+Databassidor som skrivs ihop/sek
+2996
+Databassidor som läses ihop/sek
+2998
+Database Pages Repeatedly Read/sec
+3000
+FCB Async Scan/sec
+3002
+FCB Async Purge/sec
+3004
+FCB Async Threshold-Scan/sec
+3006
+FCB Async Threshold-Purge/sec
+3008
+FCB Async Threshold Purge Failures (Conflicts)/sec
+3010
+FCB Async Threshold Purge Failures (In Use)/sec
+3012
+FCB Async Threshold Purge Failures (Sentinel)/sec
+3014
+FCB Async Threshold Purge Failures (Delete Pending)/sec
+3016
+FCB Async Threshold Purge Failures (Outstanding Versions)/sec
+3018
+FCB Async Threshold Purge Failures (LV Outstanding)/sec
+3020
+FCB Async Threshold Purge Failures (Index Outstanding)/sec
+3022
+FCB Async Threshold Purge Failures (Active Tasks)/sec
+3024
+FCB Async Threshold Purge Failures (Callbacks)/sec
+3026
+FCB Async Threshold Purge Failures (Other)/sec
+3028
+FCB Async Purge Failures (Conflicts)/sec
+3030
+FCB Async Purge Failures (In Use)/sec
+3032
+FCB Async Purge Failures (Sentinel)/sec
+3034
+FCB Async Purge Failures (Delete Pending)/sec
+3036
+FCB Async Purge Failures (Outstanding Versions)/sec
+3038
+FCB Async Purge Failures (LV Outstanding)/sec
+3040
+FCB Async Purge Failures (Index Outstanding)/sec
+3042
+FCB Async Purge Failures (Active Tasks)/sec
+3044
+FCB Async Purge Failures (Callbacks)/sec
+3046
+FCB Async Purge Failures (Other)/sec
+3048
+FCB Sync Purge/sec
+3050
+Table Open Pages Read/sec
+3052
+Table Open Pages Preread/sec
+3054
+Databas ==> Instanser
+3056
+Konverterade sidor/sek
+3058
+Konverterade sidor
+3060
+Konverterade poster/sek
+3062
+Konverterade poster
+3064
+Defragmenteringsaktiviteter
+3066
+Väntande defragmenteringsaktiviteter
+3068
+Avvisade defragmenteringsaktiviteter
+3070
+Planerade defragmenteringsaktiviteter/sek
+3072
+Slutförda defragmenteringsaktiviteter/sek
+3074
+FCB Async Scan/sec
+3076
+FCB Async Purge/sec
+3078
+FCB Async Threshold-Scan/sec
+3080
+FCB Async Threshold-Purge/sec
+3082
+FCB Async Threshold Purge Failures (Conflicts)/sec
+3084
+FCB Async Threshold Purge Failures (In Use)/sec
+3086
+FCB Async Threshold Purge Failures (Sentinel)/sec
+3088
+FCB Async Threshold Purge Failures (Delete Pending)/sec
+3090
+FCB Async Threshold Purge Failures (Outstanding Versions)/sec
+3092
+FCB Async Threshold Purge Failures (LV Outstanding)/sec
+3094
+FCB Async Threshold Purge Failures (Index Outstanding)/sec
+3096
+FCB Async Threshold Purge Failures (Active Tasks)/sec
+3098
+FCB Async Threshold Purge Failures (Callbacks)/sec
+3100
+FCB Async Threshold Purge Failures (Other)/sec
+3102
+FCB Async Purge Failures (Conflicts)/sec
+3104
+FCB Async Purge Failures (In Use)/sec
+3106
+FCB Async Purge Failures (Sentinel)/sec
+3108
+FCB Async Purge Failures (Delete Pending)/sec
+3110
+FCB Async Purge Failures (Outstanding Versions)/sec
+3112
+FCB Async Purge Failures (LV Outstanding)/sec
+3114
+FCB Async Purge Failures (Index Outstanding)/sec
+3116
+FCB Async Purge Failures (Active Tasks)/sec
+3118
+FCB Async Purge Failures (Callbacks)/sec
+3120
+FCB Async Purge Failures (Other)/sec
+3122
+FCB Sync Purge/sec
+3124
+FCB Sync Purge Stalls/sec
+3126
+FCB-allokeringar som väntat på versionsresningar per sekund
+3128
+FCB tömning när pekaren stängs/sek
+3130
+FCB-cache % träffar
+3132
+No name
+3134
+FCB cacheuppehåll/sek
+3136
+Maximal FCB-cache
+3138
+Önskad FCB-cache
+3140
+Allokerad FCB-cache
+3142
+FCB Cache Allocated/sec
+3144
+Tillgänglig FCB-cache
+3146
+FCB Cache Allocations Failed
+3148
+FCB Cache Allocation Average Latency (ms)
+3150
+No name
+3152
+FCB Attached RCEs
+3154
+Sessioner som används
+3156
+Sessioner % använda
+3158
+No name
+3160
+Öppnade tabeller från cache, % träffar
+3162
+No name
+3164
+Öppnade tabeller, träffar/sek
+3166
+Öppnade tabeller, missar/sek
+3168
+Table Open Pages Read/sec
+3170
+Table Open Pages Preread/sec
+3172
+Öppnade tabeller/sek
+3174
+Antal tabeller som stängs/sek
+3176
+Tabeller öppnas
+3178
+Skrivna loggbyte/sek
+3180
+Genererade loggbyte/sek
+3182
+Loggbuffertstorlek
+3184
+Antal använda byte i loggbuffert
+3186
+Antal lediga byte i loggbuffert
+3188
+Allokerade loggbuffertbyte
+3190
+Väntande loggtrådar
+3192
+Loggfilsstorlek
+3194
+Djup för loggkontrollpunkt
+3196
+Loggkontrollpunkt i antal loggfiler
+3198
+Log Checkpoint Maintenance Outstanding IO Max
+3200
+Mål för loggkontrollpunkt i antal loggfiler
+3202
+Loggkontrollpunkt i antal loggfiler som % av mål
+3204
+No name
+3206
+Maxvärde för loggkontrollpunkt i antal loggfiler
+3208
+Återhämtningsdjup för loggkontrollpunktförlust
+3210
+Genererade loggfiler
+3212
+Loggfiler som genererats i förväg
+3214
+Aktuell kontrollpunkt för loggfil
+3216
+Skrivskyddade användartransaktioner för nivå 0/sek
+3218
+User Read/Write Transaction Commits to Level 0 (Durable)/sec
+3220
+User Read/Write Transaction Commits to Level 0 (Lazy)/sec
+3222
+User Wait All Transaction Commits/sec
+3224
+User Wait Last Transaction Commits/sec
+3226
+Användartransaktioner för nivå 0/sek
+3228
+Återgång av skrivskyddade användartransaktioner för nivå 0/sek
+3230
+Återgång av läs- och skrivbara användartransaktioner för nivå 0/sek
+3232
+Återgång av användartransaktioner för nivå 0/sek
+3234
+Skrivskyddade systemtransaktioner för nivå 0/sek
+3236
+System Read/Write Transaction Commits to Level 0 (Durable)/sec
+3238
+System Read/Write Transaction Commits to Level 0 (Lazy)/sec
+3240
+Systemtransaktioner för nivå 0/sek
+3242
+Återgång av skrivskyddade systemtransaktioner för nivå 0/sek
+3244
+Återgång av läs- och skrivbara systemtransaktioner för nivå 0/sek
+3246
+Återgång av systemtransaktioner för nivå 0/sek
+3248
+Sidallokering genom utökning av databasfil (asynkron)/sek
+3250
+Sidallokering genom utökning av databasfil (uppehåll)/sek
+3252
+Database Page Allocation File Shrink Stalls/sec
+3254
+Loggposter/sek
+3256
+Kapacitet för loggbufferttömningar/sek
+3258
+Genomförda loggbufferttömningar/sek
+3260
+Log Buffer Flushes Skipped/sec
+3262
+Log Buffer Flushes Blocked/sec
+3264
+Loggbufferttömningar/sek
+3266
+Loggsparande/sek
+3268
+Antal skrivningar av hela loggsegment/sek
+3270
+Antal skrivningar av partiella loggsegment/sek
+3272
+Oanvända loggbyte/sek
+3274
+Loggpostuppehåll/sek
+3276
+Allokerade versionsdataområden
+3278
+Allokerade versionsdataområden för borttagningar
+3280
+VER-behållarallokeringar som väntat på versionsrensningar per sekund
+3282
+Genomsnittlig längd på RCE-bokmärke för versionslagring
+3284
+Onödiga anrop för versionslagring/sek
+3286
+Asynkront skickade upprensningsåtgärder för versionslagring/sek
+3288
+Synkront skickade upprensningsåtgärder för versionslagring/sek
+3290
+Ignorerade upprensningsåtgärder för versionslagring/sek
+3292
+Misslyckade upprensningsåtgärder för versionslagring/sek
+3294
+Infogade poster/sek
+3296
+Borttagna poster/sek
+3298
+Ersatta poster/sek
+3300
+Onödiga postersättningar/sek
+3302
+Redundanta postersättningar/sek
+3304
+Escrow-uppdateringar av poster/sek
+3306
+Infogningar i sekundärt index/sek
+3308
+Borttagningar i sekundärt index/sek
+3310
+Falska uppdateringar av indexerad kolumn/sek
+3312
+Falska uppdateringar av tuple-indexerad kolumn/sek
+3314
+Uppdaterade inbäddade Long-värden för post/sek
+3316
+Tillagda avgränsade Long-värden för post/sek
+3318
+Framtvingade avgränsade Long-värden för post/sek
+3320
+Alla framtvingade avgränsade Long-värden för post/sek
+3322
+Referering av alla avgränsade Long-värden för post/sek
+3324
+Avreferering av alla avgränsade Long-värden för post/sek
+3326
+Sökningar efter avgränsade Long-värden/sek
+3328
+Hämtningar av avgränsade Long-värden/sek
+3330
+Genereringar av avgränsade Long-värden/sek
+3332
+Long-Value Maximum LID
+3334
+Uppdateringar av avgränsade Long-värden/sek
+3336
+Borttagningar av avgränsade Long-värden/sek
+3338
+Kopior av avgränsade Long-värden/sek
+3340
+Sökningar efter grupper med avgränsade Long-värden/sek
+3342
+Hämtningar av grupper med avgränsade Long-värden/sek
+3344
+Tillägg av grupper med avgränsade Long-värden/sek
+3346
+Ersättningar av grupper med avgränsade Long-värden/sek
+3348
+Borttagningar av grupper med avgränsade Long-värden/sek
+3350
+Kopior av grupper med avgränsade Long-värden/sek
+3352
+B+ Tree Append Splits/sec
+3354
+B+ Tree Right Splits/sec
+3356
+Antal delningar i B+-träd (hotpoint)/sek
+3358
+Lodräta delningar av B+-träd/sek
+3360
+Delningar av B+-träd/sek
+3362
+Sammanfogningar av tomma sidor i B+-träd/sek
+3364
+Högersammanfogningar av B+-träd/sek
+3366
+Ofullständiga sammanfogningar av B+-träd/sek
+3368
+Sammanfogningar åt vänster i B+-träd/sek
+3370
+Delsammanfogningar åt vänster i B+-träd/sek
+3372
+Sidflyttningar i B+-träd/sek
+3374
+Sammanfogning av B+-träd/sek
+3376
+Misslyckade enkla sidrensningsförsök i B+-träd/sek
+3378
+Sökningar efter kortslutningar i B+-träd/sek
+3380
+Opportuna läsningar i förväg i B+-träd/sek
+3382
+Onödiga underordnade spärrar för B+-träd/sek
+3384
+B+ Tree Move Nexts/sec
+3386
+Antal förflyttningar till nästa post i B+-träd (ej synliga noder ignoreras)/sek
+3388
+B+ Tree Move Nexts (Nodes Filtered)/sec
+3390
+B+ Tree Move Prevs/sec
+3392
+Antal förflyttningar till föregående post i B+-träd (ej synliga noder ignoreras)/sek
+3394
+B+ Tree Move Prevs (Nodes Filtered)/sec
+3396
+Sökning av B+-träd/sek
+3398
+Infogning av B+-träd/sek
+3400
+Ersättning av B+-träd/sek
+3402
+Borttagning av flaggor för B+-träd/sek
+3404
+Borttagning av B+-träd/sek
+3406
+Tillägg av B+-träd/sek
+3408
+Skapade B+-träd/sek
+3410
+Skapade B+-träd (totalt)
+3412
+Radering av B+-träd/sek
+3414
+Radering av B+-träd (totalt)
+3416
+Trimmade sidor/sek
+3418
+Trimmade sidor (totalt)
+3420
+Ojusterade sidor ej trimmade/sek
+3422
+Ojusterade sidor ej trimmade (totalt)
+3424
+Smutsiga trimamde sidor/sek
+3426
+Smutsiga trimmade sidor (totalt)
+3428
+Orörda databassidor som lästs i förväg/sek
+3430
+Database Page Evictions (k=1)/sec
+3432
+Database Page Evictions (k=2)/sec
+3434
+Database Page Evictions (Scavenging)/sec
+3436
+Database Page Evictions (Shrink)/sec
+3438
+Database Page Evictions (Purge)/sec
+3440
+Database Page Evictions (Patch)/sec
+3442
+Cachestorlek för databas (MB)
+3444
+Missar i databascache/sek
+3446
+Databascache % träffar
+3448
+No name
+3450
+Procent databascacheträffar (ej korrelerade)
+3452
+No name
+3454
+Begäranden i databascache/sek
+3456
+Instance Status
+3458
+Asynkront lästa databassidor/sek
+3460
+Synkront lästa databassidor/sek
+3462
+Database Pages Dirtied/sec
+3464
+Database Pages Dirtied (Repeatedly)/sec
+3466
+Databassidor som skrivs/sek
+3468
+Databassidor som överförs/sek
+3470
+Database Pages Non-Resident Reclaimed (Soft Faulted)/sec
+3472
+Database Pages Non-Resident Reclaimed (Failed)/sec
+3474
+Database Pages Non-Resident Re-read/sec
+3476
+Database Pages Non-Resident Evicted (Normally)/sec
+3478
+Database Page Touches (Non-Touch)/sec
+3480
+Database Page Touches (k=1)/sec
+3482
+Database Page Touches (k=2)/sec
+3484
+Database Page Touches (Correlated)/sec
+3486
+Database Pages Colded (Ext)/sec
+3488
+Database Pages Colded (Int)/sec
+3490
+Databassidor som läses i förväg/sek
+3492
+Database Page Preread Stalls/sec
+3494
+Database Pages Preread (Unnecessary)/sec
+3496
+Database Pages Dehydrated/sec
+3498
+Database Pages Rehydrated/sec
+3500
+Versioner av databassidor/sek
+3502
+Kopierade sidor i databasversion/sek
+3504
+Databassidor som skrivs upprepade gånger/sek
+3506
+Database Pages Flushed (Cache Shrink)/sec
+3508
+Database Pages Flushed (Checkpoint)/sec
+3510
+Database Pages Flushed (Checkpoint Foreground)/sec
+3512
+Database Pages Flushed (Context Flush)/sec
+3514
+Database Pages Flushed (Idle)/sec
+3516
+Database Pages Flushed (Filthy Foreground)/sec
+3518
+Database Pages Flushed (Scavenge)/sec
+3520
+Database Pages Flushed Opportunely/sec
+3522
+Database Pages Flushed Opportunely Clean/sec
+3524
+Databassidor som skrivs ihop/sek
+3526
+Databassidor som läses ihop/sek
+3528
+Database Pages Repeatedly Read/sec
+3530
+Lästa sidor för direktuppspelad säkerhetskopiering/sek
+3532
+Refererade sidor vid onlinedefragmentering/sek
+3534
+Lästa sidor vid onlinedefragmentering/sek
+3536
+I förväg lästa sidor vid onlinedefragmentering/sek
+3538
+Modifierade rena sidor vid onlinedefragmentering/sek
+3540
+Ytterligare modifiering av rena sidor vid onlinedefragmentering/sek
+3542
+Frigjorda sidor vid onlinedefragmentering/sek
+3544
+Dataflyttningar vid onlinedefragmentering/sek
+3546
+Dataflyttningar vid onlinedefrag/sek
+3548
+Loggposter vid onlinedefragmentering/sek
+3550
+Genomsnittlig loggstorlek vid onlinedefragmentering
+3552
+No name
+3554
+Databasunderhållets varaktighet
+3556
+Database Maintenance Pages Read
+3558
+Database Maintenance Pages Read/sec
+3560
+Database Maintenance Pages Zeroed
+3562
+Database Maintenance Pages Zeroed/sec
+3564
+Antal felaktiga kontrollsummor för underhåll av databassidor
+3566
+Database Maintenance IO Reads/sec
+3568
+Database Maintenance IO Reads Average Bytes
+3570
+No name
+3572
+Database Maintenance Throttle Setting
+3574
+Database Maintenance IO Re-Reads/sec
+3576
+Database Maintenance IO Re-Reads Average Bytes
+3578
+No name
+3580
+Database Maintenance IO Re-Reads Average Latency
+3582
+No name
+3584
+Refererade sidor vid databasåtgärder/sek
+3586
+Lästa sidor vid databasåtgärder/sek
+3588
+I förväg lästa sidor vid databasåtgärder/sek
+3590
+Modifierade rena sidor vid databasåtgärder/sek
+3592
+Ytterligare modifiering av rena sidor vid databasåtgärder/sek
+3594
+Loggposter vid databasåtgärder/sek
+3596
+Genomsnittlig loggstorlek vid databasåtgärder
+3598
+No name
+3600
+I/O-databasläsningar (anslutna)/sek
+3602
+Genomsnittlig tidsåtgång för I/O-databasläsningar (anslutna)
+3604
+No name
+3606
+I/O Database Reads (Attached) Average Bytes
+3608
+No name
+3610
+I/O Database Reads (Attached) In Heap
+3612
+I/O Database Reads (Attached) Async Pending
+3614
+I/O Database Reads (Attached) Abnormal Latency/sec
+3616
+I/O-databasläsningar (återställning)/sek
+3618
+Genomsnittlig tidsåtgång för I/O-databasläsningar (återställning)
+3620
+No name
+3622
+I/O Database Reads (Recovery) Average Bytes
+3624
+No name
+3626
+I/O Database Reads (Recovery) In Heap
+3628
+I/O Database Reads (Recovery) Async Pending
+3630
+I/O Database Reads (Recovery) Abnormal Latency/sec
+3632
+I/O-databasläsningar/sek
+3634
+Genomsnittlig tidsåtgång för I/O-databasläsningar
+3636
+No name
+3638
+I/O Database Reads Average Bytes
+3640
+No name
+3642
+I/O Database Reads In Heap
+3644
+I/O Database Reads Async Pending
+3646
+I/O Database Reads Abnormal Latency/sec
+3648
+I/O-loggläsningar/sek
+3650
+Genomsnittlig tidsåtgång per I/O-loggläsning
+3652
+No name
+3654
+Genomsnittligt antal byte per I/O-loggläsning
+3656
+No name
+3658
+Antal I/O-loggläsningar i heap
+3660
+Asynkront väntande I/O-loggläsningar
+3662
+Onormalt långsamma I/O-loggläsningar/sek
+3664
+I/O-databasskrivningar (anslutna)/sek
+3666
+Genomsnittlig tidsåtgång för I/O-databasskrivningar (anslutna)
+3668
+No name
+3670
+I/O Database Writes (Attached) Average Bytes
+3672
+No name
+3674
+I/O Database Writes (Attached) In Heap
+3676
+I/O Database Writes (Attached) Async Pending
+3678
+I/O Database Writes (Attached) Abnormal Latency/sec
+3680
+I/O-databasskrivningar (återställning)/sek
+3682
+Genomsnittlig tidsåtgång för I/O-databasskrivningar (återställning)
+3684
+No name
+3686
+I/O Database Writes (Recovery) Average Bytes
+3688
+No name
+3690
+I/O Database Writes (Recovery) In Heap
+3692
+I/O Database Writes (Recovery) Async Pending
+3694
+I/O Database Writes (Recovery) Abnormal Latency/sec
+3696
+I/O-databasskrivningar/sek
+3698
+Genomsnittlig tidsåtgång för I/O-databasskrivningar
+3700
+No name
+3702
+I/O Database Writes Average Bytes
+3704
+No name
+3706
+I/O Database Writes In Heap
+3708
+I/O Database Writes Async Pending
+3710
+I/O Database Writes Abnormal Latency/sec
+3712
+I/O-loggskrivningar/sek
+3714
+Genomsnittlig tidsåtgång per I/O-loggskrivning
+3716
+No name
+3718
+Genomsnittligt antal byte per I/O-loggskrivning
+3720
+No name
+3722
+Antal I/O-loggskrivningar i heap
+3724
+Asynkront väntande I/O-loggskrivningar
+3726
+Onormalt långsamma I/O-loggskrivningar/sek
+3728
+Byte som inte komprimerats i post/sek
+3730
+Pages Reorganized (Other)/sec
+3732
+Pages Reorganized (Free Space Request)/sec
+3734
+Pages Reorganized (Page Move Logging)/sec
+3736
+Pages Reorganized (Dehydrate Buffer)/sec
+7042
+ServiceModelOperation 3.0.0.0
+7044
+Calls
+7046
+Calls Per Second
+7048
+Calls Outstanding
+7050
+Calls Failed
+7052
+Call Failed Per Second
+7054
+Calls Faulted
+7056
+Calls Faulted Per Second
+7058
+Calls Duration
+7060
+Calls Duration Base
+7062
+Transactions Flowed
+7064
+Transactions Flowed Per Second
+7066
+Security Validation and Authentication Failures
+7068
+Security Validation and Authentication Failures Per Second
+7070
+Security Calls Not Authorized
+7072
+Security Calls Not Authorized Per Second
+7074
+ServiceModelEndpoint 3.0.0.0
+7076
+Calls
+7078
+Calls Per Second
+7080
+Calls Outstanding
+7082
+Calls Failed
+7084
+Calls Failed Per Second
+7086
+Calls Faulted
+7088
+Calls Faulted Per Second
+7090
+Calls Duration
+7092
+Calls Duration Base
+7094
+Transactions Flowed
+7096
+Transactions Flowed Per Second
+7098
+Security Validation and Authentication Failures
+7100
+Security Validation and Authentication Failures Per Second
+7102
+Security Calls Not Authorized
+7104
+Security Calls Not Authorized Per Second
+7106
+Reliable Messaging Sessions Faulted
+7108
+Reliable Messaging Sessions Faulted Per Second
+7110
+Reliable Messaging Messages Dropped
+7112
+Reliable Messaging Messages Dropped Per Second
+7182
+MSDTC Bridge 3.0.0.0
+7184
+Message send failures/sec
+7186
+Prepare retry count/sec
+7188
+Commit retry count/sec
+7190
+Prepared retry count/sec
+7192
+Replay retry count/sec
+7194
+Faults received count/sec
+7196
+Faults sent count/sec
+7198
+Average participant prepare response time
+7200
+Average participant prepare response time Base
+7202
+Average participant commit response time
+7204
+Average participant commit response time Base
+7012
+SMSvcHost 3.0.0.0
+7014
+Protocol Failures over net.tcp
+7016
+Protocol Failures over net.pipe
+7018
+Dispatch Failures over net.tcp
+7020
+Dispatch Failures over net.pipe
+7022
+Connections Dispatched over net.tcp
+7024
+Connections Dispatched over net.pipe
+7026
+Connections Accepted over net.tcp
+7028
+Connections Accepted over net.pipe
+7030
+Registrations Active for net.tcp
+7032
+Registrations Active for net.pipe
+7034
+Uris Registered for net.tcp
+7036
+Uris Registered for net.pipe
+7038
+Uris Unregistered for net.tcp
+7040
+Uris Unregistered for net.pipe
+7114
+ServiceModelService 3.0.0.0
+7116
+Calls
+7118
+Calls Per Second
+7120
+Calls Outstanding
+7122
+Calls Failed
+7124
+Calls Failed Per Second
+7126
+Calls Faulted
+7128
+Calls Faulted Per Second
+7130
+Calls Duration
+7132
+Calls Duration Base
+7134
+Transactions Flowed
+7136
+Transactions Flowed Per Second
+7138
+Transacted Operations Committed
+7140
+Transacted Operations Committed Per Second
+7142
+Transacted Operations Aborted
+7144
+Transacted Operations Aborted Per Second
+7146
+Transacted Operations In Doubt
+7148
+Transacted Operations In Doubt Per Second
+7150
+Security Validation and Authentication Failures
+7152
+Security Validation and Authentication Failures Per Second
+7154
+Security Calls Not Authorized
+7156
+Security Calls Not Authorized Per Second
+7158
+Instances
+7160
+Instances Created Per Second
+7162
+Reliable Messaging Sessions Faulted
+7164
+Reliable Messaging Sessions Faulted Per Second
+7166
+Reliable Messaging Messages Dropped
+7168
+Reliable Messaging Messages Dropped Per Second
+7170
+Queued Poison Messages
+7172
+Queued Poison Messages Per Second
+7174
+Queued Messages Rejected
+7176
+Queued Messages Rejected Per Second
+7178
+Queued Messages Dropped
+7180
+Queued Messages Dropped Per Second
+6968
+Windows Workflow Foundation
+6970
+Workflows Created
+6972
+Workflows Created/sec
+6974
+Workflows Unloaded
+6976
+Workflows Unloaded/sec
+6978
+Workflows Loaded
+6980
+Workflows Loaded/sec
+6982
+Workflows Completed
+6984
+Workflows Completed/sec
+6986
+Workflows Suspended
+6988
+Workflows Suspended/sec
+6990
+Workflows Terminated
+6992
+Workflows Terminated/sec
+6994
+Workflows In Memory
+6996
+Workflows Aborted
+6998
+Workflows Aborted/sec
+7000
+Workflows Persisted
+7002
+Workflows Persisted/sec
+7004
+Workflows Executing
+7006
+Workflows Idle/sec
+7008
+Workflows Runnable
+7010
+Workflows Pending
+4262
+BITS-nätanvändning
+4264
+Hastighet för fjärrserver (bitar/sekund)
+4266
+Nätverkskortets hastighet (bitar/sekund)
+4268
+Procent ledigt för nätverkskortet
+4270
+IGD-hastighet (bitar/sekund)
+4272
+Procent ledigt för IGD
+4274
+Storlek på hämtade block för BITS (byte)
+4276
+Svarsintervall för nedladdning för BITS (ms)
+4278
+Uppskattad bandbredd som finns tillgänglig för fjärrsystemet (bitar/sekund)
+9978
+Webbtjänst
+9980
+Totalt antal skickade byte
+9982
+Antal skickade byte per sekund
+9984
+Totalt antal mottagna byte
+9986
+Antal mottagna byte per sekund
+9988
+Totalt antal överförda byte
+9990
+Totalt antal byte/s
+9992
+Sammanlagt antal skickade filer
+9994
+Antal skickade filer per sekund
+9996
+Sammanlagt antal mottagna filer
+9998
+Antal mottagna filer per sekund
+10000
+Sammanlagt antal överförda filer
+10002
+Antal filer per sekund
+10004
+Nuvarande anonyma användare
+10006
+Nuvarande icke-anonyma användare
+10008
+Totalt antal anonyma användare
+10010
+Antal anonyma användare per sekund
+10012
+Totalt antal icke-anonyma användare
+10014
+Antal icke-anonyma användare per sekund
+10016
+Maximalt antal anonyma användare
+10018
+Maximalt antal icke-anonyma användare
+10020
+Aktuella anslutningar
+10022
+Högsta antal anslutningar
+10024
+Sammanlagt antal anslutningsförsök (alla instanser)
+10026
+Anslutningsförsök per sekund
+10028
+Sammanlagt antal inloggningar
+10030
+Inloggningsförsök/sek
+10032
+Antal OPTIONS-begäranden sammanlagt
+10034
+OPTIONS-begäranden per sekund
+10036
+GET-begäranden totalt
+10038
+GET-begäranden/sek
+10040
+POST-begäranden totalt
+10042
+POST-begäranden/sek
+10044
+HEAD-begäranden totalt
+10046
+HEAD-begäranden/sek
+10048
+PUT-begäranden totalt
+10050
+PUT-begäranden/sek
+10052
+DELETE-begäranden totalt
+10054
+DELETE-begäranden/sek
+10056
+TRACE-begäranden totalt
+10058
+TRACE-begäranden/sek
+10060
+Antal MOVE-begäran sammanlagt
+10062
+MOVE-begäran per sekund
+10064
+Antal COPY-begäran sammanlagt
+10066
+COPY-begäran per sekund
+10068
+Antal MKCOL-begäran sammanlagt
+10070
+MKCOL-begäranden/sekund
+10072
+Antal PROPFIND-begäran sammanlagt
+10074
+PROPFIND-begäranden/sekund
+10076
+Antal PROPPATCH-begäran sammanlagt
+10078
+PROPPATCH-begäranden/sekund
+10080
+Antal SEARCH-begäran sammanlagt
+10082
+SEARCH-begäran per sekund
+10084
+Antal LOCK-begäran sammanlagt
+10086
+LOCK-begäran per sekund
+10088
+Antal UNLOCK-begäran sammanlagt
+10090
+UNLOCK-begäran per sekund
+10092
+Alla övriga metodbegäranden sammanlagt
+10094
+Alla övriga metodbegäranden/sek
+10096
+Alla metodbegäranden sammanlagt
+10098
+Alla metodbegäranden/sek
+10100
+CGI-begäranden totalt
+10102
+CGI-begäranden/sek
+10104
+Totalt antal begäranden för ISAPI-tillägg
+10106
+begäranden för ISAPI-tillägg/sek
+10108
+Antal fel p.g.a. resurs inte hittas
+10110
+Antal fel p.g.a. resurs inte hittas per sekund
+10112
+Antal låsningsfel sammanlagt
+10114
+Låsningsfel/sekund
+10116
+Aktuella CGI-begäranden
+10118
+Aktuella ISAPI-tilläggsbegäranden
+10120
+Högsta antal CGI-begäranden
+10122
+Högsta antal ISAPI-begäranden
+10124
+Aktuellt CAL-antal för autentiserade användare
+10126
+Maximalt CAL-antal för autentiserade användare
+10128
+Totalt antal misslyckade CAL-begäranden för autentiserade användare
+10130
+Aktuellt CAL-antal för SSL-anslutningar
+10132
+Maximalt CAL-antal för SSL-anslutningar
+10134
+Totala antalet blockerade, asynkrona I/O-begäranden
+10136
+Antal tillåtna asynkrona I/O-begäran sammanlagt
+10138
+Totala antalet nekade, asynkrona I/O-begäranden
+10140
+För tillfället blockerade, asynkrona I/O-begäranden
+10142
+Totalt antal misslyckade CAL-begäranden för SSL-anslutningar
+10144
+Uppmätt asynkron användning av I/O-bandbredd
+10146
+Totalt antal byte blockerad bandbredd.
+10148
+Aktuellt antal byte blockerad bandbredd.
+10150
+Drifttid för tjänst
+10152
+Cache för webbtjänsten
+10154
+Aktuellt antal filer i cacheminnet
+10156
+Totalt antal filer i cacheminnet
+10158
+Fil-cacheträffar
+10160
+Fil-cachemissar
+10162
+Fil-cacheträffar %
+10166
+Fil-cacherensningar
+10168
+Aktuell minnesanvändning för fil-cachen
+10170
+Maximal minnesanvändning för fil-cachen
+10172
+Aktiva rensade poster
+10174
+Antal rensade filhandtag sammanlagt
+10176
+Aktuella cachelagrade URI:er
+10178
+Cachelagrade URI:er sammanlagt
+10180
+URI-cacheträffar
+10182
+URI-cachemissar
+10184
+URI-cacheträffar %
+10188
+URI-cacherensningar
+10190
+URI-rensningar sammanlagt
+10192
+Aktuella metadata i cache
+10194
+Totalt antal metadata i cache
+10196
+Träffar i metadata-cache
+10198
+Misslyckade träffar i metadata-cache
+10200
+Träffar i metadata-cache %
+10204
+Rensningar av metadata-cache
+10206
+Totalt antal rensade metadata
+10208
+Kernel: Aktuella URI i cache
+10210
+Kernel: Totalt antal URI i cache
+10212
+Kernel: URI-träffar i cache
+10214
+Kernel: URI-träffar/sek i cache
+10216
+Kernel: Misslyckade URI-träffar i cache
+10218
+Kernel: URI-träffar i cache %
+10222
+Kernel: URI-rensningar i cache
+10224
+Kernel: Totalt antal rensade URI
+10226
+Minnesanvändning i utdatacache
+10228
+Antal objekt i utdatacache
+10230
+Träffar totalt i utdatacache
+10232
+Missar totalt i utdatacache
+10234
+Rensningar totalt i utdatacache
+10236
+Rensade aktuella objekt i utdatacache
+10238
+Rensade objekt totalt i utdatacache
+10240
+Träffgrad för utdatacache
+4580
+USB
+4564
+Bulk - byte/sek
+4566
+Isokron - byte/sek
+4568
+Avbrott - byte/sek
+4570
+Kontrolldata - byte/sek
+4572
+PCI-avbrott från styrenhet/sek
+4574
+Arbetssignaler från styrenhet/sek
+4576
+% av total bandbredd som används för avbrott
+4578
+% av total bandbredd som används för ISO
+4582
+Genomsnittligt antal byte/överföring
+4584
+ISO-paketfel/sek
+4586
+Genomsnittlig latens i ms för ISO-överföringar
+4588
+Överförda fel/sek
+4590
+Värdstyrenhet ledig
+4592
+Asynkron ledighet för värdstyrenhet
+4594
+Asynkrona cachetömningar i värdenheten
+4596
+Periodisk ledighet för värdstyrenhet
+4598
+Periodiska cachetömningar i värdenheten
+11466
+.NET CLR-data
+11468
+SqlClient: Aktuellt antal anslutningar i och utanför pooler
+11470
+SqlClient: Aktuellt antal anslutningar som hanteras i pooler
+11472
+SqlClient: Aktuellt antal anslutningspooler
+11474
+SqlClient: Högsta uppnådda antal anslutningar i pooler
+11476
+SqlClient: Totalt antal misslyckade anslutningar
+11478
+SqlClient: Totalt antal misslyckade kommandon
+6644
+SMSvcHost 4.0.0.0
+6646
+Protokollfel via net.tcp
+6648
+Protokollfel via net.pipe
+6650
+Sändningsfel via net.tcp
+6652
+Sändningsfel via net.pipe
+6654
+Anslutningar som sänts via net.tcp
+6656
+Anslutningar som sänts via net.pipe
+6658
+Anslutningar som accepterats via net.tcp
+6660
+Anslutningar som accepterats via net.pipe
+6662
+Aktiva registreringar för net.tcp
+6664
+Aktiva registreringar för net.pipe
+6666
+Registrerade URI:er för net.tcp
+6668
+Registrerade URI:er för net.pipe
+6670
+Avregistrerade URI:er för net.tcp
+6672
+Avregistrerade URI:er för net.pipe
+6094
+.NET-dataprovider för Oracle
+6096
+HardConnectsPerSecond
+6098
+HardDisconnectsPerSecond
+6100
+SoftConnectsPerSecond
+6102
+SoftDisconnectsPerSecond
+6104
+NumberOfNonPooledConnections
+6106
+NumberOfPooledConnections
+6108
+NumberOfActiveConnectionPoolGroups
+6110
+NumberOfInactiveConnectionPoolGroups
+6112
+NumberOfActiveConnectionPools
+6114
+NumberOfInactiveConnectionPools
+6116
+NumberOfActiveConnections
+6118
+NumberOfFreeConnections
+6120
+NumberOfStasisConnections
+6122
+NumberOfReclaimedConnections
+5818
+MSDTC Bridge 4.0.0.0
+5820
+Fel vid sändning av meddelande/sek
+5822
+Antal nya förberedelseförsök/sek
+5824
+Antal nya bekräftelseförsök/sek
+5826
+Antal förberedda nya försök/sek
+5828
+Antal nya körningsförsök/sek
+5830
+Antal mottagna fel/sek
+5832
+Antal skickade fel/sek
+5834
+Genomsnittlig förberedelsesvarstid för deltagare
+5836
+Basräknare för genomsnittlig förberedelsesvarstid för deltagare
+5838
+Genomsnittlig bekräftelsesvarstid för deltagare
+5840
+Basräknare för genomsnittlig bekräftelsesvarstid för deltagare
+6572
+.NET CLR-nätverk 4.0.0.0
+6574
+Befintliga anslutningar
+6576
+Mottagna byte
+6578
+Skickade byte
+6580
+Mottagna datagram
+6582
+Skickade datagram
+6584
+Skapade HttpWebRequests per sekund
+6586
+Medellivslängd för HttpWebRequests
+6588
+Medellivslängdens basvärde för HttpWebRequests
+6590
+Köade HttpWebRequests per sekund
+6592
+Medelkötid för HttpWebRequests
+6594
+Medelkötidens basvärde för HttpWebRequests
+6596
+Avbrutna HttpWebRequests per sekund
+6598
+Misslyckade HttpWebRequests per sekund
+6446
+.NET CLR-nätverk
+6448
+Befintliga anslutningar
+6450
+Mottagna byte
+6452
+Skickade byte
+6454
+Mottagna datagram
+6456
+Skickade datagram
+11480
+.NET-dataprovider för SqlServer
+11482
+HardConnectsPerSecond
+11484
+HardDisconnectsPerSecond
+11486
+SoftConnectsPerSecond
+11488
+SoftDisconnectsPerSecond
+11490
+NumberOfNonPooledConnections
+11492
+NumberOfPooledConnections
+11494
+NumberOfActiveConnectionPoolGroups
+11496
+NumberOfInactiveConnectionPoolGroups
+11498
+NumberOfActiveConnectionPools
+11500
+NumberOfInactiveConnectionPools
+11502
+NumberOfActiveConnections
+11504
+NumberOfFreeConnections
+11506
+NumberOfStasisConnections
+11508
+NumberOfReclaimedConnections
+5336
+WF (System.Workflow) 4.0.0.0
+5338
+Skapade arbetsflöden
+5340
+Skapade arbetsflöden/sek
+5342
+Inaktiverade arbetsflöden
+5344
+Inaktiverade arbetsflöden/sek
+5346
+Inlästa arbetsflöden
+5348
+Inlästa arbetsflöden/sek
+5350
+Slutförda arbetsflöden
+5352
+Slutförda arbetsflöden/sek
+5354
+Pausade arbetsflöden
+5356
+Pausade arbetsflöden/sek
+5358
+Avslutade arbetsflöden
+5360
+Avslutade arbetsflöden/sek
+5362
+Arbetsflöden i minnet
+5364
+Avbrutna arbetsflöden
+5366
+Avbrutna arbetsflöden/sek
+5368
+Beständiga arbetsflöden
+5370
+Beständiga arbetsflöden/sek
+5372
+Arbetsflöden som körs
+5374
+Arbetsflöden i viloläge/sek
+5376
+Körbara arbetsflöden
+5378
+Väntande arbetsflöden
+5908
+.NET CLR-minne
+5910
+Antal generation 0-insamlingar
+5912
+Antal generation 1-insamlingar
+5914
+Antal generation 2-insamlingar
+5916
+Minne upphöjt från generation 0
+5918
+Minne upphöjt från generation 1
+5920
+Mängden byte/sekund upphöjd från generation 0
+5922
+Mängden byte/sekund upphöjd från generation 1
+5924
+Väntande minne upphöjt från generation 0
+5926
+Process-ID
+5928
+Heap-storlek för generation 0
+5930
+Heap-storlek för generation 1
+5932
+Heap-storlek för generation 2
+5934
+Heap-storlek för stora objekt
+5936
+Överlevande objekt
+5938
+Antal GC-referenser
+5940
+Allokerade byte/sekund
+5942
+Antal framkallade GC
+5944
+Tid i GC i procent
+5946
+Inte visat
+5948
+Mängden byte i alla heaps
+5950
+Total mängd allokerade byte
+5952
+Total mängd reserverade byte
+5954
+Antal fasta objekt
+5956
+Antal synkroniseringsblock som används
+5958
+.NET CLR-inläsning
+5960
+Totalt antal klasser som lästs in
+5962
+Tid för inläsning i procent
+5964
+Söklängd för sammansättning
+5966
+Totalt antal inläsningsfel
+5968
+Frekvens för inläsningsfel
+5970
+Byte i laddar-heap
+5972
+Totalt antal inaktiveringar av tillämpningsdomäner
+5974
+Frekvens för inaktiverade tillämpningsdomäner
+5976
+Aktuellt antal inlästa klasser
+5978
+Frekvens för inlästa klasser
+5980
+Aktuellt antal tillämpningsdomäner
+5982
+Totalt antal tillämpningsdomäner
+5984
+Frekvens för tillämpningsdomäner
+5986
+Aktuellt antal sammansättningar
+5988
+Totalt antal sammansättningar
+5990
+Frekvens för sammansättningar
+5992
+JIT-kompilering för .NET CLR
+5994
+Antal JIT-kompilerade metoder
+5996
+Mängd JIT-kompilerade IL-byte
+5998
+Total mängd JIT-kompilerade IL-byte
+6000
+Mängd JIT-kompilerade IL-byte/sekund
+6002
+Standardfel för JIT-kompilatorn
+6004
+Tid för JIT-kompilering i procent
+6006
+Inte visat
+6008
+.NET CLR-interop
+6010
+Antal CCW
+6012
+Antal stub-rutiner
+6014
+Antal konverteringar
+6016
+Antal TLB-importer/sekund
+6018
+Antal TLB-exporter/sekund
+6020
+.NET CLR-lås och -trådar
+6022
+Totalt antal konflikter
+6024
+Antal konflikter/sekund
+6026
+Aktuell kölängd
+6028
+Maximal kölängd
+6030
+Kölängd/sekund
+6032
+Aktuellt antal logiska trådar
+6034
+Aktuellt antal fysiska trådar
+6036
+Aktuellt antal identifierade trådar
+6038
+Totalt antal identifierade trådar
+6040
+Frekvens för identifierade trådar/sekund
+6042
+.NET CLR-säkerhet
+6044
+Totalt antal körningskontroller
+6046
+Tid för signaturautentisering i procent
+6048
+Antal länktidskontroller
+6050
+Tid för körningskontroller i procent
+6052
+Inte visat
+6054
+Stackdjup
+6056
+.NET CLR-fjärranrop
+6058
+Fjärranrop/sekund
+6060
+Kanaler
+6062
+Kontextproxy
+6064
+Inlästa kontextbundna klasser
+6066
+Antal allokerade kontextbundna objekt/sekund
+6068
+Kontexter
+6070
+Totalt antal fjärranrop
+6072
+.NET CLR-undantag
+6074
+Antal undantag som utlösts
+6076
+Antal undantag som utlöses/sekund
+6078
+Antal filter/sekund
+6080
+Antal finally-block per sekund
+6082
+Antal skickade till uppsamlingsdjup/sekund
+4536
+Distributed Transaction Coordinator
+4538
+Aktiva transaktioner
+4540
+Genomförda transaktioner
+4542
+Avbrutna transaktioner
+4544
+Osäkra transaktioner
+4546
+Maximalt antal aktiva transaktioner
+4548
+Tvångsgenomförda transaktioner
+4550
+Tvångsavbrutna transaktioner
+4552
+Svarstid - minst
+4554
+Svarstid - genomsnitt
+4556
+Svarstid - högst
+4558
+Transaktioner/sekund
+4560
+Tvångsgenomförda transaktioner/sekund
+4562
+Avbrutna transaktioner/sekund
+4280
+RAS-port
+4282
+Överförda byte
+4284
+Mottagna byte
+4286
+Skickade ramar
+4288
+Mottagna ramar
+4290
+Komprimering för utgående trafik
+4292
+Komprimering för inkommande trafik
+4294
+CRC-fel
+4296
+Timeout-fel
+4298
+Seriella överskridningar
+4300
+Justeringsfel
+4302
+Buffertöverskridningsfel
+4304
+Sammanlagt antal fel
+4306
+Överförda byte per sekund
+4308
+Mottagna byte per sekund
+4310
+Skickade ramar per sekund
+4312
+Mottagna ramar per sekund
+4314
+Sammanlagt antal fel per sekund
+4316
+Sammanlagd RAS
+4318
+Sammanlagt antal anslutningar
+10242
+W3SVC_W3WP
+10244
+Totalt antal betjänade HTTP-begäranden
+10246
+Begäranden/s
+10248
+Aktiva begäranden
+10250
+Totalt antal trådar
+10252
+Antal aktiva trådar
+10254
+Maximalt antal trådar
+10256
+Aktuell minnesanvändning för fil-cachen
+10258
+Maximal minnesanvändning för fil-cachen
+10260
+Aktuell mängd använt minne för utdatacache
+10262
+Aktuellt antal filer i cacheminnet
+10264
+Totalt antal filer i cacheminnet
+10266
+Fil-cacheträffar
+10268
+Fil-cachemissar
+10270
+Fil-cacherensningar
+10272
+Aktiva rensade poster
+10274
+Antal rensade filhandtag sammanlagt
+10276
+Aktuella cachelagrade URI:er
+10278
+Cachelagrade URI:er sammanlagt
+10280
+URI-cacheträffar
+10282
+URI-cachemissar
+10284
+URI-cacherensningar
+10286
+URI-rensningar sammanlagt
+10288
+Aktuella metadata i cache
+10290
+Totalt antal metadata i cache
+10292
+Träffar i metadata-cache
+10294
+Misslyckade träffar i metadata-cache
+10296
+Rensningar av metadata-cache
+10298
+Totalt antal rensade metadata
+10300
+Aktuella objekt för utdatacache
+10302
+Totalt antal träffar i utdatacache
+10304
+Totalt antal utdatacachemissar
+10306
+Totalt antal tömningar av utdatacache
+10308
+Aktuella objekt som tömts ur utdatacache
+10310
+Totalt antal objekt som tömts ur utdatacache
+10312
+Filcacheträffar/s
+10314
+Metadatacacheträffar/s
+10316
+Utdatacacheträffar/s
+10318
+URI-cacheträffar/s
+10320
+Filcachemissar/s
+10322
+Metadatacachemissar/s
+10324
+Utdatacachemissar/s
+10326
+URI-cachemissar/s
+10328
+% skickade 401 HTTP-svar
+10330
+% skickade 403 HTTP-svar
+10332
+% skickade 404 HTTP-svar
+10334
+% skickade 500 HTTP-svar
+10338
+Aktiva WebSocket-begäranden
+10340
+WebSocket-anslutningsförsök/s
+10342
+Nekade WebSocket-anslutningar/s
+10344
+Accepterade WebSocket-anslutningar/s
+1920
+Terminal Services
+1922
+Antal aktiva sessioner
+1924
+Antal inaktiva sessioner
+1926
+Totalt antal sessioner
+3738
+Pacer-flöde
+3740
+Utelämnade paket
+3742
+Antal schemalagda paket
+3744
+Antal överförda paket
+3746
+Antal schemalagda byte
+3748
+Överförda byte
+3750
+Överförda byte/sek
+3752
+Schemalagda byte/sek
+3754
+Överförda paket/sek
+3756
+Schemalagda paket/sek
+3758
+Ignorerade paket/sek
+3760
+Schemalagda icke-konforma paket
+3762
+Antal schemalagda icke-konforma paket/sek
+3764
+Genomsnittligt antal paket i formaren
+3766
+Högsta antal paket i formaren
+3768
+Genomsnittligt antal paket i sekventierare
+3770
+Högsta antal paket i sekventierare
+3772
+Högsta antal paket i nätverkskort
+3774
+Genomsnittligt antal paket i nätverkskort
+3776
+Antal icke-konforma skickade paket
+3778
+Antal skickade icke-konforma paket per sekund
+3780
+Pacer-rör
+3782
+Inga fler paket
+3784
+Öppnade flöden
+3786
+Stängda flöden
+3788
+Avvisade flöden
+3790
+Ändrade flöden
+3792
+Avvisade flödesändringar
+3794
+Högsta antal samtidiga flöden
+3796
+Schemalagda icke-konforma paket
+3798
+Antal schemalagda icke-konforma paket/sek
+3800
+Genomsnittligt antal paket i formaren
+3802
+Högsta antal paket i formaren
+3804
+Genomsnittligt antal paket i sekventierare
+3806
+Högsta antal paket i sekventierare
+3808
+Högsta antal paket i nätverkskortet
+3810
+Genomsnittligt antal paket i nätverkskort
+3812
+Antal icke-konforma skickade paket
+3814
+Antal skickade icke-konforma paket per sekund
+5700
+Generisk IKEv1, IKEv2 och AuthIP
+5702
+Förhandlingstid för IKEv1-huvudläge
+5704
+Förhandlingstid för AuthIP-huvudläge
+5706
+Förhandlingstid för IKEv1-snabbläge
+5708
+Förhandlingstid för AuthIP-snabbläge
+5710
+Förhandlingstid för utökat läge
+5712
+Antal mottagna paket per sekund
+5714
+Antal ogiltiga paket mottagna per sekund
+5716
+Antal lyckade förhandlingar
+5718
+Antal lyckade förhandlingar per sekund
+5720
+Antal misslyckade förhandlingar
+5722
+Antal misslyckade förhandlingar per sekund
+5724
+Förhandlingstid för IKEv2-huvudläge
+5726
+Förhandlingstid för IKEv2-snabbläge
+5728
+IPsec IKEv2 IPv4
+5730
+Aktiva säkerhetsassociationer för huvudläge
+5732
+Väntande förhandlingar om huvudläge
+5734
+Förhandlingar om huvudläge
+5736
+Förhandlingar om huvudläge/sek
+5738
+Lyckade förhandlingar om huvudläge
+5740
+Lyckade förhandlingar om huvudläge/sek
+5742
+Misslyckade förhandlingar om huvudläge
+5744
+Misslyckade förhandlingar om huvudläge/sek
+5746
+Mottagna begäranden om förhandlingar om huvudläge
+5748
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5750
+Aktiva säkerhetsassociationer för snabbläge
+5752
+Väntande förhandlingar om snabbläge
+5754
+Förhandlingar om snabbläge
+5756
+Förhandlingar om snabbläge/sek
+5758
+Lyckade förhandlingar om snabbläge
+5760
+Lyckade förhandlingar om snabbläge/sek
+5762
+Misslyckade förhandlingar om snabbläge
+5764
+Misslyckade förhandlingar om snabbläge/sek
+5580
+IPsec AuthIP IPv4
+5582
+Aktiva säkerhetsassociationer för huvudläge
+5584
+Väntande förhandlingar om huvudläge
+5586
+Förhandlingar om huvudläge
+5588
+Förhandlingar om huvudläge/sek
+5590
+Lyckade förhandlingar om huvudläge
+5592
+Lyckade förhandlingar om huvudläge/sek
+5594
+Misslyckade förhandlingar om huvudläge
+5596
+Misslyckade förhandlingar om huvudläge/sek
+5598
+Mottagna begäranden om förhandlingar om huvudläge
+5600
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5602
+Säkerhetsassociationer för huvudläge med personifiering
+5604
+Säkerhetsassociationer för huvudläge med personifiering/sek
+5606
+Aktiva säkerhetsassociationer för snabbläge
+5608
+Väntande förhandlingar om snabbläge
+5610
+Förhandlingar om snabbläge
+5612
+Förhandlingar om snabbläge/sek
+5614
+Lyckade förhandlingar om snabbläge
+5616
+Lyckade förhandlingar om snabbläge/sek
+5618
+Misslyckade förhandlingar om snabbläge
+5620
+Misslyckade förhandlingar om snabbläge/sek
+5622
+Aktiva säkerhetsassociationer för utökat läge
+5624
+Väntande förhandlingar om utökat läge
+5626
+Förhandlingar om utökat läge
+5628
+Förhandlingar om utökat läge/sek
+5630
+Lyckade förhandlingar om utökat läge
+5632
+Lyckade förhandlingar om utökat läge/sek
+5634
+Misslyckade förhandlingar om utökat läge
+5636
+Misslyckade förhandlingar om utökat läge/sek
+5638
+Säkerhetsassociationer för utökat läge med personifiering
+5804
+IPsec-anslutningar
+5806
+Totalt antal anslutningar
+5808
+Totalt antal ackumulerade anslutningar sedan start
+5810
+Maximalt antal anslutningar sedan start
+5812
+Totalt antal byte in sedan start
+5814
+Totalt antal byte ut sedan start
+5816
+Antal misslyckade autentiseringar
+5640
+IPsec AuthIP IPv6
+5642
+Aktiva säkerhetsassociationer för huvudläge
+5644
+Väntande förhandlingar om huvudläge
+5646
+Förhandlingar om huvudläge
+5648
+Förhandlingar om huvudläge/sek
+5650
+Lyckade förhandlingar om huvudläge
+5652
+Lyckade förhandlingar om huvudläge/sek
+5654
+Misslyckade förhandlingar om huvudläge
+5656
+Misslyckade förhandlingar om huvudläge/sek
+5658
+Mottagna begäranden om förhandlingar om huvudläge
+5660
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5662
+Säkerhetsassociationer för huvudläge med personifiering
+5664
+Säkerhetsassociationer för huvudläge med personifiering/sek
+5666
+Aktiva säkerhetsassociationer för snabbläge
+5668
+Väntande förhandlingar om snabbläge
+5670
+Förhandlingar om snabbläge
+5672
+Förhandlingar om snabbläge/sek
+5674
+Lyckade förhandlingar om snabbläge
+5676
+Lyckade förhandlingar om snabbläge/sek
+5678
+Misslyckade förhandlingar om snabbläge
+5680
+Misslyckade förhandlingar om snabbläge/sek
+5682
+Aktiva säkerhetsassociationer för utökat läge
+5684
+Väntande förhandlingar om utökat läge
+5686
+Förhandlingar om utökat läge
+5688
+Förhandlingar om utökat läge/sek
+5690
+Lyckade förhandlingar om utökat läge
+5692
+Lyckade förhandlingar om utökat läge/sek
+5694
+Misslyckade förhandlingar om utökat läge
+5696
+Misslyckade förhandlingar om utökat läge/sek
+5698
+Säkerhetsassociationer för utökat läge med personifiering
+5766
+IPsec IKEv2 IPv6
+5768
+Aktiva säkerhetsassociationer för huvudläge
+5770
+Väntande förhandlingar om huvudläge
+5772
+Förhandlingar om huvudläge
+5774
+Förhandlingar om huvudläge/sek
+5776
+Lyckade förhandlingar om huvudläge
+5778
+Lyckade förhandlingar om huvudläge/sek
+5780
+Misslyckade förhandlingar om huvudläge
+5782
+Misslyckade förhandlingar om huvudläge/sek
+5784
+Mottagna begäranden om förhandlingar om huvudläge
+5786
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5788
+Aktiva säkerhetsassociationer för snabbläge
+5790
+Väntande förhandlingar om snabbläge
+5792
+Förhandlingar om snabbläge
+5794
+Förhandlingar om snabbläge/sek
+5796
+Lyckade förhandlingar om snabbläge
+5798
+Lyckade förhandlingar om snabbläge/sek
+5800
+Misslyckade förhandlingar om snabbläge
+5802
+Misslyckade förhandlingar om snabbläge/sek
+5380
+WFPv4
+5382
+Ignorerade inkommande paket/sek
+5384
+Ignorerade utgående paket/sek
+5386
+Ignorerade paket/sek
+5388
+Blockerade bindningar
+5390
+Blockerade inkommande anslutningar/sek
+5392
+Blockerade utgående anslutningar/sek
+5394
+Tillåtna inkommande anslutningar/sek
+5396
+Tillåtna utgående anslutningar/sek
+5398
+Inkommande anslutningar
+5400
+Utgående anslutningar
+5402
+Aktiva inkommande anslutningar
+5404
+Aktiva utgående anslutningar
+5406
+Tillåtna klassificeringar/sek
+5504
+IPsec IKEv1 IPv4
+5506
+Aktiva säkerhetsassociationer för huvudläge
+5508
+Väntande förhandlingar om huvudläge
+5510
+Förhandlingar om huvudläge
+5512
+Förhandlingar om huvudläge/sek
+5514
+Lyckade förhandlingar om huvudläge
+5516
+Lyckade förhandlingar om huvudläge/sek
+5518
+Failed Main Mode Negotiations
+5520
+Misslyckade förhandlingar om huvudläge/sek
+5522
+Mottagna begäranden om förhandlingar om huvudläge
+5524
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5526
+Aktiva säkerhetsassociationer för snabbläge
+5528
+Väntande förhandlingar om snabbläge
+5530
+Förhandlingar om snabbläge
+5532
+Förhandlingar om snabbläge/sek
+5534
+Lyckade förhandlingar om snabbläge
+5536
+Lyckade förhandlingar om snabbläge/sek
+5538
+Misslyckade förhandlingar om snabbläge
+5540
+Misslyckade förhandlingar om snabbläge/sek
+5542
+IPsec IKEv1 IPv6
+5544
+Aktiva säkerhetsassociationer för huvudläge
+5546
+Väntande förhandlingar om huvudläge
+5548
+Förhandlingar om huvudläge
+5550
+Förhandlingar om huvudläge/sek
+5552
+Lyckade förhandlingar om huvudläge
+5554
+Lyckade förhandlingar om huvudläge/sek
+5556
+Misslyckade förhandlingar om huvudläge
+5558
+Misslyckade förhandlingar om huvudläge/sek
+5560
+Mottagna begäranden om förhandlingar om huvudläge
+5562
+Mottagna begäranden om förhandlingar om huvudläge/sek
+5564
+Aktiva säkerhetsassociationer för snabbläge
+5566
+Väntande förhandlingar om snabbläge
+5568
+Förhandlingar om snabbläge
+5570
+Förhandlingar om snabbläge/sek
+5572
+Lyckade förhandlingar om snabbläge
+5574
+Lyckade förhandlingar om snabbläge/sek
+5576
+Misslyckade förhandlingar om snabbläge
+5578
+Misslyckade förhandlingar om snabbläge/sek
+5440
+IPsec-drivrutin
+5442
+Aktiva säkerhetsassociationer
+5444
+Väntande säkerhetsassociationer
+5446
+Felaktiga SPI-paket
+5448
+Felaktiga SPI-paket/sek
+5450
+Byte som tagits emot i tunnelläge/sek
+5452
+Byte som skickats i tunnelläge/sek
+5454
+Bytes Received in Transport Mode/sec
+5456
+Byte som skickats i transportläge/sek
+5458
+Avlastade säkerhetsassociationer
+5460
+Avlastade byte som tagits emot/sek
+5462
+Avlastade byte som skickats/sek
+5464
+Paket med felaktig repetitionsavkänning
+5466
+Paket med felaktig repetitionsavkänning/sek
+5468
+Icke-autentiserade paket
+5470
+Icke-autentiserade paket/sek
+5472
+Icke-dekrypterade paket
+5474
+Icke-dekrypterade paket/sek
+5476
+Nya SA-nycklar
+5478
+Tillagda säkerhetsassociationer
+5480
+Paket med felaktig ESP-verifiering
+5482
+Paket med felaktig ESP-verifiering/sek
+5484
+Paket med felaktig UDP-ESP-verifiering
+5486
+Paket med felaktig UDP-ESP-verifiering/sek
+5488
+Paket mottagna över fel säkerhetsassociation
+5490
+Mottagna paket över fel SA/sek
+5492
+Mottagna paket i klartext
+5494
+Mottagna klartextpaket/sekund
+5496
+Totalt antal mottagna inkommande paket
+5498
+Mottagna inkommande paket/sekund
+5500
+Totalt antal utelämnade inkommande paket
+5502
+Utelämnade inkommande paket/sekund
+5436
+WFP
+5438
+Providerantal
+5408
+WFPv6
+5410
+Inbound Packets Discarded/sec
+5412
+Ignorerade utgående paket/sek
+5414
+Ignorerade paket/sek
+5416
+Blockerade bindningar
+5418
+Blockerade inkommande anslutningar/sek
+5420
+Blockerade utgående anslutningar/sek
+5422
+Tillåtna inkommande anslutningar/sek
+5424
+Tillåtna utgående anslutningar/sek
+5426
+Inkommande anslutningar
+5428
+Utgående anslutningar
+5430
+Aktiva inkommande anslutningar
+5432
+Aktiva utgående anslutningar
+5434
+Tillåtna klassificeringar/sek
+6084
+Microsoft Winsock BSP
+6086
+Ignorerade datagram/sek
+6088
+Ignorerade datagram
+6090
+Nekade anslutningar/sek
+6092
+Nekade anslutningar
+10602
+Skrivcache för Lagringsutrymmen
+10604
+Skrivningar/sek till cache
+10606
+Skrivna byte/sek till cache
+10608
+Genomsnittlig byte/skrivning till cache
+10610
+Överskrivningar/sek till cache
+10612
+Överskrivna byte/sek i cache
+10614
+Genomsnittlig byte/överskrivning i cache
+10616
+Avlägsningar/sek från cache
+10618
+Avlägsnade byte/sek från cache
+10620
+Genomsnittlig byte/avlägsning från cache
+10622
+Aktuell destage-kölängd
+10624
+Destage-åtgärder/sek
+10626
+Genomsnittlig sek/destage-åtgärd
+10628
+Genomsnittlig destage-kölängd
+10630
+Optimerade destage-åtgärder/sek
+10632
+Avlägsningar via destage/sek
+10634
+Genomsnittlig avlägsningar/destage-åtgärd
+10636
+Avlägsnade byte via destage/sek
+10638
+Genomsnittlig byte/avlägsning via destage
+10640
+Genomsnittlig avlägsnade byte/destage-åtgärd
+10642
+Överföringar via destage/sek
+10644
+Genomsnittlig överföringar/destage-åtgärd
+10646
+Genomsnittlig överföringar/avlägsning via destage
+10648
+Överförda byte via destage/sek
+10650
+Genomsnittlig byte/överföring via destage
+10652
+Genomsnittlig överförda byte/destage-åtgärd
+10654
+Byte som är cachade
+10656
+Byte som är reserverade
+10658
+Byte som kan frigöras
+10660
+Byte som används
+10662
+Cachestorlek
+10664
+Skrivningar till cache
+10666
+Överskrivningar till cache
+10668
+Avlägsningar från cache
+10670
+Destage-åtgärder
+10672
+Avlägsningar via destage
+10674
+Överföringar via destage
+10562
+Nivån Lagringsutrymmen
+10564
+Läsningar/sek från nivån
+10566
+Genomsnittlig sek/läsning från nivån
+10568
+Genomsnittlig längd på läskö i nivån
+10570
+Lästa byte/sek från nivån
+10572
+Genomsnittlig byte/läsning från nivån
+10574
+Skrivningar/sek till nivån
+10576
+Genomsnittlig sek/skrivning till nivån
+10578
+Genomsnittlig längd på skrivkö i nivån
+10580
+Skrivna byte/sek till nivån
+10582
+Genomsnittlig byte/skrivning till nivån
+10584
+Aktuell kölängd i nivån
+10586
+Överföringar/sek i nivån
+10588
+Genomsnittlig sek/överföring i nivån
+10590
+Genomsnittlig kölängd i nivån
+10592
+Överförda byte/sek i nivån
+10594
+Genomsnittlig byte/överföring i nivån
+10596
+Läsningar från nivån
+10598
+Skrivningar till nivån
+10600
+Överföringar i nivån
+9870
+WAS_W3WP
+9872
+Totalt antal betjänade begäranden
+9874
+Totalt antal pingmeddelanden om hälsa.
+9876
+Totalt antal frågor om körningsstatus
+9878
+Kanaler för aktiva lyssnare
+9880
+Aktiva protokollhanterare
+9882
+Totalt antal mottagna WAS-meddelanden
+9884
+Totalt antal meddelanden skickade till WAS
+9886
+Svarstid för pingmeddelanden om hälsa
+11244
+Offline Files
+11246
+Mottagna byte
+11248
+Överförda byte
+11250
+Antal överförda byte per sekund
+11254
+Antal mottagna byte per sekund
+11258
+Cachelagring på klientsidan
+11260
+Begärda byte till SMB BranchCache
+11262
+Mottagna byte till SMB BranchCache
+11264
+Publicerade byte i SMB BranchCache
+11266
+Begärda byte i SMB BranchCache från server
+11268
+Begärda hashar i SMB BranchCache
+11270
+Mottagna hashar i SMB BranchCache
+11272
+Mottagna byte för hashar i SMB BranchCache
+11274
+Köade förhämtningsåtgärder
+11276
+Förhämtade byte som lästs från cacheminne
+11278
+Förhämtade byte som lästs från server
+11280
+Programbyte som lästs från cacheminne
+11282
+Programbyte som lästs från server
+11284
+Programbyte som lästs från server (inte cachelagrade)
+5044
+KPSSVC
+5046
+Inkommande begäranden
+5048
+Inkommande skyddade begäranden
+5050
+Inkommande begäranden om lösenordsändring
+5052
+Misslyckade begäranden
+6684
+IPsec DoS-skydd
+6686
+Tillståndsposter
+6688
+Tillståndsposter per sekund
+6690
+Aktuella tillståndsposter
+6692
+Inkommande tillåtna icke-autentiserade IPv6 IPsec-paket
+6694
+Inkommande tillåtna icke-autentiserade IPv6 IPsec-paket
+6696
+Inkommande tillåtna autentiserade IPv6 IPsec-paket
+6698
+Inkommande tillåtna autentiserade IPv6 IPsec-paket/sek
+6700
+Inkommande tillåtna ICMPv6-paket
+6702
+Inkommande tillåtna ICMPv6-paket/sek
+6704
+Inkommande tillåtet filter undantar IPv6-paket
+6706
+Framsläppta inkommande IPv6-paket som undantagits av filter/sek
+6708
+Inkommande tillåtna paket som undantagits från standardblockering
+6710
+Inkommande tillåtna paket som undantagits från standardblockering/sek
+6712
+Ignorerade inkommande icke-autentiserade IPv6 IPsec-paket (hastighetsgräns)
+6714
+Ignorerade inkommande icke-autentiserade IPv6 IPsec-paket (hastighetsgräns)/sek
+6716
+Inkommande per IP icke-autentiserade IPv6 IPsec-paket (hastighetsgräns)
+6718
+Inkommande per IP icke-autentiserade IPv6 IPsec-paket (hastighetsgräns)/sek
+6720
+Inkommande andra ignorerade icke-autentiserade IPv6 IPsec-paket
+6722
+Inkommande andra ignorerade icke-autentiserade IPv6 IPsec-paket/sek
+6724
+Ignorerade inkommande autentiserade IPv6 IPsec-paket (hastighetsgräns)
+6726
+Ignorerade inkommande autentiserade IPv6 IPsec-paket (hastighetsgräns)/sek
+6728
+Inkommande andra ignorerade autentiserade IPv6 IPsec-paket
+6730
+Inkommande andra ignorerade autentiserade IPv6 IPsec-paket/sek
+6732
+Inkommande ignorerade ICMPv6-paket (hastighetsgräns)
+6734
+Inkommande ignorerade ICMPv6-paket (hastighetsgräns)/sek
+6736
+Ignorerade och inkommande filterundantagna IPv6-paket (hastighetsgräns)
+6738
+Ignorerade och inkommande filterundantagna IPv6-paket (hastighetsgräns)/sek 
+6740
+Inkommande ignorerade filterblockerade IPv6-paket
+6742
+Inkommande ignorerade filterblockerade IPv6-paket/sek
+6744
+Inkommande ignorerade standardblockeringsundantagna paket (hastighetsgräns)
+6746
+Inkommande ignorerade standardblockeringsundantagna paket (hastighetsgräns)/sek
+6748
+Inkommande ignorerade standardblockerade paket
+6750
+Inkommande ignorerade standardblockerade paket/sek
+6752
+Inkommande ignorerade paket
+6754
+Inkommande ignorerade paket/sek
+6756
+Per IP hastighetsgränsköer
+3962
+Teredo-relä
+3964
+In - totalt antal Teredo-reläpaket: lyckade + fel
+3966
+In - lyckade Teredo-reläpaket: totalt
+3968
+In - lyckade Teredo-reläpaket: bubblor
+3970
+In - lyckade Teredo-reläpaket: datapaket
+3972
+In - felaktiga Teredo-reläpaket: totalt
+3974
+In - felaktiga Teredo-reläpaket: rubrikfel
+3976
+In - felaktiga Teredo-reläpaket: källfel
+3978
+In - felaktiga Teredo-reläpaket: målfel
+3980
+Ut - totalt antal Teredo-reläpaket: lyckade + fel
+3982
+Ut - lyckade Teredo-reläpaket
+3984
+Ut - lyckade Teredo-reläpaket: bubblor
+3986
+Ut - lyckade Teredo-reläpaket: datapaket
+3988
+Ut - felaktiga Teredo-reläpaket
+3990
+Ut - felaktiga Teredo-reläpaket: rubrikfel
+3992
+Ut - felaktiga Teredo-reläpaket: källfel
+3994
+Ut - felaktiga Teredo-reläpaket: målfel
+3996
+In - totalt antal Teredo-reläpaket: lyckade + fel/sek
+3998
+Ut - totalt antal Teredo-reläpaket: lyckade + fel/sek
+4000
+In - lyckade Teredo-reläpaket: Datapaket i användarläge
+4002
+In - lyckade Teredo-reläpaket: Datapaket i kernelläge
+4004
+Ut - lyckade Teredo-reläpaket: Datapaket i användarläge
+4006
+Ut - lyckade Teredo-reläpaket: Datapaket i kernelläge
+4008
+IPHTTPS-session
+4010
+Sessionens mottagna paket
+4012
+Sessionens skickade paket
+4014
+Sessionens mottagna byte
+4016
+Sessionens skickade byte
+4018
+Fel - sessionens överföringsfel
+4020
+Fel - sessionens mottagningsfel
+4022
+Varaktighet - sessionens varaktighet (sekunder)
+4046
+Global DNS64
+4048
+AAAA-frågor - lyckade
+4050
+AAAA-frågor - misslyckade
+4052
+IP6.ARPA-frågor - matchade
+4054
+Andra frågor - lyckade
+4056
+Andra frågor - misslyckade
+4058
+AAAA - Syntetiserade poster
+4024
+IPHTTPS Global
+4026
+In - totalt antal mottagna byte
+4028
+Ut - Totalt antal skickade byte
+4030
+Ignorerade - timeout för grannmatchning
+4032
+Fel - autentiseringsfel
+4034
+Ut - antal vidarebefordrade byte
+4036
+Fel - serverns överföringsfel
+4038
+Fel - serverns mottagningsfel
+4040
+In - totalt antal mottagna paket
+4042
+Ut - totalt antal skickade paket
+4044
+Sessioner - Totalt antal sessioner
+3932
+Teredo-server
+3934
+In - totalt antal Teredo-serverpaket: fel + lyckade
+3936
+In - lyckade Teredo-serverpaket: totalt
+3938
+In - lyckade Teredo-serverpaket: bubblor
+3940
+In - lyckade Teredo-serverpaket: Echo
+3942
+In - lyckade Teredo-serverpaket: RS-primär
+3944
+In - lyckade Teredo-serverpaket: RS-sekundär
+3946
+In - felaktiga Teredo-serverpaket: totalt
+3948
+In - felaktiga Teredo-serverpaket: rubrikfel
+3950
+In - felaktiga Teredo-serverpaket: källfel
+3952
+In - felaktiga Teredo-serverpaket: målfel
+3954
+In - felaktiga Teredo-serverpaket: autentiseringsfel
+3956
+Ut - Teredo-server: RA-primär
+3958
+Ut - Teredo-server: RA-sekundär 
+3960
+In - totalt antal Teredo-serverpaket: lyckade + fel/sek
+3908
+Teredo-klient
+3910
+In - Teredo routerannonsering
+3912
+In - Teredo-bubblor
+3914
+In - Teredo-data
+3916
+In - Teredo ogiltiga
+3918
+Ut - Teredo-routerinbjudan
+3920
+Ut - Teredo-bubblor
+3922
+Ut - Teredo-data
+3924
+In - Teredo-dataanvändarläge
+3926
+In - Teredo-datakernelläge
+3928
+Ut - Teredo-dataanvändarläge
+3930
+Ut - Teredo-datakernelläge
+9906
+APP_POOL_WAS
+9908
+Aktuellt antal arbetsprocesser
+9910
+Maximalt antal arbetsprocesser
+9912
+Totalt antal programpoolåteranvändningar
+9914
+Aktuell programpoolsdriftstid
+9916
+Total progampoolsdriftstid
+9918
+Senaste arbetsprocessfel
+9920
+Totalt antal arbetsprocessfel
+9922
+Aktuellt tillstånd för programpool
+9930
+Totalt antal startfel för arbetsprocess
+9932
+Totalt antal stängningsfel för arbetsprocess
+9934
+Totalt antal arbetsprocesspingfel
+9936
+Tid sedan senaste arbetsprocessfel
+9940
+Totalt antal skapade arbetsprocesser
+6674
+Energimätare
+6676
+Energi
+6678
+Energibudget
+6600
+TCPIP-prestandadiagnostik
+6602
+IPv4-NBL:er som har rapporterats med flaggan low-resource
+6604
+IPv4-NBL:er/sek som har rapporterats med flaggan low-resource
+6606
+IPv6-NBL:er som har rapporterats med flaggan low-resource
+6608
+IPv6-NBL:er/sek som har rapporterats med flaggan low-resource
+6610
+IPv4-NBL:er som har rapporterats utan förhandsverifiering
+6612
+IPv4-NBL:er/sek som har rapporterats utan förhandsverifiering
+6614
+IPv6-NBL:er som har rapporterats utan förhandsverifiering
+6616
+IPv6-NBL:er/sek som har rapporterats utan förhandsverifiering
+6618
+IPv4-NBL:er som har behandlats som icke-förhandsverifierade
+6620
+IPv4-NBL:er/sek som har behandlats som icke-förhandsverifierade
+6622
+IPv6-NBL:er som har behandlats som icke-förhandsverifierade
+6624
+IPv6-NBL:er/sek som har behandlats som icke-förhandsverifierade
+6626
+Utgående IPv4-NBL:er som inte har bearbetats via snabb väg
+6628
+Utgående IPv4-NBL:er/sek som inte har bearbetats via snabb väg
+6630
+Utgående IPv6-NBL:er som inte har bearbetats via snabb väg
+6632
+Utgående IPv6-NBL:er/sek som inte har bearbetats via snabb väg
+6634
+Utgående TCP-segment som inte har bearbetats via snabb väg
+6636
+Inkommande TCP-segment/sek som inte har bearbetats via snabb väg
+6638
+TCP-anslutningsförfrågningar som fallit från den snabba loopback-vägen
+6640
+TCP-anslutningsförfrågningar/sek som fallit från den snabba loopback-vägen
+6642
+Nekade anslutnings- eller överföringsbegäranden i energisparläge
+5116
+WinNAT UDP
+5118
+NumberOfSessions
+5120
+NumberOfBindings
+5122
+NumIntToExtTranslations
+5124
+NumExtToIntTranslations
+5126
+NumPacketsDropped
+5128
+NumSessionsTimedOut
+5174
+WinNAT-instans
+5176
+TCP-portar används
+5178
+Tillgängliga TCP-portar
+5180
+UDP-portar som används
+5182
+Tillgängliga UDP-portar
+5102
+WinNAT TCP
+5104
+NumberOfSessions
+5106
+NumberOfBindings
+5108
+NumIntToExtTranslations
+5110
+NumExtToIntTranslations
+5112
+NumPacketsDropped
+5114
+NumSessionsTimedOut
+5144
+WinNAT
+5146
+Sessioner per sekund
+5148
+Aktuellt antal sessioner
+5150
+Paket per sekund - interna till externa
+5152
+Paket - interna till externa
+5154
+Paket per sekund - externa till interna
+5156
+Paket - externa till interna
+5158
+Ignorerade paket per sekund
+5160
+Ignorerade paket
+5162
+Ignorerade ICMP-felpaket per sekund
+5164
+Ignorerade ICMP-felpaket
+5166
+Inter-RoutingDomain-paket som routats tillbaka per sekund
+5168
+Inter-RoutingDomain-paket som routats tillbaka
+5170
+Intra-RoutingDomain-paket som routats tillbaka per sekund
+5172
+Intra-RoutingDomain-paket som routats tillbaka
+5130
+WinNAT ICMP
+5132
+NumberOfSessions
+5134
+NumberOfBindings
+5136
+NumIntToExtTranslations
+5138
+NumExtToIntTranslations
+5140
+NumPacketsDropped
+5142
+NumSessionsTimedOut
+4986
+Köer för HTTP-tjänstbegäranden
+4988
+CurrentQueueSize
+4990
+MaxQueueItemAge
+4992
+ArrivalRate
+4994
+RejectionRate
+4996
+RejectedRequests
+4998
+CacheHitRate
+4966
+HTTP Service Url Groups
+4968
+BytesSentRate
+4970
+BytesReceivedRate
+4972
+BytesTransferredRate
+4974
+CurrentConnections
+4976
+MaxConnections
+4978
+ConnectionAttempts
+4980
+GetRequests
+4982
+HeadRequests
+4984
+AllRequests
+4952
+HTTP Service
+4954
+CurrentUrisCached
+4956
+TotalUrisCached
+4958
+UriCacheHits
+4960
+UriCacheMisses
+4962
+UriCacheFlushes
+4964
+TotalFlushedUris
+10676
+RemoteFX-grafik
+10678
+Antal bildrutor (indata) per sekund
+10680
+Komprimeringsförhållande för grafik
+10682
+Antal bildrutor (utdata) per sekund
+10684
+Antal överhoppade bildrutor per sekund - otillräckliga klientresurser
+10686
+Antal överhoppade bildrutor per sekund - otillräckliga nätverksresurser
+10688
+Antal överhoppade bildrutor per sekund - otillräckliga serverresurser
+10690
+Bildrutekvalitet
+10692
+Genomsnittlig kodningstid
+10694
+Källbildrutor per sekund
+10696
+RemoteFX-nätverk
+10698
+Normal RTT för TCP
+10700
+Aktuell RTT för TCP
+10702
+Aktuell TCP-bandbredd
+10704
+Hastighet för inkommande data
+10706
+Hastighet för inkommande TCP-data
+10708
+Hastighet för inkommande UDP-data
+10710
+Mottagna UDP-paket per sekund
+10712
+Hastighet för utgående data
+10714
+Hastighet för utgående TCP-data
+10716
+Hastighet för utgående UDP-data
+10718
+Skickade UDP-paket per sekund
+10720
+Hastighet för utgående data med P0
+10722
+Hastighet för utgående data med P1
+10724
+Hastighet för utgående data med P2
+10726
+Hastighet för utgående data med P3
+10728
+Förlustfrekvens
+10730
+Återöverföringshastighet
+10732
+FEC-frekvens
+10736
+Normal RTT för UDP
+10738
+Aktuell RTT för UDP
+10740
+Aktuell UDP-bandbredd
+10742
+Totalt skickade byte
+10744
+Totalt mottagna byte
+4352
+SMB-serverresurser
+4354
+Mottagna byte/sek
+4356
+Begäranden/sek
+4358
+Antal trädanslutningar
+4360
+Antal filer som är öppna just nu
+4362
+Skickade byte/sek
+4364
+Överförda byte per sekund
+4366
+Aktuella väntande begäranden
+4368
+Sekunder/begäran i genomsnitt
+4372
+Skrivbegäranden/sek
+4374
+Sekunder/skrivning i genomsnitt
+4378
+Skrivna byte/s
+4380
+Läsbegäranden/sek
+4382
+Sekunder/läsning i genomsnitt
+4386
+Lästa byte/s
+4388
+Totalt antal öppnade filer
+4390
+Antal filer som öppnas/sek
+4392
+Antal varaktiga filreferenser som är öppna
+4394
+Totalt antal återöppningar av varaktiga referenser
+4396
+Totalt antal misslyckade återöppningar av varaktiga referenser
+4398
+% elastiska referenser
+4402
+Totalt antal återöppningar av elastiska referenser
+4404
+Totalt antal misslyckade återöppningar av elastiska referenser
+4406
+% beständiga referenser
+4410
+Totalt antal återöppningar av beständiga referenser
+4412
+Totalt antal misslyckade återöppningar av beständiga referenser
+4414
+Metadataförfrågningar/sek
+4416
+Genomsnittligt antal sek/databegäran
+4420
+Genomsnittligt antal databyte/begäran
+4424
+Genomsnittligt antal byte/läsning
+4428
+Genomsnittligt antal byte/skrivning
+4432
+Genomsnittlig längd på läskö
+4434
+Genomsnittlig längd på skrivkö
+4436
+Genomsnittlig längd på datakö
+4438
+Databyte/sek
+4440
+Dataförfrågningar/sek
+4442
+Aktuell längd på datakö
+4444
+SMB-serversessioner
+4446
+Mottagna byte/sek
+4448
+Begäranden/sek
+4450
+Antal trädanslutningar
+4452
+Antal filer som är öppna just nu
+4454
+Skickade byte/sek
+4456
+Överförda byte per sekund
+4458
+Aktuella väntande begäranden
+4460
+Sekunder/begäran i genomsnitt
+4464
+Skrivbegäranden/sek
+4466
+Sekunder/skrivning i genomsnitt
+4470
+Skrivna byte/s
+4472
+Läsbegäranden/sek
+4474
+Sekunder/läsning i genomsnitt
+4478
+Lästa byte/s
+4480
+Totalt antal öppnade filer
+4482
+Antal filer som öppnas/sek
+4484
+Antal varaktiga filreferenser som är öppna
+4486
+Totalt antal återöppningar av varaktiga referenser
+4488
+Totalt antal misslyckade återöppningar av varaktiga referenser
+4490
+% elastiska referenser
+4494
+Totalt antal återöppningar av elastiska referenser
+4496
+Totalt antal misslyckade återöppningar av elastiska referenser
+4498
+% beständiga referenser
+4502
+Totalt antal återöppningar av beständiga referenser
+4504
+Totalt antal misslyckade återöppningar av beständiga referenser
+4506
+Metadataförfrågningar/sek
+4508
+Genomsnittligt antal sek/databegäran
+4512
+Genomsnittligt antal databyte/begäran
+4516
+Genomsnittligt antal byte/läsning
+4520
+Genomsnittligt antal byte/skrivning
+4524
+Genomsnittlig längd på läskö
+4526
+Genomsnittlig längd på skrivkö
+4528
+Genomsnittlig längd på datakö
+4530
+Databyte/sek
+4532
+Dataförfrågningar/sek
+4534
+Aktuell längd på datakö
+1848
+Netlogon
+1850
+Väntar på semafor
+1852
+Semaforinnehavare
+1854
+Semaforhämtningar
+1856
+Semafor-timeouter
+1858
+Genomsnittlig tid för semaforinnehav
+1860
+Tidsbas för semaforinnehav
+5004
+XHCI Interrupter
+5006
+Interrupts/sec
+5008
+DPCs/sec
+5010
+Events processed/DPC
+5012
+DPC count
+5014
+EventRingFullCount
+5016
+DpcRequeueCount
+5028
+XHCI TransferRing
+5030
+Transfers/sec
+5032
+Failed Transfer Count
+5034
+Bytes/Sec
+5036
+Isoch TD/sec
+5038
+Isoch TD Failures/sec
+5040
+Missed Service Error Count
+5042
+Underrun Overrun count
+5018
+XHCI CommonBuffer
+5020
+PagesTotal
+5022
+PagesInUse
+5024
+AllocationCount
+5026
+FreeCount
+6560
+Aktivitet för gränssnittskort i fysiskt nätverk
+6562
+Enhetens energiläge
+6564
+Tid i energisparläge i % (ögonblicksvärde)
+6566
+Tid i energisparläge i % (livslängd)
+6568
+Energisparövergångar (livslängd)
+6458
+Aktivitet på nätverkskort per processor
+6460
+Köade DPC-anrop per sekund
+6462
+Avbrott per sekund
+6464
+Mottagningsindikationer per sekund
+6466
+Returpaketanrop per sekund
+6468
+Passiva anrop om returpaket/sek
+6470
+Mottagna paket per sekund
+6472
+Returnerade paket per sekund
+6474
+Passiva returnerade paket/sek
+6476
+Köade DPC-anrop på andra processorer/sek
+6478
+Anrop om sändningsbegäran per sekund
+6480
+Passiva anrop om sändningsbegäran/sek
+6482
+Anrop om slutförd sändning per sekund
+6484
+Skickade paket per sekund
+6486
+Passiva skickade paket/sek
+6488
+Skickade slutförda paket per sekund
+6490
+Anrop om att skapa ScatterGather-lista per sekund
+6492
+Ändringsanrop för RSS-härledningstabell per sekund
+6494
+Indikationer för låg mottagningsresurs per sekund
+6496
+Mottagna paket (låg resurs) per sekund
+6498
+Mottagningsindikationer för TCP-avlastning per sekund
+6500
+Anrop för begäran om TCP-sändningsavlastningar per sekund
+6502
+Mottagna byte per sekund från TCP-avlastning
+6504
+Skickade TCP-avlastningar per sekund
+6506
+DPC:er uppskjutna/sek
+6508
+Paketsammanslagning/sek
+6510
+Nätverksaktivitetscykler per processor
+6512
+Avbrutna DPC-cykler per sekund
+6514
+Avbrutna cykler/sek
+6516
+NDIS-mottagningscykler per sekund
+6518
+Stackmottagningsscykler per sekund
+6520
+NDIS-returpaketscykler per sekund
+6522
+Miniport-returpaketcykler per sekund
+6524
+NDIS-sändningscykler per sekund
+6526
+Miniport-sändningscykler per sekund
+6528
+NDIS-cykler för sändning slutförd per sekund
+6530
+Skapa spridningsinsamlingscykler/sekund
+6532
+Tabelländringscykler för Miniport RSS Indirection
+6534
+Sändning slutförd-cykler för stack per sekund
+6536
+Fördröjningscykler för DPC-avbrott/sek
+6538
+RDMA-aktivitet
+6540
+Initierade RDMA-anslutningar
+6542
+Godkända RDMA-anslutningar
+6544
+Misslyckade RDMA-anslutningsförsök
+6546
+RDMA-anslutningar med fel
+6548
+Aktiva RDMA-anslutningar
+6550
+RDMA-slutförandeköer i feltillstånd
+6552
+Byte/sek för inkommande RDMA-trafik
+6554
+Byte/sek för utgående RDMA-trafik
+6556
+Ramar/sek för inkommande RDMA-trafik
+6558
+Ramar/sek för utgående RDMA-trafik
+4938
+Diskaktivitet från filsystemet
+4940
+Byte som lästs av filsystemet
+4942
+Byte som skrivits av filsystemet
+4840
+Händelsespårning för Windows-session
+4842
+Buffertminnesutnyttjande -- Växlingsbar pool
+4844
+Buffertminnesutnyttjande -- Icke-växlingsbar pool
+4846
+Loggade händelser per sekund
+4848
+Förlorade händelser
+4850
+Antal realtidsförbrukare
+4674
+Processorinformation
+4676
+% processortid
+4678
+Användartid i procent
+4680
+Privilegierad tid i procent
+4682
+Avbrott per sekund
+4684
+% DPC-tid
+4686
+% avbrottstid
+4688
+Köade DPC-anrop per sekund
+4690
+DPC-hastighet
+4692
+Ledig tid i procent
+4694
+C1-tid i procent
+4696
+C2-tid i procent
+4698
+C3-tid i procent
+4700
+C1-övergångar per sekund
+4702
+C2-övergångar per sekund
+4704
+C3-övergångar per sekund
+4706
+Prioritetstid i procent
+4708
+Parkeringsstatus
+4710
+Processorfrekvens
+4712
+Procent av högsta frekvens
+4714
+Tillståndsflaggor för processorn
+4716
+Klockavbrott/sek
+4718
+Genomsnittlig inaktivitetstid
+4722
+Inaktivitetsavbrott/sek
+4724
+Processorprestanda i procent
+4728
+Processornytta i procent
+4732
+Privilegierad nytta i procent
+4736
+Prestandagräns i procent
+4738
+Prestandagränsflaggor
+4944
+Thermal Zone-information
+4946
+Temperatur
+4948
+% passiv gräns
+4950
+Begränsningsorsaker
+4826
+Händelsespårning för Windows
+4828
+Totalt antal distinkta aktiverade providers
+4830
+Totalt antal distinkta föraktiverade providers
+4832
+Totalt antal distinkta inaktiverade providers
+4834
+Totalt antal aktiva sessioner
+4836
+Totalt minnesutnyttjande -- Växlingsbar pool
+4838
+Totalt minnesutnyttjande -- Icke-växlingsbar pool
+4740
+Synkronisering
+4742
+Erhållna spinlocks/sek
+4744
+Spinlocktvister/sek
+4746
+Spinlockspins/sek
+4748
+IPI Skickade broadcastbegäranden/sek
+4750
+IPI Skickade rutinbegäranden/sek
+4752
+IPI Skickade programvaruavbrott/sek
+4754
+Totalt initierade exekutiva resurser/sek
+4756
+Totalt ominitierade exekutiva resurser/sek
+4758
+Totalt raderade exekutiva resurser/sek
+4760
+Totalt erhållna exekutiva resurser/sek
+4762
+Totalt omtvistade exekutiva resurser/sek
+4764
+Totalt frigjorda exekutiva resurser/sek
+4766
+Totalt delat frigjorda exekutiva resurser/sek
+4768
+Totalt konverterade exekutiva resurser till delade/sek
+4770
+Exekutiva resurser - försök AcqExcLite/sek
+4772
+Exekutiva resurser - erhållna AcqExcLite/sek
+4774
+Exekutiva resurser - rekursivt exkl. erhållna AcqExcLite/sek
+4776
+Exekutiva resurser - tvister AcqExcLite/sek
+4778
+Exekutiva resurser - utan väntan AcqExcLite/sek
+4780
+Exekutiva resurser - försök AcqShrdLite/sek
+4782
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdLite/sek
+4784
+Exekutiva resurser - erhållna AcqShrdLite/sek
+4786
+Exekutiva resurser - rekursivt delade erhållna AcqShrdLite/sek
+4788
+Exekutiva resurser - tvister AcqShrdLite/sek
+4790
+Exekutiva resurser - utan väntan AcqShrdLite/sek
+4792
+Exekutiva resurser - försök AcqShrdStarveExcl/sek
+4794
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdStarveExcl/sek
+4796
+Exekutiva resurser - erhållna AcqShrdStarveExcl/sek
+4798
+Exekutiva resurser - rekursivt delade erhållna AcqShrdStarveExcl/sek
+4800
+Exekutiva resurser - tvister AcqShrdStarveExcl/sek
+4802
+Exekutiva resurser - utan väntan AcqShrdStarveExcl/sek
+4804
+Exekutiva resurser - försök AcqShrdWaitForExcl/sek
+4806
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdWaitForExcl/sek
+4808
+Exekutiva resurser - erhållna AcqShrdWaitForExcl/sek
+4810
+Exekutiva resurser - rekursivt delade erhållna AcqShrdWaitForExcl/sek
+4812
+Exekutiva resurser - tvister AcqShrdWaitForExcl/sek
+4814
+Exekutiva resurser - utan väntan AcqShrdWaitForExcl/sek
+4816
+Exekutiva resurser - ange exklusiv pekarägare/sek
+4818
+Exekutiva resurser - ange delad pekarägare (ny ägare)/sek
+4820
+Exekutiva resurser - ange delad pekarägare (befintlig ägare)/sek
+4822
+Exekutiva resurser - prioritering exklusiv ägare/sek
+4824
+Exekutiva resurser - prioritering delade ägare/sek
+4852
+SynchronizationNuma
+4854
+Erhållna spinlocks/sek
+4856
+Spinlocktvister/sek
+4858
+Spinlockspins/sek
+4860
+IPI Skickade broadcastbegäranden/sek
+4862
+IPI Skickade rutinbegäranden/sek
+4864
+IPI Skickade programvaruavbrott/sek
+4866
+Totalt initierade exekutiva resurser/sek
+4868
+Totalt ominitierade exekutiva resurser/sek
+4870
+Totalt raderade exekutiva resurser/sek
+4872
+Totalt erhållna exekutiva resurser/sek
+4874
+Totalt omtvistade exekutiva resurser/sek
+4876
+Totalt frigjorda exekutiva resurser/sek
+4878
+Totalt delat frigjorda exekutiva resurser/sek
+4880
+Totalt konverterade exekutiva resurser till delade/sek
+4882
+Exekutiva resurser - försök AcqExcLite/sek
+4884
+Exekutiva resurser - erhållna AcqExcLite/sek
+4886
+Exekutiva resurser - rekursivt exkl. erhållna AcqExcLite/sek
+4888
+Exekutiva resurser - tvister AcqExcLite/sek
+4890
+Exekutiva resurser - utan väntan AcqExcLite/sek
+4892
+Exekutiva resurser - försök AcqShrdLite/sek
+4894
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdLite/sek
+4896
+Exekutiva resurser - erhållna AcqShrdLite/sek
+4898
+Exekutiva resurser - rekursivt delade erhållna AcqShrdLite/sek
+4900
+Exekutiva resurser - tvister AcqShrdLite/sek
+4902
+Exekutiva resurser - utan väntan AcqShrdLite/sek
+4904
+Exekutiva resurser - försök AcqShrdStarveExcl/sek
+4906
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdStarveExcl/sek
+4908
+Exekutiva resurser - erhållna AcqShrdStarveExcl/sek
+4910
+Exekutiva resurser - rekursivt delade erhållna AcqShrdStarveExcl/sek
+4912
+Exekutiva resurser - tvister AcqShrdStarveExcl/sek
+4914
+Exekutiva resurser - utan väntan AcqShrdStarveExcl/sek
+4916
+Exekutiva resurser - försök AcqShrdWaitForExcl/sek
+4918
+Exekutiva resurser - rekursivt exkl. erhållna AcqShrdWaitForExcl/sek
+4920
+Exekutiva resurser - erhållna AcqShrdWaitForExcl/sek
+4922
+Exekutiva resurser - rekursivt delade erhållna AcqShrdWaitForExcl/sek
+4924
+Exekutiva resurser - tvister AcqShrdWaitForExcl/sek
+4926
+Exekutiva resurser - utan väntan AcqShrdWaitForExcl/sek
+4928
+Exekutiva resurser - ange exklusiv pekarägare/sek
+4930
+Exekutiva resurser - ange delad pekarägare (ny ägare)/sek
+4932
+Exekutiva resurser - ange delad pekarägare (befintlig ägare)/sek
+4934
+Exekutiva resurser - prioritering exklusiv ägare/sek
+4936
+Exekutiva resurser - prioritering delade ägare/sek
+4212
+SMB-klientresurser
+4214
+Lästa byte/s
+4216
+Skrivna byte/s
+4218
+Läsbegäranden/sek
+4220
+Skrivbegäranden/sek
+4222
+Genomsnittligt antal byte/läsning
+4226
+Genomsnittligt antal byte/skrivning
+4230
+Sekunder/läsning i genomsnitt
+4234
+Sekunder/skrivning i genomsnitt
+4238
+Databyte/sek
+4240
+Dataförfrågningar/sek
+4242
+Genomsnittligt antal databyte/begäran
+4246
+Genomsnittligt antal sek/databegäran
+4250
+Aktuell längd på datakö
+4252
+Genomsnittlig längd på läskö
+4254
+Genomsnittlig längd på skrivkö
+4256
+Genomsnittlig längd på datakö
+4258
+Metadataförfrågningar/sek
+4260
+Kreditfördröjningar/sek
+4600
+Nätverksprincip för QoS
+4602
+Antal överförda paket
+4604
+Överförda paket/sek
+4606
+Överförda byte
+4608
+Överförda byte/sek
+4610
+Utelämnade paket
+4612
+Utelämnade paket/sek
+4320
+Kvotstatistik för WSMan
+4322
+Totalt antal begäranden/sekund
+4324
+Kvotöverträdelser/sekund (användare)
+4326
+Kvotöverträdelser/sekund (system)
+4328
+Aktiva gränssnitt
+4330
+Aktiva åtgärder
+4332
+Aktiva användare
+4334
+Process-ID
+1876
+RAS
+1878
+Totalt antal klienter
+1880
+Maximalt antal klienter
+1882
+Misslyckade autentiseringar
+1884
+Byte som har tagits emot av frånkopplade klienter
+1886
+Byte som har skickats av frånkopplade klienter

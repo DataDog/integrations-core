@@ -93,7 +93,7 @@ def bin_data():
 def text_data():
     # Loading test text data
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
-    with open(f_name, 'rb') as f:
+    with open(f_name, 'r') as f:
         text_data = f.read()
         assert len(text_data) == 14494
 
