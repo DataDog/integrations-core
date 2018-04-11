@@ -258,6 +258,8 @@ class Memcache(AgentCheck):
         socket = instance.get('socket')
         server = instance.get('url')
         options = instance.get('options', {})
+        username = instance.get('username')
+        password = instance.get('password')
 
         if not server and not socket:
             raise Exception('Either "url" or "socket" must be configured')
@@ -275,7 +277,7 @@ class Memcache(AgentCheck):
 
         try:
             self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
-            mc = bmemcached.Client(["%s:%s" % (server, port)])
+            mc = bmemcached.Client(["{}:{}".format(server, port)], username, password)
 
             self._get_metrics(mc, tags, service_check_tags)
             if options:
@@ -283,14 +285,14 @@ class Memcache(AgentCheck):
                 self.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
                 self.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
                 self._get_optional_metrics(mc, tags, options)
-        except BadResponseError:
+        except BadResponseError as e:
             self.service_check(
                 self.SERVICE_CHECK, AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message="Unable to fetch stats from server")
             raise Exception(
-                "Unable to retrieve stats from memcache instance: {0}:{1}."
-                "Please check your configuration".format(server, port))
+                "Unable to retrieve stats from memcache instance: {}:{}."
+                "Please check your configuration. ({})".format(server, port, e))
 
         if mc is not None:
             mc.disconnect_all()
