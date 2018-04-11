@@ -267,14 +267,24 @@ class KubeletCheck(PrometheusCheck):
                     self.log.debug("Unable to retrieve container limits for %s: %s", c_name, e)
 
     @staticmethod
-    def parse_quantity(s):
-        number = ''
-        unit = ''
-        for c in s:
-            if c.isdigit() or c == '.':
-                number += c
+    def parse_quantity(string):
+        """
+        Parse quantity allows to convert the value in the resources spec like:
+        resources:
+          requests:
+            cpu: "100m"
+            memory": "200Mi"
+          limits:
+            memory: "300Mi"
+        :param string: str
+        :return: float
+        """
+        number, unit = '', ''
+        for char in string:
+            if char.isdigit() or char == '.':
+                number += char
             else:
-                unit += c
+                unit += char
         return float(number) * FACTORS.get(unit, 1)
 
     @staticmethod
