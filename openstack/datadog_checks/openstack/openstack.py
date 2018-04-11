@@ -601,7 +601,6 @@ class OpenStackCheck(AgentCheck):
         host_tags = host_tags or []
         custom_tags = custom_tags or []
         tags = [
-
             'hypervisor:{0}'.format(hyp['hypervisor_hostname']),
             'hypervisor_id:{0}'.format(hyp['id']),
             'virt_type:{0}'.format(hyp['hypervisor_type'])
@@ -776,7 +775,8 @@ class OpenStackCheck(AgentCheck):
         instance_scope = None
 
         custom_tags = instance.get('tags', [])
-
+        if custom_tags is None:
+            custom_tags = []
         try:
             instance_scope = self.get_scope_for_instance(instance)
         except KeyError:
@@ -809,6 +809,8 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
         custom_tags = instance.get("tags", [])
+        if custom_tags is None:
+            custom_tags = []
         try:
             instance_scope = self.ensure_auth_scope(instance)
 
