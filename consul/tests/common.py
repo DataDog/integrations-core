@@ -3,13 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-PORT = '6379'
-PASSWORD = 'devops-best-friend'
-MASTER_PORT = '6382'
-REPLICA_PORT = '6380'
-UNHEALTHY_REPLICA_PORT = '6381'
-
-
+PORT = '8500'
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+
+URL = "http://{0}:{1}".format(HOST, PORT)
+
+CHECK_NAME = 'consul'
 
 HERE = os.path.dirname(os.path.abspath(__file__))

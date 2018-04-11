@@ -9,7 +9,7 @@ HERE = path.abspath(path.dirname(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "redisdb", "__about__.py")) as f:
+with open(path.join(HERE, "datadog_checks", "consul", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -25,7 +25,7 @@ def get_requirements(fpath):
 
 setup(
     name='datadog-consul',
-    version=version,
+    version=ABOUT['__version__'],
     description='The Consul check',
     long_description=long_description,
     keywords='datadog agent consul check',

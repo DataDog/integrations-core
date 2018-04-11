@@ -4,44 +4,56 @@
 import subprocess
 import os
 import time
+import logging
 
 import pytest
-import redis
+import mock
+import requests
 
 import common
+import consul_mocks
+
+log = logging.getLogger(__file__)
 
 
-def wait_for_consul(master, replica):
+def wait_for_cluster():
     """
     Wait for the slave to connect to the master
     """
     connected = False
     for i in xrange(0, 20):
         try:
-            raise Exception('nothing')
+            requests.get(common.URL)
+            return True
         except:
+            log.info()
             pass
+
+    return False
 
 
 @pytest.fixture(scope="session")
-def spin_up_redis():
+def spin_up_consul():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
+    env = os.environ
+    env['CONSUL_CONFIG_PATH'] = _consul_config_path()
+    env['CONSUL_PORT'] = common.PORT
+
     args = [
         "docker-compose",
-        "-f", os.path.join(HERE, 'compose', '1m-2s.compose')
+        "-f", os.path.join(common.HERE, 'compose', 'compose.yaml')
     ]
 
+    subprocess.check_call(args + ["down"])
     subprocess.check_call(args + ["up", "-d"])
     # wait for the cluster to be up before yielding
-    master = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
-    replica = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
-    if not wait_for_cluster(master, replica):
-        raise Exception("Redis cluster boot timed out!")
+    if not wait_for_cluster():
+        raise Exception("Consul cluster boot timed out!")
     yield
     subprocess.check_call(args + ["down"])
 
@@ -53,28 +65,10 @@ def aggregator():
     return aggregator
 
 
-@pytest.fixture
-def redis_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'password': PASSWORD,
-        'tags': ["foo:bar"]
-    }
+def _consul_config_path():
+    server_file = "server-{0}.json".format(_consul_version())
+    return os.path.join(common.HERE, 'compose', server_file)
 
 
-@pytest.fixture
-def replica_instance():
-    return {
-        'host': HOST,
-        'port': REPLICA_PORT,
-        'tags': ["bar:baz"]
-    }
-
-
-@pytest.fixture
-def master_instance():
-    return {
-        'host': HOST,
-        'port': MASTER_PORT,
-    }
+def _consul_version():
+    return os.getenv("CONSUL_VERSION")
