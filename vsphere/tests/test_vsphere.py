@@ -53,7 +53,7 @@ def test_init():
         'refresh_morlist_interval': -99,
         'refresh_metrics_metadata_interval': -99,
     }
-    check = VSphereCheck('disk', init_config, {}, [{'name': 'vsphere_foo'}])
+    check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
     assert check.time_started > 0
     assert check.pool_started is False
     assert len(check.jobs_status) == 0
@@ -261,3 +261,7 @@ def test_service_check_ok(aggregator, instance):
         sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
         assert sc.status == check.OK
         assert 'foo:bar' in sc.tags
+
+
+def test_sanitize_hostname(vsphere):
+    assert vsphere.sanitize_hostname(vsphere.hostname.lower()) == vsphere.hostname
