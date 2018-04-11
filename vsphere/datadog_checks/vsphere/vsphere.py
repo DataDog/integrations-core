@@ -124,6 +124,13 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata = {}
         self.latest_event_query = {}
 
+        self.hostname_upper = self.hostname.upper()
+
+    def sanitize_hostname(self, hostname):
+        if hostname.upper() == self.hostname_upper:
+            hostname = self.hostname
+        return hostname
+
     def stop(self):
         self.stop_pool()
 
@@ -660,7 +667,7 @@ class VSphereCheck(AgentCheck):
                 self.gauge(
                     "vsphere.%s" % metric_name,
                     value,
-                    hostname=mor['hostname'],
+                    hostname=self.sanitize_hostname(mor['hostname']),
                     tags=['instance:%s' % instance_name] + custom_tags
                 )
 
