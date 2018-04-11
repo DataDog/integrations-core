@@ -12,7 +12,7 @@ In order to use the Oracle integration, install the Oracle Instant Client librar
 
 You will need to install the Instant Client Basic and SDK packages.
 
-After you have installed the Instant Client libraries, ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
+After you have installed the Instant Client libraries, on linux you may have to ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
 
 ```
 # Put the library location in an ld configuration file.
