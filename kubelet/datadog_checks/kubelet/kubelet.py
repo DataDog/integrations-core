@@ -213,6 +213,9 @@ class KubeletCheck(PrometheusCheck):
         """
         Reports the number of running pods on this node
         tagged by service and creator.
+
+        :param pods: pod list object
+        :param instance_tags: list of tags
         """
         tag_counter = {}
         for pod in pods['items']:
@@ -220,6 +223,7 @@ class KubeletCheck(PrometheusCheck):
             tags = get_tags('kubernetes_pod://%s' % pod_id, False) or None
             if not tags:
                 continue
+            tags += instance_tags
             hash_tags = tuple(sorted(tags))
             if hash_tags in tag_counter.keys():
                 tag_counter[hash_tags] += 1
@@ -250,7 +254,7 @@ class KubeletCheck(PrometheusCheck):
                 if not cid:
                     continue
 
-                tags = get_tags('%s' % cid, True)
+                tags = get_tags('%s' % cid, True) + instance_tags
 
                 try:
                     for resource, value_str in ctr.get('resources', {}).get('requests', {}).iteritems():
@@ -525,7 +529,7 @@ class KubeletCheck(PrometheusCheck):
                         self.log.debug("No corresponding usage found for metric %s and "
                                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
 
-    def container_cpu_usage_seconds_total(self, message, **kwargs):
+    def container_cpu_usage_seconds_total(self, message, **_):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
         for metric in message.metric:
             # convert cores in nano cores
@@ -533,39 +537,39 @@ class KubeletCheck(PrometheusCheck):
 
         self._process_container_rate(metric_name, message)
 
-    def container_fs_reads_bytes_total(self, message, **kwargs):
+    def container_fs_reads_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.io.read_bytes'
         self._process_container_rate(metric_name, message)
 
-    def container_fs_writes_bytes_total(self, message, **kwargs):
+    def container_fs_writes_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.io.write_bytes'
         self._process_container_rate(metric_name, message)
 
-    def container_network_receive_bytes_total(self, message, **kwargs):
+    def container_network_receive_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_bytes'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_bytes_total(self, message, **kwargs):
+    def container_network_transmit_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_bytes'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_receive_errors_total(self, message, **kwargs):
+    def container_network_receive_errors_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_errors'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_errors_total(self, message, **kwargs):
+    def container_network_transmit_errors_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_errors'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_packets_dropped_total(self, message, **kwargs):
+    def container_network_transmit_packets_dropped_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_dropped'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_receive_packets_dropped_total(self, message, **kwargs):
+    def container_network_receive_packets_dropped_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_dropped'
         self._process_pod_rate(metric_name, message)
 
-    def container_fs_usage_bytes(self, message, **kwargs):
+    def container_fs_usage_bytes(self, message, **_):
         """
         Number of bytes that are consumed by the container on this filesystem.
         """
@@ -575,7 +579,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_usage_metric(metric_name, message, self.fs_usage_bytes)
 
-    def container_fs_limit_bytes(self, message, **kwargs):
+    def container_fs_limit_bytes(self, message, **_):
         """
         Number of bytes that can be consumed by the container on this filesystem.
         This method is used by container_fs_usage_bytes, it doesn't report any metric
@@ -586,7 +590,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_limit_metric('', message, self.fs_usage_bytes, pct_m_name)
 
-    def container_memory_usage_bytes(self, message, **kwargs):
+    def container_memory_usage_bytes(self, message, **_):
         """TODO: add swap, cache, failcnt and rss"""
         metric_name = self.NAMESPACE + '.memory.usage'
         if message.type >= len(METRIC_TYPES):
@@ -594,7 +598,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_usage_metric(metric_name, message, self.mem_usage_bytes)
 
-    def container_spec_memory_limit_bytes(self, message, **kwargs):
+    def container_spec_memory_limit_bytes(self, message, **_):
         metric_name = self.NAMESPACE + '.memory.limits'
         pct_m_name = self.NAMESPACE + '.memory.usage_pct'
         if message.type >= len(METRIC_TYPES):

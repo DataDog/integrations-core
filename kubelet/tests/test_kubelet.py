@@ -318,10 +318,10 @@ def test_report_pods_running(monkeypatch):
     pod_list = check.retrieve_pod_list()
 
     with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_pods_running(pod_list, None)
+        check._report_pods_running(pod_list, [])
 
     calls = [mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"])]
-    check.gauge.assert_has_calls(calls, any_order=False)
+    check.gauge.assert_has_calls(calls, any_order=True)
 
 
 def test_report_container_spec_metrics(monkeypatch):
@@ -330,19 +330,20 @@ def test_report_container_spec_metrics(monkeypatch):
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
 
+    instance_tags = ["one:1", "two:2"]
     with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check._report_container_spec_metrics(pod_list, None)
+        check._report_container_spec_metrics(pod_list, instance_tags)
 
     calls = [
-        mock.call('kubernetes.cpu.requests', 0.1, ['fluentd-gcp-v2.0.10-9q9t4']),
-        mock.call('kubernetes.memory.requests', 209715200.0, ['fluentd-gcp-v2.0.10-9q9t4']),
-        mock.call('kubernetes.memory.limits', 314572800.0, ['fluentd-gcp-v2.0.10-9q9t4']),
-        mock.call('kubernetes.cpu.requests', 0.1, []),
-        mock.call('kubernetes.cpu.requests', 0.1, []),
-        mock.call('kubernetes.memory.requests', 134217728.0, []),
-        mock.call('kubernetes.cpu.limits', 0.25, []),
-        mock.call('kubernetes.memory.limits', 536870912.0, []),
-        mock.call('kubernetes.cpu.requests', 0.1, []),
+        mock.call('kubernetes.cpu.requests', 0.1, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 209715200.0, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 314572800.0, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
+        mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
+        mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
+        mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -359,15 +360,16 @@ def test_perform_kubelet_check(monkeypatch):
     check.kubelet_conn_info = {}
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
+    instance_tags = ["one:1"]
     get = MockResponse()
     with mock.patch("requests.get", side_effect=get):
-        check._perform_kubelet_check([])
+        check._perform_kubelet_check(instance_tags)
 
     get.assert_has_calls([
         mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
                   verify=None)])
     check.service_check.assert_has_calls([
-     mock.call('kubernetes.kubelet.check', 0, tags=[])
+     mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)
     ])
 
 
