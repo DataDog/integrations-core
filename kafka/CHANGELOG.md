@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Added new Kafka "per topic" metrics. See [#1208][]
+* [FEATURE] Added metrics for Producers 0.11.x See [#1392][]
 
 1.0.2 / 2017-11-21
 ==================
@@ -30,4 +31,5 @@
 [#517]: https://github.com/DataDog/integrations-core/issues/517
 [#863]: https://github.com/DataDog/integrations-core/issues/863
 [#1208]: https://github.com/DataDog/integrations-core/issues/1208
+[#1392]: https://github.com/DataDog/integrations-core/issues/1392
 [@svendx4f]: https://github.com/svendx4f
