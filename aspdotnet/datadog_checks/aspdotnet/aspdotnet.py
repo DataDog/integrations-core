@@ -11,7 +11,6 @@ except ImportError:
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
 
-
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
     # This set is from the Microsoft recommended counters to monitor exchange:
