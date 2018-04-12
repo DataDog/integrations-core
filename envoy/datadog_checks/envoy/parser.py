@@ -9,29 +9,40 @@ def parse_metric(metric):
 
     Example:
         'listener.0.0.0.0_80.downstream_cx_total' ->
-        ('listener.downstream_cx_total', ['address:0.0.0.0:80'], 'count')
+        ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
+    metric_mapping = METRIC_TREE
     metric_parts = []
     tag_values = []
-    mapping = METRIC_TREE
+    tag_builder = []
 
     for metric_part in metric.split('.'):
-        if metric_part in mapping:
+        if metric_part in metric_mapping:
             metric_parts.append(metric_part)
-            mapping = mapping[metric_part]
+            metric_mapping = metric_mapping[metric_part]
+
+            # Rebuild any built up tags anytime we encounter a known metric part
+            if tag_builder:
+                tag_values.append('.'.join(tag_builder))
+                del tag_builder[:]
         else:
-            tag_values.append(metric_part)
+            tag_builder.append(metric_part)
+
+    # Rebuild any trailing tags
+    if tag_builder:
+        tag_values.append('.'.join(tag_builder))
+        del tag_builder[:]
 
     metric = '.'.join(metric_parts)
     if metric not in METRICS:
         raise UnknownMetric
 
     tag_names = METRICS[metric]['tags']
+    print(tag_names)
+    print(tag_values)
+    print(tag_builder)
     if len(tag_values) != len(tag_names):
-        tag_values = reassemble_addresses(tag_values)
-
-        if len(tag_values) != len(tag_names):
-            raise UnknownMetric
+        raise UnknownMetric
 
     tags = [
         '{}:{}'.format(tag_name, tag_value)
@@ -39,35 +50,3 @@ def parse_metric(metric):
     ]
 
     return METRIC_PREFIX + metric, tags, METRICS[metric]['method']
-
-
-def reassemble_addresses(seq):
-    """Takes a sequence of strings and combines any sub-sequence that looks
-    like an IPv4 address into a single string.
-
-    Example:
-        ['listener', '0', '0', '0', '0_80', downstream_cx_total'] ->
-        ['listener', '0.0.0.0:80', 'downstream_cx_total']
-    """
-    reassembled = []
-    prev = ''
-
-    for s in seq:
-        if prev.isdigit():
-            try:
-                end, port = s.split('_')
-            except ValueError:
-                end, port = '', ''
-
-            if s.isdigit():
-                reassembled[-1] += '.{}'.format(s)
-            elif end.isdigit() and port.isdigit():
-                reassembled[-1] += '.{}:{}'.format(end, port)
-            else:
-                reassembled.append(s)
-        else:
-            reassembled.append(s)
-
-        prev = s
-
-    return reassembled

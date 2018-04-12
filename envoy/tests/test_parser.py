@@ -2,16 +2,7 @@ import pytest
 
 from datadog_checks.envoy.errors import UnknownMetric
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
-from datadog_checks.envoy.parser import parse_metric, reassemble_addresses
-
-
-class TestReassembleAddresses:
-    def test_correct(self):
-        seq = ['0', '0', '0', '0_80', 'ingress_http']
-        assert reassemble_addresses(seq) == ['0.0.0.0:80', 'ingress_http']
-
-    def test_reassemble_addresses_empty(self):
-        assert reassemble_addresses([]) == []
+from datadog_checks.envoy.parser import parse_metric
 
 
 class TestParseMetric:
@@ -303,13 +294,12 @@ class TestParseMetric:
         untagged_metric = metric.format('', '')
         tags = METRICS[untagged_metric]['tags']
         tag0 = '0.0.0.0_80'
-        tag0_reassembled = tag0.replace('_', ':')
         tag1 = 'some_cipher'
         tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
 
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
-            ['{}:{}'.format(tags[0], tag0_reassembled), '{}:{}'.format(tags[1], tag1)],
+            ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
             METRICS[untagged_metric]['method']
         )
 
@@ -355,13 +345,12 @@ class TestParseMetric:
         untagged_metric = metric.format('', '')
         tags = METRICS[untagged_metric]['tags']
         tag0 = '0.0.0.0_80'
-        tag0_reassembled = tag0.replace('_', ':')
         tag1 = 'some_stat_prefix'
         tagged_metric = metric.format('.{}'.format(tag0), '.{}'.format(tag1))
 
         assert parse_metric(tagged_metric) == (
             METRIC_PREFIX + untagged_metric,
-            ['{}:{}'.format(tags[0], tag0_reassembled), '{}:{}'.format(tags[1], tag1)],
+            ['{}:{}'.format(tags[0], tag0), '{}:{}'.format(tags[1], tag1)],
             METRICS[untagged_metric]['method']
         )
 
@@ -470,6 +459,19 @@ class TestParseMetric:
         untagged_metric = metric.format('')
         tags = METRICS[untagged_metric]['tags']
         tag0 = 'some_name'
+        tagged_metric = metric.format('.{}'.format(tag0))
+
+        assert parse_metric(tagged_metric) == (
+            METRIC_PREFIX + untagged_metric,
+            ['{}:{}'.format(tags[0], tag0)],
+            METRICS[untagged_metric]['method']
+        )
+
+    def test_tag_with_dots(self):
+        metric = 'cluster{}.lb_healthy_panic'
+        untagged_metric = metric.format('')
+        tags = METRICS[untagged_metric]['tags']
+        tag0 = 'out.alerting-event-evaluator-test.datadog.svc.cluster.local|iperf'
         tagged_metric = metric.format('.{}'.format(tag0))
 
         assert parse_metric(tagged_metric) == (
