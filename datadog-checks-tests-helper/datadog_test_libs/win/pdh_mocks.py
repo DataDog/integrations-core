@@ -5,7 +5,6 @@
 import os
 import pytest
 import mock
-import re
 import string
 import _winreg
 from collections import defaultdict
@@ -100,19 +99,18 @@ def initialize_pdh_tests(lang = None):
 def read_available_counters(fname):
     counters_by_class.clear()
     instances_by_class.clear()
-    regex = r'(\\[^(]+)(?:\(([^)]+)\))?(\\[^(]+)'
-    compiled_regex = re.compile(regex)
 
     with open(fname) as f:
         for line in f:
-            line = line.rstrip()
+            line = line.strip()
             if line.startswith("#"):
-                continue
-            if "))" in line:
                 continue
 
             try:
-                clss, inst, counter = [x if not x else x.lstrip('\\') for x in compiled_regex.search(line).groups()]
+                clss, inst, counter = line.split('!')
+                clss = clss.strip()
+                inst = inst.strip()
+                counter = counter.strip()
             except:
                 print line
                 raise
