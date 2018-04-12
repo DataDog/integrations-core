@@ -7,6 +7,8 @@
 from collections import defaultdict
 import time
 import os
+import subprocess
+import sys
 # 3p
 import psutil
 
@@ -164,7 +166,7 @@ class ProcessCheck(AgentCheck):
             self.last_ad_cache_ts[name] = time.time()
         return matching_pids
 
-    def psutil_wrapper(self, process, method, accessors, *args, **kwargs):
+    def psutil_wrapper(self, process, method, accessors, try_sudo=False, *args, **kwargs):
         """
         A psutil wrapper that is calling
         * psutil.method(*args, **kwargs) and returns the result
@@ -201,12 +203,19 @@ class ProcessCheck(AgentCheck):
             self.log.debug("psutil method %s not implemented", method)
         except psutil.AccessDenied:
             self.log.debug("psutil was denied acccess for method %s", method)
+            if method == 'num_fds' and Platform.is_unix() and try_sudo:
+                try:
+                    result = subprocess.check_output(['sudo', 'ls', '/proc/%d/fd/'.format(process.pid), '|', 'wc', '-l'])
+                except subprocess.CalledProcessError as e:
+                    self.log.exception("running psutil method %s with sudo failed with return code %d", method, e.returncode)
+                except:
+                    self.log.exception("running psutil method %s with sudo also failed", method)
         except psutil.NoSuchProcess:
             self.warning("Process {0} disappeared while scanning".format(process.pid))
 
         return result
 
-    def get_process_state(self, name, pids):
+    def get_process_state(self, name, pids, try_sudo):
         st = defaultdict(list)
 
         # Remove from cache the processes that are not in `pids`
@@ -260,7 +269,7 @@ class ProcessCheck(AgentCheck):
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
 
-            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None))
+            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None))
 
             ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
@@ -333,6 +342,7 @@ class ProcessCheck(AgentCheck):
         pid_file = instance.get('pid_file')
         collect_children = _is_affirmative(instance.get('collect_children', False))
         user = instance.get('user', False)
+        try_sudo = instance.get('try_sudo', False)
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -384,7 +394,7 @@ class ProcessCheck(AgentCheck):
         if user:
             pids = self._filter_by_user(user, pids)
 
-        proc_state = self.get_process_state(name, pids)
+        proc_state = self.get_process_state(name, pids, try_sudo)
 
         # FIXME 6.x remove the `name` tag
         tags.extend(['process_name:%s' % name, name])
