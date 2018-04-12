@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Add custom tag support for service check.
+* [FEATURE] Add support for SASL authentication.
 
 1.1.0 / 2017-11-21
 ==================
