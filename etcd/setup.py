@@ -4,7 +4,6 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import json
 import re
 
 here = path.abspath(path.dirname(__file__))
@@ -44,14 +43,6 @@ def find_version(*file_paths):
 
 # https://packaging.python.org/guides/single-sourcing-package-version/
 version = find_version("datadog_checks", "etcd", "__init__.py")
-
-manifest_version = None
-with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if version != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-etcd',
