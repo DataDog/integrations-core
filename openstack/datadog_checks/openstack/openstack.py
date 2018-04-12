@@ -920,7 +920,6 @@ class OpenStackCheck(AgentCheck):
         url = "{0}/{1}/{2}/{3}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects", tenant_id)
         self.log.debug("Project URL is %s", url)
         headers = {'X-Auth-Token': self.get_auth_token()}
-        self.log.debug("Headers %s", headers)
         try:
             r = self._make_request_with_auth_fallback(url, headers)
             return r['project']['name']
