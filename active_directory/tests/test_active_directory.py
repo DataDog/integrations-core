@@ -5,7 +5,8 @@
 import os
 import pytest
 from datadog_checks.stubs import aggregator
-from datadog_checks.active_directory import ActiveDirectoryCheck, DEFAULT_COUNTERS
+from datadog_checks.active_directory import ActiveDirectoryCheck
+from datadog_checks.active_directory.active_directory import DEFAULT_COUNTERS
 
 # for reasons unknown, flake8 says that pdh_mocks_fixture is unused, even though
 # it's used below.  noqa to suppress that error.

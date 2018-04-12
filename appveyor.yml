@@ -66,6 +66,9 @@ install:
   - cd aspdotnet
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
+  - cd active_directory
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - cd ..
   - cd dotnetclr
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
@@ -82,4 +85,4 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
-  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet"
+  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"
