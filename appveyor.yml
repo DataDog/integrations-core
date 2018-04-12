@@ -40,7 +40,7 @@ install:
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install detox)
   - ps: choco install docker-compose
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
@@ -78,6 +78,7 @@ install:
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
@@ -85,4 +86,3 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
-  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"

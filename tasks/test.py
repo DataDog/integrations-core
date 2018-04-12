@@ -25,7 +25,7 @@ def run_tox(ctx, target, dry_run):
     with ctx.cd(target):
         sys.stdout.write("\nRunning tox in '{}'...\n".format(target))
         if not dry_run:
-            ctx.run('tox')
+            ctx.run('detox')
         sys.stdout.write("Ok.\n")
 
 
