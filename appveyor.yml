@@ -78,6 +78,7 @@ install:
 build: off
 test_script:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"
   - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[iis]
@@ -85,4 +86,3 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
-  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"
