@@ -4,20 +4,21 @@
 import logging
 
 try:
-    # Agent5
-    from utils.subprocess_output import get_subprocess_output as subprocess_output
+    # Agent6
+    from _util import get_subprocess_output as subprocess_output
+    from _util import SubprocessOutputEmptyError  # noqa
 except ImportError:
     try:
-        # Agent6
-        from _util import get_subprocess_output as subprocess_output
+        # Agent5 (these paths may also exist in Agent6, so import them only if Agent6-specific ones aren't found)
+        from utils.subprocess_output import subprocess_output
+        from utils.subprocess_output import SubprocessOutputEmptyError  # noqa
     except ImportError:
         # No agent
         from ..stubs._util import subprocess_output
+        from ..stubs._util import SubprocessOutputEmptyError  # noqa
 
 log = logging.getLogger(__name__)
 
-class SubprocessOutputEmptyError(Exception):
-    pass
 
 def get_subprocess_output(command, log, raise_on_empty_output=True):
     """
