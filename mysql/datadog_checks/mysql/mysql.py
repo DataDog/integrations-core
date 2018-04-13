@@ -547,17 +547,16 @@ class MySql(AgentCheck):
             binlog_running = results.get('Binlog_enabled', False)
             # slaves will only be collected iff user has PROCESS privileges.
             slaves = self._collect_scalar('Slaves_connected', results)
+            slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
+            slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
+            if slave_io_running:
+                slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
+            if slave_sql_running:
+                slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
             if self._version_compatible(db, host, (5, 7, 0)):
-                slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
-                slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
-                if slave_io_running:
-                    slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
-                if slave_sql_running:
-                    slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
-
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
                         slave_running_status = AgentCheck.OK
@@ -566,6 +565,10 @@ class MySql(AgentCheck):
                     else:
                         # not everything is running smoothly
                         slave_running_status = AgentCheck.WARNING
+            elif slave_running.lower().strip() == 'off' :
+                if not (slave_io_running is None and slave_sql_running is None):
+                    if not slave_io_running and not slave_sql_running:
+                        slave_running_status = AgentCheck.CRITICAL
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
