@@ -19,42 +19,10 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 
 # Parse requirements
-<<<<<<< HEAD
-runtime_reqs = ['datadog_checks_base']
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    for line in f.readlines():
-        req = parse_req_line(line)
-        if req:
-            runtime_reqs.append(req)
-
-def read(*parts):
-    with open(path.join(here, *parts), 'r') as fp:
-        return fp.read()
-
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
-# https://packaging.python.org/guides/single-sourcing-package-version/
-version = find_version("datadog_checks", "dotnetclr", "__init__.py")
-
-manifest_version = None
-with open(path.join(here, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if version != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
-=======
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
->>>>>>> [windows] [dotnetclr] Update to new wheel/testing infrastructure
 
 setup(
     name='datadog-dotnetclr',
@@ -89,7 +57,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     # Testing setup and dependencies
