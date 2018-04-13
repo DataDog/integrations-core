@@ -3,7 +3,6 @@
 ## 2.1.0 / Unreleased
 
  * [FEATURE] Add custom tag support for service checks.
- * [BUGFIX] Fix duplicate hostnames. See #1371
 
 ## 2.0.0 / 2018-02-28
 
