@@ -53,7 +53,7 @@ def test_init():
         'refresh_morlist_interval': -99,
         'refresh_metrics_metadata_interval': -99,
     }
-    check = VSphereCheck('disk', init_config, {}, [{'name': 'vsphere_foo'}])
+    check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
     assert check.time_started > 0
     assert check.pool_started is False
     assert len(check.jobs_status) == 0
