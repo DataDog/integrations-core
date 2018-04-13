@@ -39,7 +39,7 @@ kafka.producer.batch_size_max,gauge,10,bytes,,The max number of bytes sent per p
 kafka.producer.record_send_rate,gauge,10,record,second,The average number of records sent per second for a topic,1,kafka,rec send
 kafka.producer.record_retry_rate,gauge,10,record,second,The average per-second number of retried record sends for a topic,1,kafka,rec retry
 kafka.producer.record_error_rate,gauge,10,error,second,The average per-second number of retried record sends for a topic,1,kafka,rec error
-kafka.producer.records_per_request,gauge,10,record,,	The average number of records sent per second.,0,kafka,rec per req
+kafka.producer.records_per_request,gauge,10,record,,The average number of records sent per second.,0,kafka,rec per req
 kafka.producer.record_queue_time_avg,gauge,10,milisecond,,The average time in ms record batches spent in the record accumulator.,-1,kafka,avg record queue time
 kafka.producer.record_queue_time_max,gauge,10,milisecond,,The maximum time in ms record batches spent in the record accumulator.,-1,kafka,max record queue time
 kafka.producer.record_size_avg,gauge,10,bytes,,The average record size.,0,kafka,avg record size
