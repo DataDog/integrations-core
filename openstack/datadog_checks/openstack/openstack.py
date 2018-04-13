@@ -906,10 +906,12 @@ class OpenStackCheck(AgentCheck):
             new_server['server_name'] = server.get('name')
             new_server['hypervisor_hostname'] = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
             new_server['tenant_id'] = server.get('tenant_id')
-            new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
 
             # Update our cached list of servers
             if new_server['server_id'] not in self.server_details_by_id and new_server['state'] in DIAGNOSTICABLE_STATES:
+                # The project may not exist if the server isn't in an active state
+                # Query for the project name here to avoid 404s
+                new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
                 del self.server_details_by_id[new_server['server_id']]
@@ -936,7 +938,7 @@ class OpenStackCheck(AgentCheck):
         server_name = server_details.get('server_name')
         hypervisor_hostname = server_details.get('hypervisor_hostname')
         tenant_id = server_details.get('tenant_id')
-        project_name = self.get_project_name_from_id(tenant_id)
+        project_name = server_details.get('project_name')
 
         server_stats = {}
         headers = {'X-Auth-Token': self.get_auth_token()}
