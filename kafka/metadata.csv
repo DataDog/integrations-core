@@ -43,7 +43,7 @@ kafka.producer.records_per_request,gauge,10,record,,The average number of record
 kafka.producer.record_queue_time_avg,gauge,10,milisecond,,The average time in ms record batches spent in the record accumulator.,-1,kafka,avg record queue time
 kafka.producer.record_queue_time_max,gauge,10,milisecond,,The maximum time in ms record batches spent in the record accumulator.,-1,kafka,max record queue time
 kafka.producer.record_size_avg,gauge,10,bytes,,The average record size.,0,kafka,avg record size
-kafka.producer.record_size_max,gauge,10,bytes,,	The maximum record size.,0,kafka,max record size
+kafka.producer.record_size_max,gauge,10,bytes,,The maximum record size.,0,kafka,max record size
 kafka.producer.request_rate,gauge,10,request,second,Number of producer requests per second.,1,kafka,prod req
 kafka.producer.response_rate,gauge,10,response,second,Number of producer responses per second.,1,kafka,prod resp
 kafka.producer.requests_in_flight,gauge,10,request,,The current number of in-flight requests awaiting a response.,-1,kafka,req in flight
@@ -55,7 +55,7 @@ kafka.producer.message_rate,gauge,10,message,second,Producer message rate.,1,kaf
 kafka.producer.buffer_bytes_total,gauge,10,bytes,,The maximum amount of buffer memory the client can use (whether or not it is currently used).,1,kafka,buffer bytes
 kafka.producer.io_wait,gauge,10,nanosecond,,Producer I/O wait time.,-1,kafka,prod io wait
 kafka.producer.throttle_time_avg,gauge,10,milisecond,,The average time in ms a request was throttled by a broker.,kafka,-1,avg throttle time
-kafka.producer.throttle_time_max,gauge,10,milisecond,,	The maximum time in ms a request was throttled by a broker.,kafka,-1,max throttle time
+kafka.producer.throttle_time_max,gauge,10,milisecond,,The maximum time in ms a request was throttled by a broker.,kafka,-1,max throttle time
 kafka.producer.waiting_threads,gauge,10,threads,,The number of user threads blocked waiting for buffer memory to enqueue their records.,-1,kafka,waiting threads
 kafka.consumer.max_lag,gauge,10,offset,,Maximum consumer lag.,-1,kafka,con max lag
 kafka.consumer.fetch_rate,gauge,10,request,,The minimum rate at which the consumer sends fetch requests to a broker.,1,kafka,con min fetch
