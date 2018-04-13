@@ -52,7 +52,7 @@ setup(
         'datadog_checks_base',
     ],
     setup_requires=['pytest-runner', ],
-    tests_require=get_requirements(path.join('tests', 'requirements.txt')),
+    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
     package_data={'datadog_checks.vsphere': ['conf.yaml.default']},
