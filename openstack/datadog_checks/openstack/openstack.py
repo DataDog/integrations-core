@@ -863,6 +863,7 @@ class OpenStackCheck(AgentCheck):
     def get_all_servers(self, i_key, filter_by_host=None):
         query_params = {}
         if filter_by_host:
+            filter_by_host = filter_by_host.split('.')[0] # HACK we added this line to split hostname
             query_params["host"] = filter_by_host
 
         # If we don't have a timestamp for this instance, default to None
@@ -871,7 +872,7 @@ class OpenStackCheck(AgentCheck):
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
-
+        query_params["all_tenants"] = True # HACK we added this line
         servers = []
 
         try:
@@ -1276,7 +1277,7 @@ class OpenStackCheck(AgentCheck):
 
     def _get_tags_for_host(self):
         hostname = self.get_my_hostname()
-
+        hostname = hostname.split('.')[0] # HACK we added split('.')[0]
         tags = []
         if hostname in self._get_and_set_aggregate_list():
             tags.append('aggregate:{0}'.format(self._aggregate_list[hostname]['aggregate']))
