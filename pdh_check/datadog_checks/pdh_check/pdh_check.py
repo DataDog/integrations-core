@@ -5,7 +5,7 @@
 # project
 from datadog_checks.utils.containers import hash_mutable
 # datadog
-from datadog_checks.checks.win.winpdh import WinPDHCounter
+from datadog_checks.checks.win import WinPDHCounter
 from datadog_checks.checks import AgentCheck
 
 
@@ -40,6 +40,8 @@ class PDHCheck(AgentCheck):
                 for inst_name, dd_name, mtype in metrics:
                     m = getattr(self, mtype.lower())
                     obj = WinPDHCounter(counterset, inst_name, self.log)
+                    if not obj:
+                        continue
                     entry = [inst_name, dd_name, m, obj]
                     self.log.debug("entry: %s" % str(entry))
                     self._metrics[key].append(entry)
