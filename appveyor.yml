@@ -84,5 +84,4 @@ test_script:
   - bundle exec rake ci:run[dotnetclr]
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
-  - bundle exec rake ci:run[pdh_check]
-  - inv test --targets="datadog_checks_base,datadog-checks-tests-helper,aspdotnet,active_directory"
+  - inv test --targets="datadog_checks_base,datadog-checks-tests-helper,aspdotnet,active_directory,pdh_check"
