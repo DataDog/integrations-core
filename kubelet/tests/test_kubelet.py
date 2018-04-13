@@ -368,9 +368,8 @@ def test_perform_kubelet_check(monkeypatch):
     get.assert_has_calls([
         mock.call('http://127.0.0.1:10255/healthz', cert=None, headers=None, params={'verbose': True}, timeout=10,
                   verify=None)])
-    check.service_check.assert_has_calls([
-     mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)
-    ])
+    calls = [mock.call('kubernetes.kubelet.check', 0, tags=instance_tags)]
+    check.service_check.assert_has_calls(calls)
 
 
 def test_report_node_metrics(monkeypatch):
