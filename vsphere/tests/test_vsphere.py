@@ -261,7 +261,3 @@ def test_service_check_ok(aggregator, instance):
         sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
         assert sc.status == check.OK
         assert 'foo:bar' in sc.tags
-
-
-def test_sanitize_hostname(vsphere):
-    assert vsphere.sanitize_hostname(vsphere.hostname.lower()) == vsphere.hostname
