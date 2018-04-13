@@ -36,12 +36,12 @@ DEFAULT_COUNTERS = [
     ["NTDS", None, "DRA Outbound Values (DNs only)/sec",                                     "active_directory.dra.outbound.values.dns_persec",        "gauge"],  # noqa: E501
     ["NTDS", None, "DRA Outbound Values Total/sec",                                          "active_directory.dra.outbound.values.total_persec",        "gauge"],  # noqa: E501
 
-    #["NTDS", None, "DRA Remaining Replication Updates",                                      "active_directory.dra.replication.remaining_updates",        "gauge"],  # noqa: E501
+    # ["NTDS", None, "DRA Remaining Replication Updates",                                    "active_directory.dra.replication.remaining_updates",        "gauge"],  # noqa: E501
     ["NTDS", None, "DRA Pending Replication Synchronizations",                               "active_directory.dra.replication.pending_synchronizations", "gauge"],  # noqa: E501
     ["NTDS", None, "DRA Sync Requests Made",                                                 "active_directory.dra.sync_requests_made",                   "gauge"],  # noqa: E501
 
-    #["NTDS", None, "DS Security Descriptor Suboperations/sec",                               "active_directory.ds.security_descriptor.subops_persec",      "gauge"],  # noqa: E501
-    #["NTDS", None, "DS Security Descriptor Propagation Events",                              "active_directory.ds.security_descriptor.propagation_events", "gauge"],  # noqa: E501
+    # ["NTDS", None, "DS Security Descriptor Suboperations/sec",                             "active_directory.ds.security_descriptor.subops_persec",      "gauge"],  # noqa: E501
+    # ["NTDS", None, "DS Security Descriptor Propagation Events",                            "active_directory.ds.security_descriptor.propagation_events", "gauge"],  # noqa: E501
     ["NTDS", None, "DS Threads in Use",                                                      "active_directory.ds.threads_in_use",                         "gauge"],  # noqa: E501
 
     ["NTDS", None, "LDAP Client Sessions",                                                   "active_directory.ldap.client_sessions",                      "gauge"],  # noqa: E501
@@ -49,8 +49,8 @@ DEFAULT_COUNTERS = [
     ["NTDS", None, "LDAP Successful Binds/sec",                                              "active_directory.ldap.successful_binds_persec",              "gauge"],  # noqa: E501
     ["NTDS", None, "LDAP Searches/sec",                                                      "active_directory.ldap.searches_persec",                      "gauge"],  # noqa: E501
 
-    #["NTDS", None, "Kerberos Authentications/sec",                                           "active_directory.kerberos.auths_persec",                     "gauge"],  # noqa: E501
-    #["NTDS", None, "NTLM Authentications/sec",                                               "active_directory.ntlm.auths_persec",                         "gauge"],  # noqa: E501
+    # ["NTDS", None, "Kerberos Authentications/sec",                                         "active_directory.kerberos.auths_persec",                     "gauge"],  # noqa: E501
+    # ["NTDS", None, "NTLM Authentications/sec",                                             "active_directory.ntlm.auths_persec",                         "gauge"],  # noqa: E501
 ]
 
 
