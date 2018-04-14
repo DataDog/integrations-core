@@ -25,3 +25,4 @@ oracle.temp_space_used,gauge,,bytes,,temp space used,0,oracle,temp space used
 oracle.tablespace.used,gauge,,bytes,,tablespace used,0,oracle,tablespace used
 oracle.tablespace.size,gauge,,bytes,,tablespace size,0,oracle,tablespace size
 oracle.tablespace.in_use,gauge,,fraction,,tablespace in-use,0,oracle,tablespace in-use
+oracle.tablespace.offline,gauge,,boolean,,tablespace offline,0,oracle,tablespace offline

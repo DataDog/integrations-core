@@ -1,5 +1,13 @@
 # CHANGELOG - oracle
 
+1.1.1 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds metric `oracle.tablespace.offline`. See #1402
+* [BUGFIX] fix for DB with offline tablespace. See #1402
+
 1.1.0 / Unreleased
 ==================
 
