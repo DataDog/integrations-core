@@ -383,6 +383,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
             ('table_name', ),
+            (),
         ),
         'method': 'count',
     },
@@ -648,12 +649,14 @@ METRICS = {
         'tags': (
             ('stat_prefix', ),
             (),
+            (),
         ),
         'method': 'count',
     },
     'redis.splitter.unsupported_command': {
         'tags': (
             ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'count',
