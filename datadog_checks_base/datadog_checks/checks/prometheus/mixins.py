@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from fnmatch import fnmatchcase
+import logging
 import requests
 from urllib3 import disable_warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -39,6 +40,9 @@ class PrometheusScraper(object):
 
     def __init__(self, *args, **kwargs):
         super(PrometheusScraper, self).__init__(*args, **kwargs)
+
+        # The scraper needs its own logger
+        self.log = logging.getLogger(__name__)
 
         # message.type is the index in this array
         # see: https://github.com/prometheus/client_model/blob/master/ruby/lib/prometheus/client/model/metrics.pb.rb
@@ -469,7 +473,7 @@ class PrometheusScraper(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=True, timeout=1, cert=cert, verify=verify)
+            response = requests.get(endpoint, headers=headers, stream=True, timeout=10, cert=cert, verify=verify)
         except (requests.exceptions.SSLError):
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise

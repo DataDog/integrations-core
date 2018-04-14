@@ -44,7 +44,7 @@ install:
   - ps: choco install docker-compose
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
-  - cd datadog-checks-base
+  - cd datadog_checks_base
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
@@ -85,4 +85,4 @@ test_script:
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
   - bundle exec rake ci:run[pdh_check]
-  - inv test --targets="datadog-checks-base,datadog-checks-tests-helper,aspdotnet,active_directory"
+  - inv test --targets="datadog_checks_base,datadog-checks-tests-helper,aspdotnet,active_directory"

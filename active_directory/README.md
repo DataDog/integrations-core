@@ -13,7 +13,7 @@ Install the `dd-check-active_directory` package manually or with your favorite c
 
 ### Configuration
 
-Edit the `active_directory.yaml` file to collect Active Directory performance data. See the [sample active_directory.yaml](https://github.com/DataDog/integrations-core/blob/master/active_directory/datadog_checks/active_directory/conf.yaml.example) for all available configuration options.
+Edit the `active_directory.yaml` file to collect Active Directory performance data. See the [sample active_directory.yaml](https://github.com/DataDog/integrations-core/blob/master/active_directory/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
