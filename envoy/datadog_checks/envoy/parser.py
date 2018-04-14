@@ -2,7 +2,7 @@ from .errors import UnknownMetric
 from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
 
 
-def parse_metric(metric):
+def parse_metric(metric, metric_mapping=METRIC_TREE):
     """Takes a metric formatted by Envoy and splits it into a unique
     metric name. Returns the unique metric name, a list of tags, and
     the name of the submission method.
@@ -11,7 +11,6 @@ def parse_metric(metric):
         'listener.0.0.0.0_80.downstream_cx_total' ->
         ('listener.downstream_cx_total', ['address:0.0.0.0_80'], 'count')
     """
-    metric_mapping = METRIC_TREE
     metric_parts = []
     tag_values = []
     tag_builder = []
