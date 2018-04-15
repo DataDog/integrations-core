@@ -78,7 +78,7 @@ class Envoy(AgentCheck):
                 unknown_tags = str(e).split('|||')
                 for tag in unknown_tags:
                     if tag not in self.unknown_tags:
-                        self.log.debug('Unknown tag `{}`'.format(tag))
+                        self.log.debug('Unknown tag `{}` in metric `{}`'.format(tag, envoy_metric))
                         self.unknown_tags.add(tag)
                 continue
 
