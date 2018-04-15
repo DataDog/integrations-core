@@ -2,7 +2,6 @@ from six.moves import range, zip
 
 from .errors import UnknownMetric, UnknownTags
 from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
-from .utils import get_pairs
 
 
 def parse_metric(metric, metric_mapping=METRIC_TREE):
@@ -20,25 +19,10 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
     tag_builder = []
     unknown_tags = []
     num_tags = 0
+    minimum_tag_length = 0
 
-    metric_pairs = get_pairs(metric.split('.'))
-    metric_part, next_metric_part = next(metric_pairs)
-
-    # Ensure we consider the first part as a metric part.
-    if metric_part in metric_mapping:
-        metric_parts.append(metric_part)
-        metric_mapping = metric_mapping[metric_part]
-        minimum_tag_length = len(metric_mapping['|_tags_|'][-1])
-    else:
-        raise UnknownMetric
-
-    for metric_part, next_metric_part in metric_pairs:
-        if (
-            metric_part in metric_mapping and
-            num_tags >= minimum_tag_length and
-            # If metric parts are repeated, consider all except the last to be tags.
-            metric_part != next_metric_part
-        ):
+    for metric_part in metric.split('.'):
+        if metric_part in metric_mapping and num_tags >= minimum_tag_length:
             # Rebuild any built up tags whenever we encounter a known metric part.
             if tag_builder:
                 for tags in metric_mapping['|_tags_|']:

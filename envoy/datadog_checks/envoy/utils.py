@@ -1,8 +1,3 @@
-from itertools import islice
-
-from six.moves import zip
-
-
 def make_metric_tree(metrics):
     metric_tree = {}
 
@@ -40,8 +35,3 @@ def make_metric_tree(metrics):
                 )
 
     return metric_tree
-
-
-def get_pairs(iterable):
-    iterable.append(None)
-    return zip(iterable, islice(iterable, 1, None))
