@@ -264,7 +264,7 @@ METRICS = {
     },
     'cluster.ratelimit.ok': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             (),
             (),
         ),
@@ -272,7 +272,7 @@ METRICS = {
     },
     'cluster.ratelimit.error': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             (),
             (),
         ),
@@ -280,7 +280,7 @@ METRICS = {
     },
     'cluster.ratelimit.over_limit': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             (),
             (),
         ),
@@ -312,7 +312,7 @@ METRICS = {
     },
     'cluster.grpc.success': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -320,7 +320,7 @@ METRICS = {
     },
     'cluster.grpc.failure': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),
@@ -328,7 +328,7 @@ METRICS = {
     },
     'cluster.grpc.total': {
         'tags': (
-            ('route_target_cluster', ),
+            ('cluster_name', ),
             ('grpc_service', 'grpc_method', ),
             (),
         ),

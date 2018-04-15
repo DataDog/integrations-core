@@ -22,7 +22,7 @@ def test_make_metric_tree():
         },
     }
 
-    exp = {
+    assert make_metric_tree(metrics) == {
         'http': {
             'dynamodb': {
                 'error': {
@@ -45,8 +45,3 @@ def test_make_metric_tree():
             ],
         },
     }
-
-    mt = make_metric_tree(metrics)
-    print(mt)
-    print(exp)
-    assert mt==exp

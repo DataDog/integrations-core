@@ -5,7 +5,7 @@ import requests
 
 from datadog_checks.checks import AgentCheck
 
-from .errors import UnknownMetric
+from .errors import UnknownMetric, UnknownTags
 from .parser import parse_metric
 
 
@@ -15,6 +15,7 @@ class Envoy(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(Envoy, self).__init__(name, init_config, agentConfig, instances)
         self.unknown_metrics = set()
+        self.unknown_tags = set()
 
     def check(self, instance):
         custom_tags = instance.get('tags', [])
@@ -72,6 +73,13 @@ class Envoy(AgentCheck):
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `{}`'.format(envoy_metric))
                     self.unknown_metrics.add(envoy_metric)
+                continue
+            except UnknownTags as e:
+                unknown_tags = str(e).split('|||')
+                for tag in unknown_tags:
+                    if tag not in self.unknown_tags:
+                        self.log.debug('Unknown tag `{}`'.format(tag))
+                        self.unknown_tags.add(tag)
                 continue
 
             tags.extend(custom_tags)
