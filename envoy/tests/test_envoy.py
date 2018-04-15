@@ -9,7 +9,6 @@ except ImportError:
 
 import mock
 import pytest
-from datadog_checks.stubs import aggregator as _aggregator
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
@@ -38,8 +37,9 @@ def response(kind):
 
 @pytest.fixture
 def aggregator():
-    _aggregator.reset()
-    return _aggregator
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
 
 
 class TestEnvoy:
@@ -61,9 +61,18 @@ class TestEnvoy:
         for metric in METRICS.keys():
             metrics_collected += len(aggregator.metrics(METRIC_PREFIX + metric))
 
-        # The 244 is how many metrics are collected from our
-        # particular example fixture in the first release.
-        assert metrics_collected >= 244
+        num_metrics = len(response('multiple_services').content.decode().splitlines())
+        num_metrics -= len(c.unknown_metrics)
+        assert 200 < metrics_collected == num_metrics
+
+    def test_service_check(self, aggregator):
+        instance = self.INSTANCES['main']
+        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+
+        with mock.patch('requests.get', return_value=response('multiple_services')):
+            c.check(instance)
+
+        assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
 
     def test_unknown(self):
         instance = self.INSTANCES['main']
