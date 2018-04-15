@@ -301,7 +301,13 @@ class SnmpCheck(NetworkCheck):
                         message = "{0} for instance {1}".format(error_status.prettyPrint(),
                                                                 instance["ip_address"])
                         instance["service_check_error"] = message
-                        self.warning(message)
+                        
+                        # submit CRITICAL service check if we can't connect to device
+                        if 'unknownUserName' in message:
+                            instance["service_check_severity"] = Status.CRITICAL
+                            self.log.error(message)
+                        else:    
+                            self.warning(message)
 
                     for table_row in var_binds_table:
                         complete_results.extend(table_row)
