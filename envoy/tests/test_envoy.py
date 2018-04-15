@@ -62,7 +62,7 @@ class TestEnvoy:
             metrics_collected += len(aggregator.metrics(METRIC_PREFIX + metric))
 
         num_metrics = len(response('multiple_services').content.decode().splitlines())
-        num_metrics -= len(c.unknown_metrics)
+        num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
         assert 200 < metrics_collected == num_metrics
 
     def test_service_check(self, aggregator):
@@ -81,4 +81,4 @@ class TestEnvoy:
         with mock.patch('requests.get', return_value=response('unknown_metrics')):
             c.check(instance)
 
-        assert len(c.unknown_metrics) == 4
+        assert sum(c.unknown_metrics.values())
