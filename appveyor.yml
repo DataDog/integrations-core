@@ -15,6 +15,8 @@ environment:
   PYTHON_ARCH: 64
   PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
   PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
+init:
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 cache:
   - C:\projects\integrations-core\.cache
   - C:\projects\integrations-core\vendor\cache
