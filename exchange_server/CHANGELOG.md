@@ -6,10 +6,10 @@
 ### Changes
 
 * [Update] Migrate to new wheels packaging and test framework
+* [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. #1183
 
 1.0.0 / 2017-03-22
 ==================
-
 ### Changes
 
 * [FEATURE] adds wmi_check integration.
