@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
+from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.containers import hash_mutable
 # datadog
 try:
