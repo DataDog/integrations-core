@@ -1,8 +1,9 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2010-2017
 # All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
+# Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
+
 from datadog_checks.stubs import aggregator
 from datadog_checks.pdh_check import PDHCheck
 
@@ -10,6 +11,7 @@ from datadog_checks.pdh_check import PDHCheck
 # it's used below.  noqa to suppress that error.
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
+CHECK_NAME = 'pdh_check'
 
 INSTANCE = {
     'countersetname': 'System',
@@ -30,19 +32,21 @@ def Aggregator():
     aggregator.reset()
     return aggregator
 
-
-CHECK_NAME = 'pdh_check'
-
-
 # flake8 then says this is a redefinition of unused, which it's not.
 @pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
 def test_basic_check(Aggregator, pdh_mocks_fixture):
+    """
+    Returns the right metrics and service checks
+    """
+    # Set up & run the check
+    config = {
+        'instances': [INSTANCE]
+    }
     initialize_pdh_tests()
-    instance = INSTANCE
-    c = PDHCheck(CHECK_NAME, {}, {}, [instance])
-    c.check(instance)
+    c = PDHCheck(CHECK_NAME, {}, {}, config['instances'])
+    c.check(config['instances'][0])
 
     for metric in INSTANCE_METRICS:
         Aggregator.assert_metric(metric, tags=None, count=1)
 
-    assert Aggregator.metrics_asserted_pct == 100.0
+    Aggregator.assert_all_metrics_covered()
