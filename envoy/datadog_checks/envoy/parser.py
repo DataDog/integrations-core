@@ -37,8 +37,7 @@ def parse_metric(metric, metric_mapping=METRIC_TREE):
                 else:
                     unknown_tags.extend(constructed_tags)
 
-                num_tags = 0
-
+            num_tags = 0
             metric_parts.append(metric_part)
             metric_mapping = metric_mapping[metric_part]
             minimum_tag_length = len(metric_mapping['|_tags_|'][-1])
