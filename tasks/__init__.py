@@ -12,7 +12,7 @@ from .cleanup import cleanup
 from .manifest import manifest
 from .upgrade import upgrade
 from .test import test
-from .changelog import make_changelog
+from .changelog import update_changelog
 
 # the root namespace
 root = Collection()
