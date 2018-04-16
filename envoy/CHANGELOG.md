@@ -6,7 +6,7 @@
 ### Changes
 
 * [FEATURE] add newly-documented metrics. See #1326
-* [IMPROVEMENT] tags can now contain any characters. See #1404
+* [IMPROVEMENT] tags can now contain the dot metric delimiter itself. See #1404
 
 1.0.0 / 2018-03-23
 ==================
