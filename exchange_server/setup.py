@@ -24,7 +24,7 @@ def get_requirements(fpath):
 
 
 setup(
-    name='datadog-exchange-server',
+    name='datadog-exchange_server',
     version=ABOUT["__version__"],
     description='The MS Exchange check',
     long_description=long_description,
