@@ -63,7 +63,7 @@ class TestEnvoy:
 
         num_metrics = len(response('multiple_services').content.decode().splitlines())
         num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-        assert 200 < metrics_collected == num_metrics
+        assert 4150 <= metrics_collected == num_metrics
 
     def test_service_check(self, aggregator):
         instance = self.INSTANCES['main']
