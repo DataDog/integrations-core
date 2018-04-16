@@ -1,5 +1,10 @@
 # CHANGELOG - Dotnetclr
 
+1.0.0 / Unreleased
+==================
+
+* [Update] Adds wheel support and integrated unit tests
+
 0.1.1 / 2018-03-07
 ==================
 ### Changes
