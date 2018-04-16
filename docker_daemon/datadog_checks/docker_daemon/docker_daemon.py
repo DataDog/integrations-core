@@ -1035,7 +1035,7 @@ class DockerDaemon(AgentCheck):
                         return dict({'softlimit': value})
                 elif 'cpu.shares' in stat_file:
                     value = int(fp.read())
-                    return dict({'shares': value})
+                    return {'shares': value}
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:
