@@ -10,6 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
+    'active_directory',
     'apache',
     'aspdotnet',
     'btrfs',
@@ -17,6 +18,7 @@ AGENT_BASED_INTEGRATIONS = [
     'directory',
     'disk',
     'envoy',
+    'iis',
     'istio',
     'kube_proxy',
     'kubelet',
@@ -25,6 +27,7 @@ AGENT_BASED_INTEGRATIONS = [
     'mcache',
     'network',
     'nfsstat',
+    'pdh_check',
     'postgres',
     'powerdns_recursor',
     'prometheus',
