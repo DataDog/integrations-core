@@ -1,5 +1,12 @@
 # CHANGELOG - pdh_check
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [Update] Update to new wheels packaging and unit test framework
+
 1.1.0 / 2018-01-10
 ==================
 
