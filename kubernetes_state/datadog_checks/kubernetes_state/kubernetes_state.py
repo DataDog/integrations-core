@@ -326,7 +326,7 @@ class KubernetesState(PrometheusCheck):
         check_basename = self.NAMESPACE + '.pod.phase'
         for metric in message.metric:
             self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
-                                         tags=[self._label_to_tag("pod", metric.label), 
+                                         tags=[self._label_to_tag("pod", metric.label),
                                                self._label_to_tag("namespace", metric.label)] + self.custom_tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
