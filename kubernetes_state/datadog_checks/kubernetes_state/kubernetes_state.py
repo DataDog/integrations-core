@@ -188,6 +188,10 @@ class KubernetesState(PrometheusCheck):
             send_buckets = False
         else:
             send_buckets = True
+
+        self.custom_tags = instance.get('tags', [])
+        if self.custom_tags is None:
+            self.custom_tags = []
         # Job counters are monotonic: they increase at every run of the job
         # We want to send the delta via the `monotonic_count` method
         self.job_succeeded_count = defaultdict(int)
@@ -322,7 +326,8 @@ class KubernetesState(PrometheusCheck):
         check_basename = self.NAMESPACE + '.pod.phase'
         for metric in message.metric:
             self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
-                                         tags=[self._label_to_tag("pod", metric.label),self._label_to_tag("namespace", metric.label)])
+                                         tags=[self._label_to_tag("pod", metric.label), 
+                                               self._label_to_tag("namespace", metric.label)] + self.custom_tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
@@ -340,7 +345,7 @@ class KubernetesState(PrometheusCheck):
                 elif label.name == "namespace":
                     tags.append(self._format_tag(label.name, label.value))
             if not skip_metric:
-                self.count(metric_name, metric.gauge.value, tags)
+                self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.terminated'
@@ -358,7 +363,7 @@ class KubernetesState(PrometheusCheck):
                 elif label.name == "namespace":
                     tags.append(self._format_tag(label.name, label.value))
             if not skip_metric:
-                self.count(metric_name, metric.gauge.value, tags)
+                self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """
@@ -367,7 +372,7 @@ class KubernetesState(PrometheusCheck):
         curr_time = int(time.time())
         for metric in message.metric:
             on_schedule = int(metric.gauge.value) - curr_time
-            tags = [self._format_tag(label.name, label.value) for label in metric.label]
+            tags = [self._format_tag(label.name, label.value) for label in metric.label] + self.custom_tags
             if on_schedule < 0:
                 message = "The service check scheduled at %s is %s seconds late" % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(metric.gauge.value))), on_schedule)
                 self.service_check(check_basename, self.CRITICAL, tags=tags, message=message)
@@ -384,7 +389,7 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, trimmed_job))
                 else:
                     tags.append(self._format_tag(label.name, label.value))
-            self.service_check(service_check_name, self.OK, tags=tags)
+            self.service_check(service_check_name, self.OK, tags=tags + self.custom_tags)
 
     def kube_job_failed(self, message, **kwargs):
         service_check_name = self.NAMESPACE + '.job.complete'
@@ -396,11 +401,11 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag(label.name, trimmed_job))
                 else:
                     tags.append(self._format_tag(label.name, label.value))
-            self.service_check(service_check_name, self.CRITICAL, tags=tags)
+            self.service_check(service_check_name, self.CRITICAL, tags=tags + self.custom_tags)
 
     def kube_job_status_failed(self, message, **kwargs):
         for metric in message.metric:
-            tags = []
+            tags = [] + self.custom_tags
             for label in metric.label:
                 if label.name == 'job':
                     trimmed_job = self._trim_job_tag(label.value)
@@ -412,7 +417,7 @@ class KubernetesState(PrometheusCheck):
 
     def kube_job_status_succeeded(self, message, **kwargs):
         for metric in message.metric:
-            tags = []
+            tags = [] + self.custom_tags
             for label in metric.label:
                 if label.name == 'job':
                     trimmed_job = self._trim_job_tag(label.value)
@@ -428,14 +433,14 @@ class KubernetesState(PrometheusCheck):
 
         for metric in message.metric:
             self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
-                                         tags=[self._label_to_tag("node", metric.label)])
+                                         tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
             # Counts aggregated cluster-wide to avoid no-data issues on node churn,
             # node granularity available in the service checks
             tags = [
                 self._label_to_tag("condition", metric.label),
                 self._label_to_tag("status", metric.label)
-            ]
+            ] + self.custom_tags
             self.count(metric_name, metric.gauge.value, tags)
 
     def kube_node_status_ready(self, message, **kwargs):
@@ -443,35 +448,35 @@ class KubernetesState(PrometheusCheck):
         service_check_name = self.NAMESPACE + '.node.ready'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_positive,
-                                             tags=[self._label_to_tag("node", metric.label)])
+                                             tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
     def kube_node_status_out_of_disk(self, message, **kwargs):
         """ Whether the node is out of disk space (legacy)"""
         service_check_name = self.NAMESPACE + '.node.out_of_disk'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
-                                             tags=[self._label_to_tag("node", metric.label)])
+                                             tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
     def kube_node_status_memory_pressure(self, message, **kwargs):
         """ Whether the node is in a memory pressure state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.memory_pressure'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
-                                             tags=[self._label_to_tag("node", metric.label)])
+                                             tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
     def kube_node_status_disk_pressure(self, message, **kwargs):
         """ Whether the node is in a disk pressure state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.disk_pressure'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
-                                             tags=[self._label_to_tag("node", metric.label)])
+                                             tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
     def kube_node_status_network_unavailable(self, message, **kwargs):
         """ Whether the node is in a network unavailable state (legacy)"""
         service_check_name = self.NAMESPACE + '.node.network_unavailable'
         for metric in message.metric:
             self._condition_to_service_check(metric, service_check_name, self.condition_to_status_negative,
-                                             tags=[self._label_to_tag("node", metric.label)])
+                                             tags=[self._label_to_tag("node", metric.label)] + self.custom_tags)
 
     def kube_node_spec_unschedulable(self, message, **kwargs):
         """ Whether a node can schedule new pods. """
@@ -479,7 +484,7 @@ class KubernetesState(PrometheusCheck):
         statuses = ('schedulable', 'unschedulable')
         if message.type < len(METRIC_TYPES):
             for metric in message.metric:
-                tags = [self._format_tag(label.name, label.value) for label in metric.label]
+                tags = [self._format_tag(label.name, label.value) for label in metric.label] + self.custom_tags
                 status = statuses[int(getattr(metric, METRIC_TYPES[message.type]).value)]  # value can be 0 or 1
                 tags.append(self._format_tag('status', status))
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
@@ -497,7 +502,7 @@ class KubernetesState(PrometheusCheck):
                 tags = [
                     self._label_to_tag("namespace", metric.label),
                     self._label_to_tag("resourcequota", metric.label)
-                ]
+                ] + self.custom_tags
                 val = getattr(metric, METRIC_TYPES[message.type]).value
                 self.gauge(metric_base_name.format(resource, suffixes[mtype]), val, tags)
         else:
@@ -530,7 +535,7 @@ class KubernetesState(PrometheusCheck):
                     self._label_to_tag("namespace", metric.label),
                     self._label_to_tag("limitrange", metric.label),
                     self._label_to_tag("type", metric.label, tag_name="consumer_type")
-                ]
+                ] + self.custom_tags
                 val = getattr(metric, METRIC_TYPES[message.type]).value
                 self.gauge(metric_base_name.format(resource, constraint), val, tags)
         else:
