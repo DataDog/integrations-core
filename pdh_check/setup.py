@@ -22,6 +22,7 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
+
 setup(
     name='datadog-pdh_check',
     version=ABOUT["__version__"],
