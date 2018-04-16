@@ -2,21 +2,20 @@
 
 1.2.0 / Unreleased
 ==================
-
 ### Changes
 
 * [Update] Update to new wheels packaging and unit test framework
+* [BUGFIX] Added resilience to failed import of `WinPDHCounter`. #1183
+* [SANITY] Use `WinPDHCounter` shipped with `datadog-checks-base` wheel. #1183
 
 1.1.0 / 2018-01-10
 ==================
-
 ### Changes
 
 * [BUGFIX] Fix tag key-value separator. [#927][]
 
 1.0.0 / 2017-10-10
 ==================
-
 ### Changes
 
 * [FEATURE] adds pdh_check integration.
