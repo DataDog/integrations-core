@@ -9,7 +9,7 @@
   "supported_os": [
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "guid": "7bc177b0-b07d-4a83-921f-9cd8deef039b",
   "public_title": "Datadog-Exchange Server Integration",
   "categories":["os & system"],
