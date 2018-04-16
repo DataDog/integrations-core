@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# project
-from datadog_checks.utils.containers import hash_mutable
 # datadog
 from datadog_checks.checks.win import WinPDHCounter
 from datadog_checks.checks import AgentCheck
+
+from datadog_checks.utils.containers import hash_mutable
 
 
 class PDHCheck(AgentCheck):
