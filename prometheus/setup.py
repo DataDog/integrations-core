@@ -55,7 +55,7 @@ setup(
 
     # Run-time dependencies
     install_requires=[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     # Testing setup and dependencies

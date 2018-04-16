@@ -1,6 +1,0 @@
-include README.md
-include requirements.in
-include requirements.txt
-include tests/requirements.txt
-graft datadog_checks
-graft tests

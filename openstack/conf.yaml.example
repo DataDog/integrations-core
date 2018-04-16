@@ -75,3 +75,7 @@ instances:
       # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
       # Setting append_tenant_id to true manually adds this suffix for downstream requests
       # append_tenant_id: false
+
+      # Set (optional) custom tags for each metric
+      # tags:
+      #   - optional:tag1
