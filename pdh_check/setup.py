@@ -24,7 +24,7 @@ def get_requirements(fpath):
 
 
 setup(
-    name='datadog-aspdotnet',
+    name='datadog-pdh_check',
     version=ABOUT["__version__"],
     description='The Windows Performance Counters check',
     long_description=long_description,
