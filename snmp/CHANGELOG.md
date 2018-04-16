@@ -1,5 +1,12 @@
 # CHANGELOG - snmp
 
+1.3.2 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Enhance error handling when metrics aren't defined or device cannot be reached. See [#1406][]
+
 1.3.1 / 2018-02-13
 ==================
 
@@ -40,3 +47,4 @@
 [#426]: https://github.com/DataDog/integrations-core/issues/426
 [#723]: https://github.com/DataDog/integrations-core/issues/723
 [#1041]: https://github.com/DataDog/integrations-core/issues/1041
+[#1406]: https://github.com/DataDog/integrations-core/issues/1406
