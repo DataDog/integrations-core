@@ -81,4 +81,4 @@ class TestEnvoy:
         with mock.patch('requests.get', return_value=response('unknown_metrics')):
             c.check(instance)
 
-        assert sum(c.unknown_metrics.values()) == 4
+        assert sum(c.unknown_metrics.values()) == 5
