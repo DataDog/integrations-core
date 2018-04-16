@@ -61,7 +61,6 @@ ASP_APP_INSTANCES = (
     "_LM_W3SVC_2_ROOT_EWS",
     "_LM_W3SVC_1_ROOT_Autodiscover",
     "_LM_W3SVC_1_ROOT_PowerShell",
-    "_LM_W3SVC_1_ROOT",
     "_LM_W3SVC_2_ROOT_PowerShell",
     "_LM_W3SVC_1_ROOT_OAB",
     "_LM_W3SVC_2_ROOT_owa",

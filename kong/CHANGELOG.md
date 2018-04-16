@@ -1,5 +1,12 @@
 # CHANGELOG - kong
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add `ssl_validation` settings to disable SSL Cert Verification
+
 1.1.0 / 2018-03-23
 ==================
 

@@ -7,9 +7,10 @@ import time
 
 from datadog_checks.mcache import Memcache
 import pytest
-import memcache
+import bmemcached
+from bmemcached.exceptions import MemcachedException
 
-from .common import PORT, SERVICE_CHECK, HOST
+from .common import PORT, SERVICE_CHECK, HOST, USERNAME, PASSWORD
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -110,15 +111,20 @@ def memcached():
     """
     Start a standalone Memcached server.
     """
-    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "up", "-d"])
+    env = os.environ
+    env['PWD'] = HERE
+    compose_file = os.path.join(HERE, 'docker-compose.yaml')
+
+    subprocess.check_call(["docker-compose", "-f", compose_file, "up", "-d"], env=env)
     attempts = 0
     while True:
         if attempts > 10:
             raise Exception("Memcached boot timed out!")
 
-        mc = memcache.Client(["{}:{}".format(HOST, PORT)])
-        mc.set("foo", "bar")
-        if not mc.get("foo"):
+        mc = bmemcached.Client(["{}:{}".format(HOST, PORT)], USERNAME, PASSWORD)
+        try:
+            mc.set("foo", "bar")
+        except MemcachedException:
             attempts += 1
             time.sleep(1)
         else:
@@ -133,12 +139,23 @@ def memcached():
 
 @pytest.fixture
 def client():
-    return memcache.Client(["{}:{}".format(HOST, PORT)])
+    return bmemcached.Client(["{}:{}".format(HOST, PORT)], USERNAME, PASSWORD)
 
 
 @pytest.fixture
 def check():
     return Memcache('mcache', None, {}, [{}])
+
+
+@pytest.fixture
+def instance():
+    return {
+        'url': "{}".format(HOST),
+        'port': PORT,
+        'tags': ["foo:bar"],
+        'username': USERNAME,
+        'password': PASSWORD,
+    }
 
 
 @pytest.fixture
@@ -175,7 +192,7 @@ def test_service_ko(check, aggregator):
     """
     If the service is down, the service check should be sent accordingly
     """
-    tags = ["host:{}".format(HOST), "port:11211", "foo:bar"]
+    tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
     with pytest.raises(Exception) as e:
         check.check({'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"]})
         # FIXME: the check should raise a more precise exception and there should be
@@ -187,54 +204,55 @@ def test_service_ko(check, aggregator):
     assert sc.tags == tags
 
 
-def test_service_ok(check, aggregator, memcached):
+def test_service_ok(check, instance, aggregator, memcached):
     """
     Service is up
     """
-    tags = ["host:{}".format(HOST), "port:11211", "foo:bar"]
-    check.check({'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"]})
+    tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
+    check.check(instance)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
     assert sc.tags == tags
 
 
-def test_metrics(client, check, aggregator, memcached):
+def test_metrics(client, check, instance, aggregator, memcached):
     """
     Test all the available metrics: default, options and slabs
     """
     # we need to successfully retrieve a key to produce `get_hit_percent`
-    client.set("foo", "bar")
-    client.get("foo")
+    for _ in range(100):
+        assert client.set("foo", "bar") is True
+        assert client.get("foo") == "bar"
 
-    instance = {
-        'url': "{}".format(HOST),
-        'port': PORT,
+    instance.update({
         'options': {
             'items': True,
             'slabs': True,
         }
-    }
+    })
     check.check(instance)
 
-    expected_tags = ["url:{}:11211".format(HOST)]
+    print(aggregator._metrics)
+
+    expected_tags = ["url:{}:{}".format(HOST, PORT), 'foo:bar']
     for m in GAUGES + RATES + SLABS_AGGREGATES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
-    expected_tags = ["url:{}:11211".format(HOST), "slab:1"]
+    expected_tags += ["slab:1"]
     for m in ITEMS_GAUGES + ITEMS_RATES + SLABS_RATES + SLABS_GAUGES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_connections_leaks(check):
+def test_connections_leaks(check, instance):
     """
     This test was ported from the old test suite but the leak might not be a
     problem anymore.
     """
     # Start state, connections should be 0
     assert count_connections(PORT) == 0
-    check.check({'url': "{}".format(HOST), 'port': PORT})
+    check.check(instance)
     # Verify that the count is still 0
     assert count_connections(PORT) == 0

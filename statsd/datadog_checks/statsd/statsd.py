@@ -21,11 +21,12 @@ class StatsCheck(AgentCheck):
     def check(self, instance):
         host = instance.get("host", "localhost")
         port = instance.get("port", 8126)
+        timeout = float(instance.get('timeout', 10))
         tags = instance.get("tags", [])
         tags = ["host:{0}".format(host), "port:{0}".format(port)] + tags
 
         # Is it up?
-        health = self._send_command(host, port, "health", tags).getvalue().strip()
+        health = self._send_command(host, port, timeout, "health", tags).getvalue().strip()
         if health == "health: up":
             self.service_check(
                 SERVICE_CHECK_NAME_HEALTH, AgentCheck.OK, tags
@@ -36,7 +37,7 @@ class StatsCheck(AgentCheck):
             )
 
         # Get general stats
-        stats = self._send_command(host, port, "stats", tags)
+        stats = self._send_command(host, port, timeout, "stats", tags)
         stats.seek(0)
         for l in stats.readlines():
             parts = l.strip().split(":")
@@ -48,21 +49,22 @@ class StatsCheck(AgentCheck):
                 else:
                     self.gauge("statsd.{0}".format(parts[0]), float(parts[1]), tags=tags)
 
-        counters = len(self._send_command(host, port, "counters", tags).getvalue().splitlines()) - 1
+        counters = len(self._send_command(host, port, timeout, "counters", tags).getvalue().splitlines()) - 1
         self.gauge("statsd.counters.count", counters, tags=tags)
 
-        gauges = len(self._send_command(host, port, "gauges", tags).getvalue().splitlines()) - 1
+        gauges = len(self._send_command(host, port, timeout, "gauges", tags).getvalue().splitlines()) - 1
         self.gauge("statsd.gauges.count", gauges, tags=tags)
 
-        timers = len(self._send_command(host, port, "timers", tags).getvalue().splitlines()) - 1
+        timers = len(self._send_command(host, port, timeout, "timers", tags).getvalue().splitlines()) - 1
         self.gauge("statsd.timers.count", timers, tags=tags)
 
         # Send the final service check status
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags)
 
-    def _send_command(self, host, port, command, tags):
+    def _send_command(self, host, port, timeout, command, tags):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(timeout)
             s.connect((host, port))
 
             s.sendall("{0}\n".format(command))

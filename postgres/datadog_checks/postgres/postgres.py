@@ -544,6 +544,7 @@ SELECT s.schemaname,
             results = cursor.fetchall()
         except programming_error as e:
             log_func("Not all metrics may be available: %s" % str(e))
+            db.rollback()
             return None
 
         if not results:

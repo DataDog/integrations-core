@@ -4,10 +4,13 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import json
 
 HERE = path.abspath(path.dirname(__file__))
 
+# Get version info
+ABOUT = {}
+with open(path.join(HERE, "datadog_checks", "haproxy", "__about__.py")) as f:
+    exec(f.read(), ABOUT)
 
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
@@ -19,24 +22,6 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
-
-def read(*parts):
-    with open(path.join(HERE, *parts), 'r') as fp:
-        return fp.read()
-
-
-# Get version info
-ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "haproxy", "__about__.py")) as f:
-    exec(f.read(), ABOUT)
-
-manifest_version = None
-with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if ABOUT["__version__"] != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-haproxy',
@@ -71,7 +56,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     setup_requires=['pytest-runner', ],
