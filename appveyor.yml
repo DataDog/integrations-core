@@ -17,6 +17,7 @@ environment:
   PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
 init:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - echo %PATH%
 cache:
   - C:\projects\integrations-core\.cache
   - C:\projects\integrations-core\vendor\cache
