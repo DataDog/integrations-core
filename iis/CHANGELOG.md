@@ -1,4 +1,11 @@
 # CHANGELOG - iis
+
+2.1.0 / Unreleased
+==================
+### Changes
+
+* [Update] Updates to new wheel packaging and test infrastructure
+
 2.0.2 / 2018-03-07
 ==================
 ### Changes
