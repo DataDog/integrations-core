@@ -4,7 +4,8 @@
 ==================
 ### Changes
 
-* [Update] Updates to new wheel packaging and test infrastructure
+* [UPDATE] Updates to new wheel packaging and test infrastructure
+* [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. #1183
 
 2.0.2 / 2018-03-07
 ==================
