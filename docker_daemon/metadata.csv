@@ -13,7 +13,7 @@ docker.cpu.user.max,gauge,,percent,,Max value of docker.cpu.user,0,docker,cpu us
 docker.cpu.user.median,gauge,,percent,,Median value of docker.cpu.user,0,docker,cpu user median
 docker.cpu.usage,gauge,,percent,,The percent of CPU time obtained by this container,0,docker,docker.cpu.usage
 docker.cpu.throttled,gauge,,,,Number of times the cgroup has been throttled,-1,docker,cpu throttled
-docker.cpu.shares,gauge,,,,Available CPU time weight,0,docker,cpu shars
+docker.cpu.shares,gauge,,,,Shares of CPU usage allocated to the container,0,docker,cpu shares
 docker.mem.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),0,docker,mem cache
 docker.mem.cache.95percentile,gauge,,byte,,95th percentile value of docker.mem.cache,0,docker,mem cache 95%
 docker.mem.cache.avg,gauge,,byte,,Average value of docker.mem.cache,0,docker,mem cache avg
