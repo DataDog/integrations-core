@@ -98,6 +98,13 @@ CGROUP_METRICS = [
         },
     },
     {
+        "cgroup": "cpu",
+        "file": "cpu.shares",
+        "metrics": {
+            "shares": ("docker.cpu.shares", GAUGE)
+        },
+    },
+    {
         "cgroup": "blkio",
         "file": 'blkio.throttle.io_service_bytes',
         "metrics": {
@@ -1026,6 +1033,9 @@ class DockerDaemon(AgentCheck):
                     # 2 ** 60 is kept for consistency of other cgroups metrics
                     if value < 2 ** 60:
                         return dict({'softlimit': value})
+                elif 'cpu.shares' in stat_file:
+                    value = int(fp.read())
+                    return {'shares': value}
                 else:
                     return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
         except IOError:
