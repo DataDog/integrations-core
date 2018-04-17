@@ -469,7 +469,7 @@ class PrometheusScraper(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=True, timeout=1, cert=cert, verify=verify)
+            response = requests.get(endpoint, headers=headers, stream=True, timeout=10, cert=cert, verify=verify)
         except (requests.exceptions.SSLError):
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise
