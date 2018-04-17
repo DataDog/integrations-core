@@ -341,13 +341,15 @@ CHECK_NAME = 'spark'
 YARN_CONFIG = {
     'spark_url': 'http://localhost:8088',
     'cluster_name': CLUSTER_NAME,
-    'spark_cluster_mode': 'spark_yarn_mode'
+    'spark_cluster_mode': 'spark_yarn_mode',
+    'tags': ['optional:tag1']
 }
 
 MESOS_CONFIG = {
     'spark_url': 'http://localhost:5050',
     'cluster_name': CLUSTER_NAME,
-    'spark_cluster_mode': 'spark_mesos_mode'
+    'spark_cluster_mode': 'spark_mesos_mode',
+    'tags': ['instance:mytag']
 }
 
 MESOS_FILTERED_CONFIG = {
@@ -529,56 +531,62 @@ def test_yarn(aggregator):
         for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
-                tags=SPARK_JOB_RUNNING_METRIC_TAGS, value=value)
+                tags=SPARK_JOB_RUNNING_METRIC_TAGS + ['optional:tag1'], value=value)
 
         # Check the succeeded job metrics
         for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
+                tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + ['optional:tag1'])
 
         # Check the running stage metrics
         for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
+                tags=SPARK_STAGE_RUNNING_METRIC_TAGS + ['optional:tag1'])
 
         # Check the complete stage metrics
         for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
+                tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + ['optional:tag1'])
 
         # Check the driver metrics
         for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['optional:tag1'])
 
         # Check the executor metrics
         for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['optional:tag1'])
 
         # Check the RDD metrics
         for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['optional:tag1'])
 
         for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8088']
+            tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8088']
+            tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster', 'optional:tag1']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
 
 
 def test_mesos(aggregator):
@@ -591,58 +599,64 @@ def test_mesos(aggregator):
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_JOB_RUNNING_METRIC_TAGS)
+                tags=SPARK_JOB_RUNNING_METRIC_TAGS + ['instance:mytag'])
 
         # Check the succeeded job metrics
         for metric, value in SPARK_JOB_SUCCEEDED_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
+                tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + ['instance:mytag'])
 
         # Check the running stage metrics
         for metric, value in SPARK_STAGE_RUNNING_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
+                tags=SPARK_STAGE_RUNNING_METRIC_TAGS + ['instance:mytag'])
 
         # Check the complete stage metrics
         for metric, value in SPARK_STAGE_COMPLETE_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
+                tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + ['instance:mytag'])
 
         # Check the driver metrics
         for metric, value in SPARK_DRIVER_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['instance:mytag'])
 
         # Check the executor metrics
         for metric, value in SPARK_EXECUTOR_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['instance:mytag'])
 
         # Check the RDD metrics
         for metric, value in SPARK_RDD_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
                 metric,
                 value=value,
-                tags=SPARK_METRIC_TAGS)
+                tags=SPARK_METRIC_TAGS + ['instance:mytag'])
 
         # Check the service tests
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:5050']
+            tags = ['url:http://localhost:5050', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040']
+            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster', 'instance:mytag']
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
 
         assert aggregator.metrics_asserted_pct == 100.0
 
@@ -654,7 +668,7 @@ def test_mesos_filter(aggregator):
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:5050']
+            assert sc.tags == ['url:http://localhost:5050', 'cluster_name:SparkCluster']
 
         assert aggregator.metrics_asserted_pct == 100.0
 
@@ -723,10 +737,10 @@ def test_standalone(aggregator):
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080']
+            assert sc.tags == ['url:http://localhost:8080', 'cluster_name:SparkCluster']
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040']
+            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
 
 
 def test_standalone_pre20(aggregator):
@@ -793,10 +807,10 @@ def test_standalone_pre20(aggregator):
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:8080']
+            assert sc.tags == ['url:http://localhost:8080', 'cluster_name:SparkCluster']
         for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
-            assert sc.tags == ['url:http://localhost:4040']
+            assert sc.tags == ['url:http://localhost:4040', 'cluster_name:SparkCluster']
 
 
 def test_ssl():

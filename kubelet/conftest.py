@@ -2,11 +2,12 @@ import sys
 
 
 def get_conn_info():
-    return {'url': 'http://127.0.0.1:10250'}
+    return {'url': 'http://127.0.0.1:10255'}
 
 
 def get_tags(entity, high_card):
-    return []
+    tag_store = {}
+    return tag_store.get(entity, [])
 
 
 kubeutil = type(sys)('kubeutil')

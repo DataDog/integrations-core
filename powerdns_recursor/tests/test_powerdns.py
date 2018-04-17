@@ -145,9 +145,9 @@ def test_tags(aggregator, spin_up_powerdns):
     service_check_tags = common._config_sc_tags(common.CONFIG)
     aggregator.assert_service_check('powerdns.recursor.can_connect',
                                     status=PowerDNSRecursorCheck.OK,
-                                    tags=service_check_tags)
+                                    tags=service_check_tags+tags)
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_bad_config(aggregator):

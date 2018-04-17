@@ -51,7 +51,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
     setup_requires=['pytest-runner', ],
     tests_require=get_requirements('requirements-dev.txt'),

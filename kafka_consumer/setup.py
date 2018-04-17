@@ -29,7 +29,7 @@ setup(
     version=ABOUT["__version__"],
     description='The Kafka Consumer check',
     long_description=long_description,
-    keywords='datadog agent kafka consumer check',
+    keywords='datadog agent kafka_consumer check',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',

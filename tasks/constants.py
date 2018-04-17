@@ -11,8 +11,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'apache',
+    'aspdotnet',
     'btrfs',
-    'datadog-checks-base',
+    'datadog_checks_base',
     'directory',
     'disk',
     'envoy',
@@ -20,6 +21,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kafka_consumer',
     'kube_proxy',
     'kubelet',
+    'lighttpd',
     'linkerd',
     'mcache',
     'network',
@@ -28,6 +30,7 @@ AGENT_BASED_INTEGRATIONS = [
     'powerdns_recursor',
     'prometheus',
     'redisdb',
+    'riak',
     'spark',
     'ssh_check',
     'system_core',

@@ -8,6 +8,7 @@ from tests.checks.common import AgentCheckTest, Fixtures, get_check_class
 
 class TestMesosMaster(AgentCheckTest):
     CHECK_NAME = 'mesos_master'
+    SERVICE_CHECK_NAME = "mesos_master.can_connect"
     FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
 
     def test_checks(self):
@@ -15,17 +16,18 @@ class TestMesosMaster(AgentCheckTest):
             'init_config': {},
             'instances': [
                 {
-                    'url': 'http://localhost:5050'
+                    'url': 'http://localhost:5050',
+                    'tags': ['instance:mytag1']
                 }
             ]
         }
 
         mocks = {
-            '_get_master_roles': lambda x, y, z: json.loads(
+            '_get_master_roles': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('roles.json', sdk_dir=self.FIXTURE_DIR)),
-            '_get_master_stats': lambda x, y, z: json.loads(
+            '_get_master_stats': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('stats.json', sdk_dir=self.FIXTURE_DIR)),
-            '_get_master_state': lambda x, y, z: json.loads(
+            '_get_master_state': lambda v, x, y, z: json.loads(
                 Fixtures.read_file('state.json', sdk_dir=self.FIXTURE_DIR)),
         }
 

@@ -5,25 +5,26 @@
 
 # stdlib
 import socket
+import unicodedata
 
 # 3rd party
 from httplib2 import Http, HttpLib2Error
 import simplejson as json
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class Riak(AgentCheck):
     SERVICE_CHECK_NAME = 'riak.can_connect'
 
     keys = [
-        #KV Throughput Statistics
+        # KV Throughput Statistics
         "node_gets",
         "node_gets_total",
         "node_puts",
         "node_puts_total",
-        #CRDT Throughput Statistics
+        # CRDT Throughput Statistics
         "node_gets_counter",
         "node_gets_counter_total",
         "node_gets_set",
@@ -44,11 +45,11 @@ class Riak(AgentCheck):
         "object_set_merge_total",
         "object_map_merge",
         "object_map_merge_total",
-        #Protocol Buffers Statistics
+        # Protocol Buffers Statistics
         "pbc_active",
         "pbc_connects",
         "pbc_connects_total",
-        #Read Repair Statistics
+        # Read Repair Statistics
         "read_repairs",
         "read_repairs_total",
         "skipped_read_repairs",
@@ -67,7 +68,7 @@ class Riak(AgentCheck):
         "read_repairs_fallback_notfound_count",
         "read_repairs_fallback_outofdate_one",
         "read_repairs_fallback_outofdate_count",
-        #Overload Protection Statistics
+        # Overload Protection Statistics
         "node_get_fsm_active",
         "node_get_fsm_active_60s",
         "node_get_fsm_in_rate",
@@ -84,7 +85,7 @@ class Riak(AgentCheck):
         "node_put_fsm_rejected",
         "node_put_fsm_rejected_60s",
         "node_put_fsm_rejected_total",
-        #VNode Statistics
+        # VNode Statistics
         "riak_kv_vnodes_running",
         "vnode_gets",
         "vnode_gets_total",
@@ -109,7 +110,7 @@ class Riak(AgentCheck):
         "vnode_index_writes_postings_total",
         "vnode_index_writes_total",
         "dropped_vnode_requests_total",
-        #Search Statistics
+        # Search Statistics
         "search_index_fail_one",
         "search_index_fail_count",
         "search_index_throughput_one",
@@ -118,17 +119,17 @@ class Riak(AgentCheck):
         "search_query_fail_count",
         "search_query_throughput_one",
         "search_query_throughput_count",
-        #Keylisting Statistics
+        # Keylisting Statistics
         "list_fsm_active",
         "list_fsm_create",
         "list_fsm_create_total",
         "list_fsm_create_error",
         "list_fsm_create_error_total",
-        #Secondary Indexing Statistics
+        # Secondary Indexing Statistics
         "index_fsm_active",
         "index_fsm_create",
         "index_fsm_create_error",
-        #MapReduce Statistics
+        # MapReduce Statistics
         "riak_pipe_vnodes_running",
         "executing_mappers",
         "pipeline_active",
@@ -136,7 +137,7 @@ class Riak(AgentCheck):
         "pipeline_create_error_count",
         "pipeline_create_error_one",
         "pipeline_create_one",
-        #Ring Statistics
+        # Ring Statistics
         "rings_reconciled",
         "rings_reconciled_total",
         "converge_delay_last",
@@ -152,7 +153,7 @@ class Riak(AgentCheck):
         "coord_redirs_total",
         "gossip_received",
         "ignored_gossip_total",
-        #System Statistics
+        # System Statistics
         "mem_allocated",
         "mem_total",
         "memory_atom",
@@ -167,7 +168,7 @@ class Riak(AgentCheck):
         "sys_monitor_count",
         "sys_port_count",
         "sys_process_count",
-        #Misc. Statistics
+        # Misc. Statistics
         "late_put_fsm_coordinator_ack",
         "postcommit_fail",
         "precommit_fail",
@@ -175,12 +176,12 @@ class Riak(AgentCheck):
     ]
 
     stat_keys = [
-        #KV Latency and Object Statistics
+        # KV Latency and Object Statistics
         "node_get_fsm_objsize",
         "node_get_fsm_siblings",
         "node_get_fsm_time",
         "node_put_fsm_time",
-        #CRDT Latency and Object Statistics
+        # CRDT Latency and Object Statistics
         "node_get_fsm_counter_time",
         "node_get_fsm_set_time",
         "node_get_fsm_map_time",
@@ -200,7 +201,7 @@ class Riak(AgentCheck):
         "counter_actor_counts",
         "set_actor_counts",
         "map_actor_counts",
-        #VNode Latency and Object Statistics
+        # VNode Latency and Object Statistics
         "vnode_get_fsm_time",
         "vnode_put_fsm_time",
         "vnode_counter_update_time",
@@ -266,7 +267,7 @@ class Riak(AgentCheck):
 
         for k in self.keys:
             if k in stats:
-                self.gauge("riak." + k, stats[k], tags=tags)
+                self.safe_submit_metric("riak." + k, stats[k], tags=tags)
 
         coord_redirs_total = stats["coord_redirs_total"]
         if self.prev_coord_redirs_total > -1:
@@ -274,3 +275,20 @@ class Riak(AgentCheck):
             self.gauge('riak.coord_redirs', count)
 
         self.prev_coord_redirs_total = coord_redirs_total
+
+    def safe_submit_metric(self, name, value, tags=[]):
+        try:
+            self.gauge(name, float(value), tags=tags)
+            return
+        except ValueError:
+            self.log.debug("metric name {0} cannot be converted to a float: {1}".format(name, value))
+            pass
+
+        try:
+            self.gauge(name, unicodedata.numeric(value), tags=tags)
+            return
+        except (TypeError, ValueError):
+            self.log.debug(
+                "metric name {0} cannot be converted to a float even using unicode tools: {1}".format(
+                    name, value))
+            pass

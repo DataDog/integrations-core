@@ -3,14 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
-from checks import AgentCheck
-from utils.containers import hash_mutable
+from datadog_checks.utils.containers import hash_mutable
 # datadog
-try:
-    from checks.libs.win.winpdh import WinPDHCounter
-except ImportError:
-    def WinPDHCounter(*args, **kwargs):
-        return
+from datadog_checks.checks.win.winpdh import WinPDHCounter
+from datadog_checks.checks import AgentCheck
 
 
 class PDHCheck(AgentCheck):

@@ -5,6 +5,7 @@ instances:
   # supply a list of tags.
   #
   - kong_status_url: http://localhost:8001/status/
+  #   ssl_validation: true
   #   tags:
   #     - instance:foo
   #

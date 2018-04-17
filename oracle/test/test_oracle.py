@@ -34,6 +34,7 @@ CONFIG = {
         'user': 'system',
         'password': 'oracle',
         'service_name': 'xe',
+        'tags': ['optional:tag1']
     }]
 }
 
@@ -105,5 +106,5 @@ class TestOracle(AgentCheckTest):
         for m in METRICS:
             self.assertMetric(m, at_least=1)
 
-        self.assertServiceCheck(SERVICE_CHECK_NAME)
+        self.assertServiceCheck(SERVICE_CHECK_NAME, tags=['optional:tag1', 'server:localhost:1521'])
         self.coverage_report()

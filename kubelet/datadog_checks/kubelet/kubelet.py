@@ -29,21 +29,21 @@ CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
 FACTORS = {
-    'n': float(1)/(1000*1000*1000),
-    'u': float(1)/(1000*1000),
-    'm': float(1)/1000,
+    'n': float(1) / (1000 * 1000 * 1000),
+    'u': float(1) / (1000 * 1000),
+    'm': float(1) / 1000,
     'k': 1000,
-    'M': 1000*1000,
-    'G': 1000*1000*1000,
-    'T': 1000*1000*1000*1000,
-    'P': 1000*1000*1000*1000*1000,
-    'E': 1000*1000*1000*1000*1000*1000,
+    'M': 1000 * 1000,
+    'G': 1000 * 1000 * 1000,
+    'T': 1000 * 1000 * 1000 * 1000,
+    'P': 1000 * 1000 * 1000 * 1000 * 1000,
+    'E': 1000 * 1000 * 1000 * 1000 * 1000 * 1000,
     'Ki': 1024,
-    'Mi': 1024*1024,
-    'Gi': 1024*1024*1024,
-    'Ti': 1024*1024*1024*1024,
-    'Pi': 1024*1024*1024*1024*1024,
-    'Ei': 1024*1024*1024*1024*1024*1024,
+    'Mi': 1024 * 1024,
+    'Gi': 1024 * 1024 * 1024,
+    'Ti': 1024 * 1024 * 1024 * 1024,
+    'Pi': 1024 * 1024 * 1024 * 1024 * 1024,
+    'Ei': 1024 * 1024 * 1024 * 1024 * 1024 * 1024,
 }
 
 log = logging.getLogger('collector')
@@ -53,6 +53,7 @@ class KubeletCheck(PrometheusCheck):
     """
     Collect container metrics from Kubelet.
     """
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(KubeletCheck, self).__init__(name, init_config, agentConfig, instances)
         self.NAMESPACE = 'kubernetes'
@@ -155,7 +156,7 @@ class KubeletCheck(PrometheusCheck):
     def retrieve_pod_list(self):
         return self.perform_kubelet_query(self.pod_list_url).json()
 
-    def retrieve_node_spec(self):
+    def _retrieve_node_spec(self):
         """
         Retrieve node spec from kubelet.
         """
@@ -165,7 +166,7 @@ class KubeletCheck(PrometheusCheck):
         return node_spec
 
     def _report_node_metrics(self, instance_tags):
-        node_spec = self.retrieve_node_spec()
+        node_spec = self._retrieve_node_spec()
         num_cores = node_spec.get('num_cores', 0)
         memory_capacity = node_spec.get('memory_capacity', 0)
 
@@ -212,6 +213,9 @@ class KubeletCheck(PrometheusCheck):
         """
         Reports the number of running pods on this node
         tagged by service and creator.
+
+        :param pods: pod list object
+        :param instance_tags: list of tags
         """
         tag_counter = {}
         for pod in pods['items']:
@@ -219,6 +223,7 @@ class KubeletCheck(PrometheusCheck):
             tags = get_tags('kubernetes_pod://%s' % pod_id, False) or None
             if not tags:
                 continue
+            tags += instance_tags
             hash_tags = tuple(sorted(tags))
             if hash_tags in tag_counter.keys():
                 tag_counter[hash_tags] += 1
@@ -249,7 +254,7 @@ class KubeletCheck(PrometheusCheck):
                 if not cid:
                     continue
 
-                tags = get_tags('%s' % cid, True)
+                tags = get_tags('%s' % cid, True) + instance_tags
 
                 try:
                     for resource, value_str in ctr.get('resources', {}).get('requests', {}).iteritems():
@@ -266,21 +271,34 @@ class KubeletCheck(PrometheusCheck):
                     self.log.debug("Unable to retrieve container limits for %s: %s", c_name, e)
 
     @staticmethod
-    def parse_quantity(s):
-        number = ''
-        unit = ''
-        for c in s:
-            if c.isdigit() or c == '.':
-                number += c
+    def parse_quantity(string):
+        """
+        Parse quantity allows to convert the value in the resources spec like:
+        resources:
+          requests:
+            cpu: "100m"
+            memory": "200Mi"
+          limits:
+            memory: "300Mi"
+        :param string: str
+        :return: float
+        """
+        number, unit = '', ''
+        for char in string:
+            if char.isdigit() or char == '.':
+                number += char
             else:
-                unit += c
+                unit += char
         return float(number) * FACTORS.get(unit, 1)
 
-    def _is_container_metric(self, metric):
+    @staticmethod
+    def _is_container_metric(metric):
         """
         Return whether a metric is about a container or not.
         It can be about pods, or even higher levels in the cgroup hierarchy
         and we don't want to report on that.
+        :param metric:
+        :return: bool
         """
         for lbl in CONTAINER_LABELS:
             if lbl == 'container_name':
@@ -292,11 +310,14 @@ class KubeletCheck(PrometheusCheck):
                 return False
         return True
 
-    def _is_pod_metric(self, metric):
+    @staticmethod
+    def _is_pod_metric(metric):
         """
         Return whether a metric is about a pod or not.
         It can be about containers, pods, or higher levels in the cgroup hierarchy
         and we don't want to report on that.
+        :param metric
+        :return bool
         """
         for ml in metric.label:
             if ml.name == 'container_name' and ml.value == 'POD':
@@ -310,30 +331,51 @@ class KubeletCheck(PrometheusCheck):
                 return True
         return False
 
-    def _get_container_label(self, labels, l_name):
+    @staticmethod
+    def _get_container_label(labels, l_name):
+        """
+        Iter on all labels to find the label.name equal to the l_name
+        :param labels: list of labels
+        :param l_name: str
+        :return: str or None
+        """
         for label in labels:
             if label.name == l_name:
                 return label.value
 
-    def _get_container_id(self, labels):
+    @staticmethod
+    def _get_container_id(labels):
         """
         Should only be called on a container-scoped metric
         as it doesn't do any validation of the container id.
         It simply returns the last part of the cgroup hierarchy.
+        :param labels
+        :return str or None
         """
-        for label in labels:
-            if label.name == 'id':
-                return label.value.split('/')[-1]
+        container_id = KubeletCheck._get_container_label(labels, "id")
+        if container_id:
+            return container_id.split('/')[-1]
 
     @staticmethod
     def _get_pod_uid(labels):
-        for label in labels:
-            if label.name == 'id':
-                for part in label.value.split('/'):
-                    if part.startswith('pod'):
-                        return part[3:]
+        """
+        Return the id of a pod
+        :param labels:
+        :return: str or None
+        """
+        pod_id = KubeletCheck._get_container_label(labels, "id")
+        if pod_id:
+            for part in pod_id.split('/'):
+                if part.startswith('pod'):
+                    return part[3:]
 
     def _is_pod_host_networked(self, pod_uid):
+        """
+        Return if the pod is on host Network
+        Return False if the Pod isn't in the pod list
+        :param pod_uid: str
+        :return: bool
+        """
         for pod in self.pod_list['items']:
             if pod.get('metadata', {}).get('uid', '') == pod_uid:
                 return pod.get('spec', {}).get('hostNetwork', False)
@@ -375,7 +417,7 @@ class KubeletCheck(PrometheusCheck):
             return False
 
     @staticmethod
-    def _get_tags_from_labels(labels):
+    def _get_kube_container_name(labels):
         """
         Get extra tags from metric labels
         label {
@@ -385,13 +427,10 @@ class KubeletCheck(PrometheusCheck):
         :param labels: metric labels: iterable
         :return: list
         """
-        tags = []
-        for label in labels:
-            if label.name == "container_name":
-                tags.append("kube_container_name:%s" % label.value)
-                return tags
-
-        return tags
+        container_name = KubeletCheck._get_container_label(labels, "container_name")
+        if container_name:
+            return ["kube_container_name:%s" % container_name]
+        return []
 
     def _process_container_rate(self, metric_name, message):
         """Takes a simple metric about a container, reports it as a rate."""
@@ -409,7 +448,7 @@ class KubeletCheck(PrometheusCheck):
                 pod = self._get_pod_by_metric_label(metric.label)
                 if pod is not None and self._is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_tags_from_labels(metric.label)
+                    tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
 
                 val = getattr(metric, METRIC_TYPES[message.type]).value
@@ -451,7 +490,7 @@ class KubeletCheck(PrometheusCheck):
                 pod = self._get_pod_by_metric_label(metric.label)
                 if pod is not None and self._is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_tags_from_labels(metric.label)
+                    tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
 
                 val = getattr(metric, METRIC_TYPES[message.type]).value
@@ -485,48 +524,52 @@ class KubeletCheck(PrometheusCheck):
                         continue
                     usage, tags = cache.get(c_name, (None, None))
                     if usage:
-                        self.gauge(pct_m_name, float(usage/float(limit)), tags)
+                        self.gauge(pct_m_name, float(usage / float(limit)), tags)
                     else:
                         self.log.debug("No corresponding usage found for metric %s and "
                                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
 
-    def container_cpu_usage_seconds_total(self, message, **kwargs):
+    def container_cpu_usage_seconds_total(self, message, **_):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
+        for metric in message.metric:
+            # convert cores in nano cores
+            metric.counter.value *= 10. ** 9
+
         self._process_container_rate(metric_name, message)
 
-    def container_fs_reads_bytes_total(self, message, **kwargs):
+    def container_fs_reads_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.io.read_bytes'
         self._process_container_rate(metric_name, message)
 
-    def container_fs_writes_bytes_total(self, message, **kwargs):
+    def container_fs_writes_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.io.write_bytes'
         self._process_container_rate(metric_name, message)
 
-    def container_network_receive_bytes_total(self, message, **kwargs):
+    def container_network_receive_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_bytes'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_bytes_total(self, message, **kwargs):
+    def container_network_transmit_bytes_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_bytes'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_receive_errors_total(self, message, **kwargs):
+    def container_network_receive_errors_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_errors'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_errors_total(self, message, **kwargs):
+    def container_network_transmit_errors_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_errors'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_transmit_packets_dropped_total(self, message, **kwargs):
+    def container_network_transmit_packets_dropped_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.tx_dropped'
         self._process_pod_rate(metric_name, message)
 
-    def container_network_receive_packets_dropped_total(self, message, **kwargs):
+    def container_network_receive_packets_dropped_total(self, message, **_):
         metric_name = self.NAMESPACE + '.network.rx_dropped'
         self._process_pod_rate(metric_name, message)
 
-    def container_fs_usage_bytes(self, message, **kwargs):
+    def container_fs_usage_bytes(self, message, **_):
         """
         Number of bytes that are consumed by the container on this filesystem.
         """
@@ -536,7 +579,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_usage_metric(metric_name, message, self.fs_usage_bytes)
 
-    def container_fs_limit_bytes(self, message, **kwargs):
+    def container_fs_limit_bytes(self, message, **_):
         """
         Number of bytes that can be consumed by the container on this filesystem.
         This method is used by container_fs_usage_bytes, it doesn't report any metric
@@ -547,7 +590,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_limit_metric('', message, self.fs_usage_bytes, pct_m_name)
 
-    def container_memory_usage_bytes(self, message, **kwargs):
+    def container_memory_usage_bytes(self, message, **_):
         """TODO: add swap, cache, failcnt and rss"""
         metric_name = self.NAMESPACE + '.memory.usage'
         if message.type >= len(METRIC_TYPES):
@@ -555,7 +598,7 @@ class KubeletCheck(PrometheusCheck):
             return
         self._process_usage_metric(metric_name, message, self.mem_usage_bytes)
 
-    def container_spec_memory_limit_bytes(self, message, **kwargs):
+    def container_spec_memory_limit_bytes(self, message, **_):
         metric_name = self.NAMESPACE + '.memory.limits'
         pct_m_name = self.NAMESPACE + '.memory.usage_pct'
         if message.type >= len(METRIC_TYPES):

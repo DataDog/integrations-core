@@ -103,6 +103,7 @@ the new testing approach:
 * [kafka_consumer](kafka_consumer)
 * [kube_proxy](kube_proxy)
 * [kubelet](kubelet)
+* [lighttpd](lighttpd)
 * [linkerd](linkerd)
 * [mcache](mcache)
 * [network](network)

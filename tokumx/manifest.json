@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
   "public_title": "Datadog-Tokumx Integration",
   "categories":["data store"],
