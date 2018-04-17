@@ -115,8 +115,17 @@ class Oracle(AgentCheck):
         cur.execute(query)
         for row in cur:
             tablespace_tag = 'tablespace:%s' % row[0]
-            used = float(row[1])
-            size = float(row[2])
+            if row[1] is None:
+                # mark tablespace as offline if sum(BYTES) is null
+                offline = True
+                used = 0
+            else:
+                offline = False
+                used = float(row[1])
+            if row[2] is None:
+                size = 0
+            else:
+                size = float(row[2])
             if (used >= size):
                 in_use = 100
             elif (used == 0) or (size == 0):
@@ -127,3 +136,4 @@ class Oracle(AgentCheck):
             self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
+            self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])
