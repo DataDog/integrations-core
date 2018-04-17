@@ -32,6 +32,7 @@ def Aggregator():
     aggregator.reset()
     return aggregator
 
+
 # flake8 then says this is a redefinition of unused, which it's not.
 @pytest.mark.usefixtures("pdh_mocks_fixture")  # noqa: F811
 def test_basic_check(Aggregator, pdh_mocks_fixture):
