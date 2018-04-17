@@ -104,7 +104,8 @@ def test_parse_quantity():
 
 
 def test_kubelet_check_prometheus(monkeypatch, aggregator):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    instance_with_tag = {"tags": ["instance:tag"]}
+    check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
@@ -117,7 +118,7 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
     monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
 
-    check.check({})
+    check.check(instance_with_tag)
 
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
@@ -127,11 +128,13 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     check.process_cadvisor.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
-    check.check({})
+    check.check(instance_with_tag)
     for metric in EXPECTED_METRICS_COMMON:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, "instance:tag")
     for metric in EXPECTED_METRICS_PROMETHEUS:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, "instance:tag")
     assert aggregator.metrics_asserted_pct == 100.0
 
 
@@ -334,6 +337,10 @@ def test_report_container_spec_metrics(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    attrs = {'is_excluded.return_value': False}
+    check.container_filter = mock.Mock(**attrs)
+
     pod_list = check.retrieve_pod_list()
 
     instance_tags = ["one:1", "two:2"]

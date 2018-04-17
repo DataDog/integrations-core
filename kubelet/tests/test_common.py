@@ -48,6 +48,9 @@ def test_container_filter(monkeypatch):
     is_excluded.assert_called_once()
     is_excluded.assert_called_with(ctr_name, ctr_image)
 
+    # Clear exclusion cache
+    filter.cache = {}
+
     # Test existing filtered container
     is_excluded.reset_mock()
     is_excluded.return_value = True
@@ -56,12 +59,31 @@ def test_container_filter(monkeypatch):
     is_excluded.assert_called_with(ctr_name, ctr_image)
 
 
+def test_filter_staticpods(monkeypatch):
+    is_excluded = mock.Mock(return_value=True)
+    monkeypatch.setattr('datadog_checks.kubelet.common.is_excluded', is_excluded)
+
+    pods = json.loads(mock_from_file('pods.json'))
+    filter = ContainerFilter(pods)
+
+    # kube-proxy-gke-haissam-default-pool-be5066f1-wnvn is static
+    assert filter.is_excluded("cid", "260c2b1d43b094af6d6b4ccba082c2db") is False
+    is_excluded.assert_not_called()
+
+    # fluentd-gcp-v2.0.10-9q9t4 is not static
+    assert filter.is_excluded("docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561",
+                              "2edfd4d9-10ce-11e8-bd5a-42010af00137") is True
+
+
 def test_pod_by_uid():
     podlist = json.loads(mock_from_file('pods.json'))
 
     pod = get_pod_by_uid("260c2b1d43b094af6d6b4ccba082c2db", podlist)
     assert pod is not None
     assert pod["metadata"]["name"] == "kube-proxy-gke-haissam-default-pool-be5066f1-wnvn"
+
+    pod = get_pod_by_uid("unknown", podlist)
+    assert pod is None
 
 
 def test_is_static_pod():
