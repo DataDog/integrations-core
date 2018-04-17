@@ -150,61 +150,61 @@ init_config:
           - buffer-total-bytes:
               metric_type: gauge
               alias: kafka.producer.buffer_bytes_total
-          - buffer-available-bytes
+          - buffer-available-bytes:
               metric_type: gauge
               alias: kafka.producer.available_buffer_bytes
-          - bufferpool-wait-time
+          - bufferpool-wait-time:
               metric_type: gauge
               alias: kafka.producer.bufferpool_wait_time
-          - batch-size-avg
+          - batch-size-avg:
               metric_type: gauge
               alias: kafka.producer.batch_size_avg
-          - batch-size-max
+          - batch-size-max:
               metric_type: gauge
               alias: kafka.producer.batch_size_max
-          - compression-rate-avg
+          - compression-rate-avg:
               metric_type: rate
               alias: kafka.producer.compression_rate_avg
-          - record-queue-time-avg
+          - record-queue-time-avg:
               metric_type: gauge
               alias: kafka.producer.record_queue_time_avg
-          - record-queue-time-max
+          - record-queue-time-max:
               metric_type: gauge
               alias: kafka.producer.record_queue_time_max
-          - request-latency-avg
+          - request-latency-avg:
               metric_type: gauge
               alias: kafka.producer.request_latency_avg
-          - request-latency-max
+          - request-latency-max:
               metric_type: gauge
               alias: kafka.producer.request_latency_max
-          - record-send-rate
+          - record-send-rate:
               metric_type: rate
               alias: kafka.producer.records_send_rate
-          - records-per-request-avg
+          - records-per-request-avg:
               metric_type: gauge
               alias: kafka.producer.records_per_request
-          - record-retry-rate
+          - record-retry-rate:
               metric_type: rate
               alias: kafka.producer.record_retry_rate
-          - record-error-rate
+          - record-error-rate:
               metric_type: rate
               alias: kafka.producer.record_error_rate
-          - record-size-max
+          - record-size-max:
               metric_type: gauge
               alias: kafka.producer.record_size_max
-          - record-size-avg
+          - record-size-avg:
               metric_type: gauge
               alias: kafka.producer.record_size_avg
-          - requests-in-flight
+          - requests-in-flight:
               metric_type: gauge
               alias: kafka.producer.requests_in_flight
-          - metadata-age
+          - metadata-age:
               metric_type: gauge
               alias: kafka.producer.metadata_age
-          - produce-throttle-time-max
+          - produce-throttle-time-max:
               metric_type: gauge
               alias: kafka.producer.throttle_time_max
-          - produce-throttle-time-avg
+          - produce-throttle-time-avg:
               metric_type: gauge
               alias: kafka.producer.throttle_time_avg
 
