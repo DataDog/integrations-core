@@ -37,7 +37,7 @@ NODE_SPEC = {
     u'machine_id': u'5556dc4fc19807c8be37acb98b1ba490'
 }
 
-EXPECTED_METRICS = [
+EXPECTED_METRICS_COMMON = [
     'kubernetes.cpu.capacity',
     'kubernetes.cpu.usage.total',
     'kubernetes.cpu.limits',
@@ -48,15 +48,18 @@ EXPECTED_METRICS = [
     'kubernetes.memory.limits',
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
-    'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_bytes',
+    'kubernetes.network.tx_bytes'
+]
+
+EXPECTED_METRICS_PROMETHEUS = [
+    'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
-    'kubernetes.network.tx_bytes',
     'kubernetes.network.tx_dropped',
     'kubernetes.network.tx_errors',
     'kubernetes.io.write_bytes',
-    'kubernetes.io.read_bytes',
+    'kubernetes.io.read_bytes'
 ]
 
 Label = namedtuple('Label', 'name value')
@@ -100,26 +103,34 @@ def test_parse_quantity():
         assert KubeletCheck.parse_quantity(raw) == res
 
 
-def test_kubelet_check(monkeypatch, aggregator):
+def test_kubelet_check_prometheus(monkeypatch, aggregator):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
+
     attrs = {
         'close.return_value': True,
         'iter_lines.return_value': mock_from_file('metrics.txt').split('\n')
     }
     mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
     monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
+
     check.check({})
 
+    assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.poll.assert_called_once()
+    check.process_cadvisor.assert_not_called()
+
     # called twice so pct metrics are guaranteed to be there
     check.check({})
-    for metric in EXPECTED_METRICS:
+    for metric in EXPECTED_METRICS_COMMON:
+        aggregator.assert_metric(metric)
+    for metric in EXPECTED_METRICS_PROMETHEUS:
         aggregator.assert_metric(metric)
     assert aggregator.metrics_asserted_pct == 100.0
 
@@ -254,30 +265,6 @@ def test_get_pod_by_metric_label(monkeypatch):
     ])
     assert kube_proxy["metadata"]["name"] == "kube-proxy-gke-haissam-default-pool-be5066f1-wnvn"
     assert fluentd["metadata"]["name"] == "fluentd-gcp-v2.0.10-9q9t4"
-
-
-def test_is_static_pending_pod(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    check.pod_list = check.retrieve_pod_list()
-
-    assert len(check.pod_list) == 4
-    static_pod = check._get_pod_by_metric_label([
-        Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
-                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
-    ])
-    api_pod = check._get_pod_by_metric_label([
-        Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod2edfd4d9-10ce-11e8-bd5a-42010af00137/"
-                    "7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
-    ])
-    assert check._is_static_pending_pod(static_pod) is True
-    assert check._is_static_pending_pod(api_pod) is False
 
 
 def test_get_kube_container_name():
