@@ -15,17 +15,6 @@ import requests
 
 # project
 from datadog_checks.checks import AgentCheck
-# compatability layer
-try:
-    from config import _is_affirmative
-except ImportError:
-    from datadog_checks.config import _is_affirmative
-
-# compatability layer
-try:
-    from util import headers
-except ImportError:
-    from datadog_checks.utils.headers import headers
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
