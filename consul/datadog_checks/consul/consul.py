@@ -11,11 +11,7 @@ from urlparse import urljoin
 
 # project
 from datadog_checks.checks import AgentCheck
-# compatability layer
-try:
-    from utils.containers import hash_mutable
-except ImportError:
-    from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.containers import hash_mutable
 
 # 3p
 import requests

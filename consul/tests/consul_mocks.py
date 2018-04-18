@@ -4,8 +4,6 @@
 
 import random
 
-import common
-
 MOCK_CONFIG = {
     'url': 'http://localhost:8500',
     'catalog_checks': True,
@@ -37,7 +35,7 @@ MOCK_CONFIG_NETWORK_LATENCY_CHECKS = {
 
 
 def mock_check(check, mocks):
-    for f_name, m in _get_consul_mocks().iteritems():
+    for f_name, m in mocks.iteritems():
         if not hasattr(check, f_name):
             continue
         else:

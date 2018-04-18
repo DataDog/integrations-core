@@ -3,15 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import subprocess
 import os
-import time
 import logging
 
 import pytest
-import mock
 import requests
 
 import common
-import consul_mocks
 
 log = logging.getLogger(__file__)
 
@@ -20,12 +17,11 @@ def wait_for_cluster():
     """
     Wait for the slave to connect to the master
     """
-    connected = False
     for i in xrange(0, 20):
         try:
             requests.get(common.URL)
             return True
-        except:
+        except Exception:
             log.info()
             pass
 
