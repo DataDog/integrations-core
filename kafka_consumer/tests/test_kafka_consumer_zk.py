@@ -1,21 +1,12 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import copy
 import time
-import warnings
 
-# 3p
 import pytest
 
-from .common import (
-    is_supported,
-    cluster_ready,
-    PARTITIONS,
-    TOPICS,
-)
+from .common import is_supported, PARTITIONS, TOPICS
 from datadog_checks.kafka_consumer import KafkaCheck
 
 
@@ -44,9 +35,6 @@ def test_check_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instance, aggre
     if not zk_consumer.is_alive():
         zk_consumer.start()
         time.sleep(5)
-
-    if not cluster_ready():
-        warnings.warn('could not verify cluster came up in time')
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
     kafka_consumer_check.check(zk_instance)
@@ -81,9 +69,6 @@ def test_multiple_servers_zk(kafka_cluster, kafka_producer, zk_consumer, zk_inst
     if not zk_consumer.is_alive():
         zk_consumer.start()
         time.sleep(5)
-
-    if not cluster_ready():
-        warnings.warn('could not verify cluster came up in time')
 
     multiple_server_zk_instance = copy.deepcopy(zk_instance)
     multiple_server_zk_instance['kafka_connect_str'] = [
@@ -120,9 +105,6 @@ def test_check_nogroups_zk(kafka_cluster, kafka_producer, zk_consumer, zk_instan
     if not zk_consumer.is_alive():
         zk_consumer.start()
         time.sleep(5)
-
-    if not cluster_ready():
-        warnings.warn('could not verify cluster came up in time')
 
     nogroup_instance = copy.deepcopy(zk_instance)
     nogroup_instance.pop('consumer_groups')

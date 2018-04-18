@@ -1,18 +1,11 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import time
-import warnings
 
-# 3p
 import pytest
 
-from .common import (
-    is_supported,
-    cluster_ready,
-)
+from .common import is_supported
 from datadog_checks.kafka_consumer import KafkaCheck
 
 
@@ -41,9 +34,6 @@ def test_check_kafka(kafka_cluster, kafka_producer, kafka_consumer, kafka_instan
     if not kafka_consumer.is_alive():
         kafka_consumer.start()
         time.sleep(5)
-
-    if not cluster_ready():
-        warnings.warn('could not verify cluster came up in time')
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
     kafka_consumer_check.check(kafka_instance)

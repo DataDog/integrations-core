@@ -1,36 +1,19 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import subprocess
 import os
 import time
-import re
 import threading
-from distutils.version import LooseVersion
 
 import pytest
-import docker
-from kafka import (
-    KafkaConsumer,
-    KafkaProducer,
-)
+from kafka import KafkaConsumer, KafkaProducer
 from kazoo.client import KazooClient
 
-from .common import (
-    KAFKA_LEGACY,
-    ZK_CONNECT_STR,
-    ZK_INSTANCE,
-    KAFKA_INSTANCE,
-    KAFKA_CONNECT_STR,
-    PARTITIONS,
-    TOPICS,
-)
+from .common import ZK_CONNECT_STR, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, HOST
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-docker_client = docker.from_env()
 
 
 class StoppableThread(threading.Thread):
@@ -46,7 +29,7 @@ class StoppableThread(threading.Thread):
 class Producer(StoppableThread):
 
     def run(self):
-        producer = KafkaProducer(bootstrap_servers=ZK_INSTANCE['kafka_connect_str'])
+        producer = KafkaProducer(bootstrap_servers=KAFKA_CONNECT_STR)
 
         iteration = 0
         while not self._shutdown_event.is_set():
@@ -143,26 +126,6 @@ class KConsumer(StoppableThread):
             iteration += 1
 
 
-# might block indefinitely - watchout
-def wait_for_logs(container_id, pattern, timeout=30):
-    container = docker_client.containers.get(container_id)
-    if not container:
-        return False
-
-    regex = re.compile(pattern)
-    now = time.time()
-    while time.time() < (now + timeout):
-        loglines = container.logs().splitlines()
-        for line in loglines:
-            result = regex.match(line)
-            if result:
-                return True
-
-        time.sleep(1)
-
-    return False
-
-
 @pytest.fixture(scope="session")
 def kafka_cluster():
     """
@@ -171,23 +134,31 @@ def kafka_cluster():
     env = os.environ
     args = [
         "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'kafka-cluster.compose')
+        "-f", os.path.join(HERE, 'docker-compose.yml')
     ]
 
-    subprocess.check_call(args + ["up", "-d"], env=env)
+    subprocess.check_call(args + ["up", "-d", "--scale", "kafka=2"], env=env)
 
-    clean = True
-    clean &= wait_for_logs('compose_kafka_1', '.*started \(kafka.server.KafkaServer\).*', timeout=20)
-    clean &= wait_for_logs('compose_zookeeper_1', '.*NoNode for \/brokers.*', timeout=20)
-    if LooseVersion(env.get('KAFKA_VERSION')) > KAFKA_LEGACY:
-        clean &= wait_for_logs('compose_kafka_1', '.*Created topic "marvel".*', timeout=20)
-        clean &= wait_for_logs('compose_kafka_1', '.*Created topic "dc".*', timeout=20)
+    # wait for Kafka to be up and running
+    attempts = 0
+    while True:
+        if attempts > 9:
+            raise Exception("Kafka boot timed out!")
 
-    env['EXTERNAL_JMX_PORT'] = '9998'
-    env['EXTERNAL_PORT'] = '9091'
-    subprocess.check_call(args + ["scale", "kafka=2"], env=env)
-    clean &= wait_for_logs('compose_kafka_2', '.*started \(kafka.server.KafkaServer\).*', timeout=20)
-    yield clean
+        try:
+            consumer = KafkaConsumer(bootstrap_servers='{}:9092'.format(HOST))
+            topics = consumer.topics()
+        except Exception:
+            topics = {}
+
+        # we expect to find 2 topics, "dc" and "marvel"
+        if len(topics) == 2:
+            break
+
+        attempts += 1
+        time.sleep(1)
+
+    yield
 
     subprocess.check_call(args + ["down"], env=env)
 
@@ -228,9 +199,26 @@ def aggregator():
 
 @pytest.fixture
 def zk_instance():
-    return ZK_INSTANCE
+    return {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'zk_connect_str': ZK_CONNECT_STR,
+        'consumer_groups': {
+            'my_consumer': {
+                'marvel': [0]
+            }
+        }
+    }
 
 
 @pytest.fixture
 def kafka_instance():
-    return KAFKA_INSTANCE
+    return {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'kafka_consumer_offsets': True,
+        'tags': ['optional:tag1'],
+        'consumer_groups': {
+            'my_consumer': {
+                'marvel': [0]
+            }
+        }
+    }
