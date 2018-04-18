@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# Always prefer setuptools over distutils
 from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
 
-HERE = path.dirname(path.abspath(__file__))
+HERE = path.abspath(path.dirname(__file__))
 
 # Get version info
 ABOUT = {}

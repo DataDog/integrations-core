@@ -120,6 +120,8 @@ the new testing approach:
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
 
+If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
+
 ### Building
 
 `setup.py` provides the setuptools setup script that will help us package and

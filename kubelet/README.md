@@ -29,4 +29,7 @@ Edit the `kubelet.yaml` file to point to your server and port, set tags to send 
 
 ## Compatibility
 
-The kubelet check is compatible with Kubernetes version 1.8 or superior.
+The kubelet check can run in two modes:
+
+- the default prometheus mode is compatible with Kubernetes version 1.7.6 or superior
+- the cAdvisor mode (enabled by setting the `cadvisor_port` option) should be compatible with versions 1.3 and up. Consistent tagging and filtering requires at least version 6.2 of the Agent.
