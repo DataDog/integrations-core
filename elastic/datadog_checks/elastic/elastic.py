@@ -6,7 +6,7 @@
 from collections import defaultdict, namedtuple
 import time
 import urlparse
-
+import os
 # 3p
 import requests
 
@@ -359,9 +359,9 @@ class ESCheck(AgentCheck):
         self.cluster_status = {}
 
     def get_instance_config(self, instance):
-        url = instance.get('url')
+        url = instance.get('url') or os.environ.get("ES_URL")
         if url is None:
-            raise Exception("A URL must be specified in the instance")
+            raise Exception("A URL must be specified in the instance or ES_URL environment variables set")
 
         pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
         pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
@@ -379,6 +379,8 @@ class ESCheck(AgentCheck):
             url = "%s://%s" % (parsed[0], parsed[1])
         port = parsed.port
         host = parsed.hostname
+        username = instance.get('username') or os.environ.get("ES_USERNAME")
+        password = instance.get('password') or os.environ.get("ES_PASSWORD")
 
         custom_tags = instance.get('tags', [])
         service_check_tags = [
@@ -398,7 +400,7 @@ class ESCheck(AgentCheck):
             pshard_stats=pshard_stats,
             pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
-            password=instance.get('password'),
+            password=password,
             service_check_tags=service_check_tags,
             health_tags=[],
             ssl_cert=instance.get('ssl_cert'),
@@ -407,7 +409,7 @@ class ESCheck(AgentCheck):
             tags=tags,
             timeout=timeout,
             url=url,
-            username=instance.get('username'),
+            username=username,
             pending_task_stats=pending_task_stats
         )
         return config
