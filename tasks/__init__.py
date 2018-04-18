@@ -8,6 +8,7 @@ from __future__ import print_function, unicode_literals
 
 from invoke import Collection
 
+# task functions are added to the root namespace automatically
 from .cleanup import cleanup
 from .manifest import manifest
 from .upgrade import upgrade
@@ -16,12 +17,6 @@ from .changelog import update_changelog
 
 # the root namespace
 root = Collection()
-
-# add tasks to the root, without a namespace
-root.add_task(cleanup)
-root.add_task(manifest)
-root.add_task(upgrade)
-root.add_task(test)
 
 root.configure({
     'run': {
