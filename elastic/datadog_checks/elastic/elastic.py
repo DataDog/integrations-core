@@ -43,7 +43,6 @@ ESInstanceConfig = namedtuple(
 class ESCheck(AgentCheck):
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
-    SERVICE_CHECK_INDEX_STATUS = 'elasticsearch.index_health'
 
     DEFAULT_TIMEOUT = 5
 
@@ -519,17 +518,28 @@ class ESCheck(AgentCheck):
         index_url = urlparse.urljoin(config.url, cat_url)
         index_resp = self._get_data(index_url, config)
         index_stats_metrics = self.INDEX_STATS_METRICS
+        health_stat = {'green': 0, 'yellow': 1, 'red': 2}
         for idx in index_resp:
             tags = config.tags + ['index_name:' + idx['index']]
             index_data = {
-                'docs_count':         idx['docs.count'],
-                'docs_deleted':       idx['docs.deleted'],
-                'primary_shards':     idx['pri'],
-                'replica_shards':     idx['rep'],
-                'primary_store_size': idx['pri.store.size'],
-                'store_size':         idx['store.size'],
-                'health':             idx['health'],
+                'docs_count':         idx.get('docs.count', None),
+                'docs_deleted':       idx.get('docs.deleted', None),
+                'primary_shards':     idx.get('pri', None),
+                'replica_shards':     idx.get('rep', None),
+                'primary_store_size': idx.get('pri.store.size', None),
+                'store_size':         idx.get('store.size', None),
+                'health':             idx.get('health', None),
             }
+
+            # Convert the health status value
+            if index_data['health'] is not None:
+                index_data['health'] = health_stat[index_data['health'].lower()]
+
+            # Ensure that index_data does not contain None values
+            for key, value in index_data.items():
+                if value is None:
+                    del index_data[key]
+                    self.log.warning("The index metric data for %s was not found", key)
 
             for metric in index_stats_metrics:
                 # metric description
