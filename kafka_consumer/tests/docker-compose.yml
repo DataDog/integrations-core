@@ -16,12 +16,10 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
+      KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_OFFSETS_STORAGE: ${KAFKA_OFFSETS_STORAGE}
       KAFKA_CREATE_TOPICS: "marvel:2:1,dc:2:1"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    volumes:
-      # if we mount the socket, the image can do hostname introspection
-      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
