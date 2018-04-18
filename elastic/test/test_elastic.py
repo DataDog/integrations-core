@@ -167,6 +167,16 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
 }
 
+INDEX_STATS_METRICS = { # Metrics for index level
+    "elasticsearch.index.health": ("gauge", "health"),
+    "elasticsearch.index.docs.count": ("gauge", "docs_count"),
+    "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
+    "elasticsearch.index.primary_shards": ("gauge", "primary_shards"),
+    "elasticsearch.index.replica_shards": ("gauge", "replica_shards"),
+    "elasticsearch.index.primary_store_size": ("gauge", "primary_store_size"),
+    "elasticsearch.index.store_size": ("gauge", "store_size")
+}
+
 JVM_METRICS_POST_0_90_10 = {
     "jvm.gc.collectors.young.count": ("gauge", "jvm.gc.collectors.young.collection_count"),
     "jvm.gc.collectors.young.collection_time": ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
@@ -599,3 +609,15 @@ class TestElastic(AgentCheckTest):
         # Note: please make sure you don't install Maven on the CI for future
         # elastic search CI integrations. It would make the line below fail :/
         self.assertMetric('elasticsearch.primaries.docs.count', value=2)
+
+    def test_index_metrics(self):
+        # Tests that index level metrics are forwarded
+        config = {'instances': [
+            {'url': 'http://localhost:9200', 'index_stats': True}
+        ]}
+
+        index_metrics = dict(INDEX_STATS_METRICS)
+        self.run_check(config)
+        if get_es_version() >= [1, 0, 0]:
+            for m_name, desc in index_metrics.iteritems():
+                self.assertMetric(m_name, count=1)
