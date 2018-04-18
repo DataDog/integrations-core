@@ -572,11 +572,13 @@ class OpenStackCheck(AgentCheck):
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
         """
+        self.log.debug("Request URL and Params: %s, %s", url, params)
         try:
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
                                 timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
         except requests.exceptions.HTTPError:
+            self.log.debug("Response Headers: %s", resp.headers)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
 
@@ -1178,6 +1180,7 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
         except requests.exceptions.HTTPError as e:
+            self.log.debug("Response Headers: %s", e.response.headers)
             if e.response.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
