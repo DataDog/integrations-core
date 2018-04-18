@@ -142,7 +142,7 @@ def kafka_cluster():
     # wait for Kafka to be up and running
     attempts = 0
     while True:
-        if attempts > 19:
+        if attempts >= 10:
             raise Exception("Kafka boot timed out!")
 
         try:
@@ -156,7 +156,7 @@ def kafka_cluster():
             break
 
         attempts += 1
-        time.sleep(1)
+        time.sleep(3)
 
     yield
 
