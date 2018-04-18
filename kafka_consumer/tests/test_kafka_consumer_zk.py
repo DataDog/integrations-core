@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from .common import is_supported, PARTITIONS, TOPICS
+from .common import is_supported, PARTITIONS, TOPICS, HOST
 from datadog_checks.kafka_consumer import KafkaCheck
 
 
@@ -73,7 +73,7 @@ def test_multiple_servers_zk(kafka_cluster, kafka_producer, zk_consumer, zk_inst
     multiple_server_zk_instance = copy.deepcopy(zk_instance)
     multiple_server_zk_instance['kafka_connect_str'] = [
         multiple_server_zk_instance['kafka_connect_str'],
-        'localhost:9092']
+        '{}:9092'.format(HOST)]
 
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
     kafka_consumer_check.check(multiple_server_zk_instance)

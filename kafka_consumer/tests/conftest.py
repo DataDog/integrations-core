@@ -132,6 +132,8 @@ def kafka_cluster():
     Start a kafka cluster.
     """
     env = os.environ
+    env['KAFKA_ADVERTISED_HOST_NAME'] = HOST
+
     args = [
         "docker-compose",
         "-f", os.path.join(HERE, 'docker-compose.yml')
