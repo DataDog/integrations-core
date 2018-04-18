@@ -5,3 +5,7 @@
 
 class UnknownMetric(Exception):
     pass
+
+
+class UnknownTags(Exception):
+    pass

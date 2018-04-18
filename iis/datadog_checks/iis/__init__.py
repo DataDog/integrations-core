@@ -1,7 +1,10 @@
-from . import iis
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .iis import IIS
 
-IIS = iis.IIS
-
-__version__ = "2.0.2"
-
-__all__ = ['iis']
+__all__ = [
+    '__version__',
+    'IIS'
+]

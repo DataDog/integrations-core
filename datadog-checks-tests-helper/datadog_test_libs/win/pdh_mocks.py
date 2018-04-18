@@ -180,7 +180,7 @@ def mock_AddCounter(h, path):
     return path
 
 def mock_GetFormattedCounterValue(h, p):
-    return 1, 0 # for now
+    return 1, 1 # for now
 
 def mock_CollectQueryData(h):
     return True

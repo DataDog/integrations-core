@@ -11,7 +11,7 @@
   "creates_events": false,
   "support": "contrib",
   "supported_os": ["linux","mac_os", "windows"],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "guid": "6c4ddc46-2763-4c56-8b71-c838b7f82d7b",
   "public_title": "Datadog-Oracle Integration",
   "categories":["data store"],

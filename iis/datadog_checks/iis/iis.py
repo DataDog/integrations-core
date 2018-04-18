@@ -7,14 +7,9 @@ Check the performance counters from IIS
 '''
 
 # project
-from checks import AgentCheck
-try:
-    from checks.libs.win.pdhbasecheck import PDHBaseCheck
-except ImportError:
-    def PDHBaseCheck(*args, **kwargs):
-        return
-
-from utils.containers import hash_mutable
+from datadog_checks.checks import AgentCheck
+from datadog_checks.checks.win import PDHBaseCheck
+from datadog_checks.utils.containers import hash_mutable
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -24,7 +19,7 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Bytes Total/sec", "iis.net.bytes_total", "gauge"],
     ["Web Service", None, "Current Connections", "iis.net.num_connections", "gauge"],
     ["Web Service", None, "Files Sent/sec", "iis.net.files_sent", "gauge"],
-    ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd" ,"gauge"],
+    ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd", "gauge"],
     ["Web Service", None, "Total Connection Attempts (all instances)", "iis.net.connection_attempts", "gauge"],
 
     # HTTP Methods
@@ -48,9 +43,10 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
 ]
+
+
 class IIS(PDHBaseCheck):
     SERVICE_CHECK = "iis.site_up"
-
 
     def __init__(self, name, init_config, agentConfig, instances):
         PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)

@@ -3,16 +3,16 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
-import random
 from collections import defaultdict
+import random
 from time import time, sleep
 
 # 3p
 from kafka.client import KafkaClient
-from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy
-from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
-from kafka.structs import TopicPartition
 import kafka.errors as KafkaErrors
+from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
+from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy
+from kafka.structs import TopicPartition
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 
