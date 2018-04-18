@@ -222,9 +222,9 @@ def test_optional_tags(aggregator, haproxy_mock):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     haproxy_check.check(config)
 
-    aggregator.assert_metric_tag('haproxy.backend.session.current', 'new-tag')
-    aggregator.assert_metric_tag('haproxy.backend.session.current', 'my:new:tag')
-    aggregator.assert_metric_tag('haproxy.count_per_status', 'my:new:tag')
+    aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
+    aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'my:new:tag')
+    aggregator.assert_metric_has_tag('haproxy.count_per_status', 'my:new:tag')
     tags = ['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND']
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
@@ -249,7 +249,7 @@ def test_regex_tags(aggregator, haproxy_mock):
                      'backend:BACKEND'
                      ]
     aggregator.assert_metric('haproxy.backend.session.current', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
+    aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
     tags = ['service:be_edge_http_sre-production_elk-kibana',
             'region:infra',
             'security:edge_http',
