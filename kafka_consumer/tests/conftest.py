@@ -156,7 +156,7 @@ def kafka_cluster():
             break
 
         attempts += 1
-        time.sleep(3)
+        time.sleep(5)
 
     yield
 
