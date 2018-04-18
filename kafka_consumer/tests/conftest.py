@@ -137,12 +137,12 @@ def kafka_cluster():
         "-f", os.path.join(HERE, 'docker-compose.yml')
     ]
 
-    subprocess.check_call(args + ["up", "-d", "--scale", "kafka=2"], env=env)
+    subprocess.check_call(args + ["up", "-d"], env=env)
 
     # wait for Kafka to be up and running
     attempts = 0
     while True:
-        if attempts > 9:
+        if attempts > 19:
             raise Exception("Kafka boot timed out!")
 
         try:
