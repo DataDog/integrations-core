@@ -4,7 +4,7 @@
 import os
 
 PORT = '8500'
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = os.getenv('DOCKER_HOST', 'localhost')
 
 URL = "http://{0}:{1}".format(HOST, PORT)
 
