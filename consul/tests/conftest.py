@@ -21,9 +21,9 @@ def wait_for_cluster():
     for i in xrange(0, 20):
         sleep(1)
         try:
-            res = requests.get("{}/v1/status/leader".format(common.URL))
-            # If the leader is not ready yet, the call will return an empty string ""
-            if res.json():
+            res = requests.get("{}/v1/status/peers".format(common.URL))
+            # Wait for all 3 agents to join the cluster
+            if len(res.json()) == 3:
                 return True
         except Exception as e:
             log.info("Error connecting to the cluster: %s", e)
