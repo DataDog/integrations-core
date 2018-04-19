@@ -5,12 +5,13 @@ import subprocess
 import os
 import time
 import threading
+import sys
 
 import pytest
 from kafka import KafkaConsumer, KafkaProducer
 from kazoo.client import KazooClient
 
-from .common import ZK_CONNECT_STR, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, HOST
+from .common import ZK_CONNECT_STR, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, HOST_IP
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -115,7 +116,7 @@ class KConsumer(StoppableThread):
         super(KConsumer, self).__init__()
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=[self.kafka_connect_str],
+        consumer = KafkaConsumer(bootstrap_servers=self.kafka_connect_str,
                                  group_id="my_consumer",
                                  auto_offset_reset='earliest')
         consumer.subscribe(self.topics)
@@ -129,10 +130,13 @@ class KConsumer(StoppableThread):
 @pytest.fixture(scope="session")
 def kafka_cluster():
     """
-    Start a kafka cluster.
+    Start a kafka cluster and wait for it to be up and running.
     """
     env = os.environ
-    env['KAFKA_ADVERTISED_HOST_NAME'] = HOST
+    # Advertising the hostname doesn't work on docker:dind so we manually
+    # resolve the IP address. This seems to also work outside docker:dind
+    # so we got that goin for us.
+    env['KAFKA_HOST'] = HOST_IP
 
     args = [
         "docker-compose",
@@ -144,13 +148,23 @@ def kafka_cluster():
     # wait for Kafka to be up and running
     attempts = 0
     while True:
-        if attempts >= 10:
+        # This is useful to debug Kafka booting and not too verbose when
+        # everything runs smooth, let's leave it here
+        sys.stderr.write("Attempt number {}\n".format(attempts+1))
+
+        # this brings a total of 90s to timeout
+        if attempts >= 30:
+            # print the whole compose log in case of timeout to help diagnose
+            subprocess.check_call(args + ["logs"], env=env)
+            subprocess.check_call(args + ["down"], env=env)
             raise Exception("Kafka boot timed out!")
 
         try:
-            consumer = KafkaConsumer(bootstrap_servers='{}:9092'.format(HOST))
+            consumer = KafkaConsumer(bootstrap_servers=KAFKA_CONNECT_STR)
             topics = consumer.topics()
-        except Exception:
+            sys.stderr.write("Got topics: {}\n".format(topics))
+        except Exception as e:
+            sys.stderr.write(str(e)+'\n')
             topics = {}
 
         # we expect to find 2 topics, "dc" and "marvel"
@@ -158,7 +172,7 @@ def kafka_cluster():
             break
 
         attempts += 1
-        time.sleep(5)
+        time.sleep(3)
 
     yield
 
