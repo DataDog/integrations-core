@@ -578,7 +578,6 @@ class OpenStackCheck(AgentCheck):
                                 timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
         except requests.exceptions.HTTPError:
-            self.log.debug("Response Headers: %s", resp.headers)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
 
@@ -588,6 +587,8 @@ class OpenStackCheck(AgentCheck):
                 raise InstancePowerOffFailure()
             else:
                 raise
+        finally:
+            self.log.debug("Response Headers: %s", resp.headers)
 
         return resp.json()
 
@@ -1180,7 +1181,6 @@ class OpenStackCheck(AgentCheck):
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
         except requests.exceptions.HTTPError as e:
-            self.log.debug("Response Headers: %s", e.response.headers)
             if e.response.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
