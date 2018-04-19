@@ -29,7 +29,7 @@ METRICS = [
 ]
 
 CONFIG_INTEGRATION = {
-    'url': 'http://localhost:8500',
+    'url': common.URL,
     'catalog_checks': True,
     'network_latency_checks': True,
     'new_leader_checks': True,
@@ -39,7 +39,7 @@ CONFIG_INTEGRATION = {
 }
 
 CONFIG_INTEGRATION_WRONG_TOKEN = {
-    'url': 'http://localhost:8500',
+    'url': common.URL,
     'catalog_checks': True,
     'network_latency_checks': True,
     'new_leader_checks': True,
