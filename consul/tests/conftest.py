@@ -21,8 +21,8 @@ def wait_for_cluster():
         try:
             requests.get(common.URL)
             return True
-        except Exception:
-            log.info()
+        except Exception as e:
+            log.info("Error connecting to the cluster: %s", e)
             pass
 
     return False
