@@ -18,6 +18,7 @@ AGENT_BASED_INTEGRATIONS = [
     'directory',
     'disk',
     'envoy',
+    'haproxy',
     'iis',
     'istio',
     'kafka_consumer',
