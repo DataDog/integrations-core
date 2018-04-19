@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-1.3.2 / Unreleased
+1.4.0 / Unreleased
 ==================
 
 ### Changes
