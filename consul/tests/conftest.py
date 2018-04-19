@@ -17,10 +17,14 @@ def wait_for_cluster():
     """
     Wait for the slave to connect to the master
     """
+    from time import sleep
     for i in xrange(0, 20):
+        sleep(1)
         try:
-            requests.get(common.URL)
-            return True
+            res = requests.get("{}/v1/status/leader".format(common.URL))
+            # If the leader is not ready yet, the call will return an empty string ""
+            if res.json():
+                return True
         except Exception as e:
             log.info("Error connecting to the cluster: %s", e)
             pass

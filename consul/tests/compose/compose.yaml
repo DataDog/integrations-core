@@ -9,7 +9,7 @@ services:
       - "${CONSUL_PORT}:8500"
     networks:
       - network1
-    command: agent -dev -bind=0.0.0.0 -client=0.0.0.0
+    command: agent -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0
 
   consul-follower-1:
     image: "consul:${CONSUL_VERSION}"
