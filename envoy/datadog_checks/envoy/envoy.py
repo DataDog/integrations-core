@@ -72,14 +72,16 @@ class Envoy(AgentCheck):
             try:
                 metric, tags, method = parse_metric(envoy_metric)
             except UnknownMetric:
+                if envoy_metric not in self.unknown_metrics:
+                    self.log.debug('Unknown metric `{}`'.format(envoy_metric))
                 self.unknown_metrics[envoy_metric] += 1
-                self.log.debug('Unknown metric `{}`'.format(envoy_metric))
                 continue
             except UnknownTags as e:
                 unknown_tags = str(e).split('|||')
                 for tag in unknown_tags:
+                    if tag not in self.unknown_tags:
+                        self.log.debug('Unknown tag `{}` in metric `{}`'.format(tag, envoy_metric))
                     self.unknown_tags[tag] += 1
-                    self.log.debug('Unknown tag `{}` in metric `{}`'.format(tag, envoy_metric))
                 continue
 
             tags.extend(custom_tags)
