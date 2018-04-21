@@ -48,15 +48,13 @@ def aggregator():
 
 @pytest.fixture(scope='session', autouse=True)
 def spin_up_envoy():
-    env = dict(os.environ)
-    env['ENVOY_VERSION'] = 'latest'
     flavor = os.getenv('FLAVOR', 'default')
     base_command = [
         'docker-compose', '-f', os.path.join(DOCKER_DIR, flavor, 'docker-compose.yaml')
     ]
-    subprocess.check_call(base_command + ['up', '-d', '--build'], env=env)
+    subprocess.check_call(base_command + ['up', '-d', '--build'])
     yield
-    subprocess.check_call(base_command + ['down'], env=env)
+    subprocess.check_call(base_command + ['down'])
 
 
 class TestEnvoy:
