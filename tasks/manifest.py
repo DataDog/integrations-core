@@ -103,22 +103,60 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                         check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
                         failed -= 1
 
-                if len(version_parts) == 3 and version_parts >= [1, 0, 0]:
-                    if 'max_agent_version' in decoded:
-                        check_output += '  outdated field: max_agent_version\n'
-                        failed += 1
-                        if fix:
-                            del decoded['max_agent_version']
-                            check_output += '  removed field: max_agent_version\n'
-                            failed -= 1
+                if len(version_parts) == 3:
+                    if version_parts >= [1, 0, 0]:
+                        if 'version' in decoded:
+                            check_output += '  outdated field: version\n'
+                            failed += 1
+                            if fix:
+                                del decoded['version']
+                                check_output += '  removed field: version\n'
+                                failed -= 1
 
-                    if 'min_agent_version' in decoded:
-                        check_output += '  outdated field: min_agent_version\n'
+                        if 'max_agent_version' in decoded:
+                            check_output += '  outdated field: max_agent_version\n'
+                            failed += 1
+                            if fix:
+                                del decoded['max_agent_version']
+                                check_output += '  removed field: max_agent_version\n'
+                                failed -= 1
+
+                        if 'min_agent_version' in decoded:
+                            check_output += '  outdated field: min_agent_version\n'
+                            failed += 1
+                            if fix:
+                                del decoded['min_agent_version']
+                                check_output += '  removed field: min_agent_version\n'
+                                failed -= 1
+                    elif os.path.isfile(os.path.join(check_dir, 'datadog_checks', check_name, '__about__.py')):
+                        check_output += '  outdated `manifest_version`: {}\n'.format(manifest_version)
                         failed += 1
                         if fix:
-                            del decoded['max_agent_version']
-                            check_output += '  removed field: min_agent_version\n'
+                            decoded['manifest_version'] = correct_manifest_version
+                            check_output += '  new `manifest_version`: {}\n'.format(correct_manifest_version)
+
+                            if 'version' in decoded:
+                                del decoded['version']
+                                check_output += '  removed field: version\n'
+
+                            if 'max_agent_version' in decoded:
+                                del decoded['max_agent_version']
+                                check_output += '  removed field: max_agent_version\n'
+
+                            if 'min_agent_version' in decoded:
+                                del decoded['min_agent_version']
+                                check_output += '  removed field: min_agent_version\n'
+
                             failed -= 1
+                    else:
+                        version = decoded.get('version')
+                        version_parts = parse_version_parts(version)
+                        if len(version_parts) != 3:
+                            if not version:
+                                check_output += '  required non-null string: version\n'
+                            else:
+                                check_output += '  invalid `version`: {}\n'.format(version)
+                            failed += 1
 
                 # maintainer
                 correct_maintainer = 'help@datadoghq.com'
@@ -151,23 +189,13 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                 # support
                 correct_support = 'contrib' if os.path.basename(ROOT) == 'extras' else 'core'
                 support = decoded.get('support')
-                if support not in ('core', 'contrib'):
-                    check_output += '  invalid `support`: {}\n'.format(support)
+                if support != correct_support:
+                    check_output += '  incorrect `support`: {}\n'.format(support)
                     failed += 1
                     if fix:
                         decoded['support'] = correct_support
                         check_output += '  new `support`: {}\n'.format(correct_support)
                         failed -= 1
-
-                # version
-                version = decoded.get('version')
-                version_parts = parse_version_parts(version)
-                if len(version_parts) != 3:
-                    if not version:
-                        check_output += '  required non-null string: version\n'
-                    else:
-                        check_output += '  invalid `version`: {}\n'.format(version)
-                    failed += 1
 
                 if include_extras:
                     # supported_os

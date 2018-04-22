@@ -13,4 +13,5 @@ test:
   - export DOCKER_HOSTNAME=docker
   - export DOCKER_HOST="tcp://docker:2375"
   - export INVOKE_RUN_SHELL="/bin/ash"
+  - inv manifest --include-extras
   - inv test --changed-only

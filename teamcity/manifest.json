@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "teamcity",
   "short_description": "Track builds and understand the performance impact of every deploy.",
   "support": "core",
@@ -11,11 +9,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
   "guid": "b390dd3f-47d5-4555-976a-36722833f000",
   "public_title": "Datadog-Teamcity Integration",
-  "categories":["configuration & deployment"],
-  "type":"check",
+  "categories": [
+    "configuration & deployment"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/teamcity/",
   "is_public": true,
   "has_logo": true
