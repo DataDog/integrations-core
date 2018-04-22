@@ -7,4 +7,4 @@ from six.moves.urllib.parse import urlparse
 
 
 def get_docker_hostname():
-    return urlparse(os.getenv('DOCKER_HOST')).hostname or 'localhost'
+    return urlparse(os.getenv('DOCKER_HOST', '')).hostname or 'localhost'
