@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from six import iteritems
+
 
 def freeze(o):
     """
@@ -8,12 +10,13 @@ def freeze(o):
     Accepts nested dictionaries.
     """
     if isinstance(o, dict):
-        return frozenset(dict([(k, freeze(v)) for k,v in o.iteritems()]).iteritems())
+        return frozenset((k, freeze(v)) for k, v in iteritems(o))
 
     if isinstance(o, list):
-        return tuple([freeze(v) for v in o])
+        return tuple(freeze(v) for v in o)
 
     return o
+
 
 def hash_mutable(m):
     return hash(freeze(m))
