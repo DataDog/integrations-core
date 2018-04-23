@@ -10,7 +10,7 @@ except ImportError:
 
 import mock
 import pytest
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_test_libs.utils.common import get_docker_hostname
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
