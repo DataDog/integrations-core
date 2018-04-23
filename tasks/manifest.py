@@ -104,8 +104,11 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                         failed -= 1
 
                 if len(version_parts) == 3:
+                    about_exists = os.path.isfile(
+                        os.path.join(check_dir, 'datadog_checks', check_name, '__about__.py')
+                    )
                     if version_parts >= [1, 0, 0]:
-                        if 'version' in decoded:
+                        if 'version' in decoded and about_exists:
                             check_output += '  outdated field: version\n'
                             failed += 1
                             if fix:
@@ -128,7 +131,7 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
                                 del decoded['min_agent_version']
                                 check_output += '  removed field: min_agent_version\n'
                                 failed -= 1
-                    elif os.path.isfile(os.path.join(check_dir, 'datadog_checks', check_name, '__about__.py')):
+                    elif about_exists:
                         check_output += '  outdated `manifest_version`: {}\n'.format(manifest_version)
                         failed += 1
                         if fix:
