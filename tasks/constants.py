@@ -28,6 +28,7 @@ AGENT_BASED_INTEGRATIONS = [
     'mcache',
     'network',
     'nfsstat',
+    'nginx',
     'pdh_check',
     'postgres',
     'powerdns_recursor',
