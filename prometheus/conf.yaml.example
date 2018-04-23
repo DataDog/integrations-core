@@ -59,6 +59,10 @@ instances:
   #
   #   send_histograms_buckets: True
 
+  #   To send counters as monotonic counter
+  #
+  #   send_monotonic_counter: True
+
   #   List of label to be excluded
   #
   #   exclude_labels:

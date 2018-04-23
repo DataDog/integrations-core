@@ -35,6 +35,18 @@ class Scraper(PrometheusScraper):
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
         self.check.gauge('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
 
+    def _submit_monotonic_count(self, metric_name, val, metric, custom_tags=None, hostname=None):
+        """
+        Submit a metric as a monotonic count, additional tags provided will be added to
+        the ones from the label provided via the metrics object.
+
+        `custom_tags` is an array of 'tag:value' that will be added to the
+        metric when sending the gauge to Datadog.
+        """
+
+        _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
+        self.check.monotonic_count('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
+
     def _metric_tags(self, metric_name, val, metric, custom_tags=None, hostname=None):
         _tags = []
         if custom_tags is not None:
@@ -82,6 +94,7 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.process(
             endpoint,
             send_histograms_buckets=instance.get('send_histograms_buckets', True),
+            send_monotonic_counter=instance.get('send_monotonic_counter', True),
             instance=instance,
             ignore_unmapped=True
         )
