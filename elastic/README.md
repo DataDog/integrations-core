@@ -68,20 +68,7 @@ Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands
   
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `elastic` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    elastic
-    -------
-      - instance #0 [OK]
-      - Collected 118 metrics, 0 events & 2 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `elastic` under the Checks section.
 
 ## Compatibility
 

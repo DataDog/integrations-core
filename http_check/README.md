@@ -61,22 +61,7 @@ When you have finished configuring `http_check.yaml`, [restart the Agent](https:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    http_check
-    ----------
-      - instance #0 [WARNING]
-          Warning: Skipping SSL certificate validation for https://example.com based on configuration
-      - instance #1 [OK]
-      - Collected 2 metrics, 0 events & 4 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section.
 
 ## Compatibility
 

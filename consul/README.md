@@ -99,34 +99,7 @@ Change the `path` and `service` parameter values and configure them for your env
 
 ### Validation
 
-#### Datadog Agent to Consul Agent
-
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `consul` under the Checks section:
-
-```
-  Checks
-  ======
-	[...]
-
-    consul (5.12.1)
-    ---------------
-      - instance #0 [OK]
-      - Collected 9 metrics, 0 events & 2 service checks
-
-    [...]
-```
-
-Also, if your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular polling in the Consul log:
-
-```
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/leader (59.344µs) from=127.0.0.1:53768
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/status/peers (62.678µs) from=127.0.0.1:53770
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/health/state/any (106.725µs) from=127.0.0.1:53772
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/catalog/services (79.657µs) from=127.0.0.1:53774
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/health/service/consul (153.917µs) from=127.0.0.1:53776
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/coordinate/datacenters (71.778µs) from=127.0.0.1:53778
-    2017/03/27 21:38:12 [DEBUG] http: Request GET /v1/coordinate/nodes (84.95µs) from=127.0.0.1:53780
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `consul` under the Checks section.
 
 #### Consul Agent to DogStatsD
 

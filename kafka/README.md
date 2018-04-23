@@ -84,20 +84,7 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    kafka-localhost-9999
-    -------
-      - instance #0 [OK]
-      - Collected 8 metrics, 0 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka` under the Checks section.
 
 ## Compatibility
 

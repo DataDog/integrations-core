@@ -18,15 +18,7 @@ See [sample linkerd.yaml](https://github.com/DataDog/integrations-core/blob/mast
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `linkerd` under the Checks section:
-
-    Checks
-    ======
-
-        linkerd
-        -----------
-          - instance #0 [OK]
-          - Collected 139 metrics, 0 events & 1 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `linkerd` under the Checks section.
 
 ## Compatibility
 

@@ -33,20 +33,7 @@ Note: spaces are replaced by underscores in Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `windows_service` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    windows_service
-    -------
-      - instance #0 [OK]
-      - Collected 0 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `windows_service` under the Checks section.
 
 ## Compatibility
 

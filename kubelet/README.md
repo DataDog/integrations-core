@@ -17,15 +17,7 @@ Edit the `kubelet.yaml` file to point to your server and port, set tags to send 
 
 ## Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubelet` under the Checks section:
-
-    Checks
-    ======
-
-        kubelet
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubelet` under the Checks section.
 
 ## Compatibility
 

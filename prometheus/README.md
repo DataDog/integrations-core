@@ -24,15 +24,7 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 ## Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `prometheus` under the Checks section:
-
-    Checks
-    ======
-
-        prometheus
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `prometheus` under the Checks section.
 
 ## Compatibility
 

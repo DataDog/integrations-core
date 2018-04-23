@@ -19,20 +19,7 @@ Create a `kafka_consumer.yaml` file using [this sample conf file](https://github
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka_consumer` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    kafka_consumer
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka_consumer` under the Checks section.
 
 ## Compatibility
 

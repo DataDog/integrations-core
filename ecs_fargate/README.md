@@ -19,15 +19,7 @@ Edit the `ecs_fargate.yaml` file to point to your server and port, set the maste
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ecs_fargate` under the Checks section:
-
-    Checks
-    ======
-
-        ecs_fargate
-        -----------
-          - instance #0 [OK]
-          - Collected 63 metrics, 0 events & 1 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ecs_fargate` under the Checks section.
 
 ## Compatibility
 

@@ -48,20 +48,7 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    ntp
-    -------
-      - instance #0 [OK]
-      - Collected 1 metrics, 0 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section.
 
 ### Compatibility
 
