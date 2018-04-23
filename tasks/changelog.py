@@ -21,7 +21,7 @@ from .constants import ROOT, GITHUB_API_URL
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
 
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url')
+ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
 
 
 def get_version_string(check_name):
@@ -57,6 +57,14 @@ def parse_pr_numbers(git_log_lines):
         if match:
             prs.append(match.group(1))
     return prs
+
+
+def is_contributor(payload):
+    """
+    If the PR comes from a fork, we can safely assumed it's from an
+    external contributor.
+    """
+    return payload.get('head', {}).get('repo', {}).get('fork') is True
 
 
 @task(help={
@@ -99,7 +107,12 @@ def update_changelog(ctx, target, new_version, dry_run=False):
             continue
 
         payload = json.loads(response.read())
-        entry = ChangelogEntry(pr_num, payload.get('title'), payload.get('html_url'))
+        author = payload.get('user', {}).get('login')
+        author_url = payload.get('user', {}).get('html_url')
+
+        entry = ChangelogEntry(pr_num, payload.get('title'), payload.get('html_url'),
+                               author, author_url, is_contributor(payload))
+
         entries.append(entry)
 
     # store the new changelog in memory
@@ -112,7 +125,10 @@ def update_changelog(ctx, target, new_version, dry_run=False):
     # one bullet point for each PR
     new_entry.write("\n")
     for entry in entries:
-        new_entry.write("* {}. See [#{}]({}).\n".format(entry.title, entry.number, entry.url))
+        thanknote = ""
+        if entry.is_contributor:
+            thanknote = " Thanks [{}]({}).".format(entry.author, entry.author_url)
+        new_entry.write("* {}. See [#{}]({}).{}\n".format(entry.title, entry.number, entry.url, thanknote))
     new_entry.write("\n")
 
     # read the old contents
