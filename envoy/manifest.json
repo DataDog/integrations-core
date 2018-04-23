@@ -6,7 +6,7 @@
   "metric_prefix": "envoy",
   "metric_to_check": "envoy.stats.overflow",
   "creates_events": "false",
-  "short_description": "Gain insight into your distributed systems using Envoy.",
+  "short_description": "Envoy is an open source edge and service proxy, designed for cloud-native applications.",
   "guid": "007f4e6c-ac88-411e-ad81-f0272539b5ff",
   "support": "core",
   "supported_os": [
