@@ -14,6 +14,8 @@ If you need the newest version of the Envoy check, install the `dd-check-envoy` 
 
 Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml](https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example) for all available configuration options.
 
+Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin).
+
 #### via Istio
 
 If you are using Envoy as part of [Istio](https://istio.io), to access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin) you need to set Istio's [proxyAdminPort](https://istio.io/docs/reference/config/istio.mesh.v1alpha1.html#ProxyConfig).
@@ -24,7 +26,7 @@ There are 2 ways to setup the `/stats` endpoint:
 
 ##### Unsecured stats endpoint
 
-Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin). Here's an example Envoy admin configuration: 
+Here's an example Envoy admin configuration: 
 
 ```yaml
 admin:

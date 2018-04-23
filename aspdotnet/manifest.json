@@ -2,13 +2,13 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "aspdotnet",
-  "short_description": "aspdotnet description.",
+  "short_description": "Track your ASP.NET service metrics in real time",
   "guid": "475b0c6c-02e5-49ef-806b-9fab377f0839",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "public_title": "Datadog-ASP .NET Integration",
+  "public_title": "Datadog-ASP.NET Integration",
   "categories": ["web", "languages"],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/aspdotnet/",
