@@ -1148,8 +1148,8 @@ class OpenStackCheck(AgentCheck):
 
                     if scope.tenant_id:
                         server_tags.append("tenant_id:%s" % scope.tenant_id)
-                    if project and 'name' in project:
-                        server_tags.append('project_name:{0}'.format(project['name']))
+                    # if project and 'name' in project:
+                    #     server_tags.append('project_name:{0}'.format(project['name']))
 
                     self.external_host_tags[server] = host_tags
                     self.get_stats_for_single_server(servers[server], tags=server_tags)
