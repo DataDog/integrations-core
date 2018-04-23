@@ -1,6 +1,4 @@
-from . import ceph
-
-Ceph = ceph.Ceph
+from ceph import Ceph
 
 __all__ = [
     '__version__',
