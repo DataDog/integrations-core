@@ -885,7 +885,6 @@ class OpenStackCheck(AgentCheck):
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
-                self.changes_since_time[i_key] = datetime.utcnow().isoformat()
 
                 # Get a list of deleted serversTimestamp used to filter the call to get the list
                 # Need to have admin perms for this to take affect
