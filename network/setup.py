@@ -4,8 +4,6 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import json
-
 HERE = path.abspath(path.dirname(__file__))
 
 # Get version info
@@ -21,6 +19,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
+
 
 setup(
     name='datadog-network',
