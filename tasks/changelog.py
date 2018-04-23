@@ -7,10 +7,11 @@ import re
 import sys
 import json
 import urllib2
-import StringIO
 from collections import namedtuple
 from datetime import datetime
 
+from six.moves.urllib.request import urlopen
+from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
 
@@ -92,7 +93,7 @@ def update_changelog(ctx, target, new_version, dry_run=False):
     entries = []
     for pr_num in pr_numbers:
         try:
-            response = urllib2.urlopen(endpoint.format(pr_num))
+            response = urlopen(endpoint.format(pr_num))
         except Exception as e:
             sys.stderr.write("Unable to fetch info for PR #{}\n: {}".format(pr_num, e))
             continue
@@ -102,17 +103,17 @@ def update_changelog(ctx, target, new_version, dry_run=False):
         entries.append(entry)
 
     # store the new changelog in memory
-    output = StringIO.StringIO()
+    new_entry = StringIO()
 
     # the header contains version and date
     header = "### {} / {}\n".format(new_version, datetime.now().strftime("%Y-%m-%d"))
-    output.write(header)
+    new_entry.write(header)
 
     # one bullet point for each PR
-    output.write("\n")
+    new_entry.write("\n")
     for entry in entries:
-        output.write("* {}. See [#{}]({}).\n".format(entry.title, entry.number, entry.url))
-    output.write("\n")
+        new_entry.write("* {}. See [#{}]({}).\n".format(entry.title, entry.number, entry.url))
+    new_entry.write("\n")
 
     # read the old contents
     changelog_path = os.path.join(ROOT, target, "CHANGELOG.md")
@@ -120,7 +121,7 @@ def update_changelog(ctx, target, new_version, dry_run=False):
         old = f.readlines()
 
     # write the new changelog in memory
-    changelog = StringIO.StringIO()
+    changelog = StringIO()
 
     # preserve the title
     changelog.write("".join(old[:2]))
@@ -128,7 +129,7 @@ def update_changelog(ctx, target, new_version, dry_run=False):
     # prepend the new changelog to the old contents
     # make the command idempotent
     if header not in old:
-        changelog.write(output.getvalue())
+        changelog.write(new_entry.getvalue())
 
     # append the rest of the old changelog
     changelog.write("".join(old[2:]))
