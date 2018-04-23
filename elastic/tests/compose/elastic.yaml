@@ -1,0 +1,18 @@
+version: '3.5'
+
+services:
+  elastic:
+    image: "datadog/docker-library:elasticsearch_${ELASTIC_VERSION}"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: elastic_default

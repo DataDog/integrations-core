@@ -3,17 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+import pytest
 import os
+import sys
 import time
 import socket
-
-# 3p
-from nose.plugins.attrib import attr
 import requests
-
-# project
-from config import get_version
-from tests.checks.common import AgentCheckTest, load_check
+import logging
+import subprocess
+from datadog_checks.elastic import ESCheck
 
 # Clusterwise metrics, pre aggregated on ES, compatible with all ES versions
 PRIMARY_SHARD_METRICS = {
@@ -21,23 +19,29 @@ PRIMARY_SHARD_METRICS = {
     "elasticsearch.primaries.docs.deleted": ("gauge", "_all.primaries.docs.deleted"),
     "elasticsearch.primaries.store.size": ("gauge", "_all.primaries.store.size_in_bytes"),
     "elasticsearch.primaries.indexing.index.total": ("gauge", "_all.primaries.indexing.index_total"),
-    "elasticsearch.primaries.indexing.index.time": ("gauge", "_all.primaries.indexing.index_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.indexing.index.time":
+        ("gauge", "_all.primaries.indexing.index_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.indexing.index.current": ("gauge", "_all.primaries.indexing.index_current"),
     "elasticsearch.primaries.indexing.delete.total": ("gauge", "_all.primaries.indexing.delete_total"),
-    "elasticsearch.primaries.indexing.delete.time": ("gauge", "_all.primaries.indexing.delete_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.indexing.delete.time":
+        ("gauge", "_all.primaries.indexing.delete_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.indexing.delete.current": ("gauge", "_all.primaries.indexing.delete_current"),
     "elasticsearch.primaries.get.total": ("gauge", "_all.primaries.get.total"),
     "elasticsearch.primaries.get.time": ("gauge", "_all.primaries.get.time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.get.current": ("gauge", "_all.primaries.get.current"),
     "elasticsearch.primaries.get.exists.total": ("gauge", "_all.primaries.get.exists_total"),
-    "elasticsearch.primaries.get.exists.time": ("gauge", "_all.primaries.get.exists_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.get.exists.time":
+        ("gauge", "_all.primaries.get.exists_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.get.missing.total": ("gauge", "_all.primaries.get.missing_total"),
-    "elasticsearch.primaries.get.missing.time": ("gauge", "_all.primaries.get.missing_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.get.missing.time":
+        ("gauge", "_all.primaries.get.missing_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.search.query.total": ("gauge", "_all.primaries.search.query_total"),
-    "elasticsearch.primaries.search.query.time": ("gauge", "_all.primaries.search.query_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.search.query.time":
+        ("gauge", "_all.primaries.search.query_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.search.query.current": ("gauge", "_all.primaries.search.query_current"),
     "elasticsearch.primaries.search.fetch.total": ("gauge", "_all.primaries.search.fetch_total"),
-    "elasticsearch.primaries.search.fetch.time": ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.search.fetch.time":
+        ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current"),
     "elasticsearch.indices.count": ("gauge", "indices", lambda indices: len(indices))
 }
@@ -47,13 +51,16 @@ PRIMARY_SHARD_METRICS_POST_1_0 = {
     "elasticsearch.primaries.merges.current.docs": ("gauge", "_all.primaries.merges.current_docs"),
     "elasticsearch.primaries.merges.current.size": ("gauge", "_all.primaries.merges.current_size_in_bytes"),
     "elasticsearch.primaries.merges.total": ("gauge", "_all.primaries.merges.total"),
-    "elasticsearch.primaries.merges.total.time": ("gauge", "_all.primaries.merges.total_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.merges.total.time":
+        ("gauge", "_all.primaries.merges.total_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.merges.total.docs": ("gauge", "_all.primaries.merges.total_docs"),
     "elasticsearch.primaries.merges.total.size": ("gauge", "_all.primaries.merges.total_size_in_bytes"),
     "elasticsearch.primaries.refresh.total": ("gauge", "_all.primaries.refresh.total"),
-    "elasticsearch.primaries.refresh.total.time": ("gauge", "_all.primaries.refresh.total_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.primaries.refresh.total.time":
+        ("gauge", "_all.primaries.refresh.total_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.primaries.flush.total": ("gauge", "_all.primaries.flush.total"),
-    "elasticsearch.primaries.flush.total.time": ("gauge", "_all.primaries.flush.total_time_in_millis", lambda v: float(v)/1000)
+    "elasticsearch.primaries.flush.total.time":
+        ("gauge", "_all.primaries.flush.total_time_in_millis", lambda v: float(v)/1000)
 }
 
 STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
@@ -167,7 +174,7 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
 }
 
-INDEX_STATS_METRICS = { # Metrics for index level
+INDEX_STATS_METRICS = {  # Metrics for index level
     "elasticsearch.index.health": ("gauge", "health"),
     "elasticsearch.index.docs.count": ("gauge", "docs_count"),
     "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
@@ -179,16 +186,20 @@ INDEX_STATS_METRICS = { # Metrics for index level
 
 JVM_METRICS_POST_0_90_10 = {
     "jvm.gc.collectors.young.count": ("gauge", "jvm.gc.collectors.young.collection_count"),
-    "jvm.gc.collectors.young.collection_time": ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
+    "jvm.gc.collectors.young.collection_time":
+        ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
     "jvm.gc.collectors.old.count": ("gauge", "jvm.gc.collectors.old.collection_count"),
-    "jvm.gc.collectors.old.collection_time": ("gauge", "jvm.gc.collectors.old.collection_time_in_millis", lambda v: float(v)/1000)
+    "jvm.gc.collectors.old.collection_time":
+        ("gauge", "jvm.gc.collectors.old.collection_time_in_millis", lambda v: float(v)/1000)
 }
 
 JVM_METRICS_PRE_0_90_10 = {
     "jvm.gc.concurrent_mark_sweep.count": ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_count"),
-    "jvm.gc.concurrent_mark_sweep.collection_time": ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis", lambda v: float(v)/1000),
+    "jvm.gc.concurrent_mark_sweep.collection_time":
+        ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis", lambda v: float(v)/1000),
     "jvm.gc.par_new.count": ("gauge", "jvm.gc.collectors.ParNew.collection_count"),
-    "jvm.gc.par_new.collection_time": ("gauge", "jvm.gc.collectors.ParNew.collection_time_in_millis", lambda v: float(v)/1000),
+    "jvm.gc.par_new.collection_time":
+        ("gauge", "jvm.gc.collectors.ParNew.collection_time_in_millis", lambda v: float(v)/1000),
     "jvm.gc.collection_count": ("gauge", "jvm.gc.collection_count"),
     "jvm.gc.collection_time": ("gauge", "jvm.gc.collection_time_in_millis", lambda v: float(v)/1000),
 }
@@ -229,18 +240,23 @@ ADDITIONAL_METRICS_1_x = {
 }
 
 ADDITIONAL_METRICS_POST_1_3_0 = {
-    "elasticsearch.indices.segments.index_writer_memory_in_bytes": ("gauge", "indices.segments.index_writer_memory_in_bytes"),
-    "elasticsearch.indices.segments.version_map_memory_in_bytes": ("gauge", "indices.segments.version_map_memory_in_bytes"),
+    "elasticsearch.indices.segments.index_writer_memory_in_bytes":
+        ("gauge", "indices.segments.index_writer_memory_in_bytes"),
+    "elasticsearch.indices.segments.version_map_memory_in_bytes":
+        ("gauge", "indices.segments.version_map_memory_in_bytes"),
 }
 
 ADDITIONAL_METRICS_POST_1_4_0 = {
-    "elasticsearch.indices.indexing.throttle_time": ("rate", "indices.indexing.throttle_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.indices.indexing.throttle_time":
+        ("rate", "indices.indexing.throttle_time_in_millis", lambda v: float(v)/1000),
     "elasticsearch.indices.query_cache.memory_size_in_bytes": ("gauge", "indices.query_cache.memory_size_in_bytes"),
     "elasticsearch.indices.query_cache.hit_count": ("rate", "indices.query_cache.hit_count"),
     "elasticsearch.indices.query_cache.miss_count": ("rate", "indices.query_cache.miss_count"),
     "elasticsearch.indices.query_cache.evictions": ("rate", "indices.query_cache.evictions"),
-    "elasticsearch.indices.segments.index_writer_max_memory_in_bytes": ("gauge", "indices.segments.index_writer_max_memory_in_bytes"),
-    "elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes": ("gauge", "indices.segments.fixed_bit_set_memory_in_bytes"),
+    "elasticsearch.indices.segments.index_writer_max_memory_in_bytes":
+        ("gauge", "indices.segments.index_writer_max_memory_in_bytes"),
+    "elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes":
+        ("gauge", "indices.segments.fixed_bit_set_memory_in_bytes"),
     "elasticsearch.breakers.fielddata.estimated_size_in_bytes": ("gauge", "breakers.fielddata.estimated_size_in_bytes"),
     "elasticsearch.breakers.fielddata.overhead": ("gauge", "breakers.fielddata.overhead"),
     "elasticsearch.breakers.fielddata.tripped": ("rate", "breakers.fielddata.tripped"),
@@ -259,7 +275,8 @@ ADDITIONAL_METRICS_POST_1_4_0 = {
 ADDITIONAL_METRICS_POST_1_5_0 = {
     "elasticsearch.indices.recovery.current_as_source": ("gauge", "indices.recovery.current_as_source"),
     "elasticsearch.indices.recovery.current_as_target": ("gauge", "indices.recovery.current_as_target"),
-    "elasticsearch.indices.recovery.throttle_time": ("rate", "indices.recovery.throttle_time_in_millis", lambda v: float(v)/1000),
+    "elasticsearch.indices.recovery.throttle_time":
+        ("rate", "indices.recovery.throttle_time_in_millis", lambda v: float(v)/1000),
 }
 
 ADDITIONAL_METRICS_POST_1_6_0 = {
@@ -284,11 +301,15 @@ ADDITIONAL_METRICS_POST_2_0 = {
     "elasticsearch.indices.query_cache.cache_size": ("gauge", "indices.query_cache.cache_size"),
     "elasticsearch.indices.query_cache.cache_count": ("rate", "indices.query_cache.cache_count"),
     "elasticsearch.indices.query_cache.total_count": ("rate", "indices.query_cache.total_count"),
-    "elasticsearch.indices.segments.doc_values_memory_in_bytes": ("gauge", "indices.segments.doc_values_memory_in_bytes"),
+    "elasticsearch.indices.segments.doc_values_memory_in_bytes":
+        ("gauge", "indices.segments.doc_values_memory_in_bytes"),
     "elasticsearch.indices.segments.norms_memory_in_bytes": ("gauge", "indices.segments.norms_memory_in_bytes"),
-    "elasticsearch.indices.segments.stored_fields_memory_in_bytes": ("gauge", "indices.segments.stored_fields_memory_in_bytes"),
-    "elasticsearch.indices.segments.term_vectors_memory_in_bytes": ("gauge", "indices.segments.term_vectors_memory_in_bytes"),
-    "elasticsearch.indices.segments.terms_memory_in_bytes": ("gauge", "indices.segments.terms_memory_in_bytes"),
+    "elasticsearch.indices.segments.stored_fields_memory_in_bytes":
+        ("gauge", "indices.segments.stored_fields_memory_in_bytes"),
+    "elasticsearch.indices.segments.term_vectors_memory_in_bytes":
+        ("gauge", "indices.segments.term_vectors_memory_in_bytes"),
+    "elasticsearch.indices.segments.terms_memory_in_bytes":
+        ("gauge", "indices.segments.terms_memory_in_bytes"),
     "elasticsearch.indices.request_cache.memory_size_in_bytes": ("gauge", "indices.request_cache.memory_size_in_bytes"),
     "elasticsearch.indices.request_cache.evictions": ("rate", "indices.request_cache.evictions"),
     "elasticsearch.indices.request_cache.hit_count": ("rate", "indices.request_cache.hit_count"),
@@ -320,220 +341,287 @@ CLUSTER_PENDING_TASKS = {
     "elasticsearch.pending_tasks_priority_urgent": ("gauge", "pending_tasks_priority_urgent"),
     "elasticsearch.pending_tasks_time_in_queue": ("gauge", "pending_tasks_time_in_queue"),
 }
+log = logging.getLogger('test_elastic')
+
+CHECK_NAME = "elastic"
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+PORT = '9200'
+BAD_PORT = '9405'
+CONF_HOSTNAME = "foo"
+TAGS = [u"foo:bar", u"baz"]
+CLUSTER_TAG = [u"cluster_name:elasticsearch"]
+URL = 'http://{0}:{1}'.format(HOST, PORT)
+BAD_URL = 'http://{0}:{1}'.format(HOST, BAD_PORT)
+
+AGENT_CONFIG = {
+    "hostname": CONF_HOSTNAME,
+    "version": '5.21.0',
+    "api_key": "bar"
+}
+INSTANCE_CONFIG = {
+        'instances': [
+            {'url': URL, 'tags': TAGS},  # One with tags not external
+            {'url': URL, 'cluster_stats': True},  # One without tags, external
+            {'url': BAD_URL},  # One bad url
+        ]
+}
+
+
+@pytest.fixture(scope="session")
+def spin_up_elastic():
+    env = os.environ
+    args = [
+        'docker-compose', '-f', os.path.join(HERE, 'compose', 'elastic.yaml')
+    ]
+    subprocess.check_call(args + ["up", "-d"], env=env)
+    sys.stderr.write("Waiting for ES to boot...")
+
+    attempts = 1
+
+    while True:
+        if attempts >= 10:
+            subprocess.check_call(args + ["down"], env=env)
+            raise Exception("ES failed to boot...")
+        try:
+            res = requests.get(URL + '/_cluster/health')
+            res.raise_for_status
+            break
+        except Exception:
+            attempts += 1
+            time.sleep(1)
+
+    # Create an index in ES
+    requests.put(URL, '/datadog/')
+    yield
+    subprocess.check_call(args + ["down"], env=env)
+
+
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
 
 
 def get_es_version():
-    version = os.environ.get("FLAVOR_VERSION")
+    version = os.environ.get("ELASTIC_VERSION")
     if version is None:
-        return [1, 3, 9]
-    return [int(k) for k in version.split(".")]
+        return [1, 3, 9]  # Need to default to something more recent
+    if '_' in version:
+        version_formatted = [int(k) for k in version.split("_")]
+        return version_formatted
+    else:
+        return [int(k) for k in version.split(".")]
 
 
-@attr(requires='elastic')
-class TestElastic(AgentCheckTest):
-    CHECK_NAME = "elastic"
+def test_bad_port(aggregator, spin_up_elastic):
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    BAD_CONFIG = INSTANCE_CONFIG["instances"][2]
+    with pytest.raises(Exception):
+        elastic_check.check(BAD_CONFIG)
 
-    def test_check(self):
-        conf_hostname = "foo"
-        port = 9200
-        bad_port = 9405
-        agent_config = {
-            "hostname": conf_hostname, "version": get_version(),
-            "api_key": "bar"
-        }
 
-        tags = [u"foo:bar", u"baz"]
-        cluster_tag = [u"cluster_name:elasticsearch"]
-        url = 'http://localhost:{0}'.format(port)
-        bad_url = 'http://localhost:{0}'.format(bad_port)
+def test_check(aggregator, spin_up_elastic):
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
+    CONFIG = INSTANCE_CONFIG["instances"][0]
+    elastic_check.check(CONFIG)
 
-        config = {
-            'instances': [
-                {'url': url, 'tags': tags},  # One with tags not external
-                {'url': url, 'cluster_stats': True},  # One without tags, external
-                {'url': bad_url},  # One bad url
-            ]
-        }
+    expected_metrics = dict(STATS_METRICS)
+    CLUSTER_HEALTH_METRICS.update(CLUSTER_PENDING_TASKS)
+    expected_metrics.update(CLUSTER_HEALTH_METRICS)
 
-        self.assertRaises(
-            requests.exceptions.ConnectionError,
-            self.run_check, config=config, agent_config=agent_config)
+    instance = elastic_check.get_instance_config(INSTANCE_CONFIG['instances'][0])
+    es_version = elastic_check._get_es_version(instance)
 
-        default_tags = ["url:http://localhost:{0}".format(port)]
+    assert es_version[:2] == get_es_version()
 
-        expected_metrics = dict(STATS_METRICS)
-        CLUSTER_HEALTH_METRICS.update(CLUSTER_PENDING_TASKS)
-        expected_metrics.update(CLUSTER_HEALTH_METRICS)
-
-        instance_config = self.check.get_instance_config(config['instances'][0])
-        es_version = self.check._get_es_version(instance_config)
-
-        self.assertEquals(es_version, get_es_version())
-
-        if es_version >= [0, 90, 5]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_0_90_5)
-            if es_version >= [0, 90, 10]:
-                expected_metrics.update(JVM_METRICS_POST_0_90_10)
-            else:
-                expected_metrics.update(JVM_METRICS_PRE_0_90_10)
+    if es_version >= [0, 90, 5]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_0_90_5)
+        if es_version >= [0, 90, 10]:
+            expected_metrics.update(JVM_METRICS_POST_0_90_10)
         else:
-            expected_metrics.update(ADDITIONAL_METRICS_PRE_0_90_5)
             expected_metrics.update(JVM_METRICS_PRE_0_90_10)
+    else:
+        expected_metrics.update(ADDITIONAL_METRICS_PRE_0_90_5)
+        expected_metrics.update(JVM_METRICS_PRE_0_90_10)
 
+    if es_version >= [1, 0, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_1_0_0)
+
+    if es_version < [2, 0, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_PRE_2_0)
+        if es_version >= [0, 90, 5]:
+            expected_metrics.update(ADDITIONAL_METRICS_POST_0_90_5_PRE_2_0)
         if es_version >= [1, 0, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_1_0_0)
+            expected_metrics.update(ADDITIONAL_METRICS_1_x)
 
-        if es_version < [2, 0, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_PRE_2_0)
-            if es_version >= [0, 90, 5]:
-                expected_metrics.update(ADDITIONAL_METRICS_POST_0_90_5_PRE_2_0)
-            if es_version >= [1, 0, 0]:
-                expected_metrics.update(ADDITIONAL_METRICS_1_x)
+    if es_version >= [1, 3, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_1_3_0)
 
-        if es_version >= [1, 3, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_1_3_0)
+    if es_version >= [1, 4, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_1_4_0)
 
-        if es_version >= [1, 4, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_1_4_0)
+    if es_version >= [1, 5, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_1_5_0)
 
-        if es_version >= [1, 5, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_1_5_0)
+    if es_version >= [1, 6, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_1_6_0)
 
-        if es_version >= [1, 6, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_1_6_0)
+    if es_version >= [2, 0, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_2_0)
 
-        if es_version >= [2, 0, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_2_0)
+    if es_version >= [2, 1, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_POST_2_1)
 
-        if es_version >= [2, 1, 0]:
-            expected_metrics.update(ADDITIONAL_METRICS_POST_2_1)
+    if os.environ.get("DD_ELASTIC_LOCAL_HOSTNAME"):
+        local_hostname = os.environ.get("DD_ELASTIC_LOCAL_HOSTNAME")
+    elif es_version < [2, 0, 0]:
+        local_hostname = socket.gethostname()
+    else:
+        local_hostname = '127.0.0.1'
 
-        if os.environ.get("DD_ELASTIC_LOCAL_HOSTNAME"):
-            local_hostname = os.environ.get("DD_ELASTIC_LOCAL_HOSTNAME")
-        elif es_version < [2, 0, 0]:
-            local_hostname = socket.gethostname()
-        else:
-            local_hostname = '127.0.0.1'
+    contexts = [
+        (CONF_HOSTNAME, default_tags + TAGS),
+        (local_hostname, default_tags)
+    ]
 
-        contexts = [
-            (conf_hostname, default_tags + tags),
-            (local_hostname, default_tags)
-        ]
+    stats_keys = (
+        set(expected_metrics.keys()) - set(CLUSTER_HEALTH_METRICS.keys()) -
+        set(CLUSTER_PENDING_TASKS.keys())
+    )
+    for m_name, desc in expected_metrics.iteritems():
+        for hostname, m_tags in contexts:
+            m_tags = m_tags + CLUSTER_TAG
+            if (m_name in CLUSTER_HEALTH_METRICS and
+                    hostname == local_hostname):
+                hostname = CONF_HOSTNAME
 
-        stats_keys = (
-            set(expected_metrics.keys()) - set(CLUSTER_HEALTH_METRICS.keys()) -
-            set(CLUSTER_PENDING_TASKS.keys())
-        )
+            if m_name in stats_keys:
+                m_tags = m_tags + [u"node_name:batman"]
 
-        for m_name, desc in expected_metrics.iteritems():
-            for hostname, m_tags in contexts:
-                m_tags = m_tags + cluster_tag
-                if (m_name in CLUSTER_HEALTH_METRICS and
-                        hostname == local_hostname):
-                    hostname = conf_hostname
+            if desc[0] == "gauge":
+                aggregator.assert_metric(m_name)
 
-                if m_name in stats_keys:
-                    m_tags = m_tags + [u"node_name:batman"]
+    good_sc_tags = ['host:{0}'.format(HOST), 'port:{0}'.format(PORT)]
+    aggregator.assert_service_check('elasticsearch.can_connect',
+                                    status=0,  # OK
+                                    tags=good_sc_tags + TAGS)
 
-                if desc[0] == "gauge":
-                    self.assertMetric(
-                        m_name, tags=m_tags, count=1, hostname=hostname)
+    # Assert service metadata
+    # self.assertServiceMetadata(['version'], count=3)
+    # FIXME: 0.90.13 returns randomly a red status instead of yellow,
+    # so we don't do a coverage test for it
+    # Remove me when we stop supporting 0.90.x (not supported anymore by ES)
+    if get_es_version() != [0, 90, 13]:
+        # Warning because elasticsearch status should be yellow, according to
+        # http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
+        aggregator.assert_service_check('elasticsearch.cluster_health',
+                                        status=0)
 
-        good_sc_tags = ['host:localhost', 'port:{0}'.format(port)]
-        bad_sc_tags = ['host:localhost', 'port:{0}'.format(bad_port)]
 
-        self.assertServiceCheckOK('elasticsearch.can_connect',
-                                  tags=good_sc_tags + tags,
-                                  count=1)
-        self.assertServiceCheckOK('elasticsearch.can_connect',
-                                  tags=good_sc_tags,
-                                  count=1)
-        self.assertServiceCheckCritical('elasticsearch.can_connect',
-                                        tags=bad_sc_tags,
-                                        count=1)
-
-        # Assert service metadata
-        self.assertServiceMetadata(['version'], count=3)
-
-        # FIXME: 0.90.13 returns randomly a red status instead of yellow,
-        # so we don't do a coverage test for it
-        # Remove me when we stop supporting 0.90.x (not supported anymore by ES)
-        if get_es_version() != [0, 90, 13]:
-            # Warning because elasticsearch status should be yellow, according to
-            # http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
-            self.assertServiceCheckWarning('elasticsearch.cluster_health',
-                                           tags=good_sc_tags + tags + cluster_tag,
-                                           count=1)
-            self.assertServiceCheckWarning('elasticsearch.cluster_health',
-                                           tags=good_sc_tags + cluster_tag,
-                                           count=1)
-            # Assert event
-            self.assertEvent('ElasticSearch: foo just reported as yellow', count=1,
-                             tags=default_tags+tags+cluster_tag,
-                             msg_title='foo is yellow',
-                             event_type='elasticsearch', alert_type='warning',
-                             source_type_name='elasticsearch')
-
-            self.coverage_report()
-
-    def test_config_parser(self):
-        check = load_check(self.CHECK_NAME, {}, {})
-        instance = {
-            "username": "user",
-            "password": "pass",
-            "is_external": "yes",
-            "url": "http://foo.bar",
-            "tags": ["a", "b:c"],
+def test_config_parser(aggregator, spin_up_elastic):
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    instance = {
+        "username": "user",
+        "password": "pass",
+        "is_external": "yes",
+        "url": "http://foo.bar",
+        "tags": ["a", "b:c"],
         }
+    c = elastic_check.get_instance_config(instance)
+    assert c.username == "user"
+    assert c.password == "pass"
+    assert c.cluster_stats is True
+    assert c.url == "http://foo.bar"
+    assert c.tags == ["url:http://foo.bar", "a", "b:c"]
+    assert c.timeout == elastic_check.DEFAULT_TIMEOUT
+    assert c.service_check_tags == ["host:foo.bar", "port:None", "a", "b:c"]
 
-        c = check.get_instance_config(instance)
-        self.assertEquals(c.username, "user")
-        self.assertEquals(c.password, "pass")
-        self.assertEquals(c.cluster_stats, True)
-        self.assertEquals(c.url, "http://foo.bar")
-        self.assertEquals(c.tags, ["url:http://foo.bar", "a", "b:c"])
-        self.assertEquals(c.timeout, check.DEFAULT_TIMEOUT)
-        self.assertEquals(c.service_check_tags, ["host:foo.bar", "port:None", "a", "b:c"])
+    instance = {
+        "url": "http://192.168.42.42:12999",
+        "timeout": 15}
+    c = elastic_check.get_instance_config(instance)
+    assert c.username is None
+    assert c.password is None
+    assert c.cluster_stats is False
+    assert c.url == "http://192.168.42.42:12999"
+    assert c.tags == ["url:http://192.168.42.42:12999"]
+    assert c.timeout == 15
+    assert c.service_check_tags == ["host:192.168.42.42", "port:12999"]
 
-        instance = {
-            "url": "http://192.168.42.42:12999",
-            "timeout": 15
-        }
+    instance = {
+        "username": "user",
+        "password": "pass",
+        "url": "https://foo.bar:9200",
+        "ssl_verify": "true",
+        "ssl_cert": "/path/to/cert.pem",
+        "ssl_key": "/path/to/cert.key",
+    }
+    c = elastic_check.get_instance_config(instance)
+    assert c.username == "user"
+    assert c.password == "pass"
+    assert c.cluster_stats is False
+    assert c.url == "https://foo.bar:9200"
+    assert c.tags == ["url:https://foo.bar:9200"]
+    assert c.timeout == elastic_check.DEFAULT_TIMEOUT
+    assert c.service_check_tags == ["host:foo.bar", "port:9200"]
+    assert c.ssl_verify == "true"
+    assert c.ssl_cert == "/path/to/cert.pem"
+    assert c.ssl_key == "/path/to/cert.key"
 
-        c = check.get_instance_config(instance)
-        self.assertEquals(c.username, None)
-        self.assertEquals(c.password, None)
-        self.assertEquals(c.cluster_stats, False)
-        self.assertEquals(c.url, "http://192.168.42.42:12999")
-        self.assertEquals(c.tags, ["url:http://192.168.42.42:12999"])
-        self.assertEquals(c.timeout, 15)
-        self.assertEquals(c.service_check_tags,
-                          ["host:192.168.42.42", "port:12999"])
 
-        instance = {
-            "username": "user",
-            "password": "pass",
-            "url": "https://foo.bar:9200",
-            "ssl_verify": "true",
-            "ssl_cert": "/path/to/cert.pem",
-            "ssl_key": "/path/to/cert.key",
-        }
+def test_pshard_metrics(aggregator, spin_up_elastic):
+    """ Tests that the pshard related metrics are forwarded and that the
+        document count for primary indexes is twice smaller as the global
+        document count when "number_of_replicas" is set to 1 """
+    elastic_latency = 10
+    config = {'instances': [
+        {'url': 'http://localhost:9200', 'pshard_stats': True}
+    ]}
 
-        c = check.get_instance_config(instance)
-        self.assertEquals(c.username, "user")
-        self.assertEquals(c.password, "pass")
-        self.assertEquals(c.cluster_stats, False)
-        self.assertEquals(c.url, "https://foo.bar:9200")
-        self.assertEquals(c.tags, ["url:https://foo.bar:9200"])
-        self.assertEquals(c.timeout, check.DEFAULT_TIMEOUT)
-        self.assertEquals(c.service_check_tags, ["host:foo.bar", "port:9200"])
-        self.assertEquals(c.ssl_verify, "true")
-        self.assertEquals(c.ssl_cert, "/path/to/cert.pem")
-        self.assertEquals(c.ssl_key, "/path/to/cert.key")
+    requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
+    requests.put('http://localhost:9200/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
+    requests.put('http://localhost:9200/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
 
+    time.sleep(elastic_latency)
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    elastic_check.check(config["instances"][0])
+
+    pshard_stats_metrics = dict(PRIMARY_SHARD_METRICS)
+    if get_es_version() >= [1, 0, 0]:
+        pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
+
+    for m_name, desc in pshard_stats_metrics.iteritems():
+        if desc[0] == "gauge":
+            aggregator.assert_metric(m_name, count=1)
+
+    # Our pshard metrics are getting sent, let's check that they're accurate
+    # Note: please make sure you don't install Maven on the CI for future
+    # elastic search CI integrations. It would make the line below fail :/
+    aggregator.assert_metric('elasticsearch.primaries.docs.count', value=2)
+
+
+def test_index_metrics(aggregator, spin_up_elastic):
+    # Tests that index level metrics are forwarded
+    config = {'instances': [
+        {'url': 'http://localhost:9200', 'index_stats': True}
+    ]}
+    index_metrics = dict(INDEX_STATS_METRICS)
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    elastic_check.check(config['instances'][0])
+
+    if get_es_version() >= [1, 0, 0]:
+        for m_name, desc in index_metrics.iteritems():
+            aggregator.assert_metric(m_name, count=1)
+
+
+"""
     def test_health_event(self):
         dummy_tags = ['foo:bar', 'elastique:recherche']
-        cluster_tag = ['cluster_name:elasticsearch']
+        dummy_tags = ['foo:bar', 'elastique:recherche']
 
         config = {'instances': [
             {'url': 'http://localhost:9200', 'tags': dummy_tags}
@@ -572,52 +660,4 @@ class TestElastic(AgentCheckTest):
             tags=['host:localhost', 'port:9200'] + dummy_tags + cluster_tag,
             count=1
         )
-
-    def test_pshard_metrics(self):
-        """ Tests that the pshard related metrics are forwarded and that the
-        document count for primary indexes is twice smaller as the global
-        document count when "number_of_replicas" is set to 1 """
-        elastic_latency = 10
-
-        config = {'instances': [
-            {'url': 'http://localhost:9200', 'pshard_stats': True}
-        ]}
-        # Cleaning up everything won't hurt.
-        req = requests.get('http://localhost:9200/_cat/indices?v')
-        indices_info = req.text.split('\n')[1::-1]
-        for index_info in indices_info:
-            index_name = index_info.split()[1]
-            requests.delete('http://localhost:9200/' + index_name)
-
-        requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
-        requests.put('http://localhost:9200/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
-        requests.put('http://localhost:9200/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
-
-        time.sleep(elastic_latency)
-
-        self.run_check(config)
-
-        pshard_stats_metrics = dict(PRIMARY_SHARD_METRICS)
-        if get_es_version() >= [1, 0, 0]:
-            pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
-
-        for m_name, desc in pshard_stats_metrics.iteritems():
-            if desc[0] == "gauge":
-                self.assertMetric(m_name, count=1)
-
-        # Our pshard metrics are getting sent, let's check that they're accurate
-        # Note: please make sure you don't install Maven on the CI for future
-        # elastic search CI integrations. It would make the line below fail :/
-        self.assertMetric('elasticsearch.primaries.docs.count', value=2)
-
-    def test_index_metrics(self):
-        # Tests that index level metrics are forwarded
-        config = {'instances': [
-            {'url': 'http://localhost:9200', 'index_stats': True}
-        ]}
-
-        index_metrics = dict(INDEX_STATS_METRICS)
-        self.run_check(config)
-        if get_es_version() >= [1, 0, 0]:
-            for m_name, desc in index_metrics.iteritems():
-                self.assertMetric(m_name, count=1)
+"""

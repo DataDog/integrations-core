@@ -1,10 +1,9 @@
-# Always prefer setuptools over distutils
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from setuptools import setup
-# To use a consistent encoding
 from codecs import open
 from os import path
-
-import json
 
 HERE = path.abspath(path.dirname(__file__))
 
@@ -18,27 +17,16 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
-def read(*parts):
-    with open(path.join(HERE, *parts), 'r') as fp:
-        return fp.read()
 
 # Get version info
 ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "elastic", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
-manifest_version = None
-with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if ABOUT["__version__"] != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
-
 setup(
     name='datadog-elastic',
     version=ABOUT["__version__"],
-    description='The Elastic check',
+    description='The Elastic Check',
     long_description=long_description,
     keywords='datadog agent elastic check',
 
@@ -58,7 +46,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -68,7 +56,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     setup_requires=['pytest-runner', ],
