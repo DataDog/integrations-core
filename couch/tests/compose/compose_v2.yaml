@@ -1,0 +1,8 @@
+version: '3.5'
+
+services:
+  couch:
+    image: klaemo/couchdb:${COUCH_VERSION}
+    ports:
+      - ${COUCH_PORT}:5984
+    command: --admin=dduser:pawprint --with-haproxy
