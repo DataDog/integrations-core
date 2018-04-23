@@ -67,6 +67,19 @@ def test_prometheus_check(aggregator, poll_mock):
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
     assert aggregator.metrics_asserted_pct == 100.0
 
+def test_prometheus_check_counter_gauge(aggregator, poll_mock):
+    """
+    Testing prometheus check.
+    """
+
+    instance["send_monotonic_counter"] = False
+    c = PrometheusCheck('prometheus', None, {}, [instance])
+    c.check(instance)
+    aggregator.assert_metric(CHECK_NAME + '.renamed.metric1', tags=['node:host1', 'flavor:test', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
+    assert aggregator.metrics_asserted_pct == 100.0
+
 def test_prometheus_wildcard(aggregator, poll_mock):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
