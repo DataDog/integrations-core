@@ -1,4 +1,3 @@
-# Agent Check: Envoy
 ## Overview
 
 This check collects distributed system observability metrics from [Envoy](https://www.envoyproxy.io).
@@ -26,7 +25,7 @@ There are 2 ways to setup the `/stats` endpoint:
 
 ##### Unsecured stats endpoint
 
-Here's an example Envoy admin configuration: 
+Here's an example Envoy admin configuration:
 
 ```yaml
 admin:
@@ -43,7 +42,7 @@ Create a listener/vhost that routes to the admin endpoint (Envoy connecting to i
 
 Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
 
-```yaml
+```
 admin:
   access_log_path: /dev/null
   address:
@@ -106,14 +105,12 @@ static_resources:
     [...]
 ```
 
-## Compatibility
-
-The Envoy check is compatible with all platforms.
-
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv) for a list of metrics provided by this check.
+
 See [metrics.py](https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py) for a list of tags sent by each metric.
 
 ### Events
