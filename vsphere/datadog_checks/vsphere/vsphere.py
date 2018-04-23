@@ -205,11 +205,13 @@ class VSphereCheck(AgentCheck):
 
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
+        tags = instance.get('tags', [])
 
         service_check_tags = [
             'vcenter_server:{0}'.format(instance.get('name')),
             'vcenter_host:{0}'.format(instance.get('host')),
-        ]
+        ] + tags
+        service_check_tags = list(set(service_check_tags))
 
         # Check for ssl configs and generate an appropriate ssl context object
         ssl_verify = instance.get('ssl_verify', True)
@@ -427,7 +429,7 @@ class VSphereCheck(AgentCheck):
         if isinstance(obj, vim.HostSystem):
             # Based on `host_include_only_regex`
             if regexes and regexes.get('host_include') is not None:
-                match = re.search(regexes['host_include'], obj.name)
+                match = re.search(regexes['host_include'], obj.name, re.IGNORECASE)
                 if not match:
                     return True
 
@@ -435,7 +437,7 @@ class VSphereCheck(AgentCheck):
         elif isinstance(obj, vim.VirtualMachine):
             # Based on `vm_include_only_regex`
             if regexes and regexes.get('vm_include') is not None:
-                match = re.search(regexes['vm_include'], obj.name)
+                match = re.search(regexes['vm_include'], obj.name, re.IGNORECASE)
                 if not match:
                     return True
 

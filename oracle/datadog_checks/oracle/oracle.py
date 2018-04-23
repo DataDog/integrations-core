@@ -62,7 +62,7 @@ class Oracle(AgentCheck):
         if not server or not user:
             raise Exception("Oracle host and user are needed")
 
-        con = self._get_connection(server, user, password, service)
+        con = self._get_connection(server, user, password, service, tags)
 
         self._get_sys_metrics(con, tags)
         self._get_tablespace_metrics(con, tags)
@@ -75,10 +75,12 @@ class Oracle(AgentCheck):
         tags = instance.get('tags', [])
         return (self.server, user, password, service, tags)
 
-    def _get_connection(self, server, user, password, service):
+    def _get_connection(self, server, user, password, service, tags):
+        if tags is None:
+            tags = []
         self.service_check_tags = [
             'server:%s' % server
-        ]
+        ] + tags
         connect_string = '{0}/{1}@//{2}/{3}'.format(user, password, server, service)
         try:
             con = cx_Oracle.connect(connect_string)
@@ -93,6 +95,8 @@ class Oracle(AgentCheck):
         return con
 
     def _get_sys_metrics(self, con, tags):
+        if tags is None:
+            tags = []
         query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC " \
             "ORDER BY BEGIN_TIME"
         cur = con.cursor()
@@ -104,13 +108,24 @@ class Oracle(AgentCheck):
                 self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
 
     def _get_tablespace_metrics(self, con, tags):
+        if tags is None:
+            tags = []
         query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
         cur = con.cursor()
         cur.execute(query)
         for row in cur:
             tablespace_tag = 'tablespace:%s' % row[0]
-            used = float(row[1])
-            size = float(row[2])
+            if row[1] is None:
+                # mark tablespace as offline if sum(BYTES) is null
+                offline = True
+                used = 0
+            else:
+                offline = False
+                used = float(row[1])
+            if row[2] is None:
+                size = 0
+            else:
+                size = float(row[2])
             if (used >= size):
                 in_use = 100
             elif (used == 0) or (size == 0):
@@ -121,3 +136,4 @@ class Oracle(AgentCheck):
             self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
+            self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])

@@ -78,7 +78,7 @@ Query OK, 0 rows affected (0.00 sec)
   instances:
     - server: 127.0.0.1
       user: datadog
-      pass: <YOUR_CHOSEN_PASSWORD> # from the CREATE USER step earlier
+      pass: '<YOUR_CHOSEN_PASSWORD>' # from the CREATE USER step earlier
       port: <YOUR_MYSQL_PORT> # e.g. 3306
       options:
           replication: 0
@@ -89,6 +89,9 @@ Query OK, 0 rows affected (0.00 sec)
           schema_size_metrics: false
           disable_innodb_metrics: false
   ```
+  
+**Note**: Wrap your password in single quotes in case there is a special character in it.
+
   In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.
   See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
 

@@ -12,7 +12,7 @@ In order to use the Oracle integration, install the Oracle Instant Client librar
 
 You will need to install the Instant Client Basic and SDK packages.
 
-After you have installed the Instant Client libraries, ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
+After you have installed the Instant Client libraries, on linux you may have to ensure that the runtime linker can find the libraries. For example, using `'ldconfig`:
 
 ```
 # Put the library location in an ld configuration file.
@@ -34,6 +34,8 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 
 export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
+
+**Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart](http://upstart.ubuntu.com/cookbook/#environment-variables) or [systemd](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines) for more information on how to configured these settings.
 
 Finally, create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 

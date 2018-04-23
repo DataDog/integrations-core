@@ -19,8 +19,9 @@ class TestMySql(AgentCheckTest):
     CHECK_NAME = 'mysql'
 
     METRIC_TAGS = ['tag1', 'tag2']
-    SC_TAGS = ['server:localhost', 'port:13306']
-    SC_TAGS_REPLICA = ['server:localhost', 'port:13307']
+    SC_TAGS = ['server:localhost', 'port:13306', 'tag1', 'tag2']
+    SC_TAGS_MIN = ['server:localhost', 'port:13306']
+    SC_TAGS_REPLICA = ['server:localhost', 'port:13307', 'tag1', 'tag2']
     SC_FAILURE_TAGS = ['server:localhost', 'port:unix_socket']
 
 
@@ -332,7 +333,7 @@ class TestMySql(AgentCheckTest):
 
         # Test service check
         self.assertServiceCheck('mysql.can_connect', status=AgentCheck.OK,
-                                tags=self.SC_TAGS, count=1)
+                                tags=self.SC_TAGS_MIN, count=1)
 
         # Test metrics
         testable_metrics = (self.STATUS_VARS + self.VARIABLES_VARS + self.INNODB_VARS +

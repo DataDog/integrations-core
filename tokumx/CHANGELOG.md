@@ -1,5 +1,12 @@
 # CHANGELOG - tokumx
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds custom tag support to service checks.
+
 1.1.0 / 2017-11-21
 ==================
 

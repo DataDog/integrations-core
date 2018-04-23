@@ -23,6 +23,13 @@ instances:
     port: 8126 # or wherever your statsd listens
 ```
 
+Configuration Options
+
+* `host` (Optional) - Host to be checked. This will be included as a tag: `host:<host>`. Defaults to `localhost`.
+* `port` (Optional) - Port to be checked. This will be included as a tag: `port:<port>`. Defaults to `8126`.
+* `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
+* `tags` (Optional) - Tags to be assigned to the metric.
+
 [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation

@@ -112,7 +112,7 @@ class TestSqlserver(AgentCheckTest):
             self.assertMetric(metric, count=1)
 
         self.assertServiceCheckOK('sqlserver.can_connect',
-                                  tags=['host:{}'.format(config['instances'][0]['host']), 'db:master'])
+                                tags=['host:{}'.format(config['instances'][0]['host']), 'db:master'] + config['instances'][0].get('tags', []))
 
         self.coverage_report()
 
@@ -140,10 +140,11 @@ class TestSqlserver(AgentCheckTest):
             'username': 'sa',
             'password': 'InvalidPassword',
             'timeout': 1,
+            'tags': ['optional:tag1'],
         }]
 
         with self.assertRaisesRegexp(Exception, 'Unable to connect to SQL Server'):
             self.run_check(config, force_reload=True)
 
         self.assertServiceCheckCritical('sqlserver.can_connect',
-                                        tags=['host:(local)\SQL2012SP1', 'db:master'])
+                                        tags=['host:(local)\SQL2012SP1', 'db:master', 'optional:tag1'])

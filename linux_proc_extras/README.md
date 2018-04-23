@@ -13,7 +13,7 @@ The Linux_proc_extras check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Edit the `linux_proc_extras.yaml` file to point to your server and port, set the masters to monitor. See the [sample linux_proc_extras.yaml](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/conf.yaml.example) for all available configuration options.
+Create a `linux_proc_extras.yaml` file in the Datadog Agent's `conf.d` directory. See the [sample linux_proc_extras.yaml](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/conf.yaml.example) for all available configuration options.
 
 ### Validation
 

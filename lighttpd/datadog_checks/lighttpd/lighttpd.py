@@ -10,8 +10,8 @@ import urlparse
 import requests
 
 # project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 VERSION_REGEX = re.compile(r".*/(\d)")
 
@@ -81,11 +81,21 @@ class Lighttpd(AgentCheck):
         url = self.assumed_url.get(instance['lighttpd_status_url'], instance['lighttpd_status_url'])
 
         tags = instance.get('tags', [])
-        self.log.debug("Connecting to %s" % url)
 
         auth = None
-        if 'user' in instance and 'password' in instance:
-            auth = (instance['user'], instance['password'])
+        auth_type = instance.get('auth_type', 'basic').lower()
+
+        if auth_type == 'basic':
+            if 'user' in instance and 'password' in instance:
+                auth = (instance['user'], instance['password'])
+        elif auth_type == 'digest':
+            if 'user' in instance and 'password' in instance:
+                auth = requests.auth.HTTPDigestAuth(instance['user'], instance['password'])
+        else:
+            msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
+            raise Exception(msg)
+
+        self.log.debug("Connecting to %s" % url)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse.urlparse(url)

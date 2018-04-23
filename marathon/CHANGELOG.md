@@ -1,5 +1,12 @@
 # CHANGELOG - marathon
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds custom tag support for service checks.
+
 1.2.1 / 2018-01-10
 ==================
 

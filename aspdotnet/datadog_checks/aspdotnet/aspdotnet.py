@@ -4,13 +4,12 @@
 
 # datadog
 try:
-    from checks.libs.win.pdhbasecheck import PDHBaseCheck
+    from datadog_checks.checks.win import PDHBaseCheck
 except ImportError:
     class PDHBaseCheck:
         pass
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'aspdotnet'
-
 
 DEFAULT_COUNTERS = [
     # counterset, instance of counter, counter name, metric name
@@ -23,12 +22,13 @@ DEFAULT_COUNTERS = [
     ["ASP.NET",              None, "Request Wait Time",             "aspdotnet.request.wait_time",       "gauge"],
 
     # ASP.Net Applications
-    ["ASP.NET Applications", None, "Requests In Application Queue", "aspdotnet.applications.requests.in_queue",       "gauge"],
-    ["ASP.NET Applications", None, "Requests Executing",            "aspdotnet.applications.requests.executing",      "gauge"],
-    ["ASP.NET Applications", None, "Requests/Sec",                  "aspdotnet.applications.requests.persec",         "gauge"],
-    ["ASP.NET Applications", None, "Forms Authentication Failure", "aspdotnet.applications.forms_authentication.failure",       "gauge"],
-    ["ASP.NET Applications", None, "Forms Authentication Success", "aspdotnet.applications.forms_authentication.successes",       "gauge"],
+    ["ASP.NET Applications", None, "Requests In Application Queue", "aspdotnet.applications.requests.in_queue",       "gauge"],  # noqa: E501
+    ["ASP.NET Applications", None, "Requests Executing",            "aspdotnet.applications.requests.executing",      "gauge"],  # noqa: E501
+    ["ASP.NET Applications", None, "Requests/Sec",                  "aspdotnet.applications.requests.persec",         "gauge"],  # noqa: E501
+    ["ASP.NET Applications", None, "Forms Authentication Failure", "aspdotnet.applications.forms_authentication.failure",       "gauge"],  # noqa: E501
+    ["ASP.NET Applications", None, "Forms Authentication Success", "aspdotnet.applications.forms_authentication.successes",       "gauge"],  # noqa: E501
 ]
+
 
 class AspdotnetCheck(PDHBaseCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):

@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "guid": "a5cca58a-9984-4226-ad1c-8dff73c9d6ac",
   "public_title": "Datadog-Twemproxy Integration",
   "categories":["web"],

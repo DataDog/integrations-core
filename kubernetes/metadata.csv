@@ -12,3 +12,4 @@ kubernetes.memory.usage,gauge,,byte,,The amount of memory used,-1,kubernetes,k8s
 kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubernetes,k8s.net.rx
 kubernetes.network.tx_bytes,gauge,,byte,second,The amount of bytes per second transmitted,0,kubernetes,k8s.net.tx
 kubernetes.network_errors,gauge,,error,second,The amount of network errors per second,-1,kubernetes,k8s.net.errors
+kubernetes.diskio.io_service_bytes.stats.total,gauge,,byte,,The amount of disk space the container uses.,-1,kubernetes,k8s.disk.total

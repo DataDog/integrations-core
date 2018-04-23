@@ -1,7 +1,10 @@
-from . import system_core
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .system_core import SystemCore
 
-SystemCore = system_core.SystemCore
-
-__version__ = "1.0.0"
-
-__all__ = ['system_core']
+__all__ = [
+    '__version__',
+    'SystemCore'
+]

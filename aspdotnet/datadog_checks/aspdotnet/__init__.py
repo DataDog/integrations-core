@@ -1,7 +1,10 @@
-from . import aspdotnet
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .aspdotnet import AspdotnetCheck
 
-AspdotnetCheck = aspdotnet.AspdotnetCheck
-
-__version__ = "0.1.1"
-
-__all__ = ['aspdotnet']
+__all__ = [
+    '__version__',
+    'AspdotnetCheck'
+]
