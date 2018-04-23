@@ -156,13 +156,15 @@ class Nginx(AgentCheck):
         return r
 
     def _nest_payload(self, keys, payload):
-        # Nest a payload in a dict under the keys contained in `keys`
+        """
+        Nest a payload in a dict under the keys contained in `keys`
+        """
         if len(keys) == 0:
             return payload
-        else:
-            return {
-                keys[0]: self._nest_payload(keys[1:], payload)
-            }
+
+        return {
+            keys[0]: self._nest_payload(keys[1:], payload)
+        }
 
     def _get_plus_api_data(self, instance, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned

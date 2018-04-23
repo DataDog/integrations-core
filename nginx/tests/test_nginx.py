@@ -119,8 +119,9 @@ def test_flatten_json(check):
     assert parsed == expected
 
 
-def api_call(*args, **kwargs):
+def mocked_perform_request(*args, **kwargs):
     """
+    A mocked version of _perform_request
     """
     response = mock.MagicMock()
     url = args[1]
@@ -167,7 +168,7 @@ def api_call(*args, **kwargs):
 
 def test_plus_api(check, instance, aggregator):
     instance['use_plus_api'] = True
-    check._perform_request = mock.MagicMock(side_effect=api_call)
+    check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
     all = 0
@@ -177,8 +178,6 @@ def test_plus_api(check, instance, aggregator):
 
 
 def test_nest_payload(check):
-    """
-    """
     keys = ["foo", "bar"]
     payload = {
         "key1": "val1",
