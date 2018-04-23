@@ -884,22 +884,21 @@ class OpenStackCheck(AgentCheck):
             servers.extend(resp['servers'])
 
             # Don't collect Deleted or Shut off VMs on the first run:
-            if i_key not in self.changes_since_time:
+            if i_key in self.changes_since_time:
                 self.changes_since_time[i_key] = datetime.utcnow().isoformat()
-                break
 
-            # Get a list of deleted serversTimestamp used to filter the call to get the list
-            # Need to have admin perms for this to take affect
-            query_params['deleted'] = 'true'
-            query_params['status'] = None
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
-            servers.extend(resp['servers'])
-            query_params['deleted'] = 'false'
+                # Get a list of deleted serversTimestamp used to filter the call to get the list
+                # Need to have admin perms for this to take affect
+                query_params['deleted'] = 'true'
+                query_params['status'] = None
+                resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+                servers.extend(resp['servers'])
+                query_params['deleted'] = 'false'
 
-            # Get a list of shut off servers
-            query_params['status'] = 'SHUTOFF'
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
-            servers.extend(resp['servers'])
+                # Get a list of shut off servers
+                query_params['status'] = 'SHUTOFF'
+                resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+                servers.extend(resp['servers'])
 
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
 
