@@ -9,7 +9,8 @@ try:
 except ImportError:
     # Don't fail on < 6.2
     import logging
-    logging.info('Agent does not provide filtering logic, disabling container filtering')
+    log = logging.getLogger(__name__)
+    log.info('Agent does not provide filtering logic, disabling container filtering')
 
     def is_excluded(name, image):
         return False
