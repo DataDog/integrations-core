@@ -1085,6 +1085,9 @@ class OpenStackCheck(AgentCheck):
 
     def check(self, instance):
 
+        # [HACK] only here to help see custom version number while development
+        self.log.info("Running modified version 0.1.0")
+
         # have we been backed off
         if not self.should_run(instance):
             self.log.info('Skipping run due to exponential backoff in effect')
