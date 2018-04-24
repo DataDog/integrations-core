@@ -49,7 +49,7 @@ class PrometheusCheck(PrometheusScraper, AgentCheck):
         the ones from the label provided via the metrics object.
 
         `custom_tags` is an array of 'tag:value' that will be added to the
-        metric when sending the gauge to Datadog.
+        metric when sending the monotonic count to Datadog.
         """
 
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
