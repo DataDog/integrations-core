@@ -45,7 +45,7 @@ rules:
     - "namespaces"  #
     - "events"      # Cluster events + kube_service cache invalidation
     - "services"    # kube_service tag
-  verbs: ["get", "list"]
+  verbs: ["get", "list", "watch"]
 - apiGroups: [""]
   resources:
     - "configmaps"
