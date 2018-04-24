@@ -41,7 +41,7 @@ class NoKafkaBrokersAvailable(Exception):
 
 class KafkaCheck(AgentCheck):
     """
-    Check Consumer Lag for Kafka consumers that store their offsets in Zookeeper.
+    Check the offsets and lag of Kafka consumers.
 
     This check also returns broker highwater offsets.
     """
