@@ -19,11 +19,7 @@ except ImportError:
 
 # project
 from datadog_checks.checks import AgentCheck
-# compatability layer
-try:
-    from config import _is_affirmative
-except ImportError:
-    from datadog_checks.config import _is_affirmative
+from datadog_checks.config import _is_affirmative
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -569,7 +565,7 @@ class MySql(AgentCheck):
                     else:
                         # not everything is running smoothly
                         slave_running_status = AgentCheck.WARNING
-            elif slave_running.lower().strip() == 'off' :
+            elif slave_running.lower().strip() == 'off':
                 if not (slave_io_running is None and slave_sql_running is None):
                     if not slave_io_running and not slave_sql_running:
                         slave_running_status = AgentCheck.CRITICAL
