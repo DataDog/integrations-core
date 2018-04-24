@@ -2,7 +2,11 @@ version: '3.5'
 
 services:
   elastic:
-    image: "datadog/docker-library:elasticsearch_${ELASTIC_VERSION}"
+    image: "${ELASTIC_DOCKER}${ELASTIC_VERSION}"
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -10,9 +14,15 @@ services:
       memlock:
         soft: -1
         hard: -1
+    # volumes:
+    #  - esdata1:/usr/share/elasticsearch/data
     networks:
       - network1
 
+volumes:
+  esdata1:
+    driver: local
+
 networks:
   network1:
-    name: elastic_default
+    name: elastic5

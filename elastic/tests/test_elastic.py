@@ -346,6 +346,7 @@ log = logging.getLogger('test_elastic')
 CHECK_NAME = "elastic"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+PASSWORD = "changeme"
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
 PORT = '9200'
 BAD_PORT = '9405'
@@ -360,11 +361,11 @@ AGENT_CONFIG = {
     "version": '5.21.0',
     "api_key": "bar"
 }
+
 INSTANCE_CONFIG = {
         'instances': [
-            {'url': URL, 'tags': TAGS},  # One with tags not external
-            {'url': URL, 'cluster_stats': True},  # One without tags, external
-            {'url': BAD_URL},  # One bad url
+            {'url': URL, 'password': PASSWORD, 'tags': TAGS},  # One with tags not external
+            {'url': BAD_URL, 'password': PASSWORD},  # One bad url
         ]
 }
 
@@ -385,7 +386,7 @@ def spin_up_elastic():
             subprocess.check_call(args + ["down"], env=env)
             raise Exception("ES failed to boot...")
         try:
-            res = requests.get(URL + '/_cluster/health')
+            res = requests.get(URL)
             res.raise_for_status
             break
         except Exception:
@@ -418,7 +419,7 @@ def get_es_version():
 
 def test_bad_port(aggregator, spin_up_elastic):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
-    BAD_CONFIG = INSTANCE_CONFIG["instances"][2]
+    BAD_CONFIG = INSTANCE_CONFIG["instances"][1]
     with pytest.raises(Exception):
         elastic_check.check(BAD_CONFIG)
 
@@ -530,7 +531,7 @@ def test_config_parser(aggregator, spin_up_elastic):
         "is_external": "yes",
         "url": "http://foo.bar",
         "tags": ["a", "b:c"],
-        }
+    }
     c = elastic_check.get_instance_config(instance)
     assert c.username == "user"
     assert c.password == "pass"
@@ -579,7 +580,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
         document count when "number_of_replicas" is set to 1 """
     elastic_latency = 10
     config = {'instances': [
-        {'url': 'http://localhost:9200', 'pshard_stats': True}
+        {'url': 'http://localhost:9200', 'pshard_stats': True, 'password': PASSWORD}
     ]}
 
     requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
@@ -607,7 +608,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
 def test_index_metrics(aggregator, spin_up_elastic):
     # Tests that index level metrics are forwarded
     config = {'instances': [
-        {'url': 'http://localhost:9200', 'index_stats': True}
+        {'url': 'http://localhost:9200', 'index_stats': True, 'password': PASSWORD}
     ]}
     index_metrics = dict(INDEX_STATS_METRICS)
     elastic_check = ESCheck(CHECK_NAME, {}, {})
@@ -615,7 +616,7 @@ def test_index_metrics(aggregator, spin_up_elastic):
 
     if get_es_version() >= [1, 0, 0]:
         for m_name, desc in index_metrics.iteritems():
-            aggregator.assert_metric(m_name, count=1)
+            aggregator.assert_metric(m_name)
 
 
 """
