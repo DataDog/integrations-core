@@ -164,7 +164,7 @@ mongodb.replset.health,gauge,,,,Member health value of the replica set: conveys 
 mongodb.replset.replicationlag,gauge,,second,,Delay between a write operation on the primary and its copy to a secondary.,-1,mongodb,replication lag
 mongodb.replset.state,gauge,,,,State of a replica that reflects its disposition within the set.,0,mongodb,replset state
 mongodb.replset.votefraction,gauge,,fraction,,Fraction of votes a server will cast in a replica set election.,0,mongodb,votes fraction
-mongodb.replset.votes,gauge,,vote,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
+mongodb.replset.votes,gauge,,item,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
 mongodb.stats.datasize,gauge,,byte,,Total size of the data held in this database including the padding factor.,0,mongodb,stats datasize
 mongodb.stats.indexes,gauge,,index,,Total number of indexes across all collections in the database.,0,mongodb,stats indexes
 mongodb.stats.indexsize,gauge,,byte,,Total size of all indexes created on this database.,0,mongodb,stats indexsize
