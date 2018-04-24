@@ -10,7 +10,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from collections import defaultdict
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from ...utils.prometheus import metrics_pb2
-
+from math import isnan, isinf
 from prometheus_client.parser import text_fd_to_metric_families
 
 # toolkit
@@ -533,10 +533,13 @@ class PrometheusScraper(object):
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
                 else:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    if message.name in self.rate_metrics:
-                        self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
+                    if not (isnan(val) or isinf(val)):
+                        if message.name in self.rate_metrics:
+                            self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
+                        else:
+                            self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
                     else:
-                        self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                        self.log.warning("Metric value is not supported for metric {}.".format(metric_name))
 
         else:
             self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))
