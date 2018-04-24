@@ -863,6 +863,9 @@ class OpenStackCheck(AgentCheck):
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
     def get_all_servers(self, i_key, filter_by_host=None):
+
+        # Print the current state of the cache:
+        self.log.debug("Cache before server refresh: %s", self.server_details_by_id)
         query_params = {}
         if filter_by_host:
             filter_by_host = filter_by_host.split('.')[0] # HACK we added this line to split hostname
@@ -870,6 +873,7 @@ class OpenStackCheck(AgentCheck):
 
         # If we don't have a timestamp for this instance, default to None
         if i_key in self.changes_since_time:
+            self.log.debug("Last changes-since time is: %s", self.changes_since_time.get(i_key))
             query_params['changes-since'] = self.changes_since_time.get(i_key)
 
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
@@ -882,6 +886,7 @@ class OpenStackCheck(AgentCheck):
             query_params['status'] = 'ACTIVE'
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
             servers.extend(resp['servers'])
+            self.log.debug("Active servers incoming: %s", resp)
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
@@ -891,12 +896,14 @@ class OpenStackCheck(AgentCheck):
                 query_params['deleted'] = 'true'
                 query_params['status'] = None
                 resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+                self.log.debug("Deleted servers are: %s", resp)
                 servers.extend(resp['servers'])
                 query_params['deleted'] = 'false'
 
                 # Get a list of shut off servers
                 query_params['status'] = 'SHUTOFF'
                 resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+                self.log.debug("Shutoff servers are: %s", resp)
                 servers.extend(resp['servers'])
 
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
@@ -916,11 +923,13 @@ class OpenStackCheck(AgentCheck):
 
             # Update our cached list of servers
             if new_server['server_id'] not in self.server_details_by_id and new_server['state'] in DIAGNOSTICABLE_STATES:
+                self.log.debug("Adding server to cache: %s", new_server)
                 # The project may not exist if the server isn't in an active state
                 # Query for the project name here to avoid 404s
                 new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
+                self.log.debug("Removing server from cache: %s", new_server)
                 del self.server_details_by_id[new_server['server_id']]
         
         return self.server_details_by_id
