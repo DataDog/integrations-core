@@ -29,6 +29,7 @@ AGENT_BASED_INTEGRATIONS = [
     'lighttpd',
     'linkerd',
     'mcache',
+    'mysql',
     'network',
     'nfsstat',
     'nginx',
