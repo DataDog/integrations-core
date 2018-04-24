@@ -7,7 +7,11 @@ Get metrics from kubernetes service in real time to:
 * Visualize and monitor kubernetes states
 * Be notified about kubernetes failovers and events.
 
-## Setup
+## Agent6 migration instructions
+
+Agent6 uses a new set of integrations, see [the update instructions](https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support) and the [new dedicated documentation page](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/) for more information.
+
+## Setup (Agent5 only)
 ### Installation
 
 The Kubernetes check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kubernetes servers.
