@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package provides the Python bits needed by the [Datadog Agent](https://github.com/DataDog/datadog-agent)
+This package provides the Python bits needed by the [Datadog Agent][1]
 to run Agent-based Integrations (also known as _Checks_).
 
 This _Check toolkit_ is used in two scenarios:
@@ -16,7 +16,7 @@ This _Check toolkit_ is used in two scenarios:
 
 ## Installation
 
-Checks from [integrations-core](https://github.com/DataDog/integrations-core) already
+Checks from [integrations-core][2] already
 use the toolkit in a transparent way when you run the tests with Tox but you can
 install the toolkit locally and play with it:
 ```
@@ -38,13 +38,20 @@ To build the wheel package:
 python setup.py bdist_wheel
 ```
 
-To run the tests, [install tox](http://tox.readthedocs.io/en/latest/install.html) and just run:
+To run the tests, [install tox][3] and just run:
 ```
 tox
 ```
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][4].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][5]
+
+
+[1]: https://github.com/DataDog/datadog-agent
+[2]: https://github.com/DataDog/integrations-core
+[3]: http://tox.readthedocs.io/en/latest/install.html
+[4]: http://docs.datadoghq.com/help/
+[5]: https://www.datadoghq.com/blog/

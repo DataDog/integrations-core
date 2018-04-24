@@ -12,7 +12,7 @@ And more.
 ## Setup
 ### Installation
 
-The RabbitMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your RabbitMQ servers.
+The RabbitMQ check is packaged with the Agent, so simply [install the Agent][1] on your RabbitMQ servers.
 
 ### Configuration
 
@@ -20,7 +20,7 @@ Create a `rabbitmq.yaml` file in the Agent's `conf.d` directory.
 
 #### Prepare RabbitMQ
 
-Enable the RabbitMQ management plugin. See [RabbitMQ's documentation](https://www.rabbitmq.com/management.html) to enable it.
+Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][2] to enable it.
 
 #### Metric Collection
 
@@ -45,11 +45,11 @@ If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
-There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for details on these configuration options (and all others).
+There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][3] for details on these configuration options (and all others).
 
 Configuration Options
 
-* `rabbitmq_api_url` - **required** - Points to the api url of the [RabbitMQ Managment Plugin](http://www.rabbitmq.com/management.html)
+* `rabbitmq_api_url` - **required** - Points to the api url of the [RabbitMQ Managment Plugin][4]
 * `rabbitmq_user` - **optional** - Defaults to 'guest'
 * `rabbitmq_pass` - **optional** - Defaults to 'guest'
 * `tag_families` - **optional** - Defaults to false - Tag queue "families" based off of regex matching
@@ -58,7 +58,7 @@ Configuration Options
 * `vhosts` - **optional** - By default a list of all vhosts is fetched and each one will be checked using the aliveness API. If you prefer only certain vhosts to be monitored, list the vhosts you care about.
 
  See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options.
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+* [Restart the Agent][5] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
 #### Log Collection
 
@@ -98,7 +98,7 @@ See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `rabbitmq` under the Checks section:
+[Run the Agent's `status` subcommand][6] and look for `rabbitmq` under the Checks section:
 
 ```
   Checks
@@ -120,7 +120,7 @@ The rabbitmq check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][7] for a list of metrics provided by this check.
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` metrics by node name.
 
@@ -142,11 +142,23 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 
 ## Troubleshooting
 
-* [Tagging RabbitMQ queues by tag family](https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family)
+* [Tagging RabbitMQ queues by tag family][8]
 
 ## Further Reading
 ### Datadog Blog
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][9]
 
 ### Knowledge Base
-* By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here](https://app.datadoghq.com/account/settings#integrations/rabbitmq)
+* By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here][10]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://www.rabbitmq.com/management.html
+[3]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example
+[4]: http://www.rabbitmq.com/management.html
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
+[8]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family
+[9]: https://www.datadoghq.com/blog/
+[10]: https://app.datadoghq.com/account/settings#integrations/rabbitmq

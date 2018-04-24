@@ -10,7 +10,7 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your IIS servers. 
+1. [Install the Agent][1] on your IIS servers. 
 
 2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:
@@ -38,7 +38,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Create a file `iis.yaml` in the [Agent's `conf.d` directory](https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure).
+Create a file `iis.yaml` in the [Agent's `conf.d` directory][2].
 
 #### Prepare IIS
 
@@ -75,12 +75,12 @@ To collect metrics on a per-site basis, you *must* use the `sites` option. The A
 
 If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites — `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
-You can also monitor sites on remote IIS servers. See the [sample iis.conf](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
+You can also monitor sites on remote IIS servers. See the [sample iis.conf][3] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 
 If you want to check other remote machines as well, you can add one instance per host.
 Note: If you also want to check the counters on the current machine, you will haveto create an instance with empty params.
 
-The optional `provider` parameter allows to specify a WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`. For more information, [review this MSDN article](https://msdn.microsoft.com/en-us/library/aa393067.aspx).
+The optional `provider` parameter allows to specify a WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`. For more information, [review this MSDN article][4].
 
 The `sites` parameter allows you to specify a list of sites you want to read metrics from. With sites specified, metrics will be tagged with the site name. If you don't define any sites, the check will pull the aggregate values across all sites.
 
@@ -102,7 +102,7 @@ Here's an example of configuration that would check the current machine and a re
 
 * See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending IIS metrics to Datadog.
+* [Restart the Agent][5] to begin sending IIS metrics to Datadog.
 
 #### Log Collection
 
@@ -134,7 +134,7 @@ logs:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `iis` under the Checks section:
+[Run the Agent's `status` subcommand][6] and look for `iis` under the Checks section:
 
 ```
   Checks
@@ -152,7 +152,7 @@ logs:
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 The IIS check does not include any event at this time.
@@ -164,7 +164,18 @@ The IIS check does not include any event at this time.
 The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][8].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][9]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
+[3]: https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example
+[4]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
+[8]: http://docs.datadoghq.com/help/
+[9]: https://www.datadoghq.com/blog/

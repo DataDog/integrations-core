@@ -7,11 +7,11 @@ The Agent's Kong check tracks total requests, response codes, client connections
 ## Setup
 ### Installation
 
-The Kong check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Kong servers.
+The Kong check is packaged with the Agent, so simply [install the Agent][1] on your Kong servers.
 
 ### Configuration
 
-Create a `kong.yaml` in the Datadog Agent's `conf.d` directory. See the [sample kong.yaml](https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.example) for all available configuration options:
+Create a `kong.yaml` in the Datadog Agent's `conf.d` directory. See the [sample kong.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -26,11 +26,11 @@ instances:
 #    - instance:bar
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Kong metrics to Datadog.
+[Restart the Agent][3] to begin sending Kong metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kong` under the Checks section:
+[Run the Agent's `status` subcommand][4] and look for `kong` under the Checks section:
 
 ```
   Checks
@@ -52,7 +52,7 @@ The kong check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Kong check does not include any event at this time.
@@ -64,8 +64,17 @@ The Kong check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to Kong to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitor Kong with our new Datadog integration](https://www.datadoghq.com/blog/monitor-kong-datadog/)
+* [Monitor Kong with our new Datadog integration][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-kong-datadog/

@@ -4,4 +4,4 @@ ad_identifiers:
 init_config:
 
 instances:
-  - server: http://%%host%%:5984
+  - server: http://%%host%%:%%port%%

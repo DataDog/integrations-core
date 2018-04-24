@@ -7,11 +7,11 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 ## Setup
 ### Installation
 
-The HTTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
+The HTTP check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
 ### Configuration
 
-Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for all available configuration options:
+Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -54,14 +54,14 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `headers` | This parameter allows you to send additional headers with the request. Please see the [example YAML file](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for additional information and caveats. |
 | `skip_proxy` | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`. |
 | `allow_redirects` | This setting allows the service check to follow HTTP redirects and defaults to `true`.
-| `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging](/guides/tagging/) and blog post, [The power of tagged metrics](https://www.datadoghq.com/blog/the-power-of-tagged-metrics/) |
+| `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging][3] and blog post, [The power of tagged metrics][4] |
 
 
-When you have finished configuring `http_check.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.yaml`, [restart the Agent][5] to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section:
+[Run the Agent's `status` subcommand][6] and look for `http_check` under the Checks section:
 
 ```
   Checks
@@ -85,7 +85,7 @@ The http_check check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -93,7 +93,7 @@ The HTTP check does not include any event at this time.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not 'Integration'.
+To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][8] page, not 'Integration'.
 
 **`http.can_connect`**:
 
@@ -120,7 +120,19 @@ Otherwise, returns `UP`.
 To disable this check, set `check_certificate_expiration` to false.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][9].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][10]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example
+[3]: /guides/tagging/
+[4]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics/
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
+[8]: https://app.datadoghq.com/monitors#/create
+[9]: http://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/

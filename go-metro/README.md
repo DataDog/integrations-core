@@ -9,7 +9,7 @@ This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. 
 ## Setup
 ### Installation
 
-The TCP RTT check—also known as [go-metro](https://github.com/DataDog/go-metro)—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
+The TCP RTT check—also known as [go-metro][1]—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
 
 Debian-based systems should use one of the following:
 
@@ -33,7 +33,7 @@ $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 ### Configuration
 
-Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml](https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example) for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml][2] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
     init_config:
       snaplen: 512
@@ -58,7 +58,7 @@ Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See th
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you run `sudo /etc/init.d/datadog-agent status`, you should see something similar to the following:
 
     ● datadog-agent.service - "Datadog Agent"
-       Loaded: loaded (/lib/...datadog-agent.service; enabled; vendor preset: enabled)
+       Loaded: loaded [3]
        Active: active (running) since Thu 2016-03-31 20:35:27 UTC; 42min ago
       Process: 10016 ExecStop=/opt/.../supervisorctl -c /etc/dd-....conf shutdown (code=exited, status=0/SUCCESS)
       Process: 10021 ExecStart=/opt/.../start_agent.sh (code=exited, status=0/SUCCESS)
@@ -81,7 +81,7 @@ The TCP RTT check is compatible with Linux platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 The Go-metro check does not include any event at this time.
@@ -90,7 +90,15 @@ The Go-metro check does not include any event at this time.
 The Go-metro check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://github.com/DataDog/go-metro
+[2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
+[3]: /lib/...datadog-agent.service; enabled; vendor preset: enabled
+[4]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/

@@ -19,7 +19,7 @@ Edit the `ecs_fargate.yaml` file to point to your server and port, set the maste
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ecs_fargate` under the Checks section:
+[Run the Agent's `status` subcommand][1] and look for `ecs_fargate` under the Checks section:
 
     Checks
     ======
@@ -37,7 +37,7 @@ The ecs_fargate check is compatible with all major platforms
 
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][2] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -49,8 +49,14 @@ The ECS Fargate check does not include any service check at this time.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][3].
 
 ## Further Reading
 
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][4]
+
+
+[1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[2]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
+[3]: http://docs.datadoghq.com/help/
+[4]: https://www.datadoghq.com/blog/

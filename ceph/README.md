@@ -11,11 +11,11 @@ Enable the Datadog-Ceph integration to:
 ## Setup
 ### Installation
 
-The Ceph check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Ceph servers.
+The Ceph check is packaged with the Agent, so simply [install the Agent][1] on your Ceph servers.
 
 ### Configuration
 
-Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml](https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example) for all available configuration options:
+Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -33,7 +33,7 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ceph` under the Checks section:
+[Run the Agent's `status` subcommand][3] and look for `ceph` under the Checks section:
 
 ```
   Checks
@@ -51,7 +51,7 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 Note: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
 
@@ -101,8 +101,16 @@ In addition to this service check, the Ceph check also collects a configurable l
 * `ceph.request_stuck` : Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
 
-* [Monitor Ceph: From node status to cluster-wide performance](https://www.datadoghq.com/blog/monitor-ceph-datadog/)
+* [Monitor Ceph: From node status to cluster-wide performance][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/monitor-ceph-datadog/

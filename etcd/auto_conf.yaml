@@ -4,4 +4,4 @@ ad_identifiers:
 init_config:
 
 instances:
-  - url: "http://%%host%%:2379"
+  - url: "http://%%host%%:%%port_0%%"

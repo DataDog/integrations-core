@@ -4,4 +4,4 @@ ad_identifiers:
 init_config:
 
 instances:
-  - url: http://%%host%%:8098/stats
+  - url: http://%%host%%:%%port%%/stats

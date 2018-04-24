@@ -12,7 +12,7 @@ Get metrics from PostgreSQL service in real time to:
 
 ### Installation
 
-The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent](https://app.datadoghq.com/account/settings#agent).
+The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent][13].
 If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
 
 ### Configuration
@@ -43,7 +43,7 @@ When it prompts for a password, enter the one used in the first command.
 
 #### Metric Collection
 
-* Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options. Configuration Options:
+* Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml][14] for all available configuration options. Configuration Options:
 
   * **`username`** (Optional) - The user account used to collect metrics, set in the [Installation section above](#installation)
   * **`password`** (Optional) - The password for the user account.
@@ -64,7 +64,7 @@ When it prompts for a password, enter the one used in the first command.
   * **`collect_function_metrics`** (Optional) - Collect metrics regarding PL/pgSQL functions from pg_stat_user_functions
   * **`collect_count_metrics`** (Optional) - Collect count metrics. The default value is `True` for backward compatibility, but this might be slow. The recommended value is `False`.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending PostgreSQL metrics to Datadog.
+* [Restart the Agent][15] to start sending PostgreSQL metrics to Datadog.
 
 #### Log Collection
 
@@ -110,10 +110,10 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+**Learn more about log collection [on the log documentation][16]**
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postgres` under the Checks section:
+[Run the Agent's `status` subcommand][17] and look for `postgres` under the Checks section:
 
 ```
 Checks
@@ -131,7 +131,7 @@ The PostgreSQL check is compatible with all major platforms
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][18] for a list of metrics provided by this integration.
 
 ### Events
 The PostgreSQL check does not include any event at this time.
@@ -145,11 +145,11 @@ Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL
 
 ## Troubleshooting
 
-* [PostgreSQL custom metric collection explained](https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained)
+* [PostgreSQL custom metric collection explained][19]
 
 ## Further Reading
 ### Blog Post
-To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/) about it.
+To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
 
 ### Knowledge Base
 #### Custom metrics
@@ -213,3 +213,13 @@ postgres
 ```
 
 You should also check the `/var/log/datadog/collector.log` file for more information.
+
+
+[13]: https://app.datadoghq.com/account/settings#agent
+[14]: https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example
+[15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[16]: https://docs.datadoghq.com/logs
+[17]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[18]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
+[19]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
+[20]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/

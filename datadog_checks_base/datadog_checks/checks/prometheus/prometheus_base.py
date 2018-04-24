@@ -43,18 +43,6 @@ class PrometheusCheck(PrometheusScraper, AgentCheck):
         _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
         self.rate('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
 
-    def _submit_monotonic_count(self, metric_name, val, metric, custom_tags=None, hostname=None):
-        """
-        Submit a metric as a monotonic count, additional tags provided will be added to
-        the ones from the label provided via the metrics object.
-
-        `custom_tags` is an array of 'tag:value' that will be added to the
-        metric when sending the monotonic count to Datadog.
-        """
-
-        _tags = self._metric_tags(metric_name, val, metric, custom_tags, hostname)
-        self.monotonic_count('{}.{}'.format(self.NAMESPACE, metric_name), val, _tags, hostname=hostname)
-
 
     def _submit_gauge(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """

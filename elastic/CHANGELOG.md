@@ -1,12 +1,5 @@
 # CHANGELOG - elastic
 
-1.7.0 / Unreleased
-==================
-
-### Changes
-
-* [FEATURE] Hardcode the 9200 port in the Autodiscovery template. See [#1444][] for more information.
-
 1.6.0 / Unreleased
 ==================
 

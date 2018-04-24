@@ -10,7 +10,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.5.0",
+  "version": "1.4.0",
   "guid": "0e2f3ed1-d36b-47a4-b69c-fedb50adf240",
   "max_agent_version": "6.0.0",
   "public_title": "Datadog-RedisDB Integration",

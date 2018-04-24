@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.7.0",
+  "version": "1.6.0",
   "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a",
   "public_title": "Datadog-ElasticSearch Integration",
   "categories":["data store", "log collection"],

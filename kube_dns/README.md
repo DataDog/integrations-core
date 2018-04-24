@@ -13,11 +13,11 @@ more informations about kube-dns
 ## Setup
 ### Installation
 
-The Kube-dns check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
+The Kube-dns check is packaged with the Agent, so simply [install the Agent][1] on your servers.
 
 ### Configuration
 
-Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor. See the [sample kube_dns.yaml](https://github.com/DataDog/integrations-core/blob/master/kube_dns/conf.yaml.example) for all available configuration options.
+Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor. See the [sample kube_dns.yaml][2] for all available configuration options.
 
 #### Using with service discovery
 
@@ -46,7 +46,7 @@ metadata:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kube_dns` under the Checks section:
+[Run the Agent's `status` subcommand][3] and look for `kube_dns` under the Checks section:
 
     Checks
     ======
@@ -62,7 +62,7 @@ The kube_dns check is compatible with all major platforms
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kube_dns/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 The Kube-DNS check does not include any event at this time.
@@ -71,7 +71,15 @@ The Kube-DNS check does not include any event at this time.
 The Kube-DNS check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/

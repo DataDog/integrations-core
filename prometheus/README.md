@@ -24,7 +24,7 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 ## Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `prometheus` under the Checks section:
+[Run the Agent's `status` subcommand][1] and look for `prometheus` under the Checks section:
 
     Checks
     ======
@@ -37,3 +37,6 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 ## Compatibility
 
 The prometheus check is compatible with all major platforms
+
+
+[1]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/

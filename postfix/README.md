@@ -7,7 +7,7 @@ This check monitors the size of all your Postfix queues.
 ## Setup
 ### Installation
 
-The Postfix check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Postfix servers.
+The Postfix check is packaged with the Agent, so simply [install the Agent][1] on your Postfix servers.
 
 ## Configuration
 This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
@@ -17,7 +17,7 @@ Optionally, you can configure the agent to use a built in `postqueue -p` command
 **WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
 
 ### Using sudo
-Create a file `postfix.yaml` in the Agent's `conf.d` directory. See the [sample postfix.yaml](https://github.com/DataDog/integrations-core/blob/master/postfix/conf.yaml.example) for all available configuration options:
+Create a file `postfix.yaml` in the Agent's `conf.d` directory. See the [sample postfix.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -76,11 +76,11 @@ http://www.postfix.org/postqueue.1.html
                 List of users who are authorized to view the queue.
 
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Postfix metrics to Datadog.
+[Restart the Agent][3] to start sending Postfix metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postfix` under the Checks section:
+[Run the Agent's `status` subcommand][4] and look for `postfix` under the Checks section:
 
 ```
   Checks
@@ -101,7 +101,7 @@ The postfix check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
 The Postfix check does not include any event at this time.
@@ -110,8 +110,17 @@ The Postfix check does not include any event at this time.
 The Postfix check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitor Postfix queue performance](https://www.datadoghq.com/blog/monitor-postfix-queues/)
+* [Monitor Postfix queue performance][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/postfix/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-postfix-queues/

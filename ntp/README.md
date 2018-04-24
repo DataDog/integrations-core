@@ -24,7 +24,7 @@ To install the check on the agent:
 
 ### Configuration
 
-The Agent enables the NTP check by default, but if you want to configure the check yourself, create a file `ntp.yaml` in the Agent's `conf.d` directory. See the [sample ntp.yaml](https://github.com/DataDog/integrations-core/blob/master/ntp/conf.yaml.default) for all available configuration options:
+The Agent enables the NTP check by default, but if you want to configure the check yourself, create a file `ntp.yaml` in the Agent's `conf.d` directory. See the [sample ntp.yaml][1] for all available configuration options:
 
 ```
 init_config:
@@ -44,11 +44,11 @@ Configuration Options:
 * `version` (Optional) - ntp version
 * `timeout` (Optional) - Response timeout
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to effect any configuration changes.
+[Restart the Agent][2] to effect any configuration changes.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section:
+[Run the Agent's `status` subcommand][3] and look for `ntp` under the Checks section:
 
 ```
   Checks
@@ -69,7 +69,7 @@ The NTP check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 The NTP check does not include any event at this time.
@@ -81,7 +81,15 @@ The NTP check does not include any event at this time.
 Returns CRITICAL if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://github.com/DataDog/integrations-core/blob/master/ntp/conf.yaml.default
+[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/

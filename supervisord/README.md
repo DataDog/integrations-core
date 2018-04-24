@@ -7,7 +7,7 @@ This check monitors the uptime, status, and number of processes running under su
 ## Setup
 ### Installation
 
-The Supervisor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that use Supervisor to manage processes.
+The Supervisor check is packaged with the Agent, so simply [install the Agent][1] on any servers that use Supervisor to manage processes.
 
 ### Configuration
 #### Prepare supervisord
@@ -45,7 +45,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for all available configuration options:
+Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -76,11 +76,11 @@ Configuration Options
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Supervisor metrics to Datadog.
+[Restart the Agent][3] to start sending Supervisor metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `supervisord` under the Checks section:
+[Run the Agent's `status` subcommand][4] and look for `supervisord` under the Checks section:
 
 ```
   Checks
@@ -102,7 +102,7 @@ The supervisord check is compatible with all major platforms.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
 The Supervisord check does not include any event at this time.
@@ -131,8 +131,17 @@ This table shows the `supervisord.process.status` that results from each supervi
 |UNKNOWN|UNKNOWN|
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Supervisor monitors your processes. Datadog monitors Supervisor.](https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/)
+* [Supervisor monitors your processes. Datadog monitors Supervisor.][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/

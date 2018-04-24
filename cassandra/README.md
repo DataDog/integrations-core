@@ -10,11 +10,11 @@ Get metrics from cassandra service in real time to:
 ## Setup
 ### Installation
 
-The Cassandra check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Cassandra nodes.
+The Cassandra check is packaged with the Agent, so simply [install the Agent][1] on your Cassandra nodes.
 
 We recommend the use of Oracle's JDK for this integration.
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation](https://docs.datadoghq.com/integrations/java/) for more detailed instructions. If you need to monitor more metrics, please send us an email at support@datadoghq.com
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation][2] for more detailed instructions. If you need to monitor more metrics, please send us an email at support@datadoghq.com
 
 ### Configuration
 
@@ -23,9 +23,9 @@ Create a `cassandra.yaml` file in the Agent's `conf.d` directory.
 #### Metric Collection
 
 *  The default configuration of your `cassandra.yaml` file activate the collection of your [Cassandra metrics](#metrics).
- See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example) for all available configuration options.
+ See the [sample  cassandra.yaml][3] for all available configuration options.
  
-2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+2. [Restart the Agent][4].
 
 #### Log Collection
 
@@ -55,7 +55,7 @@ See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/bl
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `cassandra` under the Checks section:
+[Run the Agent's `status` subcommand][5] and look for `cassandra` under the Checks section:
 
 ```
   Checks
@@ -76,7 +76,7 @@ The cassandra check is compatible with all major platforms.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The Cassandra check does not include any event at this time.
@@ -87,10 +87,22 @@ The Cassandra check does not include any event at this time.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance. Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [How to monitor Cassandra performance metrics](https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/)
-* [How to collect Cassandra metrics](https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/)
-* [Monitoring Cassandra with Datadog](https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/)
+* [How to monitor Cassandra performance metrics][8]
+* [How to collect Cassandra metrics][9]
+* [Monitoring Cassandra with Datadog][10]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/integrations/java/
+[3]: https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
+[9]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
+[10]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/

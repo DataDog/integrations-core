@@ -4,7 +4,7 @@ ad_identifiers:
 init_config:
 
 instances:
-  - url: "http://%%host%%:8500"
+  - url: "http://%%host%%:%%port%%"
     catalog_checks: yes
     new_leader_checks: yes
     # service_whitelist:

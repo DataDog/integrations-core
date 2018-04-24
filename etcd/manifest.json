@@ -13,7 +13,6 @@
   "public_title": "Datadog-etcd Integration",
   "categories":["orchestration", "containers", "configuration & deployment", "orchestration"],
   "type":"check",
-  "version": "1.4.0",
   "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
   "is_public": true,
   "has_logo": true

@@ -412,14 +412,13 @@ class PrometheusScraper(object):
         self.join_labels(message)
 
         send_histograms_buckets = kwargs.get('send_histograms_buckets', True)
-        send_monotonic_counter = kwargs.get('send_monotonic_counter', False)
         custom_tags = kwargs.get('custom_tags')
         ignore_unmapped = kwargs.get('ignore_unmapped', False)
 
         try:
             if not self._dry_run:
                 try:
-                    self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets, send_monotonic_counter, custom_tags)
+                    self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets, custom_tags)
                 except KeyError:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
@@ -431,7 +430,7 @@ class PrometheusScraper(object):
                         # try matching wildcard (generic check)
                         for wildcard in self._metrics_wildcards:
                             if fnmatchcase(message.name, wildcard):
-                                self._submit(message.name, message, send_histograms_buckets, send_monotonic_counter, custom_tags)
+                                self._submit(message.name, message, send_histograms_buckets, custom_tags)
 
         except AttributeError as err:
             self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
@@ -505,7 +504,7 @@ class PrometheusScraper(object):
                 )
             raise
 
-    def _submit(self, metric_name, message, send_histograms_buckets=True, send_monotonic_counter=False, custom_tags=None, hostname=None):
+    def _submit(self, metric_name, message, send_histograms_buckets=True, custom_tags=None, hostname=None):
         """
         For each metric in the message, report it as a gauge with all labels as tags
         except if a labels dict is passed, in which case keys are label names we'll extract
@@ -521,13 +520,7 @@ class PrometheusScraper(object):
         if message.type < len(self.METRIC_TYPES):
             for metric in message.metric:
                 custom_hostname = self._get_hostname(hostname, metric)
-                if message.type == 0:
-                    val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    if send_monotonic_counter:
-                        self._submit_monotonic_count(metric_name, val, metric, custom_tags, custom_hostname)
-                    else:
-                        self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
-                elif message.type == 4:
+                if message.type == 4:
                     self._submit_gauges_from_histogram(metric_name, metric, send_histograms_buckets, custom_tags, custom_hostname)
                 elif message.type == 2:
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)

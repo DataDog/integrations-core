@@ -1,12 +1,4 @@
 # CHANGELOG - kyototycoon
-
-1.3.0 / Unreleased
-==================
-
-### Changes
-
-* [FEATURE] Hardcode the 1978 port in the Autodiscovery template. See [#1444][] for more information.
-
 1.2.0 / 2018-03-23
 ==================
 

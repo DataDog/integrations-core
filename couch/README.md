@@ -12,11 +12,11 @@ For performance reasons, the CouchDB version you're using is cached, so you cann
 ## Setup
 ### Installation
 
-The CouchDB check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your CouchDB servers.
+The CouchDB check is packaged with the Agent, so simply [install the Agent][1] on your CouchDB servers.
 
 ### Configuration
 
-Create a file `couch.yaml` in the Agent's `conf.d` directory. See the [sample  couch.yaml](https://github.com/DataDog/integrations-core/blob/master/couch/conf.yaml.example) for all available configuration options:
+Create a file `couch.yaml` in the Agent's `conf.d` directory. See the [sample  couch.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -33,11 +33,11 @@ instances:
 
 Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending CouchDB metrics to Datadog.
+[Restart the Agent][3] to begin sending CouchDB metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `couch` under the Checks section:
+[Run the Agent's `status` subcommand][4] and look for `couch` under the Checks section:
 
 ```
   Checks
@@ -55,7 +55,7 @@ Optionally, provide a `db_whitelist` and `db_blacklist` to control which databas
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -66,8 +66,17 @@ The Couch check does not include any event at this time.
 `couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitoring CouchDB performance with Datadog](https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/)
+* [Monitoring CouchDB performance with Datadog][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/couch/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/
