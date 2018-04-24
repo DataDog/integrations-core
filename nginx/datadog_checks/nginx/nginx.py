@@ -38,11 +38,43 @@ PLUS_API_ENDPOINTS = {
 TAGGED_KEYS = {
     'caches': 'cache',
     'server_zones': 'server_zone',
+    'serverZones': 'server_zone', # VTS
     'upstreams': 'upstream',
+    'upstreamZones': 'upstream', # VTS
     'slabs': 'slab',
     'slots': 'slot'
 }
 
+# Map metrics from vhost_traffic_status to metrics from NGINX Plus
+VTS_METRIC_MAP = {
+    'nginx.loadMsec': 'nginx.load_timestamp',
+    'nginx.nowMsec': 'nginx.timestamp',
+    'nginx.connections.accepted': 'nginx.connections.accepted',
+    'nginx.connections.active': 'nginx.connections.active',
+    'nginx.connections.reading': 'nginx.net.reading',
+    'nginx.connections.writing': 'nginx.net.writing',
+    'nginx.connections.waiting': 'nginx.net.waiting',
+    'nginx.connections.requests': 'nginx.requests.total',
+    'nginx.server_zone.requestCounter': 'nginx.server_zone.requests',
+    'nginx.server_zone.responses.1xx': 'nginx.server_zone.responses.1xx',
+    'nginx.server_zone.responses.2xx': 'nginx.server_zone.responses.2xx',
+    'nginx.server_zone.responses.3xx': 'nginx.server_zone.responses.3xx',
+    'nginx.server_zone.responses.4xx': 'nginx.server_zone.responses.4xx',
+    'nginx.server_zone.responses.5xx': 'nginx.server_zone.responses.5xx',
+    'nginx.server_zone.inBytes': 'nginx.server_zone.received',
+    'nginx.server_zone.outBytes': 'nginx.server_zone.sent',
+    'nginx.upstream.requestCounter': 'nginx.upstream.peers.requests',
+    'nginx.upstream.inBytes': 'nginx.upstream.peers.received',
+    'nginx.upstream.outBytes': 'nginx.upstream.peers.sent',
+    'nginx.upstream.responses.1xx': 'nginx.upstream.peers.responses.1xx',
+    'nginx.upstream.responses.2xx': 'nginx.upstream.peers.responses.2xx',
+    'nginx.upstream.responses.3xx': 'nginx.upstream.peers.responses.3xx',
+    'nginx.upstream.responses.4xx': 'nginx.upstream.peers.responses.4xx',
+    'nginx.upstream.responses.5xx': 'nginx.upstream.peers.responses.5xx',
+    'nginx.upstream.weight': 'nginx.upstream.peers.weight',
+    'nginx.upstream.backup': 'nginx.upstream.peers.backup',
+    'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
+}
 
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
@@ -93,9 +125,32 @@ class Nginx(AgentCheck):
             'rate': self.rate,
             'count': self.count
         }
+        conn = None
+        handled = None
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
+
+                # Translate metrics received from VTS
+                if instance.get('use_vts', False):
+                    # Requests per second
+                    if name == 'nginx.connections.handled':
+                        handled = value
+                    if name == 'nginx.connections.accepted':
+                        conn = value
+                        self.rate('nginx.net.conn_opened_per_s', conn, tags)
+                    if handled is not None and conn is not None:
+                        self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
+                        handled = None
+                        conn = None
+                    if name == 'nginx.connections.requests':
+                        self.rate('nginx.net.request_per_s', value, tags)
+
+                    name = VTS_METRIC_MAP.get(name)
+                    if name is None:
+                        continue
+
+
                 if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
                     func_count = funcs['count']
                     func_count(name + "_count", value, tags)
