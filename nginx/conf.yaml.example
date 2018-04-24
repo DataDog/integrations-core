@@ -31,6 +31,10 @@ instances:
   #   # Specify the version of the Plus API to use. We support versions 1 & 2. Default to 2
   #   plus_api_version: 2
 
+  #   # Set this option to true if you are using the nginx vhost_traffic_status module. Default to false
+  #   # If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
+  #   use_vts: False
+
   #   If the status page is behind basic auth.
   #   user: USER
   #   password: PASSWORD
