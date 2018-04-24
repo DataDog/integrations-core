@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ecs_fargate",
+  "display_name": "Amazon Fargate",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "support": "core",
@@ -20,5 +21,6 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/fargate/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "creates_events": true
 }
