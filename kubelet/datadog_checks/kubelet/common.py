@@ -5,9 +5,12 @@
 from tagger import get_tags
 
 try:
-    from container import is_excluded
+    from containers import is_excluded
 except ImportError:
     # Don't fail on < 6.2
+    import logging
+    logging.info('Agent does not provide filtering logic, disabling container filtering')
+
     def is_excluded(name, image):
         return False
 
