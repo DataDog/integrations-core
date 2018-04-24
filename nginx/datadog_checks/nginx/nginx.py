@@ -38,9 +38,9 @@ PLUS_API_ENDPOINTS = {
 TAGGED_KEYS = {
     'caches': 'cache',
     'server_zones': 'server_zone',
-    'serverZones': 'server_zone', # VTS
+    'serverZones': 'server_zone',  # VTS
     'upstreams': 'upstream',
-    'upstreamZones': 'upstream', # VTS
+    'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot'
 }
@@ -75,6 +75,7 @@ VTS_METRIC_MAP = {
     'nginx.upstream.backup': 'nginx.upstream.peers.backup',
     'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
 }
+
 
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
@@ -149,7 +150,6 @@ class Nginx(AgentCheck):
                     name = VTS_METRIC_MAP.get(name)
                     if name is None:
                         continue
-
 
                 if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
                     func_count = funcs['count']
