@@ -136,9 +136,9 @@ mongodb.metrics.repl.network.getmores.numps,gauge,,operation,second,Number of ge
 mongodb.metrics.repl.network.getmores.totalmillisps,gauge,,fraction,,Fraction of time (ms/s) required to collect data from getmore operations.,0,mongodb,repl network getmores totalmillis ps
 mongodb.metrics.repl.network.opsps,gauge,,operation,second,Number of operations read from the replication source per second.,0,mongodb,repl network ops ps
 mongodb.metrics.repl.network.readerscreatedps,gauge,,process,second,Number of oplog query processes created per second.,0,mongodb,repl network readerscreated ps
-mongodb.metrics.repl.preload.docs.numps,rate,,doc,,Number of documents loaded during the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.docs.numps,rate,,document,,Number of documents loaded during the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.repl.preload.docs.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
-mongodb.metrics.repl.preload.indexes.numps,rate,,doc,,Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.indexes.numps,rate,,document,,Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.repl.preload.indexes.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.ttl.deleteddocumentsps,gauge,,document,second,Number of documents deleted from collections with a ttl index per second.,0,mongodb,ttl deleted docs ps
 mongodb.metrics.ttl.passesps,gauge,,operation,second,Number of times per second the background process removes documents from collections with a ttl index.,0,mongodb,ttl passes ps
