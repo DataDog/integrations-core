@@ -7,6 +7,7 @@
 
 * [FEATURE] Add custom tag support for service check.
 * [FEATURE] Add support for SASL authentication.
+* [FEATURE] Hardcode the 11211 port in the Autodiscovery template. See [#1444][] for more information.
 
 1.1.0 / 2017-11-21
 ==================
