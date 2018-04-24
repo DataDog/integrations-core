@@ -117,7 +117,7 @@ instances:
   - gitlab_url: http://localhost
 
     # url of the metrics endpoint of prometheus
-    prometheus_endpoint: http://localhost:9090
+    prometheus_endpoint: http://localhost:9090/metrics
     # The histogram buckets can be noisy and generate a lot of tags.
     # send_histograms_buckets controls whether or not you want to pull them.
     #

@@ -28,6 +28,13 @@ begin
         execute immediate 'drop user ' || r.username || ' cascade';
     end loop;
 
+    for t in
+            ( select tablespace_name
+              from dba_tablespaces
+              where tablespace_name in ('OFFLINE_TABLESPACE')
+            ) loop
+        execute immediate 'drop tablespace ' || t.tablespace_name ||
+            ' including contents and datafiles';
+    end loop;
 end;
 /
-

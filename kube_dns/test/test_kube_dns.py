@@ -47,6 +47,11 @@ class TestKubeDNS(AgentCheckTest):
         NAMESPACE + '.error_count',
         NAMESPACE + '.cachemiss_count',
     ]
+    COUNT_METRICS = [
+        NAMESPACE + '.request_count.count',
+        NAMESPACE + '.error_count.count',
+        NAMESPACE + '.cachemiss_count.count',
+    ]
 
     def test_check(self):
         """
@@ -62,7 +67,15 @@ class TestKubeDNS(AgentCheckTest):
         }
 
         self.run_check({'instances': [instance]}, mocks=mocks)
+        # check that we have gauge metrics, and NOT rate metrics (as we should then only have one point for them)
+        # (Can happen if some labels are not picked up as tags when reading up the prometheus output)
         for metric in self.METRICS:
+            self.assertMetric(metric)
+        self.coverage_report()
+
+        # check that we then get the count metrics also
+        self.run_check({'instances': [instance]}, mocks=mocks)
+        for metric in self.METRICS + self.COUNT_METRICS:
             self.assertMetric(metric)
 
         self.coverage_report()

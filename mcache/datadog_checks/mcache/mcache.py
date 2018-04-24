@@ -1,68 +1,14 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import memcache
+import bmemcached
+import pkg_resources
 
 from datadog_checks.checks import AgentCheck
 
-# Ref: http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt
-# Name              Type     Meaning
-# ----------------------------------
-# pid               32u      Process id of this server process
-# uptime            32u      Number of seconds this server has been running
-# time              32u      current UNIX time according to the server
-# version           string   Version string of this server
-# pointer_size      32       Default size of pointers on the host OS
-#                            (generally 32 or 64)
-# rusage_user       32u:32u  Accumulated user time for this process
-#                            (seconds:microseconds)
-# rusage_system     32u:32u  Accumulated system time for this process
-#                            (seconds:microseconds)
-# curr_items        32u      Current number of items stored by the server
-# total_items       32u      Total number of items stored by this server
-#                            ever since it started
-# bytes             64u      Current number of bytes used by this server
-#                            to store items
-# curr_connections  32u      Number of open connections
-# total_connections 32u      Total number of connections opened since
-#                            the server started running
-# connection_structures 32u  Number of connection structures allocated
-#                            by the server
-# cmd_get           64u      Cumulative number of retrieval requests
-# cmd_set           64u      Cumulative number of storage requests
-# get_hits          64u      Number of keys that have been requested and
-#                            found present
-# get_misses        64u      Number of items that have been requested
-#                            and not found
-# delete_misses     64u      Number of deletions reqs for missing keys
-# delete_hits       64u      Number of deletion reqs resulting in
-#                            an item being removed.
-# evictions         64u      Number of valid items removed from cache
-#                            to free memory for new items
-# bytes_read        64u      Total number of bytes read by this server
-#                            from network
-# bytes_written     64u      Total number of bytes sent by this server to
-#                            network
-# limit_maxbytes    32u      Number of bytes this server is allowed to
-#                            use for storage.
-# threads           32u      Number of worker threads requested.
-#                            (see doc/threads.txt)
-# listen_disabled_num 32u    How many times the server has reached maxconns
-#                            (see https://code.google.com/p/memcached/wiki/Timeouts)
-#     >>> mc.get_stats()
-# [('127.0.0.1:11211 (1)', {'pid': '2301', 'total_items': '2',
-# 'uptime': '80', 'listen_disabled_num': '0', 'version': '1.2.8',
-# 'limit_maxbytes': '67108864', 'rusage_user': '0.002532',
-# 'bytes_read': '51', 'accepting_conns': '1', 'rusage_system':
-# '0.007445', 'cmd_get': '0', 'curr_connections': '4', 'threads': '2',
-# 'total_connections': '5', 'cmd_set': '2', 'curr_items': '0',
-# 'get_misses': '0', 'cmd_flush': '0', 'evictions': '0', 'bytes': '0',
-# 'connection_structures': '5', 'bytes_written': '25', 'time':
-# '1306364220', 'pointer_size': '64', 'get_hits': '0'})]
 
-# For Membase it gets worse
-# http://www.couchbase.org/wiki/display/membase/Membase+Statistics
-# https://github.com/membase/ep-engine/blob/master/docs/stats.org
+class BadResponseError(Exception):
+    pass
 
 
 class Memcache(AgentCheck):
@@ -163,17 +109,26 @@ class Memcache(AgentCheck):
     SERVICE_CHECK = 'memcache.can_connect'
 
     def get_library_versions(self):
-        return {"memcache": memcache.__version__}
+        return {
+            "memcache": pkg_resources.get_distribution("python-binary-memcached").version
+        }
+
+    def _process_response(self, response):
+        """
+        Examine the response and raise an error is something is off
+        """
+        if len(response) != 1:
+            raise BadResponseError("Malformed response: {}".format(response))
+
+        stats = response.values()[0]
+        if not len(stats):
+            raise BadResponseError("Malformed response for host: {}".format(stats))
+
+        return stats
 
     def _get_metrics(self, client, tags, service_check_tags=None):
         try:
-            raw_stats = client.get_stats()
-
-            assert len(raw_stats) == 1 and len(raw_stats[0]) == 2,\
-                "Malformed response: %s" % raw_stats
-
-            # Access the dict
-            stats = raw_stats[0][1]
+            stats = self._process_response(client.stats())
             for metric in stats:
                 # Check if metric is a gauge or rate
                 if metric in self.GAUGES:
@@ -222,7 +177,7 @@ class Memcache(AgentCheck):
                 self.SERVICE_CHECK, AgentCheck.OK,
                 tags=service_check_tags,
                 message="Server has been up for %s seconds" % uptime)
-        except AssertionError:
+        except BadResponseError:
             raise
 
     def _get_optional_metrics(self, client, tags, options=None):
@@ -233,14 +188,9 @@ class Memcache(AgentCheck):
                     optional_gauges = metrics_args[1]
                     optional_fn = metrics_args[2]
 
-                    raw_stats = client.get_stats(arg)
-
-                    assert len(raw_stats) == 1 and len(raw_stats[0]) == 2,\
-                        "Malformed response: %s" % raw_stats
-
-                    # Access the dict
-                    stats = raw_stats[0][1]
+                    stats = self._process_response(client.stats(arg))
                     prefix = "memcache.{}".format(arg)
+
                     for metric, val in stats.iteritems():
                         # Check if metric is a gauge or rate
                         metric_tags = []
@@ -255,7 +205,7 @@ class Memcache(AgentCheck):
                             our_metric = self.normalize(
                                 "{0}_rate".format(metric.lower()), prefix)
                             self.rate(our_metric, float(val), tags=tags+metric_tags)
-                except AssertionError:
+                except BadResponseError:
                     self.log.warning(
                         "Unable to retrieve optional stats from memcache instance, "
                         "running 'stats %s' they could be empty or bad configuration.", arg
@@ -308,6 +258,8 @@ class Memcache(AgentCheck):
         socket = instance.get('socket')
         server = instance.get('url')
         options = instance.get('options', {})
+        username = instance.get('username')
+        password = instance.get('password')
 
         if not server and not socket:
             raise Exception('Either "url" or "socket" must be configured')
@@ -325,7 +277,7 @@ class Memcache(AgentCheck):
 
         try:
             self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
-            mc = memcache.Client(["%s:%s" % (server, port)])
+            mc = bmemcached.Client(["{}:{}".format(server, port)], username, password)
 
             self._get_metrics(mc, tags, service_check_tags)
             if options:
@@ -333,14 +285,14 @@ class Memcache(AgentCheck):
                 self.OPTIONAL_STATS["items"][2] = Memcache.get_items_stats
                 self.OPTIONAL_STATS["slabs"][2] = Memcache.get_slabs_stats
                 self._get_optional_metrics(mc, tags, options)
-        except AssertionError:
+        except BadResponseError as e:
             self.service_check(
                 self.SERVICE_CHECK, AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message="Unable to fetch stats from server")
             raise Exception(
-                "Unable to retrieve stats from memcache instance: {0}:{1}."
-                "Please check your configuration".format(server, port))
+                "Unable to retrieve stats from memcache instance: {}:{}."
+                "Please check your configuration. ({})".format(server, port, e))
 
         if mc is not None:
             mc.disconnect_all()

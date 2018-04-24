@@ -1,0 +1,24 @@
+version: '3.5'
+
+services:
+  haproxy:
+    image: "haproxy:${HAPROXY_VERSION}"
+    volumes:
+      - ${HAPROXY_CONFIG}:/usr/local/etc/haproxy/haproxy.cfg
+      - ${HAPROXY_SOCKET_DIR}:/tmp
+    ports:
+      - "13835:13835"
+    networks:
+      - network1
+  haproxy-open:
+    image: "haproxy:${HAPROXY_VERSION}"
+    volumes:
+      - ${HAPROXY_CONFIG_OPEN}:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - "13836:13836"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: haproxy_network

@@ -25,6 +25,7 @@ ESInstanceConfig = namedtuple(
         'pshard_stats',
         'pshard_graceful_to',
         'cluster_stats',
+        'index_stats',
         'password',
         'service_check_tags',
         'health_tags',
@@ -197,6 +198,16 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
     }
 
+    INDEX_STATS_METRICS = { # Metrics for index level
+        "elasticsearch.index.health": ("gauge", "health"),
+        "elasticsearch.index.docs.count": ("gauge", "docs_count"),
+        "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
+        "elasticsearch.index.primary_shards": ("gauge", "primary_shards"),
+        "elasticsearch.index.replica_shards": ("gauge", "replica_shards"),
+        "elasticsearch.index.primary_store_size": ("gauge", "primary_store_size"),
+        "elasticsearch.index.store_size": ("gauge", "store_size")
+    }
+
     JVM_METRICS_POST_0_90_10 = {
         "jvm.gc.collectors.young.count": ("gauge", "jvm.gc.collectors.young.collection_count"),
         "jvm.gc.collectors.young.collection_time": ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
@@ -365,7 +376,7 @@ class ESCheck(AgentCheck):
 
         pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
         pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
-
+        index_stats = _is_affirmative(instance.get('index_stats', False))
         cluster_stats = _is_affirmative(instance.get('cluster_stats', False))
         if 'is_external' in instance:
             cluster_stats = _is_affirmative(instance.get('is_external', False))
@@ -398,6 +409,7 @@ class ESCheck(AgentCheck):
             pshard_stats=pshard_stats,
             pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
+            index_stats=index_stats,
             password=instance.get('password'),
             service_check_tags=service_check_tags,
             health_tags=[],
@@ -429,7 +441,6 @@ class ESCheck(AgentCheck):
         # Load stats data.
         # This must happen before other URL processing as the cluster name
         # is retreived here, and added to the tag list.
-
         stats_url = urlparse.urljoin(config.url, stats_url)
         stats_data = self._get_data(stats_url, config)
         if stats_data['cluster_name']:
@@ -465,6 +476,12 @@ class ESCheck(AgentCheck):
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
 
+        if config.index_stats and version >= [1, 0, 0]:
+            try:
+                self._get_index_metrics(config)
+            except requests.ReadTimeout as e:
+                self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
+
         # If we're here we did not have any ES conn issues
         self.service_check(
             self.SERVICE_CHECK_CONNECT_NAME,
@@ -495,6 +512,40 @@ class ESCheck(AgentCheck):
         self.service_metadata('version', version)
         self.log.debug("Elasticsearch version is %s" % version)
         return version
+
+    def _get_index_metrics(self, config):
+        cat_url = '/_cat/indices?format=json&bytes=b'
+        index_url = urlparse.urljoin(config.url, cat_url)
+        index_resp = self._get_data(index_url, config)
+        index_stats_metrics = self.INDEX_STATS_METRICS
+        health_stat = {'green': 0, 'yellow': 1, 'red': 2}
+        for idx in index_resp:
+            tags = config.tags + ['index_name:' + idx['index']]
+            index_data = {
+                'docs_count':         idx.get('docs.count', None),
+                'docs_deleted':       idx.get('docs.deleted', None),
+                'primary_shards':     idx.get('pri', None),
+                'replica_shards':     idx.get('rep', None),
+                'primary_store_size': idx.get('pri.store.size', None),
+                'store_size':         idx.get('store.size', None),
+                'health':             idx.get('health', None),
+            }
+
+            # Convert the health status value
+            if index_data['health'] is not None:
+                index_data['health'] = health_stat[index_data['health'].lower()]
+
+            # Ensure that index_data does not contain None values
+            for key, value in index_data.items():
+                if value is None:
+                    del index_data[key]
+                    self.log.warning("The index metric data for %s was not found", key)
+
+            for metric in index_stats_metrics:
+                # metric description
+                desc = index_stats_metrics[metric]
+                self._process_metric(index_data, metric, *desc, tags=tags)
+
 
     def _define_params(self, version, cluster_stats):
         """ Define the set of URLs and METRICS to use depending on the
@@ -688,10 +739,11 @@ class ESCheck(AgentCheck):
 
     def _process_metric(self, data, metric, xtype, path, xform=None,
                         tags=None, hostname=None):
-        """data: dictionary containing all the stats
+        """
+        data: dictionary containing all the stats
         metric: datadog metric
         path: corresponding path in data, flattened, e.g. thread_pool.bulk.queue
-        xfom: a lambda to apply to the numerical value
+        xform: a lambda to apply to the numerical value
         """
         value = data
 

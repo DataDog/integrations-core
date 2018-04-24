@@ -2,7 +2,7 @@
 
 ## Overview
 
-nfsiostat is a tool that gets metrics from NFS mounts. This check grabs these metrics.
+The NFS integration collects metrics about mount points on the NFS client as it uses the `nfsiostat` tool that displays NFS client per-mount [statistics](http://man7.org/linux/man-pages/man8/nfsiostat.8.html).
 
 ## Setup
 ### Installation

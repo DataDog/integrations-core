@@ -16,3 +16,4 @@ kubernetes.network.rx_errors,gauge,,error,second,The amount of rx errors per sec
 kubernetes.network.tx_bytes,gauge,,byte,second,The amount of bytes per second transmitted,-1,kubelet,k8s.net.tx
 kubernetes.network.tx_dropped,gauge,,packet,second,The amount of tx packets dropped per second,-1,kubelet,k8s.net.tx.drop
 kubernetes.network.tx_errors,gauge,,error,second,The amount of tx errors per second,-1,kubelet,k8s.net.tx.errors
+kubernetes.diskio.io_service_bytes.stats.total,gauge,,byte,,The amount of disk space the container uses.,-1,kubernetes,k8s.disk.total

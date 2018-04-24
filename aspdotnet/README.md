@@ -1,15 +1,15 @@
-# Aspdotnet Integration
+# ASP.NET Integration
 
 ## Overview
 
-Get metrics from aspdotnet service in real time to:
+Get metrics from ASP.NET service in real time to:
 
-* Visualize and monitor aspdotnet states
-* Be notified about aspdotnet failovers and events.
+* Visualize and monitor ASP.NET states
+* Be notified about ASP.NET failovers and events.
 
 ## Installation
 
-The Aspdotnet check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
+The ASP.NET check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ## Configuration
 

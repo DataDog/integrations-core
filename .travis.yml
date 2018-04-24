@@ -67,9 +67,6 @@ env:
     - TRAVIS_FLAVOR=gitlab_runner MASTER_FLAVOR_VERSION=latest RUNNER_FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=gunicorn FLAVOR_VERSION=19.6.0
     - TRAVIS_FLAVOR=go_expvar FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.4.26
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.5.11
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.6.9
     - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.8.1.1-1 FLAVOR_OPTIONS='zookeeper'
     - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='zookeeper'
     - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='kafka'
@@ -88,11 +85,6 @@ env:
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.4
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.5
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.6.2
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.7.11
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.9.15
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.11.8
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.10.2
     - TRAVIS_FLAVOR=openstack
     # - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.5
@@ -124,7 +116,7 @@ install:
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - pip install -r requirements-test.txt
   - bundle exec rake setup_agent_libs
-  - cd $TRAVIS_BUILD_DIR/datadog-checks-base && python setup.py bdist_wheel && pip install . && cd -
+  - cd $TRAVIS_BUILD_DIR/datadog_checks_base && python setup.py bdist_wheel && pip install . && cd -
   - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci

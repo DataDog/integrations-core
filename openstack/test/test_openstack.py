@@ -289,6 +289,7 @@ class TestOpenstack(AgentCheckTest):
 
     def test_ensure_auth_scope(self):
         instance = self.MOCK_CONFIG["instances"][0]
+        instance['tags'] = ['optional:tag1']
 
         self.assertRaises(KeyError, self.check.get_scope_for_instance, instance)
 
@@ -296,16 +297,21 @@ class TestOpenstack(AgentCheckTest):
             scope = self.check.ensure_auth_scope(instance)
 
             self.assertEqual(self.check.get_scope_for_instance(instance), scope)
-            self.check._send_api_service_checks(scope)
+            self.check._send_api_service_checks(scope, ['optional:tag1'])
 
             self.service_checks = self.check.get_service_checks()
+            # Sort the tags list
+            for sc in self.service_checks:
+                sc["tags"].sort()
+            tags = ['keystone_server:http://10.0.2.15:5000', 'optional:tag1']
+            tags.sort()
 
             # Expect OK, since we've mocked an API response
-            self.assertServiceCheck(self.check.IDENTITY_API_SC, status=AgentCheck.OK, count=1)
+            self.assertServiceCheck(self.check.IDENTITY_API_SC, status=AgentCheck.OK, count=1, tags=tags)
 
             # Expect CRITICAL since URLs are non-existent
-            self.assertServiceCheck(self.check.COMPUTE_API_SC, status=AgentCheck.CRITICAL, count=1)
-            self.assertServiceCheck(self.check.NETWORK_API_SC, status=AgentCheck.CRITICAL, count=1)
+            self.assertServiceCheck(self.check.COMPUTE_API_SC, status=AgentCheck.CRITICAL, count=1, tags=tags)
+            self.assertServiceCheck(self.check.NETWORK_API_SC, status=AgentCheck.CRITICAL, count=1, tags=tags)
 
             self.check._current_scope = scope
 
@@ -355,7 +361,7 @@ class TestOpenstack(AgentCheckTest):
             self.check.exclude_network_id_rules = set([re.compile(rule) for rule in self.EXCLUDED_NETWORK_IDS])
 
             # Retrieve network stats
-            self.check.get_network_stats()
+            self.check.get_network_stats([])
 
             # Assert
             # .. 1 out of 4 network filtered in
