@@ -156,25 +156,13 @@ class KafkaCheck(AgentCheck):
         for cli in self.kafka_clients.itervalues():
             cli.close()
 
-    def _get_instance_key(self, instance):
-        servers = instance.get('kafka_connect_str')
-        key = None
-        if isinstance(servers, basestring):
-            key = servers
-        elif isinstance(servers, list):
-            key = ",".join(servers)
-        else:
-            raise BadKafkaConsumerConfiguration('kafka_connect_str should be string or list of strings')
-
-        return key
-
-
     def _get_kafka_client(self, instance):
         kafka_conn_str = instance.get('kafka_connect_str')
-        if not kafka_conn_str:
-            raise BadKafkaConsumerConfiguration('Bad instance configuration')
+        if not isinstance(kafka_conn_str, (basestring, list)):
+            raise BadKafkaConsumerConfiguration(
+                    'kafka_connect_str should be string or list of strings')
 
-        instance_key = self._get_instance_key(instance)
+        instance_key = tuple(kafka_conn_str)  # cast to tuple in case it's a list
         if instance_key not in self.kafka_clients:
             # While we check for SSL params, if not present they will default
             # to the kafka-python values for plaintext connections
