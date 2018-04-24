@@ -4,4 +4,7 @@ MySql = mysql.MySql
 
 __version__ = "1.2.0"
 
-__all__ = ['mysql']
+__all__ = [
+    '__version__',
+    'MySql'
+]

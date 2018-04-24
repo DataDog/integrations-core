@@ -323,23 +323,23 @@ class MongoDb(AgentCheck):
     https://docs.mongodb.org/v3.0/reference/command/top/
     """
     TOP_METRICS = {
-        "commands.count": GAUGE,
+        "commands.count": RATE,
         "commands.time": GAUGE,
-        "getmore.count": GAUGE,
+        "getmore.count": RATE,
         "getmore.time": GAUGE,
-        "insert.count": GAUGE,
+        "insert.count": RATE,
         "insert.time": GAUGE,
-        "queries.count": GAUGE,
+        "queries.count": RATE,
         "queries.time": GAUGE,
-        "readLock.count": GAUGE,
+        "readLock.count": RATE,
         "readLock.time": GAUGE,
-        "remove.count": GAUGE,
+        "remove.count": RATE,
         "remove.time": GAUGE,
-        "total.count": GAUGE,
+        "total.count": RATE,
         "total.time": GAUGE,
-        "update.count": GAUGE,
+        "update.count": RATE,
         "update.time": GAUGE,
-        "writeLock.count": GAUGE,
+        "writeLock.count": RATE,
         "writeLock.time": GAUGE,
     }
 

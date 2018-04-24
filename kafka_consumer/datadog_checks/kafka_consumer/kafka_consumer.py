@@ -43,7 +43,7 @@ class NoKafkaBrokersAvailable(Exception):
 
 class KafkaCheck(AgentCheck):
     """
-    Check Consumer Lag for Kafka consumers that store their offsets in Zookeeper.
+    Check the offsets and lag of Kafka consumers.
 
     This check also returns broker highwater offsets.
     """
@@ -88,8 +88,8 @@ class KafkaCheck(AgentCheck):
         if instance.get('monitor_unlisted_consumer_groups', False):
             consumer_groups = None
         elif 'consumer_groups' in instance:
-            consumer_groups = self._read_config(instance, 'consumer_groups',
-                                                cast=self._validate_consumer_groups)
+            consumer_groups = instance.get('consumer_groups')
+            self._validate_explicit_consumer_groups(consumer_groups)
 
         zk_consumer_offsets = None
         if zk_hosts_ports and \
@@ -157,7 +157,7 @@ class KafkaCheck(AgentCheck):
             cli.close()
 
     def _get_instance_key(self, instance):
-        servers = self._read_config(instance, 'kafka_connect_str')
+        servers = instance.get('kafka_connect_str')
         key = None
         if isinstance(servers, basestring):
             key = servers
@@ -169,7 +169,7 @@ class KafkaCheck(AgentCheck):
         return key
 
     def _get_kafka_client(self, instance):
-        kafka_conn_str = self._read_config(instance, 'kafka_connect_str')
+        kafka_conn_str = instance.get('kafka_connect_str')
         if not kafka_conn_str:
             raise BadKafkaConsumerConfiguration('Bad instance configuration')
 
@@ -429,7 +429,7 @@ class KafkaCheck(AgentCheck):
         :param dict consumer_groups: The consumer groups, topics, and partitions
             that you want to fetch offsets for. If consumer_groups is None, will
             fetch offsets for all consumer_groups. For examples of what this
-            dict can look like, see _validate_consumer_groups().
+            dict can look like, see _validate_explicit_consumer_groups().
         """
         zk_consumer_offsets = {}
 
@@ -567,35 +567,27 @@ class KafkaCheck(AgentCheck):
 
         return should_zk
 
-    @staticmethod
-    def _read_config(instance, key, cast=None):
-        val = instance.get(key)
-        if val is None:
-            raise BadKafkaConsumerConfiguration('Must provide `%s` value in instance config' % key)
+    def _validate_explicit_consumer_groups(self, val):
+        """Validate any explicitly specified consumer groups.
 
-        if cast is None:
-            return val
+        While the check does not require specifying consumer groups,
+        if they are specified this method should be used to validate them.
 
-        return cast(val)
-
-    def _validate_consumer_groups(self, val):
-        # val = {'consumer_group': {'topic': [0, 1]}}
-        # consumer groups are optional
-        assert isinstance(val, dict) or val is None
-        if val is not None:
-            for consumer_group, topics in val.iteritems():
-                assert isinstance(consumer_group, basestring)
-                # topics are optional
-                assert isinstance(topics, dict) or topics is None
-                if topics is not None:
-                    for topic, partitions in topics.iteritems():
-                        assert isinstance(topic, basestring)
-                        # partitions are optional
-                        assert isinstance(partitions, (list, tuple)) or partitions is None
-                        if partitions is not None:
-                            for partition in partitions:
-                                assert isinstance(partition, int)
-        return val
+        val = {'consumer_group': {'topic': [0, 1]}}
+        """
+        assert isinstance(val, dict)
+        for consumer_group, topics in val.iteritems():
+            assert isinstance(consumer_group, basestring)
+            # topics are optional
+            assert isinstance(topics, dict) or topics is None
+            if topics is not None:
+                for topic, partitions in topics.iteritems():
+                    assert isinstance(topic, basestring)
+                    # partitions are optional
+                    assert isinstance(partitions, (list, tuple)) or partitions is None
+                    if partitions is not None:
+                        for partition in partitions:
+                            assert isinstance(partition, int)
 
     def _send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

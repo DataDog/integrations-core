@@ -13,7 +13,6 @@
   "category": ["aws","containers","orchestration"],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/fargate/",
-  "is_public": false,
-  "private": true,
+  "is_public": true,
   "has_logo": true
 }

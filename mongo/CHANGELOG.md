@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.5.3 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Changed `top` metric `count`s from `gauges`s to `rate`s. See #1391
+
 1.5.2 / 2018-02-13
 ==================
 ### Changes

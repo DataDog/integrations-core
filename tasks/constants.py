@@ -8,6 +8,9 @@ import os
 # the root of the repo
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Github API url
+GITHUB_API_URL = 'https://api.github.com'
+
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'active_directory',
@@ -27,8 +30,10 @@ AGENT_BASED_INTEGRATIONS = [
     'lighttpd',
     'linkerd',
     'mcache',
+    'mysql',
     'network',
     'nfsstat',
+    'nginx',
     'pdh_check',
     'postgres',
     'powerdns_recursor',
