@@ -63,6 +63,7 @@ class ConsulCheck(AgentCheck):
         'passing': AgentCheck.OK,
         'warning': AgentCheck.WARNING,
         'critical': AgentCheck.CRITICAL,
+        'maintenance': AgentCheck.MAINTENANCE
     }
 
     STATUS_SEVERITY = {
@@ -70,6 +71,7 @@ class ConsulCheck(AgentCheck):
         AgentCheck.OK: 1,
         AgentCheck.WARNING: 2,
         AgentCheck.CRITICAL: 3,
+        AgentCheck.MAINTENANCE: 4,
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -322,12 +324,13 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_passing` : # of Nodes with service status `passing` from those registered
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
+                # `consul.catalog.nodes_maintenance` : # of Nodes set in maintenance from those registered
 
                 service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(instance, service)
 
-                # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
+                # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0, 'maintenance': 0}
                 node_status = defaultdict(int)
 
                 for node in nodes_with_service:
@@ -345,8 +348,18 @@ class ConsulCheck(AgentCheck):
                         found_critical = False
                         found_warning = False
                         found_serf_health = False
+                        found_maint_critical = False
 
                         for check in node['Checks']:
+
+                            # If a node is in maintenance state, it means that, for some reason, we don't
+                            # really expect it to be healthy. We don't really care about it, until the maintenance
+                            # window is over. So, we just move on.
+                            if check['CheckID'] == '_node_maintenance':
+                                if check['Status'] == 'critical':
+                                    found_maint_critical = True
+                                    break
+
                             if check['CheckID'] == 'serfHealth':
                                 found_serf_health = True
 
@@ -367,8 +380,11 @@ class ConsulCheck(AgentCheck):
                                 # Keep looping in case there is a critical status
 
                         # Increment the counters based on what was found in Checks
-                        # `critical` checks override `warning`s, and if neither are found, register the node as `passing`
-                        if found_critical:
+                        # `maintenance` checks override `critical`s, which override `warning`s. If none is found, register the node as `passing`
+                        if found_maint_critical:
+                            node_status['maintenance'] += 1
+                            nodes_to_service_status[node_id]["maintenance"] += 1
+                        elif found_critical:
                             node_status['critical'] += 1
                             nodes_to_service_status[node_id]["critical"] += 1
                         elif found_warning:

@@ -1,5 +1,10 @@
 # CHANGELOG - consul
 
+1.3.1 / Unreleased
+=================
+
+* [IMPROVEMENT] Add maintenance metrics (services_maintenance and nodes_maintenance) 
+
 1.3.0 / 2018-01-10
 ==================
 

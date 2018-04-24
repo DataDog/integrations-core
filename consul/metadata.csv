@@ -1,9 +1,11 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 consul.catalog.nodes_critical,gauge,,node,,Number of nodes with service status `critical` from those registered,-1,consul,nodes crit
+consul.catalog.nodes_maintenance,gauge,,node,,Number of nodes in maintenance from those registered,-1,consul,nodes maint
 consul.catalog.nodes_passing,gauge,,node,,Number of nodes with service status `passing` from those registered,1,consul,nodes pass
 consul.catalog.nodes_up,gauge,,node,,Number of nodes,0,consul,nodes up
 consul.catalog.nodes_warning,gauge,,node,,Number of nodes with service status `warning` from those registered,-1,consul,nodes warn
 consul.catalog.services_critical,gauge,,service,,Total critical services on nodes,-1,consul,svc crit
+consul.catalog.services_maintenance,gauge,,service,,Total services in maintenance on nodes,-1,consul,svc maint
 consul.catalog.services_passing,gauge,,service,,Total passing services on nodes,1,consul,svc pass
 consul.catalog.services_up,gauge,,service,,Total services registered on nodes,0,consul,svc up
 consul.catalog.services_warning,gauge,,service,,Total warning services on nodes,-1,consul,svc warn
