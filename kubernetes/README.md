@@ -9,7 +9,7 @@ Get metrics from kubernetes service in real time to:
 
 ## Agent6 migration instructions
 
-Agent6 uses a new set of integrations, see [the update instructions](https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support) and the [new dedicated documentation page](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/) for more information.
+Agent6 uses a new set of integrations, see [the update instructions](https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support) and the [new dedicated kubernetes documentation page](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/) for more information.
 
 ## Setup (Agent5 only)
 ### Installation
