@@ -17,9 +17,7 @@ instances:
   # 3. Set required env variables for cx_Oracle installation
   #       export LD_RUN_PATH=/opt/oracle/instantclient_12_1
   #       export ORACLE_HOME=/opt/oracle/instantclient_12_1
-  # 4. Install instant client in agent's virtual environment
-  #       /opt/datadog-agent/embedded/bin/pip install cx_Oracle
-  # 5. Following cx_Oracle installation, ensure LD_LIBRARY_PATH points
+  # 4. Ensure LD_LIBRARY_PATH points
   #    to this directory when starting/restarting the agent
   #       export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1
   #
@@ -30,6 +28,7 @@ instances:
   #   service_name: my_sid
   #   user: my_username
   #   password: my_password
+  #   jdbc_driver_path: "/path/to/driver.jar" # Optionnal, to set if you are not using the oracle native client. You can also add it to your $CLASSPATH instead. 
   #
   - server: localhost:1521
     service_name: my_sid

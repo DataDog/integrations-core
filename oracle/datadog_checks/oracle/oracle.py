@@ -5,15 +5,18 @@
 # stdlib
 
 # 3rd party
-try:
-    import cx_Oracle
-except Exception as e:
-    cx_Oracle = None
+import jaydebeapi as jdb
+import jpype
+import cx_Oracle
 
 # project
 from checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
+
+ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
+JDBC_CONNECT_STRING = "jdbc:oracle:thin:@//{}/{}"
+CX_CONNECT_STRING = "{}/{}@//{}/{}"
 
 
 class Oracle(AgentCheck):
@@ -47,46 +50,78 @@ class Oracle(AgentCheck):
     }
 
     def check(self, instance):
-        if not cx_Oracle:
-            msg = """Cannot run the Oracle check until the Oracle instant client is available:
-            http://www.oracle.com/technetwork/database/features/instant-client/index.html
-            You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs
-            are reachable.
-            """
-            self.log.error(msg)
-            return
+        self.use_oracle_client = True
+        try:
+            # Check if the instantclient is available
+            cx_Oracle.clientversion()
+            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
+        except cx_Oracle.DatabaseError, e:
+            self.log.error(e)
+            # Fallback to JDBC
+            self.use_oracle_client = False
+            self.log.warning('Oracle instant client unavailable, falling back to JDBC')
 
-        self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
-        server, user, password, service, tags = self._get_config(instance)
+        server, user, password, service, jdbc_driver, tags = self._get_config(instance)
 
         if not server or not user:
             raise Exception("Oracle host and user are needed")
 
-        con = self._get_connection(server, user, password, service, tags)
+        con = self._get_connection(server, user, password, service, jdbc_driver, tags)
 
         self._get_sys_metrics(con, tags)
         self._get_tablespace_metrics(con, tags)
+
+        con.close()
 
     def _get_config(self, instance):
         self.server = instance.get('server', None)
         user = instance.get('user', None)
         password = instance.get('password', None)
         service = instance.get('service_name', None)
+        jdbc_driver = instance.get('jdbc_driver_path', None)
         tags = instance.get('tags', [])
-        return (self.server, user, password, service, tags)
+        return (self.server, user, password, service, jdbc_driver, tags)
 
-    def _get_connection(self, server, user, password, service, tags):
+    def _get_connection(self, server, user, password, service, jdbc_driver, tags):
         if tags is None:
             tags = []
         self.service_check_tags = [
             'server:%s' % server
         ] + tags
-        connect_string = '{0}/{1}@//{2}/{3}'.format(user, password, server, service)
+
+        if self.use_oracle_client:
+            connect_string = CX_CONNECT_STRING.format(user, password, server, service)
+        else:
+            connect_string = JDBC_CONNECT_STRING.format(server, service)
+
         try:
-            con = cx_Oracle.connect(connect_string)
+            if self.use_oracle_client:
+                con = cx_Oracle.connect(connect_string)
+            else:
+                if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                    jpype.attachThreadToJVM()
+                    jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                        jpype.java.lang.ClassLoader.getSystemClassLoader())
+                con = jdb.connect(ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
+
             self.log.debug("Connected to Oracle DB")
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=self.service_check_tags)
+        except jpype.JException(jpype.java.lang.RuntimeException), e:
+            if e.message() == "Class {} not found".format(ORACLE_DRIVER_CLASS):
+                msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
+                is available.
+                For the Oracle instant client, see:
+                http://www.oracle.com/technetwork/database/features/instant-client/index.html
+                You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
+
+                For the JDBC Driver, see:
+                http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+                You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
+                configuration file of the check.
+                """
+                self.log.error(msg)
+            raise
         except Exception, e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=self.service_check_tags)
@@ -101,11 +136,12 @@ class Oracle(AgentCheck):
             "ORDER BY BEGIN_TIME"
         cur = con.cursor()
         cur.execute(query)
-        for row in cur:
+        for row in cur.fetchall():
             metric_name = row[0]
             metric_value = row[1]
             if metric_name in self.SYS_METRICS:
                 self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
+        cur.close()
 
     def _get_tablespace_metrics(self, con, tags):
         if tags is None:
@@ -113,7 +149,7 @@ class Oracle(AgentCheck):
         query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
         cur = con.cursor()
         cur.execute(query)
-        for row in cur:
+        for row in cur.fetchall():
             tablespace_tag = 'tablespace:%s' % row[0]
             if row[1] is None:
                 # mark tablespace as offline if sum(BYTES) is null
@@ -137,3 +173,4 @@ class Oracle(AgentCheck):
             self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
             self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])
+        cur.close()
