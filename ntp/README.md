@@ -17,10 +17,7 @@ Default NTP servers reached:
 ## Setup
 ### Installation
 
-To install the check on the agent:
-```
-/opt/datadog-agent/embedded/bin/pip install .
-```
+The NTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 

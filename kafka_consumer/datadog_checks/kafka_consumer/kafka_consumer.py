@@ -156,44 +156,25 @@ class KafkaCheck(AgentCheck):
         for cli in self.kafka_clients.itervalues():
             cli.close()
 
-    def _get_instance_key(self, instance):
-        servers = instance.get('kafka_connect_str')
-        key = None
-        if isinstance(servers, basestring):
-            key = servers
-        elif isinstance(servers, list):
-            key = ",".join(servers)
-        else:
-            raise BadKafkaConsumerConfiguration('kafka_connect_str should be string or list of strings')
-
-        return key
-
     def _get_kafka_client(self, instance):
         kafka_conn_str = instance.get('kafka_connect_str')
-        if not kafka_conn_str:
-            raise BadKafkaConsumerConfiguration('Bad instance configuration')
+        if not isinstance(kafka_conn_str, (basestring, list)):
+            raise BadKafkaConsumerConfiguration(
+                    'kafka_connect_str should be string or list of strings')
 
-        instance_key = self._get_instance_key(instance)
+        instance_key = tuple(kafka_conn_str)  # cast to tuple in case it's a list
         if instance_key not in self.kafka_clients:
-            conf_security_protocol = instance.get('security_protocol', 'PLAINTEXT')
-            if conf_security_protocol == 'SSL':
-                conf_ssl_cafile = instance.get('ssl_cafile')
-                conf_ssl_check_hostname = instance.get('ssl_check_hostname', True)
-                conf_ssl_certfile = instance.get('ssl_certfile')
-                conf_ssl_keyfile = instance.get('ssl_keyfile')
-                conf_ssl_password = instance.get('ssl_password')
-                cli = KafkaClient(bootstrap_servers=kafka_conn_str,
-                                  client_id='dd-agent',
-                                  security_protocol=conf_security_protocol,
-                                  ssl_cafile=conf_ssl_cafile,
-                                  ssl_check_hostname=conf_ssl_check_hostname,
-                                  ssl_certfile=conf_ssl_certfile,
-                                  ssl_keyfile=conf_ssl_keyfile,
-                                  ssl_password=conf_ssl_password)
-                self.kafka_clients[instance_key] = cli
-            else:
-                cli = KafkaClient(bootstrap_servers=kafka_conn_str, client_id='dd-agent')
-                self.kafka_clients[instance_key] = cli
+            # While we check for SSL params, if not present they will default
+            # to the kafka-python values for plaintext connections
+            cli = KafkaClient(bootstrap_servers=kafka_conn_str,
+                    client_id='dd-agent',
+                    security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
+                    ssl_cafile=instance.get('ssl_cafile'),
+                    ssl_check_hostname=instance.get('ssl_check_hostname', True),
+                    ssl_certfile=instance.get('ssl_certfile'),
+                    ssl_keyfile=instance.get('ssl_keyfile'),
+                    ssl_password=instance.get('ssl_password'))
+            self.kafka_clients[instance_key] = cli
 
         return self.kafka_clients[instance_key]
 
