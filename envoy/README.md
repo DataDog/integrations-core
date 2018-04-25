@@ -1,9 +1,9 @@
+# Agent Check: Envoy
 ## Overview
 
 This check collects distributed system observability metrics from [Envoy](https://www.envoyproxy.io).
 
 ## Setup
-
 ### Installation
 
 The Envoy check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your server.
@@ -16,7 +16,7 @@ Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [s
 
 Be sure the Datadog Agent can access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin).
 
-#### Via Istio
+#### via Istio
 
 If you are using Envoy as part of [Istio](https://istio.io), to access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin) you need to set Istio's [proxyAdminPort](https://istio.io/docs/reference/config/istio.mesh.v1alpha1.html#ProxyConfig).
 
@@ -28,7 +28,7 @@ There are 2 ways to setup the `/stats` endpoint:
 
 Here's an example Envoy admin configuration:
 
-```
+```yaml
 admin:
   access_log_path: "/dev/null"
   address:
@@ -43,7 +43,7 @@ Create a listener/vhost that routes to the admin endpoint (Envoy connecting to i
 
 Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
 
-```
+```yaml
 admin:
   access_log_path: /dev/null
   address:
@@ -93,12 +93,14 @@ static_resources:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `envoy` under the Checks section.
 
-## Data Collected
+## Compatibility
 
+The Envoy check is compatible with all platforms.
+
+## Data Collected
 ### Metrics
 
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv) for a list of metrics provided by this check.
-
 See [metrics.py](https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py) for a list of tags sent by each metric.
 
 ### Events
