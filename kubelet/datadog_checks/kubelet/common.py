@@ -88,7 +88,9 @@ class ContainerFilter(object):
         self.static_pod_uids = set()
         self.cache = {}
 
-        for pod in podlist.get('items'):
+        pods = podlist.get('items') or []
+
+        for pod in pods:
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             if is_static_pending_pod(pod):
