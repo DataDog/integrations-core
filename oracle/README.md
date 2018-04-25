@@ -8,7 +8,16 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 ### Installation
 
-In order to use the Oracle integration, install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle][1].
+In order to use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions we are unable to include these libraries in our agent, but you can download them directly from Oracle.
+
+#### Steps for the JDBC Driver
+
+- [Download][9] the jar file
+- Add the path to the downloaded file in your $CLASSPATH, or add it to the check configuration file under `jdbc_driver_path`, as in the [sample oracle.yaml][4].
+
+#### Steps for the Instant Client
+
+Go to the [download page][1]
 
 You will need to install the Instant Client Basic and SDK packages.
 
@@ -36,6 +45,8 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
 **Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][2] or [systemd][3] for more information on how to configured these settings.
+
+#### After installing either the JDBC Driver or the Instant Client
 
 Finally, create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
@@ -100,3 +111,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [7]: http://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/
+[9]: http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html

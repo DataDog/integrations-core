@@ -56,10 +56,9 @@ class Oracle(AgentCheck):
             cx_Oracle.clientversion()
             self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
         except cx_Oracle.DatabaseError, e:
-            self.log.error(e)
             # Fallback to JDBC
             self.use_oracle_client = False
-            self.log.warning('Oracle instant client unavailable, falling back to JDBC')
+            self.log.info('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
 
         server, user, password, service, jdbc_driver, tags = self._get_config(instance)
 
@@ -98,30 +97,31 @@ class Oracle(AgentCheck):
             if self.use_oracle_client:
                 con = cx_Oracle.connect(connect_string)
             else:
-                if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
-                    jpype.attachThreadToJVM()
-                    jpype.java.lang.Thread.currentThread().setContextClassLoader(
-                        jpype.java.lang.ClassLoader.getSystemClassLoader())
-                con = jdb.connect(ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
+                try:
+                    if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                        jpype.attachThreadToJVM()
+                        jpype.java.lang.Thread.currentThread().setContextClassLoader(
+                            jpype.java.lang.ClassLoader.getSystemClassLoader())
+                    con = jdb.connect(ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
+                except jpype.JException(jpype.java.lang.RuntimeException), e:
+                    if e.message() == "Class {} not found".format(ORACLE_DRIVER_CLASS):
+                        msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
+                        is available.
+                        For the Oracle instant client, see:
+                        http://www.oracle.com/technetwork/database/features/instant-client/index.html
+                        You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
+
+                        For the JDBC Driver, see:
+                        http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+                        You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
+                        configuration file of the check.
+                        """
+                        self.log.error(msg)
+                    raise
 
             self.log.debug("Connected to Oracle DB")
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=self.service_check_tags)
-        except jpype.JException(jpype.java.lang.RuntimeException), e:
-            if e.message() == "Class {} not found".format(ORACLE_DRIVER_CLASS):
-                msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
-                is available.
-                For the Oracle instant client, see:
-                http://www.oracle.com/technetwork/database/features/instant-client/index.html
-                You will also need to ensure the `LD_LIBRARY_PATH` is also updated so the libs are reachable.
-
-                For the JDBC Driver, see:
-                http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-                You will also need to ensure the jar is either listed in your $CLASSPATH or in the yaml
-                configuration file of the check.
-                """
-                self.log.error(msg)
-            raise
         except Exception, e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=self.service_check_tags)
