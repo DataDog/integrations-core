@@ -29,15 +29,7 @@ The `allowed_metrics` item in the `init_config` section allows to specify the me
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `gitlab_runner` under the Checks section:
-
-    Checks
-    ======
-
-        gitlab_runner
-        -----------
-          - instance #0 [OK]
-          - Collected 10 metrics, 0 events & 2 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `gitlab_runner` under the Checks section.
 
 ## Compatibility
 

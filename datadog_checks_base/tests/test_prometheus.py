@@ -257,6 +257,17 @@ def test_process_send_histograms_buckets(bin_data, mocked_prometheus_check, ref_
     check.process_metric.assert_called_with(ref_gauge, instance=None, send_histograms_buckets=False)
 
 
+def test_process_send_monotonic_counter(bin_data, mocked_prometheus_check, ref_gauge):
+    """ Checks that the send_monotonic_counter parameter is passed along """
+    endpoint = "http://fake.endpoint:10055/metrics"
+    check = mocked_prometheus_check
+    check.poll = mock.MagicMock(
+        return_value=MockResponse(bin_data, protobuf_content_type))
+    check.process_metric = mock.MagicMock()
+    check.process(endpoint, send_monotonic_counter=False, instance=None)
+    check.poll.assert_called_with(endpoint)
+    check.process_metric.assert_called_with(ref_gauge, instance=None, send_monotonic_counter=False)
+
 def test_process_instance_with_tags(bin_data, mocked_prometheus_check, ref_gauge):
     """ Checks that an instances with tags passes them as custom tag """
     endpoint = "http://fake.endpoint:10055/metrics"

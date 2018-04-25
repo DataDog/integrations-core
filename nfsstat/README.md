@@ -15,15 +15,7 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nfsstat` under the Checks section:
-
-    Checks
-    ======
-
-        nfsstat
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nfsstat` under the Checks section.
 
 ## Compatibility
 

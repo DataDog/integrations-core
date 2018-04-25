@@ -43,23 +43,7 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `process` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    process
-    -------
-      - instance #0 [OK]
-      - instance #1 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-Each instance configured in `process.yaml` should have one `instance #<num> [OK]` line in the output, regardless of how many search_strings it might be configured with.
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `process` under the Checks section.
 
 ## Compatibility
 

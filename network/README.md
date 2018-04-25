@@ -30,20 +30,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `network` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    network
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `network` under the Checks section.
 
 ## Compatibility
 

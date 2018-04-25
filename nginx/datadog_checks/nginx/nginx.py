@@ -1,20 +1,16 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import re
 import urlparse
 import time
 from datetime import datetime
 
-# 3rd party
 import requests
 import simplejson as json
 
-# project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 
 UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
@@ -46,6 +42,7 @@ TAGGED_KEYS = {
     'slabs': 'slab',
     'slots': 'slot'
 }
+
 
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
@@ -86,7 +83,8 @@ class Nginx(AgentCheck):
             # since we can't get everything in one place anymore.
 
             for endpoint, nest in PLUS_API_ENDPOINTS.iteritems():
-                response = self._get_plus_api_data(instance, url, ssl_validation, auth, plus_api_version, endpoint, nest)
+                response = self._get_plus_api_data(instance, url, ssl_validation, auth,
+                                                   plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
@@ -158,13 +156,15 @@ class Nginx(AgentCheck):
         return r
 
     def _nest_payload(self, keys, payload):
-        # Nest a payload in a dict under the keys contained in `keys`
+        """
+        Nest a payload in a dict under the keys contained in `keys`
+        """
         if len(keys) == 0:
             return payload
-        else:
-            return {
-                keys[0]: self._nest_payload(keys[1:], payload)
-            }
+
+        return {
+            keys[0]: self._nest_payload(keys[1:], payload)
+        }
 
     def _get_plus_api_data(self, instance, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned

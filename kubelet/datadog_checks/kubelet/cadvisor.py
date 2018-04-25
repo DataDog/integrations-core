@@ -9,6 +9,7 @@ Collects metrics from cAdvisor instance
 from fnmatch import fnmatch
 import numbers
 from urlparse import urlparse
+import logging
 
 # 3p
 import requests
@@ -39,6 +40,11 @@ class CadvisorScraper(object):
     class, as it uses its AgentCheck facilities and class members.
     It is not possible to run it standalone.
     """
+    def __init__(self, *args, **kwargs):
+        super(CadvisorScraper, self).__init__(*args, **kwargs)
+
+        # The scraper needs its own logger
+        self.log = logging.getLogger(__name__)
 
     @staticmethod
     def detect_cadvisor(kubelet_url, cadvisor_port):

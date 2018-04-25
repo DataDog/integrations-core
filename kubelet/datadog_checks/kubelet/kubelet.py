@@ -111,7 +111,7 @@ class KubeletCheck(PrometheusCheck, CadvisorScraper):
             raise CheckException("Unable to find metrics_endpoint in config "
                                  "file or detect the kubelet URL automatically.")
 
-        self.metrics_url = instance.get('metrics_endpoint') or urljoin(endpoint, CADVISOR_METRICS_PATH)
+        self.metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
@@ -147,7 +147,7 @@ class KubeletCheck(PrometheusCheck, CadvisorScraper):
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.container_filter)
-        else:  # Prometheus
+        elif self.metrics_url:  # Prometheus
             self.process(self.metrics_url, send_histograms_buckets=send_buckets, instance=instance)
 
         # Free up memory

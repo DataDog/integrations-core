@@ -32,20 +32,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `riakcs` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    riakcs
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `riakcs` under the Checks section.
 
 ## Compatibility
 

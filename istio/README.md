@@ -36,23 +36,7 @@ Both endpoints need to be connected to the check for it to work. To learn more a
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `istio` under the Checks section:
-
-```
-  Checks
-  ======
-
-    [...]
-
-    istio
-    -----
-      - instance #0 [OK]
-      - Collected 168 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-If the status is not OK, see the Troubleshooting section.
+[Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `istio` under the Checks section.
 
 ## Compatibility
 

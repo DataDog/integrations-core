@@ -40,20 +40,7 @@ Add an item like the above to `instances` for each build configuration you want 
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `teamcity` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    teamcity
-    -------
-      - instance #0 [OK]
-      - Collected 0 metrics, 3 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `teamcity` under the Checks section.
 
 ## Compatibility
 
