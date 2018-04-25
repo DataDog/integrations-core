@@ -28,7 +28,7 @@ There are 2 ways to setup the `/stats` endpoint:
 
 Here's an example Envoy admin configuration:
 
-```yaml
+```
 admin:
   access_log_path: "/dev/null"
   address:
@@ -43,7 +43,7 @@ Create a listener/vhost that routes to the admin endpoint (Envoy connecting to i
 
 Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
 
-```yaml
+```
 admin:
   access_log_path: /dev/null
   address:
