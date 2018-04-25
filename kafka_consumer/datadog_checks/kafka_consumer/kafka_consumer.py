@@ -167,13 +167,13 @@ class KafkaCheck(AgentCheck):
             # While we check for SSL params, if not present they will default
             # to the kafka-python values for plaintext connections
             cli = KafkaClient(bootstrap_servers=kafka_conn_str,
-                    client_id='dd-agent',
-                    security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
-                    ssl_cafile=instance.get('ssl_cafile'),
-                    ssl_check_hostname=instance.get('ssl_check_hostname', True),
-                    ssl_certfile=instance.get('ssl_certfile'),
-                    ssl_keyfile=instance.get('ssl_keyfile'),
-                    ssl_password=instance.get('ssl_password'))
+                              client_id='dd-agent',
+                              security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
+                              ssl_cafile=instance.get('ssl_cafile'),
+                              ssl_check_hostname=instance.get('ssl_check_hostname', True),
+                              ssl_certfile=instance.get('ssl_certfile'),
+                              ssl_keyfile=instance.get('ssl_keyfile'),
+                              ssl_password=instance.get('ssl_password'))
             self.kafka_clients[instance_key] = cli
 
         return self.kafka_clients[instance_key]
