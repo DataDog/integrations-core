@@ -45,8 +45,6 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `process` under the Checks section.
 
-**Note**: Each instance configured in `process.yaml` should have one `instance #<num> [OK]` line in the output, regardless of how many search_strings it might be configured with.
-
 ## Compatibility
 
 The process check is compatible with all major platforms.
