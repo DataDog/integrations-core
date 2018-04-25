@@ -3,6 +3,7 @@
 This check collects distributed system observability metrics from [Envoy](https://www.envoyproxy.io).
 
 ## Setup
+
 ### Installation
 
 The Envoy check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your server.
