@@ -25,20 +25,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `twemproxy` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    twemproxy
-    -------
-      - instance #0 [OK]
-      - Collected 20 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `twemproxy` under the Checks section.
 
 ## Compatibility
 

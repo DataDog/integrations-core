@@ -37,20 +37,7 @@ Optionally, provide a `db_whitelist` and `db_blacklist` to control which databas
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `couch` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    couch
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `couch` under the Checks section.
 
 ## Data Collected
 ### Metrics

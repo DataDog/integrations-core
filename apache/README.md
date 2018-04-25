@@ -72,20 +72,7 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `apache` under the Checks section:
-
-```
-Checks
-======
-  [...]
-
-  apache
-  -------
-    - instance #0 [OK]
-    - Collected 26 metrics, 0 events & 1 service check
-
-  [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `apache` under the Checks section.
 
 ## Compatibility
 

@@ -17,15 +17,7 @@ Edit the `active_directory.yaml` file to collect Active Directory performance da
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `active_directory` under the Checks section:
-
-    Checks
-    ======
-
-        active_directory
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `active_directory` under the Checks section.
 
 ## Compatibility
 

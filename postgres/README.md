@@ -113,17 +113,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 **Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postgres` under the Checks section:
-
-```
-Checks
-======
-
-    postgres
-    -----------
-      - instance #0 [OK]
-      - Collected 39 metrics, 0 events & 7 service checks
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postgres` under the Checks section.
 
 ## Compatibility
 

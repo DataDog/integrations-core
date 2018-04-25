@@ -31,20 +31,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ssh_check` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    ssh_check
-    -------
-      - instance #0 [OK]
-      - Collected 1 metric, 0 events & 2 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ssh_check` under the Checks section.
 
 ## Compatibility
 

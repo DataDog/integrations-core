@@ -24,20 +24,7 @@ instances: [{}]
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `system_swap` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    system_swap
-    -------
-      - instance #0 [OK]
-      - Collected 2 metrics, 0 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `system_swap` under the Checks section.
 
 ## Compatibility
 

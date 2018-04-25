@@ -80,20 +80,7 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `supervisord` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    supervisord
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 4 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `supervisord` under the Checks section.
 
 ## Compatibility
 

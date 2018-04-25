@@ -30,20 +30,7 @@ Restart the Agent to start sending metrics and service checks to Datadog.
 
 ## Validation
 
-[Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `squid` under the Checks section:
-
-```
-    Checks
-    ======
-        [...]
-
-        squid
-        -----
-          - instance #0 [OK]
-          - Collected 40 metrics, 0 events & 1 service checks
-
-        [...]
-```
+[Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `squid` under the Checks section.
 
 ## Compatibility
 
