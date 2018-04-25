@@ -13,7 +13,7 @@ def freeze(o):
         return frozenset((k, freeze(v)) for k, v in iteritems(o))
 
     if isinstance(o, list):
-        return tuple(freeze(v) for v in o)
+        return tuple(freeze(v) for v in sorted(o))
 
     return o
 
