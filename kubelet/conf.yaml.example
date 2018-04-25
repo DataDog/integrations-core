@@ -15,6 +15,8 @@ instances:
     ###
     #
     # url of the kubelet metrics endpoint
+    # Pass an empty string, or set the cadvisor_port option to disable
+    # prometheus metrics collection
     # metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
     #
     # The histogram buckets can be noisy and generate a lot of tags.

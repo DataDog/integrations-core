@@ -135,6 +135,25 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     assert aggregator.metrics_asserted_pct == 100.0
 
 
+def test_kubelet_check_neither(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+
+    monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
+    monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
+
+    check.check({"cadvisor_port": 0, "metrics_endpoint": ""})
+
+    assert check.cadvisor_legacy_url is None
+    check.retrieve_pod_list.assert_called_once()
+    check._retrieve_node_spec.assert_called_once()
+    check._perform_kubelet_check.assert_called_once()
+    check.process_cadvisor.assert_not_called()
+    check.process.assert_not_called()
+
+
 def test_is_container_metric():
     false_metrics = [
         MockMetric('foo', []),
