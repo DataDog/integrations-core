@@ -616,5 +616,5 @@ class PrometheusScraper(object):
                 else:
                     self.log.debug("Metric value is not supported for metric {}.count.".format(name))
 
-    def _is_value_valid(val):
+    def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
