@@ -300,7 +300,7 @@ def manifest(ctx, update=None, fix=False, include_extras=False):
             if len(check_output.splitlines()) > 1:
                 output += check_output
                 if fix or update:
-                    new_manifest = '{}\n'.format(json.dumps(decoded, indent=2))
+                    new_manifest = '{}\n'.format(json.dumps(decoded, indent=2, separators=(',', ': ')))
                     with open(manifest_file, 'w') as f:
                         f.write(new_manifest)
 
