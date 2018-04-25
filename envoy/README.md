@@ -4,6 +4,7 @@
 This check collects distributed system observability metrics from [Envoy](https://www.envoyproxy.io).
 
 ## Setup
+
 ### Installation
 
 The Envoy check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your server.
@@ -26,9 +27,9 @@ There are 2 ways to setup the `/stats` endpoint:
 
 ##### Unsecured stats endpoint
 
-Here's an example Envoy admin configuration: 
+Here's an example Envoy admin configuration:
 
-```yaml
+```
 admin:
   access_log_path: "/dev/null"
   address:
@@ -43,7 +44,7 @@ Create a listener/vhost that routes to the admin endpoint (Envoy connecting to i
 
 Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
 
-```yaml
+```
 admin:
   access_log_path: /dev/null
   address:
