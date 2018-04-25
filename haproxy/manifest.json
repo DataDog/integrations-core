@@ -1,8 +1,7 @@
 {
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "name": "haproxy",
   "display_name": "haproxy",
-  "version": "1.2.1",
   "support": "core",
   "maintainer": "help@datadoghq.com",
   "supported_os": [
@@ -10,14 +9,15 @@
     "mac_os",
     "windows"
   ],
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
   "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
   "description": "The HAProxy integration helps to collect performance and avaialbility metrics from HAProxy instances.",
   "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b",
   "public_title": "Datadog-HAProxy Integration",
-  "categories":["web", "log collection"],
-  "type":"check",
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/haproxy/",
   "is_public": true,
   "has_logo": true

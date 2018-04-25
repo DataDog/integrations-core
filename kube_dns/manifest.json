@@ -6,12 +6,19 @@
   "name": "kube_dns",
   "short_description": "Track all your Kube DNS metrics with Datadog",
   "guid": "3c05ed97-bf34-4061-83c4-e742d7daa5f8",
-  "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "version": "1.3.0",
   "public_title": "Datadog-Kube DNS Integration",
-  "categories":["web", "network"],
-  "type":"check",
+  "categories": [
+    "web",
+    "network"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/kube_dns/",
   "is_public": true,
   "has_logo": true

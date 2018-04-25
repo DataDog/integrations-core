@@ -10,11 +10,15 @@
   ],
   "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
   "public_title": "Datadog-Memcache Integration",
-  "categories":["web", "caching"],
-  "type":"check",
-  "version": "1.2.0",
+  "categories": [
+    "web",
+    "caching"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/mcache/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/memcached"]
+  "aliases": [
+    "/integrations/memcached"
+  ]
 }
