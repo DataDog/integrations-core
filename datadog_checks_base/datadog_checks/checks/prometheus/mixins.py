@@ -523,23 +523,26 @@ class PrometheusScraper(object):
                 custom_hostname = self._get_hostname(hostname, metric)
                 if message.type == 0:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    if send_monotonic_counter:
-                        self._submit_monotonic_count(metric_name, val, metric, custom_tags, custom_hostname)
+                    if self._is_value_valid(val):
+                        if send_monotonic_counter:
+                            self._submit_monotonic_count(metric_name, val, metric, custom_tags, custom_hostname)
+                        else:
+                            self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
                     else:
-                        self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                        self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
                 elif message.type == 4:
                     self._submit_gauges_from_histogram(metric_name, metric, send_histograms_buckets, custom_tags, custom_hostname)
                 elif message.type == 2:
                     self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
                 else:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
-                    if not (isnan(val) or isinf(val)):
+                    if self._is_value_valid(val):
                         if message.name in self.rate_metrics:
                             self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
                         else:
                             self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
                     else:
-                        self.log.warning("Metric value is not supported for metric {}.".format(metric_name))
+                        self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
 
         else:
             self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))
@@ -570,13 +573,22 @@ class PrometheusScraper(object):
             custom_tags = []
         # summaries do not have a value attribute
         val = getattr(metric, self.METRIC_TYPES[2]).sample_count
-        self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+        if self._is_value_valid(val):
+            self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+        else:
+            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
         val = getattr(metric, self.METRIC_TYPES[2]).sample_sum
-        self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+        if self._is_value_valid(val):
+            self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+        else:
+            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
         for quantile in getattr(metric, self.METRIC_TYPES[2]).quantile:
             val = quantile.value
             limit = quantile.quantile
-            self._submit_gauge("{}.quantile".format(name), val, metric, custom_tags=custom_tags+["quantile:{}".format(limit)], hostname=hostname)
+            if self._is_value_valid(val):
+                self._submit_gauge("{}.quantile".format(name), val, metric, custom_tags=custom_tags+["quantile:{}".format(limit)], hostname=hostname)
+            else:
+                self.log.debug("Metric value is not supported for metric {}.quantile.".format(name))
 
     def _submit_gauges_from_histogram(self, name, metric, send_histograms_buckets=True, custom_tags=None, hostname=None):
         """
@@ -586,11 +598,23 @@ class PrometheusScraper(object):
             custom_tags = []
         # histograms do not have a value attribute
         val = getattr(metric, self.METRIC_TYPES[4]).sample_count
-        self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+        if self._is_value_valid(val):
+            self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+        else:
+            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
         val = getattr(metric, self.METRIC_TYPES[4]).sample_sum
-        self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+        if self._is_value_valid(val):
+            self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+        else:
+            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
         if send_histograms_buckets:
             for bucket in getattr(metric, self.METRIC_TYPES[4]).bucket:
                 val = bucket.cumulative_count
                 limit = bucket.upper_bound
-                self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags+["upper_bound:{}".format(limit)], hostname=hostname)
+                if self._is_value_valid(val):
+                    self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags+["upper_bound:{}".format(limit)], hostname=hostname)
+                else:
+                    self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+
+    def _is_value_valid(val):
+        return not (isnan(val) or isinf(val))
