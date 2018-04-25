@@ -129,10 +129,6 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "elasticsearch.thread_pool.management.threads": ("gauge", "thread_pool.management.threads"),
     "elasticsearch.thread_pool.management.queue": ("gauge", "thread_pool.management.queue"),
     "elasticsearch.thread_pool.management.rejected": ("rate", "thread_pool.management.rejected"),
-    "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
-    "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
-    "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
-    "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
     "elasticsearch.thread_pool.refresh.active": ("gauge", "thread_pool.refresh.active"),
     "elasticsearch.thread_pool.refresh.threads": ("gauge", "thread_pool.refresh.threads"),
     "elasticsearch.thread_pool.refresh.queue": ("gauge", "thread_pool.refresh.queue"),
@@ -145,10 +141,6 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "elasticsearch.thread_pool.snapshot.threads": ("gauge", "thread_pool.snapshot.threads"),
     "elasticsearch.thread_pool.snapshot.queue": ("gauge", "thread_pool.snapshot.queue"),
     "elasticsearch.thread_pool.snapshot.rejected": ("rate", "thread_pool.snapshot.rejected"),
-    "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
-    "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
-    "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
-    "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
     "elasticsearch.thread_pool.warmer.active": ("gauge", "thread_pool.warmer.active"),
     "elasticsearch.thread_pool.warmer.threads": ("gauge", "thread_pool.warmer.threads"),
     "elasticsearch.thread_pool.warmer.queue": ("gauge", "thread_pool.warmer.queue"),
@@ -172,6 +164,18 @@ STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
     "elasticsearch.fs.total.total_in_bytes": ("gauge", "fs.total.total_in_bytes"),
     "elasticsearch.fs.total.free_in_bytes": ("gauge", "fs.total.free_in_bytes"),
     "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
+}
+
+ADDITIONAL_METRICS_PRE_5_0_0 = {
+    "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
+    "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
+    "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
+    "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
+    "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
+    "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
+    "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
+    "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
+
 }
 
 INDEX_STATS_METRICS = {  # Metrics for index level
@@ -346,6 +350,7 @@ log = logging.getLogger('test_elastic')
 CHECK_NAME = "elastic"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+USER = "elastic"
 PASSWORD = "changeme"
 HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
 PORT = '9200'
@@ -364,7 +369,7 @@ AGENT_CONFIG = {
 
 INSTANCE_CONFIG = {
         'instances': [
-            {'url': URL, 'password': PASSWORD, 'tags': TAGS},  # One with tags not external
+            {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS},  # One with tags not external
             {'url': BAD_URL, 'password': PASSWORD},  # One bad url
         ]
 }
@@ -382,7 +387,7 @@ def spin_up_elastic():
     attempts = 1
 
     while True:
-        if attempts >= 10:
+        if attempts >= 30:
             subprocess.check_call(args + ["down"], env=env)
             raise Exception("ES failed to boot...")
         try:
@@ -408,11 +413,11 @@ def aggregator():
 
 def get_es_version():
     version = os.environ.get("ELASTIC_VERSION")
+    dd_versions = {'0_90': [0, 90, 13], '1_0': [1, 0, 3], '1_1': [1, 1, 2], '1_2': [1, 2, 4]}
     if version is None:
-        return [1, 3, 9]  # Need to default to something more recent
+        return [6, 0, 1]
     if '_' in version:
-        version_formatted = [int(k) for k in version.split("_")]
-        return version_formatted
+        return dd_versions[version]
     else:
         return [int(k) for k in version.split(".")]
 
@@ -437,7 +442,10 @@ def test_check(aggregator, spin_up_elastic):
     instance = elastic_check.get_instance_config(INSTANCE_CONFIG['instances'][0])
     es_version = elastic_check._get_es_version(instance)
 
-    assert es_version[:2] == get_es_version()
+    assert es_version == get_es_version()
+
+    if es_version < [5, 0, 0]:
+        expected_metrics.update(ADDITIONAL_METRICS_PRE_5_0_0)
 
     if es_version >= [0, 90, 5]:
         expected_metrics.update(ADDITIONAL_METRICS_POST_0_90_5)
@@ -493,6 +501,9 @@ def test_check(aggregator, spin_up_elastic):
         set(expected_metrics.keys()) - set(CLUSTER_HEALTH_METRICS.keys()) -
         set(CLUSTER_PENDING_TASKS.keys())
     )
+
+    # index_writer_max_memory metric was removed in v5
+    deprecated_metrics = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
     for m_name, desc in expected_metrics.iteritems():
         for hostname, m_tags in contexts:
             m_tags = m_tags + CLUSTER_TAG
@@ -504,7 +515,10 @@ def test_check(aggregator, spin_up_elastic):
                 m_tags = m_tags + [u"node_name:batman"]
 
             if desc[0] == "gauge":
-                aggregator.assert_metric(m_name)
+                if es_version < [5, 0, 0]:
+                    aggregator.assert_metric(m_name)
+                elif not (m_name in deprecated_metrics):
+                    aggregator.assert_metric(m_name)
 
     good_sc_tags = ['host:{0}'.format(HOST), 'port:{0}'.format(PORT)]
     aggregator.assert_service_check('elasticsearch.can_connect',
@@ -580,7 +594,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
         document count when "number_of_replicas" is set to 1 """
     elastic_latency = 10
     config = {'instances': [
-        {'url': 'http://localhost:9200', 'pshard_stats': True, 'password': PASSWORD}
+        {'url': 'http://localhost:9200', 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
     ]}
 
     requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
@@ -602,13 +616,13 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
     # Our pshard metrics are getting sent, let's check that they're accurate
     # Note: please make sure you don't install Maven on the CI for future
     # elastic search CI integrations. It would make the line below fail :/
-    aggregator.assert_metric('elasticsearch.primaries.docs.count', value=2)
+    aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
 def test_index_metrics(aggregator, spin_up_elastic):
     # Tests that index level metrics are forwarded
     config = {'instances': [
-        {'url': 'http://localhost:9200', 'index_stats': True, 'password': PASSWORD}
+        {'url': 'http://localhost:9200', 'index_stats': True, 'username': USER, 'password': PASSWORD}
     ]}
     index_metrics = dict(INDEX_STATS_METRICS)
     elastic_check = ESCheck(CHECK_NAME, {}, {})

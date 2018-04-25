@@ -170,10 +170,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.management.threads": ("gauge", "thread_pool.management.threads"),
         "elasticsearch.thread_pool.management.queue": ("gauge", "thread_pool.management.queue"),
         "elasticsearch.thread_pool.management.rejected": ("rate", "thread_pool.management.rejected"),
-        "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
-        "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
-        "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
-        "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
         "elasticsearch.thread_pool.refresh.active": ("gauge", "thread_pool.refresh.active"),
         "elasticsearch.thread_pool.refresh.threads": ("gauge", "thread_pool.refresh.threads"),
         "elasticsearch.thread_pool.refresh.queue": ("gauge", "thread_pool.refresh.queue"),
@@ -186,10 +182,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.snapshot.threads": ("gauge", "thread_pool.snapshot.threads"),
         "elasticsearch.thread_pool.snapshot.queue": ("gauge", "thread_pool.snapshot.queue"),
         "elasticsearch.thread_pool.snapshot.rejected": ("rate", "thread_pool.snapshot.rejected"),
-        "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
-        "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
-        "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
-        "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
         "elasticsearch.thread_pool.warmer.active": ("gauge", "thread_pool.warmer.active"),
         "elasticsearch.thread_pool.warmer.threads": ("gauge", "thread_pool.warmer.threads"),
         "elasticsearch.thread_pool.warmer.queue": ("gauge", "thread_pool.warmer.queue"),
@@ -213,6 +205,17 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.total_in_bytes": ("gauge", "fs.total.total_in_bytes"),
         "elasticsearch.fs.total.free_in_bytes": ("gauge", "fs.total.free_in_bytes"),
         "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
+    }
+
+    ADDITIONAL_METRICS_PRE_5_0_0 = {
+        "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
+        "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
+        "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
+        "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
+        "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
+        "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
+        "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
+        "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
     }
 
     INDEX_STATS_METRICS = {  # Metrics for index level
@@ -659,6 +662,9 @@ class ESCheck(AgentCheck):
 
         if version >= [1, 0, 0]:
             additional_metrics = self.PRIMARY_SHARD_METRICS_POST_1_0
+
+        if version < [5, 0, 0]:
+            stats_metrics.update(self.ADDITIONAL_METRICS_PRE_5_0_0)
 
         pshard_stats_metrics.update(additional_metrics)
 
