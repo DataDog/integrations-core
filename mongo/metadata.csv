@@ -136,9 +136,9 @@ mongodb.metrics.repl.network.getmores.numps,gauge,,operation,second,Number of ge
 mongodb.metrics.repl.network.getmores.totalmillisps,gauge,,fraction,,Fraction of time (ms/s) required to collect data from getmore operations.,0,mongodb,repl network getmores totalmillis ps
 mongodb.metrics.repl.network.opsps,gauge,,operation,second,Number of operations read from the replication source per second.,0,mongodb,repl network ops ps
 mongodb.metrics.repl.network.readerscreatedps,gauge,,process,second,Number of oplog query processes created per second.,0,mongodb,repl network readerscreated ps
-mongodb.metrics.repl.preload.docs.numps,rate,,doc,,Number of documents loaded during the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.docs.numps,rate,,document,,Number of documents loaded during the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.repl.preload.docs.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
-mongodb.metrics.repl.preload.indexes.numps,rate,,doc,,Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.indexes.numps,rate,,document,,Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.repl.preload.indexes.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.ttl.deleteddocumentsps,gauge,,document,second,Number of documents deleted from collections with a ttl index per second.,0,mongodb,ttl deleted docs ps
 mongodb.metrics.ttl.passesps,gauge,,operation,second,Number of times per second the background process removes documents from collections with a ttl index.,0,mongodb,ttl passes ps
@@ -164,7 +164,7 @@ mongodb.replset.health,gauge,,,,Member health value of the replica set: conveys 
 mongodb.replset.replicationlag,gauge,,second,,Delay between a write operation on the primary and its copy to a secondary.,-1,mongodb,replication lag
 mongodb.replset.state,gauge,,,,State of a replica that reflects its disposition within the set.,0,mongodb,replset state
 mongodb.replset.votefraction,gauge,,fraction,,Fraction of votes a server will cast in a replica set election.,0,mongodb,votes fraction
-mongodb.replset.votes,gauge,,vote,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
+mongodb.replset.votes,gauge,,item,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
 mongodb.stats.datasize,gauge,,byte,,Total size of the data held in this database including the padding factor.,0,mongodb,stats datasize
 mongodb.stats.indexes,gauge,,index,,Total number of indexes across all collections in the database.,0,mongodb,stats indexes
 mongodb.stats.indexsize,gauge,,byte,,Total size of all indexes created on this database.,0,mongodb,stats indexsize
@@ -197,7 +197,7 @@ mongodb.collection.maxSize,gauge,,byte,,Maximum size of a capped collection in b
 mongodb.collection.storageSize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
 mongodb.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,mongodb,number of indices on collection
 mongodb.collection.indexSizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
-mongodb.collection.indexes.accesses.ops,gauge,,access,,Number of time the index was used.,0,mongodb,index usage
+mongodb.collection.indexes.accesses.ops,gauge,,event,,Number of time the index was used.,0,mongodb,index usage
 mongodb.usage.commands.count,rate,,command,,Number of commands since server start,0,mongodb,
 mongodb.usage.commands.time,gauge,,microsecond,,Total time spent performing commands in microseconds,-1,mongodb,
 mongodb.usage.getmore.count,rate,,fetch,,Number of getmore since server start,0,mongodb,
