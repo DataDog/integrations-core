@@ -67,7 +67,10 @@ class Envoy(AgentCheck):
             except ValueError:
                 continue
 
-            value = int(value)
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                continue
 
             try:
                 metric, tags, method = parse_metric(envoy_metric)
