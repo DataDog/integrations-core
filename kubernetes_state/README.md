@@ -18,15 +18,7 @@ Edit the `kubernetes_state.yaml` file to point to your server and port, set the 
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubernetes_state` under the Checks section:
-
-    Checks
-    ======
-
-        kubernetes_state
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubernetes_state` under the Checks section.
 
 ## Compatibility
 

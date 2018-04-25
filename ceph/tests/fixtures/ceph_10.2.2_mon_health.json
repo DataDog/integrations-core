@@ -219,7 +219,7 @@
         "monmap": {
             "created": "2016-09-15 17:01:16.908541",
             "epoch": 1,
-            "fsid": "7d375c2a-902a-4990-93fd-ce21a296f444",
+            "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
             "modified": "2016-09-15 17:01:16.908541",
             "mons": [
                 {
@@ -235,7 +235,7 @@
             0
         ],
         "rank": 0,
-        "state": "leader",
+        "state": "peon",
         "sync_provider": []
     },
     "osd_perf": {
@@ -316,7 +316,7 @@
     ],
     "status": {
         "election_epoch": 3,
-        "fsid": "7d375c2a-902a-4990-93fd-ce21a296f444",
+        "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
         "fsmap": {
             "by_rank": [
                 {
@@ -375,7 +375,7 @@
         "monmap": {
             "created": "2016-09-15 17:01:16.908541",
             "epoch": 1,
-            "fsid": "7d375c2a-902a-4990-93fd-ce21a296f444",
+            "fsid": "e0efcf84-e8ed-4916-8ce1-9c70242d390a",
             "modified": "2016-09-15 17:01:16.908541",
             "mons": [
                 {

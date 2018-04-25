@@ -81,20 +81,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `zk` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    zk
-    -------
-      - instance #0 [OK]
-      - Collected 14 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `zk` under the Checks section.
 
 ## Compatibility
 

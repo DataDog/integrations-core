@@ -131,20 +131,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nginx` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    nginx
-    -----
-      - instance #0 [OK]
-      - Collected 7 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nginx` under the Checks section.
 
 ## Compatibility
 

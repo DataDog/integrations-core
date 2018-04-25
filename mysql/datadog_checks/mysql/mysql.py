@@ -18,8 +18,8 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 # project
-from config import _is_affirmative
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -321,7 +321,7 @@ class MySql(AgentCheck):
         user = instance.get('user', '')
         password = str(instance.get('pass', ''))
         tags = instance.get('tags', [])
-        options = instance.get('options', {}) or {} # options could be None if empty in the YAML
+        options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
         queries = instance.get('queries', [])
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', 10)
@@ -547,17 +547,16 @@ class MySql(AgentCheck):
             binlog_running = results.get('Binlog_enabled', False)
             # slaves will only be collected iff user has PROCESS privileges.
             slaves = self._collect_scalar('Slaves_connected', results)
+            slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
+            slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
+            if slave_io_running:
+                slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
+            if slave_sql_running:
+                slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
             if self._version_compatible(db, host, (5, 7, 0)):
-                slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
-                slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
-                if slave_io_running:
-                    slave_io_running = any(v.lower().strip() == 'yes' for v in slave_io_running.itervalues())
-                if slave_sql_running:
-                    slave_sql_running = any(v.lower().strip() == 'yes' for v in slave_sql_running.itervalues())
-
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
                         slave_running_status = AgentCheck.OK
@@ -566,6 +565,10 @@ class MySql(AgentCheck):
                     else:
                         # not everything is running smoothly
                         slave_running_status = AgentCheck.WARNING
+            elif slave_running.lower().strip() == 'off':
+                if not (slave_io_running is None and slave_sql_running is None):
+                    if not slave_io_running and not slave_sql_running:
+                        slave_running_status = AgentCheck.CRITICAL
 
             # if we don't yet have a status - inspect
             if slave_running_status == AgentCheck.UNKNOWN:
@@ -607,12 +610,15 @@ class MySql(AgentCheck):
         if isinstance(queries, list):
             for index, check in enumerate(queries[:self.MAX_CUSTOM_QUERIES]):
                 total_tags = tags + check.get('tags', [])
-                self._collect_dict(check['type'], {check['field']: check['metric']}, check['query'], db, tags=total_tags)
+                self._collect_dict(check['type'],
+                                   {check['field']: check['metric']},
+                                   check['query'],
+                                   db,
+                                   tags=total_tags)
 
             if len(queries) > self.MAX_CUSTOM_QUERIES:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest."
                              % self.MAX_CUSTOM_QUERIES)
-
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
@@ -621,7 +627,6 @@ class MySql(AgentCheck):
             return True
 
         return False
-
 
     def _collect_metadata(self, db, host):
         version = self._get_version(db, host)
@@ -960,7 +965,8 @@ class MySql(AgentCheck):
             # No data from SHOW ENGINE STATUS, even though the engine is enabled.
             # EG: This could be an Aurora Read Instance
             self.warning("""'SHOW ENGINE INNODB STATUS' returned no data.
-                If you are running an Aurora Read Instace, this is expected and you should disable the innodb metrics collection""")
+                If you are running an Aurora Read Instace, \
+                this is expected and you should disable the innodb metrics collection""")
             return {}
 
         innodb_status = cursor.fetchone()
@@ -1077,9 +1083,9 @@ class MySql(AgentCheck):
                         # (len(row) == 16) Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
                         if self._are_values_numeric(row[4:8]) and self._are_values_numeric(row[11:15]):
                             results['Innodb_pending_normal_aio_reads'] = (long(row[4]) + long(row[5]) +
-                                                                      long(row[6]) + long(row[7]))
+                                                                          long(row[6]) + long(row[7]))
                             results['Innodb_pending_normal_aio_writes'] = (long(row[11]) + long(row[12]) +
-                                                                       long(row[13]) + long(row[14]))
+                                                                           long(row[13]) + long(row[14]))
 
                         # (len(row) == 16) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0] ,
                         elif self._are_values_numeric(row[4:9]) and self._are_values_numeric(row[12:15]):
@@ -1092,7 +1098,8 @@ class MySql(AgentCheck):
                         results['Innodb_pending_normal_aio_reads'] = long(row[4])
                         results['Innodb_pending_normal_aio_writes'] = long(row[12])
                     elif len(row) == 22:
-                        # (len(row) == 22) Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+                        # (len(row) == 22)
+                        # Pending normal aio reads: 0 [0, 0, 0, 0, 0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
                         results['Innodb_pending_normal_aio_reads'] = long(row[4])
                         results['Innodb_pending_normal_aio_writes'] = long(row[16])
                 except ValueError as e:
@@ -1271,7 +1278,8 @@ class MySql(AgentCheck):
         # in microseconds
         sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM
             (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
-                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us` FROM performance_schema.events_statements_summary_by_digest
+                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us`
+                    FROM performance_schema.events_statements_summary_by_digest
                     ORDER BY `avg_us` ASC) p,
                 (SELECT @rownum := 0) r) q
             WHERE q.`ro` > ROUND(.95*@rownum)
@@ -1283,7 +1291,8 @@ class MySql(AgentCheck):
                 cursor.execute(sql_95th_percentile)
 
                 if cursor.rowcount < 1:
-                    self.warning("Failed to fetch records from the perf schema 'events_statements_summary_by_digest' table.")
+                    self.warning("Failed to fetch records from the perf schema\
+                                 'events_statements_summary_by_digest' table.")
                     return None
 
                 row = cursor.fetchone()
@@ -1308,7 +1317,8 @@ class MySql(AgentCheck):
                 cursor.execute(sql_avg_query_run_time)
 
                 if cursor.rowcount < 1:
-                    self.warning("Failed to fetch records from the perf schema 'events_statements_summary_by_digest' table.")
+                    self.warning("Failed to fetch records from the perf schema \
+                                 'events_statements_summary_by_digest' table.")
                     return None
 
                 schema_query_avg_run_time = {}
@@ -1363,18 +1373,19 @@ class MySql(AgentCheck):
                 results['Qcache_utilization'] = 0
             else:
                 results['Qcache_utilization'] = (float(results['Qcache_hits']) /
-                                                (int(results['Qcache_inserts']) +
-                                                int(results['Qcache_not_cached']) +
-                                                int(results['Qcache_hits'])) * 100)
+                                                 (int(results['Qcache_inserts']) +
+                                                  int(results['Qcache_not_cached']) +
+                                                  int(results['Qcache_hits'])) * 100)
 
             if all(v is not None for v in (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)):
                 if not (int(results['Qcache_hits']) - self._qcache_hits):
                     results['Qcache_instant_utilization'] = 0
                 else:
-                    results['Qcache_instant_utilization'] = ((float(results['Qcache_hits']) - self._qcache_hits) /
-                                                    ((int(results['Qcache_inserts']) - self._qcache_inserts) +
-                                                    (int(results['Qcache_not_cached']) - self._qcache_not_cached) +
-                                                    (int(results['Qcache_hits']) - self._qcache_hits)) * 100)
+                    top = (float(results['Qcache_hits']) - self._qcache_hits)
+                    bottom = ((int(results['Qcache_inserts']) - self._qcache_inserts) +
+                              (int(results['Qcache_not_cached']) - self._qcache_not_cached) +
+                              (int(results['Qcache_hits']) - self._qcache_hits))
+                    results['Qcache_instant_utilization'] = ((top / bottom) * 100)
 
             # update all three, or none - for consistent samples.
             self._qcache_hits = int(results['Qcache_hits'])

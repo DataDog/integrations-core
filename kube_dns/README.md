@@ -46,15 +46,7 @@ metadata:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kube_dns` under the Checks section:
-
-    Checks
-    ======
-
-        kube_dns
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kube_dns` under the Checks section.
 
 ## Compatibility
 
@@ -70,8 +62,8 @@ The Kube-DNS check does not include any event at this time.
 ### Service Checks
 The Kube-DNS check does not include any service check at this time.
 
-## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
-
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+## Troubleshooting  
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).    
+   
+## Further Reading 
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/).

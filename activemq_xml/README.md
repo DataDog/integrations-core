@@ -18,15 +18,7 @@ Edit the `activemq_xml.yaml` file to point to your server and port, set the mast
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `activemq_xml` under the Checks section:
-
-    Checks
-    ======
-
-        activemq_xml
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `activemq_xml` under the Checks section.
 
 ## Compatibility
 

@@ -17,15 +17,7 @@ Edit the `exchange_server.yaml` file to collect Exchange Server performance data
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section:
-
-    Checks
-    ======
-
-        exchange_server
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section.
 
 ## Compatibility
 

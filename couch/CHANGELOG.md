@@ -1,5 +1,12 @@
 # CHANGELOG - couch
 
+2.5.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Hardcode the 5984 port in the Autodiscovery template. See [#1444][] for more information.
+
 2.4.0 / 2018-02-13
 ==================
 

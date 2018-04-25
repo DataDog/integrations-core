@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 """ceph check
 Collects metrics from ceph clusters
@@ -11,9 +11,9 @@ import os
 import re
 
 # project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.config import _is_affirmative
 
 # third party
 import simplejson as json
@@ -61,7 +61,7 @@ class Ceph(AgentCheck):
 
         args = ceph_args + ['version']
         try:
-            output,_,_ = get_subprocess_output(args, self.log)
+            output, _, _ = get_subprocess_output(args, self.log)
         except Exception as e:
             raise Exception('Unable to run cmd=%s: %s' % (' '.join(args), str(e)))
 
@@ -69,7 +69,7 @@ class Ceph(AgentCheck):
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
             try:
                 args = ceph_args + cmd.split() + ['-fjson']
-                output,_,_ = get_subprocess_output(args, self.log)
+                output, _, _ = get_subprocess_output(args, self.log)
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s' % (cmd, str(e)))
@@ -138,7 +138,7 @@ class Ceph(AgentCheck):
                     for osdhealth in raw['health_detail']['detail']:
                         osd, pct = self._osd_pct_used(osdhealth)
                         if osd:
-                            local_tags = tags + ['ceph_osd:%s' % osd.replace('.','')]
+                            local_tags = tags + ['ceph_osd:%s' % osd.replace('.', '')]
 
                             if 'near' in osdhealth:
                                 health['num_near_full_osds'] += 1
@@ -163,35 +163,35 @@ class Ceph(AgentCheck):
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
                     ops += osdinfo['client_io_rate']['read_op_per_sec']
                 except KeyError:
-                    osdinfo['client_io_rate'].update({'read_op_per_sec' : 0})
+                    osdinfo['client_io_rate'].update({'read_op_per_sec': 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
 
                 try:
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
                     ops += osdinfo['client_io_rate']['write_op_per_sec']
                 except KeyError:
-                    osdinfo['client_io_rate'].update({'write_op_per_sec' : 0})
+                    osdinfo['client_io_rate'].update({'write_op_per_sec': 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
 
                 try:
                     osdinfo['client_io_rate']['op_per_sec']
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'op_per_sec'], local_tags)
                 except KeyError:
-                    osdinfo['client_io_rate'].update({'op_per_sec' : ops})
+                    osdinfo['client_io_rate'].update({'op_per_sec': ops})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'op_per_sec'], local_tags)
 
                 try:
                     osdinfo['client_io_rate']['read_bytes_sec']
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_bytes_sec'], local_tags)
                 except KeyError:
-                    osdinfo['client_io_rate'].update({'read_bytes_sec' : 0})
+                    osdinfo['client_io_rate'].update({'read_bytes_sec': 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_bytes_sec'], local_tags)
 
                 try:
                     osdinfo['client_io_rate']['write_bytes_sec']
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
                 except KeyError:
-                    osdinfo['client_io_rate'].update({'write_bytes_sec' : 0})
+                    osdinfo['client_io_rate'].update({'write_bytes_sec': 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
         except KeyError:
             self.log.debug('Error retrieving osd_pool_stats metrics')
@@ -232,7 +232,7 @@ class Ceph(AgentCheck):
             used = float(stats['total_used_bytes'])
             total = float(stats['total_bytes'])
             if total > 0:
-                self.gauge(self.NAMESPACE + '.aggregate_pct_used', 100.0*used/total, tags)
+                self.gauge(self.NAMESPACE + '.aggregate_pct_used', 100.0 * used / total, tags)
 
             l_pools = raw['df_detail']['pools']
             self.gauge(self.NAMESPACE + '.num_pools', len(l_pools), tags)
@@ -241,9 +241,9 @@ class Ceph(AgentCheck):
                 stats = pdata['stats']
                 used = float(stats['bytes_used'])
                 avail = float(stats['max_avail'])
-                total = used+avail
+                total = used + avail
                 if total > 0:
-                    self.gauge(self.NAMESPACE + '.pct_used', 100.0*used/total, local_tags)
+                    self.gauge(self.NAMESPACE + '.pct_used', 100.0 * used / total, local_tags)
                 self.gauge(self.NAMESPACE + '.num_objects', stats['objects'], local_tags)
                 self.rate(self.NAMESPACE + '.read_bytes', stats['rd_bytes'], local_tags)
                 self.rate(self.NAMESPACE + '.write_bytes', stats['wr_bytes'], local_tags)

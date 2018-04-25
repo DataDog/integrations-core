@@ -20,15 +20,7 @@ Please contribute to the integration if you want to add a relevant metric.
 
 ## Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kube_proxy` under the Checks section:
-
-    Checks
-    ======
-
-        kube_proxy
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 1 service checks
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kube_proxy` under the Checks section.
 
 ## Compatibility
 

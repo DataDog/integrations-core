@@ -17,10 +17,7 @@ Default NTP servers reached:
 ## Setup
 ### Installation
 
-To install the check on the agent:
-```
-/opt/datadog-agent/embedded/bin/pip install .
-```
+The NTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
 
 ### Configuration
 
@@ -48,20 +45,7 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    ntp
-    -------
-      - instance #0 [OK]
-      - Collected 1 metrics, 0 events & 0 service checks
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section.
 
 ### Compatibility
 

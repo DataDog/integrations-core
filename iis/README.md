@@ -124,8 +124,7 @@ logs:
        service: myservice
        source: iis
        sourcecategory: http_web_access
-    
-``` 
+```
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
   
@@ -134,20 +133,7 @@ logs:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `iis` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    iis
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `iis` under the Checks section.
 
 ## Data Collected
 ### Metrics

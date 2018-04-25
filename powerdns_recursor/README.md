@@ -54,20 +54,7 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `powerdns_recursor` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    powerdns_recursor
-    -------
-      - instance #0 [OK]
-      - Collected 8 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `powerdns_recursor` under the Checks section.
 
 ## Compatibility
 
