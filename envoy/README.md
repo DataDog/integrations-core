@@ -1,4 +1,3 @@
-# Agent Check: Envoy
 ## Overview
 
 This check collects distributed system observability metrics from [Envoy](https://www.envoyproxy.io).
