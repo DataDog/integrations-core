@@ -28,7 +28,7 @@ Follow the instructions in our [blog post](https://www.datadoghq.com/blog/deploy
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change the DATADOGAPIKEY with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub](https://hub.docker.com/r/datadog/docker-dd-agent/tags/)
+If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change <YOUR_DATADOG_API_KEY> with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub](https://hub.docker.com/r/datadog/agent/tags/)
 
 ```json
 {
@@ -48,7 +48,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
       {"containerPath": "/host/sys/fs/cgroup","hostPath": "/sys/fs/cgroup","mode": "RO"}
     ],
     "docker": {
-      "image": "datadog/docker-dd-agent:11.0.5160",
+      "image": "datadog/agent:latest",
       "network": "BRIDGE",
       "portMappings": [
         {"containerPort": 8125,"hostPort": 8125,"servicePort": 10000,"protocol": "udp","labels": {}},
@@ -56,10 +56,9 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
       ],
       "privileged": false,
       "parameters": [
-        {"key": "name","value": "dd-agent"},
-        {"key": "env","value": "API_KEY=DATADOGAPIKEY"},
-        {"key": "env","value": "MESOS_SLAVE=true"},
-        {"key": "env","value": "SD_BACKEND=docker"}
+        {"key": "name","value": "datadog-agent"},
+        {"key": "env","value": "DD_API_KEY=<YOUR_DATADOG_API_KEY>"},
+        {"key": "env","value": "MESOS_SLAVE=true"}
       ],
       "forcePullImage": false
     }
@@ -83,7 +82,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
 }
 ```
 
-Unless you want to configure a custom `mesos_slave.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
+Unless you want to configure a custom `mesos_slave.d/conf.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
 
 ### Validation
 #### DC/OS
