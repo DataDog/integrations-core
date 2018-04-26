@@ -586,6 +586,8 @@ class OpenStackCheck(AgentCheck):
                 self.delete_current_scope()
             elif resp.status_code == 409:
                 raise InstancePowerOffFailure()
+            elif resp.status_code == 404:
+                raise requests.exceptions.HTTPError
             else:
                 raise
 
@@ -969,6 +971,20 @@ class OpenStackCheck(AgentCheck):
             server_stats = self._make_request_with_auth_fallback(url, headers)
         except InstancePowerOffFailure:
             self.warning("Server %s is powered off and cannot be monitored" % server_id)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                # Check here if we hit a case where the deleted VM isn't properly removed from the cache
+                # If its still ACTIVE, keep it and perform a backoff, otherwise delete it from the cache and move on.
+                self.log.debug("Server: %s in a deleted state, querying to see if its still active", server_id)
+                headers = {'X-Auth-Token': self.get_auth_token()}
+                url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
+                server_state = self._make_request_with_auth_fallback(url, headers)
+                self.log.debug("Server is in state: %s", server_state)
+                if server_state.get('status') in DIAGNOSTICABLE_STATES:
+                    raise Exception
+                else:
+                    del self.server_details_by_id[server_id]
+
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
             raise e
