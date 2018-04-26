@@ -79,7 +79,7 @@ class Oracle(AgentCheck):
         service = instance.get('service_name', None)
         jdbc_driver = instance.get('jdbc_driver_path', None)
         tags = instance.get('tags', [])
-        return (self.server, user, password, service, jdbc_driver, tags)
+        return self.server, user, password, service, jdbc_driver, tags
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):
         if tags is None:
@@ -103,8 +103,8 @@ class Oracle(AgentCheck):
                         jpype.java.lang.Thread.currentThread().setContextClassLoader(
                             jpype.java.lang.ClassLoader.getSystemClassLoader())
                     con = jdb.connect(ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
-                except jpype.JException(jpype.java.lang.RuntimeException), e:
-                    if e.message() == "Class {} not found".format(ORACLE_DRIVER_CLASS):
+                except jpype.JException(jpype.java.lang.RuntimeException) as e:
+                    if "Class {} not found".format(ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
                         is available.
                         For the Oracle instant client, see:
@@ -122,7 +122,7 @@ class Oracle(AgentCheck):
             self.log.debug("Connected to Oracle DB")
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=self.service_check_tags)
-        except Exception, e:
+        except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=self.service_check_tags)
             self.log.error(e)
