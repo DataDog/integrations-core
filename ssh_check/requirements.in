@@ -1,10 +1,10 @@
-cryptography==2.1.4
+cryptography==2.2.2
 paramiko==2.1.5
 pyasn1==0.4.2
-cffi==1.11.2
+cffi==1.11.5
 pycparser==2.18
 enum34==1.1.6
 idna==2.6
 six==1.11.0
-asn1crypto==0.23.0
-ipaddress==1.0.18
+asn1crypto==0.24.0
+ipaddress==1.0.22
