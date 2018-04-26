@@ -433,6 +433,17 @@ def test_check(aggregator, spin_up_elastic):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
     CONFIG = INSTANCE_CONFIG["instances"][0]
+
+    attempts = 0
+    while True:
+        if attempts >= 3:
+            log.debug("Authentication Error occurred when running check")
+        try:
+            elastic_check.check(INSTANCE_CONFIG["instances"][0])
+            break
+        except Exception:
+            attempts += 1
+            time.sleep(1)
     elastic_check.check(CONFIG)
 
     expected_metrics = dict(STATS_METRICS)
@@ -494,7 +505,7 @@ def test_check(aggregator, spin_up_elastic):
 
     contexts = [
         (CONF_HOSTNAME, default_tags + TAGS),
-        (local_hostname, default_tags)
+        (local_hostname, default_tags + TAGS)
     ]
 
     stats_keys = (
@@ -514,9 +525,10 @@ def test_check(aggregator, spin_up_elastic):
             if m_name in stats_keys:
                 m_tags = m_tags + [u"node_name:batman"]
 
+            m_tags.sort()
             if desc[0] == "gauge":
-                if es_version < [5, 0, 0]:
-                    aggregator.assert_metric(m_name)
+                if es_version < [2, 0, 0]:
+                    aggregator.assert_metric(m_name, tags=m_tags)
                 elif not (m_name in deprecated_metrics):
                     aggregator.assert_metric(m_name)
 
@@ -611,7 +623,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
 
     for m_name, desc in pshard_stats_metrics.iteritems():
         if desc[0] == "gauge":
-            aggregator.assert_metric(m_name, count=1)
+            aggregator.assert_metric(m_name, count=1, tags=[])
 
     # Our pshard metrics are getting sent, let's check that they're accurate
     # Note: please make sure you don't install Maven on the CI for future
@@ -633,46 +645,18 @@ def test_index_metrics(aggregator, spin_up_elastic):
             aggregator.assert_metric(m_name)
 
 
-"""
-    def test_health_event(self):
-        dummy_tags = ['foo:bar', 'elastique:recherche']
-        dummy_tags = ['foo:bar', 'elastique:recherche']
-
-        config = {'instances': [
-            {'url': 'http://localhost:9200', 'tags': dummy_tags}
-        ]}
-
-        # Should be yellow at first
-        requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
-        self.run_check(config)
-
-        self.assertEquals(len(self.events), 1)
-        self.assertIn('yellow', self.events[0]['msg_title'])
-        self.assertEquals(
-            sorted(set(['url:http://localhost:9200'] + dummy_tags + cluster_tag)),
-            self.events[0]['tags']
-        )
-        self.assertServiceCheckWarning(
-            'elasticsearch.cluster_health',
-            tags=['host:localhost', 'port:9200'] + dummy_tags + cluster_tag,
-            count=1
-        )
-
-        # Set number of replicas to 0 for all indices
-        requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 0}}')
-        time.sleep(5)
-        # Now shards should be green
-        self.run_check(config)
-
-        self.assertEquals(len(self.events), 1)
-        self.assertIn('green', self.events[0]['msg_title'])
-        self.assertEquals(
-            sorted(set(['url:http://localhost:9200'] + dummy_tags + cluster_tag)),
-            self.events[0]['tags']
-        )
-        self.assertServiceCheckOK(
-            'elasticsearch.cluster_health',
-            tags=['host:localhost', 'port:9200'] + dummy_tags + cluster_tag,
-            count=1
-        )
-"""
+def test_health_event(aggregator, spin_up_elastic):
+    dummy_tags = ['elastique:recherche']
+    config = {'instances': [
+        {'url': 'http://localhost:9200', 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
+    ]}
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    # Should be yellow at first
+    requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 100}')
+    elastic_check.check(config['instances'][0])
+    if get_es_version() < [2, 0, 0]:
+        assert len(aggregator.events) == 1
+        assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:http://localhost:9200']
+                                                              + dummy_tags + CLUSTER_TAG))
+    else:
+        aggregator.assert_service_check('elasticsearch.cluster_health')
