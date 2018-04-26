@@ -50,8 +50,9 @@ def test_detect_cadvisor_port_zero():
 
 
 def test_kubelet_check_cadvisor(monkeypatch, aggregator):
+    instance_with_tag = {"tags": ["instance:tag"], "cadvisor_port": 4194}
     cadvisor_url = "http://valid:port/url"
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
     monkeypatch.setattr(check, 'retrieve_pod_list',
                         mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
@@ -67,7 +68,7 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
     monkeypatch.setattr('datadog_checks.kubelet.cadvisor.tags_for_pod',
                         mock.Mock(return_value=["foo:bar"]))
 
-    check.check({})
+    check.check(instance_with_tag)
     assert check.cadvisor_legacy_url == cadvisor_url
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
@@ -76,9 +77,11 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator):
     check.process.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
-    check.check({})
+    check.check(instance_with_tag)
     for metric in EXPECTED_METRICS_COMMON:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, "instance:tag")
     for metric in EXPECTED_METRICS_CADVISOR:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, "instance:tag")
     assert aggregator.metrics_asserted_pct == 100.0

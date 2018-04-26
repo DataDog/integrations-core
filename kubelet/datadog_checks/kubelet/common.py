@@ -73,11 +73,30 @@ def is_static_pending_pod(pod):
 
 
 class ContainerFilter(object):
+    """
+    Queries the podlist and the agent6's filtering logic to determine whether to
+    send metrics for a given container.
+    Results and podlist are cached between calls to avoid the repeated python-go switching
+    cost (filter called once per prometheus metric), hence the ContainerFilter object MUST
+    be re-created at every check run.
+
+    Containers that are part of a static pod are not filtered, as we cannot curently
+    reliably determine their image name to pass to the filtering logic.
+    """
     def __init__(self, podlist):
         self.containers = {}
+        self.static_pod_uids = set()
+        self.cache = {}
 
-        for pod in podlist.get('items'):
-            for ctr in pod['status'].get('containerStatuses', []):
+        pods = podlist.get('items') or []
+
+        for pod in pods:
+            # FIXME we are forced to do that because the Kubelet PodList isn't updated
+            # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
+            if is_static_pending_pod(pod):
+                self.static_pod_uids.add(pod.get("metadata", {}).get("uid"))
+
+            for ctr in pod.get('status', {}).get('containerStatuses', []):
                 cid = ctr.get('containerID')
                 if not cid:
                     continue
@@ -88,19 +107,34 @@ class ContainerFilter(object):
                     short_cid = cid.split("://", 1)[-1]
                     self.containers[short_cid] = ctr
 
-    def is_excluded(self, cid):
+    def is_excluded(self, cid, pod_uid=None):
         """
         Queries the agent6 container filter interface. It retrieves container
         name + image from the podlist, so static pod filtering is not supported.
+
+        Result is cached between calls to avoid the python-go switching cost for
+        prometheus metrics (will be called once per metric)
         :param cid: container id
+        :param pod_uid: pod UID for static pod detection
         :return: bool
         """
+        if cid in self.cache:
+            return self.cache[cid]
+
+        if pod_uid and pod_uid in self.static_pod_uids:
+            self.cache[cid] = False
+            return False
+
         if cid not in self.containers:
             # Filter out metrics not coming from a container (system slices)
+            self.cache[cid] = True
             return True
         ctr = self.containers[cid]
         if not ("name" in ctr and "image" in ctr):
             # Filter out invalid containers
+            self.cache[cid] = True
             return True
 
-        return is_excluded(ctr.get("name"), ctr.get("image"))
+        excluded = is_excluded(ctr.get("name"), ctr.get("image"))
+        self.cache[cid] = excluded
+        return excluded
