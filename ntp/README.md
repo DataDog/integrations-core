@@ -47,7 +47,7 @@ Configuration Options:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ntp` under the Checks section.
 
-### Data Collected
+## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv) for a list of metrics provided by this check.
 
