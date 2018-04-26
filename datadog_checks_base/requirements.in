@@ -1,3 +1,9 @@
 prometheus-client==0.1.0
 requests==2.18.4
 protobuf==3.5.1
+pyopenssl==17.5.0
+pyyaml==3.11
+simplejson==3.6.5
+uptime==3.0.1
+uuid==1.30
+boto==2.46.1
