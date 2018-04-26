@@ -9,22 +9,28 @@ Get metrics from Microsoft Exchange Server
 ## Setup
 ### Installation
 
-The Exchange check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
+The Exchange check is packaged with the Agent, so simply [install the Agent][1] on your servers.
 
 ### Configuration
 
-Edit the `exchange_server.yaml` file to collect Exchange Server performance data. See the [sample exchange_server.yaml](https://github.com/DataDog/integrations-core/blob/master/exchange_server/conf.yaml.example) for all available configuration options.
+Edit the `exchange_server.yaml` file to collect Exchange Server performance data. See the [sample exchange_server.yaml][2] for all available configuration options.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section.
+[Run the Agent's `status` subcommand][3] and look for `exchange_server` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 The exchange server check does not include any events at this time.
 
 ### Service Checks
 The exchange server check does not include any service check at this time.
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv

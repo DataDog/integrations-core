@@ -7,7 +7,7 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 ## Setup
 ### Installation
 
-The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers.
+The Zookeeper check is packaged with the Agent, so simply [install the Agent][13] on your Zookeeper servers.
 
 ### Configuration
 
@@ -26,9 +26,9 @@ instances:
     timeout: 3
 ```
 
-* See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options.
+* See the [sample zk.yaml][14] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Zookeeper metrics to Datadog.
+* [Restart the Agent][15] to start sending Zookeeper metrics to Datadog.
 
 #### Log Collection
 
@@ -81,7 +81,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `zk` under the Checks section.
+[Run the Agent's `status` subcommand][16] and look for `zk` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -105,7 +105,7 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 | `zookeeper.num_alive_connections` | `zookeeper.connections` |
 | `zookeeper.znode_count` | `zookeeper.nodes` |
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv)
+See [metadata.csv][17]
 for a list of metrics provided by this check.
 
 #### Deprecated metrics
@@ -129,7 +129,16 @@ Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN`
 The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][18].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][19]
+
+
+[13]: https://app.datadoghq.com/account/settings#agent
+[14]: https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example
+[15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
+[18]: http://docs.datadoghq.com/help/
+[19]: https://www.datadoghq.com/blog/

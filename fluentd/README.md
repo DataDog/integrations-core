@@ -10,7 +10,7 @@ Get metrics from Fluentd to:
 ## Setup
 ### Installation
 
-The Fluentd check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Fluentd servers.
+The Fluentd check is packaged with the Agent, so simply [install the Agent][1] on your Fluentd servers.
 
 ### Configuration
 
@@ -43,22 +43,22 @@ instances:
     #  - plg2
 ```
 
-See the [sample fluentd.yaml](https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example) for all available configuration options.  
+See the [sample fluentd.yaml][2] for all available configuration options.  
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Fluentd metrics to Datadog.
+* [Restart the Agent][3] to begin sending Fluentd metrics to Datadog.
 
 #### Log Collection
 
-Follow [those instructions](https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd) to forward logs to Datadog with Fluentd.
+Follow [those instructions][4] to forward logs to Datadog with Fluentd.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `fluentd` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `fluentd` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The FluentD check does not include any event at this time.
@@ -70,8 +70,18 @@ The FluentD check does not include any event at this time.
 Returns 'Critical' if the Agent cannot connect to Fluentd to collect metrics. This is the check which most other integrations would call `can_connect`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [How to monitor Fluentd with Datadog](https://www.datadoghq.com/blog/monitor-fluentd-datadog/)
+* [How to monitor Fluentd with Datadog][8]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/monitor-fluentd-datadog/

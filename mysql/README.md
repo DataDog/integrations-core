@@ -14,7 +14,7 @@ And many more. You can also invent your own metrics using custom SQL queries.
 ## Setup
 ### Installation
 
-The MySQL check is included in the Datadog Agent package, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your MySQL servers.
+The MySQL check is included in the Datadog Agent package, so simply [install the Agent][13] on your MySQL servers.
 
 ### Configuration
 
@@ -29,7 +29,7 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here](https://dev.mysql.com/doc/refman/5.7/en/adding-users.html)
+Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here][14]
 
 
 Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
@@ -92,12 +92,12 @@ Query OK, 0 rows affected (0.00 sec)
   
 **Note**: Wrap your password in single quotes in case there is a special character in it.
 
-  In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation](https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html) to enable it, otherwise set extra_performance_metrics to false.
-  See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
+  In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation][15] to enable it, otherwise set extra_performance_metrics to false.
+  See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
 
 The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending MySQL metrics to Datadog.
+* [Restart the Agent][17] to start sending MySQL metrics to Datadog.
 
 #### Log Collection
 
@@ -172,16 +172,16 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 
 4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+**Learn more about log collection [on the log documentation][18]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mysql` under the Checks section.
+[Run the Agent's `status` subcommand][19] and look for `mysql` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][20] for a list of metrics provided by this integration.
 
 The check does not collect all metrics by default. Set the following boolean configuration options to `true` to enable its metrics:
 
@@ -341,14 +341,33 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 
 ## Troubleshooting
 
-* [Connection Issues with the SQL Server Integration](https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration)
-* [MySQL Localhost Error - Localhost VS 127.0.0.1](https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1)
-* [Can I use a named instance in the SQL Server integration?](https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration)
-* [Can I set up the dd-agent MySQL check on my Google CloudSQL?](https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql)
-* [How to collect metrics from custom MySQL queries](https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries)
-* [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI](https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi)
-* [How can I collect more metrics from my SQL Server integration?](https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration)
-* [Database user lacks privileges](https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges)
+* [Connection Issues with the SQL Server Integration][21]
+* [MySQL Localhost Error - Localhost VS 127.0.0.1][22]
+* [Can I use a named instance in the SQL Server integration?][23]
+* [Can I set up the dd-agent MySQL check on my Google CloudSQL?][24]
+* [How to collect metrics from custom MySQL queries][25]
+* [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][26]
+* [How can I collect more metrics from my SQL Server integration?][27]
+* [Database user lacks privileges][28]
 
 ## Further Reading
-Read our [series of blog posts](https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/) about monitoring MySQL with Datadog.
+Read our [series of blog posts][29] about monitoring MySQL with Datadog.
+
+
+[13]: https://app.datadoghq.com/account/settings#agent
+[14]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
+[15]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
+[16]: https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example
+[17]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[18]: https://docs.datadoghq.com/logs
+[19]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[20]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
+[21]: https://docs.datadoghq.com/integrations/faq/connection-issues-with-the-sql-server-integration
+[22]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1
+[23]: https://docs.datadoghq.com/integrations/faq/can-i-use-a-named-instance-in-the-sql-server-integration
+[24]: https://docs.datadoghq.com/integrations/faq/can-i-set-up-the-dd-agent-mysql-check-on-my-google-cloudsql
+[25]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries
+[26]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi
+[27]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration
+[28]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
+[29]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/
