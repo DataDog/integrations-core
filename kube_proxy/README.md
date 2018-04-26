@@ -21,7 +21,3 @@ Please contribute to the integration if you want to add a relevant metric.
 ## Validation
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `kube_proxy` under the Checks section.
-
-## Compatibility
-
-The kube_proxy check is compatible with all major platforms
