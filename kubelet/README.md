@@ -17,7 +17,7 @@ Edit the `kubelet.yaml` file to point to your server and port, set tags to send 
 
 ## Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubelet` under the Checks section.
+[Run the Agent's `status` subcommand][1] and look for `kubelet` under the Checks section.
 
 ## Compatibility
 
@@ -29,7 +29,7 @@ The kubelet check can run in two modes:
 ## OpenShift <3.7 support
 
 The cAdvisor 4194 port is disabled by default on OpenShift. To enable it, you need to add
-the following lines to your [node-config file](https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files):
+the following lines to your [node-config file][2]:
 
 ```
 kubeletArguments:
@@ -47,3 +47,7 @@ The check will still be able to collect:
 - pod running/stopped metrics
 - pod limits and requests
 - node capacity metrics
+
+
+[1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[2]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files

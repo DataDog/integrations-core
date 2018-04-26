@@ -7,11 +7,11 @@ This check lets you monitor SSH connectivity to remote hosts and SFTP response t
 ## Setup
 ### Installation
 
-The SSH/SFTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) anywhere from which you'd like to test SSH connectivity.
+The SSH/SFTP check is packaged with the Agent, so simply [install the Agent][1] anywhere from which you'd like to test SSH connectivity.
 
 ### Configuration
 
-Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml](https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.example) for all available configuration options:
+Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -27,16 +27,16 @@ instances:
 #   add_missing_keys: True    # default is False
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending SSH/SFTP metrics and service checks to Datadog.
+[Restart the Agent][3] to start sending SSH/SFTP metrics and service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ssh_check` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `ssh_check` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
 The SSH Check check does not include any event at this time.
@@ -52,7 +52,16 @@ Returns CRITICAL if the Agent cannot open an SSH session, otherwise OK.
 Returns CRITICAL if the Agent cannot open an SFTP session, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/

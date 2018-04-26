@@ -13,7 +13,7 @@ And more.
 ## Setup
 ### Installation
 
-The TokuMX check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your TokuMX servers.
+The TokuMX check is packaged with the Agent, so simply [install the Agent][1] on your TokuMX servers.
 
 ### Configuration
 #### Prepare TokuMX
@@ -46,11 +46,11 @@ The TokuMX check is packaged with the Agent, so simply [install the Agent](https
         echo -e "\033[0;32mdatadog user - OK\033[0m" || \
         echo -e "\033[0;31mdatadog user - Missing\033[0m"
 
-For more details about creating and managing users in MongoDB, refer to [the MongoDB documentation](http://www.mongodb.org/display/DOCS/Security+and+Authentication).
+For more details about creating and managing users in MongoDB, refer to [the MongoDB documentation][2].
 
 #### Connect the Agent
 
-Create a file `tokumx.yaml` in the Agent's `conf.d` directory. See the [sample tokumx.yaml](https://github.com/DataDog/integrations-core/blob/master/tokumx/conf.yaml.example) for all available configuration options:
+Create a file `tokumx.yaml` in the Agent's `conf.d` directory. See the [sample tokumx.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -59,15 +59,15 @@ instances:
   - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending TokuMX metrics to Datadog.
+[Restart the Agent][4] to start sending TokuMX metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `tokumx` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `tokumx` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 **Replication state changes**:
@@ -81,8 +81,18 @@ This check emits an event each time a TokuMX node has a change in its replicatio
 Returns CRITICAL if the Agent cannot connect to TokuMX to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [Monitor key TokuMX metrics for MongoDB applications](https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/).
+* [Monitor key TokuMX metrics for MongoDB applications][8].
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: http://www.mongodb.org/display/DOCS/Security+and+Authentication
+[3]: https://github.com/DataDog/integrations-core/blob/master/tokumx/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications/

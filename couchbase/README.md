@@ -15,11 +15,11 @@ And many more.
 ## Setup
 ### Installation
 
-The Couchbase check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Couchbase nodes.
+The Couchbase check is packaged with the Agent, so simply [install the Agent][1] on your Couchbase nodes.
 
 ### Configuration
 
-Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml](https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example) for all available configuration options:
+Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -30,16 +30,16 @@ instances:
     #password: <your_password>
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Couchbase metrics to Datadog.
+[Restart the Agent][3] to begin sending Couchbase metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `couchbase` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `couchbase` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Couchbase check does not include any event at this time.
@@ -51,8 +51,17 @@ The Couchbase check does not include any event at this time.
 Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitor key Couchbase metrics](https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/).
+* [Monitor key Couchbase metrics][7].
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/

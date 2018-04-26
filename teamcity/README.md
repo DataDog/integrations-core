@@ -9,14 +9,14 @@ Unlike most Agent checks, this one doesn't collect any metrics—just events.
 ## Setup
 ### Installation
 
-The Teamcity check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Teamcity servers.
+The Teamcity check is packaged with the Agent, so simply [install the Agent][1] on your Teamcity servers.
 
 ### Configuration
 #### Prepare Teamcity
 
-Follow [Teamcity's documentation](https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login) to enable Guest Login.
+Follow [Teamcity's documentation][2] to enable Guest Login.
 
-Create a file `teamcity.yaml` in the Agent's `conf.d` directory. See the [sample teamcity.yaml](https://github.com/DataDog/integrations-core/blob/master/teamcity/conf.yaml.example) for all available configuration options:
+Create a file `teamcity.yaml` in the Agent's `conf.d` directory. See the [sample teamcity.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -36,11 +36,11 @@ instances:
 
 Add an item like the above to `instances` for each build configuration you want to track.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start collecting and sending Teamcity events to Datadog.
+[Restart the Agent][4] to start collecting and sending Teamcity events to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `teamcity` under the Checks section.
+[Run the Agent's `status` subcommand][5] and look for `teamcity` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -53,8 +53,17 @@ All Teamcity events are forwared to your Datadog application.
 The Teamcity check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Track performance impact of code changes with TeamCity and Datadog.](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)
+* [Track performance impact of code changes with TeamCity and Datadog.][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
+[3]: https://github.com/DataDog/integrations-core/blob/master/teamcity/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/
