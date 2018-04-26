@@ -186,7 +186,7 @@ We've also written several other in-depth blog posts to help you get the most ou
 [8]: https://github.com/DataDog/dd-agent/wiki/Capturing-EC2-tags-at-startup
 [9]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
 [10]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy
-[11]: /guides/autodiscovery/
+[11]: https://docs.datadoghq.com/agent/autodiscovery/
 [12]: https://alpinelinux.org/
 [13]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [14]: https://docs.docker.com/engine/reference/commandline/cli/#environment-variables

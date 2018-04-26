@@ -109,7 +109,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example
-[3]: /guides/tagging/
+[3]: https://docs.datadoghq.com/getting_started/tagging/
 [4]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

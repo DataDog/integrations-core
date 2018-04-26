@@ -50,10 +50,10 @@ See the [example configuration](https://github.com/DataDog/integrations-core/blo
 
 **Note**: Some metrics are not available on Linux or OSX:
 
-* Process I/O metrics aren't available on Linux or OSX since the files that the agent must read [8] are only readable by the process's owner. For more information, [read the Agent FAQ][9]
+* Process I/O metrics aren't available on Linux or OSX since the files that the agent read (/proc//io) are only readable by the process's owner. For more information, [read the Agent FAQ][8]
 * `system.cpu.iowait` is not available on windows
 
-See [metadata.csv][10] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
@@ -85,10 +85,10 @@ The Agent submits a `process.up` tagged `process:my_worker_process` whose status
 - OK when there are 3, 4 or 5 worker processes
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][11].
+Need help? Contact [Datadog Support][10].
 
 ## Further Reading
-To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts][12] about it.
+To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts][11] about it.
 
 
 [1]: http://docs.datadoghq.com/monitoring/#process
@@ -98,8 +98,7 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [5]: https://github.com/DataDog/integrations-core/tree/master/docker_daemon
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[8]: /proc//io
-[9]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric
-[10]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
-[11]: http://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/process-check-monitoring/
+[8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric
+[9]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
+[10]: http://docs.datadoghq.com/help/
+[11]: https://www.datadoghq.com/blog/process-check-monitoring/

@@ -105,5 +105,5 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
 [7]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
-[8]: /integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics
+[8]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
 [9]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/

@@ -58,7 +58,7 @@ Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See th
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you run `sudo /etc/init.d/datadog-agent status`, you should see something similar to the following:
 
     ● datadog-agent.service - "Datadog Agent"
-       Loaded: loaded [3]
+       Loaded: loaded (/lib/...datadog-agent.service; enabled; vendor preset: enabled)
        Active: active (running) since Thu 2016-03-31 20:35:27 UTC; 42min ago
       Process: 10016 ExecStop=/opt/.../supervisorctl -c /etc/dd-....conf shutdown (code=exited, status=0/SUCCESS)
       Process: 10021 ExecStart=/opt/.../start_agent.sh (code=exited, status=0/SUCCESS)
@@ -77,7 +77,7 @@ This is a passive check, so unless there are packets actively being sent to the 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this check.
+See [metadata.csv][3] for a list of metrics provided by this check.
 
 ### Events
 The Go-metro check does not include any event at this time.
@@ -86,15 +86,14 @@ The Go-metro check does not include any event at this time.
 The Go-metro check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog Support][4].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+Learn more about infrastructure monitoring and all our integrations on [our blog][5]
 
 
 [1]: https://github.com/DataDog/go-metro
 [2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
-[3]: /lib/...datadog-agent.service; enabled; vendor preset: enabled
-[4]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
-[5]: http://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/
+[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
+[4]: http://docs.datadoghq.com/help/
+[5]: https://www.datadoghq.com/blog/
