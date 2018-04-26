@@ -19,10 +19,6 @@ Create a `linux_proc_extras.yaml` file in the Datadog Agent's `conf.d` directory
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `linux_proc_extras` under the Checks section.
 
-## Compatibility
-
-The linux_proc_extras check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 The Linux proc extras check does not include any metric at this time.

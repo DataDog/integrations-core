@@ -91,10 +91,6 @@ The longer it is, the less hard your agent hits the apiserver with requests, but
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kubernetes` under the Checks section.
 
-## Compatibility
-
-The kubernetes check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv) for a list of metrics provided by this integration.

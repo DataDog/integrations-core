@@ -133,10 +133,6 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nginx` under the Checks section.
 
-## Compatibility
-
-The NGINX check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

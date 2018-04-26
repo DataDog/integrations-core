@@ -31,10 +31,6 @@ The `allowed_metrics` item in the `init_config` section allows to specify the me
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `gitlab_runner` under the Checks section.
 
-## Compatibility
-
-The gitlab_runner check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/metadata.csv) for a list of metrics provided by this integration.

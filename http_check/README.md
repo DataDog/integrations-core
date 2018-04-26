@@ -63,10 +63,6 @@ When you have finished configuring `http_check.yaml`, [restart the Agent](https:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section.
 
-## Compatibility
-
-The http_check check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

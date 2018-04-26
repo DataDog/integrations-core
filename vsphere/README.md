@@ -41,10 +41,6 @@ instances:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `vsphere` under the Checks section.
 
-## Compatibility
-
-The vsphere check is compatible with all Windows platforms.
-
 ## Data Collected
 ### Metrics
 

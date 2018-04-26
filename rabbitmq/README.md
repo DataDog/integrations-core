@@ -100,10 +100,6 @@ See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `rabbitmq` under the Checks section.
 
-## Compatibility
-
-The rabbitmq check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

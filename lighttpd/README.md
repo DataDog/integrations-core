@@ -31,10 +31,6 @@ instances:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `lighttpd` under the Checks section.
 
-## Compatibility
-
-The lighttpd check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

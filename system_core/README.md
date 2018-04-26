@@ -28,10 +28,6 @@ The Agent just needs one item in `instances` in order to enable the check. The c
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `system_core` under the Checks section.
 
-## Compatibility
-
-The system_core check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

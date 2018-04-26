@@ -35,10 +35,6 @@ Note: spaces are replaced by underscores in Datadog.
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `windows_service` under the Checks section.
 
-## Compatibility
-
-The Windows Service check is compatible with all Windows platforms.
-
 ## Data Collected
 ### Metrics
 

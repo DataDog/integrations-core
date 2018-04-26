@@ -87,10 +87,6 @@ The Agent collects metrics via a stats endpoint:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `haproxy` under the Checks section.
 
-## Compatibility
-
-The haproxy check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv) for a list of metrics provided by this integration.

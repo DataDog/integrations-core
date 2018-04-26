@@ -48,10 +48,6 @@ If you don't configure a `metrics` list, the Agent will still collect memstat me
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `go_expvar` under the Checks section.
 
-## Compatibility
-
-The go_expvar check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

@@ -41,10 +41,6 @@ This check also works with Icinga, the popular fork of Nagios. If you use Icinga
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nagios` under the Checks section.
 
-## Compatibility
-
-The nagios check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

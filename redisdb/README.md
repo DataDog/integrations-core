@@ -73,10 +73,6 @@ See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `redisdb` under the Checks section.
 
-## Compatibility
-
-The Redis check is compatible with all major platforms.
-
 ## Data Collected
 
 ### Metrics

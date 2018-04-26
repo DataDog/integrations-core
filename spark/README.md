@@ -48,10 +48,6 @@ Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `spark` under the Checks section.
 
-## Compatibility
-
-The spark check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv) for a list of metrics provided by this check.

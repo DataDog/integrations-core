@@ -36,10 +36,6 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `yarn` under the Checks section.
 
-## Compatibility
-
-The yarn check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

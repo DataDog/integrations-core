@@ -74,10 +74,6 @@ If the TCP RTT check has started you should see something similar to the go-metr
 
 This is a passive check, so unless there are packets actively being sent to the hosts mentioned in the yaml file, the metrics will not be reported.
 
-## Compatibility
-
-The TCP RTT check is compatible with Linux platforms.
-
 ## Data Collected
 ### Metrics
 

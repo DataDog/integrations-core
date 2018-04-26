@@ -70,10 +70,6 @@ Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `elastic` under the Checks section.
 
-## Compatibility
-
-The Elasticsearch check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

@@ -42,10 +42,6 @@ Add an item like the above to `instances` for each build configuration you want 
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `teamcity` under the Checks section.
 
-## Compatibility
-
-The teamcity check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 The Teamcity check does not include any metric at this time.
