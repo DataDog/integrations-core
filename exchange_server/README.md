@@ -19,10 +19,6 @@ Edit the `exchange_server.yaml` file to collect Exchange Server performance data
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section.
 
-## Compatibility
-
-The exchange_server check is compatible with Windows.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv) for a list of metrics provided by this integration.

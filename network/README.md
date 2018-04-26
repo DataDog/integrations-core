@@ -32,10 +32,6 @@ instances:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `network` under the Checks section.
 
-## Compatibility
-
-The network check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv) for a list of metrics provided by this integration.

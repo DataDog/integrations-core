@@ -26,10 +26,6 @@ instances: [{}]
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `system_swap` under the Checks section.
 
-## Compatibility
-
-The system_swap check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

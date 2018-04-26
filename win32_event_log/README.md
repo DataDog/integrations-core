@@ -28,10 +28,6 @@ This minimal file will capture all events from localhost, but you can configure 
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `win32_event_log` under the Checks section.
 
-## Compatibility
-
-The win32_event_log check is compatible with all Windows platforms.
-
 ## Data Collected
 ### Metrics
 The Win32 Event log check does not include any metric at this time.

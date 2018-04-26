@@ -32,10 +32,6 @@ Restart the Agent to start sending metrics and service checks to Datadog.
 
 [Run the Agent's info subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `squid` under the Checks section.
 
-## Compatibility
-
-The squid check is compatible with all major platforms.
-
 ## Data Collected
 
 ### Metrics

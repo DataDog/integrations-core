@@ -112,10 +112,6 @@ Put all your pysnmp mibs into a folder and specify this folder's path in ```snmp
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `snmp` under the Checks section.
 
-## Compatibility
-
-The snmp check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

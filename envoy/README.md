@@ -94,10 +94,6 @@ static_resources:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `envoy` under the Checks section.
 
-## Compatibility
-
-The Envoy check is compatible with all platforms.
-
 ## Data Collected
 ### Metrics
 

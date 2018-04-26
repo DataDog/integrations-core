@@ -41,10 +41,6 @@ Configuration Options:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `php_fpm` under the Checks section.
 
-## Compatibility
-
-The php_fpm check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

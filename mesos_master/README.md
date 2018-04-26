@@ -38,10 +38,6 @@ Unless your masters' API uses a self-signed certificate. In that case, set `disa
 
 In the Datadog app, search for `mesos.cluster` in the Metrics Explorer.
 
-## Compatibility
-
-The mesos_master check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

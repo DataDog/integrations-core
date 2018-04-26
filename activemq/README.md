@@ -98,10 +98,6 @@ else echo -e "\e[031mAgent is not running\e[0m"; fi
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `activemq` under the Checks section.
 
-## Compatibility
-
-The ActiveMQ check only runs on Linux or Mac (OS X or macOS).
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv) for a list of metrics provided by this integration.

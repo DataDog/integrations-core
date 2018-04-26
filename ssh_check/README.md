@@ -33,10 +33,6 @@ instances:
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `ssh_check` under the Checks section.
 
-## Compatibility
-
-The ssh check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

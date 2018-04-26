@@ -19,10 +19,6 @@ Edit the `pdh_check.yaml` file to collect Windows performance data. See the [sam
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `pdh_check` under the Checks section.
 
-## Compatibility
-
-The pdh_check check is compatible with Windows.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/pdh_check/metadata.csv) for a list of metrics provided by this integration.

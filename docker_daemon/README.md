@@ -100,10 +100,6 @@ For more information about building custom Docker containers with the Datadog Ag
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `docker_daemon` under the Checks section.
 
-## Compatibility
-
-The docker_daemon check is compatible with all major platforms
-
 ## Agent v6 
 
 The new docker check is named `docker`. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent version 5.x. All features are ported on version >6.0 , excepted the following deprecations:

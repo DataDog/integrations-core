@@ -74,10 +74,6 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `apache` under the Checks section.
 
-## Compatibility
-
-The Apache check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

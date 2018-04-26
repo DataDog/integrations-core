@@ -19,10 +19,6 @@ Create a `kafka_consumer.yaml` file using [this sample conf file](https://github
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kafka_consumer` under the Checks section.
 
-## Compatibility
-
-The kafka_consumer check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv) for a list of metrics provided by this check.

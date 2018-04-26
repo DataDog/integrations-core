@@ -178,10 +178,6 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mysql` under the Checks section.
 
-## Compatibility
-
-The MySQL integration is supported on versions x.x+
-
 ## Data Collected
 ### Metrics
 

@@ -57,10 +57,6 @@ See the [sample  cassandra.yaml](https://github.com/DataDog/integrations-core/bl
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `cassandra` under the Checks section.
 
-## Compatibility
-
-The cassandra check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv) for a list of metrics provided by this integration.

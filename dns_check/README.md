@@ -33,10 +33,6 @@ If you omit the `nameserver` option, the check will use whichever nameserver is 
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `dns_check` under the Checks section.
 
-## Compatibility
-
-The DNS check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

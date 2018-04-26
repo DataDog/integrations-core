@@ -19,10 +19,6 @@ Edit the `active_directory.yaml` file to collect Active Directory performance da
 
 [Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `active_directory` under the Checks section.
 
-## Compatibility
-
-The ative_directory check is compatible with Windows.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv) for a list of metrics provided by this integration.

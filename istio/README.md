@@ -38,10 +38,6 @@ Both endpoints need to be connected to the check for it to work. To learn more a
 
 [Run the Agent's `info` subcommand](https://docs.datadoghq.com/agent/faq/agent-status-and-information/) and look for `istio` under the Checks section.
 
-## Compatibility
-
-The Istio integration is supported on Istio 0.4.
-
 ## Data Collected
 ### Metrics
 

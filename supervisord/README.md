@@ -82,10 +82,6 @@ See the [example check configuration](https://github.com/DataDog/integrations-co
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `supervisord` under the Checks section.
 
-## Compatibility
-
-The supervisord check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

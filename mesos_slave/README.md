@@ -91,10 +91,6 @@ Under the Services tab in the DC/OS web UI you should see the Datadog Agent show
 #### Marathon
 If you are not using DC/OS, then datadog-agent will be in the list of running applications with a healthy status. In the Datadog app, search for mesos.slave in the Metrics Explorer.
 
-## Compatibility
-
-The mesos_slave check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

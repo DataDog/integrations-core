@@ -20,10 +20,6 @@ See [sample linkerd.yaml](https://github.com/DataDog/integrations-core/blob/mast
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `linkerd` under the Checks section.
 
-## Compatibility
-
-The linkerd check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 

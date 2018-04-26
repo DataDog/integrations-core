@@ -34,10 +34,6 @@ The function of `user` and `password` depends on whether or not you configure `a
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `marathon` under the Checks section.
 
-## Compatibility
-
-The marathon check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv) for a list of metrics provided by this integration.

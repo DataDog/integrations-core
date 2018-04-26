@@ -115,10 +115,6 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postgres` under the Checks section.
 
-## Compatibility
-
-The PostgreSQL check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv) for a list of metrics provided by this integration.

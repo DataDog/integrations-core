@@ -122,10 +122,6 @@ $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 23176/consul
 ```
 
-## Compatibility
-
-The Consul check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

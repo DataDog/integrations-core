@@ -20,10 +20,6 @@ Edit the `mapreduce.yaml` file to point to your server and port, set the masters
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mapreduce` under the Checks section.
 
-## Compatibility
-
-The mapreduce check is compatible with all major platforms
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mapreduce/metadata.csv) for a list of metrics provided by this integration.

@@ -17,10 +17,6 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nfsstat` under the Checks section.
 
-## Compatibility
-
-The nfsstat check is compatible with linux
-
 ## Data Collected
 ### Metrics
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv) for a list of metrics provided by this check.

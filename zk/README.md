@@ -83,10 +83,6 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `zk` under the Checks section.
 
-## Compatibility
-
-The Zookeeper check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 

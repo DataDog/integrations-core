@@ -38,10 +38,6 @@ Ensure that the user running the Agent process (usually `dd-agent`) has read acc
 
 [Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `directory` under the Checks section.
 
-## Compatibility
-
-The directory check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 
