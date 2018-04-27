@@ -985,10 +985,10 @@ class OpenStackCheck(AgentCheck):
                 try:
                     server_state = self._make_request_with_auth_fallback(url, headers)
                 except:
-                    raise Exception
+                    raise e
                 self.log.debug("Server is in state: %s", server_state)
                 if server_state.get('status') in DIAGNOSTICABLE_STATES:
-                    raise Exception
+                    raise e
                 else:
                     del self.server_details_by_id[server_id]
 
