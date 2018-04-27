@@ -138,6 +138,39 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     assert aggregator.metrics_asserted_pct == 100.0
 
 
+def test_prometheus_cpu_summed(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    monkeypatch.setattr(check, 'rate', mock.Mock())
+
+    attrs = {
+        'close.return_value': True,
+        'iter_lines.return_value': mock_from_file('metrics.txt').split('\n')
+    }
+    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+    monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
+
+    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
+        check.check({"metrics_endpoint": "http://dummy"})
+
+    # Make sure we submit the summed rate for fluentd-gcp-v2.0.10-9q9t4 :
+    # usage on two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
+    calls = [
+        mock.call('kubernetes.cpu.usage.total', 2053640000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+    ]
+    check.rate.assert_has_calls(calls, any_order=True)
+
+    # Make sure the per-core metrics are not submitted
+    bad_calls = [
+        mock.call('kubernetes.cpu.usage.total', 1228320000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.usage.total', 825320000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+    ]
+    for c in bad_calls:
+        assert c not in check.rate.mock_calls
+
+
 def test_kubelet_check_neither(monkeypatch, aggregator):
     check = KubeletCheck('kubelet', None, {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))

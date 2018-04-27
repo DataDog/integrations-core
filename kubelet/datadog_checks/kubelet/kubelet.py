@@ -550,9 +550,20 @@ class KubeletCheck(PrometheusCheck, CadvisorScraper):
 
     def container_cpu_usage_seconds_total(self, message, **_):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
+        cpu_usage_sum = {}
+
         for metric in message.metric:
-            # convert cores in nano cores
+            c_id = self._get_container_id(metric.label)
+            if not c_id:
+                continue
+            # Convert cores in nano cores
             metric.counter.value *= 10. ** 9
+            # Sum the counter value accross all cores
+            if c_id not in cpu_usage_sum:
+                cpu_usage_sum[c_id] = metric
+            else:
+                cpu_usage_sum[c_id].counter.value += metric.counter.value
+                metric.Clear()  # Ignore this metric message
 
         self._process_container_rate(metric_name, message)
 
