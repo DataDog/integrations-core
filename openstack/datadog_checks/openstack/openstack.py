@@ -606,7 +606,7 @@ class OpenStackCheck(AgentCheck):
             'virt_type:{0}'.format(hyp['hypervisor_type'])
         ]
         tags.extend(host_tags)
-        tags.extens(custom_tags)
+        tags.extend(custom_tags)
         service_check_tags = list(custom_tags)
 
         try:
