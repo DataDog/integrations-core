@@ -1122,7 +1122,7 @@ class OpenStackCheck(AgentCheck):
     def check(self, instance):
 
         # [HACK] only here to help see custom version number while development
-        self.log.info("Running modified version 0.1.2")
+        self.log.info("Running modified version 0.1.3")
 
         # have we been backed off
         if not self.should_run(instance):
