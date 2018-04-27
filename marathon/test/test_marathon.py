@@ -90,6 +90,8 @@ class MarathonCheckTest(AgentCheckTest):
                 return {"deployments": []}
             elif "v2/queue" in url:
                 return {"queue": []}
+            elif "v2/groups" in url:
+                return {"apps": []}
             else:
                 raise Exception("unknown url:" + url)
 
