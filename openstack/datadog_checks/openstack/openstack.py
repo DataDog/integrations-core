@@ -935,7 +935,10 @@ class OpenStackCheck(AgentCheck):
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
                 self.log.debug("Removing server from cache: %s", new_server)
-                del self.server_details_by_id[new_server['server_id']]
+                try:
+                    del self.server_details_by_id[new_server['server_id']]
+                except KeyError as e:
+                    self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
         
         self.log.debug("Cache after refresh: %s", self.server_details_by_id)
         return self.server_details_by_id
@@ -970,9 +973,10 @@ class OpenStackCheck(AgentCheck):
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
         except InstancePowerOffFailure:
+            del self.server_details_by_id[server_id]
             self.warning("Server %s is powered off and cannot be monitored" % server_id)
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
+            if e.response.status_code == 404 or e.response.status_code == 409:
                 # Check here if we hit a case where the deleted VM isn't properly removed from the cache
                 # If its still ACTIVE, keep it and perform a backoff, otherwise delete it from the cache and move on.
                 self.log.debug("Server: %s in a deleted state, querying to see if its still active", server_id)
@@ -1115,7 +1119,7 @@ class OpenStackCheck(AgentCheck):
     def check(self, instance):
 
         # [HACK] only here to help see custom version number while development
-        self.log.info("Running modified version 0.1.1")
+        self.log.info("Running modified version 0.1.2")
 
         # have we been backed off
         if not self.should_run(instance):
