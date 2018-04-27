@@ -577,7 +577,7 @@ class OpenStackCheck(AgentCheck):
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
                                 timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
-        except requests.exceptions.HTTPError:
+        except requests.HTTPError as e:
             self.log.debug("Response Headers: %s", resp.headers)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
@@ -587,7 +587,7 @@ class OpenStackCheck(AgentCheck):
             elif resp.status_code == 409:
                 raise InstancePowerOffFailure()
             elif resp.status_code == 404:
-                raise requests.exceptions.HTTPError
+                raise e
             else:
                 raise
 
@@ -972,17 +972,20 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:
+        except InstancePowerOffFailure: # 409 response code came back fro nova
             del self.server_details_by_id[server_id]
             self.warning("Server %s is powered off and cannot be monitored" % server_id)
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404 or e.response.status_code == 409:
+            if e.response.status_code == 404:
                 # Check here if we hit a case where the deleted VM isn't properly removed from the cache
                 # If its still ACTIVE, keep it and perform a backoff, otherwise delete it from the cache and move on.
                 self.log.debug("Server: %s in a deleted state, querying to see if its still active", server_id)
                 headers = {'X-Auth-Token': self.get_auth_token()}
                 url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
-                server_state = self._make_request_with_auth_fallback(url, headers)
+                try:
+                    server_state = self._make_request_with_auth_fallback(url, headers)
+                except:
+                    raise Exception
                 self.log.debug("Server is in state: %s", server_state)
                 if server_state.get('status') in DIAGNOSTICABLE_STATES:
                     raise Exception
