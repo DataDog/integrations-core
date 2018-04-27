@@ -478,7 +478,7 @@ class MapReduceCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=ssl_verify)
             response.raise_for_status()
             response_json = response.json()
 
