@@ -10,9 +10,10 @@ import time
 import pytest
 
 from datadog_checks.lighttpd import Lighttpd
+from datadog_checks.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = get_docker_hostname()
 STATUS_URL = 'http://{}:9449/server-status'.format(HOST)
 CHECK_GAUGES = [
     'lighttpd.net.bytes',
@@ -50,7 +51,10 @@ def lighttpd():
     """
     env = os.environ
     env['PWD'] = HERE
-    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "up", "-d"], env=env)
+    subprocess.check_call(
+        ["docker-compose", "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml'), "up", "-d"],
+        env=env
+    )
     attempts = 0
     while True:
         if attempts > 10:
@@ -67,7 +71,10 @@ def lighttpd():
 
     yield
 
-    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "down"], env=env)
+    subprocess.check_call(
+        ["docker-compose", "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml'), "down"],
+        env=env
+    )
 
 
 def test_lighttpd(aggregator, instance, lighttpd):

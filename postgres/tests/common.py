@@ -3,7 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+from datadog_checks.utils.common import get_docker_hostname
+
+HOST = get_docker_hostname()
 PORT = '5432'
 USER = 'datadog'
 PASSWORD = 'datadog'
