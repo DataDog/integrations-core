@@ -34,7 +34,7 @@ def run_tox(ctx, target, bench, dry_run):
                 benches = [e for e in env_list if e.startswith('bench')]
                 # Don't print anything if there are no benchmarks
                 if benches:
-                    ctx.run('tox -e {}'.format(benches[0]))
+                    ctx.run('tox -e {}'.format(','.join(benches)))
             else:
                 sys.stdout.write('\nRunning tox in `{}`...\n'.format(target))
                 ctx.run('tox -e {}'.format(','.join(e for e in env_list if not e.startswith('bench'))))
