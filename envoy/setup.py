@@ -46,7 +46,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -60,7 +60,6 @@ setup(
     ],
 
     # Testing setup and dependencies
-    setup_requires=['pytest-runner'],
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
