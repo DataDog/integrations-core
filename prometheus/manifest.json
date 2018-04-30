@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "prometheus",
-  "short_description": "prometheus description.",
+  "short_description": "Prometheus is an open source monitoring system for timeseries metric data",
   "guid": "58e75868-0933-407b-aaa5-469c252bdb2b",
   "support": "core",
   "supported_os": ["linux","mac_os","windows"],
@@ -11,5 +11,7 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/prometheus/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "display_name": "Prometheus",
+  "creates_events": false
 }
