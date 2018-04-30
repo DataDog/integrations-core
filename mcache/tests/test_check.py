@@ -110,7 +110,7 @@ def memcached():
     """
     Start a standalone Memcached server.
     """
-    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "up", "-d"])
+    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml'), "up", "-d"])
     attempts = 0
     while True:
         if attempts > 10:
@@ -128,7 +128,7 @@ def memcached():
 
     yield
 
-    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker-compose.yaml'), "down"])
+    subprocess.check_call(["docker-compose", "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml'), "down"])
 
 
 @pytest.fixture

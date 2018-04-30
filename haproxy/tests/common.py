@@ -1,5 +1,7 @@
 import os
 
+from datadog_checks.utils.common import get_docker_hostname
+
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a'], 1),
     (['status:available', 'service:b'], 4),
@@ -17,7 +19,7 @@ CHECK_NAME = 'haproxy'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = get_docker_hostname()
 PORT = '13835'
 PORT_OPEN = '13836'
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
