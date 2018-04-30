@@ -491,7 +491,8 @@ class HAProxy(AgentCheck):
 
     def _process_status_metric(self, hosts_statuses, collect_status_metrics_by_host,
                                services_incl_filter=None, services_excl_filter=None,
-                               collate_status_tags_per_host=False, count_status_by_service=True, custom_tags=[], active_tag=[]):
+                               collate_status_tags_per_host=False, count_status_by_service=True,
+                               custom_tags=[], active_tag=[]):
         agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
 
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
