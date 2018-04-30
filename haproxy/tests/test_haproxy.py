@@ -30,7 +30,7 @@ def _test_frontend_metrics(aggregator, shared_tag):
 
 
 def _test_backend_metrics(aggregator, shared_tag, services=None):
-    backend_tags = shared_tag + ['type:BACKEND']
+    backend_tags = shared_tag + ['type:BACKEND', 'active:true']
     if not services:
         services = common.BACKEND_SERVICES
     for service in services:
