@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.22.0",
   "name": "elastic",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.8.0",
   "guid": "d91d91bd-4a8e-4489-bfb1-b119d4cc388a",
   "public_title": "Datadog-ElasticSearch Integration",
   "categories": [
