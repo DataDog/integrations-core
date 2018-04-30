@@ -98,6 +98,7 @@ the new testing approach:
 * [btrfs](btrfs)
 * [directory](directory)
 * [disk](disk)
+* [elastic](elastic)
 * [envoy](envoy)
 * [istio](istio)
 * [kube_proxy](kube_proxy)

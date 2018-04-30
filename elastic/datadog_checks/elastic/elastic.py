@@ -8,17 +8,8 @@ import time
 import urlparse
 import requests
 from datadog_checks.checks import AgentCheck
-# compatibility layer
-try:
-    from config import _is_affirmative
-except ImportError:
-    from datadog_checks.config import _is_affirmative
-
-# compatibility layer
-try:
-    from util import headers
-except ImportError:
-    from datadog_checks.utils.headers import headers
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.headers import headers
 
 
 class NodeNotFound(Exception):
