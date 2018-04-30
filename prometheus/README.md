@@ -10,6 +10,8 @@ Extract custom metrics from any prometheus endpoints.
 
 ### Installation
 
+The Prometheus check is packaged with the Agent starting version 6.1.0.
+
 ### Configuration
 
 Edit the `prometheus.yaml` file to add your different prometheus instances you want to retrieve metrics from.
