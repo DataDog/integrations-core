@@ -253,11 +253,11 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
         document count for primary indexes is twice smaller as the global
         document count when "number_of_replicas" is set to 1 """
     elastic_latency = 10
-    config = {'url': 'http://localhost:9200', 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
+    config = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
 
-    requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 1}}')
-    requests.put('http://localhost:9200/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
-    requests.put('http://localhost:9200/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 1}}')
+    requests.put(URL + '/testindex/testtype/2', data='{"name": "Jane Doe", "age": 27}')
+    requests.put(URL + '/testindex/testtype/1', data='{"name": "John Doe", "age": 42}')
 
     time.sleep(elastic_latency)
     elastic_check = ESCheck(CHECK_NAME, {}, {})
@@ -279,7 +279,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
 
 def test_index_metrics(aggregator, spin_up_elastic):
     # Tests that index level metrics are forwarded
-    config = {'url': 'http://localhost:9200', 'index_stats': True, 'username': USER, 'password': PASSWORD}
+    config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
 
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     index_metrics = dict(ESCheck.INDEX_STATS_METRICS)
@@ -292,15 +292,15 @@ def test_index_metrics(aggregator, spin_up_elastic):
 
 def test_health_event(aggregator, spin_up_elastic):
     dummy_tags = ['elastique:recherche']
-    config = {'url': 'http://localhost:9200', 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
+    config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
 
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     # Should be yellow at first
-    requests.put('http://localhost:9200/_settings', data='{"index": {"number_of_replicas": 100}')
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
     elastic_check.check(config)
     if get_es_version() < [2, 0, 0]:
         assert len(aggregator.events) == 1
-        assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:http://localhost:9200']
+        assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:' + URL]
                                                               + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')
