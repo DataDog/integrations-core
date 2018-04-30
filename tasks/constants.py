@@ -21,7 +21,7 @@ AGENT_BASED_INTEGRATIONS = [
     'datadog_checks_base',
     'directory',
     'disk',
-    'elastic'
+    'elastic',
     'envoy',
     'haproxy',
     'iis',
