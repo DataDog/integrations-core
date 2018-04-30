@@ -17,6 +17,7 @@ METRICS = [
     'consul.catalog.services_passing',
     'consul.catalog.services_warning',
     'consul.catalog.services_critical',
+    'consul.catalog.total_nodes',
     'consul.net.node.latency.p95',
     'consul.net.node.latency.min',
     'consul.net.node.latency.p25',

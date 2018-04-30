@@ -318,6 +318,8 @@ class ConsulCheck(AgentCheck):
             max_services = instance.get('max_services',
                                         self.init_config.get('max_services', self.MAX_SERVICES))
 
+            self.count_all_nodes(instance, main_tags)
+
             services = self._cull_services_list(services, service_whitelist, max_services)
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
@@ -494,3 +496,9 @@ class ConsulCheck(AgentCheck):
                            latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.max',
                            latencies[-1], hostname=node_name, tags=main_tags)
+    def _get_all_nodes(self, instance):
+        return self.consul_request(instance, 'v1/catalog/nodes')
+
+    def count_all_nodes(self, instance, main_tags):
+        nodes = self._get_all_nodes(instance)
+        self.gauge('consul.catalog.total_nodes', len(nodes), tags=main_tags)
