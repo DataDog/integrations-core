@@ -987,7 +987,7 @@ class OpenStackCheck(AgentCheck):
                 except:
                     raise e
                 self.log.debug("Server is in state: %s", server_state)
-                if server_state.get('status') in DIAGNOSTICABLE_STATES:
+                if server_state.get('server').get('status') in DIAGNOSTICABLE_STATES:
                     raise e
                 else:
                     del self.server_details_by_id[server_id]
@@ -1122,7 +1122,7 @@ class OpenStackCheck(AgentCheck):
     def check(self, instance):
 
         # [HACK] only here to help see custom version number while development
-        self.log.info("Running modified version 0.1.3")
+        self.log.info("Running modified version 0.1.4")
 
         # have we been backed off
         if not self.should_run(instance):
