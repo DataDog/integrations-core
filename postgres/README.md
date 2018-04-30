@@ -13,11 +13,10 @@ Get metrics from PostgreSQL service in real time to:
 ### Installation
 
 The PostgreSQL check is packaged with the Agent. To start gathering your PostgreSQL metrics and logs, [install the Agent][13].
-If you need the newest version of the check, install the `dd-check-postgres` package manually or with your favorite configuration manager.
 
 ### Configuration
 
-Create a `postgres.yaml` file in the Agent's `conf.d` directory.
+Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options. 
 
 #### Prepare Postgres
 
@@ -43,7 +42,7 @@ When it prompts for a password, enter the one used in the first command.
 
 #### Metric Collection
 
-* Edit the `postgres.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.yaml][14] for all available configuration options. Configuration Options:
+* Edit the `postgres.d/conf.yaml` file to point to your server and port, set the masters to monitor. See the [sample postgres.d/conf.yaml][14] for all available configuration options. Configuration Options:
 
   * **`username`** (Optional) - The user account used to collect metrics, set in the [Installation section above](#installation)
   * **`password`** (Optional) - The password for the user account.
@@ -90,7 +89,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
   logs_enabled: true
   ```
 
-*  Add this configuration setup to your `postgres.yaml` file to start collecting your PostgreSQL logs:
+*  Add this configuration setup to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
 
   ```
   logs:
@@ -106,9 +105,9 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
         #    name: new_log_start_with_date
   ```
   Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample postgres.yaml](https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example) for all available configuration options.
+  See the [sample postgres.d/conf.yaml][14] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+* [Restart the Agent][15].
 
 **Learn more about log collection [on the log documentation][16]**
 ### Validation
@@ -189,7 +188,7 @@ custom_metrics:
 
 ##### Debugging
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `postgres` under the Checks section:
+[Run the Agent's `status` subcommand][17] and look for `postgres` under the Checks section:
 
 ```
 postgres

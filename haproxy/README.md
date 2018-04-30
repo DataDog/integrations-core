@@ -20,7 +20,8 @@ The HAProxy check is packaged with the Agent. To start gathering your HAProxy me
 
 ### Configuration
 
-Create a `haproxy.yaml` file in the Agent's `conf.d` directory.
+Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample haproxy.d/conf.yaml][4] for all available configuration options.
 
 #### Prepare HAProxy
 
@@ -43,7 +44,7 @@ The Agent collects metrics via a stats endpoint:
 
 #### Metric Collection
 
-*  Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics):
+*  Add this configuration setup to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
   ```
   init_config:
@@ -67,7 +68,7 @@ The Agent collects metrics via a stats endpoint:
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+* Add this configuration setup to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
   ```
   logs:
@@ -77,7 +78,7 @@ The Agent collects metrics via a stats endpoint:
         source: haproxy
         sourcecategory: http_web_access
   ```
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 

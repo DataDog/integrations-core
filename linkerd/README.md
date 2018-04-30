@@ -9,12 +9,10 @@ This check collects distributed system observability metrics from [Linkerd][1].
 
 The Linkerd check is packaged with the Agent, so simply [install the Agent][2] on your server.
 
-If you need the newest version of the Linkerd check, install the `dd-check-linkerd` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details][3].
-
 ### Configuration
 
-Edit the `linkerd.yaml` file located in your configuration directory.
-See [sample linkerd.yaml][4] for all available configuration options.
+Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 
 ### Validation
 
@@ -37,7 +35,7 @@ curl <linkerd_prometheus_endpoint>
 Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
-Simply follow the examples present in the [default configuration](https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example).
+Simply follow the examples present in the [default configuration][4].
 
 ### Service Checks
 

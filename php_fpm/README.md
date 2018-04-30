@@ -11,7 +11,7 @@ The PHP-FPM check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-Create a file `php_fpm.yaml` in the Agent's `conf.d` directory. See the [sample php_fpm.yaml][2] for all available configuration options:
+Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample php_fpm.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -35,6 +35,7 @@ Configuration Options:
 * `user` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
+
 [Restart the Agent][3] to start sending PHP-FPM metrics to Datadog.
 
 ### Validation
@@ -47,7 +48,7 @@ Configuration Options:
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The php-fpm check does not include any event at this time.
+The PHP-FPM check does not include any event at this time.
 
 ### Service Checks
 

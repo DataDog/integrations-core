@@ -13,7 +13,7 @@ Configure this Agent check to get metrics from docker_daemon service in real tim
 ## Setup
 ### Installation
 
-To collect Docker metrics about all your containers, you will run **one** Datadog Agent on every host. There are two ways to run the Agent: directly on each host, or within a [docker-dd-agent container][1]. We recommend the latter.
+To collect Docker metrics about all your containers, run **one** Datadog Agent on every host. There are two ways to run the Agent: directly on each host, or within a [docker-dd-agent container][1]. We recommend the latter.  
 
 Whichever you choose, your hosts need to have cgroup memory management enabled for the Docker check to succeed. See the [docker-dd-agent repository][2] for how to enable it.
 

@@ -11,18 +11,18 @@ The system_core check is packaged with the Agent, so simply [install the Agent][
 
 ### Configuration
 
-Create a file `system_core.yaml` in the Agent's `conf.d` directory. See the [sample system_core.yaml][2] for all available configuration options:
+1. Edit the `system_core.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample system_core.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - foo: bar
-```
+    instances:
+      - foo: bar
+    ```
 
-The Agent just needs one item in `instances` in order to enable the check. The content of the item doesn't matter.
+    The Agent just needs one item in `instances` in order to enable the check. The content of the item doesn't matter.
 
-[Restart the Agent][3] to enable the check.
+2. [Restart the Agent][3] to enable the check.
 
 ### Validation
 

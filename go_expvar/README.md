@@ -12,7 +12,6 @@ If you prefer to instrument your Go code using only [dogstats-go][1], you can st
 The Go Expvar check is packaged with the Agent, so simply [install the Agent][2] anywhere you run Go services whose metrics you want to collect.
 
 ### Configuration
-
 #### Prepare your Go service
 
 If your Go service doesn't use the [expvar package][3] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar — i.e. you only want to collect your service's memory metrics — import the package using the blank identifier (`import _ "expvar"`).
@@ -21,28 +20,28 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-Create a file `go_expvar.yaml` in the Agent's `conf.d` directory. See the [sample go_expvar.yaml][5] for all available configuration options:
+1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
 
-```
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-  - expvar_url: http://localhost:<your_apps_port>
-    # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
-    namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
-    # optionally define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
-    metrics:
-      - path: my_func_counter
-        # if you don't want it named my_go_app.my_func_counter
-        #alias: my_go_app.preferred_counter_name
-        type: counter # other valid options: rate, gauge
-        #tags:
-        #  - "tag_name1:tag_value1"
-```
+    instances:
+      - expvar_url: http://localhost:<your_apps_port>
+        # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
+        namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
+        # optionally define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
+        metrics:
+          - path: my_func_counter
+            # if you don't want it named my_go_app.my_func_counter
+            #alias: my_go_app.preferred_counter_name
+            type: counter # other valid options: rate, gauge
+            #tags:
+            #  - "tag_name1:tag_value1"
+    ```
 
-If you don't configure a `metrics` list, the Agent will still collect memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
+    If you don't configure a `metrics` list, the Agent will still collect memstat metrics. Use `metrics` to tell the Agent which expvar vars to collect.
 
-[Restart the Agent][6] to begin sending memstat and expvar metrics to Datadog.
+2. [Restart the Agent][6] to begin sending memstat and expvar metrics to Datadog.
 
 ### Validation
 

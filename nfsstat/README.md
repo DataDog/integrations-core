@@ -11,7 +11,7 @@ The NFSstat check is packaged with the Agent, so simply [install the Agent][2] o
 
 ### Configuration
 
-Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.yaml][3] for all available configuration options.
+Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
 
@@ -22,10 +22,10 @@ Edit the `nfsstat.yaml` file to point to your nfsiostat binary script, or use th
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The nfststat check does not include any event at this time.
+The Nfststat check does not include any event at this time.
 
 ### Service Checks
-The nfsstat check does not include any service check at this time.
+The Nfsstat check does not include any service check at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].

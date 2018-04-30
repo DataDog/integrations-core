@@ -11,23 +11,23 @@ The SSH/SFTP check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-Create a file `ssh_check.yaml` in the Agent's `conf.d` directory. See the [sample ssh_check.yaml][2] for all available configuration options:
+1. Edit the `ssh_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample ssh_check.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - host: <SOME_REMOTE_HOST>  # required
-    username: <SOME_USERNAME> # required
-    password: <SOME_PASSWORD> # or use private_key_file
-#   private_key_file: <PATH_TO_PRIVATE_KEY>
-#   private_key_type:         # rsa or ecdsa; default is rsa
-#   port: 22                  # default is port 22
-#   sftp_check: False         # set False to disable SFTP check; default is True
-#   add_missing_keys: True    # default is False
-```
+    instances:
+      - host: <SOME_REMOTE_HOST>  # required
+        username: <SOME_USERNAME> # required
+        password: <SOME_PASSWORD> # or use private_key_file
+    #   private_key_file: <PATH_TO_PRIVATE_KEY>
+    #   private_key_type:         # rsa or ecdsa; default is rsa
+    #   port: 22                  # default is port 22
+    #   sftp_check: False         # set False to disable SFTP check; default is True
+    #   add_missing_keys: True    # default is False
+    ```
 
-[Restart the Agent][3] to start sending SSH/SFTP metrics and service checks to Datadog.
+2. [Restart the Agent][3] to start sending SSH/SFTP metrics and service checks to Datadog.
 
 ### Validation
 

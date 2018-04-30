@@ -28,7 +28,7 @@ Follow the instructions in our [blog post][1] to install the Datadog Agent on ea
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change <YOUR_DATADOG_API_KEY> with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][2]
+If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][2]
 
 ```json
 {
@@ -89,7 +89,7 @@ Unless you want to configure a custom `mesos_slave.d/conf.yaml`—perhaps you ne
 Under the Services tab in the DC/OS web UI you should see the Datadog Agent shown. In the Datadog app, search for `mesos.slave` in the Metrics Explorer.
 
 #### Marathon
-If you are not using DC/OS, then datadog-agent will be in the list of running applications with a healthy status. In the Datadog app, search for mesos.slave in the Metrics Explorer.
+If you are not using DC/OS, then datadog-agent is in the list of running applications with a healthy status. In the Datadog app, search for `mesos.slave` in the Metrics Explorer.
 
 ## Data Collected
 ### Metrics
@@ -126,7 +126,7 @@ Need help? Contact [Datadog Support][4].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS](https://www.datadoghq.com/blog/deploy-datadog-dcos/)
+* [Installing Datadog on Mesos with DC/OS][1]
 
 
 [1]: https://www.datadoghq.com/blog/deploy-datadog-dcos/

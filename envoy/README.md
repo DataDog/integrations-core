@@ -9,17 +9,18 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 The Envoy check is packaged with the Agent, so simply [install the Agent][2] on your server.
 
-If you need the newest version of the Envoy check, install the `dd-check-envoy` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details][3].
-
 ### Configuration
 
-Create a file `envoy.yaml` in the Datadog Agent's `conf.d` directory. See the [sample envoy.yaml][4] for all available configuration options.
+1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Envoy performance data.
+See the [sample envoy.d/conf.yaml][4] for all available configuration options.
 
-Be sure the Datadog Agent can access Envoy's [admin endpoint][5].
+2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
+
+3. [Restart the Agent][3]
 
 #### via Istio
 
-If you are using Envoy as part of [Istio][6], to access Envoy's [admin endpoint](https://www.envoyproxy.io/docs/envoy/latest/operations/admin) you need to set Istio's [proxyAdminPort][7].
+If you are using Envoy as part of [Istio][6], to access Envoy's [admin endpoint][5] you need to set Istio's [proxyAdminPort][7].
 
 #### Standard
 
@@ -29,7 +30,7 @@ There are 2 ways to setup the `/stats` endpoint:
 
 Here's an example Envoy admin configuration:
 
-```
+```yaml
 admin:
   access_log_path: "/dev/null"
   address:
@@ -42,9 +43,9 @@ admin:
 
 Create a listener/vhost that routes to the admin endpoint (Envoy connecting to itself), but only has a route for `/stats`; all other routes get a static/error response. Additionally, this allows nice integration with L3 filters for auth, for example.
 
-Here's an example config (from [this gist](https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8)):
+Here's an example config (from [this gist][13]):
 
-```
+```yaml
 admin:
   access_log_path: /dev/null
   address:
@@ -97,7 +98,8 @@ static_resources:
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this integration.
+
 See [metrics.py][10] for a list of tags sent by each metric.
 
 ### Events
@@ -120,7 +122,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/faq/install-core-extra/
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example
 [5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [6]: https://istio.io
@@ -130,3 +132,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
 [11]: http://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/
+[13]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8

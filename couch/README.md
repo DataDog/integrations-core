@@ -16,24 +16,25 @@ The CouchDB check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-Create a file `couch.yaml` in the Agent's `conf.d` directory. See the [sample  couch.yaml][2] for all available configuration options:
+1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your CouchDB performance data.  
+See the [sample couch.d/conf.yaml][2] for all available configuration options.
 
-```
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-  - server: http://localhost:5984 # or wherever your CouchDB is listening
-  #user: <your_username>
-  #password: <your_password>
-  #name: <A node's Erlang name> # Only for CouchDB 2.x
-  #max_nodes_per_check: If no name is specified, the agent will scan all nodes up. As that may be very long, you can limit how many to collect per check. Default: 20
-  #max_dbs_per_check. Maximum number of databases to report on. Default: 50
-  #tags: A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs. Default: []
-```
+    instances:
+      - server: http://localhost:5984 # or wherever your CouchDB is listening
+      #user: <your_username>
+      #password: <your_password>
+      #name: <A node's Erlang name> # Only for CouchDB 2.x
+      #max_nodes_per_check: If no name is specified, the agent will scan all nodes up. As that may be very long, you can limit how many to collect per check. Default: 20
+      #max_dbs_per_check. Maximum number of databases to report on. Default: 50
+      #tags: A list of tags applied to all metrics collected. Tags may be simple strings or key-value pairs. Default: []
+    ```
 
-Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
+    Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
-[Restart the Agent][3] to begin sending CouchDB metrics to Datadog.
+2. [Restart the Agent][3] to begin sending CouchDB metrics to Datadog.
 
 ### Validation
 

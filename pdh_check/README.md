@@ -13,7 +13,7 @@ The PDH check is packaged with the Agent, so simply [install the Agent][1] on yo
 
 ### Configuration
 
-Edit the `pdh_check.yaml` file to collect Windows performance data. See the [sample pdh_check.yaml][2] for all available configuration options.
+Edit the `pdh_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to collect Windows performance data. See the [sample pdh_check.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

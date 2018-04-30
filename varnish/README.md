@@ -19,7 +19,10 @@ The Varnish check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-Create a `varnish.yaml` file in the Agent's `conf.d` directory
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample varnish.d/conf.yaml][2] for all available configuration options.
+
+2. [Restart the Agent][3]
 
 #### Prepare Varnish
 
@@ -27,7 +30,7 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
 
 #### Metric Collection
 
-* Add this configuration setup to your `varnish.yaml` file to start gathering your [Varnish metrics](#metrics):
+* Add this configuration setup to your `varnish.d/conf.yaml` file to start gathering your [Varnish metrics](#metrics):
 
   ```
   init_config:
@@ -77,7 +80,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `varnish.yaml` file to start collecting your Varnish logs:
+* Add this configuration setup to your `varnish.d/conf.yaml` file to start collecting your Varnish logs:
 
   ```
   logs:
@@ -88,9 +91,9 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
       service: varnish
   ```
   Change the `path` and `service` parameter value and configure them for your environment.
-  See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
+  See the [sample varnish.yaml][2] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+* [Restart the Agent][3].
 
 **Learn more about log collection [on the log documentation][4]**
 

@@ -30,9 +30,9 @@ Substitute your Datadog API key and Mesos Master's API URL into the command abov
 
 ### Configuration
 
-If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][1] for all available configuration options.
+If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][101] for all available configuration options.
 
-Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.yaml`.
+Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
 ### Validation
 
@@ -41,7 +41,7 @@ In the Datadog app, search for `mesos.cluster` in the Metrics Explorer.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][2] for a list of metrics provided by this integration.
+See [metadata.csv][102] for a list of metrics provided by this integration.
 
 ### Events
 The Mesos-master check does not include any event at this time.
@@ -53,14 +53,14 @@ The Mesos-master check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][3].
+Need help? Contact [Datadog Support][103].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS][4]
+* [Installing Datadog on Mesos with DC/OS][104]
 
 
-[1]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/conf.yaml.example
-[2]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
-[3]: http://docs.datadoghq.com/help/
-[4]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
+[101]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/conf.yaml.example
+[102]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
+[103]: http://docs.datadoghq.com/help/
+[104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/

@@ -20,13 +20,13 @@ The check collects metrics via JMX, so you'll need a JVM on each kafka node so t
 
 ### Configuration
 
-Create a file `kafka.yaml` in the Datadog Agent's `conf.d` directory.
+Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's directory.
 
 #### Metric Collection
 
 **The following instructions are for the Datadog agent >= 5.0. For agents before that, refer to the [older documentation][17].**
 
-Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample conf file][18] as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
+Kafka bean names depend on the exact Kafka version you're running. You should always use the example that comes packaged with the Agent as a base since that will be the most up-to-date configuration. Use [this sample configuration file][18] as an example, but note that the version there may be for a newer version of the Agent than what you've got installed.
 
 After you've configured `kafka.yaml`, [restart the Agent][19] to begin sending Kafka metrics to Datadog.
 
@@ -60,7 +60,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `kafka.yaml` file to start collecting your Kafka Logs:
+* Add this configuration setup to your `kafka.d/conf.yaml` file to start collecting your Kafka Logs:
 
   ```
   logs:
@@ -76,9 +76,9 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample kafka.yaml](https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example) for all available configuration options.
+  See the [sample kafka.d/conf.yaml][18] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent). 
+* [Restart the Agent][19]. 
 
 **Learn more about log collection [on the log documentation][21]**
 

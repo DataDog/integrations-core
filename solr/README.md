@@ -13,7 +13,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-Create a file `solr.yaml` in the Agent's `conf.d` directory. See the [sample solr.yaml][3] for all available configuration options:
+Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample solr.d/conf.yaml][3] for all available configuration options:
 
 ```
 instances:
@@ -92,7 +92,7 @@ init_config:
           metric_type: gauge
 ```
 
-Again, see the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+Again, see the [JMX Check documentation][2] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
 [Restart the Agent][4] to start sending Solr metrics to Datadog.
 
@@ -159,8 +159,8 @@ In that case you can specify an alias for the metric that will become the metric
 
 In that case:
 
-  * The metric type will be a gauge
-  * The metric name will be jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]
+  * The metric type is a gauge
+  * The metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`
 
 Here is another filtering example:
 

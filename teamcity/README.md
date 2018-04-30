@@ -16,7 +16,7 @@ The Teamcity check is packaged with the Agent, so simply [install the Agent][1] 
 
 Follow [Teamcity's documentation][2] to enable Guest Login.
 
-Create a file `teamcity.yaml` in the Agent's `conf.d` directory. See the [sample teamcity.yaml][3] for all available configuration options:
+Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:

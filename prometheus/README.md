@@ -8,7 +8,7 @@ Extract custom metrics from any prometheus endpoints.
 
 ## Configuration
 
-Edit the `prometheus.yaml` file to add your different prometheus instances you want to retrieve metrics from.
+Edit the `prometheus.d/conf.yaml` file to add your different prometheus instances you want to retrieve metrics from.
 
 Each instance is at least composed of:
 
@@ -18,7 +18,7 @@ Each instance is at least composed of:
 simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`.
 It's also possible to use a `*` wildcard such as `- metric*` that would fetch all matching metrics (to use with caution as it can potentially send a lot of custom metrics)
 
-There is also a couple of more advanced settings (ssl, labels joining, custom tags,...) that are documented in the [example configuration](conf.yaml.example)
+There is also a couple of more advanced settings (ssl, labels joining, custom tags,...) that are documented in the [example configuration][2]
 
 If you are monitoring an off-the-shelf software and you think it would deserve an official integration, have a look at `kube-proxy` for an example, and don't hesitate to contribute.
 
@@ -28,3 +28,4 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 
 [1]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
+[2]: https://docs.datadoghq.com/agent/prometheus/

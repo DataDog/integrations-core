@@ -11,7 +11,8 @@ The disk check is packaged with the Agent, so simply [install the Agent][1] anyw
 
 ### Configuration
 
-The disk check is enabled by default, and the Agent will collect metrics on all local partitions. If you want to configure the check with custom options, create a file `disk.yaml` in the Agent's `conf.d` directory. See the [sample disk.yaml][2] for all available configuration options.
+The disk check is enabled by default, and the Agent collects metrics on all local partitions.  
+If you want to configure the check with custom options, Edit the `disk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample disk.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

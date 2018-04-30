@@ -17,7 +17,7 @@ The Kube-dns check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-Edit the `kube_dns.yaml` file to point to your server and port, set the masters to monitor. See the [sample kube_dns.yaml][2] for all available configuration options.
+Edit the `kube_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor. See the [sample kube_dns.d/conf.yaml][2] for all available configuration options.
 
 #### Using with service discovery
 

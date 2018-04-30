@@ -14,7 +14,11 @@ The Agent Metrics check is packaged with the Agent, so simply [install the Agent
 
 ### Configuration
 
-Edit the `agent_metrics.yaml` file to point to your server and port, set the masters to monitor. See the [sample agent_metrics.yaml][2] for all available configuration options.
+1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor.  
+
+    See the [sample agent_metrics.d/conf.yaml][2] for all available configuration options.
+
+2. [Restart the Agent][7]
 
 ### Validation
 
@@ -43,3 +47,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [4]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
 [5]: http://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
