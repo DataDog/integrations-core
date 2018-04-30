@@ -46,6 +46,7 @@ CHECK_CONFIG = {
     'status_check': True,
     'collect_aggregates_only': False,
     'tag_service_check_by_host': True,
+    'active_tag': True,
 }
 
 CHECK_CONFIG_OPEN = {

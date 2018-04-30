@@ -80,8 +80,8 @@ def test_check(aggregator, spin_up_haproxy):
 
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
-    _test_frontend_metrics(aggregator, shared_tag)
-    _test_backend_metrics(aggregator, shared_tag)
+    _test_frontend_metrics(aggregator, shared_tag + ['active:false'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'])
 
     # check was run 2 times
     #       - FRONTEND is reporting OPEN that we ignore
@@ -101,7 +101,7 @@ def test_check_service_filter(aggregator, spin_up_haproxy):
     haproxy_check.check(config)
     shared_tag = ["instance_url:{0}".format(common.STATS_URL)]
 
-    _test_backend_metrics(aggregator, shared_tag, ['datadog'])
+    _test_backend_metrics(aggregator, shared_tag + ['active:false'], ['datadog'])
 
     _test_service_checks(aggregator, ['datadog'])
 
