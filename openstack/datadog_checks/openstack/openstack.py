@@ -579,6 +579,7 @@ class OpenStackCheck(AgentCheck):
             resp.raise_for_status()
         except requests.HTTPError as e:
             self.log.debug("Response Headers: %s", resp.headers)
+            self.log.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
 
@@ -973,25 +974,15 @@ class OpenStackCheck(AgentCheck):
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
         except InstancePowerOffFailure: # 409 response code came back fro nova
+            self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             del self.server_details_by_id[server_id]
-            self.warning("Server %s is powered off and cannot be monitored" % server_id)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
-                # Check here if we hit a case where the deleted VM isn't properly removed from the cache
-                # If its still ACTIVE, keep it and perform a backoff, otherwise delete it from the cache and move on.
-                self.log.debug("Server: %s in a deleted state, querying to see if its still active", server_id)
-                headers = {'X-Auth-Token': self.get_auth_token()}
-                url = '{0}/servers/{1}'.format(self.get_nova_endpoint(), server_id)
-                try:
-                    server_state = self._make_request_with_auth_fallback(url, headers)
-                except:
-                    raise e
-                self.log.debug("Server is in state: %s", server_state)
-                if server_state.get('server').get('status') in DIAGNOSTICABLE_STATES:
-                    raise e
-                else:
-                    del self.server_details_by_id[server_id]
-
+                self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
+                del self.server_details_by_id[server_id]
+            else:
+                self.log.debug("Received HTTP Error when reaching the nova endpoint")
+                raise e
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
             raise e
@@ -1181,7 +1172,10 @@ class OpenStackCheck(AgentCheck):
 
                 host_tags = self._get_tags_for_host()
 
-                for server in self.server_details_by_id:
+                # Deep copy the cache so we can remove things from the Original during the iteration
+                server_cache_copy = copy.deepcopy(self.server_details_by_id)
+
+                for server in server_cache_copy:
                     server_tags = copy.copy(instance.get('server_tags', []))
                     server_tags.append("nova_managed_server")
 
