@@ -15,17 +15,18 @@ The Gearman check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-Create a file `gearmand.yaml` in the Agent's `conf.d` directory. See the [sample gearmand.yaml][2] for all available configuration options:
 
-```
-init_config:
+1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Gearman performance data.  
+    See the [sample gearmand.d/conf.yaml][2] for all available configuration options.
+    ```
+    init_config:
 
-instances:
-  - server: localhost
-    port: 4730
-```
+    instances:
+        - server: localhost
+        port: 4730
+    ```
 
-[Restart the Agent][3] to begin sending Gearman metrics to Datadog.
+2. [Restart the Agent][3]
 
 ### Validation
 

@@ -9,11 +9,11 @@ This integration gets container metrics from kubelet
 
 ## Installation
 
-Install the `dd-check-kubelet` package manually or with your favorite configuration manager
+The Kubelet check is packaged with the Agent, so simply [install the Agent][3] on your servers.
 
 ## Configuration
 
-Edit the `kubelet.yaml` file to point to your server and port, set tags to send along with metrics.
+Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set tags to send along with metrics.
 
 ## Validation
 
@@ -51,3 +51,4 @@ The check will still be able to collect:
 
 [1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [2]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
+[3]: https://app.datadoghq.com/account/settings#agent

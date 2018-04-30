@@ -16,7 +16,7 @@ The process check is packaged with the Agent, so simply [install the Agent][2] a
 
 Unlike many checks, the process check doesn't monitor anything useful by default; you must tell it which processes you want to monitor, and how.
 
-While there's no standard default check configuration, here's an example `process.yaml` that monitors ssh/sshd processes. See the [sample process.yaml][3] for all available configuration options:
+While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors ssh/sshd processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -37,7 +37,7 @@ You can also configure the check to find any process by exact PID (`pid`) or pid
 
 To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent](https://github.com/DataDog/docker-dd-agent)) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check][5] monitors those.  
 
-See the [example configuration](https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example) for more details on configuration options.  
+See the [example configuration][3] for more details on configuration options.  
 
 [Restart the Agent][6] to start sending process metrics and service checks to Datadog.
 

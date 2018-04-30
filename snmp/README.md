@@ -13,7 +13,7 @@ The SNMP check is packaged with the Agent, so simply [install the Agent][1] on a
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example `snmp.yaml`. See the [sample snmp.yaml][2] for all available configuration options:
+Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

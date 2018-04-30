@@ -13,24 +13,24 @@ The StatsD check is packaged with the Agent, so simply [install the Agent][1] on
 
 ### Configuration
 
-Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml][2] for all available configuration options:
+1. Edit the `statsd.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample statsd.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - host: localhost
-    port: 8126 # or wherever your statsd listens
-```
+    instances:
+      - host: localhost
+        port: 8126 # or wherever your statsd listens
+    ```
 
-Configuration Options
+    Configuration Options
 
-* `host` (Optional) - Host to be checked. This will be included as a tag: `host:<host>`. Defaults to `localhost`.
-* `port` (Optional) - Port to be checked. This will be included as a tag: `port:<port>`. Defaults to `8126`.
-* `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
-* `tags` (Optional) - Tags to be assigned to the metric.
+    - `host` (Optional) - Host to be checked. This will be included as a tag: `host:<host>`. Defaults to `localhost`.
+    - `port` (Optional) - Port to be checked. This will be included as a tag: `port:<port>`. Defaults to `8126`.
+    - `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
+    - `tags` (Optional) - Tags to be assigned to the metric.
 
-[Restart the Agent][3] to start sending StatsD metrics and service checks to Datadog.
+2. [Restart the Agent][3] to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation
 

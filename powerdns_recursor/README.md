@@ -38,19 +38,19 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory. See the [sample powerdns_recursor.yaml][2] for all available configuration options:
+1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample powerdns_recursor.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - host: 127.0.0.1
-    port: 8082
-    api_key: changeme
-    version: 4 # omit this line if you're running pdns_recursor version 3.x
-```
+    instances:
+      - host: 127.0.0.1
+        port: 8082
+        api_key: changeme
+        version: 4 # omit this line if you're running pdns_recursor version 3.x
+    ```
 
-[Restart the Agent][3] to begin sending PowerDNS Recursor metrics to Datadog.
+2. [Restart the Agent][3] to begin sending PowerDNS Recursor metrics to Datadog.
 
 ### Validation
 

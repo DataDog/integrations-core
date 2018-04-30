@@ -14,7 +14,8 @@ The Fluentd check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-Create a `fluentd.yaml` file in the Agent's `conf.d` directory.
+Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 #### Prepare Fluentd
 
@@ -30,22 +31,22 @@ In your fluentd configuration file, add a `monitor_agent` source:
 
 #### Metric Collection
 
- * Add this configuration setup to your `fluentd.yaml` file to start gathering your [Fluentd metrics](#metrics):
+1. Add this configuration setup to your `fluentd.d/conf.yaml` file to start gathering your [Fluentd metrics](#metrics):
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - monitor_agent_url: http://localhost:24220/api/plugins.json
-    #tag_by: "type" # defaults to 'plugin_id'
-    #plugin_ids:    # collect metrics only on your chosen plugin_ids (optional)
-    #  - plg1
-    #  - plg2
-```
+    instances:
+      - monitor_agent_url: http://localhost:24220/api/plugins.json
+        #tag_by: "type" # defaults to 'plugin_id'
+        #plugin_ids:    # collect metrics only on your chosen plugin_ids (optional)
+        #  - plg1
+        #  - plg2
+    ```
 
-See the [sample fluentd.yaml][2] for all available configuration options.  
+    See the [sample fluentd.d/conf.yaml][2] for all available configuration options.  
 
-* [Restart the Agent][3] to begin sending Fluentd metrics to Datadog.
+2. [Restart the Agent][3] to begin sending Fluentd metrics to Datadog.
 
 #### Log Collection
 

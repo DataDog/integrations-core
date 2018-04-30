@@ -50,16 +50,16 @@ For more details about creating and managing users in MongoDB, refer to [the Mon
 
 #### Connect the Agent
 
-Create a file `tokumx.yaml` in the Agent's `conf.d` directory. See the [sample tokumx.yaml][3] for all available configuration options:
+1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample tokumx.d/conf.yaml][3] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
-```
+    instances:
+      - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
+    ```
 
-[Restart the Agent][4] to start sending TokuMX metrics to Datadog.
+2. [Restart the Agent][4] to start sending TokuMX metrics to Datadog.
 
 ### Validation
 

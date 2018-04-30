@@ -12,11 +12,12 @@ The Redis check is packaged with the Agent, so simply [install the Agent][1] on 
 
 ### Configuration
 
-Create a `redisdb.yaml` in the Datadog Agent's `conf.d` directory.
+Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample redis.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
 
-Add this configuration setup to your `redisdb.yaml` file to start gathering your [Redis metrics](#metrics):
+Add this configuration setup to your `redisdb.d/conf.yaml` file to start gathering your [Redis metrics](#metrics):
 
 ```
 init_config:
@@ -39,7 +40,7 @@ Configuration Options:
         set the value here. Warning: It may impact the performance of your Redis instance
 * `command_stats` - (Optional) - Collect INFO COMMANDSTATS output as metrics.
 
-See the [sample redisdb.yaml][2] for all available configuration options.
+See the [sample redisdb.d/conf.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to begin sending Redis metrics to Datadog.
 
@@ -53,7 +54,7 @@ See the [sample redisdb.yaml][2] for all available configuration options.
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `redisdb.yaml` file to start collecting your Redis Logs:
+* Add this configuration setup to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
 
   ```
     logs:
@@ -65,9 +66,9 @@ See the [sample redisdb.yaml][2] for all available configuration options.
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample redisdb.yaml](https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example) for all available configuration options.
+  See the [sample redisdb.yaml][2] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Redis logs to Datadog.
+* [Restart the Agent][3] to begin sending Redis logs to Datadog.
 
 ### Validation
 

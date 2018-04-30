@@ -11,7 +11,10 @@ The Zookeeper check is packaged with the Agent, so simply [install the Agent][13
 
 ### Configuration
 
-Create a file `zk.yaml` in the Agent's `conf.d` directory.
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample zk.d/conf.yaml][14] for all available configuration options.
+
+2. [Restart the Agent][15]
 
 #### Metric Collection
 
@@ -75,9 +78,9 @@ Make sure you clone and edit the integration pipeline if you have a different fo
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-* See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options.
+* See the [sample zk.yaml][14] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Zookeeper Logs to Datadog.
+* [Restart the Agent][15] to start sending Zookeeper Logs to Datadog.
 
 ### Validation
 

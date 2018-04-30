@@ -14,23 +14,22 @@ And more.
 
 The YARN check is packaged with the Agent, so simply [install the Agent][1] on your YARN ResourceManager.
 
-
 ### Configuration
 
-Create a file `yarn.yaml` in the Agent's `conf.d` directory. See the [sample yarn.yaml][2] for all available configuration options.:
+1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory.
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - resourcemanager_uri: http://localhost:8088 # or whatever your resource manager listens
-    cluster_name: MyCluster # used to tag metrics, i.e. 'cluster_name:MyCluster'; default is 'default_cluster'
-    collect_app_metrics: true
-```
+    instances:
+      - resourcemanager_uri: http://localhost:8088 # or whatever your resource manager listens
+        cluster_name: MyCluster # used to tag metrics, i.e. 'cluster_name:MyCluster'; default is 'default_cluster'
+        collect_app_metrics: true
+    ```
 
-See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example) for a comprehensive list and description of all check options.
+    See the [example check configuration][2] for a comprehensive list and description of all check options.
 
-[Restart the Agent][3] to start sending YARN metrics to Datadog.
+2. [Restart the Agent][3] to start sending YARN metrics to Datadog.
 
 ### Validation
 

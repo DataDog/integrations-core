@@ -18,27 +18,27 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 1. Create a read-only user to connect to your server:
 
-```
-CREATE LOGIN datadog WITH PASSWORD = 'YOUR_PASSWORD';
-CREATE USER datadog FOR LOGIN datadog;
-GRANT SELECT on sys.dm_os_performance_counters to datadog;
-GRANT VIEW SERVER STATE to datadog;
-```
+    ```
+    CREATE LOGIN datadog WITH PASSWORD = 'YOUR_PASSWORD';
+    CREATE USER datadog FOR LOGIN datadog;
+    GRANT SELECT on sys.dm_os_performance_counters to datadog;
+    GRANT VIEW SERVER STATE to datadog;
+    ```
 
-2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory. See the [sample sqlserver.yaml][2] for all available configuration options:
+2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory. See the [sample sqlserver.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - host: <SQL_HOST>,<SQL_PORT>
-    username: <SQL_ADMIN_USER>
-    password: <SQL_ADMIN_PASSWORD>
-    connector: odbc # alternative is 'adodbapi'
-    driver: SQL Server
-```
+    instances:
+      - host: <SQL_HOST>,<SQL_PORT>
+        username: <SQL_ADMIN_USER>
+        password: <SQL_ADMIN_PASSWORD>
+        connector: odbc # alternative is 'adodbapi'
+        driver: SQL Server
+    ```
 
-See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example) for a comprehensive description of all options, including how to use custom queries to create your own metrics.
+    See the [example check configuration][2] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
 3. [Restart the Agent][3] to start sending SQL Server metrics to Datadog.
 

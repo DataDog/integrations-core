@@ -12,16 +12,16 @@ The Riak check is packaged with the Agent, so simply [install the Agent][1] on y
 
 ### Configuration
 
-Create a file `riak.yaml` in the Agent's `conf.d` directory. See the [sample riak.yaml][2] for all available configuration options:
+1. Edit the `riak.d/conf.yaml` file, . See the [sample riak.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
-```
+    instances:
+      - url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
+    ```
 
-[Restart the Agent][3] to start sending Riak metrics to Datadog.
+2. [Restart the Agent][3] to start sending Riak metrics to Datadog.
 
 ### Validation
 

@@ -15,8 +15,6 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 * Caches (size, hits, misses, etc)
 * SSL (handshakes, failed handshakes, etc)
 
-And many more.
-
 ## Setup
 ### Installation
 
@@ -43,7 +41,8 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Configuration
 
-Create a `nginx.yaml` file in the Agent's `conf.d` directory.
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare NGINX
 
@@ -81,7 +80,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
-* Add this configuration setup to your `nginx.yaml` file to start gathering your [NGINX metrics](#metrics):
+* Add this configuration setup to your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics):
 
   ```
   init_config:
@@ -92,7 +91,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
     # user: <USER>
     # password: <PASSWORD>
   ```
-  See the [sample nginx.yaml][5] for all available configuration options.
+  See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 * [Restart the Agent][6] to start sending NGINX metrics to Datadog.
 
@@ -106,7 +105,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
   logs_enabled: true
   ```
 
-*  Add this configuration setup to your `nginx.yaml` file to start collecting your NGINX Logs:
+*  Add this configuration setup to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
 
   ```
   logs:
@@ -123,9 +122,9 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
       sourcecategory: http_web_access
   ```
   Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample nginx.yaml](https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example) for all available configuration options.
+  See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
+* [Restart the Agent][6]
 
 **Learn more about log collection [on the log documentation][7]**
 
@@ -138,7 +137,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 See [metadata.csv][9] for a full list of provided metrics by this integration.
 
-Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html) (open source NGINX) and [http status](http://nginx.org/en/docs/http/ngx_http_status_module.html) (NGINX Plus) to understand which metrics are provided by each module.
+Not all metrics shown are available to users of open source NGINX. Compare the module reference for [stub status][2] (open source NGINX) and [http status][3] (NGINX Plus) to understand which metrics are provided by each module.
 
 A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
 

@@ -19,18 +19,19 @@ The Couchbase check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-Create a file `couchbase.yaml` in the Agent's `conf.d` directory. See the [sample couchbase.yaml][2] for all available configuration options:
+1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Couchbase performance data.  
+See the [sample couchbase.d/conf.yaml][2] for all available configuration options.
 
-```
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-  - server: http://localhost:8091 # or wherever your Couchbase is listening
-    #user: <your_username>
-    #password: <your_password>
-```
+    instances:
+      - server: http://localhost:8091 # or wherever your Couchbase is listening
+        #user: <your_username>
+        #password: <your_password>
+    ```
 
-[Restart the Agent][3] to begin sending Couchbase metrics to Datadog.
+2. [Restart the Agent][3] to begin sending Couchbase metrics to Datadog.
 
 ### Validation
 

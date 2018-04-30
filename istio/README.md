@@ -21,7 +21,7 @@ Istio needs to have the built in [prometheus adapter][2] enabled and the ports e
 
 #### Connect the Agent
 
-Create a basic `istio.yaml` in the Agent's `conf.d` directory to connect it to istio. See the [sample istio.yaml][3] for all available configuration options:
+Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to connect it to Istio. See the [sample istio.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -32,7 +32,7 @@ instances:
     send_histograms_buckets: true
 ```
 
-Both endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation](https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on).
+Both endpoints need to be connected to the check for it to work. To learn more about the prometheus adapter, you can read the [istio documentation][2].
 
 ### Validation
 

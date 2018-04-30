@@ -84,7 +84,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-In your `kubernetes.yaml` file you will see the [leader_lease_duration][7] parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**.
+In your `kubernetes.d/conf.yaml` file you will see the [leader_lease_duration][7] parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**.
 The longer it is, the less hard your agent hits the apiserver with requests, but it also means that if the leader dies (and under certain conditions) there can be an event blackout until the lease expires and a new leader takes over.
 
 ### Validation

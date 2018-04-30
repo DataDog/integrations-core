@@ -17,7 +17,7 @@ The Nagios check is packaged with the Agent, so simply [install the Agent][1] on
 
 ### Configuration
 
-Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml][2] for all available configuration options:
+Edit the `nagios.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

@@ -8,14 +8,16 @@ Get metrics from all your containers running in ECS Fargate:
 * I/O metrics
 
 ## Setup
-
 ### Installation
 
-Install the `dd-check-ecs_fargate` package manually or with your favorite configuration manager
+The ECS Fargate check is packaged with the Agent, so simply [run the Agent][1] with your containers.
 
 ### Configuration
 
-Edit the `ecs_fargate.yaml` file to point to your server and port, set the masters to monitor
+1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your ECS Fargate performance data.  
+See the [sample ecs_fargate.d/conf.yaml][6] for all available configuration options.
+
+2. [Restart the Agent][5]
 
 ### Validation
 
@@ -48,3 +50,5 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [2]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [3]: http://docs.datadoghq.com/help/
 [4]: https://www.datadoghq.com/blog/
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/conf.yaml.example

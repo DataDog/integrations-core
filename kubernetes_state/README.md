@@ -14,7 +14,7 @@ The Kubernetes-Sate check is packaged with the Agent, so simply [install the Age
 
 ### Configuration
 
-Edit the `kubernetes_state.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.yaml][2] for all available configuration options.
+Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

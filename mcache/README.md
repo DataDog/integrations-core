@@ -11,23 +11,23 @@ The memcache check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml][2] for all available configuration options:
+1. Edit the `mcache.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample mcache.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - url: localhost  # url used to connect to the memcached instance
-    port: 11212 # optional; default is 11211
-#    socket: /path/to/memcache/socket # alternative to url/port; 'dd-agent' user must have read/write permission
-    options:
-      items: false # set to true to collect items stats
-      slabs: false # set to true to collect slabs stats
-#    tags:
-#    - optional_tag
-```
+    instances:
+      - url: localhost  # url used to connect to the memcached instance
+        port: 11212 # optional; default is 11211
+    #    socket: /path/to/memcache/socket # alternative to url/port; 'dd-agent' user must have read/write permission
+        options:
+          items: false # set to true to collect items stats
+          slabs: false # set to true to collect slabs stats
+    #    tags:
+    #    - optional_tag
+    ```
 
-[Restart the Agent][3] to begin sending memcache metrics to Datadog.
+2. [Restart the Agent][3] to begin sending memcache metrics to Datadog.
 
 ### Validation
 
@@ -38,7 +38,7 @@ instances:
 
 See [metadata.csv][5] for a list of metrics provided by this check.
 
-The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
+The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.d/conf.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
 
 
 ### Events

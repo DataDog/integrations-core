@@ -18,15 +18,15 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 1. First configure a Datadog role and user with your identity server
 
-
-        openstack role create datadog_monitoring
-        openstack user create datadog \
-            --password my_password \
-            --project my_project_name
-        openstack role add datadog_monitoring \
-            --project my_project_name \
-            --user datadog
-
+```
+openstack role create datadog_monitoring
+openstack user create datadog \
+    --password my_password \
+    --project my_project_name
+openstack role add datadog_monitoring \
+    --project my_project_name \
+    --user datadog
+```
 
 2. Update your policy.json files to grant the needed permissions.
 ```role:datadog_monitoring``` requires access to the following operations:
@@ -71,7 +71,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
 
-3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit `openstack.yaml`. You can find a sample configuration in the conf.d directory in your agent install. See the [sample openstack.yaml][2] for all available configuration options.
+3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
 
 4. [Restart the Agent][3]
 
