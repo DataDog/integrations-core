@@ -107,7 +107,7 @@ class WinPDHCounter(object):
         try:
             win32pdh.CloseQuery(self.hq)
         except AttributeError:
-            # An error occurred during initialization before a query was opened.
+            # An error occurred during instantiation before a query was opened.
             pass
 
     def is_single_instance(self):
