@@ -24,7 +24,7 @@ instances:
     # check_certificate_expiration: true # default is true
     # days_warning: 28                   # default 14
     # days_critical: 14                  # default 7
-    # timeout: 3                         # in seconds. Default is 1.
+    # timeout: 3                         # in seconds. Default is 10.
   - name: Example website (staging)
     url: http://staging.example.com/
 ```
