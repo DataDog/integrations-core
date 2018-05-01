@@ -127,7 +127,7 @@ class MesosSlave(AgentCheck):
             if self.service_check_needed:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
-            if status == AgentCheck.CRITICAL:
+            if status is AgentCheck.CRITICAL:
                 raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
 
         if r.encoding is None:
