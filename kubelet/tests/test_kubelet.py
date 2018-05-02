@@ -155,17 +155,20 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
         check.check({"metrics_endpoint": "http://dummy"})
 
-    # Make sure we submit the summed rate for fluentd-gcp-v2.0.10-9q9t4 :
-    # usage on two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
+    # Make sure we submit the summed rates correctly:
+    # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
+    # - demo-app-success-c485bc67b-klj45 is mono-threaded, we submit 7.756358313 * 10**9 = 7756358313
+    #
     calls = [
-        mock.call('kubernetes.cpu.usage.total', 2053640000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.usage.total', 2053640000000.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.usage.total', 7756358313.0, ['pod_name=demo-app-success-c485bc67b-klj45']),
     ]
     check.rate.assert_has_calls(calls, any_order=True)
 
     # Make sure the per-core metrics are not submitted
     bad_calls = [
-        mock.call('kubernetes.cpu.usage.total', 1228320000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
-        mock.call('kubernetes.cpu.usage.total', 825320000000.0, ['fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.usage.total', 1228320000000.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
+        mock.call('kubernetes.cpu.usage.total', 825320000000.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
     ]
     for c in bad_calls:
         assert c not in check.rate.mock_calls
@@ -347,7 +350,10 @@ def mocked_get_tags(entity, _):
             "pod_name:fluentd-gcp-v2.0.10-9q9t4"
         ],
         'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
-            'fluentd-gcp-v2.0.10-9q9t4'
+            'pod_name:fluentd-gcp-v2.0.10-9q9t4'
+        ],
+        "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
+            "pod_name=demo-app-success-c485bc67b-klj45"
         ]
     }
     return tag_store.get(entity, [])
@@ -381,15 +387,15 @@ def test_report_container_spec_metrics(monkeypatch):
         check._report_container_spec_metrics(pod_list, instance_tags)
 
     calls = [
-        mock.call('kubernetes.cpu.requests', 0.1, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
-        mock.call('kubernetes.memory.requests', 209715200.0, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
-        mock.call('kubernetes.memory.limits', 314572800.0, ['fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['pod_name:fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 209715200.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 314572800.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4'] + instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
         mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
         mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name=demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
