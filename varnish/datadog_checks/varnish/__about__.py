@@ -2,9 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from varnish import Varnish
-
-__all__ = [
-    "__version__",
-    "Varnish"
-]
+__version__ = "1.2.0"

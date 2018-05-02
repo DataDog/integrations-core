@@ -44,5 +44,6 @@ AGENT_BASED_INTEGRATIONS = [
     'ssh_check',
     'system_core',
     'teamcity',
+    'varnish',
     'vsphere',
 ]

@@ -1,4 +1,4 @@
-version: '2'
+version: '3.5'
 services:
 
   varnish4:
@@ -8,7 +8,7 @@ services:
     - "80"
 
   varnish5:
-    image: datadog/docker-library:varnish_5_0_0
+    image: datadog/docker-library:varnish_5_2_1
     container_name: ci_varnish5
     ports:
     - "80"
