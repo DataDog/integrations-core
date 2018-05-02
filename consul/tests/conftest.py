@@ -18,7 +18,7 @@ def wait_for_cluster():
     Wait for the slave to connect to the master
     """
     from time import sleep
-    for i in xrange(0, 20):
+    for i in xrange(0, 50):
         sleep(1)
         try:
             res = requests.get("{}/v1/status/peers".format(common.URL))
