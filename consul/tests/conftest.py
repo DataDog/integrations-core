@@ -33,7 +33,7 @@ def wait_for_cluster():
 
 
 @pytest.fixture(scope="session")
-def spin_up_consul():
+def consul_cluster():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.

@@ -50,7 +50,7 @@ CONFIG_INTEGRATION_WRONG_TOKEN = {
 
 
 @pytest.mark.integration
-def test_integration(aggregator, spin_up_consul):
+def test_integration(aggregator, consul_cluster):
     """
     Testing Consul Integration
     """
@@ -68,7 +68,7 @@ def test_integration(aggregator, spin_up_consul):
 
 
 @pytest.mark.integration
-def test_acl_forbidden(aggregator, spin_up_consul):
+def test_acl_forbidden(aggregator, consul_cluster):
     """
     Testing Consul Integration with wrong ACL token
     """
