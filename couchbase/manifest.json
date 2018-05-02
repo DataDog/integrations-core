@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
+  "version": "1.3.0",
   "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
   "public_title": "Datadog-CouchBase Integration",
   "categories":["data store"],

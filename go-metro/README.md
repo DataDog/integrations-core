@@ -9,7 +9,7 @@ This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. 
 ## Setup
 ### Installation
 
-The TCP RTT check—also known as [go-metro](https://github.com/DataDog/go-metro)—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
+The TCP RTT check—also known as [go-metro][1]—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
 
 Debian-based systems should use one of the following:
 
@@ -33,7 +33,7 @@ $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 ### Configuration
 
-Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml](https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example) for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml][2] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
     init_config:
       snaplen: 512
@@ -74,14 +74,10 @@ If the TCP RTT check has started you should see something similar to the go-metr
 
 This is a passive check, so unless there are packets actively being sent to the hosts mentioned in the yaml file, the metrics will not be reported.
 
-## Compatibility
-
-The TCP RTT check is compatible with Linux platforms.
-
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][3] for a list of metrics provided by this check.
 
 ### Events
 The Go-metro check does not include any event at this time.
@@ -90,7 +86,14 @@ The Go-metro check does not include any event at this time.
 The Go-metro check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][4].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][5]
+
+
+[1]: https://github.com/DataDog/go-metro
+[2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
+[4]: http://docs.datadoghq.com/help/
+[5]: https://www.datadoghq.com/blog/

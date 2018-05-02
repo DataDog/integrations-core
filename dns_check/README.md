@@ -7,11 +7,11 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 ## Setup
 ### Installation
 
-The DNS check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your DNS servers. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
+The DNS check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your DNS servers. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
 ### Configuration
 
-Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml](https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example) for all available configuration options:
+Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -27,34 +27,16 @@ instances:
 
 If you omit the `nameserver` option, the check will use whichever nameserver is configured in local network settings.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending DNS service checks and response times to Datadog.
+[Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `dns_check` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    dns_check
-    ---------
-      - instance #0 [OK]
-      - instance #1 [OK]
-      - Collected 2 metrics, 0 events & 2 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The DNS check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `dns_check` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The DNS check does not include any event at this time.
@@ -72,7 +54,16 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 Tagged by `hostname` and `record_type`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/

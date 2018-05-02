@@ -1,11 +1,17 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.1.2",
-  "max_agent_version": "7.0.0",
-  "min_agent_version": "6.0.0",
+  "manifest_version": "1.2.0",
   "name": "kubelet",
   "short_description": "Collects container stats from kubelet.",
   "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
   "support": "core",
-  "supported_os": ["linux"]
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Datadog-Kubelet Integration",
+  "categories": ["containers"],
+  "type": "check",
+  "doc_link": "https://docs.datadoghq.com/integrations/kubelet/",
+  "is_public": true,
+  "has_logo": true
 }

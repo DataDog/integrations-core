@@ -1,15 +1,15 @@
-[![Build Status](https://travis-ci.org/DataDog/integrations-core.svg?branch=master)](https://travis-ci.org/DataDog/integrations-core)
-[![Build status](https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true)](https://ci.appveyor.com/project/Datadog/integrations-core)
+[![Build Status][1]][2]
+[![Build status][3]][4]
 
 # Datadog Agent Integrations - Core
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
-officially develops and supports. To add a new integration, please see the [Integrations Extras](https://github.com/DataDog/integrations-extras)
-repository and the [accompanying documentation](https://docs.datadoghq.com/developers/integrations/integration_sdk/).
+officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
+repository and the [accompanying documentation][6].
 
-The [Datadog Agent](https://github.com/DataDog/datadog-agent) packages are equipped
+The [Datadog Agent][7] packages are equipped
 with all the checks from this repository, so to get started using them, you can
-simply [install the Agent](https://docs.datadoghq.com/agent/) for your operating
+simply [install the Agent][8] for your operating
 system.
 
 General documentation about the project can be [found here](docs/index.md)
@@ -84,7 +84,7 @@ To run the testsuite for a given check you can either use `tox`, like:
 cd {integration} && tox
 ```
 
-or invoke [Pytest](https://docs.pytest.org/en/latest/) directly:
+or invoke [Pytest][9] directly:
 
 ```shell
 cd {integration} && py.test
@@ -98,6 +98,7 @@ the new testing approach:
 * [btrfs](btrfs)
 * [directory](directory)
 * [disk](disk)
+* [elastic](elastic)
 * [envoy](envoy)
 * [istio](istio)
 * [kube_proxy](kube_proxy)
@@ -119,11 +120,13 @@ the new testing approach:
 
 For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
 
+If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
+
 ### Building
 
 `setup.py` provides the setuptools setup script that will help us package and
 build the wheel. If you wish to learn more about python packaging please take a
-look at the official python documentation [here](https://packaging.python.org/tutorials/distributing-packages/)
+look at the official python documentation [here][10]
 
 Once your setup.py is ready, creating a wheel is a easy as:
 
@@ -134,6 +137,21 @@ python setup.py bdist_wheel
 
 # Reporting Issues
 
-For more information on integrations, please reference our [documentation](http://docs.datadoghq.com)
-and [knowledge base](https://help.datadoghq.com/hc/en-us). You can also visit our
-[help page](http://docs.datadoghq.com/help/) to connect with us.
+For more information on integrations, please reference our [documentation][11]
+and [knowledge base][12]. You can also visit our
+[help page][13] to connect with us.
+
+
+[1]: https://travis-ci.org/DataDog/integrations-core.svg?branch=master
+[2]: https://travis-ci.org/DataDog/integrations-core
+[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
+[4]: https://ci.appveyor.com/project/Datadog/integrations-core
+[5]: https://github.com/DataDog/integrations-extras
+[6]: https://docs.datadoghq.com/developers/integrations/integration_sdk/
+[7]: https://github.com/DataDog/datadog-agent
+[8]: https://docs.datadoghq.com/agent/
+[9]: https://docs.pytest.org/en/latest/
+[10]: https://packaging.python.org/tutorials/distributing-packages/
+[11]: http://docs.datadoghq.com
+[12]: https://help.datadoghq.com/hc/en-us
+[13]: http://docs.datadoghq.com/help/

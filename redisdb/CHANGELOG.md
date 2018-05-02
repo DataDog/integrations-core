@@ -1,7 +1,13 @@
 # CHANGELOG - redisdb
 
-1.4.0 / 2018-01-10
+1.5.0 / Unreleased
+==================
+### Changes
 
+* [FEATURE] Hardcode the 6379 port in the Autodiscovery template. See [#1444][] for more information.
+
+1.4.0 / 2018-01-10
+==================
 ### Changes
 
 * [IMPROVEMENT] keys can be expressed as patterns, see [#300][]. Thanks [@aliva][].

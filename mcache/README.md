@@ -7,11 +7,11 @@ The Agent's memcache check lets you track memcache's memory use, hits, misses, e
 ## Setup
 ### Installation
 
-The memcache check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your memcache servers.
+The memcache check is packaged with the Agent, so simply [install the Agent][1] on your memcache servers.
 
 ### Configuration
 
-Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml](https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.example) for all available configuration options:
+Create a file `mcache.yaml` in the Agent's `conf.d` directory.See the [sample mcache.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -27,33 +27,16 @@ instances:
 #    - optional_tag
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending memcache metrics to Datadog.
+[Restart the Agent][3] to begin sending memcache metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `mcache` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    mcache
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The memcache check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `mcache` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mcache/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
 
@@ -68,10 +51,21 @@ The Mcache check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to memcache to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Speed up your web applications with Memcached monitoring](https://www.datadoghq.com/blog/speed-up-web-applications-memcached/)
-* [Instrument Memcached performance metrics with DogStatsD](https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/)
-* [Monitoring ElastiCache performance metrics with Redis or Memcached](https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/)
+* [Speed up your web applications with Memcached monitoring][7]
+* [Instrument Memcached performance metrics with DogStatsD][8]
+* [Monitoring ElastiCache performance metrics with Redis or Memcached][9]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/mcache/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/mcache/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/speed-up-web-applications-memcached/
+[8]: https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/
+[9]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/

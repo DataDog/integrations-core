@@ -46,6 +46,22 @@ class AggregatorStub(object):
         """
         return self._events
 
+    def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
+        """
+        Assert a metric is tagged with tag
+        """
+        self._asserted.add(metric_name)
+
+        candidates = []
+        for metric in self._metrics.get(metric_name, []):
+            if tag in metric.tags:
+                candidates.append(metric)
+
+        if count:
+            assert len(candidates) == count
+        else:
+            assert len(candidates) > at_least
+
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
         """
@@ -70,7 +86,7 @@ class AggregatorStub(object):
             candidates.append(metric)
 
         if value is not None and all(m.type == self.COUNTER for m in candidates):
-            assert value == sum(map(lambda m : m.value, candidates))
+            assert value == sum(map(lambda m: m.value, candidates))
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
@@ -101,7 +117,7 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_all_metrics_covered(self):
-        assert aggregator.metrics_asserted_pct == 100.0
+        assert aggregator.metrics_asserted_pct >= 100.0
 
     def reset(self):
         """
@@ -113,7 +129,7 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
-        assert aggregator.metrics_asserted_pct == 100.0
+        assert aggregator.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
         not_asserted = []

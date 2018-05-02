@@ -1,16 +1,13 @@
 {
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "name": "MySQL",
   "display_name": "MySQL",
-  "version": "1.2.0",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
   "maintainer": "help@datadoghq.com",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
@@ -22,8 +19,11 @@
   },
   "guid": "056bfc7f-4775-4581-9442-502078593d10",
   "public_title": "Datadog-MySQL Integration",
-  "categories":["data store", "log collection"],
-  "type":"check",
+  "categories": [
+    "data store",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/mysql/",
   "is_public": true,
   "has_logo": true

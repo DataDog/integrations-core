@@ -15,7 +15,7 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The Varnish check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Varnish servers.
+The Varnish check is packaged with the Agent, so simply [install the Agent][1] on your Varnish servers.
 
 ### Configuration
 
@@ -46,9 +46,9 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
   dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
   ```
 
-  See the [sample varnish.yaml](https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example) for all available configuration options.
+  See the [sample varnish.yaml][2] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Varnish metrics and service checks to Datadog.
+* [Restart the Agent][3] to start sending Varnish metrics and service checks to Datadog.
 
 #### Log Collection
 
@@ -92,31 +92,15 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+**Learn more about log collection [on the log documentation][4]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `varnish` under the Checks section:
-
-```
-Checks
-======
-  [...]
-
-  varnish
-  -------
-    - instance #0 [OK]
-    - Collected 26 metrics, 0 events & 1 service check
-
-  [...]
-```
-## Compatibility
-
-The Varnish check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][5] and look for `varnish` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 The Varnish check does not include any event at this time.
@@ -127,10 +111,22 @@ The Varnish check does not include any event at this time.
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [Top Varnish performance metrics](https://www.datadoghq.com/blog/top-varnish-performance-metrics/)
-* [How to collect Varnish metrics](https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/)
-* [Monitor Varnish using Datadog](https://www.datadoghq.com/blog/monitor-varnish-using-datadog/)
+* [Top Varnish performance metrics][8]
+* [How to collect Varnish metrics][9]
+* [Monitor Varnish using Datadog][10]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/logs
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
+[9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
+[10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/

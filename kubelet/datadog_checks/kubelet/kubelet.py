@@ -17,6 +17,10 @@ from datadog_checks.checks.prometheus import PrometheusCheck
 from kubeutil import get_connection_info
 from tagger import get_tags
 
+# check
+from .common import CADVISOR_DEFAULT_PORT, ContainerFilter, is_static_pending_pod, get_pod_by_uid
+from .cadvisor import CadvisorScraper
+
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 # container-specific metrics should have all these labels
 CONTAINER_LABELS = ['container_name', 'namespace', 'pod_name', 'name', 'image', 'id']
@@ -49,7 +53,7 @@ FACTORS = {
 log = logging.getLogger('collector')
 
 
-class KubeletCheck(PrometheusCheck):
+class KubeletCheck(PrometheusCheck, CadvisorScraper):
     """
     Collect container metrics from Kubelet.
     """
@@ -63,6 +67,9 @@ class KubeletCheck(PrometheusCheck):
         inst = instances[0] if instances else None
 
         self.kube_node_labels = inst.get('node_labels_to_host_tags', {})
+        self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
+        self.cadvisor_legacy_url = None
+
         self.metrics_mapper = {
             'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
         }
@@ -104,10 +111,16 @@ class KubeletCheck(PrometheusCheck):
             raise CheckException("Unable to find metrics_endpoint in config "
                                  "file or detect the kubelet URL automatically.")
 
-        self.metrics_url = instance.get('metrics_endpoint') or urljoin(endpoint, CADVISOR_METRICS_PATH)
+        self.metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
+
+        # Legacy cadvisor support
+        try:
+            self.cadvisor_legacy_url = self.detect_cadvisor(endpoint, self.cadvisor_legacy_port)
+        except Exception as e:
+            self.log.debug('cAdvisor not found, running in prometheus mode: %s' % str(e))
 
         # By default we send the buckets.
         send_buckets = instance.get('send_histograms_buckets', True)
@@ -118,15 +131,28 @@ class KubeletCheck(PrometheusCheck):
 
         try:
             self.pod_list = self.retrieve_pod_list()
+            if self.pod_list.get("items") is None:
+                # Sanitize input: if no pod are running, 'items' is a NoneObject
+                self.pod_list['items'] = []
         except Exception:
             self.pod_list = None
 
-        instance_tags = instance.get('tags', [])
-        self._perform_kubelet_check(instance_tags)
-        self._report_node_metrics(instance_tags)
-        self._report_pods_running(self.pod_list, instance_tags)
-        self._report_container_spec_metrics(self.pod_list, instance_tags)
-        self.process(self.metrics_url, send_histograms_buckets=send_buckets, instance=instance)
+        self.container_filter = ContainerFilter(self.pod_list)
+
+        self.instance_tags = instance.get('tags', [])
+        self._perform_kubelet_check(self.instance_tags)
+        self._report_node_metrics(self.instance_tags)
+        self._report_pods_running(self.pod_list, self.instance_tags)
+        self._report_container_spec_metrics(self.pod_list, self.instance_tags)
+
+        if self.cadvisor_legacy_url:  # Legacy cAdvisor
+            self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.container_filter)
+        elif self.metrics_url:  # Prometheus
+            self.process(self.metrics_url, send_histograms_buckets=send_buckets, instance=instance)
+
+        # Free up memory
+        self.pod_list = None
+        self.container_filter = None
 
     def perform_kubelet_query(self, url, verbose=True, timeout=10):
         """
@@ -252,6 +278,10 @@ class KubeletCheck(PrometheusCheck):
                         cid = ctr_status.get('containerID')
                         break
                 if not cid:
+                    continue
+
+                pod_uid = pod.get('metadata', {}).get('uid')
+                if self.container_filter.is_excluded(cid, pod_uid):
                     continue
 
                 tags = get_tags('%s' % cid, True) + instance_tags
@@ -387,34 +417,7 @@ class KubeletCheck(PrometheusCheck):
         :return:
         """
         pod_uid = self._get_pod_uid(labels)
-        for pod in self.pod_list["items"]:
-            try:
-                if pod["metadata"]["uid"] == pod_uid:
-                    return pod
-            except KeyError:
-                continue
-
-        return None
-
-    @staticmethod
-    def _is_static_pending_pod(pod):
-        """
-        Return if the pod is a static pending pod
-        See https://github.com/kubernetes/kubernetes/pull/57106
-        :param pod: dict
-        :return: bool
-        """
-        try:
-            if pod["metadata"]["annotations"]["kubernetes.io/config.source"] == "api":
-                return False
-
-            pod_status = pod["status"]
-            if pod_status["phase"] != "Pending":
-                return False
-
-            return "containerStatuses" not in pod_status
-        except KeyError:
-            return False
+        return get_pod_by_uid(pod_uid, self.pod_list)
 
     @staticmethod
     def _get_kube_container_name(labels):
@@ -441,12 +444,17 @@ class KubeletCheck(PrometheusCheck):
         for metric in message.metric:
             if self._is_container_metric(metric):
                 c_id = self._get_container_id(metric.label)
+                pod_uid = self._get_pod_uid(metric.label)
+                if self.container_filter.is_excluded(c_id, pod_uid):
+                    continue
+
                 tags = get_tags('docker://%s' % c_id, True)
+                tags += self.instance_tags
 
                 # FIXME we are forced to do that because the Kubelet PodList isn't updated
                 # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
                 pod = self._get_pod_by_metric_label(metric.label)
-                if pod is not None and self._is_static_pending_pod(pod):
+                if pod is not None and is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
                     tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
@@ -466,6 +474,7 @@ class KubeletCheck(PrometheusCheck):
                 if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                     continue
                 tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
+                tags += self.instance_tags
                 val = getattr(metric, METRIC_TYPES[message.type]).value
                 self.rate(metric_name, val, tags)
 
@@ -483,12 +492,17 @@ class KubeletCheck(PrometheusCheck):
                 c_name = self._get_container_label(metric.label, 'name')
                 if not c_name:
                     continue
+                pod_uid = self._get_pod_uid(metric.label)
+                if self.container_filter.is_excluded(c_id, pod_uid):
+                    continue
+
                 tags = get_tags('docker://%s' % c_id, True)
+                tags += self.instance_tags
 
                 # FIXME we are forced to do that because the Kubelet PodList isn't updated
                 # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
                 pod = self._get_pod_by_metric_label(metric.label)
-                if pod is not None and self._is_static_pending_pod(pod):
+                if pod is not None and is_static_pending_pod(pod):
                     tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
                     tags += self._get_kube_container_name(metric.label)
                     tags = list(set(tags))
@@ -513,7 +527,12 @@ class KubeletCheck(PrometheusCheck):
             if self._is_container_metric(metric):
                 limit = getattr(metric, METRIC_TYPES[message.type]).value
                 c_id = self._get_container_id(metric.label)
+                pod_uid = self._get_pod_uid(metric.label)
+                if self.container_filter.is_excluded(c_id, pod_uid):
+                    continue
+
                 tags = get_tags('docker://%s' % c_id, True)
+                tags += self.instance_tags
 
                 if m_name:
                     self.gauge(m_name, limit, tags)

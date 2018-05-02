@@ -6,14 +6,10 @@
 from collections import defaultdict, namedtuple
 import time
 import urlparse
-
-# 3p
 import requests
-
-# project
-from checks import AgentCheck
-from config import _is_affirmative
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
+from datadog_checks.utils.headers import headers
 
 
 class NodeNotFound(Exception):
@@ -25,6 +21,7 @@ ESInstanceConfig = namedtuple(
         'pshard_stats',
         'pshard_graceful_to',
         'cluster_stats',
+        'index_stats',
         'password',
         'service_check_tags',
         'health_tags',
@@ -51,24 +48,31 @@ class ESCheck(AgentCheck):
         "elasticsearch.primaries.docs.deleted": ("gauge", "_all.primaries.docs.deleted"),
         "elasticsearch.primaries.store.size": ("gauge", "_all.primaries.store.size_in_bytes"),
         "elasticsearch.primaries.indexing.index.total": ("gauge", "_all.primaries.indexing.index_total"),
-        "elasticsearch.primaries.indexing.index.time": ("gauge", "_all.primaries.indexing.index_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.indexing.index.time":
+            ("gauge", "_all.primaries.indexing.index_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.indexing.index.current": ("gauge", "_all.primaries.indexing.index_current"),
         "elasticsearch.primaries.indexing.delete.total": ("gauge", "_all.primaries.indexing.delete_total"),
-        "elasticsearch.primaries.indexing.delete.time": ("gauge", "_all.primaries.indexing.delete_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.indexing.delete.time":
+            ("gauge", "_all.primaries.indexing.delete_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.indexing.delete.current": ("gauge", "_all.primaries.indexing.delete_current"),
         "elasticsearch.primaries.get.total": ("gauge", "_all.primaries.get.total"),
         "elasticsearch.primaries.get.time": ("gauge", "_all.primaries.get.time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.get.current": ("gauge", "_all.primaries.get.current"),
         "elasticsearch.primaries.get.exists.total": ("gauge", "_all.primaries.get.exists_total"),
-        "elasticsearch.primaries.get.exists.time": ("gauge", "_all.primaries.get.exists_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.get.exists.time":
+            ("gauge", "_all.primaries.get.exists_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.get.missing.total": ("gauge", "_all.primaries.get.missing_total"),
-        "elasticsearch.primaries.get.missing.time": ("gauge", "_all.primaries.get.missing_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.get.missing.time":
+            ("gauge", "_all.primaries.get.missing_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.search.query.total": ("gauge", "_all.primaries.search.query_total"),
-        "elasticsearch.primaries.search.query.time": ("gauge", "_all.primaries.search.query_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.search.query.time":
+            ("gauge", "_all.primaries.search.query_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.search.query.current": ("gauge", "_all.primaries.search.query_current"),
         "elasticsearch.primaries.search.fetch.total": ("gauge", "_all.primaries.search.fetch_total"),
-        "elasticsearch.primaries.search.fetch.time": ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
-        "elasticsearch.primaries.search.fetch.current": ("gauge", "_all.primaries.search.fetch_current"),
+        "elasticsearch.primaries.search.fetch.time":
+            ("gauge", "_all.primaries.search.fetch_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.search.fetch.current":
+            ("gauge", "_all.primaries.search.fetch_current"),
         "elasticsearch.indices.count": ("gauge", "indices", lambda indices: len(indices))
     }
 
@@ -77,13 +81,16 @@ class ESCheck(AgentCheck):
         "elasticsearch.primaries.merges.current.docs": ("gauge", "_all.primaries.merges.current_docs"),
         "elasticsearch.primaries.merges.current.size": ("gauge", "_all.primaries.merges.current_size_in_bytes"),
         "elasticsearch.primaries.merges.total": ("gauge", "_all.primaries.merges.total"),
-        "elasticsearch.primaries.merges.total.time": ("gauge", "_all.primaries.merges.total_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.merges.total.time":
+            ("gauge", "_all.primaries.merges.total_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.merges.total.docs": ("gauge", "_all.primaries.merges.total_docs"),
         "elasticsearch.primaries.merges.total.size": ("gauge", "_all.primaries.merges.total_size_in_bytes"),
         "elasticsearch.primaries.refresh.total": ("gauge", "_all.primaries.refresh.total"),
-        "elasticsearch.primaries.refresh.total.time": ("gauge", "_all.primaries.refresh.total_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.primaries.refresh.total.time":
+            ("gauge", "_all.primaries.refresh.total_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.primaries.flush.total": ("gauge", "_all.primaries.flush.total"),
-        "elasticsearch.primaries.flush.total.time": ("gauge", "_all.primaries.flush.total_time_in_millis", lambda v: float(v)/1000)
+        "elasticsearch.primaries.flush.total.time":
+            ("gauge", "_all.primaries.flush.total_time_in_millis", lambda v: float(v)/1000)
     }
 
     STATS_METRICS = {  # Metrics that are common to all Elasticsearch versions
@@ -91,10 +98,12 @@ class ESCheck(AgentCheck):
         "elasticsearch.docs.deleted": ("gauge", "indices.docs.deleted"),
         "elasticsearch.store.size": ("gauge", "indices.store.size_in_bytes"),
         "elasticsearch.indexing.index.total": ("gauge", "indices.indexing.index_total"),
-        "elasticsearch.indexing.index.time": ("gauge", "indices.indexing.index_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.indexing.index.time":
+            ("gauge", "indices.indexing.index_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.indexing.index.current": ("gauge", "indices.indexing.index_current"),
         "elasticsearch.indexing.delete.total": ("gauge", "indices.indexing.delete_total"),
-        "elasticsearch.indexing.delete.time": ("gauge", "indices.indexing.delete_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.indexing.delete.time":
+            ("gauge", "indices.indexing.delete_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.indexing.delete.current": ("gauge", "indices.indexing.delete_current"),
         "elasticsearch.get.total": ("gauge", "indices.get.total"),
         "elasticsearch.get.time": ("gauge", "indices.get.time_in_millis", lambda v: float(v)/1000),
@@ -152,10 +161,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.management.threads": ("gauge", "thread_pool.management.threads"),
         "elasticsearch.thread_pool.management.queue": ("gauge", "thread_pool.management.queue"),
         "elasticsearch.thread_pool.management.rejected": ("rate", "thread_pool.management.rejected"),
-        "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
-        "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
-        "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
-        "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
         "elasticsearch.thread_pool.refresh.active": ("gauge", "thread_pool.refresh.active"),
         "elasticsearch.thread_pool.refresh.threads": ("gauge", "thread_pool.refresh.threads"),
         "elasticsearch.thread_pool.refresh.queue": ("gauge", "thread_pool.refresh.queue"),
@@ -168,10 +173,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.snapshot.threads": ("gauge", "thread_pool.snapshot.threads"),
         "elasticsearch.thread_pool.snapshot.queue": ("gauge", "thread_pool.snapshot.queue"),
         "elasticsearch.thread_pool.snapshot.rejected": ("rate", "thread_pool.snapshot.rejected"),
-        "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
-        "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
-        "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
-        "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
         "elasticsearch.thread_pool.warmer.active": ("gauge", "thread_pool.warmer.active"),
         "elasticsearch.thread_pool.warmer.threads": ("gauge", "thread_pool.warmer.threads"),
         "elasticsearch.thread_pool.warmer.queue": ("gauge", "thread_pool.warmer.queue"),
@@ -197,18 +198,43 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.available_in_bytes": ("gauge", "fs.total.available_in_bytes"),
     }
 
+    ADDITIONAL_METRICS_PRE_5_0_0 = {
+        "elasticsearch.thread_pool.percolate.active": ("gauge", "thread_pool.percolate.active"),
+        "elasticsearch.thread_pool.percolate.threads": ("gauge", "thread_pool.percolate.threads"),
+        "elasticsearch.thread_pool.percolate.queue": ("gauge", "thread_pool.percolate.queue"),
+        "elasticsearch.thread_pool.percolate.rejected": ("rate", "thread_pool.percolate.rejected"),
+        "elasticsearch.thread_pool.suggest.active": ("gauge", "thread_pool.suggest.active"),
+        "elasticsearch.thread_pool.suggest.threads": ("gauge", "thread_pool.suggest.threads"),
+        "elasticsearch.thread_pool.suggest.queue": ("gauge", "thread_pool.suggest.queue"),
+        "elasticsearch.thread_pool.suggest.rejected": ("rate", "thread_pool.suggest.rejected"),
+    }
+
+    INDEX_STATS_METRICS = {  # Metrics for index level
+        "elasticsearch.index.health": ("gauge", "health"),
+        "elasticsearch.index.docs.count": ("gauge", "docs_count"),
+        "elasticsearch.index.docs.deleted": ("gauge", "docs_deleted"),
+        "elasticsearch.index.primary_shards": ("gauge", "primary_shards"),
+        "elasticsearch.index.replica_shards": ("gauge", "replica_shards"),
+        "elasticsearch.index.primary_store_size": ("gauge", "primary_store_size"),
+        "elasticsearch.index.store_size": ("gauge", "store_size")
+    }
+
     JVM_METRICS_POST_0_90_10 = {
         "jvm.gc.collectors.young.count": ("gauge", "jvm.gc.collectors.young.collection_count"),
-        "jvm.gc.collectors.young.collection_time": ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
+        "jvm.gc.collectors.young.collection_time":
+            ("gauge", "jvm.gc.collectors.young.collection_time_in_millis", lambda v: float(v)/1000),
         "jvm.gc.collectors.old.count": ("gauge", "jvm.gc.collectors.old.collection_count"),
-        "jvm.gc.collectors.old.collection_time": ("gauge", "jvm.gc.collectors.old.collection_time_in_millis", lambda v: float(v)/1000)
+        "jvm.gc.collectors.old.collection_time":
+            ("gauge", "jvm.gc.collectors.old.collection_time_in_millis", lambda v: float(v)/1000)
     }
 
     JVM_METRICS_PRE_0_90_10 = {
         "jvm.gc.concurrent_mark_sweep.count": ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_count"),
-        "jvm.gc.concurrent_mark_sweep.collection_time": ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis", lambda v: float(v)/1000),
+        "jvm.gc.concurrent_mark_sweep.collection_time":
+            ("gauge", "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis", lambda v: float(v)/1000),
         "jvm.gc.par_new.count": ("gauge", "jvm.gc.collectors.ParNew.collection_count"),
-        "jvm.gc.par_new.collection_time": ("gauge", "jvm.gc.collectors.ParNew.collection_time_in_millis", lambda v: float(v)/1000),
+        "jvm.gc.par_new.collection_time":
+            ("gauge", "jvm.gc.collectors.ParNew.collection_time_in_millis", lambda v: float(v)/1000),
         "jvm.gc.collection_count": ("gauge", "jvm.gc.collection_count"),
         "jvm.gc.collection_time": ("gauge", "jvm.gc.collection_time_in_millis", lambda v: float(v)/1000),
     }
@@ -248,19 +274,25 @@ class ESCheck(AgentCheck):
     }
 
     ADDITIONAL_METRICS_POST_1_3_0 = {
-        "elasticsearch.indices.segments.index_writer_memory_in_bytes": ("gauge", "indices.segments.index_writer_memory_in_bytes"),
-        "elasticsearch.indices.segments.version_map_memory_in_bytes": ("gauge", "indices.segments.version_map_memory_in_bytes"),
+        "elasticsearch.indices.segments.index_writer_memory_in_bytes":
+            ("gauge", "indices.segments.index_writer_memory_in_bytes"),
+        "elasticsearch.indices.segments.version_map_memory_in_bytes":
+            ("gauge", "indices.segments.version_map_memory_in_bytes"),
     }
 
     ADDITIONAL_METRICS_POST_1_4_0 = {
-        "elasticsearch.indices.indexing.throttle_time": ("rate", "indices.indexing.throttle_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.indices.indexing.throttle_time":
+            ("rate", "indices.indexing.throttle_time_in_millis", lambda v: float(v)/1000),
         "elasticsearch.indices.query_cache.memory_size_in_bytes": ("gauge", "indices.query_cache.memory_size_in_bytes"),
         "elasticsearch.indices.query_cache.hit_count": ("rate", "indices.query_cache.hit_count"),
         "elasticsearch.indices.query_cache.miss_count": ("rate", "indices.query_cache.miss_count"),
         "elasticsearch.indices.query_cache.evictions": ("rate", "indices.query_cache.evictions"),
-        "elasticsearch.indices.segments.index_writer_max_memory_in_bytes": ("gauge", "indices.segments.index_writer_max_memory_in_bytes"),
-        "elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes": ("gauge", "indices.segments.fixed_bit_set_memory_in_bytes"),
-        "elasticsearch.breakers.fielddata.estimated_size_in_bytes": ("gauge", "breakers.fielddata.estimated_size_in_bytes"),
+        "elasticsearch.indices.segments.index_writer_max_memory_in_bytes":
+            ("gauge", "indices.segments.index_writer_max_memory_in_bytes"),
+        "elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes":
+            ("gauge", "indices.segments.fixed_bit_set_memory_in_bytes"),
+        "elasticsearch.breakers.fielddata.estimated_size_in_bytes":
+            ("gauge", "breakers.fielddata.estimated_size_in_bytes"),
         "elasticsearch.breakers.fielddata.overhead": ("gauge", "breakers.fielddata.overhead"),
         "elasticsearch.breakers.fielddata.tripped": ("rate", "breakers.fielddata.tripped"),
         "elasticsearch.breakers.parent.estimated_size_in_bytes": ("gauge", "breakers.parent.estimated_size_in_bytes"),
@@ -278,7 +310,8 @@ class ESCheck(AgentCheck):
     ADDITIONAL_METRICS_POST_1_5_0 = {
         "elasticsearch.indices.recovery.current_as_source": ("gauge", "indices.recovery.current_as_source"),
         "elasticsearch.indices.recovery.current_as_target": ("gauge", "indices.recovery.current_as_target"),
-        "elasticsearch.indices.recovery.throttle_time": ("rate", "indices.recovery.throttle_time_in_millis", lambda v: float(v)/1000),
+        "elasticsearch.indices.recovery.throttle_time":
+            ("rate", "indices.recovery.throttle_time_in_millis", lambda v: float(v)/1000),
     }
 
     ADDITIONAL_METRICS_POST_1_6_0 = {
@@ -305,12 +338,16 @@ class ESCheck(AgentCheck):
         "elasticsearch.indices.query_cache.cache_size": ("gauge", "indices.query_cache.cache_size"),
         "elasticsearch.indices.query_cache.cache_count": ("rate", "indices.query_cache.cache_count"),
         "elasticsearch.indices.query_cache.total_count": ("rate", "indices.query_cache.total_count"),
-        "elasticsearch.indices.segments.doc_values_memory_in_bytes": ("gauge", "indices.segments.doc_values_memory_in_bytes"),
+        "elasticsearch.indices.segments.doc_values_memory_in_bytes":
+            ("gauge", "indices.segments.doc_values_memory_in_bytes"),
         "elasticsearch.indices.segments.norms_memory_in_bytes": ("gauge", "indices.segments.norms_memory_in_bytes"),
-        "elasticsearch.indices.segments.stored_fields_memory_in_bytes": ("gauge", "indices.segments.stored_fields_memory_in_bytes"),
-        "elasticsearch.indices.segments.term_vectors_memory_in_bytes": ("gauge", "indices.segments.term_vectors_memory_in_bytes"),
+        "elasticsearch.indices.segments.stored_fields_memory_in_bytes":
+            ("gauge", "indices.segments.stored_fields_memory_in_bytes"),
+        "elasticsearch.indices.segments.term_vectors_memory_in_bytes":
+            ("gauge", "indices.segments.term_vectors_memory_in_bytes"),
         "elasticsearch.indices.segments.terms_memory_in_bytes": ("gauge", "indices.segments.terms_memory_in_bytes"),
-        "elasticsearch.indices.request_cache.memory_size_in_bytes": ("gauge", "indices.request_cache.memory_size_in_bytes"),
+        "elasticsearch.indices.request_cache.memory_size_in_bytes":
+            ("gauge", "indices.request_cache.memory_size_in_bytes"),
         "elasticsearch.indices.request_cache.evictions": ("rate", "indices.request_cache.evictions"),
         "elasticsearch.indices.request_cache.hit_count": ("rate", "indices.request_cache.hit_count"),
         "elasticsearch.indices.request_cache.miss_count": ("rate", "indices.request_cache.miss_count"),
@@ -365,7 +402,7 @@ class ESCheck(AgentCheck):
 
         pshard_stats = _is_affirmative(instance.get('pshard_stats', False))
         pshard_graceful_to = _is_affirmative(instance.get('pshard_graceful_timeout', False))
-
+        index_stats = _is_affirmative(instance.get('index_stats', False))
         cluster_stats = _is_affirmative(instance.get('cluster_stats', False))
         if 'is_external' in instance:
             cluster_stats = _is_affirmative(instance.get('is_external', False))
@@ -398,6 +435,7 @@ class ESCheck(AgentCheck):
             pshard_stats=pshard_stats,
             pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
+            index_stats=index_stats,
             password=instance.get('password'),
             service_check_tags=service_check_tags,
             health_tags=[],
@@ -429,7 +467,6 @@ class ESCheck(AgentCheck):
         # Load stats data.
         # This must happen before other URL processing as the cluster name
         # is retreived here, and added to the tag list.
-
         stats_url = urlparse.urljoin(config.url, stats_url)
         stats_data = self._get_data(stats_url, config)
         if stats_data['cluster_name']:
@@ -453,7 +490,6 @@ class ESCheck(AgentCheck):
                     raise
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
-
         # Load the health data.
         health_url = urlparse.urljoin(config.url, health_url)
         health_data = self._get_data(health_url, config)
@@ -464,6 +500,12 @@ class ESCheck(AgentCheck):
             pending_tasks_url = urlparse.urljoin(config.url, pending_tasks_url)
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
+
+        if config.index_stats and version >= [1, 0, 0]:
+            try:
+                self._get_index_metrics(config)
+            except requests.ReadTimeout as e:
+                self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # If we're here we did not have any ES conn issues
         self.service_check(
@@ -491,10 +533,42 @@ class ESCheck(AgentCheck):
             )
             version = [1, 0, 0]
 
-
         self.service_metadata('version', version)
         self.log.debug("Elasticsearch version is %s" % version)
         return version
+
+    def _get_index_metrics(self, config):
+        cat_url = '/_cat/indices?format=json&bytes=b'
+        index_url = urlparse.urljoin(config.url, cat_url)
+        index_resp = self._get_data(index_url, config)
+        index_stats_metrics = self.INDEX_STATS_METRICS
+        health_stat = {'green': 0, 'yellow': 1, 'red': 2}
+        for idx in index_resp:
+            tags = config.tags + ['index_name:' + idx['index']]
+            index_data = {
+                'docs_count':         idx.get('docs.count', None),
+                'docs_deleted':       idx.get('docs.deleted', None),
+                'primary_shards':     idx.get('pri', None),
+                'replica_shards':     idx.get('rep', None),
+                'primary_store_size': idx.get('pri.store.size', None),
+                'store_size':         idx.get('store.size', None),
+                'health':             idx.get('health', None),
+            }
+
+            # Convert the health status value
+            if index_data['health'] is not None:
+                index_data['health'] = health_stat[index_data['health'].lower()]
+
+            # Ensure that index_data does not contain None values
+            for key, value in index_data.items():
+                if value is None:
+                    del index_data[key]
+                    self.log.warning("The index metric data for %s was not found", key)
+
+            for metric in index_stats_metrics:
+                # metric description
+                desc = index_stats_metrics[metric]
+                self._process_metric(index_data, metric, *desc, tags=tags)
 
     def _define_params(self, version, cluster_stats):
         """ Define the set of URLs and METRICS to use depending on the
@@ -532,8 +606,7 @@ class ESCheck(AgentCheck):
         stats_metrics = dict(self.STATS_METRICS)
         stats_metrics.update(additional_metrics)
 
-
-        ### Additional Stats metrics ###
+        # Additional Stats metrics
         if version >= [0, 90, 5]:
             # ES versions 0.90.5 and above
             additional_metrics = self.ADDITIONAL_METRICS_POST_0_90_5
@@ -581,6 +654,9 @@ class ESCheck(AgentCheck):
         if version >= [1, 0, 0]:
             additional_metrics = self.PRIMARY_SHARD_METRICS_POST_1_0
 
+        if version < [5, 0, 0]:
+            stats_metrics.update(self.ADDITIONAL_METRICS_PRE_5_0_0)
+
         pshard_stats_metrics.update(additional_metrics)
 
         return health_url, stats_url, pshard_stats_url, pending_tasks_url, \
@@ -596,7 +672,8 @@ class ESCheck(AgentCheck):
             auth = None
 
         # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
+        # ssl_verify can be a bool or a string
+        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
         if isinstance(config.ssl_verify, bool) or isinstance(config.ssl_verify, str):
             verify = config.ssl_verify
         else:
@@ -648,7 +725,7 @@ class ESCheck(AgentCheck):
             'pending_task_total':               total,
             'pending_tasks_priority_high':      p_tasks['high'],
             'pending_tasks_priority_urgent':    p_tasks['urgent'],
-            'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1), # if total is 0
+            'pending_tasks_time_in_queue':      average_time_in_queue/(total or 1),  # if total is 0
         }
 
         for metric in self.CLUSTER_PENDING_TASKS:
@@ -688,10 +765,11 @@ class ESCheck(AgentCheck):
 
     def _process_metric(self, data, metric, xtype, path, xform=None,
                         tags=None, hostname=None):
-        """data: dictionary containing all the stats
+        """
+        data: dictionary containing all the stats
         metric: datadog metric
         path: corresponding path in data, flattened, e.g. thread_pool.bulk.queue
-        xfom: a lambda to apply to the numerical value
+        xform: a lambda to apply to the numerical value
         """
         value = data
 

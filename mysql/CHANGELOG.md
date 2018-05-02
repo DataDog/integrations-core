@@ -5,6 +5,7 @@
 ### Changes
 
 * [FEATURE] Add custom tag support to service checks.
+* [BUGFIX] reports slave_service check as `CRITICAL` if `Slave_running` global variable is OFF.
 
 1.1.3 / 2018-03-23
 ==================

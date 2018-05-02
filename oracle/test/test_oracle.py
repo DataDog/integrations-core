@@ -43,6 +43,7 @@ METRICS = [
     'oracle.tablespace.used',
     'oracle.tablespace.size',
     'oracle.tablespace.in_use',
+    'oracle.tablespace.offline',
     'oracle.buffer_cachehit_ratio',
     'oracle.cursor_cachehit_ratio',
     'oracle.library_cachehit_ratio',

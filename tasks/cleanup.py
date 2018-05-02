@@ -12,8 +12,10 @@ from invoke import task
 from .constants import ROOT
 
 
-@task(help={})
-def cleanup(ctx):
+@task(help={
+    'dry-run': 'Print out files and directories that will be deleted without deleting them'
+})
+def cleanup(ctx, dry_run=False):
     """
     Cleanup all temporary files and directories
 
@@ -24,24 +26,40 @@ def cleanup(ctx):
         ".eggs",
         ".pytest_cache",
         ".tox",
-        "__pycache__"
+        "__pycache__",
+        "build"
     ]
 
     should_delete_directories_globs = [
         "*.egg-info"
     ]
 
+    should_delete_file_globs = [
+        "*.whl",
+        '*.pyc'
+    ]
+
     for path, dirnames, filenames in os.walk('.'):
-        for filename in fnmatch.filter(filenames, '*.pyc'):
-            file_path = os.path.join(ROOT, path, filename)
-            os.remove(file_path)
+        for file_glob in should_delete_file_globs:
+            for filename in fnmatch.filter(filenames, file_glob):
+                file_path = os.path.join(ROOT, path, filename)
+                if not dry_run:
+                    os.remove(file_path)
+                else:
+                    print(file_path)
 
         for dirname in dirnames:
             if dirname in should_delete_directories:
                 dir_path = os.path.join(ROOT, path, dirname)
-                shutil.rmtree(dir_path)
+                if not dry_run:
+                    shutil.rmtree(dir_path)
+                else:
+                    print(dir_path)
 
         for dir_glob in should_delete_directories_globs:
             for dirname in fnmatch.filter(dirnames, dir_glob):
                 dir_path = os.path.join(ROOT, path, dirname)
-                shutil.rmtree(dir_path)
+                if not dry_run:
+                    shutil.rmtree(dir_path)
+                else:
+                    print(dir_path)

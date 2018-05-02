@@ -10,6 +10,7 @@ import socket
 import time
 import logging
 from datadog_checks.riak import Riak
+from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger('test_riak')
 
@@ -341,7 +342,7 @@ SERVICE_CHECK_NAME = 'riak.can_connect'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = get_docker_hostname()
 PORT = 18098
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 

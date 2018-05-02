@@ -12,6 +12,7 @@ DATA_TYPE_INT = win32pdh.PDH_FMT_LONG
 DATA_TYPE_DOUBLE = win32pdh.PDH_FMT_DOUBLE
 DATA_POINT_INTERVAL = 0.10
 SINGLE_INSTANCE_KEY = "__single_instance"
+
 class WinPDHCounter(object):
     # store the dictionary of pdh counter names
     pdh_counter_dict = defaultdict(list)
@@ -103,8 +104,11 @@ class WinPDHCounter(object):
             raise AttributeError("No valid counters to report")
 
     def __del__(self):
-        if(self.hq):
+        try:
             win32pdh.CloseQuery(self.hq)
+        except AttributeError:
+            # An error occurred during instantiation before a query was opened.
+            pass
 
     def is_single_instance(self):
         return self._is_single_instance

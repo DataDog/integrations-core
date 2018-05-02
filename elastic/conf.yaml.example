@@ -15,6 +15,9 @@ instances:
   # This parameter was also called `is_external` and you can still use it but it
   # will be removed in version 6.
   #
+  # If you enable the "index_stats" flag, you will collect metrics for individual 
+  # indices.
+  #
   # If you enable the "pshard_stats" flag, statistics over primary shards
   # will be collected by the check and sent to the backend with the
   # 'elasticsearch.primary' prefix. It is particularly useful if you want to
@@ -37,6 +40,7 @@ instances:
     # username: username
     # password: password
     # cluster_stats: false
+    # index_stats: false
     # pshard_stats: false
     # pshard_graceful_timeout: false  # continue gracefully if pshard stats TO
     # pending_task_stats: true

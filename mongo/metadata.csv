@@ -94,22 +94,22 @@ mongodb.mem.mapped,gauge,,mebibyte,,Amount of mapped memory by the database.,0,m
 mongodb.mem.mappedwithjournal,gauge,,mebibyte,,"The amount of mapped memory, including the memory used for journaling.",0,mongodb,memory mapped with journal
 mongodb.mem.resident,gauge,,mebibyte,,Amount of memory currently used by the database process.,0,mongodb,mem resident
 mongodb.mem.virtual,gauge,,mebibyte,,Amount of virtual memory used by the mongod process.,0,mongodb,mem virtual
-mongodb.metrics.commands.count.failed,rate,,commands,,"Number of times count failed",-1,mongodb,cmd count failed
-mongodb.metrics.commands.count.total,gauge,,commands,,"Number of times count executed",0,mongodb,cmd count executed
-mongodb.metrics.commands.createIndexes.failed,rate,,commands,,"Number of times createIndexes failed",-1,mongodb,cmd createIndexes failed
-mongodb.metrics.commands.createIndexes.total,gauge,,commands,,"Number of times createIndexes executed",0,mongodb,cmd createIndexes executed
-mongodb.metrics.commands.delete.failed,rate,,commands,,"Number of times delete failed",-1,mongodb,cmd delete failed
-mongodb.metrics.commands.delete.total,gauge,,commands,,"Number of times delete executed",0,mongodb,cmd delete executed
-mongodb.metrics.commands.eval.failed,rate,,commands,,"Number of times eval failed",-1,mongodb,cmd eval failed
-mongodb.metrics.commands.eval.total,gauge,,commands,,"Number of times eval executed",0,mongodb,cmd eval executed
-mongodb.metrics.commands.findAndModify.failed,rate,,commands,,"Number of times findAndModify failed",-1,mongodb,cmd findAndModify failed
-mongodb.metrics.commands.findAndModify.total,gauge,,commands,,"Number of times findAndModify executed",0,mongodb,cmd findAndModify executed
-mongodb.metrics.commands.insert.failed,rate,,commands,,"Number of times insert failed",-1,mongodb,cmd insert failed
-mongodb.metrics.commands.insert.total,gauge,,commands,,"Number of times insert executed",0,mongodb,cmd insert executed
-mongodb.metrics.commands.update.failed,rate,,commands,,"Number of times update failed",-1,mongodb,cmd update failed
-mongodb.metrics.commands.update.total,gauge,,commands,,"Number of times update executed",0,mongodb,cmd update executed
-mongodb.metrics.cursor.open.notimeout,gauge,,cursor,,"Number of open cursors with the option `DBQuery.Option.noTimeout` set to prevent timeout after a period of inactivity.",-1,mongodb,cursors open no timeout
-mongodb.metrics.cursor.open.pinned,gauge,,cursor,,"Number of pinned open cursors.",0,mongodb,cursors open pinned
+mongodb.metrics.commands.count.failed,rate,,command,,Number of times count failed,-1,mongodb,cmd count failed
+mongodb.metrics.commands.count.total,gauge,,command,,Number of times count executed,0,mongodb,cmd count executed
+mongodb.metrics.commands.createIndexes.failed,rate,,command,,Number of times createIndexes failed,-1,mongodb,cmd createIndexes failed
+mongodb.metrics.commands.createIndexes.total,gauge,,command,,Number of times createIndexes executed,0,mongodb,cmd createIndexes executed
+mongodb.metrics.commands.delete.failed,rate,,command,,Number of times delete failed,-1,mongodb,cmd delete failed
+mongodb.metrics.commands.delete.total,gauge,,command,,Number of times delete executed,0,mongodb,cmd delete executed
+mongodb.metrics.commands.eval.failed,rate,,command,,Number of times eval failed,-1,mongodb,cmd eval failed
+mongodb.metrics.commands.eval.total,gauge,,command,,Number of times eval executed,0,mongodb,cmd eval executed
+mongodb.metrics.commands.findAndModify.failed,rate,,command,,Number of times findAndModify failed,-1,mongodb,cmd findAndModify failed
+mongodb.metrics.commands.findAndModify.total,gauge,,command,,Number of times findAndModify executed,0,mongodb,cmd findAndModify executed
+mongodb.metrics.commands.insert.failed,rate,,command,,Number of times insert failed,-1,mongodb,cmd insert failed
+mongodb.metrics.commands.insert.total,gauge,,command,,Number of times insert executed,0,mongodb,cmd insert executed
+mongodb.metrics.commands.update.failed,rate,,command,,Number of times update failed,-1,mongodb,cmd update failed
+mongodb.metrics.commands.update.total,gauge,,command,,Number of times update executed,0,mongodb,cmd update executed
+mongodb.metrics.cursor.open.notimeout,gauge,,cursor,,Number of open cursors with the option `DBQuery.Option.noTimeout` set to prevent timeout after a period of inactivity.,-1,mongodb,cursors open no timeout
+mongodb.metrics.cursor.open.pinned,gauge,,cursor,,Number of pinned open cursors.,0,mongodb,cursors open pinned
 mongodb.metrics.cursor.open.total,gauge,,cursor,,Number of cursors that MongoDB is maintaining for clients.,-1,mongodb,open cursors
 mongodb.metrics.cursor.timedoutps,gauge,,cursor,second,"Number of cursors that time out, per second.",-1,mongodb,timed out cursors per s
 mongodb.metrics.document.deletedps,gauge,,document,second,Number of documents deleted per second.,0,mongodb,document deleted ps
@@ -136,15 +136,15 @@ mongodb.metrics.repl.network.getmores.numps,gauge,,operation,second,Number of ge
 mongodb.metrics.repl.network.getmores.totalmillisps,gauge,,fraction,,Fraction of time (ms/s) required to collect data from getmore operations.,0,mongodb,repl network getmores totalmillis ps
 mongodb.metrics.repl.network.opsps,gauge,,operation,second,Number of operations read from the replication source per second.,0,mongodb,repl network ops ps
 mongodb.metrics.repl.network.readerscreatedps,gauge,,process,second,Number of oplog query processes created per second.,0,mongodb,repl network readerscreated ps
-mongodb.metrics.repl.preload.docs.numps,rate,,doc,,"Number of documents loaded during the pre-fetch stage of replication.",0,mongodb,repl docs nums
-mongodb.metrics.repl.preload.docs.totalmillisps,rate,,millisecond,,"Amount of time spent loading documents as part of the pre-fetch stage of replication.",0,mongodb,repl docs nums
-mongodb.metrics.repl.preload.indexes.numps,rate,,doc,,"Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.",0,mongodb,repl docs nums
-mongodb.metrics.repl.preload.indexes.totalmillisps,rate,,millisecond,,"Amount of time spent loading documents as part of the pre-fetch stage of replication.",0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.docs.numps,rate,,document,,Number of documents loaded during the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.docs.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.indexes.numps,rate,,document,,Number of index entries loaded by members before updating documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
+mongodb.metrics.repl.preload.indexes.totalmillisps,rate,,millisecond,,Amount of time spent loading documents as part of the pre-fetch stage of replication.,0,mongodb,repl docs nums
 mongodb.metrics.ttl.deleteddocumentsps,gauge,,document,second,Number of documents deleted from collections with a ttl index per second.,0,mongodb,ttl deleted docs ps
 mongodb.metrics.ttl.passesps,gauge,,operation,second,Number of times per second the background process removes documents from collections with a ttl index.,0,mongodb,ttl passes ps
-mongodb.network.bytesinps,rate,,byte,,"The number of bytes that reflects the amount of network traffic received by this database.",0,mongodb,bytes inps
-mongodb.network.bytesoutps,rate,,byte,,"The number of bytes that reflects the amount of network traffic sent from this database.",0,mongodb,bytes outps
-mongodb.network.numrequestsps,rate,,request,,"Number of distinct requests that the server has received.",0,mongodb,num requests ps
+mongodb.network.bytesinps,rate,,byte,,The number of bytes that reflects the amount of network traffic received by this database.,0,mongodb,bytes inps
+mongodb.network.bytesoutps,rate,,byte,,The number of bytes that reflects the amount of network traffic sent from this database.,0,mongodb,bytes outps
+mongodb.network.numrequestsps,rate,,request,,Number of distinct requests that the server has received.,0,mongodb,num requests ps
 mongodb.opcounters.commandps,gauge,,command,second,Total number of commands per second issued to the database.,0,mongodb,opcounters command ps
 mongodb.opcounters.deleteps,gauge,,operation,second,Number of delete operations per second.,0,mongodb,opcounters delete ps
 mongodb.opcounters.getmoreps,gauge,,operation,second,Number of getmore operations per second.,0,mongodb,opcounters getmore ps
@@ -162,9 +162,9 @@ mongodb.oplog.timediff,gauge,,second,,Oplog window: difference between the first
 mongodb.oplog.usedsizemb,gauge,,mebibyte,,Total amount of space used by the oplog.,0,mongodb,oplog used size mb
 mongodb.replset.health,gauge,,,,Member health value of the replica set: conveys if the member is up (i.e. 1) or down (i.e. 0).,1,mongodb,replset health
 mongodb.replset.replicationlag,gauge,,second,,Delay between a write operation on the primary and its copy to a secondary.,-1,mongodb,replication lag
-mongodb.replset.state,gauge,,,,"State of a replica that reflects its disposition within the set.",0,mongodb,replset state
-mongodb.replset.votefraction,gauge,,fraction,,"Fraction of votes a server will cast in a replica set election.",0,mongodb,votes fraction
-mongodb.replset.votes,gauge,,vote,,"The number of votes a server will cast in a replica set election.",0,mongodb,replset votes
+mongodb.replset.state,gauge,,,,State of a replica that reflects its disposition within the set.,0,mongodb,replset state
+mongodb.replset.votefraction,gauge,,fraction,,Fraction of votes a server will cast in a replica set election.,0,mongodb,votes fraction
+mongodb.replset.votes,gauge,,item,,The number of votes a server will cast in a replica set election.,0,mongodb,replset votes
 mongodb.stats.datasize,gauge,,byte,,Total size of the data held in this database including the padding factor.,0,mongodb,stats datasize
 mongodb.stats.indexes,gauge,,index,,Total number of indexes across all collections in the database.,0,mongodb,stats indexes
 mongodb.stats.indexsize,gauge,,byte,,Total size of all indexes created on this database.,0,mongodb,stats indexsize
@@ -197,4 +197,31 @@ mongodb.collection.maxSize,gauge,,byte,,Maximum size of a capped collection in b
 mongodb.collection.storageSize,gauge,,byte,,Total storage space allocated to this collection for document storage.,0,mongodb,storage space of collection
 mongodb.collection.nindexes,gauge,,index,,Total number of indices on the collection.,0,mongodb,number of indices on collection
 mongodb.collection.indexSizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size
-mongodb.collection.indexes.accesses.ops,gauge,,access,,Number of time the index was used.,0,mongodb,index usage
+mongodb.collection.indexes.accesses.ops,gauge,,event,,Number of time the index was used.,0,mongodb,index usage
+mongodb.usage.commands.countsps,rate,,command,,Number of commands per second,0,mongodb,
+mongodb.usage.commands.count,gauge,,command,,Number of commands since server start (deprecated),0,mongodb,
+mongodb.usage.commands.time,gauge,,microsecond,,Total time spent performing commands in microseconds,-1,mongodb,
+mongodb.usage.getmore.countsps,rate,,fetch,,Number of getmore per second,0,mongodb,
+mongodb.usage.getmore.count,gauge,,fetch,,Number of getmore since server start (deprecated),0,mongodb,
+mongodb.usage.getmore.time,gauge,,microsecond,,Total time spent performing getmore in microseconds,-1,mongodb,
+mongodb.usage.insert.countsps,rate,,commit,,Number of inserts per second,0,mongodb,
+mongodb.usage.insert.count,gauge,,commit,,Number of inserts since server start (deprecated),0,mongodb,
+mongodb.usage.insert.time,gauge,,microsecond,,Total time spent performing inserts in microseconds,-1,mongodb,
+mongodb.usage.queries.countsps,rate,,query,,Number of queries per second,0,mongodb,
+mongodb.usage.queries.count,gauge,,query,,Number of queries since server start (deprecated),0,mongodb,
+mongodb.usage.queries.time,gauge,,microsecond,,Total time spent performing queries in microseconds,-1,mongodb,
+mongodb.usage.readLock.countsps,rate,,lock,,Number of read locks per second,0,mongodb,
+mongodb.usage.readLock.count,gauge,,lock,,Number of read locks since server start (deprecated),0,mongodb,
+mongodb.usage.readLock.time,gauge,,microsecond,,Total time spent performing read locks in microseconds,-1,mongodb,
+mongodb.usage.remove.countsps,rate,,commit,,Number of removes per second,0,mongodb,
+mongodb.usage.remove.count,gauge,,commit,,Number of removes since server start (deprecated),0,mongodb,
+mongodb.usage.remove.time,gauge,,microsecond,,Total time spent performing removes in microseconds,-1,mongodb,
+mongodb.usage.total.countsps,rate,,command,,Number of operations per second,0,mongodb,
+mongodb.usage.total.count,gauge,,command,,Number of operations since server start (deprecated),0,mongodb,
+mongodb.usage.total.time,gauge,,microsecond,,Total time spent performing operations in microseconds,-1,mongodb,
+mongodb.usage.update.countsps,rate,,commit,,Number of updates per second,0,mongodb,
+mongodb.usage.update.count,gauge,,commit,,Number of updates since server start (deprecated),0,mongodb,
+mongodb.usage.update.time,gauge,,microsecond,,Total time spent performing updates in microseconds,-1,mongodb,
+mongodb.usage.writeLock.countsps,rate,,lock,,Number of write locks per second,0,mongodb,
+mongodb.usage.writeLock.count,gauge,,lock,,Number of write locks since server start (deprecated),0,mongodb,
+mongodb.usage.writeLock.time,gauge,,microsecond,,Total time spent performing write locks in microseconds,-1,mongodb,
