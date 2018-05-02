@@ -1,8 +1,7 @@
 init_config:
 
 instances:
-  - enabled: true
-    ###
+  - ###
     ### Common additional tags for all metrics from this check
     ###
     #
