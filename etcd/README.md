@@ -15,15 +15,15 @@ The etcd check is packaged with the Agent, so simply [install the Agent][1] on y
 
 ### Configuration
 
-1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your etcd performance data.  
+1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your etcd performance data.  
     See the [sample etcd.d/conf.yaml][2] for all available configuration options.
 
-        ```yaml
-        init_config:
+    ```yaml
+	init_config:
 
-        instances:
-            - url: "https://server:port" # API endpoint of your etcd instance
-        ```
+	instances:
+		- url: "https://server:port" # API endpoint of your etcd instance
+    ```
 
 2. [Restart the Agent][3]
 

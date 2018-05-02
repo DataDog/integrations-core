@@ -15,7 +15,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -33,8 +33,8 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     #   apache_password: example_password
     #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
     ```
-        Change the `apache_status_url` parameter value and configure it for your environment.
-        See the [sample apache.d/conf.yaml][2] for all available configuration options.
+    Change the `apache_status_url` parameter value and configure it for your environment.
+    See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2.  [Restart the Agent][3].
 

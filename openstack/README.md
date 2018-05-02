@@ -18,15 +18,15 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 1. First configure a Datadog role and user with your identity server
 
-```
-openstack role create datadog_monitoring
-openstack user create datadog \
-    --password my_password \
-    --project my_project_name
-openstack role add datadog_monitoring \
-    --project my_project_name \
-    --user datadog
-```
+    ```
+    openstack role create datadog_monitoring
+    openstack user create datadog \
+        --password my_password \
+        --project my_project_name
+    openstack role add datadog_monitoring \
+        --project my_project_name \
+        --user datadog
+    ```
 
 2. Update your policy.json files to grant the needed permissions.
 ```role:datadog_monitoring``` requires access to the following operations:

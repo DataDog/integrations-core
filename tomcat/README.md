@@ -19,7 +19,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
 
 2. [Restart the Agent][16]

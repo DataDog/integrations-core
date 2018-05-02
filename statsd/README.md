@@ -15,12 +15,12 @@ The StatsD check is packaged with the Agent, so simply [install the Agent][1] on
 
 1. Edit the `statsd.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample statsd.d/conf.yaml][2] for all available configuration options:
 
-    ```
-    init_config:
+    ```yaml
+        init_config:
 
-    instances:
-      - host: localhost
-        port: 8126 # or wherever your statsd listens
+        instances:
+            - host: localhost
+            port: 8126 # or wherever your statsd listens
     ```
 
     Configuration Options

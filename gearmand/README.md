@@ -16,9 +16,9 @@ The Gearman check is packaged with the Agent, so simply [install the Agent][1] o
 ### Configuration
 
 
-1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Gearman performance data.  
+1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Gearman performance data.  
     See the [sample gearmand.d/conf.yaml][2] for all available configuration options.
-    ```
+    ```yaml
     init_config:
 
     instances:

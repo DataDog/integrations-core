@@ -50,14 +50,14 @@ instances:
         #rrd_whitelist: /path/to/rrd_whitelist.txt
 ```
 
-Give the dd-agent user access to the RRD files
+Give the datadog-agent user access to the RRD files
 
 ```shell
 sudo gpasswd -a dd-agent www-data
 sudo chmod -R g+rx /var/lib/cacti/rra/
-sudo su - dd-agent -c 'if [ -r /var/lib/cacti/rra/ ];
-then echo -e "\033[0;31mdd-agent can read the RRD files\033[0m";
-else echo -e "\033[0;31mdd-agent can not read the RRD files\033[0m";
+sudo su - datadog-agent -c 'if [ -r /var/lib/cacti/rra/ ];
+then echo -e "\033[0;31mdatadog-agent can read the RRD files\033[0m";
+else echo -e "\033[0;31mdatadog-agent can not read the RRD files\033[0m";
 fi'
 ```
 

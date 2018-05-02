@@ -66,10 +66,10 @@ Configuration Options
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-```
-log.dir = /var/log/rabbit
-log.file = rabbit.log
-```
+  ```
+  log.dir = /var/log/rabbit
+  log.file = rabbit.log
+  ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -79,20 +79,20 @@ log.file = rabbit.log
     
 3. Add this configuration setup to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-```
-logs:
-    
-    - type: file
-      path: /var/log/rabbit/*.log
-      source: rabbitmq
-      service: myservice
-      log_processing_rules:
-        - type: multi_line
-          name: logs_starts_with_equal_sign
-          pattern: =
-```
+  ```
+  logs:
+      
+      - type: file
+        path: /var/log/rabbit/*.log
+        source: rabbitmq
+        service: myservice
+        log_processing_rules:
+          - type: multi_line
+            name: logs_starts_with_equal_sign
+            pattern: =
+  ```
 
-See the [sample rabbitmq.yaml][3] for all available configuration options.
+  See the [sample rabbitmq.yaml][3] for all available configuration options.
 
 4. [Restart the Agent][5].
 

@@ -13,7 +13,7 @@ The Exchange check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Exchange Server performance data.  
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Exchange Server performance data.  
     See the [sample exchange_server.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][5]

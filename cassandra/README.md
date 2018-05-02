@@ -18,7 +18,7 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 ### Configuration
 
-Edit the `cassandra.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Cassandra [metrics](#metric-collection) and [logs](#log-collection).  
+Edit the `cassandra.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Cassandra [metrics](#metric-collection) and [logs](#log-collection).  
 See the [sample cassandra.d/conf.yaml][103] for all available configuration options.
 
 #### Metric Collection

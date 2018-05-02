@@ -13,16 +13,17 @@ In addition, install `mod_status` on your Lighttpd servers.
 
 ### Configuration
 
-1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample lighttpd.d/conf.yaml][2] for all available configuration options:
+1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+	See the [sample lighttpd.d/conf.yaml][2] for all available configuration options:
 
-    ```
-    init_config:
+    ```yaml
+	init_config:
 
-    instances:
-    # Each instance needs a lighttpd_status_url. Tags are optional.
-      - lighttpd_status_url: http://example.com/server-status?auto
-    #   tags:
-    #     - instance:foo
+	instances:
+	    # Each instance needs a lighttpd_status_url. Tags are optional.
+      	- lighttpd_status_url: http://example.com/server-status?auto
+	    #   tags:
+	    #     - instance:foo
     ```
 
 2. [Restart the Agent][3] to begin sending lighttpd metrics to Datadog.

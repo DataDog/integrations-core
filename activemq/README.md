@@ -16,70 +16,70 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 1. **Make sure that [JMX Remote is enabled][103] on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
 
-    ```yaml
-    instances:
-      - host: localhost
-        port: 7199
-        user: username
-        password: password
-        name: activemq_instance
-    # List of metrics to be collected by the integration
-    # You should not have to modify this.
-    init_config:
-      conf:
-        - include:
-          Type: Queue
-          attribute:
-            AverageEnqueueTime:
-              alias: activemq.queue.avg_enqueue_time
-              metric_type: gauge
-            ConsumerCount:
-              alias: activemq.queue.consumer_count
-              metric_type: gauge
-            ProducerCount:
-              alias: activemq.queue.producer_count
-              metric_type: gauge
-            MaxEnqueueTime:
-              alias: activemq.queue.max_enqueue_time
-              metric_type: gauge
-            MinEnqueueTime:
-              alias: activemq.queue.min_enqueue_time
-              metric_type: gauge
-            MemoryPercentUsage:
-              alias: activemq.queue.memory_pct
-              metric_type: gauge
-            QueueSize:
-              alias: activemq.queue.size
-              metric_type: gauge
-            DequeueCount:
-              alias: activemq.queue.dequeue_count
-              metric_type: counter
-            DispatchCount:
-              alias: activemq.queue.dispatch_count
-              metric_type: counter
-            EnqueueCount:
-              alias: activemq.queue.enqueue_count
-              metric_type: counter
-            ExpiredCount:
-              alias: activemq.queue.expired_count
-              type: counter
-            InFlightCount:
-              alias: activemq.queue.in_flight_count
-              metric_type: counter
+      ```yaml
+      instances:
+        - host: localhost
+          port: 7199
+          user: username
+          password: password
+          name: activemq_instance
+      # List of metrics to be collected by the integration
+      # You should not have to modify this.
+      init_config:
+        conf:
+          - include:
+            Type: Queue
+            attribute:
+              AverageEnqueueTime:
+                alias: activemq.queue.avg_enqueue_time
+                metric_type: gauge
+              ConsumerCount:
+                alias: activemq.queue.consumer_count
+                metric_type: gauge
+              ProducerCount:
+                alias: activemq.queue.producer_count
+                metric_type: gauge
+              MaxEnqueueTime:
+                alias: activemq.queue.max_enqueue_time
+                metric_type: gauge
+              MinEnqueueTime:
+                alias: activemq.queue.min_enqueue_time
+                metric_type: gauge
+              MemoryPercentUsage:
+                alias: activemq.queue.memory_pct
+                metric_type: gauge
+              QueueSize:
+                alias: activemq.queue.size
+                metric_type: gauge
+              DequeueCount:
+                alias: activemq.queue.dequeue_count
+                metric_type: counter
+              DispatchCount:
+                alias: activemq.queue.dispatch_count
+                metric_type: counter
+              EnqueueCount:
+                alias: activemq.queue.enqueue_count
+                metric_type: counter
+              ExpiredCount:
+                alias: activemq.queue.expired_count
+                type: counter
+              InFlightCount:
+                alias: activemq.queue.in_flight_count
+                metric_type: counter
 
-        - include:
-          Type: Broker
-          attribute:
-            StorePercentUsage:
-              alias: activemq.broker.store_pct
-              metric_type: gauge
-            TempPercentUsage:
-              alias: activemq.broker.temp_pct
-              metric_type: gauge
-            MemoryPercentUsage:
-              alias: activemq.broker.memory_pct
-              metric_type: gauge
-    ```
+          - include:
+            Type: Broker
+            attribute:
+              StorePercentUsage:
+                alias: activemq.broker.store_pct
+                metric_type: gauge
+              TempPercentUsage:
+                alias: activemq.broker.temp_pct
+                metric_type: gauge
+              MemoryPercentUsage:
+                alias: activemq.broker.memory_pct
+                metric_type: gauge
+      ```
 
 3. Restart the agent
 

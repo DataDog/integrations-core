@@ -12,21 +12,21 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 
 ### Configuration
 
-1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Couchbase performance data.  
+1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Couchbase performance data.  
     See the [sample dns_check.d/conf.yaml][2] for all available configuration options:
+    
+    ```yaml
+      init_config:
 
-        ```yaml
-        init_config:
-
-        instances:
-          - name: Example (com)
-            # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
-            hostname: example.com # the record to fetch
-            # record_type: AAAA   # default is A
-          - name: Example (org)
-            hostname: example.org
-        ```
-
+      instances:
+        - name: Example (com)
+          # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
+          hostname: example.com # the record to fetch
+          # record_type: AAAA   # default is A
+        - name: Example (org)
+          hostname: example.org
+    ```
+    
     If you omit the `nameserver` option, the check uses whichever nameserver is configured in local network settings.
 
 2. [Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.

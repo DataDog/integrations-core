@@ -2,9 +2,7 @@
 
 ## Overview
 
-Get metrics from Microsoft Active Directory
-
-The Agent's Active directory check is packaged with the Agent, so simply [install the Agent][4] on your servers.
+Get metrics from Microsoft Active Directory to visualize and monitor its performances.
 
 ## Setup
 ### Installation
@@ -13,7 +11,7 @@ The Agent's Active directory check is packaged with the Agent, so simply [instal
 
 ### Configuration
 
-1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Active Directory performance data.  
+1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Active Directory performance data.  
 
     See the [sample active_directory.d/conf.yaml][1] for all available configuration options.
 

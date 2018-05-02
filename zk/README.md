@@ -11,7 +11,7 @@ The Zookeeper check is packaged with the Agent, so simply [install the Agent][13
 
 ### Configuration
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample zk.d/conf.yaml][14] for all available configuration options.
 
 2. [Restart the Agent][15]

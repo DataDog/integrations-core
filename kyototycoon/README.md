@@ -11,26 +11,28 @@ The KyotoTycoon check is packaged with the Agent, so simply [install the Agent][
 
 ### Configuration
 
-1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample kyototycoon.d/conf.yaml][2] for all available configuration options:
+1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+    See the [sample kyototycoon.d/conf.yaml][2] for all available configuration options:
 
-    ```
+    ```yaml
     init_config:
 
     instances:
-    #  Each instance needs a report URL.
-    #  name, and optionally tags keys. The report URL should
-    #  be a URL to the Kyoto Tycoon "report" RPC endpoint.
-    #
-    #  Complete example:
-    #
-    - report_url: http://localhost:1978/rpc/report
-    #   name: my_kyoto_instance
-    #   tags:
-    #     foo: bar
-    #     baz: bat
+        #  Each instance needs a report URL.
+        #  name, and optionally tags keys. The report URL should
+        #  be a URL to the Kyoto Tycoon "report" RPC endpoint.
+        #
+        #  Complete example:
+        #
+        - report_url: http://localhost:1978/rpc/report
+        #   name: my_kyoto_instance
+        #   tags:
+        #     foo: bar
+        #     baz: bat
     ```
 
 2. [Restart the Agent][7] to begin sending Kong metrics to Datadog.
+
 
 ### Validation
 
