@@ -108,8 +108,10 @@ class ConsulCheck(AgentCheck):
 
     # Consul Config Accessors
     def _get_local_config(self, instance, instance_state):
-        time_window = datetime.now() - instance_state.last_config_fetch_time > timedelta(seconds=self.MAX_CONFIG_TTL)
-        if not instance_state.local_config or time_window:
+        time_window = 0
+        if instance_state.last_config_fetch_time:
+            time_window = datetime.now() - instance_state.last_config_fetch_time
+        if not instance_state.local_config or time_window > timedelta(seconds=self.MAX_CONFIG_TTL):
             instance_state.local_config = self.consul_request(instance, '/v1/agent/self')
             instance_state.last_config_fetch_time = datetime.now()
 
