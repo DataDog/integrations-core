@@ -48,6 +48,7 @@ CONFIG_INTEGRATION_WRONG_TOKEN = {
     'acl_token': 'wrong_token'
 }
 
+
 @pytest.mark.integration
 def test_integration(aggregator, spin_up_consul):
     """
@@ -64,6 +65,7 @@ def test_integration(aggregator, spin_up_consul):
 
     aggregator.assert_service_check('consul.check')
     aggregator.assert_service_check('consul.up')
+
 
 @pytest.mark.integration
 def test_acl_forbidden(aggregator, spin_up_consul):

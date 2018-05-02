@@ -66,6 +66,7 @@ def mock_get_peers_in_cluster(instance):
         "10.0.2.16:8300"
     ]
 
+
 def mock_get_services_in_cluster(instance):
     return {
         "service-1": [
@@ -88,12 +89,14 @@ def mock_get_services_in_cluster(instance):
         ]
     }
 
+
 def mock_get_n_services_in_cluster(n):
     dct = {}
     for i in range(n):
         k = "service_{0}".format(i)
         dct[k] = []
     return dct
+
 
 def mock_get_local_config(instance, instance_state):
     return {
@@ -111,6 +114,7 @@ def mock_get_local_config(instance, instance_state):
             },
         }
     }
+
 
 def mock_get_nodes_in_cluster(instance):
     return [
@@ -170,6 +174,7 @@ def mock_get_nodes_with_service(instance, service):
             }
         }
     ]
+
 
 def mock_get_nodes_with_service_warning(instance, service):
 
@@ -266,6 +271,7 @@ def mock_get_nodes_with_service_critical(instance, service):
         }
     ]
 
+
 def mock_get_coord_datacenters(instance):
     return [{
         "Datacenter": "dc1",
@@ -312,6 +318,7 @@ def mock_get_coord_datacenters(instance):
 
     }]
 
+
 def mock_get_coord_nodes(instance):
     return [{
         "Node": "host-1",
@@ -348,6 +355,7 @@ def mock_get_coord_nodes(instance):
             "Height": 0.00015006836008626717
         }
     }]
+
 
 def mock_get_health_check(instance, endpoint):
     return [{
@@ -423,8 +431,10 @@ def mock_get_health_check(instance, endpoint):
         "ServiceName": "server-empty",
     }]
 
+
 def mock_get_cluster_leader_A(instance):
     return '10.0.2.15:8300'
+
 
 def mock_get_cluster_leader_B(instance):
     return 'My New Leader'
