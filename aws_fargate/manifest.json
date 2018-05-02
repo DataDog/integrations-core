@@ -1,0 +1,8 @@
+{
+  "maintainer": "",
+  "manifest_version": "1.0.0",
+  "name": "aws_fargate",
+  "display_name": "Amazon Fargate",
+  "short_description": "Amazon Fargate provisions containers for your applications.",
+  "creates_events": true
+}
