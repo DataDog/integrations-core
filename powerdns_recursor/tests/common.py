@@ -4,7 +4,9 @@
 
 import os
 
-HOST = os.getenv('DOCKER_HOSTNAME', '127.0.0.1')
+from datadog_checks.utils.common import get_docker_hostname
+
+HOST = get_docker_hostname()
 PORT = os.getenv('POWERDNS_HOST_PORT_0', 8082)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
