@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "kong",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "f1098d6f-b393-4374-81c0-47c0a142aeef",
   "public_title": "Datadog-Kong Integration",
   "categories":["web", "api"],

@@ -35,6 +35,7 @@ AGENT_BASED_INTEGRATIONS = [
     'iis',
     'istio',
     'kafka_consumer',
+    'kong',
     'kube_proxy',
     'kubelet',
     'kyototycoon',
