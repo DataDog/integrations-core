@@ -694,6 +694,8 @@ class MongoDb(AgentCheck):
         server = instance['server']
         username, password, db_name, nodelist, clean_server_name, auth_source = self._parse_uri(server, sanitize_username=bool(ssl_params))
         additional_metrics = instance.get('additional_metrics', [])
+        if 'top' in additional_metrics:
+            additional_metrics.append('old_top')
 
         # Get the list of metrics to collect
         collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
