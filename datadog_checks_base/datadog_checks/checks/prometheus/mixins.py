@@ -467,6 +467,8 @@ class PrometheusScraper(object):
             cert = self.ssl_cert
             if isinstance(self.ssl_private_key, basestring):
                 cert = (self.ssl_cert, self.ssl_private_key)
+        elif isinstance(self.ssl_cert, tuple):
+            cert = self.ssl_cert
         verify = True
         if isinstance(self.ssl_ca_cert, basestring):
             verify = self.ssl_ca_cert
@@ -475,10 +477,10 @@ class PrometheusScraper(object):
             verify = False
         try:
             response = requests.get(endpoint, headers=headers, stream=True, timeout=10, cert=cert, verify=verify)
-        except (requests.exceptions.SSLError):
+        except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise
-        except (IOError):
+        except IOError:
             if self.health_service_check:
                 self._submit_service_check(
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"),
