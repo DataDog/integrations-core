@@ -26,9 +26,9 @@ def wait_for_cluster():
             if len(res.json()) == 3:
                 return True
         except Exception as e:
-            subprocess.check_call(['docker', 'logs', 'compose_consul-leader'])
-            subprocess.check_call(['docker', 'logs', 'compose_consul-follower-1'])
-            subprocess.check_call(['docker', 'logs', 'compose_consul-follower-2'])
+            subprocess.check_call(['docker', 'logs', 'compose_consul-leader_1'])
+            subprocess.check_call(['docker', 'logs', 'compose_consul-follower-1_1'])
+            subprocess.check_call(['docker', 'logs', 'compose_consul-follower-2_1'])
             log.info("Error connecting to the cluster: %s", e)
             pass
 
