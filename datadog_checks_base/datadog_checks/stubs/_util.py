@@ -10,8 +10,8 @@ class SubprocessOutputEmptyError(Exception):
 
 def subprocess_output(command, raise_on_empty_output):
     """
-    Run the given subprocess command and return its output. This is a private method
-    and should not be called directly, use `get_subprocess_output` instead.
+    This is a stub to allow a check requiring `Popen` to run without an Agent (e.g. during tests or development),
+    it's not supposed to be used anywhere outside the `datadog_checks.utils` package.
     """
 
     # Use tempfile, allowing a larger amount of memory. The subprocess.Popen
