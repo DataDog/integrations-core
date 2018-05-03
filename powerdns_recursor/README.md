@@ -15,7 +15,7 @@ And many more.
 ## Setup
 ### Installation
 
-The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your recursors.
+The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent][1] on your recursors.
 
 ### Configuration
 #### Prepare PowerDNS
@@ -38,7 +38,7 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory. See the [sample powerdns_recursor.yaml](https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/conf.yaml.example) for all available configuration options:
+Create a file `powerdns_recursor.yaml` in the Agent's `conf.d` directory. See the [sample powerdns_recursor.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -50,32 +50,15 @@ instances:
     version: 4 # omit this line if you're running pdns_recursor version 3.x
 ```
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending PowerDNS Recursor metrics to Datadog.
+[Restart the Agent][3] to begin sending PowerDNS Recursor metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `powerdns_recursor` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    powerdns_recursor
-    -------
-      - instance #0 [OK]
-      - Collected 8 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The PowerDNS Recursor check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `powerdns_recursor` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The PowerDns check does not include any event at this time.### Service Checks
@@ -86,7 +69,16 @@ The PowerDns check does not include any event at this time.### Service Checks
 Returns CRITICAL if the Agent is unable to connect to the recursor's statistics API, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/

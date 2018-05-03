@@ -9,11 +9,11 @@ This check does **NOT** forward application metrics from StatsD servers to Datad
 ## Setup
 ### Installation
 
-The StatsD check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any servers that run StatsD.
+The StatsD check is packaged with the Agent, so simply [install the Agent][1] on any servers that run StatsD.
 
 ### Configuration
 
-Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml](https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.example) for all available configuration options:
+Create a file `statsd.yaml` in the Agent's `conf.d` directory. See the [sample statsd.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -30,32 +30,15 @@ Configuration Options
 * `timeout` (Optional) - Timeout for the check. Defaults to 10 seconds.
 * `tags` (Optional) - Tags to be assigned to the metric.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending StatsD metrics and service checks to Datadog.
+[Restart the Agent][3] to start sending StatsD metrics and service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `statsd` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    statsd
-    -------
-      - instance #0 [OK]
-      - Collected 3 metrics, 0 events & 2 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The statsd check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `statsd` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The StatsD check does not include any event at this time.
@@ -71,9 +54,19 @@ Returns CRITICAL if the StatsD server does not respond to the Agent's health sta
 Returns CRITICAL if the Agent cannot collect metrics about StatsD, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-If you don't know what StatsD is and how does it work, check out [our blog post about it](https://www.datadoghq.com/blog/statsd/)
+If you don't know what StatsD is and how does it work, check out [our blog post about it][7]
 
-To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/) about it.
+To get a better idea of how (or why) to visualize StatsD metrics with Counts Graphing with Datadog, check out our [series of blog posts][8] about it.
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/statsd/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/statsd/
+[8]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing/

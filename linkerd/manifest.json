@@ -4,12 +4,18 @@
   "name": "linkerd",
   "short_description": "Monitor your services health with metrics from linkerd.",
   "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
-  "support": "contrib",
-  "type":"check",
+  "support": "core",
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/linkerd/",
-  "supported_os": ["linux","mac_os","windows"],
-  "categories":["web"],
-  "version": "1.0.0",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Linkerd Integration",
+  "categories": [
+    "web"
+  ],
   "is_public": true,
   "has_logo": true
 }

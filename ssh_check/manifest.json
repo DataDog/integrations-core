@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "ssh_check",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",
@@ -11,13 +9,16 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
   "public_title": "Datadog-SSH Check Integration",
-  "categories":["network"],
-  "type":"check",
+  "categories": [
+    "network"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/ssh_check/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/ssh"]
+  "aliases": [
+    "/integrations/ssh"
+  ]
 }

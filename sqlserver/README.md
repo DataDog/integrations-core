@@ -9,7 +9,7 @@ You can also create your own metrics by having the check run custom queries.
 ## Setup
 ### Installation
 
-The SQL Server check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your SQL Server instances.  
+The SQL Server check is packaged with the Agent, so simply [install the Agent][1] on your SQL Server instances.  
 
 Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties.
 **Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**
@@ -25,7 +25,7 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 ```
 
-2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory. See the [sample sqlserver.yaml](https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example) for all available configuration options:
+2. Create a file `sqlserver.yaml` in the Agent's `conf.d` directory. See the [sample sqlserver.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -40,33 +40,16 @@ instances:
 
 See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example) for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-3. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending SQL Server metrics to Datadog.
+3. [Restart the Agent][3] to start sending SQL Server metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `sqlserver` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    sqlserver
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The sqlserver check is compatible with all Windows and Linux platforms.
+[Run the Agent's `status` subcommand][4] and look for `sqlserver` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
@@ -80,8 +63,17 @@ The SQL server check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitor your Azure SQL Databases with Datadog](https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog/)
+* [Monitor your Azure SQL Databases with Datadog][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog/

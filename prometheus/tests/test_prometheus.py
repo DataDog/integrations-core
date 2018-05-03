@@ -43,6 +43,8 @@ def poll_mock():
     g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
     c1 = Counter('counter1', 'hits', ['node'], registry=registry)
     c1.labels(node="host2").inc(42)
+    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
+    g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
     poll_mock = mock.patch(
         'requests.get',
@@ -79,6 +81,24 @@ def test_prometheus_check_counter_gauge(aggregator, poll_mock):
     aggregator.assert_metric(CHECK_NAME + '.metric2', tags=['timestamp:123', 'node:host2', 'matched_label:foobar'], metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
+
+def test_invalid_metric(aggregator, poll_mock):
+    """
+    Testing that invalid values of metrics are discarded
+    """
+    bad_metric_instance = {
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'prometheus',
+        'metrics': [
+            {'metric1': 'renamed.metric1'},
+            'metric2',
+            'metric3'
+        ],
+        'send_histograms_buckets': True
+    }
+    c = PrometheusCheck('prometheus', None, {}, [bad_metric_instance])
+    c.check(bad_metric_instance)
+    assert aggregator.metrics('metric3') == []
 
 def test_prometheus_wildcard(aggregator, poll_mock):
     instance_wildcard = {

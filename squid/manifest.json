@@ -16,7 +16,7 @@
   "public_title": "Datadog-Squid Integration",
   "categories": ["web", "caching"],
   "type": "check",
-  "doc-link": "https://docs.datadoghq.com/integrations/squid/",
+  "doc_link": "https://docs.datadoghq.com/integrations/squid/",
   "is_public": true,
   "has_logo": true
 }

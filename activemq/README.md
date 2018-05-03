@@ -7,14 +7,14 @@ The ActiveMQ check lets you collect metrics for brokers and queues, producers an
 ## Setup
 ### Installation
 
-The Agent's ActiveMQ check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your ActiveMQ nodes.
+The Agent's ActiveMQ check is packaged with the Agent, so simply [install the Agent][1] on your ActiveMQ nodes.
 
-The check collects metrics via JMX, so you'll need a JVM on each node so the Agent can fork [jmxfetch](https://github.com/DataDog/jmxfetch). We recommend using an Oracle-provided JVM.
+The check collects metrics via JMX, so you'll need a JVM on each node so the Agent can fork [jmxfetch][2]. We recommend using an Oracle-provided JVM.
 
 ### Configuration
 
-1. **Make sure that [JMX Remote is enabled](http://activemq.apache.org/jmx.html) on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`. See the [sample activemq.yaml](https://github.com/DataDog/integrations-core/blob/master/activemq/conf.yaml.example) for all available configuration options.
+1. **Make sure that [JMX Remote is enabled][3] on your ActiveMQ server.**
+2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`. See the [sample activemq.yaml][4] for all available configuration options.
 
 ```
 instances:
@@ -96,28 +96,11 @@ else echo -e "\e[031mAgent is not running\e[0m"; fi
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `activemq` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    activemq
-    -------
-      - instance #0 [OK]
-      - Collected 8 metrics, 0 events & 0 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The ActiveMQ check only runs on Linux or Mac (OS X or macOS).
+[Run the Agent's `status` subcommand][5] and look for `activemq` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The Activemq check does not include any event at this time.
@@ -128,8 +111,18 @@ The Activemq check does not include any event at this time.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-* [Monitor ActiveMQ metrics and performance](https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/)
+* [Monitor ActiveMQ metrics and performance][8]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/jmxfetch
+[3]: http://activemq.apache.org/jmx.html
+[4]: https://github.com/DataDog/integrations-core/blob/master/activemq/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/

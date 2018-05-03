@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.20.0",
+  "manifest_version": "1.0.0",
   "name": "riak",
   "short_description": "Track node, vnode and ring performance metrics for RiakKV or RiakTS.",
   "support": "core",
@@ -11,11 +9,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "e1ed642c-8a15-420c-954b-6fb894905956",
   "public_title": "Datadog-Riak Integration",
-  "categories":["data store"],
-  "type":"check",
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/riak/",
   "is_public": true,
   "has_logo": true

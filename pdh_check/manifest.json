@@ -1,7 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "min_agent_version": "5.21.0",
   "name": "pdh_check",
   "short_description": "Collect and graph any Windows PDH metrics.",
   "support": "core",

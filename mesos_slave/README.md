@@ -15,7 +15,7 @@ This check also creates a service check for every executor task.
 ## Setup
 ### Installation
 
-Follow the instructions in our [blog post](https://www.datadoghq.com/blog/deploy-datadog-dcos/) to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
+Follow the instructions in our [blog post][1] to install the Datadog Agent on each Mesos agent node via the DC/OS web UI.
 
 ### Configuration
 #### DC/OS
@@ -28,7 +28,7 @@ Follow the instructions in our [blog post](https://www.datadoghq.com/blog/deploy
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change the DATADOGAPIKEY with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub](https://hub.docker.com/r/datadog/docker-dd-agent/tags/)
+If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change <YOUR_DATADOG_API_KEY> with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][2]
 
 ```json
 {
@@ -48,7 +48,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
       {"containerPath": "/host/sys/fs/cgroup","hostPath": "/sys/fs/cgroup","mode": "RO"}
     ],
     "docker": {
-      "image": "datadog/docker-dd-agent:11.0.5160",
+      "image": "datadog/agent:latest",
       "network": "BRIDGE",
       "portMappings": [
         {"containerPort": 8125,"hostPort": 8125,"servicePort": 10000,"protocol": "udp","labels": {}},
@@ -56,10 +56,9 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
       ],
       "privileged": false,
       "parameters": [
-        {"key": "name","value": "dd-agent"},
-        {"key": "env","value": "API_KEY=DATADOGAPIKEY"},
-        {"key": "env","value": "MESOS_SLAVE=true"},
-        {"key": "env","value": "SD_BACKEND=docker"}
+        {"key": "name","value": "datadog-agent"},
+        {"key": "env","value": "DD_API_KEY=<YOUR_DATADOG_API_KEY>"},
+        {"key": "env","value": "MESOS_SLAVE=true"}
       ],
       "forcePullImage": false
     }
@@ -83,7 +82,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
 }
 ```
 
-Unless you want to configure a custom `mesos_slave.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
+Unless you want to configure a custom `mesos_slave.d/conf.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
 
 ### Validation
 #### DC/OS
@@ -92,14 +91,10 @@ Under the Services tab in the DC/OS web UI you should see the Datadog Agent show
 #### Marathon
 If you are not using DC/OS, then datadog-agent will be in the list of running applications with a healthy status. In the Datadog app, search for mesos.slave in the Metrics Explorer.
 
-## Compatibility
-
-The mesos_slave check is compatible with all major platforms.
-
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Events
 The Mesos-slave check does not include any event at this time.
@@ -127,8 +122,14 @@ The mesos_slave check creates a service check for each executor task, giving it 
 |TASK_ERROR|AgentCheck.CRITICAL
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][4].
 
 ## Further Reading
 
 * [Installing Datadog on Mesos with DC/OS](https://www.datadoghq.com/blog/deploy-datadog-dcos/)
+
+
+[1]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
+[2]: https://hub.docker.com/r/datadog/agent/tags/
+[3]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
+[4]: http://docs.datadoghq.com/help/
