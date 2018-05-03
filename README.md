@@ -64,7 +64,7 @@ To work with a specific check you need to install its own dependencies. The easi
 way to iterate on a check development is installing the wheel itself in editable mode.
 For example, if you want to do this for the `disk` check run the following:
 
-```bash
+```shell
 cd disk && pip install -e .
 ```
 

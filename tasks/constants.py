@@ -27,6 +27,7 @@ AGENT_BASED_INTEGRATIONS = [
     'haproxy',
     'iis',
     'istio',
+    'kafka_consumer',
     'kube_proxy',
     'kubelet',
     'lighttpd',

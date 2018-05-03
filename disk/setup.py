@@ -12,9 +12,11 @@ ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "disk", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
+
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+
 
 # Parse requirements
 def get_requirements(fpath):
@@ -67,7 +69,7 @@ setup(
     },
 
     # Testing setup and dependencies
-    setup_requires=['pytest-runner',],
+    setup_requires=['pytest-runner', ],
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
