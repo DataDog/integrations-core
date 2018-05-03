@@ -59,7 +59,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml][4] for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][4] for all available configuration options.
 
 Configuration Options:
 

@@ -17,15 +17,12 @@ The Gitlab Runner check is packaged with the Agent, so simply [install the Agent
 
 ### Configuration
 
-Edit the `gitlab_runner.yaml` file to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check.
-See the [sample gitlab_runner.yaml][2] for all available configuration options.
+Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check.  
+See the [sample gitlab_runner.d/conf.yaml][2] for all available configuration options.
 
-The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
+**Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
 
-**Remarks:**
-
- - Some metrics should be reported as `rate` (i.e., `ci_runner_errors`)
-
+**Remarks**: Some metrics should be reported as `rate` (i.e., `ci_runner_errors`)
 
 ### Validation
 

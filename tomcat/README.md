@@ -19,7 +19,10 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-Create a file `tomcat.yaml` in the Agent's `conf.d` directory. 
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
+
+2. [Restart the Agent][16]
 
 #### Metric Collection
 
@@ -165,8 +168,8 @@ In that case you can specify an alias for the metric that will become the metric
 
 In that case:
 
-  * The metric type will be a gauge
-  * The metric name will be jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]
+  * The metric type is a gauge
+  * The metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`
 
 Here is another filtering example:
 
@@ -271,7 +274,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `tomcat.yaml` file to start collecting your Tomcat Logs:
+* Add this configuration setup to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
 
   ```
   logs:
@@ -287,8 +290,8 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-    see the [sample tomcat.yaml](https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example) for all available configuration options.
-    * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent). 
+    see the [sample tomcat.yaml][17] for all available configuration options.
+    * [Restart the Agent][16]. 
 
 ### Validation
 

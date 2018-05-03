@@ -11,7 +11,7 @@ The HTTP check is packaged with the Agent, so simply [install the Agent][1] on a
 
 ### Configuration
 
-Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml][2] for all available configuration options:
+Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample http_check.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -31,7 +31,7 @@ instances:
 
 The HTTP check has more configuration options than many checks — many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
-See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for a full list and description of available options, here is a list of them:
+See the [sample http_check.d/conf.yaml][2] for a full list and description of available options, here is a list of them:
 
 | Setting | Description |
 |---|---|
@@ -57,7 +57,7 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging][3] and blog post, [The power of tagged metrics][4] |
 
 
-When you have finished configuring `http_check.yaml`, [restart the Agent][5] to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][5] to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 

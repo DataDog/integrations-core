@@ -14,21 +14,22 @@ The RiakCS check is packaged with the Agent, so simply [install the Agent][1] on
 
 ### Configuration
 
-Create a file `riakcs.yaml` in the Agent's `conf.d` directory. See the [sample riakcs.yaml][2] for all available configuration options:
+1. Edit the `riakcs.yamld/conf.` file, in the `conf.d/` folder at the root of your Agent's directory.  
+    See the [sample riakcs.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```yaml
+        init_config:
 
-instances:
-  - host: localhost
-    port: 8080
-    access_id: <YOUR_ACCESS_KEY>
-    access_secret: <YOUR_ACCESS_SECRET>
-#   is_secure: true # set to false if your endpoint doesn't use SSL
-#   s3_root: s3.amazonaws.com #
-```
+        instances:
+          - host: localhost
+            port: 8080
+            access_id: <YOUR_ACCESS_KEY>
+            access_secret: <YOUR_ACCESS_SECRET>
+        #   is_secure: true # set to false if your endpoint doesn't use SSL
+        #   s3_root: s3.amazonaws.com #
+    ```
 
-[Restart the Agent][3] to start sending RiakCS metrics to Datadog.
+2. [Restart the Agent][3] to start sending RiakCS metrics to Datadog.
 
 ### Validation
 

@@ -92,15 +92,15 @@ See [MSDN][7] for more information.
 
 `constant_tags` optionally lets you tag each metric with a set of fixed values.
 
-`tag_queries` optionally lets you specify a list of queries, to tag metrics with a target class property. Each item in the list is a set of \[link source property, target class, link target class property, target property] where:
+`tag_queries` optionally lets you specify a list of queries, to tag metrics with a target class property. Each item in the list is a set of `[link source property, target class, link target class property, target property]` where:
 
-- 'link source property' contains the link value
+- `link source property` contains the link value
 
-- 'target class' is the class to link to
+- `target class` is the class to link to
 
-- 'link target class property' is the target class property to link to
+- `link target class property` is the target class property to link to
 
-- 'target property' contains the value to tag with
+- `target property` contains the value to tag with
 
 It translates to a WMI query:
 

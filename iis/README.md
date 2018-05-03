@@ -38,7 +38,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Create a file `iis.yaml` in the [Agent's `conf.d` directory][2].
+Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][2] at the root of your Agent's directory,
 
 #### Prepare IIS
 
@@ -59,7 +59,7 @@ C:/> winmgmt /resyncperf
 
 #### Metric Collection
 
- * Add this configuration setup to your `iis.yaml` file to start gathering your [IIS metrics](#metrics):
+ * Add this configuration setup to your `iis.d/conf.yaml` file to start gathering your [IIS metrics](#metrics):
 
 ```
 init_config:
@@ -75,7 +75,7 @@ To collect metrics on a per-site basis, you *must* use the `sites` option. The A
 
 If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites — `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
-You can also monitor sites on remote IIS servers. See the [sample iis.conf][3] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
+You can also monitor sites on remote IIS servers. See the [sample iis.d/conf.yaml][3] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 
 If you want to check other remote machines as well, you can add one instance per host.
 Note: If you also want to check the counters on the current machine, you will haveto create an instance with empty params.
@@ -100,7 +100,7 @@ Here's an example of configuration that would check the current machine and a re
 
 * `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
 
-* See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
+* See the [sample iis.yaml][3] for all available configuration options.
 
 * [Restart the Agent][5] to begin sending IIS metrics to Datadog.
 
@@ -114,19 +114,19 @@ Here's an example of configuration that would check the current machine and a re
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `iis.yaml` file to start collecting your IIS Logs:
+* Add this configuration setup to your `iis.d/conf.yaml` file to start collecting your IIS Logs:
 
-```
-logs:
-    
-     - type: file
-       path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
-       service: myservice
-       source: iis
-       sourcecategory: http_web_access
-```
+  ```
+  logs:
+       - type: file
+         path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
+         service: myservice
+         source: iis
+         sourcecategory: http_web_access
+  ```
+
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample iis.yaml](https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example) for all available configuration options.
+  See the [sample iis.d/conf.yaml][2] for all available configuration options.
   
   * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 

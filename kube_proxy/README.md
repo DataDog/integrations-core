@@ -10,11 +10,11 @@ Get metrics from kube_proxy service in real time to:
 ## Configuration
 
 The integration relies on the `--metrics-bind-address` option of the kube-proxy, by default it's bound to `127.0.0.1:10249`.
-You can either start the agent on the host network if the kube-proxy is also on the host network (default) or start the kube-proxy with the `--metrics-bind-address=0.0.0.0:10249`
+Either start the agent on the host network if the kube-proxy is also on the host network (default) or start the kube-proxy with the `--metrics-bind-address=0.0.0.0:10249`
 
-Edit the `kube_proxy.yaml` file to point to your server and port, set the masters to monitor
+Edit the `kube_proxy.d/conf.yaml` file to point to your server and port, set the masters to monitor
 
-⚠️ If you edit the namespace & metrics name, or add any other metric they will be considered as custom
+⚠️ If you edit the namespace & metrics name, or add any other metric they are considered as custom
 
 Please contribute to the integration if you want to add a relevant metric.
 

@@ -13,7 +13,10 @@ The Exchange check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-Edit the `exchange_server.yaml` file to collect Exchange Server performance data. See the [sample exchange_server.yaml][2] for all available configuration options.
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Exchange Server performance data.  
+    See the [sample exchange_server.d/conf.yaml][2] for all available configuration options.
+
+2. [Restart the Agent][5]
 
 ### Validation
 
@@ -34,3 +37,6 @@ The exchange server check does not include any service check at this time.
 [2]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+
+

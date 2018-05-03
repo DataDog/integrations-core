@@ -7,27 +7,29 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 ## Setup
 ### Installation
 
-The DNS check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your DNS servers. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
+The DNS check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your DNS servers.  
+Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
 ### Configuration
 
-Create a file `dns_check.yaml` in the Agent's `conf.d` directory. See the [sample dns_check.yaml][2] for all available configuration options:
+1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Couchbase performance data.  
+    See the [sample dns_check.d/conf.yaml][2] for all available configuration options:
+    
+    ```yaml
+      init_config:
 
-```
-init_config:
+      instances:
+        - name: Example (com)
+          # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
+          hostname: example.com # the record to fetch
+          # record_type: AAAA   # default is A
+        - name: Example (org)
+          hostname: example.org
+    ```
+    
+    If you omit the `nameserver` option, the check uses whichever nameserver is configured in local network settings.
 
-instances:
-  - name: Example (com)
-    # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
-    hostname: example.com # the record to fetch
-    # record_type: AAAA   # default is A
-  - name: Example (org)
-    hostname: example.org
-```
-
-If you omit the `nameserver` option, the check will use whichever nameserver is configured in local network settings.
-
-[Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.
+2. [Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.
 
 ### Validation
 

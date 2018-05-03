@@ -12,21 +12,22 @@ The Agent's Squid integration is packaged with the Agent, so simply [install the
 
 ## Configuration
 
-Create a file `squid.yaml` in the Agent's `conf.d` directory. See the [sample squid.yaml][2] for all available configuration options:
+1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory.  
+	See the [sample squid.d/conf.yaml][2] for all available configuration options:
 
-```yaml
-init_config:
+    ```yaml
+	    init_config:
 
-instances:
-  # A list of squid instances identified by their name
+	    instances:
+	      # A list of squid instances identified by their name
 
-  - name: my_squid
-  #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
-  #   port: 3128  # The port where the squid server is listening. Default to 3128
-  #   tags: ['custom:tag']  # A list of tags that you wish to send with your squid metrics
-```
+      	- name: my_squid
+	      #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
+	      #   port: 3128  # The port where the squid server is listening. Default to 3128
+	      #   tags: ['custom:tag']  # A list of tags that you wish to send with your squid metrics
+    ```
 
-Restart the Agent to start sending metrics and service checks to Datadog.
+2. [Restart the Agent][10] to start sending metrics and service checks to Datadog.
 
 ## Validation
 
@@ -77,3 +78,4 @@ Reach out to our team and other Datadog users on [Slack][9].
 [7]: https://app.datadoghq.com/event/stream
 [8]: mailto:support@datadoghq.com
 [9]: http://chat.datadoghq.com/
+[10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

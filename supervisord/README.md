@@ -13,6 +13,7 @@ The Supervisor check is packaged with the Agent, so simply [install the Agent][1
 #### Prepare supervisord
 
 The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
+
 ##### HTTP server
 
 Add a block like this to supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
@@ -45,7 +46,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Create a file `supervisord.yaml` in the Agent's `conf.d` directory. See the [sample supervisord.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -74,7 +75,7 @@ Configuration Options
 * `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
 * `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
 
-See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example) for comprehensive descriptions of other check options.
+See the [example check configuration][2] for comprehensive descriptions of other check options.
 
 [Restart the Agent][3] to start sending Supervisor metrics to Datadog.
 

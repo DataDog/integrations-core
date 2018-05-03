@@ -2,18 +2,20 @@
 
 ## Overview
 
-Get metrics from Microsoft Active Directory
-
-* Visualize and monitor Active Directory performance
+Get metrics from Microsoft Active Directory to visualize and monitor its performances.
 
 ## Setup
 ### Installation
 
-Install the `dd-check-active_directory` package manually or with your favorite configuration manager
+The Agent's Active directory check is packaged with the Agent, so simply [install the Agent][4] on your servers.
 
 ### Configuration
 
-Edit the `active_directory.yaml` file to collect Active Directory performance data. See the [sample active_directory.yaml][1] for all available configuration options.
+1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Active Directory performance data.  
+
+    See the [sample active_directory.d/conf.yaml][1] for all available configuration options.
+
+2. [Restart the Agent][7]
 
 ### Validation
 
@@ -29,7 +31,16 @@ The active directory check does not include any event at this time.
 ### Service Checks
 The active directory check does not include any service check at this time.
 
+## Troubleshooting
+Need help? Contact [Datadog Support][5].
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/active_directory/conf.yaml.example
-[2]: https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information
+[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [3]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
+[4]: https://app.datadoghq.com/account/settings#agent
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

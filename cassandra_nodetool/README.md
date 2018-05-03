@@ -8,13 +8,14 @@ It uses the `nodetool` utility to collect them.
 ## Setup
 ### Installation
 
-The Cassandra nodetool check is packaged with the Agent, so simply [install the Agent][2] on your cassandra nodes.
+The Cassandra Nodetool check is packaged with the Agent, so simply [install the Agent][2] on your Cassandra nodes.
 
 ### Configuration
 
-Create a file `cassandra_nodetool.yaml` in the Agent's `conf.d` directory. See the [sample cassandra_nodetool.yaml][3] for all available configuration options:
+Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory.  
+See the [sample cassandra_nodetool.d/conf.yaml][3] for all available configuration options:
 
-```
+```yaml
 init_config:
   # command or path to nodetool (e.g. /usr/bin/nodetool or docker exec container nodetool)
   # can be overwritten on an instance

@@ -16,7 +16,7 @@ The RabbitMQ check is packaged with the Agent, so simply [install the Agent][1] 
 
 ### Configuration
 
-Create a `rabbitmq.yaml` file in the Agent's `conf.d` directory.
+Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your RabbitMQ [metrics](#metric-collection) and [logs](#log-collection). See the [sample rabbitmq.yaml][3] for all available configuration options.
 
 #### Prepare RabbitMQ
 
@@ -24,7 +24,7 @@ Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][2] to enab
 
 #### Metric Collection
 
-* Add this configuration setup to your `rabbitmq.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
+* Add this configuration setup to your `rabbitmq.d/conf.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
 
 ```
 init_config:
@@ -57,7 +57,7 @@ Configuration Options
 * `queues` or `queues_regexes` - **optional** - Use the `queues` or `queues_regexes` parameters to specify the queues you'd like to collect metrics on (up to 200 queues). If you have less than 200 queues, you don't have to set this parameter, the metrics will be collected on all the queues by. default. If you have set up vhosts, set the queue names as `vhost_name/queue_name`. If you have `tag_families` enabled, the first captured group in the regex will be used as the queue_family tag.  See the link to the example YAML below for more.
 * `vhosts` - **optional** - By default a list of all vhosts is fetched and each one will be checked using the aliveness API. If you prefer only certain vhosts to be monitored, list the vhosts you care about.
 
- See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options.
+ See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options.
 * [Restart the Agent][5] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
 #### Log Collection
@@ -66,10 +66,10 @@ Configuration Options
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-```
-log.dir = /var/log/rabbit
-log.file = rabbit.log
-```
+  ```
+  log.dir = /var/log/rabbit
+  log.file = rabbit.log
+  ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -77,24 +77,24 @@ log.file = rabbit.log
     logs_enabled: true
     ```
     
-3. Add this configuration setup to your `rabbitmq.yaml` file to start collecting your RabbitMQ logs:
+3. Add this configuration setup to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-```
-logs:
-    
-    - type: file
-      path: /var/log/rabbit/*.log
-      source: rabbitmq
-      service: myservice
-      log_processing_rules:
-        - type: multi_line
-          name: logs_starts_with_equal_sign
-          pattern: =
-```
+  ```
+  logs:
+      
+      - type: file
+        path: /var/log/rabbit/*.log
+        source: rabbitmq
+        service: myservice
+        log_processing_rules:
+          - type: multi_line
+            name: logs_starts_with_equal_sign
+            pattern: =
+  ```
 
-See the [sample rabbitmq.yaml](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for all available configuration options.
+  See the [sample rabbitmq.yaml][3] for all available configuration options.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+4. [Restart the Agent][5].
 
 ### Validation
 
@@ -111,7 +111,7 @@ The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` m
 
 For performance reasons, the RabbitMQ check self-limits the number of queues and nodes it will collect metrics for. If and when the check nears this limit, it emits a warning-level event to your event stream.
 
-See the [example check configuration](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example) for details about these limits.
+See the [example check configuration][3] for details about these limits.
 
 ### Service Checks
 

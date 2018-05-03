@@ -13,7 +13,7 @@ The Linux_proc_extras check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Create a `linux_proc_extras.yaml` file in the Datadog Agent's `conf.d` directory. See the [sample linux_proc_extras.yaml][2] for all available configuration options.
+Edit the `linux_proc_extras.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample linux_proc_extras.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

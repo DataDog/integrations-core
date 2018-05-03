@@ -14,10 +14,11 @@ Enable the Datadog-Ceph integration to:
 The Ceph check is packaged with the Agent, so simply [install the Agent][1] on your Ceph servers.
 
 ### Configuration
+ 
+Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory.  
+See the [sample ceph.d/conf.yaml][2] for all available configuration options:  
 
-Create a file `ceph.yaml` in the Agent's `conf.d` directory. See the [sample ceph.yaml][2] for all available configuration options:
-
-```
+```yaml
 init_config:
 
 instances:

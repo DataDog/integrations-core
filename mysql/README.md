@@ -18,7 +18,8 @@ The MySQL check is included in the Datadog Agent package, so simply [install the
 
 ### Configuration
 
-Create a `mysql.yaml` file in the Agent's `conf.d` directory to connect it to the MySQL server.
+Edit the `mysql.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory, to connect it to the MySQL server and start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample mysql.d/conf.yaml][16] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -70,7 +71,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Metric Collection
 
-* Add this configuration setup to your `mysql.yaml` file to start gathering your [MySQL metrics](#metrics):
+* Add this configuration setup to your `mysql.d/conf.yaml` file to start gathering your [MySQL metrics](#metrics):
 
   ```
   init_config:
@@ -141,7 +142,7 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
     logs_enabled: true
     ```
 
-3. Add this configuration setup to your `mysql.yaml` file to start collecting your MySQL logs:
+3. Add this configuration setup to your `mysql.d/conf.yaml` file to start collecting your MySQL logs:
 
     ```
     logs:
@@ -168,9 +169,9 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
           #     name: new_log_start_with_date
           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
     ```
-    See our [sample mysql.yaml](https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example) for all available configuration options, including those for custom metrics.
+    See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+4. [Restart the Agent][17].
 
 **Learn more about log collection [on the log documentation][18]**
 

@@ -11,16 +11,16 @@ The system swap check is packaged with the Agent, so simply [install the Agent][
 
 ### Configuration
 
-Create a blank Agent check configuration file called `system_swap.yaml` in the Agent's `conf.d` directory. See the [sample system_swap.yaml][2] for all available configuration options:
+1. Edit the `system_swap.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample system_swap.d/conf.yaml][2] for all available configuration options:
 
-```
-# This check takes no initial configuration
-init_config:
+    ```
+    # This check takes no initial configuration
+    init_config:
 
-instances: [{}]
-```
+    instances: [{}]
+    ```
 
-[Restart the Agent][3] to start collecting swap metrics.
+2. [Restart the Agent][3] to start collecting swap metrics.
 
 ### Validation
 

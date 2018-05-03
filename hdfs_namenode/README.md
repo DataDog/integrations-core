@@ -27,7 +27,7 @@ Restart the NameNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Create a file `hdfs_namenode.yaml` in the Agent's `conf.d` directory. See the [sample hdfs_namenode.yaml][2] for all available configuration options:
+Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample hdfs_namenode.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

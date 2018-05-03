@@ -11,17 +11,17 @@ The Agent's twemproxy check is packaged with the Agent, so simply [install the A
 
 ### Configuration
 
-Create a file `twemproxy.yaml` in the Agent's `conf.d` directory. See the [sample twemproxy.yaml][2] for all available configuration options:
+1. Edit the `twemproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample twemproxy.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-    - host: localhost
-      port: 2222 # change if your twemproxy doesn't use the default stats monitoring port
-```
+    instances:
+        - host: localhost
+          port: 2222 # change if your twemproxy doesn't use the default stats monitoring port
+    ```
 
-[Restart the Agent][3] to begin sending twemproxy metrics to Datadog.
+2. [Restart the Agent][3] to begin sending twemproxy metrics to Datadog.
 
 ### Validation
 

@@ -20,29 +20,30 @@ The Spark check is packaged with the Agent, so simply [install the Agent][1] on 
 
 ### Configuration
 
-Create a file `spark.yaml` in the Agent's `conf.d` directory. See the [sample spark.yaml][2] for all available configuration options:
+1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.  
+    See the [sample spark.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```yaml
+        init_config:
 
-instances:
-  - spark_url: http://localhost:8088 # Spark master web UI
-#   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
-#   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
+        instances:
+          - spark_url: http://localhost:8088 # Spark master web UI
+        #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
+        #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
-    spark_cluster_mode: spark_standalone_mode # default is spark_yarn_mode
-#   spark_cluster_mode: spark_mesos_mode
-#   spark_cluster_mode: spark_yarn_mode
+            spark_cluster_mode: spark_standalone_mode # default is spark_yarn_mode
+        #   spark_cluster_mode: spark_mesos_mode
+        #   spark_cluster_mode: spark_yarn_mode
 
-    cluster_name: <CLUSTER_NAME> # required; adds a tag 'cluster_name:<CLUSTER_NAME>' to all metrics
+            cluster_name: <CLUSTER_NAME> # required; adds a tag 'cluster_name:<CLUSTER_NAME>' to all metrics
 
-#   spark_pre_20_mode: true   # if you use Standalone Spark < v2.0
-#   spark_proxy_enabled: true # if you have enabled the spark UI proxy
-```
+        #   spark_pre_20_mode: true   # if you use Standalone Spark < v2.0
+        #   spark_proxy_enabled: true # if you have enabled the spark UI proxy
+    ```
 
-Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
+    Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
-[Restart the Agent][3] to start sending Spark metrics to Datadog.
+2. [Restart the Agent][3] to start sending Spark metrics to Datadog.
 
 ### Validation
 

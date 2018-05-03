@@ -11,22 +11,22 @@ The Kong check is packaged with the Agent, so simply [install the Agent][1] on y
 
 ### Configuration
 
-Create a `kong.yaml` in the Datadog Agent's `conf.d` directory. See the [sample kong.yaml][2] for all available configuration options:
+1. Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+    See the [sample kong.d/conf.yaml][2] for all available configuration options:  
+    ```yaml
+    init_config:
 
-```
-init_config:
+    instances:
+        # Each instance needs a `kong_status_url`. Tags are optional.
+        -   kong_status_url: http://example.com:8001/status/
+            tags:
+            - instance:foo
+        #-   kong_status_url: http://example2.com:8001/status/
+        #    tags:
+        #    - instance:bar
+    ```
 
-instances:
-# Each instance needs a `kong_status_url`. Tags are optional.
--   kong_status_url: http://example.com:8001/status/
-    tags:
-    - instance:foo
-#-   kong_status_url: http://example2.com:8001/status/
-#    tags:
-#    - instance:bar
-```
-
-[Restart the Agent][3] to begin sending Kong metrics to Datadog.
+2. [Restart the Agent][3] to begin sending Kong metrics to Datadog.
 
 ### Validation
 

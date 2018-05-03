@@ -11,22 +11,23 @@ The network check is packaged with the Agent, so simply [install the Agent][1] o
 
 ### Configuration
 
-The Agent enables the network check by default, but if you want to configure the check yourself, create a file `network.yaml` in the Agent's `conf.d` directory. See the [sample network.yaml][2] for all available configuration options:
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory.  
+  See the [sample network.d/conf.yaml][2] for all available configuration options:  
 
-```
-init_config:
+    ```yaml
+      init_config:
 
-instances:
-  # Network check only supports one configured instance
-  - collect_connection_state: false # set to true to collect TCP connection state metrics, e.g. SYN_SENT, ESTABLISHED
-    excluded_interfaces: # the check will collect metrics on all other interfaces
-      - lo
-      - lo0
-# ignore any network interface matching the given regex:
-#   excluded_interface_re: eth1.*
-```
+      instances:
+        # Network check only supports one configured instance
+        - collect_connection_state: false # set to true to collect TCP connection state metrics, e.g. SYN_SENT, ESTABLISHED
+          excluded_interfaces: # the check will collect metrics on all other interfaces
+            - lo
+            - lo0
+      # ignore any network interface matching the given regex:
+      #   excluded_interface_re: eth1.*
+    ```
 
-[Restart the Agent][3] to effect any configuration changes.
+2. [Restart the Agent][3] to effect any configuration changes.
 
 ### Validation
 

@@ -14,7 +14,7 @@ The Mapreduce check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-Edit the `mapreduce.yaml` file to point to your server and port, set the masters to monitor. See the [sample mapreduce.yaml][2] for all available configuration options.
+Edit the `mapreduce.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to point to your server and port, set the masters to monitor. See the [sample mapreduce.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

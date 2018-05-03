@@ -17,7 +17,7 @@ Optionally, you can configure the agent to use a built in `postqueue -p` command
 **WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
 
 ### Using sudo
-Create a file `postfix.yaml` in the Agent's `conf.d` directory. See the [sample postfix.yaml][2] for all available configuration options:
+Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory. See the [sample postfix.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -44,8 +44,9 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type 
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
 dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
 ```
+
 ### Using postqueue
-Create a file `postfix.yaml` in the Agent's `conf.d` directory:
+Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory:
 
 ```
 init_config:
@@ -60,21 +61,18 @@ instances:
 #     - optional_tag
 #     - optional_tag0
 ```
-For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for
-the Postfix configuration directory.
+For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory.
 
-Postfix has internal access controls that limit activities on the mail queue. By default,
-Postfix allows `anyone` to view the queue. On production systems where the Postfix installation
-may be configured with stricter access controls, you may need to grant the dd-agent user access to view
-the mail queue.
+Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the dd-agent user access to view the mail queue.
 
-    postconf -e "authorized_mailq_users = dd-agent"
-
+```
+postconf -e "authorized_mailq_users = dd-agent"
+```
 http://www.postfix.org/postqueue.1.html
-
-            authorized_mailq_users (static:anyone)
-                List of users who are authorized to view the queue.
-
+```
+authorized_mailq_users (static:anyone)
+```
+List of users who are authorized to view the queue.
 
 [Restart the Agent][3] to start sending Postfix metrics to Datadog.
 

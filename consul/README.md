@@ -26,34 +26,35 @@ The Datadog Agent's Consul Check is included in the Agent package, so simply [in
 
 ### Configuration
 
-Create a `consul.yaml` in the Datadog Agent's `conf.d` directory.
+Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Consul [metrics](#metric-collection) and [logs](#log-collection).  
+See the [sample consul.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
 
-*  Add this configuration setup to your `consul.yaml` file to start gathering your [Consul Metrics](#metrics):
+1. Add this configuration setup to your `consul.d/conf.yaml` file to start gathering your [Consul Metrics](#metrics):
 
-```
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-    # where the Consul HTTP Server Lives
-    # use 'https' if Consul is configured for SSL
-    - url: http://localhost:8500
-      # again, if Consul is talking SSL
-      # client_cert_file: '/path/to/client.concatenated.pem'
+    instances:
+        # where the Consul HTTP Server Lives
+        # use 'https' if Consul is configured for SSL
+        - url: http://localhost:8500
+          # again, if Consul is talking SSL
+          # client_cert_file: '/path/to/client.concatenated.pem'
 
-      # submit per-service node status and per-node service status?
-      catalog_checks: yes
+          # submit per-service node status and per-node service status?
+          catalog_checks: yes
 
-      # emit leader election events
-      self_leader_check: yes
+          # emit leader election events
+          self_leader_check: yes
 
-      network_latency_checks: yes
-```
+          network_latency_checks: yes
+    ```
 
-See the [sample consul.yaml][2] for all available configuration options.
+    See the [sample consul.d/conf.yaml][2] for all available configuration options.
 
-[Restart the Agent][3] to start sending Consul metrics to Datadog.
+2. [Restart the Agent][3] to start sending Consul metrics to Datadog.
 
 #### Connect Consul Agent to DogStatsD
 
@@ -75,25 +76,25 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+    logs_enabled: true
+    ```
 
-* Add this configuration setup to your `consul.yaml` file to start collecting your Consul Logs:
+2. Add this configuration setup to your `consul.yaml` file to start collecting your Consul Logs:
 
-  ```
-    logs:
-        - type: file
-          path: /var/log/consul_server.log
-          source: consul
-          service: myservice
-  ```
-Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample consul.yaml](https://github.com/DataDog/integrations-core/blob/master/consul/conf.yaml.example) for all available configuration options.
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/consul_server.log
+            source: consul
+            service: myservice
+    ```
+    Change the `path` and `service` parameter values and configure them for your environment.
+    See the [sample consul.d/conf.yaml][2] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+3. [Restart the Agent][3].
 
 **Learn more about log collection [on the log documentation][4]**
 
@@ -117,7 +118,7 @@ Change the `path` and `service` parameter values and configure them for your env
 
 Use `netstat` to verify that Consul is sending its metrics, too:
 
-```
+```shell
 $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 23176/consul
 ```

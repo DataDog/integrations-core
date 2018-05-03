@@ -11,7 +11,7 @@ The PgBouncer check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-Create a file `pgbouncer.yaml` in the Agent's `conf.d` directory. See the [sample pgbouncer.yaml][2] for all available configuration options:
+Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -27,6 +27,8 @@ instances:
 #   tags:
 #     - role:main
 ```
+
+**Note**: `database_url` parameter value should point to PgBouncer stats database.
 
 In your PGBouncer userlist.txt file add
 ```

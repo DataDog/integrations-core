@@ -16,14 +16,14 @@ The Cacti check is packaged with the Agent, so simply [install the Agent][1] on 
 
 Create a datadog user with read-only rights to the Cacti database
 
-```
+```shell
 sudo mysql -e "create user 'datadog'@'localhost' identified by '<password>';"
 sudo mysql -e "grant select on cacti.* to 'datadog'@'localhost';"
 ```
 
 Check user and rights
 
-```
+```shell
 mysql -u datadog --password=<password> -e "show status" | \
 grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
@@ -33,10 +33,9 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing SELECT grant\033[0m"
 ```
 
-Configure the Agent to connect to MySQL
-Edit conf.d/`cacti.yaml`. See the [sample cacti.yaml][2] for all available configuration options:
+Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -51,14 +50,14 @@ instances:
         #rrd_whitelist: /path/to/rrd_whitelist.txt
 ```
 
-Give the dd-agent user access to the RRD files
+Give the datadog-agent user access to the RRD files
 
-```
+```shell
 sudo gpasswd -a dd-agent www-data
 sudo chmod -R g+rx /var/lib/cacti/rra/
-sudo su - dd-agent -c 'if [ -r /var/lib/cacti/rra/ ];
-then echo -e "\033[0;31mdd-agent can read the RRD files\033[0m";
-else echo -e "\033[0;31mdd-agent can not read the RRD files\033[0m";
+sudo su - datadog-agent -c 'if [ -r /var/lib/cacti/rra/ ];
+then echo -e "\033[0;31mdatadog-agent can read the RRD files\033[0m";
+else echo -e "\033[0;31mdatadog-agent can not read the RRD files\033[0m";
 fi'
 ```
 

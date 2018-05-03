@@ -21,7 +21,7 @@ The NTP check is packaged with the Agent, so simply [install the Agent][1] on yo
 
 ### Configuration
 
-The Agent enables the NTP check by default, but if you want to configure the check yourself, create a file `ntp.yaml` in the Agent's `conf.d` directory. See the [sample ntp.yaml][2] for all available configuration options:
+The Agent enables the NTP check by default, but if you want to configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample ntp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

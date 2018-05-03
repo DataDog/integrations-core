@@ -21,19 +21,20 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 ### Configuration
 #### Configure the Datadog Agent
 
-Create a `gunicorn.yaml` in the Datadog Agent's `conf.d` directory. See the [sample gunicorn.yaml][3] for all available configuration options:
+1. Edit the `gunicorn.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. 
+  See the [sample gunicorn.yaml][3] for all available configuration options:
+  
+    ```yaml
+    init_config:
 
-```
-init_config:
+    instances:
+        # as set
+        # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
+        # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
+        - proc_name: <YOUR_APP_NAME>
+    ```
 
-instances:
-  # as set
-  # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
-  # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
-  - proc_name: <YOUR_APP_NAME>
-```
-
-[Restart the Agent][4] to begin sending Gunicorn metrics to Datadog.
+2. [Restart the Agent][4] to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
