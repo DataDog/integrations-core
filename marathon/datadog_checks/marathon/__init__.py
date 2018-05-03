@@ -1,7 +1,10 @@
-from . import marathon
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .marathon import Marathon
+from .__about__ import __version__
 
-Marathon = marathon.Marathon
-
-__version__ = "1.3.0"
-
-__all__ = ['marathon']
+__all__ = [
+    'Marathon',
+    '__version__'
+]

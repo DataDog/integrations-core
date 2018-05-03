@@ -31,6 +31,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kubelet',
     'lighttpd',
     'linkerd',
+    'marathon',
     'mcache',
     'mysql',
     'network',

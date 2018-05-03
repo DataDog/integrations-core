@@ -1,16 +1,11 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2018
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from urlparse import urljoin
 
-# 3rd party
 import requests
 
-# project
 from checks import AgentCheck
 from config import _is_affirmative
 
