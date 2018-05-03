@@ -1,5 +1,11 @@
 # CHANGELOG - haproxy
 
+1.3.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add optional 'active' tag to metrics. (Thanks @gabetax!) See [#1478][]
+
 1.2.1 / 2018-02-13
 ==================
 ### Changes
