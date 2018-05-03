@@ -8,7 +8,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 ### Installation
 
-In order to use the Oracle integration, install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle](https://www.oracle.com/technetwork/database/features/instant-client/index.htm).
+In order to use the Oracle integration, install the Oracle Instant Client libraries. Due to licensing restrictions we are unable to include these libraries in our agent, but you can [download them directly frrom Oracle][1].
 
 You will need to install the Instant Client Basic and SDK packages.
 
@@ -35,7 +35,7 @@ unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
 export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
 ```
 
-**Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart](http://upstart.ubuntu.com/cookbook/#environment-variables) or [systemd](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines) for more information on how to configured these settings.
+**Note:** Agent 6 uses upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.service` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][2] or [systemd][3] for more information on how to configured these settings.
 
 Finally, create a read-only datadog user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
@@ -59,7 +59,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example) for all available configuration options.
+Edit the `oracle.yaml` file to point to your server and port, set the masters to monitor. See the [sample oracle.yaml][4] for all available configuration options.
 
 Configuration Options:
 
@@ -71,24 +71,12 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `oracle` under the Checks section:
-
-    Checks
-    ======
-
-        oracle
-        -----------
-          - instance #0 [OK]
-          - Collected 18 metrics, 0 events & 1 service checks
-
-### Compatibility
-
-The Oracle check is currently compatible with Linux and macOS.
+[Run the Agent's `status` subcommand][5] and look for `oracle` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 The Oracle Database check does not include any events at this time.
@@ -97,8 +85,18 @@ The Oracle Database check does not include any events at this time.
 The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][7].
 
 ## Further Reading
 
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][8]
+
+
+[1]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[2]: http://upstart.ubuntu.com/cookbook/#environment-variables
+[3]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
+[4]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[7]: http://docs.datadoghq.com/help/
+[8]: https://www.datadoghq.com/blog/

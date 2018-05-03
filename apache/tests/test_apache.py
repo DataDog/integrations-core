@@ -10,13 +10,14 @@ import time
 import logging
 
 from datadog_checks.apache import Apache
+from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger('test_apache')
 
 CHECK_NAME = 'apache'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = get_docker_hostname()
 PORT = '18180'
 BASE_URL = "http://{0}:{1}".format(HOST, PORT)
 

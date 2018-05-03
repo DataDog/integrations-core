@@ -3,10 +3,12 @@
 1.2.2 / Unreleased
 ==================
 
+* [FEATURE] The generic Prometheus check will now send counter as monotonic counter.
 * [BUG] Prometheus requests can use an insecure option
 * [BUG] Correctly handle missing counters/strings in PDH checks when possible
 * [BUG] Fix Prometheus Scrapper logger
 * [SANITY] Clean-up export for `PDHBaseCheck` + export `WinPDHCounter`. [#1183][]
+* [IMPROVEMENT] Discard metrics with invalid values
 
 1.2.1 / 2018-03-23
 ==================

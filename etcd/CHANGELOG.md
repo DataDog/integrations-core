@@ -1,10 +1,11 @@
 # CHANGELOG - etcd
 
-1.3.1 / Unreleased
+1.4.0 / Unreleased
 ==================
 ### Changes
 
 * [IMPROVEMENT] Get the right metrics depending on the instance state. See [#1348][].
+* [FEATURE] Hardcode the 2379 port in the Autodiscovery template. See [#1444][] for more information.
 
 1.3.0 / 2018-01-10
 ==================

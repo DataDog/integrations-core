@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import subprocess
 try:
     from functools import lru_cache
 except ImportError:
@@ -9,11 +10,14 @@ except ImportError:
 
 import mock
 import pytest
+from datadog_checks.utils.common import get_docker_hostname
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+HERE = os.path.dirname(os.path.abspath(__file__))
+DOCKER_DIR = os.path.join(HERE, 'docker')
+FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 
 class MockResponse:
@@ -42,15 +46,37 @@ def aggregator():
     return aggregator
 
 
+@pytest.fixture(scope='session', autouse=True)
+def spin_up_envoy():
+    flavor = os.getenv('FLAVOR', 'default')
+    base_command = [
+        'docker-compose', '-f', os.path.join(DOCKER_DIR, flavor, 'docker-compose.yaml')
+    ]
+    subprocess.check_call(base_command + ['up', '-d', '--build'])
+    yield
+    subprocess.check_call(base_command + ['down'])
+
+
 class TestEnvoy:
     CHECK_NAME = 'envoy'
     INSTANCES = {
         'main': {
-            'stats_url': 'http://localhost:80/stats',
+            'stats_url': 'http://{}:8001/stats'.format(get_docker_hostname()),
         },
     }
 
     def test_success(self, aggregator):
+        instance = self.INSTANCES['main']
+        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c.check(instance)
+
+        metrics_collected = 0
+        for metric in METRICS.keys():
+            metrics_collected += len(aggregator.metrics(METRIC_PREFIX + metric))
+
+        assert metrics_collected >= 250
+
+    def test_success_fixture(self, aggregator):
         instance = self.INSTANCES['main']
         c = Envoy(self.CHECK_NAME, None, {}, [instance])
 

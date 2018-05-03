@@ -14,6 +14,7 @@
   "public_title": "Datadog-Linux Proc Extras Integration",
   "categories":["os & system"],
   "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/linux_proc_extras/",
   "is_public": true,
   "has_logo": true
 }

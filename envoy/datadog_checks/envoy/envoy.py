@@ -67,7 +67,13 @@ class Envoy(AgentCheck):
             except ValueError:
                 continue
 
-            value = int(value)
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                self.log.debug(
+                    'Unable to parse value `{}` as an integer for metric `{}`'.format(value, envoy_metric)
+                )
+                continue
 
             try:
                 metric, tags, method = parse_metric(envoy_metric)

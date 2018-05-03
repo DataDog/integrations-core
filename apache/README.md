@@ -9,7 +9,7 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your Apache servers.
+1. [Install the Agent][1] on your Apache servers.
   
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
@@ -32,9 +32,9 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
   #   disable_ssl_validation: true # if you need to disable SSL cert validation, i.e. for self-signed certs
   ```
   Change the `apache_status_url` parameter value and configure it for your environment.
-  See the [sample apache.yaml](https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example) for all available configuration options.
+  See the [sample apache.yaml][2] for all available configuration options.
 
-*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+*  [Restart the Agent][3].
 
 #### Log Collection
 
@@ -68,33 +68,16 @@ Create a file `apache.yaml` in the Agent's `conf.d` directory.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+**Learn more about log collection [on the log documentation][4]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `apache` under the Checks section:
-
-```
-Checks
-======
-  [...]
-
-  apache
-  -------
-    - instance #0 [OK]
-    - Collected 26 metrics, 0 events & 1 service check
-
-  [...]
-```
-
-## Compatibility
-
-The Apache check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][5] and look for `apache` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 The Apache check does not include any event at this time.
@@ -107,11 +90,24 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 
 ## Troubleshooting
 
-* [Issues with Apache Integration](https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration)
-* [Apache SSL certificate issues](https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues)
+* [Issues with Apache Integration][7]
+* [Apache SSL certificate issues][8]
 
 ## Further Reading
 
-* [Monitoring Apache web server performance](https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/)
-* [How to collect Apache performance metrics](https://www.datadoghq.com/blog/collect-apache-performance-metrics/)
-* [How to monitor Apache web server with Datadog](https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/)
+* [Monitoring Apache web server performance][9]
+* [How to collect Apache performance metrics][10]
+* [How to monitor Apache web server with Datadog][11]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/logs
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
+[7]: https://docs.datadoghq.com/integrations/faq/issues-with-apache-integration
+[8]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues
+[9]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/
+[10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
+[11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/

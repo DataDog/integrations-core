@@ -1,7 +1,10 @@
-from . import elastic
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .elastic import ESCheck
+from .__about__ import __version__
 
-ESCheck = elastic.ESCheck
-
-__version__ = "1.6.0"
-
-__all__ = ['elastic']
+__all__ = [
+    '__version__',
+    'ESCheck'
+]

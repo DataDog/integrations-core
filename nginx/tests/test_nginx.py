@@ -13,26 +13,27 @@ import requests
 
 from datadog_checks.stubs import aggregator as _aggregator
 from datadog_checks.nginx import Nginx, VTS_METRIC_MAP
+from datadog_checks.utils.common import get_docker_hostname
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_PATH = os.path.join(HERE, 'fixtures')
 
-NGINX_HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+NGINX_HOST = get_docker_hostname()
 NGINX_PORT = '8080'
 NGINX_PORT_SSL = '8081'
 TAGS = ['foo', 'bar']
 
 DOCKER_COMPOSE_ARGS = [
     "docker-compose",
-    "-f", os.path.join(HERE, 'docker-compose.yaml')
+    "-f", os.path.join(HERE, 'docker', 'docker-compose.yaml')
 ]
 
 
 @pytest.fixture(scope="session")
 def nginx():
     env = os.environ
-    env['NGINX_CONFIG_FOLDER'] = os.path.join(HERE, 'nginx')
+    env['NGINX_CONFIG_FOLDER'] = os.path.join(HERE, 'docker', 'nginx')
 
     start_nginx(env)
     yield

@@ -6,15 +6,19 @@
   "name": "kubernetes",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
   "guid": "eb31452b-d681-4823-87cc-2ef114559edf",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
   "version": "1.5.0",
   "public_title": "Datadog-Kubernetes Integration",
-  "categories":["orchestration", "containers", "log collection"],
-  "type":"check",
+  "categories": [
+    "orchestration",
+    "containers",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/kubernetes/",
   "is_public": true,
   "has_logo": true
