@@ -971,7 +971,7 @@ class MongoDb(AgentCheck):
                         submit_method(self, metric_name_alias, value, tags=ns_tags)
                         # Keep old incorrect metric
                         if metric_name_alias.endswith('countps'):
-                            self.log.error('m: %s' % m)
+                            self.log.error('sent old metric: {}'.format(metric_name_alias[:-2]))
                             GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s' % str(e))
