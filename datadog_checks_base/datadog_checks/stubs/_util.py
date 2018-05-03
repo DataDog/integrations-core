@@ -28,4 +28,4 @@ def subprocess_output(command, raise_on_empty_output):
     if not output and raise_on_empty_output:
         raise SubprocessOutputEmptyError("get_subprocess_output expected output but had none.")
 
-    return (output, err, proc.returncode)
+    return output, err, proc.returncode
