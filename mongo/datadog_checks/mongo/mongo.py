@@ -942,6 +942,7 @@ class MongoDb(AgentCheck):
                     # configure tags for db name and collection name
                     dbname, collname = ns.split(".", 1)
                     ns_tags = tags + ["db:%s" % dbname, "collection:%s" % collname]
+                    #RATE(self, 'mongodb.usage.insert.countps', 0, tags=ns_tags)
 
                     # iterate over DBTOP metrics
                     for m in self.TOP_METRICS:
@@ -964,10 +965,14 @@ class MongoDb(AgentCheck):
                         # Submit the metric
                         submit_method, metric_name_alias = \
                             self._resolve_metric(m, metrics_to_collect, prefix="usage")
-                        submit_method(self, metric_name_alias, value, tags=ns_tags)
+                        self.log.error('submit_method: {}'.format(submit_method))
+                        self.log.error('metric_name: {}'.format(metric_name_alias))
+                        self.log.error('value: {}'.format(value))
+                        RATE(self, metric_name_alias, value, tags=ns_tags)
                         # Keep old incorrect metric
-                        if m.endswith('count'):
-                            self.gauge(metric_name_alias[:-2], value, tags=ns_tags)
+                        if metric_name_alias.endswith('countps'):
+                            self.log.error('m: %s' % m)
+                            GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s' % str(e))
 
