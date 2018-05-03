@@ -28,6 +28,8 @@ instances:
 #     - role:main
 ```
 
+**Note**: `database_url` parameter value should point to PgBouncer stats database.
+
 In your PGBouncer userlist.txt file add
 ```
   "datadog" "<your_pass>"
