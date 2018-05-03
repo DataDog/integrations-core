@@ -1159,8 +1159,10 @@ class OpenStackCheck(AgentCheck):
 
                 project = self.get_scoped_project(scope)
 
+                regexes = instance.get('projects_blacklist', None)
+
                 if collect_all_projects or project is None:
-                    scope_projects = self.get_all_projects(scope)
+                    scope_projects = self.get_all_projects(scope, regexes)
                     if scope_projects:
                         projects.extend(scope_projects)
                 else:
@@ -1244,15 +1246,22 @@ class OpenStackCheck(AgentCheck):
         if hyp:
             return hyp[0]
 
-    def get_all_projects(self, scope):
+    def get_all_projects(self, scope, regexes):
         """
         Returns all projects in the domain
         """
+
         url = "{0}/{1}/{2}".format(self.keystone_server_url, DEFAULT_KEYSTONE_API_VERSION, "projects")
         headers = {'X-Auth-Token': scope.auth_token}
         try:
             r = self._make_request_with_auth_fallback(url, headers)
-            return r['projects']
+            filtered_projects = copy.deepcopy(r['projects'])
+            for project_match in r['projects']:
+               if regexes:
+                   for regex in regexes:
+                        if re.search(regex, project_match['name']):
+                            filtered_projects[:] = [project for project in filtered_projects if project.get('name') != project_match.get('name')]
+            return filtered_projects
 
         except Exception as e:
             self.warning('Unable to get projects: {0}'.format(str(e)))
