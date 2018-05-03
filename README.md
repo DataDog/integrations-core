@@ -1,7 +1,7 @@
+# Datadog Agent Integrations - Core
+
 [![Build Status][1]][2]
 [![Build status][3]][4]
-
-# Datadog Agent Integrations - Core
 
 This repository contains the Agent Integrations (also known as checks) that Datadog
 officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
@@ -64,7 +64,7 @@ To work with a specific check you need to install its own dependencies. The easi
 way to iterate on a check development is installing the wheel itself in editable mode.
 For example, if you want to do this for the `disk` check run the following:
 
-```shell
+```bash
 cd disk && pip install -e .
 ```
 
@@ -91,34 +91,9 @@ cd {integration} && py.test
 ```
 
 **Note:** only a subset of the checks can be tested like this. Porting all the
-checks to Pytest is a work in progress, this is the list of the checks supporting
-the new testing approach:
-
-* [apache](apache)
-* [btrfs](btrfs)
-* [directory](directory)
-* [disk](disk)
-* [elastic](elastic)
-* [envoy](envoy)
-* [istio](istio)
-* [kube_proxy](kube_proxy)
-* [kubelet](kubelet)
-* [lighttpd](lighttpd)
-* [linkerd](linkerd)
-* [mcache](mcache)
-* [network](network)
-* [nfsstat](nfsstat)
-* [postgres](postgres)
-* [powerdns_recursor](powerdns_recursor)
-* [prometheus](prometheus)
-* [redisdb](redisdb)
-* [spark](spark)
-* [ssh_check](ssh_check)
-* [system_core](system_core)
-* [teamcity](teamcity)
-* [vsphere](vsphere)
-
-For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
+checks to Pytest is a work in progress. There is an [updated list][14] of the
+checks supporting the new testing approach, for checks that are not listed there
+please refer to [Legacy development Setup](docs/dev/legacy.md).
 
 If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
 
@@ -135,12 +110,11 @@ cd {integration}
 python setup.py bdist_wheel
 ```
 
-# Reporting Issues
+## Reporting Issues
 
 For more information on integrations, please reference our [documentation][11]
 and [knowledge base][12]. You can also visit our
 [help page][13] to connect with us.
-
 
 [1]: https://travis-ci.org/DataDog/integrations-core.svg?branch=master
 [2]: https://travis-ci.org/DataDog/integrations-core
@@ -155,3 +129,4 @@ and [knowledge base][12]. You can also visit our
 [11]: http://docs.datadoghq.com
 [12]: https://help.datadoghq.com/hc/en-us
 [13]: http://docs.datadoghq.com/help/
+[14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
