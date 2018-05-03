@@ -1,3 +1,0 @@
-#!/bin/bash
-
-docker exec ci_varnish4 varnishstat $@ 2>&1

@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.15.0",
+  "manifest_version": "1.0.0",
   "name": "varnish",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "d2052eae-89b8-4cb1-b631-f373010da4b8",
   "public_title": "Datadog-Varnish Integration",
   "categories":["web", "caching", "log collection"],

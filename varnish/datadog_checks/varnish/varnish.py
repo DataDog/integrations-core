@@ -1,19 +1,19 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from collections import defaultdict
+from distutils.version import LooseVersion
 from os import geteuid
-from distutils.version import LooseVersion # pylint: disable=E0611,E0401
+import json
 import re
-import xml.parsers.expat # python 2.4 compatible
 import shlex
-import simplejson as json
+import xml.parsers.expat  # python 2.4 compatible
 
 # project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 
 class BackendStatus(object):
@@ -29,13 +29,15 @@ class BackendStatus(object):
             return AgentCheck.CRITICAL
         return AgentCheck.UNKNOWN
 
+
 class Varnish(AgentCheck):
     SERVICE_CHECK_NAME = 'varnish.backend_healthy'
     # Parse metrics from varnishstat.
-    VARNISHSTAT_FORMAT_OPTION = {"text": "-1", # version < 3.0.0
-                                 "xml":  "-x", # version >= 3.0.0 < 5.0.0
-                                 "json": "-j", # version >=5.0.0
-                                 }
+    VARNISHSTAT_FORMAT_OPTION = {
+        "text": "-1",  # version < 3.0.0
+        "xml": "-x",  # version >= 3.0.0 < 5.0.0
+        "json": "-j",  # version >=5.0.0
+    }
 
     # Output of varnishstat -V : `varnishstat (varnish-4.1.1 revision 66bb824)`
     version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
@@ -61,7 +63,7 @@ class Varnish(AgentCheck):
             else:
                 # Unsupported data type, ignore
                 self._reset()
-                return # don't save
+                return  # don't save
 
             # reset for next stat element
             self._reset()
@@ -142,7 +144,12 @@ class Varnish(AgentCheck):
             if version < LooseVersion('4.1.0'):
                 cmd.extend(varnishadm_path + ['-S', secretfile_path, 'debug.health'])
             else:
-                cmd.extend(varnishadm_path + ['-T', '{}:{}'.format(daemon_host, daemon_port), '-S', secretfile_path, 'backend.list', '-p'])
+                cmd.extend(varnishadm_path + [
+                    '-T', '{}:{}'.format(daemon_host, daemon_port),
+                    '-S', secretfile_path,
+                    'backend.list',
+                    '-p'
+                ])
 
             try:
                 output, err, _ = get_subprocess_output(cmd, self.log)
@@ -157,8 +164,7 @@ class Varnish(AgentCheck):
 
     def _get_version_info(self, varnishstat_path):
         # Get the varnish version from varnishstat
-        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log,
-            raise_on_empty_output=False)
+        output, error, _ = get_subprocess_output(varnishstat_path + ["-V"], self.log, raise_on_empty_output=False)
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
@@ -182,7 +188,7 @@ class Varnish(AgentCheck):
         # Location of varnishstat
         if version < LooseVersion('3.0.0'):
             varnishstat_format = "text"
-        elif version < LooseVersion('5.0.0'): # we default to json starting version 5.0.0
+        elif version < LooseVersion('5.0.0'):  # we default to json starting version 5.0.0
             varnishstat_format = "xml"
 
         return version, varnishstat_format
@@ -204,15 +210,14 @@ class Varnish(AgentCheck):
         if varnishstat_format == "xml":
             p = xml.parsers.expat.ParserCreate()
             p.StartElementHandler = self._start_element
-            end_handler = lambda name: self._end_element(name, tags)
-            p.EndElementHandler = end_handler
+            p.EndElementHandler = lambda name: self._end_element(name, tags)
             p.CharacterDataHandler = self._char_data
             self._reset()
             p.Parse(output, True)
         elif varnishstat_format == "json":
             json_output = json.loads(output)
             for name, metric in json_output.iteritems():
-                if not isinstance(metric, dict): # skip 'timestamp' field
+                if not isinstance(metric, dict):  # skip 'timestamp' field
                     continue
 
                 if name.startswith("MAIN."):
