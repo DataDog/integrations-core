@@ -968,7 +968,7 @@ class MongoDb(AgentCheck):
                         self.log.error('submit_method: {}'.format(submit_method))
                         self.log.error('metric_name: {}'.format(metric_name_alias))
                         self.log.error('value: {}'.format(value))
-                        RATE(self, metric_name_alias, value, tags=ns_tags)
+                        submit_method(self, metric_name_alias, value, tags=ns_tags)
                         # Keep old incorrect metric
                         if metric_name_alias.endswith('countps'):
                             self.log.error('m: %s' % m)
