@@ -23,12 +23,12 @@ The Couchbase check is packaged with the Agent, so simply [install the Agent][1]
 	See the [sample couchbase.d/conf.yaml][2] for all available configuration options.
 
 	```yaml
-	    init_config:
+	  init_config:
 
-	    instances:
-      	- server: http://localhost:8091 # or wherever your Couchbase is listening
-	        #user: <your_username>
-	        #password: <your_password>
+	  instances:
+        - server: http://localhost:8091 # or wherever your Couchbase is listening
+	      #user: <your_username>
+	      #password: <your_password>
 	```
 
 2. [Restart the Agent][3] to begin sending Couchbase metrics to Datadog.

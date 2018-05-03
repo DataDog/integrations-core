@@ -81,16 +81,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
                 metric_type: gauge
       ```
 
-3. Restart the agent
-
-    ```bash
-    sudo /etc/init.d/datadog-agent restart
-
-
-    if [ $(sudo supervisorctl status | egrep "datadog-agent.*RUNNING" | wc -l) == 3 ]; \
-    then echo -e "\e[0;32mAgent is running\e[0m"; \
-    else echo -e "\e[031mAgent is not running\e[0m"; fi
-    ```
+3. [Restart the agent][109]
 
 ### Validation
 
@@ -124,3 +115,4 @@ Need help? Contact [Datadog Support][107].
 [106]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [107]: http://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
+[109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent 
