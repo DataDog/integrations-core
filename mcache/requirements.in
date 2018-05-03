@@ -1,1 +1,1 @@
-python-memcached==1.53
+python-binary-memcached==0.26.1
