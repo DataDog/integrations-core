@@ -6,8 +6,9 @@ import socket
 from distutils.version import LooseVersion
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.utils.common import get_docker_hostname
 
-HOST = os.getenv('DOCKER_HOSTNAME', 'localhost')
+HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)
 LAST_ZKONLY_VERSION = (0, 8, 1, 1)
 KAFKA_LEGACY = LooseVersion('0.8.2.0')
