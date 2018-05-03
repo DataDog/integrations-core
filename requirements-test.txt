@@ -1,5 +1,4 @@
-docker==3.1.4
-docker-compose==1.20.1
+docker-py==1.10.6
 flake8==3.5.0
 mock==2.0.0
 pep8==1.5.7
@@ -9,4 +8,3 @@ google_compute_engine
 pika==0.10.0
 beautifulsoup4==4.5.1
 simplejson==3.6.5
-docker-py==1.10.6
