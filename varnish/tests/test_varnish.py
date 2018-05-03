@@ -56,6 +56,10 @@ def test_version():
     version requested in the VARNISH_VERSION env var is the one running inside the container.
     """
     varnishstat = common.get_varnish_stat_path()
+    print("path to varnishstat : ", varnishstat)
+    print(common.HERE, os.listdir(common.HERE))
+    for d in (e for e in os.listdir(common.HERE) if os.path.isdir(os.path.join(common.HERE, e))):
+        print(d, os.listdir(os.path.join(common.HERE, d)))
 
     output = subprocess.check_output([varnishstat, "-V"])
     res = re.search(r"varnish-(\d+\.\d\.\d)", output)
