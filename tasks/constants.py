@@ -18,6 +18,7 @@ AGENT_BASED_INTEGRATIONS = [
     'aspdotnet',
     'btrfs',
     'ceph',
+    'consul',
     'datadog_checks_base',
     'directory',
     'disk',
