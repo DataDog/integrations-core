@@ -54,6 +54,10 @@ instances:
       #   - gunicorn
       #   - redis
 
+      # If you'd rather not maintain a whitelist, you can increase the maximum
+      # number of queried services
+      # max_services: 100
+
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
       # on the same agent.
