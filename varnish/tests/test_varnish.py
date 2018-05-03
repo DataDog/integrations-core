@@ -5,6 +5,7 @@
 # stdlib
 import os
 import re
+import shlex
 import subprocess
 
 import pytest
@@ -56,10 +57,9 @@ def test_version():
     version requested in the VARNISH_VERSION env var is the one running inside the container.
     """
     varnishstat = common.get_varnish_stat_path()
-    import stat
-    print("{0:b}".format(os.stat(varnishstat).st_mode & (stat.S_IRWXU + stat.S_IRWXG + stat.S_IRWXO)))
 
-    output = subprocess.check_output([varnishstat, "-V"])
+    # Version info is printed to stderr
+    output = subprocess.check_output(shlex.split(varnishstat) + ["-V"], stderr=subprocess.STDOUT)
     res = re.search(r"varnish-(\d+\.\d\.\d)", output)
     if res is None:
         raise Exception("Could not retrieve varnish version from docker")

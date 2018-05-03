@@ -88,5 +88,5 @@ def get_config_by_version(name=None):
 
 
 def get_varnish_stat_path():
-    varnish_version = os.environ.get("VARNISH_VERSION", VARNISH_DEFAULT_VERSION)
-    return os.path.join(HERE, "compose", "varnishstat{}".format(varnish_version.split(".")[0]))
+    varnish_version = os.environ.get("VARNISH_VERSION", VARNISH_DEFAULT_VERSION).split(".")[0]
+    return "docker exec ci_varnish{} varnishstat".format(varnish_version)
