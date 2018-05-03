@@ -26,7 +26,8 @@ def cleanup(ctx, dry_run=False):
         ".eggs",
         ".pytest_cache",
         ".tox",
-        "__pycache__"
+        "__pycache__",
+        "build"
     ]
 
     should_delete_directories_globs = [

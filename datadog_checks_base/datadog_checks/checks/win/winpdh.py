@@ -104,8 +104,11 @@ class WinPDHCounter(object):
             raise AttributeError("No valid counters to report")
 
     def __del__(self):
-        if(self.hq):
+        try:
             win32pdh.CloseQuery(self.hq)
+        except AttributeError:
+            # An error occurred during instantiation before a query was opened.
+            pass
 
     def is_single_instance(self):
         return self._is_single_instance

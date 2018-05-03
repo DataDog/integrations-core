@@ -6,5 +6,5 @@ services:
     ports:
       - "9449:9449"
     volumes:
-      - ${PWD}/lighttpd.conf:/etc/lighttpd/lighttpd.conf
-      - ${PWD}/passwd:/etc/lighttpd/passwd
+      - ./lighttpd.conf:/etc/lighttpd/lighttpd.conf
+      - ./passwd:/etc/lighttpd/passwd
