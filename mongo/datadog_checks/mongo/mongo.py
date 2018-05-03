@@ -2,7 +2,6 @@
 import re
 import time
 import urllib
-from itertools import chain
 
 # 3p
 import pymongo
@@ -324,36 +323,24 @@ class MongoDb(AgentCheck):
     https://docs.mongodb.org/v3.0/reference/command/top/
     """
     TOP_METRICS = {
-        "commands.counts": RATE,
+        "commands.count": RATE,
         "commands.time": GAUGE,
-        "getmore.counts": RATE,
+        "getmore.count": RATE,
         "getmore.time": GAUGE,
-        "insert.counts": RATE,
+        "insert.count": RATE,
         "insert.time": GAUGE,
-        "queries.counts": RATE,
+        "queries.count": RATE,
         "queries.time": GAUGE,
-        "readLock.counts": RATE,
+        "readLock.count": RATE,
         "readLock.time": GAUGE,
-        "remove.counts": RATE,
+        "remove.count": RATE,
         "remove.time": GAUGE,
-        "total.counts": RATE,
+        "total.count": RATE,
         "total.time": GAUGE,
-        "update.counts": RATE,
+        "update.count": RATE,
         "update.time": GAUGE,
-        "writeLock.counts": RATE,
+        "writeLock.count": RATE,
         "writeLock.time": GAUGE,
-    }
-    # Incorrect type
-    OLD_TOP_METRICS = {
-        "commands.count": GAUGE,
-        "getmore.count": GAUGE,
-        "insert.count": GAUGE,
-        "queries.count": GAUGE,
-        "readLock.count": GAUGE,
-        "remove.count": GAUGE,
-        "total.count": GAUGE,
-        "update.count": GAUGE,
-        "writeLock.count": GAUGE,
     }
 
     COLLECTION_METRICS = {
@@ -397,7 +384,6 @@ class MongoDb(AgentCheck):
         'metrics.commands': COMMANDS_METRICS,
         'tcmalloc': TCMALLOC_METRICS,
         'top': TOP_METRICS,
-        'old_top': OLD_TOP_METRICS,
         'collection': COLLECTION_METRICS,
     }
 
@@ -694,8 +680,6 @@ class MongoDb(AgentCheck):
         server = instance['server']
         username, password, db_name, nodelist, clean_server_name, auth_source = self._parse_uri(server, sanitize_username=bool(ssl_params))
         additional_metrics = instance.get('additional_metrics', [])
-        if 'top' in additional_metrics:
-            additional_metrics.append('old_top')
 
         # Get the list of metrics to collect
         collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
@@ -960,7 +944,7 @@ class MongoDb(AgentCheck):
                     ns_tags = tags + ["db:%s" % dbname, "collection:%s" % collname]
 
                     # iterate over DBTOP metrics
-                    for m in chain(self.TOP_METRICS, self.OLD_TOP_METRICS):
+                    for m in self.TOP_METRICS:
                         # each metric is of the form: x.y.z with z optional
                         # and can be found at ns_metrics[x][y][z]
                         value = ns_metrics
@@ -981,6 +965,9 @@ class MongoDb(AgentCheck):
                         submit_method, metric_name_alias = \
                             self._resolve_metric(m, metrics_to_collect, prefix="usage")
                         submit_method(self, metric_name_alias, value, tags=ns_tags)
+                        # Keep old incorrect metric
+                        if metric_name_alias.endswith('countps'):
+                            GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s' % str(e))
 
