@@ -20,7 +20,7 @@ services:
       - DD_API_KEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     volumes:
       - ./mongo.yaml:/etc/datadog-agent/conf.d/mongo.d/mongo.yaml
-      - C:\Users\Ofek\Desktop\code\integrations-core\mongo:/home/mongo
+      - ../:/home/mongo
     networks:
       - mongodb
 
