@@ -172,9 +172,6 @@ class Marathon(AgentCheck):
             return
 
         self.gauge('{}.size'.format(QUEUE_PREFIX), len(response['queue']), tags=tags)
-        print('{}.size'.format(QUEUE_PREFIX))
-        print(len(response['queue']))
-        print(tags)
         for queue in response['queue']:
             q_tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
 
