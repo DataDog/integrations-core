@@ -85,8 +85,10 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-        if value is not None and all(m.type == self.COUNTER for m in candidates):
-            assert value == sum(map(lambda m: m.value, candidates))
+        if value is not None and candidates and all(m.type == self.COUNTER for m in candidates):
+            got = sum(m.value for m in candidates)
+            msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
+            assert value == got, msg
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
