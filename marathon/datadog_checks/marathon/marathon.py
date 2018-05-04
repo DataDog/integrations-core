@@ -99,7 +99,7 @@ class Marathon(AgentCheck):
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message="{} timed out after {} seconds.".forma(url, timeout),
+                               message="{} timed out after {} seconds.".format(url, timeout),
                                tags=["url:{}".format(url)] + tags)
             raise Exception("Timeout when hitting {}".format(url))
 
