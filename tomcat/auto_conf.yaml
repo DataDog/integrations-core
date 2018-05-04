@@ -1,0 +1,8 @@
+ad_identifiers:
+  - tomcat
+
+init_config:
+
+instances:
+  - url: "%%host%%"
+    port: "9012"
