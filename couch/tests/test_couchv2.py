@@ -352,7 +352,7 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
 
 def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
-    for _ in xrange(50):
+    for _ in xrange(70):
         r = requests.post(
             url,
             auth=(common.NODE1['user'], common.NODE1['password']),
