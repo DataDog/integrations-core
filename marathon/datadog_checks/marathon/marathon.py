@@ -1,18 +1,13 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2018
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from urlparse import urljoin
 
-# 3rd party
 import requests
 
-# project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 
 class Marathon(AgentCheck):
@@ -73,8 +68,8 @@ class Marathon(AgentCheck):
             return token
         except requests.exceptions.HTTPError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message='acs auth url %s returned a status of %s' % (acs_url, r.status_code),
-                               tags = ["url:{0}".format(acs_url)] + tags)
+                               message="acs auth url {} returned a status of {}".format(acs_url, r.status_code),
+                               tags=["url:{}".format(acs_url)] + tags)
             raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
 
     def get_json(self, url, timeout, auth, acs_url, verify, tags=None):
@@ -104,25 +99,25 @@ class Marathon(AgentCheck):
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message='%s timed out after %s seconds.' % (url, timeout),
-                               tags = ["url:{0}".format(url)] + tags)
-            raise Exception("Timeout when hitting %s" % url)
+                               message="{} timed out after {} seconds.".format(url, timeout),
+                               tags=["url:{}".format(url)] + tags)
+            raise Exception("Timeout when hitting {}".format(url))
 
         except requests.exceptions.HTTPError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               message='%s returned a status of %s' % (url, r.status_code),
-                               tags = ["url:{0}".format(url)] + tags)
-            raise Exception("Got %s when hitting %s" % (r.status_code, url))
+                               message="{} returned a status of {}".format(url, r.status_code),
+                               tags=["url:{}".format(url)] + tags)
+            raise Exception("Got {} when hitting {}".format(r.status_code, url))
 
         except requests.exceptions.ConnectionError:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                message='%s Connection Refused.' % (url),
-                tags = ["url:{0}".format(url)] + tags)
-            raise Exception("Connection refused when hitting %s" % url)
+                               message="{} Connection Refused.".format(url),
+                               tags=["url:{}".format(url)] + tags)
+            raise Exception("Connection refused when hitting {}".format(url))
 
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags = ["url:{0}".format(url)] + tags)
+                               tags=["url:{}".format(url)] + tags)
 
         return r.json()
 
@@ -136,7 +131,7 @@ class Marathon(AgentCheck):
         password = instance.get('password')
         acs_url = instance.get('acs_url')
         if user is not None and password is not None:
-            auth = (user,password)
+            auth = (user, password)
         else:
             auth = None
         ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
