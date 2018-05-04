@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Adds custom tag support for service checks.
+* [BUGFIX] Fix missing task count metrics (tasksStaged, tasksRunning, tasksHealthy, tasksUnhealthy) when filtering by group.
 
 1.2.1 / 2018-01-10
 ==================
