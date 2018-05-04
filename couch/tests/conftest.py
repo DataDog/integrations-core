@@ -10,6 +10,7 @@ import pytest
 import requests
 
 import common
+from datadog_checks.couch import CouchDb
 
 
 @pytest.fixture
@@ -17,6 +18,11 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
+
+@pytest.fixture
+def check():
+    return CouchDb(common.CHECK_NAME, {}, {})
 
 
 @pytest.fixture(scope="session")

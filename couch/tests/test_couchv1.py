@@ -11,9 +11,8 @@ import common
 pytestmark = pytest.mark.v1
 
 
-def test_couch(aggregator, couch_cluster):
+def test_couch(aggregator, check, couch_cluster):
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     check.check(common.BASIC_CONFIG)
 
     # Metrics should have been emitted for any publicly readable databases.
@@ -35,9 +34,8 @@ def test_couch(aggregator, couch_cluster):
                                     tags=common.BASIC_CONFIG_TAGS, count=2)
 
 
-def test_bad_config(aggregator):
+def test_bad_config(aggregator, check):
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     raised = False
 
     try:
@@ -52,8 +50,7 @@ def test_bad_config(aggregator):
                                     tags=common.BAD_CONFIG_TAGS, count=1)
 
 
-def test_couch_whitelist(aggregator, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
+def test_couch_whitelist(aggregator, check, couch_cluster):
 
     DB_WHITELIST = ["_users"]
     config = deepcopy(common.BASIC_CONFIG)
@@ -72,8 +69,7 @@ def test_couch_whitelist(aggregator, couch_cluster):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_couch_blacklist(aggregator, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
+def test_couch_blacklist(aggregator, check, couch_cluster):
 
     DB_BLACKLIST = ["_replicator"]
     config = deepcopy(common.BASIC_CONFIG)
@@ -92,8 +88,7 @@ def test_couch_blacklist(aggregator, couch_cluster):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_only_max_nodes_are_scanned(aggregator, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
+def test_only_max_nodes_are_scanned(aggregator, check, couch_cluster):
 
     config = deepcopy(common.BASIC_CONFIG)
     config["max_dbs_per_check"] = 1
@@ -103,8 +98,7 @@ def test_only_max_nodes_are_scanned(aggregator, couch_cluster):
         aggregator.assert_metric(gauge, count=1)
 
 
-def test_config_tags(aggregator, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
+def test_config_tags(aggregator, check, couch_cluster):
 
     TEST_TAG = "test_tag"
     config = deepcopy(common.BASIC_CONFIG)

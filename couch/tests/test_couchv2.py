@@ -51,11 +51,10 @@ def gauges():
         yield res
 
 
-def test_check(aggregator, gauges, couch_cluster):
+def test_check(aggregator, check, gauges, couch_cluster):
     """
     Testing Couchdb2 check.
     """
-    check = CouchDb(common.CHECK_NAME, {}, {})
 
     configs = [deepcopy(common.NODE1), deepcopy(common.NODE2), deepcopy(common.NODE3)]
 
@@ -96,10 +95,7 @@ def test_check(aggregator, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_db_whitelisting(aggregator, gauges, couch_cluster):
-
-    check = CouchDb(common.CHECK_NAME, {}, {})
-
+def test_db_whitelisting(aggregator, check, gauges, couch_cluster):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
@@ -121,9 +117,7 @@ def test_db_whitelisting(aggregator, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_db_blacklisting(aggregator, gauges, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
-
+def test_db_blacklisting(aggregator, check, gauges, couch_cluster):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
@@ -145,9 +139,7 @@ def test_db_blacklisting(aggregator, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_check_without_names(aggregator, gauges, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
-
+def test_check_without_names(aggregator, check, gauges, couch_cluster):
     config = deepcopy(common.NODE1)
     config.pop('name')
     check.check(config)
@@ -190,9 +182,7 @@ def test_check_without_names(aggregator, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_nodes_are_scanned(aggregator, gauges, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
-
+def test_only_max_nodes_are_scanned(aggregator, check, gauges, couch_cluster):
     config = deepcopy(common.NODE1)
     config.pop("name")
     config['max_nodes_per_check'] = 2
@@ -245,9 +235,7 @@ def test_only_max_nodes_are_scanned(aggregator, gauges, couch_cluster):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_dbs_are_scanned(aggregator, gauges, couch_cluster):
-    check = CouchDb(common.CHECK_NAME, {}, {})
-
+def test_only_max_dbs_are_scanned(aggregator, check, gauges, couch_cluster):
     configs = []
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
@@ -268,7 +256,7 @@ def test_only_max_dbs_are_scanned(aggregator, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_replication_metrics(aggregator, gauges, couch_cluster):
+def test_replication_metrics(aggregator, check, gauges, couch_cluster):
     url = "{}/_replicator".format(common.NODE1['server'])
     replication_body = {
         '_id': 'my_replication_id',
@@ -303,7 +291,7 @@ def test_replication_metrics(aggregator, gauges, couch_cluster):
         aggregator.assert_metric(gauge)
 
 
-def test_compaction_metrics(aggregator, gauges, couch_cluster):
+def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
     body = {
         '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
@@ -355,7 +343,6 @@ def test_compaction_metrics(aggregator, gauges, couch_cluster):
     )
     r.raise_for_status()
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check.check(config)
 
@@ -363,7 +350,7 @@ def test_compaction_metrics(aggregator, gauges, couch_cluster):
         aggregator.assert_metric(gauge)
 
 
-def test_indexing_metrics(aggregator, gauges, couch_cluster):
+def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
     for _ in xrange(50):
         r = requests.post(
@@ -388,7 +375,6 @@ def test_indexing_metrics(aggregator, gauges, couch_cluster):
     t = AsyncReq(url, (common.NODE1['user'], common.NODE1['password']))
     t.start()
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check.check(config)
 
@@ -404,7 +390,7 @@ def test_indexing_metrics(aggregator, gauges, couch_cluster):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_view_compaction_metrics(aggregator, gauges, couch_cluster):
+def test_view_compaction_metrics(aggregator, check, gauges, couch_cluster):
     class LoadGenerator(threading.Thread):
         STOP = 0
         RUN = 1
@@ -493,7 +479,6 @@ def test_view_compaction_metrics(aggregator, gauges, couch_cluster):
     tries = 0
     try:
         metric_found = False
-        check = CouchDb(common.CHECK_NAME, {}, {})
         while not metric_found and tries < 40:
             tries += 1
             for config in [common.NODE1, common.NODE2, common.NODE3]:
@@ -516,12 +501,11 @@ def test_view_compaction_metrics(aggregator, gauges, couch_cluster):
         assert False, "Could not find the view_compaction happening"
 
 
-def test_config_tags(aggregator, gauges, couch_cluster):
+def test_config_tags(aggregator, check, gauges, couch_cluster):
     TEST_TAG = "test_tag:test"
     config = deepcopy(common.NODE1)
     config['tags'] = [TEST_TAG]
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     check.check(config)
 
     for gauge in gauges["erlang_gauges"]:
