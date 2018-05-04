@@ -1,11 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import mock
-
-from datadog_checks.marathon import Marathon
 
 
 APP_METRICS = [
@@ -51,8 +47,10 @@ def test_default_configuration(aggregator, check, instance, apps, deployments, q
     aggregator.assert_metric('marathon.queue.size', value=2)
 
     for metric in APP_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z', 'optional:tag1'])
-        aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z', 'optional:tag1'])
+        aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z',
+                                                        'optional:tag1'])
+        aggregator.assert_metric(metric, count=1, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z',
+                                                        'optional:tag1'])
 
     for metric in Q_METRICS:
         aggregator.assert_metric(metric, at_least=1)
