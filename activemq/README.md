@@ -89,7 +89,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][106] for a list of metrics provided by this integration.
+The ActiveMQ check does not include any metrics at this time.
 
 ### Events
 The Activemq check does not include any event at this time.
@@ -112,7 +112,6 @@ Need help? Contact [Datadog Support][107].
 [103]: http://activemq.apache.org/jmx.html
 [104]: https://github.com/DataDog/integrations-core/blob/master/activemq/conf.yaml.example
 [105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[106]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [107]: http://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
 [109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent 
