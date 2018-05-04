@@ -6,8 +6,8 @@ from urlparse import urljoin
 
 import requests
 
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 
 class Marathon(AgentCheck):
@@ -172,6 +172,9 @@ class Marathon(AgentCheck):
             return
 
         self.gauge('{}.size'.format(QUEUE_PREFIX), len(response['queue']), tags=tags)
+        print('{}.size'.format(QUEUE_PREFIX))
+        print(len(response['queue']))
+        print(tags)
         for queue in response['queue']:
             q_tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
 
