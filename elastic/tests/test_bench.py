@@ -75,13 +75,13 @@ def get_es_version():
         return [int(k) for k in version.split(".")]
 
 
-def test_bad_port(aggregator, spin_up_elastic):
+def test_bad_port(aggregator, spin_up_elastic, benchmark):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     with pytest.raises(Exception):
-        elastic_check.check(BAD_CONFIG)
+        benchmark(elastic_check.check, BAD_CONFIG)
 
 
-def test_check(aggregator, spin_up_elastic):
+def test_check(aggregator, spin_up_elastic, benchmark):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
 
@@ -91,7 +91,7 @@ def test_check(aggregator, spin_up_elastic):
         except Exception:
             time.sleep(1)
 
-    elastic_check.check(CONFIG)
+    benchmark(elastic_check.check, CONFIG)
 
     expected_metrics = dict(ESCheck.STATS_METRICS)
     ESCheck.CLUSTER_HEALTH_METRICS.update(ESCheck.CLUSTER_PENDING_TASKS)
@@ -248,7 +248,7 @@ def test_config_parser(aggregator, spin_up_elastic):
     assert c.ssl_key == "/path/to/cert.key"
 
 
-def test_pshard_metrics(aggregator, spin_up_elastic):
+def test_pshard_metrics(aggregator, spin_up_elastic, benchmark):
     """ Tests that the pshard related metrics are forwarded and that the
         document count for primary indexes is twice smaller as the global
         document count when "number_of_replicas" is set to 1 """
@@ -261,7 +261,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
 
     time.sleep(elastic_latency)
     elastic_check = ESCheck(CHECK_NAME, {}, {})
-    elastic_check.check(config)
+    benchmark(elastic_check.check, config)
 
     pshard_stats_metrics = dict(ESCheck.PRIMARY_SHARD_METRICS)
     if get_es_version() >= [1, 0, 0]:
@@ -269,7 +269,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
 
     for m_name, desc in pshard_stats_metrics.iteritems():
         if desc[0] == "gauge":
-            aggregator.assert_metric(m_name, count=1, tags=[])
+            aggregator.assert_metric(m_name, tags=[])
 
     # Our pshard metrics are getting sent, let's check that they're accurate
     # Note: please make sure you don't install Maven on the CI for future
@@ -277,27 +277,27 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
-def test_index_metrics(aggregator, spin_up_elastic):
+def test_index_metrics(aggregator, spin_up_elastic, benchmark):
     # Tests that index level metrics are forwarded
     config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
 
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     index_metrics = dict(ESCheck.INDEX_STATS_METRICS)
-    elastic_check.check(config)
+    benchmark(elastic_check.check, config)
 
     if get_es_version() >= [1, 0, 0]:
         for m_name, desc in index_metrics.iteritems():
             aggregator.assert_metric(m_name)
 
 
-def test_health_event(aggregator, spin_up_elastic):
+def test_health_event(aggregator, spin_up_elastic, benchmark):
     dummy_tags = ['elastique:recherche']
     config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
 
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     # Should be yellow at first
     requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}')
-    elastic_check.check(config)
+    benchmark(elastic_check.check, config)
     if get_es_version() < [2, 0, 0]:
         assert len(aggregator.events) == 1
         assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:' + URL]
