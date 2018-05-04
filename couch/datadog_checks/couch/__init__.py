@@ -1,4 +1,4 @@
-from couch import CouchDb
+from .couch import CouchDb
 
 __all__ = [
     '__version__',
