@@ -1,67 +1,21 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
-import pytest
-import os
-import sys
-import time
-import socket
-import requests
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import subprocess
-from datadog_checks.utils.common import get_docker_hostname
+import os
+import socket
+import time
+
+import pytest
+import requests
+
 from datadog_checks.elastic import ESCheck
+from .common import (
+    BAD_CONFIG, CHECK_NAME, CLUSTER_TAG, CONF_HOSTNAME,
+    CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER
+)
 
 log = logging.getLogger('test_elastic')
-
-CHECK_NAME = "elastic"
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-USER = "elastic"
-PASSWORD = "changeme"
-HOST = get_docker_hostname()
-PORT = '9200'
-BAD_PORT = '9405'
-CONF_HOSTNAME = "foo"
-TAGS = [u"foo:bar", u"baz"]
-CLUSTER_TAG = [u"cluster_name:elasticsearch"]
-URL = 'http://{0}:{1}'.format(HOST, PORT)
-BAD_URL = 'http://{0}:{1}'.format(HOST, BAD_PORT)
-
-CONFIG = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': TAGS}
-BAD_CONFIG = {'url': BAD_URL, 'password': PASSWORD}
-
-
-@pytest.fixture(scope="session")
-def spin_up_elastic():
-    env = os.environ
-    args = [
-        'docker-compose', '-f', os.path.join(HERE, 'compose', 'elastic.yaml')
-    ]
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    sys.stderr.write("Waiting for ES to boot...")
-
-    for _ in xrange(30):
-        try:
-            res = requests.get(URL)
-            res.raise_for_status()
-            break
-        except Exception:
-            time.sleep(1)
-
-    # Create an index in ES
-    requests.put(URL, '/datadog/')
-    yield
-    subprocess.check_call(args + ["down"], env=env)
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 def get_es_version():
@@ -75,13 +29,13 @@ def get_es_version():
         return [int(k) for k in version.split(".")]
 
 
-def test_bad_port(aggregator, spin_up_elastic):
+def test_bad_port():
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     with pytest.raises(Exception):
         elastic_check.check(BAD_CONFIG)
 
 
-def test_check(aggregator, spin_up_elastic):
+def test_check(aggregator):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
 
@@ -197,7 +151,7 @@ def test_check(aggregator, spin_up_elastic):
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-def test_config_parser(aggregator, spin_up_elastic):
+def test_config_parser():
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     instance = {
         "username": "user",
@@ -248,7 +202,7 @@ def test_config_parser(aggregator, spin_up_elastic):
     assert c.ssl_key == "/path/to/cert.key"
 
 
-def test_pshard_metrics(aggregator, spin_up_elastic):
+def test_pshard_metrics(aggregator):
     """ Tests that the pshard related metrics are forwarded and that the
         document count for primary indexes is twice smaller as the global
         document count when "number_of_replicas" is set to 1 """
@@ -277,7 +231,7 @@ def test_pshard_metrics(aggregator, spin_up_elastic):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
-def test_index_metrics(aggregator, spin_up_elastic):
+def test_index_metrics(aggregator):
     # Tests that index level metrics are forwarded
     config = {'url': URL, 'index_stats': True, 'username': USER, 'password': PASSWORD}
 
@@ -290,7 +244,7 @@ def test_index_metrics(aggregator, spin_up_elastic):
             aggregator.assert_metric(m_name)
 
 
-def test_health_event(aggregator, spin_up_elastic):
+def test_health_event(aggregator):
     dummy_tags = ['elastique:recherche']
     config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
 
