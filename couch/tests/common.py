@@ -40,8 +40,6 @@ CHECK_GAUGES = [
     "couchdb.by_db.doc_count",
 ]
 
-CHECK_NAME = "couch"
-
 BASIC_CONFIG = {
     "server": URL
 }
@@ -77,9 +75,4 @@ NODE3 = {
     "user": "dduser",
     "password": "pawprint",
     "name": "node3@127.0.0.1"
-}
-
-CHECK_NAME = "couch"
-WRONG_CONFIG = {
-    "server": "http://localhost:11111"
 }

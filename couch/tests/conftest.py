@@ -86,8 +86,8 @@ def generate_data(couch_version):
         ]
         ready = [False, False, False]
 
-        print("Waiting for stats to be generated on the nodes...")
         for i in xrange(60):
+            print("Waiting for stats to be generated on the nodes...")
             try:
                 for i in xrange(3):
                     if not ready[i]:
@@ -98,7 +98,6 @@ def generate_data(couch_version):
                 if all(ready):
                     break
             except Exception:
-                print("Waiting for stats to be generated on the nodes...")
                 pass
             sleep(1)
 
