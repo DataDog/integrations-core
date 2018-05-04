@@ -19,8 +19,8 @@ def aggregator():
     return aggregator
 
 
-@pytest.fixture(scope="module")
-def spin_up_couchv1():
+@pytest.fixture(scope="session")
+def couch_cluster():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -29,10 +29,11 @@ def spin_up_couchv1():
     """
     env = os.environ
     env['COUCH_PORT'] = common.PORT
+    couch_version = env["COUCH_VERSION"][0]
 
     args = [
         "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'compose_v1.yaml')
+        "-f", os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version))
     ]
 
     subprocess.check_call(args + ["down"])
@@ -41,82 +42,59 @@ def spin_up_couchv1():
     if not wait_for_couch():
         raise Exception("couchdb container boot timed out!")
 
-    # Generate a test database
-    requests.put("{}/kennel".format(common.URL))
+    generate_data(couch_version)
 
     yield
     subprocess.check_call(args + ["down"])
 
 
-@pytest.fixture(scope="module")
-def spin_up_couchv2():
+def generate_data(couch_version):
     """
-    Start a cluster with one master, one replica and one unhealthy replica and
-    stop it after the tests are done.
-    If there's any problem executing docker-compose, let the exception bubble
-    up.
+    Generate data on the couch cluster to test metrics
     """
-    env = os.environ
-    env['COUCH_PORT'] = common.PORT
+    if couch_version == "1":
+        # Generate a test database
+        requests.put("{}/kennel".format(common.URL))
+    else:
+        # Generate a test database
+        requests.put("{}/kennel".format(common.URL), auth=(common.USER, common.PASSWORD))
 
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'compose_v2.yaml')
-    ]
-
-    subprocess.check_call(args + ["down"])
-    subprocess.check_call(args + ["up", "-d"])
-    # wait for the cluster to be up before yielding
-    if not wait_for_couch():
-        raise Exception("couchdb container boot timed out!")
-
-    # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=(common.USER, common.PASSWORD))
-
-    # Populate database
-    data = {
-        "language": "javascript",
-        "views": {
-            "all": {
-                "map": "function(doc) { emit(doc._id, doc); }"
-            },
-            "by_data": {
-                "map": "function(doc) { emit(doc.data, doc); }"
+        # Populate database
+        data = {
+            "language": "javascript",
+            "views": {
+                "all": {
+                    "map": "function(doc) { emit(doc._id, doc); }"
+                },
+                "by_data": {
+                    "map": "function(doc) { emit(doc.data, doc); }"
+                }
             }
         }
-    }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=(common.USER, common.PASSWORD))
+        requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=(common.USER, common.PASSWORD))
 
-    url1 = "{}/_node/node1@127.0.0.1/_stats".format(common.URL)
-    url2 = "{}/_node/node2@127.0.0.1/_stats".format(common.URL)
-    url3 = "{}/_node/node3@127.0.0.1/_stats".format(common.URL)
-    ready1 = ready2 = ready3 = False
+        urls = [
+            "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
+            "{}/_node/node2@127.0.0.1/_stats".format(common.URL),
+            "{}/_node/node3@127.0.0.1/_stats".format(common.URL)
+        ]
+        ready = [False, False, False]
 
-    print("Waiting for stats to be generated on the nodes...")
-    for i in xrange(60):
-        try:
-            if not ready1:
-                res = requests.get(url1, auth=(common.USER, common.PASSWORD))
-                if res.json():
-                    ready1 = True
-            if not ready2:
-                res = requests.get(url2, auth=(common.USER, common.PASSWORD))
-                if res.json():
-                    ready2 = True
-            if not ready3:
-                res = requests.get(url3, auth=(common.USER, common.PASSWORD))
-                if res.json():
-                    ready3 = True
+        print("Waiting for stats to be generated on the nodes...")
+        for i in xrange(60):
+            try:
+                for i in xrange(3):
+                    if not ready[i]:
+                        res = requests.get(urls[i], auth=(common.USER, common.PASSWORD))
+                        if res.json():
+                            ready[i] = True
 
-            if ready1 and ready2 and ready3:
-                break
-        except Exception:
-            print("Waiting for stats to be generated on the nodes...")
-            pass
-        sleep(1)
-
-    yield
-    subprocess.check_call(args + ["down"])
+                if all(ready):
+                    break
+            except Exception:
+                print("Waiting for stats to be generated on the nodes...")
+                pass
+            sleep(1)
 
 
 def wait_for_couch():

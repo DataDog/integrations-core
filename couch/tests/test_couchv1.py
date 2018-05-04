@@ -11,7 +11,7 @@ import common
 pytestmark = pytest.mark.v1
 
 
-def test_couch(aggregator, spin_up_couchv1):
+def test_couch(aggregator, couch_cluster):
 
     check = CouchDb(common.CHECK_NAME, {}, {})
     check.check(common.BASIC_CONFIG)
@@ -19,6 +19,7 @@ def test_couch(aggregator, spin_up_couchv1):
     # Metrics should have been emitted for any publicly readable databases.
     for db_name in common.DB_NAMES:
         for gauge in common.CHECK_GAUGES:
+            print("metrcs found for ", gauge, aggregator.metrics(gauge))
             expected_tags = common.BASIC_CONFIG_TAGS + [
                 "db:{}".format(db_name),
                 "device:{}".format(db_name)
@@ -51,7 +52,7 @@ def test_bad_config(aggregator):
                                     tags=common.BAD_CONFIG_TAGS, count=1)
 
 
-def test_couch_whitelist(aggregator, spin_up_couchv1):
+def test_couch_whitelist(aggregator, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     DB_WHITELIST = ["_users"]
@@ -71,7 +72,7 @@ def test_couch_whitelist(aggregator, spin_up_couchv1):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_couch_blacklist(aggregator, spin_up_couchv1):
+def test_couch_blacklist(aggregator, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     DB_BLACKLIST = ["_replicator"]
@@ -91,7 +92,7 @@ def test_couch_blacklist(aggregator, spin_up_couchv1):
                 aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_only_max_nodes_are_scanned(aggregator, spin_up_couchv1):
+def test_only_max_nodes_are_scanned(aggregator, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     config = deepcopy(common.BASIC_CONFIG)
@@ -102,7 +103,7 @@ def test_only_max_nodes_are_scanned(aggregator, spin_up_couchv1):
         aggregator.assert_metric(gauge, count=1)
 
 
-def test_config_tags(aggregator, spin_up_couchv1):
+def test_config_tags(aggregator, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     TEST_TAG = "test_tag"

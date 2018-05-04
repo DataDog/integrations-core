@@ -51,7 +51,7 @@ def gauges():
         yield res
 
 
-def test_check(aggregator, gauges, spin_up_couchv2):
+def test_check(aggregator, gauges, couch_cluster):
     """
     Testing Couchdb2 check.
     """
@@ -96,7 +96,7 @@ def test_check(aggregator, gauges, spin_up_couchv2):
     aggregator.assert_all_metrics_covered()
 
 
-def test_db_whitelisting(aggregator, gauges, spin_up_couchv2):
+def test_db_whitelisting(aggregator, gauges, couch_cluster):
 
     check = CouchDb(common.CHECK_NAME, {}, {})
 
@@ -121,7 +121,7 @@ def test_db_whitelisting(aggregator, gauges, spin_up_couchv2):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_db_blacklisting(aggregator, gauges, spin_up_couchv2):
+def test_db_blacklisting(aggregator, gauges, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     configs = []
@@ -145,7 +145,7 @@ def test_db_blacklisting(aggregator, gauges, spin_up_couchv2):
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
-def test_check_without_names(aggregator, gauges, spin_up_couchv2):
+def test_check_without_names(aggregator, gauges, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     config = deepcopy(common.NODE1)
@@ -190,7 +190,7 @@ def test_check_without_names(aggregator, gauges, spin_up_couchv2):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_nodes_are_scanned(aggregator, gauges, spin_up_couchv2):
+def test_only_max_nodes_are_scanned(aggregator, gauges, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     config = deepcopy(common.NODE1)
@@ -245,7 +245,7 @@ def test_only_max_nodes_are_scanned(aggregator, gauges, spin_up_couchv2):
     aggregator.assert_all_metrics_covered()
 
 
-def test_only_max_dbs_are_scanned(aggregator, gauges, spin_up_couchv2):
+def test_only_max_dbs_are_scanned(aggregator, gauges, couch_cluster):
     check = CouchDb(common.CHECK_NAME, {}, {})
 
     configs = []
@@ -268,7 +268,7 @@ def test_only_max_dbs_are_scanned(aggregator, gauges, spin_up_couchv2):
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
 
-def test_replication_metrics(aggregator, gauges, spin_up_couchv2):
+def test_replication_metrics(aggregator, gauges, couch_cluster):
     url = "{}/_replicator".format(common.NODE1['server'])
     replication_body = {
         '_id': 'my_replication_id',
@@ -303,7 +303,7 @@ def test_replication_metrics(aggregator, gauges, spin_up_couchv2):
         aggregator.assert_metric(gauge)
 
 
-def test_compaction_metrics(aggregator, gauges, spin_up_couchv2):
+def test_compaction_metrics(aggregator, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
     body = {
         '_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE',
@@ -363,7 +363,7 @@ def test_compaction_metrics(aggregator, gauges, spin_up_couchv2):
         aggregator.assert_metric(gauge)
 
 
-def test_indexing_metrics(aggregator, gauges, spin_up_couchv2):
+def test_indexing_metrics(aggregator, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
     for _ in xrange(50):
         r = requests.post(
@@ -404,7 +404,7 @@ def test_indexing_metrics(aggregator, gauges, spin_up_couchv2):
             aggregator.assert_metric(gauge, tags=expected_tags)
 
 
-def test_view_compaction_metrics(aggregator, gauges, spin_up_couchv2):
+def test_view_compaction_metrics(aggregator, gauges, couch_cluster):
     class LoadGenerator(threading.Thread):
         STOP = 0
         RUN = 1
@@ -516,7 +516,7 @@ def test_view_compaction_metrics(aggregator, gauges, spin_up_couchv2):
         assert False, "Could not find the view_compaction happening"
 
 
-def test_config_tags(aggregator, gauges, spin_up_couchv2):
+def test_config_tags(aggregator, gauges, couch_cluster):
     TEST_TAG = "test_tag:test"
     config = deepcopy(common.NODE1)
     config['tags'] = [TEST_TAG]
