@@ -11,7 +11,7 @@
 * [FEATURE] Allow to disable prometheus metric collection. See [#1423][]
 * [FEATURE] Container metrics now respect the container filtering rules. Requires Agent 6.2+. See [#1442][]
 * [BUGFIX] Fix submission of CPU metrics on multi-threaded containers. See [#1489][]
-* [BUGFIX] Fix SSL when using the insecure options but still providing certificates
+* [BUGFIX] Fix SSL when specifying certificates files
 
 1.1.0 / 2018-03-23
 ==================
