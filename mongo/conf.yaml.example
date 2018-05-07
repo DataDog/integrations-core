@@ -12,10 +12,9 @@ instances:
     #   - optional_tag1
     #   - optional_tag2
 
-    # Whether or not to disable reads from available replicas.
-    # Use this if any replicas are inaccessible to the agent.
-    #
-    # disable_replica_check: false
+    # Whether or not to read from available replicas (default true).
+    # Disable this if any replicas are inaccessible to the agent.
+    replica_check: true
 
     # Optional SSL parameters, see https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
     # for more details
