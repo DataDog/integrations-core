@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.5.4 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Allow disabling of replica access. See #1516
+
 1.5.3 / Unreleased
 ==================
 ### Changes
