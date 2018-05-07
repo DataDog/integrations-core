@@ -467,8 +467,6 @@ class PrometheusScraper(object):
             cert = self.ssl_cert
             if isinstance(self.ssl_private_key, basestring):
                 cert = (self.ssl_cert, self.ssl_private_key)
-        elif isinstance(self.ssl_cert, tuple):
-            cert = self.ssl_cert
         verify = True
         if isinstance(self.ssl_ca_cert, basestring):
             verify = self.ssl_ca_cert
