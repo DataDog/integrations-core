@@ -966,8 +966,6 @@ class OpenStackCheck(AgentCheck):
         tenant_id = server_details.get('tenant_id')
         project_name = server_details.get('project_name')
 
-        self.log.debug("Getting details about server: %s", server_details)
-
         server_stats = {}
         headers = {'X-Auth-Token': self.get_auth_token()}
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
