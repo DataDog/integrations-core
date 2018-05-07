@@ -163,7 +163,7 @@ class KubeletCheck(PrometheusCheck, CadvisorScraper):
         if not cert[0] or not cert[1]:
             cert = None
         else:
-            # prometheus check setting
+            # prometheus check settings
             self.ssl_cert = cert[0]
             self.ssl_private_key = cert[1]
 
