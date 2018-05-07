@@ -74,7 +74,7 @@ instances:
     # to skip the validation of the SSL certificate of the URL being tested.
     # This is mostly useful when checking SSL connections signed with
     # certificates that are not themselves signed by a public authority.
-    # When true, the check logs a warning in collector.log
+    # When true or unset, the check logs a warning in the Agent's log file
     # Defaults to true, set to false if you want SSL certificate validation.
     #
     # disable_ssl_validation: true

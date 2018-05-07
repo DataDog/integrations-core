@@ -208,6 +208,11 @@ class HTTPCheck(NetworkCheck):
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
+
+        parsed_uri = urlparse(url)
+        if 'disable_ssl_validation' not in instance and parsed_uri.scheme == 'https' and not ignore_ssl_warning:
+            self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(url))
+
         skip_proxy = _is_affirmative(
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
