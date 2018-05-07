@@ -106,7 +106,7 @@ def wait_for_couch():
     """
     Wait for the couchdb container to be reachable
     """
-    for i in xrange(40):
+    for i in xrange(60):
         sleep(1)
         try:
             requests.get(common.URL).raise_for_status()

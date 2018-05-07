@@ -352,7 +352,7 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
 
 def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
     url = "{}/kennel".format(common.NODE1['server'])
-    for _ in xrange(30):
+    for _ in xrange(50):
         r = requests.post(
             url,
             auth=(common.NODE1['user'], common.NODE1['password']),
@@ -374,6 +374,14 @@ def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
     url = '{}/kennel/_design/dummy/_view/all'.format(common.NODE1['server'])
     t = AsyncReq(url, (common.NODE1['user'], common.NODE1['password']))
     t.start()
+
+    url = "{}/_active_tasks".format(common.NODE1["server"])
+    for _ in xrange(10):
+        print("waiting for indexer to start")
+        tasks = requests.get(url, auth=(common.NODE1["user"], common.NODE1["password"])).json()
+        if len(tasks) > 1:
+            break
+        time.sleep(1)
 
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check.check(config)
