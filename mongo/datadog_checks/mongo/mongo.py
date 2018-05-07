@@ -777,7 +777,7 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if _is_affirmative(instance.get('replica_check')):
+        if _is_affirmative(instance.get('replica_check', True)):
             try:
                 data = {}
                 dbnames = []
