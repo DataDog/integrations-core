@@ -347,7 +347,7 @@ class SnmpCheck(NetworkCheck):
 
         cmd_generator, ip_address, tags, metrics, timeout, retries, enforce_constraints = self._load_conf(instance)
 
-        if len(metrics) < 1:
+        if not metrics:
             raise Exception('Metrics list must contain at least one metric')
 
         tags += ['snmp_device:{0}'.format(ip_address)]
