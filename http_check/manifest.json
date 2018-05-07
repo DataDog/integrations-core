@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "2.0.1",
+  "version": "2.0.2",
   "guid": "eb133a1f-697c-4143-bad3-10e72541fa9c",
   "public_title": "Datadog-HTTP Check Integration",
   "categories":["web", "network"],
