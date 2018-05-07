@@ -28,7 +28,7 @@ Q_METRICS = [
 ]
 
 
-def test_default_configuration(aggregator, check, instance, apps, deployments, queue):
+def test_default_configuration(aggregator, check, instance, apps, deployments, queue, groups):
     def side_effect(url, timeout, auth, acs_url, verify, tags):
         if "v2/apps" in url:
             return apps
@@ -36,6 +36,8 @@ def test_default_configuration(aggregator, check, instance, apps, deployments, q
             return deployments
         elif "v2/queue" in url:
             return queue
+        elif "v2/groups" in url:
+            return groups
         else:
             raise Exception("unknown url:" + url)
 
@@ -64,6 +66,8 @@ def test_empty_responses(aggregator, check, instance):
             return []
         elif "v2/queue" in url:
             return {"queue": []}
+        elif "v2/groups" in url:
+            return {"apps": []}
         else:
             raise Exception("unknown url:" + url)
 

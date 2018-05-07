@@ -49,3 +49,7 @@ def deployments():
 @pytest.fixture
 def queue():
     return read_fixture_file('queue.json')
+
+@pytest.fixture
+def groups():
+    return read_fixture_file('groups.json')
