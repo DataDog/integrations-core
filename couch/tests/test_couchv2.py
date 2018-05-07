@@ -380,6 +380,7 @@ def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
         print("waiting for indexer to start")
         tasks = requests.get(url, auth=(common.NODE1["user"], common.NODE1["password"])).json()
         if len(tasks) > 1:
+            print("Indexer started!")
             break
         time.sleep(1)
 
@@ -387,6 +388,8 @@ def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
         check.check(config)
 
     t.join()
+
+    print(aggregator._metrics)
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         expected_tags = [
