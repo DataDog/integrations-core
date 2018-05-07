@@ -10,22 +10,20 @@ Get metrics from cacti service in real time to:
 ## Setup
 ### Installation
 
-The Cacti check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Cacti servers.
-
-If you need the newest version of the Cacti check, install the `dd-check-cacti` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The Cacti check is packaged with the Agent, so simply [install the Agent][1] on your Cacti servers.
 
 ### Configuration
 
 Create a datadog user with read-only rights to the Cacti database
 
-```
+```shell
 sudo mysql -e "create user 'datadog'@'localhost' identified by '<password>';"
 sudo mysql -e "grant select on cacti.* to 'datadog'@'localhost';"
 ```
 
 Check user and rights
 
-```
+```shell
 mysql -u datadog --password=<password> -e "show status" | \
 grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
@@ -35,10 +33,9 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing SELECT grant\033[0m"
 ```
 
-Configure the Agent to connect to MySQL
-Edit conf.d/`cacti.yaml`. See the [sample cacti.yaml](https://github.com/DataDog/integrations-core/blob/master/cacti/conf.yaml.example) for all available configuration options:
+Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -53,41 +50,24 @@ instances:
         #rrd_whitelist: /path/to/rrd_whitelist.txt
 ```
 
-Give the dd-agent user access to the RRD files
+Give the datadog-agent user access to the RRD files
 
-```
+```shell
 sudo gpasswd -a dd-agent www-data
 sudo chmod -R g+rx /var/lib/cacti/rra/
-sudo su - dd-agent -c 'if [ -r /var/lib/cacti/rra/ ];
-then echo -e "\033[0;31mdd-agent can read the RRD files\033[0m";
-else echo -e "\033[0;31mdd-agent can not read the RRD files\033[0m";
+sudo su - datadog-agent -c 'if [ -r /var/lib/cacti/rra/ ];
+then echo -e "\033[0;31mdatadog-agent can read the RRD files\033[0m";
+else echo -e "\033[0;31mdatadog-agent can not read the RRD files\033[0m";
 fi'
 ```
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `cacti` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    cacti
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The Cacti check is compatible with all major platforms
+[Run the Agent's `status` subcommand][3] and look for `cacti` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 The Cacti check does not include any event at this time.
@@ -96,7 +76,15 @@ The Cacti check does not include any event at this time.
 The Cacti check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/cacti/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/

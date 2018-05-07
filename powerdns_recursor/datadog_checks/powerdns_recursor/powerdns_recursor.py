@@ -6,7 +6,7 @@
 from collections import namedtuple
 
 # Datadog
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # 3p
 import requests
@@ -116,7 +116,7 @@ class PowerDNSRecursorCheck(AgentCheck):
 
     def check(self, instance):
         config, tags = self._get_config(instance)
-        stats = self._get_pdns_stats(config)
+        stats = self._get_pdns_stats(config, tags)
         for stat in stats:
             if stat['name'] in PowerDNSRecursorCheck.GAUGE_METRICS:
                 self.gauge('powerdns.recursor.{}'.format(stat['name']), float(stat['value']), tags=tags)
@@ -141,7 +141,8 @@ class PowerDNSRecursorCheck(AgentCheck):
         api_key = instance.get('api_key')
         version = instance.get('version')
         tags = instance.get('tags', [])
-
+        if tags is None:
+            tags = []
         Config = namedtuple('Config', [
             'host',
             'port',
@@ -152,14 +153,14 @@ class PowerDNSRecursorCheck(AgentCheck):
 
         return Config(host, port, api_key, version), tags
 
-    def _get_pdns_stats(self, config):
+    def _get_pdns_stats(self, config, tags):
         fallback_url = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
         if config.version == 4:
             url = fallback_url
         else:
             url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
 
-        service_check_tags = ['recursor_host:{}'.format(config.host), 'recursor_port:{}'.format(config.port)]
+        service_check_tags = ['recursor_host:{}'.format(config.host), 'recursor_port:{}'.format(config.port)] + tags
         headers = {"X-API-Key": config.api_key}
         try:
             request = requests.get(url, headers=headers)

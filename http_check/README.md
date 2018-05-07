@@ -7,13 +7,11 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 ## Setup
 ### Installation
 
-The HTTP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
-
-If you need the newest version of the HTTP check, install the `dd-check-http` package; this package's check will override the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The HTTP check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
 ### Configuration
 
-Create a file `http_check.yaml` in the Agent's `conf.d` directory. See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for all available configuration options:
+Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample http_check.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -26,16 +24,14 @@ instances:
     # check_certificate_expiration: true # default is true
     # days_warning: 28                   # default 14
     # days_critical: 14                  # default 7
-    # timeout: 3                         # in seconds. Default is 1.
-    skip_event: true # Default is false, i.e. emit events instead of service checks. Recommend to set to true.
+    # timeout: 3                         # in seconds. Default is 10.
   - name: Example website (staging)
     url: http://staging.example.com/
-    skip_event: true
 ```
 
 The HTTP check has more configuration options than many checks — many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
-See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for a full list and description of available options, here is a list of them:
+See the [sample http_check.d/conf.yaml][2] for a full list and description of available options, here is a list of them:
 
 | Setting | Description |
 |---|---|
@@ -56,51 +52,29 @@ See the [sample http_check.yaml](https://github.com/DataDog/integrations-core/bl
 | `check_certificate_expiration` | When `check_certificate_expiration` is enabled, the service check will check the expiration date of the SSL certificate. Note that this will cause the SSL certificate to be validated, regardless of the value of the `disable_ssl_validation` setting. |
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration. |
 | `headers` | This parameter allows you to send additional headers with the request. Please see the [example YAML file](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for additional information and caveats. |
-| `skip_event` | When enabled, the check will not create an event. This is useful to avoid duplicates with a server side service check. This defaults to `false`. |
 | `skip_proxy` | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`. |
 | `allow_redirects` | This setting allows the service check to follow HTTP redirects and defaults to `true`.
-| `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging](/guides/tagging/) and blog post, [The power of tagged metrics](https://www.datadoghq.com/blog/the-power-of-tagged-metrics/) |
+| `tags` | A list of arbitrary tags that will be associated with the check. For more information about tags, please see our [Guide to tagging][3] and blog post, [The power of tagged metrics][4] |
 
 
-When you have finished configuring `http_check.yaml`, [restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][5] to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `http_check` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    http_check
-    ----------
-      - instance #0 [WARNING]
-          Warning: Skipping SSL certificate validation for https://example.com based on configuration
-      - instance #1 [OK]
-      - Collected 2 metrics, 0 events & 4 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The http_check check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][6] and look for `http_check` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-Older versions of the HTTP check only emitted events to reflect site status, but now the check supports service checks, too. However, emitting events is still the default behavior. Set `skip_event` to true for all configured instances to submit service checks instead of events.
-
-The Agent will soon deprecate `skip_event`, i.e. the HTTP check will only support service checks.
+The HTTP check does not include any event at this time.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor](https://app.datadoghq.com/monitors#/create) page, not 'Integration'.
+To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][8] page, not 'Integration'.
 
 **`http.can_connect`**:
 
@@ -127,7 +101,19 @@ Otherwise, returns `UP`.
 To disable this check, set `check_certificate_expiration` to false.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][9].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][10]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example
+[3]: https://docs.datadoghq.com/getting_started/tagging/
+[4]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics/
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
+[8]: https://app.datadoghq.com/monitors#/create
+[9]: http://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/

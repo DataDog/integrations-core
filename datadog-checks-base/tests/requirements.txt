@@ -1,5 +1,0 @@
-mock==2.0.0
-pytest
-requests==2.11.1
-protobuf==3.5.1
-prometheus-client==0.1.0

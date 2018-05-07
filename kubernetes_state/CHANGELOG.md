@@ -1,9 +1,21 @@
 # CHANGELOG - kubernetes_state
 
+2.5.0 / Unreleased
+==================
+
+* [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
+* [FEATURE] Add custom tag support.
+
+2.4.0 / 2018-03-23
+==================
+
+* [IMPROVEMENT] Add kubernetes_state.nodes.by_condition count metric [#1277][]
+
 2.3.0 / 2018-02-28
 ==================
 
 * [BUGFIX] Fix fetching kubernetes_state.container.restarts with kube-state-metrics v1.2.0 [#1137][]
+* [BUGFIX] Fix rows with mismatch columns in metadata.csv [#1195][]
 
 2.2.0 / 2018-02-13
 ==================

@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+1.4.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support for service checks.
+
 1.3.0 / 2018-02-13
 ==================
 

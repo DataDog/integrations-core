@@ -1,5 +1,13 @@
 # CHANGELOG - mesos_master
 
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Add debug logs and a noisier error message.
+* [FEATURE] adds custom tag support for service checks.
+
 1.1.0 / 2017-08-21
 ==================
 

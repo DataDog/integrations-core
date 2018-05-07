@@ -14,13 +14,14 @@ Capture HAProxy activity in Datadog to:
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:
 
-1. [Install the Agent](https://app.datadoghq.com/account/settings#agent) on your HAProxy servers. If you need the newest version of the HAProxy check, install the `dd-check-haproxy` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+1. [Install the Agent][1] on your HAProxy servers. 
 
-2. Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/).
+2. Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information][2].
 
 ### Configuration
 
-Create a `haproxy.yaml` file in the Agent's `conf.d` directory.
+Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample haproxy.d/conf.yaml][4] for all available configuration options.
 
 #### Prepare HAProxy
 
@@ -28,24 +29,24 @@ The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
-  ```
-  listen stats # Define a listen section called "stats"
-  bind :9000 # Listen on localhost:9000
-  mode http
-  stats enable  # Enable stats page
-  stats hide-version  # Hide HAProxy version
-  stats realm Haproxy\ Statistics  # Title text for popup window
-  stats uri /haproxy_stats  # Stats URI
-  stats auth Username:Password  # Authentication credentials
-  ```
+    ```
+    listen stats # Define a listen section called "stats"
+    bind :9000 # Listen on localhost:9000
+    mode http
+    stats enable  # Enable stats page
+    stats hide-version  # Hide HAProxy version
+    stats realm Haproxy\ Statistics  # Title text for popup window
+    stats uri /haproxy_stats  # Stats URI
+    stats auth Username:Password  # Authentication credentials
+    ```
 
-2. [Restart HAProxy to enable the stats endpoint](https://www.haproxy.org/download/1.7/doc/management.txt).
+2. [Restart HAProxy to enable the stats endpoint][3].
 
 #### Metric Collection
 
-*  Add this configuration setup to your `haproxy.yaml` file to start gathering your [Haproxy Metrics](#metrics):
+Add this configuration setup to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
-  ```
+  ```yaml
   init_config:
 
   instances:
@@ -53,9 +54,9 @@ The Agent collects metrics via a stats endpoint:
         username: <your_username>
         password: <your_password>
   ```
-  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  See the [sample haproxy.yaml][4] for all available configuration options.
 
-*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
+*  [Restart the Agent][5].
 
 #### Log Collection
 
@@ -67,7 +68,7 @@ The Agent collects metrics via a stats endpoint:
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `haproxy.yaml` file to start collecting your Haproxy Logs:
+* Add this configuration setup to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
   ```
   logs:
@@ -77,36 +78,19 @@ The Agent collects metrics via a stats endpoint:
         source: haproxy
         sourcecategory: http_web_access
   ```
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
-**Learn more about log collection [on the log documentation](https://docs.datadoghq.com/logs)**
+**Learn more about log collection [on the log documentation][6]**
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `haproxy` under the Checks section:
-
-```
-Checks
-======
-  [...]
-
-  haproxy
-  -------
-    - instance #0 [OK]
-    - Collected 26 metrics, 0 events & 1 service check
-
-  [...]
-```
-
-## Compatibility
-
-The haproxy check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][7] and look for `haproxy` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 The Haproxy check does not include any event at this time.
@@ -119,10 +103,23 @@ Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
 Returns `OK` for `maint`, `ok` and any other state.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][9].
 
 ## Further Reading
 
-* [Monitoring HAProxy performance metrics](https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/)
+* [Monitoring HAProxy performance metrics][10]
 * [How to collect HAProxy metrics](https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/)
-* [Monitor HAProxy with Datadog](https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/)
+* [Monitor HAProxy with Datadog][11]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
+[3]: https://www.haproxy.org/download/1.7/doc/management.txt
+[4]: https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/logs
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
+[9]: http://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/
+[11]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/

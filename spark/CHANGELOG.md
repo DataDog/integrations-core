@@ -1,5 +1,12 @@
 # CHANGELOG - spark
 
+1.3.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] adds custom tag support to service check.
+
 1.2.0 / 2018-02-13
 ==================
 

@@ -1,5 +1,10 @@
 # CHANGELOG - network
 
+1.5.0 / 2018-03-23
+==================
+
+* [FEATURE] Add custom tag support.
+
 1.4.0 / 2018-02-13
 ==================
 

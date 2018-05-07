@@ -45,6 +45,7 @@ class TestKubernetesState(AgentCheckTest):
         NAMESPACE + '.node.pods_allocatable',
         NAMESPACE + '.node.gpu.cards_capacity',
         NAMESPACE + '.node.gpu.cards_allocatable',
+        NAMESPACE + '.nodes.by_condition',
         # deployments
         NAMESPACE + '.deployment.replicas',
         NAMESPACE + '.deployment.replicas_available',
@@ -95,7 +96,12 @@ class TestKubernetesState(AgentCheckTest):
 
     TAGS = {
         NAMESPACE + '.pod.ready': ['node:minikube'],
-        NAMESPACE + '.pod.scheduled': ['node:minikube']
+        NAMESPACE + '.pod.scheduled': ['node:minikube'],
+        NAMESPACE + '.nodes.by_condition': [
+            'condition:MemoryPressure', 'condition:DiskPressure',
+            'condition:OutOfDisk', 'condition:Ready',
+            'status:true', 'status:false', 'status:unknown',
+        ]
     }
 
     JOINED_METRICS = {
@@ -138,6 +144,7 @@ class TestKubernetesState(AgentCheckTest):
             'instances': [{
                 'host': 'foo',
                 'kube_state_url': 'http://foo',
+                'tags': ['optional:tag1']
             }]
         }
 
@@ -150,15 +157,20 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
-                                tags=['namespace:default', 'pod:task-pv-pod'])  # Running
+                                tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1'])  # Running
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,
-                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml'])  # Pending
+                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1'])  # Pending
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
-                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q'])  # Succeeded
+                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1'])  # Succeeded
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,
-                                tags=['namespace:default', 'pod:should-run-once'])  # Failed
+                                tags=['namespace:default', 'pod:should-run-once', 'optional:tag1'])  # Failed
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,
-                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k'])  # Unknown
+                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1'])  # Unknown
+
+        # Make sure we send counts for all statuses to avoid no-data graphing issues
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:true', 'optional:tag1'], value=1)
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:false', 'optional:tag1'], value=0)
+        self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:unknown', 'optional:tag1'], value=0)
 
         for metric in self.METRICS:
             self.assertMetric(

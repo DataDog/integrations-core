@@ -1,5 +1,11 @@
 # CHANGELOG - apache
 
+1.2.0 / 2018-03-23
+==================
+### Changes
+
+* [FEATURE] Add custom tag to service check.
+
 1.1.2 / 2018-02-28
 ==================
 ### Changes

@@ -1,5 +1,12 @@
 # CHANGELOG - etcd
 
+1.4.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Get the right metrics depending on the instance state. See [#1348][].
+* [FEATURE] Hardcode the 2379 port in the Autodiscovery template. See [#1444][] for more information.
+
 1.3.0 / 2018-01-10
 ==================
 ### Changes
@@ -30,4 +37,5 @@
 [#736]: https://github.com/DataDog/integrations-core/issues/736
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#917]: https://github.com/DataDog/integrations-core/issues/917
+[#1348]: https://github.com/DataDog/integrations-core/issues/1348
 [@stensonb]: https://github.com/stensonb

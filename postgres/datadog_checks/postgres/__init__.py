@@ -1,7 +1,7 @@
-from . import postgres
+from .postgres import PostgreSql
+from .__about__ import __version__
 
-PostgreSql = postgres.PostgreSql
-
-__version__ = "2.1.0"
-
-__all__ = ['postgres']
+__all__ = [
+    '__version__',
+    'PostgreSql',
+]

@@ -1,20 +1,16 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import re
 import urlparse
 import time
 from datetime import datetime
 
-# 3rd party
 import requests
 import simplejson as json
 
-# project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 
 UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
@@ -38,6 +34,48 @@ PLUS_API_ENDPOINTS = {
     "stream/server_zones": ["stream", "server_zones"],
     "stream/upstreams": ["stream", "upstreams"],
 }
+
+TAGGED_KEYS = {
+    'caches': 'cache',
+    'server_zones': 'server_zone',
+    'serverZones': 'server_zone',  # VTS
+    'upstreams': 'upstream',
+    'upstreamZones': 'upstream',  # VTS
+    'slabs': 'slab',
+    'slots': 'slot'
+}
+
+# Map metrics from vhost_traffic_status to metrics from NGINX Plus
+VTS_METRIC_MAP = {
+    'nginx.loadMsec': 'nginx.load_timestamp',
+    'nginx.nowMsec': 'nginx.timestamp',
+    'nginx.connections.accepted': 'nginx.connections.accepted',
+    'nginx.connections.active': 'nginx.connections.active',
+    'nginx.connections.reading': 'nginx.net.reading',
+    'nginx.connections.writing': 'nginx.net.writing',
+    'nginx.connections.waiting': 'nginx.net.waiting',
+    'nginx.connections.requests': 'nginx.requests.total',
+    'nginx.server_zone.requestCounter': 'nginx.server_zone.requests',
+    'nginx.server_zone.responses.1xx': 'nginx.server_zone.responses.1xx',
+    'nginx.server_zone.responses.2xx': 'nginx.server_zone.responses.2xx',
+    'nginx.server_zone.responses.3xx': 'nginx.server_zone.responses.3xx',
+    'nginx.server_zone.responses.4xx': 'nginx.server_zone.responses.4xx',
+    'nginx.server_zone.responses.5xx': 'nginx.server_zone.responses.5xx',
+    'nginx.server_zone.inBytes': 'nginx.server_zone.received',
+    'nginx.server_zone.outBytes': 'nginx.server_zone.sent',
+    'nginx.upstream.requestCounter': 'nginx.upstream.peers.requests',
+    'nginx.upstream.inBytes': 'nginx.upstream.peers.received',
+    'nginx.upstream.outBytes': 'nginx.upstream.peers.sent',
+    'nginx.upstream.responses.1xx': 'nginx.upstream.peers.responses.1xx',
+    'nginx.upstream.responses.2xx': 'nginx.upstream.peers.responses.2xx',
+    'nginx.upstream.responses.3xx': 'nginx.upstream.peers.responses.3xx',
+    'nginx.upstream.responses.4xx': 'nginx.upstream.peers.responses.4xx',
+    'nginx.upstream.responses.5xx': 'nginx.upstream.peers.responses.5xx',
+    'nginx.upstream.weight': 'nginx.upstream.peers.weight',
+    'nginx.upstream.backup': 'nginx.upstream.peers.backup',
+    'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
+}
+
 
 class Nginx(AgentCheck):
     """Tracks basic nginx metrics via the status module
@@ -78,7 +116,8 @@ class Nginx(AgentCheck):
             # since we can't get everything in one place anymore.
 
             for endpoint, nest in PLUS_API_ENDPOINTS.iteritems():
-                response = self._get_plus_api_data(instance, url, ssl_validation, auth, plus_api_version, endpoint, nest)
+                response = self._get_plus_api_data(instance, url, ssl_validation, auth,
+                                                   plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
@@ -87,9 +126,31 @@ class Nginx(AgentCheck):
             'rate': self.rate,
             'count': self.count
         }
+        conn = None
+        handled = None
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
+
+                # Translate metrics received from VTS
+                if instance.get('use_vts', False):
+                    # Requests per second
+                    if name == 'nginx.connections.handled':
+                        handled = value
+                    if name == 'nginx.connections.accepted':
+                        conn = value
+                        self.rate('nginx.net.conn_opened_per_s', conn, tags)
+                    if handled is not None and conn is not None:
+                        self.rate('nginx.net.conn_dropped_per_s', conn - handled, tags)
+                        handled = None
+                        conn = None
+                    if name == 'nginx.connections.requests':
+                        self.rate('nginx.net.request_per_s', value, tags)
+
+                    name = VTS_METRIC_MAP.get(name)
+                    if name is None:
+                        continue
+
                 if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
                     func_count = funcs['count']
                     func_count(name + "_count", value, tags)
@@ -131,8 +192,12 @@ class Nginx(AgentCheck):
         parsed_url = urlparse.urlparse(url)
         nginx_host = parsed_url.hostname
         nginx_port = parsed_url.port or 80
+        custom_tags = instance.get('tags', [])
+        if custom_tags is None:
+            custom_tags = []
+
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port]
+        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
             self.log.debug(u"Querying URL: {0}".format(url))
             r = self._perform_request(instance, url, ssl_validation, auth)
@@ -146,13 +211,15 @@ class Nginx(AgentCheck):
         return r
 
     def _nest_payload(self, keys, payload):
-        # Nest a payload in a dict under the keys contained in `keys`
+        """
+        Nest a payload in a dict under the keys contained in `keys`
+        """
         if len(keys) == 0:
             return payload
-        else:
-            return {
-                keys[0]: self._nest_payload(keys[1:], payload)
-            }
+
+        return {
+            keys[0]: self._nest_payload(keys[1:], payload)
+        }
 
     def _get_plus_api_data(self, instance, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
@@ -170,9 +237,11 @@ class Nginx(AgentCheck):
         return payload
 
     @classmethod
-    def parse_text(cls, raw, tags):
+    def parse_text(cls, raw, tags=None):
         # Thanks to http://hostingfu.com/files/nginx/nginxstats.py for this code
         # Connections
+        if tags is None:
+            tags = []
         output = []
         parsed = re.search(r'Active connections:\s+(\d+)', raw)
         if parsed:
@@ -209,27 +278,8 @@ class Nginx(AgentCheck):
         else:
             parsed = json.loads(raw)
         metric_base = 'nginx'
-        output = []
-        all_keys = parsed.keys()
 
-        tagged_keys = [('caches', 'cache'), ('server_zones', 'server_zone'),
-                       ('upstreams', 'upstream')]
-
-        # Process the special keys that should turn into tags instead of
-        # getting concatenated to the metric name
-        for key, tag_name in tagged_keys:
-            metric_name = '%s.%s' % (metric_base, tag_name)
-            for tag_val, data in parsed.get(key, {}).iteritems():
-                tag = '%s:%s' % (tag_name, tag_val)
-                output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
-
-        # Process the rest of the keys
-        rest = set(all_keys) - set([k for k, _ in tagged_keys])
-        for key in rest:
-            metric_name = '%s.%s' % (metric_base, key)
-            output.extend(cls._flatten_json(metric_name, parsed[key], tags))
-
-        return output
+        return cls._flatten_json(metric_base, parsed, tags)
 
     @classmethod
     def _flatten_json(cls, metric_base, val, tags):
@@ -237,6 +287,7 @@ class Nginx(AgentCheck):
             [(metric_name, value, tags)]
         '''
         output = []
+
         if isinstance(val, dict):
             # Pull out the server as a tag instead of trying to read as a metric
             if 'server' in val and val['server']:
@@ -246,8 +297,14 @@ class Nginx(AgentCheck):
                 else:
                     tags = tags + [server]
             for key, val2 in val.iteritems():
-                metric_name = '%s.%s' % (metric_base, key)
-                output.extend(cls._flatten_json(metric_name, val2, tags))
+                if key in TAGGED_KEYS:
+                    metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
+                    for tag_val, data in val2.iteritems():
+                        tag = '%s:%s' % (TAGGED_KEYS[key], tag_val)
+                        output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
+                else:
+                    metric_name = '%s.%s' % (metric_base, key)
+                    output.extend(cls._flatten_json(metric_name, val2, tags))
 
         elif isinstance(val, list):
             for val2 in val:

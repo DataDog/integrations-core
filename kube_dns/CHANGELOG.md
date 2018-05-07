@@ -1,6 +1,12 @@
 # CHANGELOG - Kube-dns
 
-1.2.0 / 2018-01-10 
+1.3.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add metrics `kubedns.request_count.count`, `kubedns.error_count.count` and `cachemiss_count.count`, alternative metrics submitted as monotonic\_counts. See [#1341][]
+
+1.2.0 / 2018-01-10
 ==================
 ### Changes
 
@@ -10,7 +16,7 @@
 ==================
 ### Changes
 
-* [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
+* [UPDATE] Update auto\_conf template to support agent 6 and 5.20+. See [#860][]
 
 1.0.0 / 2017-07-18
 ==================
@@ -24,4 +30,5 @@
 [#451]: https://github.com/DataDog/integrations-core/issues/451
 [#860]: https://github.com/DataDog/integrations-core/issues/860
 [#965]: https://github.com/DataDog/integrations-core/issues/965
+[#1341]: https://github.com/DataDog/integrations-core/issues/1341
 [@aerostitch]: https://github.com/aerostitch

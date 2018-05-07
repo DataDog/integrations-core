@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.8.0",
+        "integration":"kong",
+        "check": "kong.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Kong instance. Returns `OK` otherwise."
+    }
+]

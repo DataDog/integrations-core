@@ -5,4 +5,4 @@ init_config:
 
 instances:
   - url: "%%host%%"
-    port: "%%port%%"
+    port: "11211"

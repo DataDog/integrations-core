@@ -17,8 +17,8 @@ init_config:
           type: gauge
           active: no
 
-instances: 
-# Optional tags to be applied to every emitted metric and service check.
-#   tags:
-#      - optional_tag1
-#      - optional_tag2
+instances:
+  - tags:
+    # Optional tags to be applied to every emitted metric and service check.
+    #   - optional_tag1
+    #   - optional_tag2

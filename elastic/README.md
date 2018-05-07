@@ -10,15 +10,20 @@ The Datadog Agent's Elasticsearch check collects metrics for search and indexing
 ## Setup
 ### Installation
 
-The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
-
-If you need the newest version of the Elasticsearch check, install the `dd-check-elastic` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent][1] on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
 
 ### Configuration
 
-Create a file `elastic.yaml` in the Datadog Agent's `conf.d` directory. See the [sample elastic.yaml](https://github.com/DataDog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options:
+1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample elastic.d/conf.yaml][2] for all available configuration options.
 
-```
+2. [Restart the Agent][3]
+
+#### Metric Collection
+
+*  Add this configuration setup to your `elastic.yaml` file to start gathering your [ElasticSearch metrics](#metrics):
+
+```yaml
 init_config:
 
 instances:
@@ -34,36 +39,44 @@ instances:
 
 * To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
-See the [sample elastic.yaml](https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example) for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
+See the [sample elastic.yaml][2] for all available configuration options, including those for authentication to and SSL verification of your cluster's API `url`.
 
-Finally, [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Elasticsearch metrics to Datadog.
+Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datadog.
 
+#### Log Collection
 
+**Available for Agent >6.0**
+
+* Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+
+  ```
+  logs_enabled: true
+  ```
+
+* Then add this configuration setup to your `apache.yaml` file to start collecting your Elasticsearch Logs:
+
+  ```yaml
+    logs:
+        - type: file
+          path: /var/log/elasticsearch/*.log
+          source: elasticsearch
+          service: myservice
+  ```
+
+  Change the `path` and `service` parameter values and configure them for your environment.
+  
+* [Restart the Agent][3] to begin sending Elasticsearch logs to Datadog.
+  
+**Learn more about log collection [on the log documentation][4]**
+  
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `elastic` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    elastic
-    -------
-      - instance #0 [OK]
-      - Collected 118 metrics, 0 events & 2 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The Elasticsearch check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][5] and look for `elastic` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -81,8 +94,19 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 
 ## Troubleshooting
 
-* [Agent can't connect](https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect)
-* [Why isn't Elasticsearch sending all my metrics?](/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics)
+* [Agent can't connect][7]
+* [Why isn't Elasticsearch sending all my metrics?][8]
 
 ## Further Reading
-To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/) about it.
+To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts][9] about it.
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/logs
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
+[7]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
+[8]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
+[9]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/

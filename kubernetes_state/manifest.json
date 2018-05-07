@@ -6,16 +6,19 @@
   "name": "kubernetes_state",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
   "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "version": "2.3.0",
+  "version": "2.5.0",
   "use_omnibus_reqs": true,
   "public_title": "Datadog-Kubernetes State Integration",
-  "categories":["orchestration", "containers"],
-  "type":"check",
+  "categories": [
+    "orchestration",
+    "containers"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/kubernetes_state/",
   "is_public": true,
   "has_logo": true

@@ -1,5 +1,11 @@
 # CHANGELOG - riak
 
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Hardcode the 8098 port in the Autodiscovery template. See [#1444][] for more information.
+
 1.1.0 / 2017-11-21
 ==================
 ### Changes

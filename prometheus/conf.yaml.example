@@ -18,6 +18,10 @@ instances:
   #     - memory: mem
   #     - io
 
+  # Prefix for exposed Prometheus metrics
+  #
+  # prometheus_metrics_prefix: prefix_
+
   #   Send a service check reporting about the health of the prometheus endpoint
   #   It will be named <namespace>.prometheus.health (true by default)
   #
@@ -54,6 +58,10 @@ instances:
   #   To send the histograms bucket
   #
   #   send_histograms_buckets: True
+
+  #   To send counters as monotonic counter
+  #
+  #   send_monotonic_counter: True
 
   #   List of label to be excluded
   #

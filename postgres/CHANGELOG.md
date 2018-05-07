@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+2.1.1 / Unreleased
+=================
+### Changes
+
+* [BUGFIX] Adding db rollback when transaction fails in postgres metrics collection. See[#1193][].
+
 2.1.0 / 2018-03-07
 ==================
 ### Changes

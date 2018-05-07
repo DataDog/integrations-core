@@ -1,5 +1,12 @@
 # CHANGELOG - cassandra
 
+1.2.1 / 2018-03-23
+==================
+
+### Changes
+
+* [IMPROVEMENT] Adjusted comment whitespacing to avoid confusion around indent level for `user` and `password`. See [#1075][]
+
 1.2.0 / 2017-11-21
 ==================
 

@@ -13,13 +13,11 @@ The check emits events for service flaps, host state changes, passive service ch
 ## Setup
 ### Installation
 
-The Nagios check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Nagios servers.
-
-If you need the newest version of the Nagios check, install the `dd-check-nagios` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The Nagios check is packaged with the Agent, so simply [install the Agent][1] on your Nagios servers.
 
 ### Configuration
 
-Create a file `nagios.yaml` in the Agent's `conf.d` directory. See the [sample nagios.yaml](https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.example) for all available configuration options:
+Edit the `nagios.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -37,28 +35,11 @@ The Agent reads the main nagios configuration file to get the locations of the n
 
 This check also works with Icinga, the popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Nagios events and (optionally) perfdata metrics to Datadog.
+[Restart the Agent][3] to start sending Nagios events and (optionally) perfdata metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `nagios` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    nagios
-    -------
-      - instance #0 [OK]
-      - Collected 10 metrics, 15 events & 0 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The nagios check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `nagios` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -86,8 +67,16 @@ The check watches the Nagios events log for log lines containing these string, e
 The Nagios check does not include any service check at this time.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
 
-* [Understand your Nagios alerts with Datadog](https://www.datadoghq.com/blog/nagios-monitoring/)
+* [Understand your Nagios alerts with Datadog][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/nagios/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/nagios-monitoring/

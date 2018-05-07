@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"windows_service",
+        "check": "windows_service.state",
+        "statuses": ["ok", "warning", "critical", "unknown"],
+        "groups": ["host", "service"],
+        "name": "Service state",
+        "description": "Returns `OK` if the windows service is in Running state, `CRITICAL` if it is Stopped, `UNKNOWN` if it is Unknown, and `WARNING` for the other service states."
+    }
+]

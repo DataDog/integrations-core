@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  lighttpd:
+    image: sebp/lighttpd
+    ports:
+      - "9449:9449"
+    volumes:
+      - ./lighttpd.conf:/etc/lighttpd/lighttpd.conf
+      - ./passwd:/etc/lighttpd/passwd

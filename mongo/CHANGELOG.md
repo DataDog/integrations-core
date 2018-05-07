@@ -1,5 +1,11 @@
 # CHANGELOG - mongo
 
+1.5.3 / Unreleased
+==================
+### Changes
+
+* [BUGFIX] Added `top` metrics ending in `countsps` that properly submit as `rate`s. See #1491
+
 1.5.2 / 2018-02-13
 ==================
 ### Changes

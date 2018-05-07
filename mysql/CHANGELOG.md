@@ -1,10 +1,18 @@
 # CHANGELOG - mysql
 
-1.1.3 / Unreleased
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Add custom tag support to service checks.
+* [BUGFIX] reports slave_service check as `CRITICAL` if `Slave_running` global variable is OFF.
+
+1.1.3 / 2018-03-23
 ==================
 ### Changes
 
 * [BUGFIX] Fixes the buffer pool metric to return the aggregated values
+* [DEPENDENCY] Bump the pymysql version from 0.6.6 to 0.8.0
 
 1.1.2 / 2018-02-13
 ==================

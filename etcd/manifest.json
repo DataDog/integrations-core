@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.20.0",
+  "manifest_version": "1.0.0",
   "name": "etcd",
   "short_description": "Track writes, updates, deletes, inter-node latencies, and more etcd metrics.",
   "support": "core",
@@ -11,11 +9,11 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.3.0",
   "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73",
   "public_title": "Datadog-etcd Integration",
   "categories":["orchestration", "containers", "configuration & deployment", "orchestration"],
   "type":"check",
+  "version": "1.4.0",
   "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
   "is_public": true,
   "has_logo": true

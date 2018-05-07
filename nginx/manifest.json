@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "nginx",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
@@ -11,11 +9,13 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "88620208-3919-457c-ba51-d844d09ac97f",
   "public_title": "Datadog-Nginx Integration",
-  "categories":["web", "log collection"],
-  "type":"check",
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/nginx/",
   "is_public": true,
   "has_logo": true

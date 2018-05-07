@@ -91,7 +91,8 @@ class MapReduceCheck(AgentCheckTest):
     MR_CONFIG = {
         'resourcemanager_uri': 'http://localhost:8088',
         'cluster_name': CLUSTER_NAME,
-        'collect_task_metrics': 'true'
+        'collect_task_metrics': 'true',
+        'tags': ['optional:tag1']
     }
 
     INIT_CONFIG = {
@@ -150,7 +151,8 @@ class MapReduceCheck(AgentCheckTest):
         'cluster_name:' + CLUSTER_NAME,
         'app_name:' + APP_NAME,
         'job_name:' + JOB_NAME,
-        'user_name:' + USER_NAME
+        'user_name:' + USER_NAME,
+        'optional:tag1'
     ]
 
     MAPREDUCE_MAP_TASK_METRIC_VALUES = {
@@ -162,7 +164,8 @@ class MapReduceCheck(AgentCheckTest):
         'app_name:' + APP_NAME,
         'job_name:' + JOB_NAME,
         'user_name:' + USER_NAME,
-        'task_type:map'
+        'task_type:map',
+        'optional:tag1'
     ]
 
     MAPREDUCE_REDUCE_TASK_METRIC_VALUES = {
@@ -174,7 +177,8 @@ class MapReduceCheck(AgentCheckTest):
         'app_name:' + APP_NAME,
         'job_name:' + JOB_NAME,
         'user_name:' + USER_NAME,
-        'task_type:reduce'
+        'task_type:reduce',
+        'optional:tag1'
     ]
 
     MAPREDUCE_JOB_COUNTER_METRIC_VALUES_READ = {
@@ -199,7 +203,8 @@ class MapReduceCheck(AgentCheckTest):
         'cluster_name:' + CLUSTER_NAME,
         'app_name:' + APP_NAME,
         'job_name:' + JOB_NAME,
-        'user_name:' + USER_NAME
+        'user_name:' + USER_NAME,
+        'optional:tag1'
     ]
 
     @mock.patch('requests.get', side_effect=requests_get_mock)
@@ -255,6 +260,6 @@ class MapReduceCheck(AgentCheckTest):
 
         # Check the service tests
         self.assertServiceCheckOK(YARN_SERVICE_CHECK,
-            tags=['url:http://localhost:8088'])
+            tags=['url:http://localhost:8088', 'optional:tag1'])
         self.assertServiceCheckOK(MAPREDUCE_SERVICE_CHECK,
-            tags=['url:http://localhost:8088'])
+            tags=['url:http://localhost:8088', 'optional:tag1'])
