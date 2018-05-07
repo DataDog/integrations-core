@@ -777,80 +777,81 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        try:
-            data = {}
-            dbnames = []
+        if not instance.get('disable_replica_check'):
+            try:
+                data = {}
+                dbnames = []
 
-            replSet = admindb.command('replSetGetStatus')
-            if replSet:
-                primary = None
-                current = None
+                replSet = admindb.command('replSetGetStatus')
+                if replSet:
+                    primary = None
+                    current = None
 
-                # need a new connection to deal with replica sets
-                setname = replSet.get('set')
-                cli_rs = pymongo.mongo_client.MongoClient(
-                    server,
-                    socketTimeoutMS=timeout,
-                    connectTimeoutMS=timeout,
-                    serverSelectionTimeoutMS=timeout,
-                    replicaset=setname,
-                    read_preference=pymongo.ReadPreference.NEAREST,
-                    **ssl_params)
+                    # need a new connection to deal with replica sets
+                    setname = replSet.get('set')
+                    cli_rs = pymongo.mongo_client.MongoClient(
+                        server,
+                        socketTimeoutMS=timeout,
+                        connectTimeoutMS=timeout,
+                        serverSelectionTimeoutMS=timeout,
+                        replicaset=setname,
+                        read_preference=pymongo.ReadPreference.NEAREST,
+                        **ssl_params)
 
-                if do_auth:
-                    if auth_source:
-                        self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
-                    else:
-                        self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
+                    if do_auth:
+                        if auth_source:
+                            self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
+                        else:
+                            self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
 
-                # Replication set information
-                replset_name = replSet['set']
-                replset_state = self.get_state_name(replSet['myState']).lower()
+                    # Replication set information
+                    replset_name = replSet['set']
+                    replset_state = self.get_state_name(replSet['myState']).lower()
 
-                tags.extend([
-                    u"replset_name:{0}".format(replset_name),
-                    u"replset_state:{0}".format(replset_state),
-                ])
+                    tags.extend([
+                        u"replset_name:{0}".format(replset_name),
+                        u"replset_state:{0}".format(replset_state),
+                    ])
 
-                # Find nodes: master and current node (ourself)
-                for member in replSet.get('members'):
-                    if member.get('self'):
-                        current = member
-                    if int(member.get('state')) == 1:
-                        primary = member
+                    # Find nodes: master and current node (ourself)
+                    for member in replSet.get('members'):
+                        if member.get('self'):
+                            current = member
+                        if int(member.get('state')) == 1:
+                            primary = member
 
-                # Compute a lag time
-                if current is not None and primary is not None:
-                    if 'optimeDate' in primary and 'optimeDate' in current:
-                        lag = primary['optimeDate'] - current['optimeDate']
-                        data['replicationLag'] = total_seconds(lag)
+                    # Compute a lag time
+                    if current is not None and primary is not None:
+                        if 'optimeDate' in primary and 'optimeDate' in current:
+                            lag = primary['optimeDate'] - current['optimeDate']
+                            data['replicationLag'] = total_seconds(lag)
 
-                if current is not None:
-                    data['health'] = current['health']
+                    if current is not None:
+                        data['health'] = current['health']
 
-                data['state'] = replSet['myState']
+                    data['state'] = replSet['myState']
 
-                if current is not None:
-                    total = 0.0
-                    cfg = cli_rs['local']['system.replset'].find_one()
-                    for member in cfg.get('members'):
-                        total += member.get('votes', 1)
-                        if member['_id'] == current['_id']:
-                            data['votes'] = member.get('votes', 1)
-                    data['voteFraction'] = data['votes'] / total
+                    if current is not None:
+                        total = 0.0
+                        cfg = cli_rs['local']['system.replset'].find_one()
+                        for member in cfg.get('members'):
+                            total += member.get('votes', 1)
+                            if member['_id'] == current['_id']:
+                                data['votes'] = member.get('votes', 1)
+                        data['voteFraction'] = data['votes'] / total
 
-                status['replSet'] = data
+                    status['replSet'] = data
 
-                # Submit events
-                self._report_replica_set_state(
-                    data['state'], clean_server_name, replset_name, self.agentConfig
-                )
+                    # Submit events
+                    self._report_replica_set_state(
+                        data['state'], clean_server_name, replset_name, self.agentConfig
+                    )
 
-        except Exception as e:
-            if "OperationFailure" in repr(e) and ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
-                pass
-            else:
-                raise e
+            except Exception as e:
+                if "OperationFailure" in repr(e) and ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
+                    pass
+                else:
+                    raise e
 
         # If these keys exist, remove them for now as they cannot be serialized
         try:

@@ -12,6 +12,11 @@ instances:
     #   - optional_tag1
     #   - optional_tag2
 
+    # Whether or not to disable reads from available replicas.
+    # Use this if any replicas are inaccessible to the agent.
+    #
+    # disable_replica_check: false
+
     # Optional SSL parameters, see https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
     # for more details
     #
@@ -63,7 +68,7 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
-    
+
     # - type: file
     #   path: /var/log/mongodb/mongodb.log
     #   service: mongo
