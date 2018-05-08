@@ -336,7 +336,7 @@ class KafkaCheck(AgentCheck):
         for topic, partitions in topics_to_fetch.iteritems():
             for partition in partitions:
                 partition_leader = cli.cluster.leader_for_partition(TopicPartition(topic, partition))
-                if partition_leader is not None and partition_leader > -1:
+                if partition_leader is not None and partition_leader >= 0:
                     leader_tp[partition_leader][topic].update([partition])
 
         max_offsets = 1
