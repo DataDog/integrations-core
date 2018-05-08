@@ -203,22 +203,17 @@ class HTTPCheck(NetworkCheck):
         if not url:
             raise Exception("Bad configuration. You must specify a url")
         include_content = _is_affirmative(instance.get('include_content', False))
-        ssl = _is_affirmative(instance.get('disable_ssl_validation', True))
+        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
         ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
-
-        parsed_uri = urlparse(url)
-        if 'disable_ssl_validation' not in instance and parsed_uri.scheme == 'https' and not ignore_ssl_warning:
-            self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(url))
-
         skip_proxy = _is_affirmative(
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
-            headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
+            headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs,\
             weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
@@ -247,9 +242,12 @@ class HTTPCheck(NetworkCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s" % addr)
+
             if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
-                self.warning("Skipping SSL certificate validation for %s based on configuration"
-                             % addr)
+                if 'disable_ssl_validation' in instance:
+                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(addr))
+                else:
+                    self.warning("Skipping SSL certificate validation for {0} based on configuration".format(addr))
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
