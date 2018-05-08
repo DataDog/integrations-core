@@ -37,10 +37,6 @@ class BadKafkaConsumerConfiguration(Exception):
     pass
 
 
-class NoKafkaBrokersAvailable(Exception):
-    pass
-
-
 class KafkaCheck(AgentCheck):
     """
     Check the offsets and lag of Kafka consumers.
@@ -185,14 +181,6 @@ class KafkaCheck(AgentCheck):
 
         return version > self.LAST_ZKONLY_VERSION
 
-    def _get_random_node_id(self, client):
-        brokers = client.cluster.brokers()
-        if not brokers:
-            raise NoKafkaBrokersAvailable('No available brokers.')
-        node_id = random.sample(brokers, 1)[0].nodeId
-
-        return node_id
-
     def _ensure_ready_node(self, client, node_id):
         if node_id is None:
             raise Exception("node_id is None")
@@ -219,7 +207,7 @@ class KafkaCheck(AgentCheck):
 
     def _make_blocking_req(self, client, request, node_id=None):
         if node_id is None:
-            node_id = self._get_random_node_id(client)
+            node_id = client.least_loaded_node()
 
         self._ensure_ready_node(client, node_id)
 
