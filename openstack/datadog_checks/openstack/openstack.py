@@ -29,7 +29,7 @@ DEFAULT_NOVA_API_VERSION = V21_NOVA_API_VERSION
 FALLBACK_NOVA_API_VERSION = 'v2'
 DEFAULT_NEUTRON_API_VERSION = 'v2.0'
 
-DEFAULT_API_REQUEST_TIMEOUT = 5  # seconds
+DEFAULT_API_REQUEST_TIMEOUT = 10 # seconds
 
 NOVA_HYPERVISOR_METRICS = [
     'current_workload',
@@ -572,11 +572,13 @@ class OpenStackCheck(AgentCheck):
         Generic request handler for OpenStack API requests
         Raises specialized Exceptions for commonly encountered error codes
         """
+        self.log.debug("Request URL and Params: %s, %s", url, params)
         try:
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
                                 timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
-        except requests.exceptions.HTTPError:
+        except requests.HTTPError as e:
+            self.log.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
 
@@ -584,6 +586,8 @@ class OpenStackCheck(AgentCheck):
                 self.delete_current_scope()
             elif resp.status_code == 409:
                 raise InstancePowerOffFailure()
+            elif resp.status_code == 404:
+                raise e
             else:
                 raise
 
@@ -860,7 +864,7 @@ class OpenStackCheck(AgentCheck):
 
     # Get all of the server IDs and their metadata and cache them
     # After the first run, we will only get servers that have changed state since the last collection run
-    def get_all_servers(self, i_key, filter_by_host=None):
+    def get_all_servers(self, i_key, collect_all_tenants, filter_by_host=None):
         query_params = {}
         if filter_by_host:
             query_params["host"] = filter_by_host
@@ -872,6 +876,8 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/detail'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
 
+        if collect_all_tenants:
+            query_params["all_tenants"] = True
         servers = []
 
         try:
@@ -880,20 +886,25 @@ class OpenStackCheck(AgentCheck):
             resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
             servers.extend(resp['servers'])
 
-            # Get a list of deleted serversTimestamp used to filter the call to get the list
-            # Need to have admin perms for this to take affect
-            query_params['deleted'] = 'true'
-            query_params['status'] = None
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
-            servers.extend(resp['servers'])
-            query_params['deleted'] = 'false'
+            # Don't collect Deleted or Shut off VMs on the first run:
+            if i_key in self.changes_since_time:
 
-            # Get a list of shut off servers
-            query_params['status'] = 'SHUTOFF'
-            resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
-            servers.extend(resp['servers'])
+                # Get a list of deleted serversTimestamp used to filter the call to get the list
+                # Need to have admin perms for this to take affect
+                query_params['deleted'] = 'true'
+                del query_params['status']
+                resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+
+                servers.extend(resp['servers'])
+                query_params['deleted'] = 'false'
+
+                # Get a list of shut off servers
+                query_params['status'] = 'SHUTOFF'
+                resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
+                servers.extend(resp['servers'])
 
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
+
         except Exception as e:
             self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
             raise e
@@ -909,12 +920,17 @@ class OpenStackCheck(AgentCheck):
 
             # Update our cached list of servers
             if new_server['server_id'] not in self.server_details_by_id and new_server['state'] in DIAGNOSTICABLE_STATES:
+                self.log.debug("Adding server to cache: %s", new_server)
                 # The project may not exist if the server isn't in an active state
                 # Query for the project name here to avoid 404s
                 new_server['project_name'] = self.get_project_name_from_id(new_server['tenant_id'])
                 self.server_details_by_id[new_server['server_id']] = new_server
             elif new_server['server_id'] in self.server_details_by_id and new_server['state'] in REMOVED_STATES:
-                del self.server_details_by_id[new_server['server_id']]
+                self.log.debug("Removing server from cache: %s", new_server)
+                try:
+                    del self.server_details_by_id[new_server['server_id']]
+                except KeyError as e:
+                    self.log.debug("Server: %s has already been removed from the cache", new_server['server_id'])
         
         return self.server_details_by_id
 
@@ -945,8 +961,16 @@ class OpenStackCheck(AgentCheck):
         url = '{0}/servers/{1}/diagnostics'.format(self.get_nova_endpoint(), server_id)
         try:
             server_stats = self._make_request_with_auth_fallback(url, headers)
-        except InstancePowerOffFailure:
-            self.warning("Server %s is powered off and cannot be monitored" % server_id)
+        except InstancePowerOffFailure: # 409 response code came back fro nova
+            self.log.debug("Server %s is powered off and cannot be monitored", server_id)
+            del self.server_details_by_id[server_id]
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
+                del self.server_details_by_id[server_id]
+            else:
+                self.log.debug("Received HTTP Error when reaching the nova endpoint")
+                raise e
         except Exception as e:
             self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
             raise e
@@ -1075,7 +1099,6 @@ class OpenStackCheck(AgentCheck):
         return instance_scope
 
     def check(self, instance):
-
         # have we been backed off
         if not self.should_run(instance):
             self.log.info('Skipping run due to exponential backoff in effect')
@@ -1083,7 +1106,7 @@ class OpenStackCheck(AgentCheck):
 
         try:
             instance_scope = self.ensure_auth_scope(instance)
-
+            split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1108,6 +1131,7 @@ class OpenStackCheck(AgentCheck):
                 self._send_api_service_checks(scope)
 
                 collect_all_projects = instance.get("collect_all_projects", False)
+                collect_all_tenants = self._if_affirmative(instance.get('collect_all_tenants', False))
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
@@ -1116,7 +1140,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor()
+                hyp = self.get_local_hypervisor(split_hostname_on_first_period)
 
                 project = self.get_scoped_project(scope)
 
@@ -1129,18 +1153,19 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                servers = self.get_servers_managed_by_hypervisor(i_key)
+                servers = self.get_servers_managed_by_hypervisor(i_key, split_hostname_on_first_period, collect_all_tenants)
 
-                host_tags = self._get_tags_for_host()
+                host_tags = self._get_tags_for_host(split_hostname_on_first_period)
 
-                for server in self.server_details_by_id:
+                # Deep copy the cache so we can remove things from the Original during the iteration
+                server_cache_copy = copy.deepcopy(self.server_details_by_id)
+
+                for server in server_cache_copy:
                     server_tags = copy.copy(instance.get('server_tags', []))
                     server_tags.append("nova_managed_server")
 
                     if scope.tenant_id:
                         server_tags.append("tenant_id:%s" % scope.tenant_id)
-                    if project and 'name' in project:
-                        server_tags.append('project_name:{0}'.format(project['name']))
 
                     self.external_host_tags[server] = host_tags
                     self.get_stats_for_single_server(servers[server], tags=server_tags)
@@ -1148,7 +1173,7 @@ class OpenStackCheck(AgentCheck):
                 if hyp:
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
                 else:
-                    self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
+                    self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname(split_hostname_on_first_period))
 
                 # For now, monitor all networks
                 self.get_network_stats()
@@ -1192,12 +1217,12 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self):
+    def get_local_hypervisor(self, split_hostname_on_first_period):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname()
+        host = self.get_my_hostname(split_hostname_on_first_period)
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
@@ -1259,14 +1284,19 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-    def get_my_hostname(self):
+    def get_my_hostname(self, split_hostname_on_first_period):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
         """
-        return self.init_config.get("os_host") or self.hostname
+        
+        hostname = self.init_config.get("os_host") or self.hostname
+        if split_hostname_on_first_period:
+            hostname = hostname.split('.')[0]
+        
+        return hostname
 
-    def get_servers_managed_by_hypervisor(self, i_key):
-        servers = self.get_all_servers(i_key, filter_by_host=self.get_my_hostname())
+    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period, collect_all_tenants):
+        servers = self.get_all_servers(i_key, collect_all_tenants, filter_by_host=self.get_my_hostname(split_hostname_on_first_period))
         if self.exclude_server_id_rules:
             # Filter out excluded servers
             for exclude_id_rule in self.exclude_server_id_rules:
@@ -1276,9 +1306,8 @@ class OpenStackCheck(AgentCheck):
         
         return self.server_details_by_id
 
-    def _get_tags_for_host(self):
-        hostname = self.get_my_hostname()
-
+    def _get_tags_for_host(self, split_hostname_on_first_period):
+        hostname = self.get_my_hostname(split_hostname_on_first_period)
         tags = []
         if hostname in self._get_and_set_aggregate_list():
             tags.append('aggregate:{0}'.format(self._aggregate_list[hostname]['aggregate']))
