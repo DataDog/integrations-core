@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "kafka_consumer",
   "short_description": "Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.",
   "support": "core",
@@ -10,7 +8,6 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.3.0",
   "guid": "74e1ce9c-dee9-4ad5-9b6a-05eeee7f5259",
   "public_title": "Datadog-Kafka Consumer Integration",
   "categories":["processing", "messaging"],

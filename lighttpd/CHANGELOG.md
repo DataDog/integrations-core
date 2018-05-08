@@ -1,6 +1,13 @@
 # CHANGELOG - lighttpd
 
-1.1.0 / Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Support digest authentication on the server status page.
+
+1.1.0 / 2018-03-23
 ==================
 
 ### Changes

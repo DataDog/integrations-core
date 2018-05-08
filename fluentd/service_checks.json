@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.2.0",
+        "integration":"fluentd",
+        "check": "fluentd.is_ok",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "fluentd_host", "fluentd_port"],
+        "name": "Service state",
+        "description": "Returns `OK` if fluentd and its monitor agent are running, CRITICAL otherwise."
+    }
+]

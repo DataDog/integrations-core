@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.3.0",
+        "integration":"activemq",
+        "groups": ["host", "instance"],
+        "check": "activemq.can_connect",
+        "statuses": ["ok", "critical"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise."
+    }
+]

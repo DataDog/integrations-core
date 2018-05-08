@@ -1,11 +1,19 @@
 # CHANGELOG - elastic
 
+1.6.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Hardcode the 9200 port in the Autodiscovery template. See [#1444][].
+* [FEATURE] adds `index_stats` to collect index level metrics. See [#1312][].
+
 1.5.0 / 2018-02-13
 ==================
 
 ### Changes
 
-* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. [#1050][].
+* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. See [#1050][].
 * [BUG] Fixes bug that causes poor failovers when authentication fails. See [#1026][].
 * [IMPROVEMENT] Adds `cluster_name` tag to the `elasticsearch.cluster_health` service check. See [#1038][].
 
@@ -37,7 +45,7 @@
 
 * [BUG] Fixes bug for retreiving indices count. See [#806][]
 * [FEATURE] Added more JVM metrics. See [#695][]
-* [FEATURE] Add metric on the average time spent by tasks in the pending queue. See[#820][]
+* [FEATURE] Add metric on the average time spent by tasks in the pending queue. See [#820][]
 
 1.0.1 / 2017-08-28
 ==================
@@ -63,3 +71,5 @@
 [#893]: https://github.com/DataDog/integrations-core/issues/893
 [#1026]: https://github.com/DataDog/integrations-core/issues/1026
 [#1050]: https://github.com/DataDog/integrations-core/issues/1050
+[#1312]: https://github.com/DataDog/integrations-core/issues/1312
+[#1444]: https://github.com/DataDog/integrations-core/issues/1444

@@ -1,6 +1,13 @@
 # CHANGELOG - mysql
 
-1.1.3 / Unreleased
+1.2.0 / Unreleased
+==================
+### Changes
+
+* [FEATURE] Add custom tag support to service checks.
+* [BUGFIX] reports slave_service check as `CRITICAL` if `Slave_running` global variable is OFF.
+
+1.1.3 / 2018-03-23
 ==================
 ### Changes
 

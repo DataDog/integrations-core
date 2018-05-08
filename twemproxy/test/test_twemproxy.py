@@ -15,6 +15,7 @@ from tests.checks.common import AgentCheckTest
 instance = {
     'host': '127.0.0.1',
     'port': 6222,
+    'tags': ['optional:tag1']
 }
 
 GLOBAL_STATS = set([
@@ -53,7 +54,7 @@ SERVER_STATS = set([
 class TestTwemproxy(AgentCheckTest):
     """Basic Test for twemproxy integration."""
     CHECK_NAME = 'twemproxy'
-    SC_TAGS = ['host:127.0.0.1', 'port:6222']
+    SC_TAGS = ['host:127.0.0.1', 'port:6222', 'optional:tag1']
 
     def test_check(self):
         """

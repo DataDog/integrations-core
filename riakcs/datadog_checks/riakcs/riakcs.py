@@ -37,10 +37,10 @@ class RiakCs(AgentCheck):
     def check(self, instance):
         s3, aggregation_key, tags, metrics = self._connect(instance)
 
-        stats = self._get_stats(s3, aggregation_key)
+        stats = self._get_stats(s3, aggregation_key, tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-          tags=["aggregation_key:{0}".format(aggregation_key)])
+          tags=["aggregation_key:{0}".format(aggregation_key)] + tags)
 
         self.process_stats(stats, tags, metrics)
 
@@ -88,25 +88,26 @@ class RiakCs(AgentCheck):
             s3_settings['host'] = instance['s3_root']
 
         aggregation_key = s3_settings['proxy'] + ":" + str(s3_settings['proxy_port'])
-
+        tags = instance.get("tags", [])
+        if tags is None:
+            tags = []
         try:
             s3 = S3Connection(**s3_settings)
         except Exception as e:
             self.log.error("Error connecting to {0}: {1}".format(aggregation_key, e))
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=["aggregation_key:{0}".format(aggregation_key)],
+                tags=["aggregation_key:{0}".format(aggregation_key)] + tags,
                 message=str(e))
             raise
 
-        tags = instance.get("tags", [])
         tags.append("aggregation_key:{0}".format(aggregation_key))
 
         metrics = instance.get("metrics", [])
 
         return s3, aggregation_key, tags, metrics
 
-    def _get_stats(self, s3, aggregation_key):
+    def _get_stats(self, s3, aggregation_key, tags):
         try:
             bucket = s3.get_bucket(self.STATS_BUCKET, validate=False)
             key = bucket.get_key(self.STATS_KEY)
@@ -117,7 +118,7 @@ class RiakCs(AgentCheck):
             self.log.error("Error retrieving stats from {0}: {1}".format(aggregation_key, e))
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=["aggregation_key:{0}".format(aggregation_key)],
+                tags=["aggregation_key:{0}".format(aggregation_key)] + tags,
                 message=str(e))
             raise
 

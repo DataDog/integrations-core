@@ -24,7 +24,8 @@ class RiakCSTest(AgentCheckTest):
             unittest.TestCase.__init__(self, *args, **kwargs)
             self.config = {"instances": [{
                 "access_id":"foo",
-                "access_secret": "bar"}]}
+                "access_secret": "bar",
+                "tags": ["optional:tag1"]}]}
             self.check = load_check(self.CHECK_NAME, self.config, {})
             self.check._connect = Mock(return_value=(None, None, ["aggregation_key:localhost:8080"], []))
             self.check._get_stats = Mock(return_value=self.check.load_json(
@@ -48,7 +49,7 @@ class RiakCSTest(AgentCheckTest):
             self.assertEqual(len(self.service_checks), 1, self.service_checks)
             self.assertServiceCheck(self.check.SERVICE_CHECK_NAME,
                                     status=AgentCheck.CRITICAL,
-                                    tags=['aggregation_key:localhost:8080'])
+                                    tags=['aggregation_key:localhost:8080', 'optional:tag1'])
 
 
 class Riak21CSTest(AgentCheckTest):

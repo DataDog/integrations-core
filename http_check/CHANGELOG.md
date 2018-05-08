@@ -1,6 +1,13 @@
 # CHANGELOG - http_check
 
-2.0.0 / Unreleased
+2.0.1 / Unreleased
+==================
+
+### Changes
+
+* [BUGFIX] Properly detect default certificate file for all supported Platforms. See [#1340][]
+
+2.0.0 / 2018-03-23
 ==================
 
 ### Changes
@@ -80,3 +87,4 @@
 [@xkrt]: https://github.com/xkrt
 [#905]:https://github.com/DataDog/integrations-core/pull/905
 [#1054]:https://github.com/DataDog/integrations-core/pull/1054
+[#1340]:https://github.com/DataDog/integrations-core/pull/1340

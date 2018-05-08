@@ -67,6 +67,7 @@ init_config:
 
     # As well as capturing from the DMV you can also capture from a custom proc
     # Please note this feature will produce a number of custom metrics that might affect your billing
+    # This feature is also only available when using the adodbapi driver (set by default)
     # To use this feature, specify in your instance the procedure to execute : 
     # stored_procedure: ProcedureToExecute
     #

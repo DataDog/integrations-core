@@ -1,4 +1,5 @@
-./datadog-checks-base
+./datadog_checks_base
 mock==2.0.0
 pytest
 tox
+pip-tools

@@ -883,3 +883,18 @@ create or replace package body &main_user..pkg_TestRecords as
 end;
 /
 
+-- create offline tablespace
+declare
+    t_FilePath dba_data_files.file_name%TYPE;
+begin
+    select substr(file_name, 1, instr(file_name, '/', -1)) into t_FilePath
+        from dba_data_files do where upper(tablespace_name) = 'SYSTEM'
+        and file_id in (select min(file_id) from dba_data_files di
+            where do.tablespace_name = di.tablespace_name);
+
+    -- create offline tablespace
+    execute immediate 'create tablespace OFFLINE_TABLESPACE datafile ''' ||
+        t_FilePath || 'offline_tablespace.dbf'' size 10m autoextend off';
+    execute immediate 'alter tablespace OFFLINE_TABLESPACE offline';
+end;
+/

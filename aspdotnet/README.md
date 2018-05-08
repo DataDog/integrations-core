@@ -1,32 +1,49 @@
-# Aspdotnet Integration
+# ASP.NET Integration
 
 ## Overview
 
-Get metrics from aspdotnet service in real time to:
+Get metrics from ASP.NET service in real time to:
 
-* Visualize and monitor aspdotnet states
-* Be notified about aspdotnet failovers and events.
+* Visualize and monitor ASP.NET states
+* Be notified about ASP.NET failovers and events.
 
-## Installation
+## Setup
+### Installation
 
-The Aspdotnet check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
+The ASP.NET check is packaged with the Agent, so simply [install the Agent][1] on your servers.
 
-## Configuration
+### Configuration
 
-Edit the `aspdotnet.yaml` file to point to your server and port, set the masters to monitor
+1. Edit the `aspdotnet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your ASP.NET performance data.  
 
-## Validation
+    See the [sample aspdotnet.d/conf.yaml][3] for all available configuration options.
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `aspdotnet` under the Checks section:
+2. [Restart the Agent][5]
 
-    Checks
-    ======
+### Validation
 
-        aspdotnet
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
+[Run the Agent's `status` subcommand][2] and look for `aspdotnet` under the Checks section.
 
-## Compatibility
+## Data Collected
+### Metrics
+The ASP.NET check does not include any metrics at this time.
 
-The aspdotnet check is compatible with all major platforms
+### Events
+All ASP.NET events and failovers are sent to your [Datadog event stream][4]
+
+### Service Checks
+The ASP.NET check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support][5].
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[3]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/conf.yaml.example
+[4]: https://app.datadoghq.com/event/stream
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://www.datadoghq.com/blog/

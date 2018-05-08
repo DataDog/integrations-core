@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"sql_server",
+        "check": "sqlserver.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "db"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored SQL Server instance. Returns `OK` otherwise."
+    }
+]

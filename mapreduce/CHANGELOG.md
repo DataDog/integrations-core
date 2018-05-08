@@ -1,6 +1,13 @@
 # CHANGELOG - mapreduce
 
-1.1.0 / Unreleased
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Adds an SSL verification option
+
+1.1.0 / 2018-03-23
 ==================
 
 ### Changes

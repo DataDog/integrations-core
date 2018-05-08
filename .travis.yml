@@ -22,6 +22,7 @@ env:
     - NOSE_FILTER="not windows and not fixme"
     - VOLATILE_DIR=/tmp/integration-sdk-testing
     - SKIP_CLEANUP=true
+    - SKIP_LINT=true
     - INTEGRATIONS_DIR=$HOME/embedded
     - PIP_CACHE=$HOME/.cache/pip
     - SDK_TESTING=true
@@ -37,7 +38,6 @@ env:
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
-    - TRAVIS_FLAVOR=apache FLAVOR_VERSION=2.4.12
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.2.10
@@ -46,21 +46,7 @@ env:
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
     - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
     - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
-    - TRAVIS_FLAVOR=consul FLAVOR_VERSION=v0.6.4
-    - TRAVIS_FLAVOR=consul FLAVOR_VERSION=0.7.2
-    - TRAVIS_FLAVOR=consul FLAVOR_VERSION=1.0.0
     - TRAVIS_FLAVOR=docker_daemon
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=0.90.13
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.0.3
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.1.2
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.2.4
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.3.9
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.4.5
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.5.2
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.6.2
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=1.7.4
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=2.0.2
-    - TRAVIS_FLAVOR=elastic FLAVOR_VERSION=2.1.1
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
     - TRAVIS_FLAVOR=gearmand FLAVOR_VERSION=latest
@@ -68,55 +54,29 @@ env:
     - TRAVIS_FLAVOR=gitlab_runner MASTER_FLAVOR_VERSION=latest RUNNER_FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=gunicorn FLAVOR_VERSION=19.6.0
     - TRAVIS_FLAVOR=go_expvar FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.4.26
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.5.11
-    - TRAVIS_FLAVOR=haproxy FLAVOR_VERSION=1.6.9
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.8.1.1-1 FLAVOR_OPTIONS='zookeeper'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='zookeeper'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.9.0.1-1 FLAVOR_OPTIONS='kafka'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.2.1 FLAVOR_OPTIONS='zookeeper'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.10.2.1 FLAVOR_OPTIONS='kafka'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.11.0.1 FLAVOR_OPTIONS='zookeeper'
-    - TRAVIS_FLAVOR=kafka_consumer FLAVOR_VERSION=0.11.0.1 FLAVOR_OPTIONS='kafka'
     - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=0.10.1.0-1
+    # - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=1.0.1-1
+    # - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=1.1.0-1
     - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.9.0
     - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
     - TRAVIS_FLAVOR=kubernetes
     - TRAVIS_FLAVOR=kubernetes_state
     - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
-    - TRAVIS_FLAVOR=lighttpd
-    - TRAVIS_FLAVOR=mcache FLAVOR_VERSION=1.4.22
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=2.6.9
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.0.1
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.4
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.5
-    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.5
-    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.6
-    - TRAVIS_FLAVOR=mysql FLAVOR_VERSION=5.7
-    - TRAVIS_FLAVOR=mysql MYSQL_FLAVOR=mariadb FLAVOR_VERSION=10.1.30-r1
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.6.2
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.7.11
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.9.15
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.11.8
-    - TRAVIS_FLAVOR=nginx FLAVOR_VERSION=1.10.2
     - TRAVIS_FLAVOR=openstack
     # - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.5
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.7
     - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.8
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
-    - TRAVIS_FLAVOR=postgres FLAVOR_VERSION=9.6
-    - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=3.7.3
-    - TRAVIS_FLAVOR=powerdns_recursor FLAVOR_VERSION=4.0.3
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.5.0
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.6.0
-    - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.4.18
-    - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.6.17
-    - TRAVIS_FLAVOR=redisdb FLAVOR_VERSION=2.8.19
-    - TRAVIS_FLAVOR=riak FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=ssh_check
-    - TRAVIS_FLAVOR=snmp
+    # this is just too flaky to stay here, suspending while we find a fix
+    # - TRAVIS_FLAVOR=snmp
     - TRAVIS_FLAVOR=solr FLAVOR_VERSION=6.2
     - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=2017-GA
     - TRAVIS_FLAVOR=statsd
@@ -125,8 +85,6 @@ env:
     - TRAVIS_FLAVOR=tokumx
     - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=4.1.7
-    - TRAVIS_FLAVOR=varnish FLAVOR_VERSION=5.0.0
     - TRAVIS_FLAVOR=squid FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=ecs_fargate FLAVOR_VERSION=latest
     # END OF TRAVIS MATRIX
@@ -139,7 +97,7 @@ install:
   - if [ -e ~/dd-agent/requirements.txt ]; then pip install -r ~/dd-agent/requirements.txt; fi
   - pip install -r requirements-test.txt
   - bundle exec rake setup_agent_libs
-  - cd $TRAVIS_BUILD_DIR/datadog-checks-base && python setup.py bdist_wheel && pip install . && cd -
+  - cd $TRAVIS_BUILD_DIR/datadog_checks_base && python setup.py bdist_wheel && pip install . && cd -
   - sudo apt-get -qqy install npm
 script:
   - bundle exec rake prep_travis_ci

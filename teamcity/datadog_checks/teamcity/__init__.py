@@ -1,7 +1,10 @@
-from . import teamcity
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __about__ import __version__
+from .teamcity import TeamCityCheck
 
-TeamCityCheck = teamcity.TeamCityCheck
-
-__version__ = "1.0.0"
-
-__all__ = ['teamcity']
+__all__ = [
+    '__version__',
+    'TeamCityCheck'
+]

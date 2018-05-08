@@ -42,9 +42,12 @@ class Etcd(AgentCheck):
         'watchers': 'etcd.store.watchers'
     }
 
-    SELF_GAUGES = {
+    LEADER_GAUGES = {
         'sendPkgRate': 'etcd.self.send.pkgrate',
-        'sendBandwidthRate': 'etcd.self.send.bandwidthrate',
+        'sendBandwidthRate': 'etcd.self.send.bandwidthrate'
+    }
+
+    FOLLOWER_GAUGES = {
         'recvPkgRate': 'etcd.self.recv.pkgrate',
         'recvBandwidthRate': 'etcd.self.recv.bandwidthrate'
     }
@@ -111,8 +114,10 @@ class Etcd(AgentCheck):
             if self_response['state'] == 'StateLeader':
                 is_leader = True
                 instance_tags.append('etcd_state:leader')
+                gauges = self.LEADER_GAUGES
             else:
                 instance_tags.append('etcd_state:follower')
+                gauges = self.FOLLOWER_GAUGES
 
             for key in self.SELF_RATES:
                 if key in self_response:
@@ -120,9 +125,9 @@ class Etcd(AgentCheck):
                 else:
                     self.log.warn("Missing key {0} in stats.".format(key))
 
-            for key in self.SELF_GAUGES:
+            for key in gauges:
                 if key in self_response:
-                    self.gauge(self.SELF_GAUGES[key], self_response[key], tags=instance_tags)
+                    self.gauge(gauges[key], self_response[key], tags=instance_tags)
                 else:
                     self.log.warn("Missing key {0} in stats.".format(key))
 

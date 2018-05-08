@@ -6,12 +6,18 @@
   "name": "cassandra_nodetool",
   "short_description": "monitor cassandra using the nodetool utility",
   "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
-  "support": "contrib",
-  "supported_os": ["linux","mac_os","windows"],
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
   "version": "0.1.1",
   "public_title": "Datadog-Cassandra Nodetool Integration",
-  "categories":["data store"],
-  "type":"check",
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/cassandra_nodetool/",
   "is_public": true,
   "has_logo": true

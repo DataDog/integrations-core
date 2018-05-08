@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"ssh",
+        "check": "ssh.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "instance"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent check is unable to connect to the SSH host. Returns `OK` otherwise."
+    },
+	{
+        "agent_version": "5.1.0",
+        "integration":"ssh",
+        "check": "sftp.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "instance"],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent check is unable to connect to the SFTP host. Returns `OK` otherwise."
+    }
+]

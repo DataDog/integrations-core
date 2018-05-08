@@ -1,11 +1,18 @@
 # CHANGELOG - openstack
 
-1.2.0 / Unreleased 
+1.3.0 / Unreleased 
 ==================
 
 ### Changes
 
 * [FEATURE] adding support for unscoped access. See [#1276][]
+
+1.2.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support to service check and metrics.
 
 1.1.0 / 2018-02-28
 ==================

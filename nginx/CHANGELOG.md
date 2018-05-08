@@ -1,11 +1,20 @@
 # CHANGELOG - nginx
 
-2.0.0 / Unreleased
+2.1.0 / Unreleased
+==================
+
+### Changes
+
+* [FEATURE] Add custom tag support to service checks.
+* [FEATURE] Add support for VTS module. See [#1295](https://github.com/DataDog/integrations-core/pull/1295). Thanks [mattjbray](https://github.com/mattjbray)
+
+2.0.0 / 2018-03-23
 ==================
 
 ### Changes
 
 * [IMPROVEMENT] Better process status output for good metric names. Breaking if using the badly named metrics in app. See [#1053][]
+
 
 1.2.0 / 2018-02-13
 ==================

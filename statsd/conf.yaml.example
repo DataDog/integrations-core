@@ -3,6 +3,7 @@ init_config:
 instances:
   - host: localhost
     port: 8126
+    # timeout: 10
     # tags:
     #  - optional_tag1
     #  - optional_tag2

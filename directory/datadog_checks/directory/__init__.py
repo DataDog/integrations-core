@@ -1,7 +1,8 @@
-from . import directory
+from .directory import DirectoryCheck
 
-DirectoryCheck = directory.DirectoryCheck
+from .__about__ import __version__
 
-__version__ = "1.2.0"
-
-__all__ = ['directory']
+__all__ = [
+    '__version__',
+    'DirectoryCheck'
+]

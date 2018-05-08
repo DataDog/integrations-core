@@ -1,6 +1,12 @@
 # CHANGELOG - docker_daemon
 
-1.9.0 / Unreleased
+1.10.0 / Unreleased
+==================
+### Changes
+
+* [IMPROVEMENT] Add docker.cpu.shares metric. See [#1358][]
+
+1.9.0 / 2018-03-23
 ==================
 ### Changes
 

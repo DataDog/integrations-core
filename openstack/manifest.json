@@ -9,6 +9,7 @@
     "mac_os",
     "windows"
   ],
+  "version": "1.3.0",
   "guid": "944452d0-208e-4d1c-8adb-495f517ce2c2",
   "public_title": "Datadog-OpenStack Integration",
   "categories":["cloud"],

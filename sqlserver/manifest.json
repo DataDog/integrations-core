@@ -9,7 +9,7 @@
   "supported_os": [
     "windows"
   ],
-  "version": "1.3.0",
+  "version": "1.4.0",
   "guid": "635cb962-ee9f-4788-aa55-a7ffb9661498",
   "public_title": "Datadog-SQL Server Integration",
   "categories":["data store"],

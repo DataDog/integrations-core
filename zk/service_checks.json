@@ -1,0 +1,20 @@
+[
+    {
+        "agent_version": "5.1.0",
+        "integration":"zookeeper",
+        "check": "zookeeper.ruok",
+        "statuses": ["ok", "warning", "critical"],
+        "groups": ["host", "port"],
+        "name": "ruok",
+        "description": "Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received."
+    },
+    {
+        "agent_version": "5.1.0",
+        "integration":"zookeeper",
+        "check": "zookeeper.mode",
+        "statuses": ["ok", "critical"],
+        "groups": ["host", "port"],
+        "name": "Expected Mode",
+        "description": "Compares the current mode given by the `stat` command to the expected mode configured in `zk.yaml`. Returns `OK` when the modes match and `CRITICAL` otherwise. Only returns a status when there's a value for `expected_mode` in `zk.yaml`"
+    }
+]
