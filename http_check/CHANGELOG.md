@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+2.0.2 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Add `check_hostname` option to allow users to disable matching
+  hostnames verification. See [#485][]
+
 2.0.1 / Unreleased
 ==================
 
@@ -88,3 +96,4 @@
 [#905]:https://github.com/DataDog/integrations-core/pull/905
 [#1054]:https://github.com/DataDog/integrations-core/pull/1054
 [#1340]:https://github.com/DataDog/integrations-core/pull/1340
+[#485]:https://github.com/DataDog/integrations-core/issues/485
