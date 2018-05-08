@@ -214,13 +214,8 @@ class HTTPCheck(NetworkCheck):
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
-<<<<<<< HEAD
-            headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
-            weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects
-=======
             headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs,\
-            weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
->>>>>>> master
+            weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
         addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
@@ -431,9 +426,11 @@ class HTTPCheck(NetworkCheck):
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
+        except ssl.CertificateError as e:
+            return Status.CRITICAL, 0, '{0}'.format(str(e))
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-            return Status.DOWN, 0, "%s" % (str(e))
+            return Status.DOWN, 0, '{0}'.format(str(e))
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()

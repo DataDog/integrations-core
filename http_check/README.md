@@ -51,6 +51,8 @@ See the [sample http_check.d/conf.yaml][2] for a full list and description of av
 | `ca_certs` | This setting will allow you to override the default certificate path as specified in `init_config` |
 | `check_certificate_expiration` | When `check_certificate_expiration` is enabled, the service check will check the expiration date of the SSL certificate. Note that this will cause the SSL certificate to be validated, regardless of the value of the `disable_ssl_validation` setting. |
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration. |
+| `check_hostname` | When `check_certificate_expiration` is enabled, this setting will raise a warning if the hostname on the SSL certificate does not match the host of the given URL. |
+| `ssl_server_name` | When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled. |
 | `headers` | This parameter allows you to send additional headers with the request. Please see the [example YAML file](https://github.com/DataDog/integrations-core/blob/master/http_check/conf.yaml.example) for additional information and caveats. |
 | `skip_proxy` | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`. |
 | `allow_redirects` | This setting allows the service check to follow HTTP redirects and defaults to `true`.

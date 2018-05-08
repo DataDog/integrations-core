@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-2.0.2 / Unreleased
+2.1.2 / Unreleased
 ==================
 
 ### Changes
