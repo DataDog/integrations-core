@@ -97,11 +97,15 @@ instances:
     # The SSL certificate will always be validated for this additional
     # service check regardless of the value of disable_ssl_validation.
     # By default, for the expiration check, the Agent validates the SSL certificate
-    # hostname against the host of the provided url. If necessary, you can override
-    # that hostname with ssl_server_name.
+    # hostname against the host of the provided url. If necessary, you can
+    # override the hostname to match with ssl_server_name.
+    # You can also disable the verification check for matching hostnames by explicitly
+    # setting check_hostname to false.
+    #
     # check_certificate_expiration: true
     # days_warning: 14
     # days_critical: 7
+    # check_hostname: true
     # ssl_server_name: hostname
 
     # The (optional) headers parameter allows you to send extra headers
@@ -120,12 +124,12 @@ instances:
     # The (optional) skip_proxy parameter would bypass any proxy settings enabled
     # and attempt to reach the the URL directly.
     # If no proxy is defined at any level, this flag bears no effect.
-    # Defaults to False.
+    # Defaults to false.
     #
     # skip_proxy: false
 
     # The (optional) allow_redirects parameter can enable redirection.
-    # Defaults to True.
+    # Defaults to true.
     #
     # allow_redirects: true
 
@@ -133,9 +137,9 @@ instances:
     # The (optional) include_default_header parameter instructs the check to include the default headers.
     # Default headers can be found at https://github.com/DataDog/dd-agent/blob/5.10.0/util.py#L58-L67
     #
-    # Defaults to True.
+    # Defaults to true.
     #
-    #include_default_headers: false
+    # include_default_headers: false
 
     # tags:
     #   - url:http://alternative.host.example.com
