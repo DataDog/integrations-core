@@ -150,7 +150,7 @@ class Marathon(AgentCheck):
             # http://mesosphere.github.io/marathon/1.4/docs/rest-api.html#get-v2apps
             marathon_path = urljoin(url, "v2/apps?embed=apps.counts")        
         else:
-	    marathon_path = urljoin(url, "v2/groups/{}?embed=group.groups&embed=group.apps&embed=group.apps.counts".format(group))        
+            marathon_path = urljoin(url, "v2/groups/{}?embed=group.groups&embed=group.apps&embed=group.apps.counts".format(group))        
         response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
         if response is not None:
             self.gauge('marathon.apps', len(response['apps']), tags=tags)
