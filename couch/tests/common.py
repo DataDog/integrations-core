@@ -58,21 +58,21 @@ BAD_CONFIG_TAGS = [
 
 NODE1 = {
     "server": URL,
-    "user": "dduser",
-    "password": "pawprint",
+    "user": USER,
+    "password": PASSWORD,
     "name": "node1@127.0.0.1"
 }
 
 NODE2 = {
     "server": URL,
-    "user": "dduser",
-    "password": "pawprint",
+    "user": USER,
+    "password": PASSWORD,
     "name": "node2@127.0.0.1"
 }
 
 NODE3 = {
     "server": URL,
-    "user": "dduser",
-    "password": "pawprint",
+    "user": USER,
+    "password": PASSWORD,
     "name": "node3@127.0.0.1"
 }

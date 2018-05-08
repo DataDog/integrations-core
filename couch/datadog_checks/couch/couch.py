@@ -15,6 +15,18 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
 
+class BadConfigError(Exception):
+    pass
+
+
+class ConnectionError(Exception):
+    pass
+
+
+class BadVersionError(Exception):
+    pass
+
+
 class CouchDb(AgentCheck):
 
     TIMEOUT = 5
@@ -65,20 +77,25 @@ class CouchDb(AgentCheck):
         if self.checker is None:
             name = instance.get('name', server)
             tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
-            version = self.get(self.get_server(instance), instance, tags, True)['version']
+
+            try:
+                version = self.get(self.get_server(instance), instance, tags, True)['version']
+            except Exception:
+                raise ConnectionError("Unable to talk to the server")
+
             if version.startswith('1.'):
                 self.checker = CouchDB1(self)
             elif version.startswith('2.'):
                 self.checker = CouchDB2(self)
             else:
-                raise Exception("Unkown version {0}".format(version))
+                raise BadVersionError("Unkown version {0}".format(version))
 
         self.checker.check(instance)
 
     def get_server(self, instance):
         server = instance.get('server', None)
         if server is None:
-            raise Exception("A server must be specified")
+            raise BadConfigError("A server must be specified")
         return server
 
     def get_config_tags(self, instance):
@@ -303,7 +320,11 @@ class CouchDB2:
 
     def _get_dbs_to_scan(self, server, instance, name, tags):
         dbs = self.agent_check.get(urljoin(server, "_all_dbs"), instance, tags)
-        nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+        try:
+            nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+        except KeyError:
+            return []
+
         idx = nodes.index(name)
         size = int(math.ceil(len(dbs) / float(len(nodes))))
         return dbs[(idx * size):((idx + 1) * size)]

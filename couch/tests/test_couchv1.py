@@ -4,8 +4,9 @@
 from copy import deepcopy
 
 import pytest
+import mock
 
-from datadog_checks.couch import CouchDb
+from datadog_checks.couch import CouchDb, BadConfigError, ConnectionError, BadVersionError
 import common
 
 pytestmark = pytest.mark.v1
@@ -18,7 +19,6 @@ def test_couch(aggregator, check, couch_cluster):
     # Metrics should have been emitted for any publicly readable databases.
     for db_name in common.DB_NAMES:
         for gauge in common.CHECK_GAUGES:
-            print("metrcs found for ", gauge, aggregator.metrics(gauge))
             expected_tags = common.BASIC_CONFIG_TAGS + [
                 "db:{}".format(db_name),
                 "device:{}".format(db_name)
@@ -35,19 +35,25 @@ def test_couch(aggregator, check, couch_cluster):
 
 
 def test_bad_config(aggregator, check):
+    """
+    Test the check with various bogus instances
+    """
+    with pytest.raises(BadConfigError):
+        # `server` is missing from the instance
+        check.check({})
 
-    raised = False
-
-    try:
-        print(common.BAD_CONFIG)
+    with pytest.raises(ConnectionError):
+        # the server instance is invalid
         check.check(common.BAD_CONFIG)
-    except Exception:
-        raised = True
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
+                                        tags=common.BAD_CONFIG_TAGS, count=1)
 
-    assert raised
-    print(aggregator._service_checks)
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
-                                    tags=common.BAD_CONFIG_TAGS, count=1)
+    check.get = mock.MagicMock(return_value={'version': '0.1.0'})
+    with pytest.raises(BadVersionError):
+        # the server has an unsupported version
+        check.check(common.BAD_CONFIG)
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
+                                        tags=common.BAD_CONFIG_TAGS, count=1)
 
 
 def test_couch_whitelist(aggregator, check, couch_cluster):
@@ -93,7 +99,6 @@ def test_only_max_nodes_are_scanned(aggregator, check, couch_cluster):
     config = deepcopy(common.BASIC_CONFIG)
     config["max_dbs_per_check"] = 1
     check.check(config)
-    print(aggregator._metrics)
     for gauge in common.CHECK_GAUGES:
         aggregator.assert_metric(gauge, count=1)
 

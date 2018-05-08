@@ -55,7 +55,6 @@ def test_check(aggregator, check, gauges, couch_cluster):
     """
     Testing Couchdb2 check.
     """
-
     configs = [deepcopy(common.NODE1), deepcopy(common.NODE2), deepcopy(common.NODE3)]
 
     for config in configs:
@@ -350,46 +349,23 @@ def test_compaction_metrics(aggregator, check, gauges, couch_cluster):
         aggregator.assert_metric(gauge)
 
 
-def test_indexing_metrics(aggregator, check, gauges, couch_cluster):
-    url = "{}/kennel".format(common.NODE1['server'])
-    for _ in xrange(50):
-        r = requests.post(
-            url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json={"_id": str(time.time())}
-        )
-        r.raise_for_status()
+def test_indexing_metrics(aggregator, check, gauges, active_tasks):
+    """
+    Testing metrics coming from a running indexer would be extremely flaky,
+    let's use mock.
+    """
+    from datadog_checks.couch import couch
+    check.checker = couch.CouchDB2(check)
 
-    class AsyncReq(threading.Thread):
-        def __init__(self, url, auth):
-            self._url = url
-            self._auth = auth
-            threading.Thread.__init__(self)
+    def _get(url, instance, tags, run_check=False):
+        if '_active_tasks' in url:
+            return active_tasks
+        return {}
+    check.get = _get
 
-        def run(self):
-            r = requests.get(self._url, auth=self._auth)
-            r.raise_for_status()
-
-    url = '{}/kennel/_design/dummy/_view/all'.format(common.NODE1['server'])
-    t = AsyncReq(url, (common.NODE1['user'], common.NODE1['password']))
-    t.start()
-
-    url = "{}/_active_tasks".format(common.NODE1["server"])
-    for _ in xrange(10):
-        print("waiting for indexer to start")
-        tasks = requests.get(url, auth=(common.NODE1["user"], common.NODE1["password"])).json()
-        if len(tasks) > 1:
-            print("Indexer started!")
-            break
-        time.sleep(1)
-
+    # run the check on all instances
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check.check(config)
-
-    t.join()
-
-    print(aggregator._metrics)
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         expected_tags = [
