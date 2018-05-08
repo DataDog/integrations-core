@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+2.0.2 / Unreleased
+==================
+
+### Changes
+
+* [IMPROVEMENT] Emit warning when `disable_ssl_validation` is unset in configuration
+  file. See [#1999][]
+
 2.0.1 / Unreleased
 ==================
 
@@ -88,3 +96,4 @@
 [#905]:https://github.com/DataDog/integrations-core/pull/905
 [#1054]:https://github.com/DataDog/integrations-core/pull/1054
 [#1340]:https://github.com/DataDog/integrations-core/pull/1340
+[#1999]:https://github.com/DataDog/dd-agent/issues/1999
