@@ -428,10 +428,10 @@ class HTTPCheck(NetworkCheck):
 
         except ssl.CertificateError as e:
             self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
-            return Status.CRITICAL, 0, '{0}'.format(str(e))
+            return Status.CRITICAL, 0, str(e)
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-            return Status.DOWN, 0, '{0}'.format(str(e))
+            return Status.DOWN, 0, str(e)
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()

@@ -141,7 +141,7 @@ instances:
     #
     # Defaults to true.
     #
-    # include_default_headers: false
+    # include_default_headers: true
 
     # tags:
     #   - url:http://alternative.host.example.com
