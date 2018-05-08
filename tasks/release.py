@@ -18,7 +18,7 @@ def update_version_module(check_name, old_ver, new_ver):
     Change the Python code in the __about__.py module so that `__version__`
     contains the new value.
     """
-    about_module = os.path.join(check_name, 'datadog_checks', check_name, '__about__.py')
+    about_module = os.path.join(ROOT, check_name, 'datadog_checks', check_name, '__about__.py')
     with open(about_module, 'r') as f:
         contents = f.read()
 
@@ -42,7 +42,7 @@ def git_tag(ctx, tag_name):
     """
     Tag the repo using an annotated tag.
     """
-    cmd = 'git tag {} -m"{}"'.format(tag_name, tag_name)
+    cmd = 'git tag -a {} -m"{}"'.format(tag_name, tag_name)
     ctx.run(cmd)
 
 
@@ -51,7 +51,7 @@ def git_tag(ctx, tag_name):
         'new_version': "The new version",
         'dry-run': "Runs the task without actually doing anything",
 })
-def release_check(ctx, target, new_version, dry_run=False):
+def release_check(ctx, target, new_version):
     """
     Perform a set of operations needed to release a single check:
 
@@ -72,14 +72,14 @@ def release_check(ctx, target, new_version, dry_run=False):
         raise Exit("This task will add a commit, you don't want to add it on master directly")
 
     # sanity check on the version provided
+    cur_version = get_version_string(target)
     p_version = version.parse(new_version)
-    p_current = version.parse(get_version_string(target))
+    p_current = version.parse(cur_version)
     if p_version <= p_current:
         raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
 
     # update the version number
     print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
-    cur_version = get_version_string(target)
     update_version_module(target, cur_version, new_version)
 
     # update the CHANGELOG
@@ -87,7 +87,7 @@ def release_check(ctx, target, new_version, dry_run=False):
     do_update_changelog(ctx, target, cur_version, new_version)
 
     # commit the changes
-    msg = "Bumped to {}".format(new_version)
+    msg = "Bumped version to {}".format(new_version)
     git_commit(ctx, target, msg)
 
     # tagging
