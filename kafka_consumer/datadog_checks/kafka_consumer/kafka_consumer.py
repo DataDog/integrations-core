@@ -193,14 +193,6 @@ class KafkaCheck(AgentCheck):
 
         return node_id
 
-    def _make_req_async(self, client, request, node_id=None, cb=None):
-        if node_id is None:
-            node_id = self._get_random_node_id(client)
-
-        future = client.send(node_id, request)
-        if cb:
-            future.add_callback(cb, request, node_id, self.current_ts)
-
     def _ensure_ready_node(self, client, node_id):
         if node_id is None:
             raise Exception("node_id is None")
