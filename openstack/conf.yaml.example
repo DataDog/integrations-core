@@ -80,6 +80,13 @@ instances:
       # Setting append_tenant_id to true manually adds this suffix for downstream requests
       # append_tenant_id: false
 
+      # Filter the projects that we collect `limit` metrics for. 
+      # Only used when `collect_all_projects` is set to true. 
+      # This only applies to the `limits` metrics. We will still collect metrics about servers under these projects 
+      # projects_blacklist:
+      #   - "server.*"
+      #   - "project_*"
+
       # If you need additional tags to submit with your server metrics. 
       # Please note that server metrics override the host tag and thus do not get
       # the agent-level tags you may have set.
