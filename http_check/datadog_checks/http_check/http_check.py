@@ -245,9 +245,10 @@ class HTTPCheck(NetworkCheck):
 
             if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
                 if 'disable_ssl_validation' in instance:
-                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(addr))
-                else:
                     self.warning("Skipping SSL certificate validation for {0} based on configuration".format(addr))
+                else:
+                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(addr))
+
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
