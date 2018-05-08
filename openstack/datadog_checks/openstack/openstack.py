@@ -1106,7 +1106,7 @@ class OpenStackCheck(AgentCheck):
 
         try:
             instance_scope = self.ensure_auth_scope(instance)
-
+            split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1131,6 +1131,7 @@ class OpenStackCheck(AgentCheck):
                 self._send_api_service_checks(scope)
 
                 collect_all_projects = instance.get("collect_all_projects", False)
+                collect_all_tenants = self._if_affirmative(instance.get('collect_all_tenants', False))
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
@@ -1139,7 +1140,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor()
+                hyp = self.get_local_hypervisor(split_hostname_on_first_period)
 
                 project = self.get_scoped_project(scope)
 
@@ -1152,8 +1153,6 @@ class OpenStackCheck(AgentCheck):
 
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
-                split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
-                collect_all_tenants = instance.get('collect_all_tenants', False)
                 servers = self.get_servers_managed_by_hypervisor(i_key, split_hostname_on_first_period, collect_all_tenants)
 
                 host_tags = self._get_tags_for_host(split_hostname_on_first_period)
@@ -1174,7 +1173,7 @@ class OpenStackCheck(AgentCheck):
                 if hyp:
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags)
                 else:
-                    self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname())
+                    self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname(split_hostname_on_first_period))
 
                 # For now, monitor all networks
                 self.get_network_stats()
@@ -1218,12 +1217,12 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self):
+    def get_local_hypervisor(self, split_hostname_on_first_period):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname()
+        host = self.get_my_hostname(split_hostname_on_first_period)
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
@@ -1289,13 +1288,14 @@ class OpenStackCheck(AgentCheck):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
         """
+        
         hostname = self.init_config.get("os_host") or self.hostname
         if split_hostname_on_first_period:
             hostname = hostname.split('.')[0]
         
         return hostname
 
-    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period):
+    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period, collect_all_tenants):
         servers = self.get_all_servers(i_key, collect_all_tenants, filter_by_host=self.get_my_hostname(split_hostname_on_first_period))
         if self.exclude_server_id_rules:
             # Filter out excluded servers
