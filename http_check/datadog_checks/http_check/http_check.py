@@ -427,6 +427,7 @@ class HTTPCheck(NetworkCheck):
             cert = ssl_sock.getpeercert()
 
         except ssl.CertificateError as e:
+            self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
             return Status.CRITICAL, 0, '{0}'.format(str(e))
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
