@@ -809,7 +809,7 @@ class OpenStackCheck(AgentCheck):
         uptime = resp['hypervisor']['uptime']
         return self._parse_uptime_string(uptime)
 
-    def get_stats_for_single_hypervisor(self, hyp_id, instance host_tags=None, custom_tags=None):
+    def get_stats_for_single_hypervisor(self, hyp_id, instance, host_tags=None, custom_tags=None):
         url = '{0}/os-hypervisors/{1}'.format(self.get_nova_endpoint(), hyp_id)
         headers = {'X-Auth-Token': self.get_auth_token()}
         resp = self._make_request_with_auth_fallback(url, headers)
@@ -998,6 +998,8 @@ class OpenStackCheck(AgentCheck):
         if tags is None:
             tags = []
 
+        server_tags = copy.deepcopy(tags)
+
         project_name = project.get('name')
 
         self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
@@ -1006,15 +1008,15 @@ class OpenStackCheck(AgentCheck):
         headers = {'X-Auth-Token': self.get_auth_token()}
         server_stats = self._make_request_with_auth_fallback(url, headers, params={"tenant_id": project['id']})
 
-        tags.append('tenant_id:{0}'.format(project['id']))
+        server_tags.append('tenant_id:{0}'.format(project['id']))
 
         if project_name:
-            tags.append('project_name:{0}'.format(project['name']))
+            server_tags.append('project_name:{0}'.format(project['name']))
 
         for st in server_stats['limits']['absolute']:
             if _is_valid_metric(st):
                 metric_key = PROJECT_METRICS[st]
-                self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=tags)
+                self.gauge("openstack.nova.limits.{0}".format(metric_key), server_stats['limits']['absolute'][st], tags=server_tags)
 
     def get_stats_for_all_projects(self, projects, tags=None):
         if tags is None:
@@ -1144,7 +1146,7 @@ class OpenStackCheck(AgentCheck):
                 self._send_api_service_checks(scope, custom_tags)
 
                 collect_all_projects = instance.get("collect_all_projects", False)
-                collect_all_tenants = self._if_affirmative(instance.get('collect_all_tenants', False))
+                collect_all_tenants = instance.get('collect_all_tenants', False)
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
@@ -1174,7 +1176,7 @@ class OpenStackCheck(AgentCheck):
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
                 for server in server_cache_copy:
-                    server_tags = custom_tags
+                    server_tags = copy.deepcopy(custom_tags)
                     server_tags.append("nova_managed_server")
 
                     if scope.tenant_id:
@@ -1184,13 +1186,10 @@ class OpenStackCheck(AgentCheck):
                     self.get_stats_for_single_server(servers[server], tags=server_tags)
 
                 if hyp:
-                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=server_tags)
+                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
                 else:
                     self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname(split_hostname_on_first_period))
-
-                    self.external_host_tags[sid] = host_tags
-                self.get_stats_for_single_server(sid, tags=custom_tags)
-
+                    
             if projects:
                 # Ensure projects list and scoped project exists
                 self.get_stats_for_all_projects(projects, custom_tags)
@@ -1198,11 +1197,8 @@ class OpenStackCheck(AgentCheck):
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
 
-                # For now, monitor all networks
-                self.get_network_stats()
-
-                if set_external_tags is not None:
-                    set_external_tags(self.get_external_host_tags())
+            if set_external_tags is not None:
+                set_external_tags(self.get_external_host_tags())
 
             if projects:
                 # Ensure projects list and scoped project exists
