@@ -6,7 +6,7 @@ from copy import deepcopy
 import pytest
 import mock
 
-from datadog_checks.couch import CouchDb, BadConfigError, ConnectionError, BadVersionError
+from datadog_checks.couch import CouchDb, errors
 import common
 
 pytestmark = pytest.mark.v1
@@ -38,18 +38,18 @@ def test_bad_config(aggregator, check):
     """
     Test the check with various bogus instances
     """
-    with pytest.raises(BadConfigError):
+    with pytest.raises(errors.BadConfigError):
         # `server` is missing from the instance
         check.check({})
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(errors.ConnectionError):
         # the server instance is invalid
         check.check(common.BAD_CONFIG)
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,
                                         tags=common.BAD_CONFIG_TAGS, count=1)
 
     check.get = mock.MagicMock(return_value={'version': '0.1.0'})
-    with pytest.raises(BadVersionError):
+    with pytest.raises(errors.BadVersionError):
         # the server has an unsupported version
         check.check(common.BAD_CONFIG)
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.CRITICAL,

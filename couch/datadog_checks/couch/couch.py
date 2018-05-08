@@ -1,30 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 from urlparse import urljoin
 from urllib import quote
 import math
 
-# 3rd party
 import requests
-
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
-
-class BadConfigError(Exception):
-    pass
-
-
-class ConnectionError(Exception):
-    pass
-
-
-class BadVersionError(Exception):
-    pass
+from . import errors
 
 
 class CouchDb(AgentCheck):
@@ -81,21 +66,21 @@ class CouchDb(AgentCheck):
             try:
                 version = self.get(self.get_server(instance), instance, tags, True)['version']
             except Exception:
-                raise ConnectionError("Unable to talk to the server")
+                raise errors.ConnectionError("Unable to talk to the server")
 
             if version.startswith('1.'):
                 self.checker = CouchDB1(self)
             elif version.startswith('2.'):
                 self.checker = CouchDB2(self)
             else:
-                raise BadVersionError("Unkown version {0}".format(version))
+                raise errors.BadVersionError("Unkown version {0}".format(version))
 
         self.checker.check(instance)
 
     def get_server(self, instance):
         server = instance.get('server', None)
         if server is None:
-            raise BadConfigError("A server must be specified")
+            raise errors.BadConfigError("A server must be specified")
         return server
 
     def get_config_tags(self, instance):
