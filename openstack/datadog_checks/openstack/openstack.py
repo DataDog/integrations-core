@@ -1174,7 +1174,7 @@ class OpenStackCheck(AgentCheck):
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
 
                 for server in server_cache_copy:
-                    server_tags = copy.copy(instance.get('server_tags', []))
+                    server_tags = custom_tags
                     server_tags.append("nova_managed_server")
 
                     if scope.tenant_id:
@@ -1184,12 +1184,12 @@ class OpenStackCheck(AgentCheck):
                     self.get_stats_for_single_server(servers[server], tags=server_tags)
 
                 if hyp:
-                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
+                    self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=server_tags)
                 else:
                     self.warning("Couldn't get hypervisor to monitor for host: %s" % self.get_my_hostname(split_hostname_on_first_period))
 
                     self.external_host_tags[sid] = host_tags
-                self.get_stats_for_single_server(sid, tags=server_tags + custom_tags)
+                self.get_stats_for_single_server(sid, tags=custom_tags)
 
             if projects:
                 # Ensure projects list and scoped project exists
