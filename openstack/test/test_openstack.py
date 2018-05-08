@@ -483,7 +483,7 @@ class TestOpenstack(AgentCheckTest):
         # Retrieve servers
         openstackCheck.server_details_by_id = copy.deepcopy(self.ALL_SERVER_DETAILS)
         i_key = "test_instance"
-        server_ids = openstackCheck.get_servers_managed_by_hypervisor(i_key)
+        server_ids = openstackCheck.get_servers_managed_by_hypervisor(i_key, False, False)
     
         # Assert
         # .. 1 out of 4 server ids filtered
