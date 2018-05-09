@@ -1,7 +1,11 @@
-from . import couch
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .couch import CouchDb
+from . import errors
 
-CouchDb = couch.CouchDb
-
-__version__ = "2.5.0"
-
-__all__ = ['couch']
+__all__ = [
+    '__version__',
+    'CouchDb',
+    'errors',
+]

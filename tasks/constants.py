@@ -19,6 +19,7 @@ AGENT_BASED_INTEGRATIONS = [
     'btrfs',
     'ceph',
     'consul',
+    'couch',
     'datadog_checks_base',
     'directory',
     'disk',

@@ -44,8 +44,6 @@ env:
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
     - TRAVIS_FLAVOR=docker_daemon
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
