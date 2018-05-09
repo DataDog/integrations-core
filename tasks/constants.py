@@ -31,6 +31,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kafka_consumer',
     'kube_proxy',
     'kubelet',
+    'kyototycoon',
     'lighttpd',
     'linkerd',
     'marathon',
