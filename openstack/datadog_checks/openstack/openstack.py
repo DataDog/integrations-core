@@ -172,12 +172,14 @@ class OpenStackScope(object):
         }
         """
         user = instance_config.get('user')
-        if not user\
-                or not user.get('name')\
-                or not user.get('password')\
-                or not user.get("domain")\
-                or not user.get("domain").get("id"):
 
+        if not (
+          user and
+          user.get('name') and
+          user.get('password') and
+          user.get("domain") and
+          user.get("domain").get("id")
+        ):
             raise IncompleteIdentity()
 
         identity = {
@@ -204,7 +206,7 @@ class OpenStackScope(object):
             raise IncompleteAuthScope()
 
         if auth_scope['project'].get('name'):
-            # We need to add a domain scope to avoid name clashes. Search for one. If not raise IncompleteConfig
+            # We need to add a domain scope to avoid name clashes. Search for one. If not raise IncompleteAuthScope
             if not auth_scope['project'].get('domain', {}).get('id'):
                 raise IncompleteAuthScope()
         else:
@@ -239,10 +241,11 @@ class OpenStackScope(object):
             try:
                 identity['password']['user']['domain']['name'] = identity['password']['user']['domain'].pop('id')
 
-                if auth_scope and 'domain' in auth_scope['project']:
-                    auth_scope['project']['domain']['name'] = auth_scope['project']['domain'].pop('id')
-                elif auth_scope:
-                    auth_scope['project']['name'] = auth_scope['project'].pop('id')
+                if auth_scope:
+                    if 'domain' in auth_scope['project']:
+                        auth_scope['project']['domain']['name'] = auth_scope['project']['domain'].pop('id')
+                    else:
+                        auth_scope['project']['name'] = auth_scope['project'].pop('id')
                 auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
             except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
                 exception_msg = "{msg} and also failed keystone auth with identity:{user} domain:{domain} scope:{scope} @{url}: {ex}".format(
@@ -268,7 +271,7 @@ class OpenStackUnscoped(OpenStackScope):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", False)
+        ssl_verify = init_config.get("ssl_verify", True)
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
         _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
@@ -290,8 +293,10 @@ class OpenStackUnscoped(OpenStackScope):
                                                        ssl_verify, proxy_config)
                 project_auth_token = token_resp.headers.get('X-Subject-Token')
             except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                # TODO: Raise something
-                pass
+                exception_msg = "unable to retrieve project from keystone auth with identity: @{url}: {ex}".format(
+                url=keystone_server_url,
+                ex=e)
+                raise KeystoneUnreachable(exception_msg)
 
             try:
                 service_catalog = KeystoneCatalog.from_auth_response(
@@ -577,7 +582,7 @@ class OpenStackCheck(AgentCheck):
             resp = requests.get(url, headers=headers, verify=self._ssl_verify, params=params,
                                 timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=self.proxy_config)
             resp.raise_for_status()
-        except requests.HTTPError as e:
+        except requests.exceptions.HTTPError as e:
             self.log.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
