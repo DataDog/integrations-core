@@ -3,6 +3,7 @@
 ## 1.5.0 / Unreleased
 
 * [FEATURE] Introduce a check at `consul.catalog.total_nodes` as a count of all nodes registered in the cluster
+* [FEATURE] Add a service_blacklist to ensure that certain services will never have metrics logged
 
 ## 1.4.0 / 2018-05-11
 

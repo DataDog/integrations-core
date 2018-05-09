@@ -180,7 +180,7 @@ def test_cull_services_list(aggregator):
     assert len(consul_check._cull_services_list(services, whitelist)) == consul_check.MAX_SERVICES
 
     # Big whitelist with max_services
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
+    assert len(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == max_services
 
     # Whitelist < MAX_SERVICES should spit out the whitelist
     whitelist = ['service_{0}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
@@ -188,7 +188,7 @@ def test_cull_services_list(aggregator):
 
     # Whitelist < max_services param should spit out the whitelist
     whitelist = ['service_{0}'.format(k) for k in range(max_services - 1)]
-    assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
+    assert set(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == set(whitelist)
 
     # No whitelist, still triggers truncation
     whitelist = []
@@ -196,7 +196,7 @@ def test_cull_services_list(aggregator):
 
     # No whitelist with max_services set, also triggers truncation
     whitelist = []
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
+    assert len(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == max_services
 
     # Num. services < MAX_SERVICES should be no-op in absence of whitelist
     num_services = consul_check.MAX_SERVICES - 1
@@ -211,11 +211,16 @@ def test_cull_services_list(aggregator):
     num_services = max_services - 1
     whitelist = []
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == num_services
+    assert len(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == num_services
 
     # Num. services < max_services should spit out only the whitelist when one is defined
     whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
+    assert set(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == set(whitelist)
+
+    # blacklist should override whitelist
+    whitelist = ['service_1', 'service_2']
+    blacklist = ['service_1']
+    assert set(consul_check._cull_services_list(services, whitelist, blacklist, max_services)) == set(['service_2'])
 
 
 def test_new_leader_event(aggregator):

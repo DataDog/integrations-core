@@ -217,7 +217,15 @@ class ConsulCheck(AgentCheck):
 
         return self.consul_request(instance, consul_request_url)
 
-    def _cull_services_list(self, services, service_whitelist, max_services=MAX_SERVICES):
+    def _cull_services_list(self, services, service_whitelist, service_blacklist=None, max_services=MAX_SERVICES):
+
+        if not service_blacklist:
+            service_blacklist = []
+
+        print(services, service_blacklist)
+        services = {
+            s: services[s] for s in services if s not in service_blacklist
+        }
 
         if service_whitelist:
             if len(service_whitelist) > max_services:
@@ -315,12 +323,14 @@ class ConsulCheck(AgentCheck):
             services = self.get_services_in_cluster(instance)
             service_whitelist = instance.get('service_whitelist',
                                              self.init_config.get('service_whitelist', []))
+            service_blacklist = instance.get('service_blacklist',
+                                             self.init_config.get('service_blacklist', []))
             max_services = instance.get('max_services',
                                         self.init_config.get('max_services', self.MAX_SERVICES))
 
             self.count_all_nodes(instance, main_tags)
 
-            services = self._cull_services_list(services, service_whitelist, max_services)
+            services = self._cull_services_list(services, service_whitelist, service_blacklist, max_services)
 
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))

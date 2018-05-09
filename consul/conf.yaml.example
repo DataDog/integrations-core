@@ -57,6 +57,14 @@ instances:
       # If you'd rather not maintain a whitelist, you can increase the maximum
       # number of queried services
       # max_services: 50
+      #
+      # Services to always remove from querying
+      # If you have services you never want to see in results, you can remove
+      # them here.
+      # This takes precedence over both max_services and service_whitelist
+      # service_blacklist:
+      #   - memcached
+      #   - mcrouter
 
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
