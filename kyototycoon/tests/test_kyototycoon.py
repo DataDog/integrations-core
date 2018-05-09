@@ -42,8 +42,6 @@ def test_check(aggregator, kyototycoon):
     for mname in DB_GAUGES:
         aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS + ['db:0'], count=1)
 
-    # since the aggregator doesn't actually calculate the rate between two instances of a metric
-    #   we actually end up with 2 counts of a RATE metric, rather than just 1
     for mname in ALL_RATES:
         aggregator.assert_metric('kyototycoon.{0}_per_s'.format(mname), tags=TAGS, count=1)
 

@@ -45,7 +45,7 @@ def kyototycoon():
         'X-Kt-Mode': 'set'
     }
 
-    for x in range(0, 100):
+    for i in xrange(100):
         requests.put(URL, data=data, headers=headers)
         requests.get(URL)
 
