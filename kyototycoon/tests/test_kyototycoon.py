@@ -29,8 +29,6 @@ def test_check(aggregator, kyototycoon):
     for i in range(2):
         kt.check(instance)
 
-    # there are 2 instances of each metric because we run the check twice
-    
     GAUGES = KyotoTycoonCheck.GAUGES.values()
     DB_GAUGES = KyotoTycoonCheck.DB_GAUGES.values()
     TOTALS = KyotoTycoonCheck.TOTALS.values()
@@ -47,7 +45,7 @@ def test_check(aggregator, kyototycoon):
 
     for mname in DB_GAUGES:
         aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS + ['db:0'], count=2)
-        
+
     # since the aggregator doesn't actually calculate the rate between two instances of a metric
     #   we actually end up with 2 counts of a RATE metric, rather than just 1
     for mname in ALL_RATES:
