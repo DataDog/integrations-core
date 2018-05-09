@@ -441,15 +441,18 @@ class TestOpenstack(AgentCheckTest):
             # Sort the tags list
             for sc in self.service_checks:
                 sc["tags"].sort()
-            tags = ['keystone_server:http://10.0.2.15:5000', 'optional:tag1']
-            tags.sort()
+                tags = ['keystone_server:http://10.0.2.15:5000', 'optional:tag1']
+                tags.sort()
 
-            # Expect OK, since we've mocked an API response
-            self.assertServiceCheck(self.check.IDENTITY_API_SC, status=AgentCheck.OK, count=1, tags=tags)
-
-            # Expect CRITICAL since URLs are non-existent
-            self.assertServiceCheck(self.check.COMPUTE_API_SC, status=AgentCheck.CRITICAL, count=1, tags=tags)
-            self.assertServiceCheck(self.check.NETWORK_API_SC, status=AgentCheck.CRITICAL, count=1, tags=tags)
+                # Can only use assertServiceCheck if we ran the whole check with run_check
+                # We mock this API response, so return OK
+                if sc.get('check') == self.check.IDENTITY_API_SC:
+                    self.assertEqual(sc.get('status'), AgentCheck.OK)
+                # URLs are nonexistant, so return CRITICAL
+                elif sc.get('check') == self.check.COMPUTE_API_SC:
+                    self.assertEqual(sc.get('status'), AgentCheck.CRITICAL)
+                elif sc.get('check') == self.check.NETWORK_API_SC:
+                    self.assertEqual(sc.get('status'), AgentCheck.CRITICAL)
 
             self.check._current_scope = scope
 
@@ -537,7 +540,7 @@ class TestOpenstack(AgentCheckTest):
         i_key = "test_instance"
 
         # Update the cached list of servers based on what the endpoint returns
-        cached_servers = openstackCheck.get_all_servers(i_key)
+        cached_servers = openstackCheck.get_all_servers(i_key, False)
 
         assert 'server-1' not in cached_servers
         assert 'server_newly_added' in cached_servers
