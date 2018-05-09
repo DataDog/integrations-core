@@ -11,6 +11,7 @@ Get metrics from all your containers running in ECS Fargate:
 ### Installation
 
 The ECS Fargate check is packaged with the Agent, so simply [run the Agent][1] with your containers.
+Additional details are available in our [AWS Fargate guide](https://docs.datadoghq.com/integrations/ecs_fargate/).
 
 ### Configuration
 
