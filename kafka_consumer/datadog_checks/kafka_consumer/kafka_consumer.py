@@ -188,8 +188,8 @@ class KafkaCheck(AgentCheck):
         attempts = 0
         while not client.ready(node_id):
             if attempts > DEFAULT_KAFKA_RETRIES:
-                self.log.error("unable to connect to broker id: {} after {} attempts".format(
-                    node_id, DEFAULT_KAFKA_RETRIES))
+                self.log.error("unable to connect to broker id: %i after %i attempts",
+                               node_id, DEFAULT_KAFKA_RETRIES)
                 break
             attempts = attempts + 1
             delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01  # starting at 20 ms
