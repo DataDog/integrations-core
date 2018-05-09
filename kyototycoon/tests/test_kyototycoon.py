@@ -25,9 +25,8 @@ def test_check(aggregator, kyototycoon):
         'tags': TAGS
     }
 
-    # run the check twice so we can get some rate metrics
-    for i in range(2):
-        kt.check(instance)
+    # run the check
+    kt.check(instance)
 
     GAUGES = KyotoTycoonCheck.GAUGES.values()
     DB_GAUGES = KyotoTycoonCheck.DB_GAUGES.values()
@@ -41,18 +40,18 @@ def test_check(aggregator, kyototycoon):
     # no replications, so ignore kyototycoon.replication.delay
     for mname in GAUGES:
         if mname != 'replication.delay':
-            aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS, count=2)
+            aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS, count=1)
 
     for mname in DB_GAUGES:
-        aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS + ['db:0'], count=2)
+        aggregator.assert_metric('kyototycoon.{0}'.format(mname), tags=TAGS + ['db:0'], count=1)
 
     # since the aggregator doesn't actually calculate the rate between two instances of a metric
     #   we actually end up with 2 counts of a RATE metric, rather than just 1
     for mname in ALL_RATES:
-        aggregator.assert_metric('kyototycoon.{0}_per_s'.format(mname), tags=TAGS, count=2)
+        aggregator.assert_metric('kyototycoon.{0}_per_s'.format(mname), tags=TAGS, count=1)
 
     # service check
     aggregator.assert_service_check(
-        KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.OK, tags=TAGS, at_least=1)
+        KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.OK, tags=TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
