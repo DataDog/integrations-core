@@ -496,6 +496,7 @@ class ConsulCheck(AgentCheck):
                            latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags)
                 self.gauge('consul.net.node.latency.max',
                            latencies[-1], hostname=node_name, tags=main_tags)
+
     def _get_all_nodes(self, instance):
         return self.consul_request(instance, 'v1/catalog/nodes')
 

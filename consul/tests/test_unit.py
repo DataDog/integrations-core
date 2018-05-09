@@ -50,6 +50,7 @@ def test_get_peers_in_cluster(aggregator):
 
     aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:follower'])
 
+
 def test_count_all_nodes(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
