@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
-
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
 from .common import (
@@ -11,7 +9,6 @@ from .common import (
 )
 
 
-@pytest.mark.integration
 def test_check(aggregator, kyototycoon):
     """
     Testing Kyototycoon check.
