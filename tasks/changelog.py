@@ -14,33 +14,15 @@ from six.moves.urllib.request import urlopen
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
+from packaging import version
 
-from .constants import ROOT, GITHUB_API_URL
-
+from .constants import ROOT, GITHUB_API_URL, AGENT_BASED_INTEGRATIONS
+from .utils import get_version_string, get_release_tag_string
 
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
-
-
-def get_version_string(check_name):
-    """
-    Get the version string for the given check.
-    """
-    about = {}
-    about_path = os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
-    with open(about_path) as f:
-        exec(f.read(), about)
-
-    return about.get('__version__')
-
-
-def get_release_tag_string(check_name, version_string):
-    """
-    Compose a string to use for release tags
-    """
-    return '{}-{}'.format(check_name, version_string)
 
 
 def parse_pr_numbers(git_log_lines):
@@ -79,14 +61,27 @@ def update_changelog(ctx, target, new_version, dry_run=False):
     Example invocation:
         inv update-changelog redisdb 3.1.1
     """
-    # get the current version
-    version_string = get_version_string(target)
-    if not version_string:
-        raise Exit("Unable to get version for check {}".format(target))
-    print("Current version of check {}: {}".format(target, version_string))
+    # sanity check on the target
+    if target not in AGENT_BASED_INTEGRATIONS:
+        raise Exit("Provided target is not an Agent-based Integration")
 
+    # sanity check on the version provided
+    p_version = version.parse(new_version)
+    p_current = version.parse(get_version_string(target))
+    if p_version <= p_current:
+        raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
+    print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
+
+    do_update_changelog(ctx, target, str(p_current), new_version, dry_run)
+
+
+def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
+    """
+    Actually perform the operations needed to update the changelog, this
+    method is supposed to be used by other tasks and not directly.
+    """
     # get the name of the current release tag
-    target_tag = get_release_tag_string(target, version_string)
+    target_tag = get_release_tag_string(target, cur_version)
 
     # get the diff from HEAD
     target_path = os.path.join(ROOT, target)
