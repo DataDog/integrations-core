@@ -55,7 +55,7 @@ class Oracle(AgentCheck):
             # Check if the instantclient is available
             cx_Oracle.clientversion()
             self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
-        except cx_Oracle.DatabaseError, e:
+        except cx_Oracle.DatabaseError as e:
             # Fallback to JDBC
             self.use_oracle_client = False
             self.log.info('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))

@@ -33,7 +33,7 @@ instances:
   #   service_name: my_sid
   #   user: my_username
   #   password: my_password
-  #   jdbc_driver_path: "/path/to/driver.jar" # Optionnal: set if you are not using the oracle native client. You can also add it to your $CLASSPATH instead. 
+  #   jdbc_driver_path: "/path/to/driver.jar" # Optional: set if you are not using the oracle native client. You can also add it to your $CLASSPATH instead.
   #
   - server: localhost:1521
     service_name: my_sid
@@ -41,3 +41,41 @@ instances:
     password: my_password
     tags:
       - my_tag
+
+    # Providing custom queries is also supported. Each query must have 3 fields:
+    #
+    # 1. metric_prefix - This is what each metric will start with.
+    # 2. query - This is the SQL to execute. It can be a simple statement or a
+    #            multi-line script. Only the first row of the result is read.
+    # 3. columns - This is a list representing each column, ordered sequentially
+    #              from left to right. There are 2 required pieces of data:
+    #                a. type - This is the submission method (gauge, count, etc.).
+    #                b. name - This is the suffix to append to the metric_prefix
+    #                          in order to form the full metric name. If `type` is
+    #                          `tag`, this column will instead be considered a tag
+    #                          and will be applied to every metric collected by
+    #                          this particular query.
+    # 4. tags (optional) - A list of tags to apply to each metric.
+    #
+    # This:
+    #
+    #  self.gauge('oracle.custom_query.metric1', value, tags=['tester:oracle', 'tag1:value'])
+    #  self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:value'])
+    #
+    # is what the following example configuration would become.
+    #
+    # custom_queries:
+    #   - metric_prefix: oracle.custom_query
+    #     query: |  # Use the pipe if you require a multi-line script.
+    #       SELECT colums
+    #       FROM tester.test_table
+    #       WHERE conditions
+    #     columns:
+    #       - name: metric1
+    #         type: gauge
+    #       - name: tag1
+    #         type: tag
+    #       - name: metric2
+    #         type: count
+    #     tags:
+    #       - tester:oracle
