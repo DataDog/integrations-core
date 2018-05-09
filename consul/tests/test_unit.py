@@ -54,11 +54,10 @@ def test_get_peers_in_cluster(aggregator):
 def test_count_all_nodes(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
     consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
-    my_mocks['_get_all_nodes'] = consul_mocks.mock_get_all_nodes
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
-    aggregator.assert_metric('consul.catalog.total_nodes', value=2, tags=['consul_datacenter:c1'])
+    aggregator.assert_metric('consul.catalog.total_nodes', value=2, tags=['consul_datacenter:dc1'])
 
 
 def test_get_nodes_with_service_warning(aggregator):
