@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Hardcode the 8500 port in the Autodiscovery template. See [#1444][] for more information.
+* [FEATURE] Introduce a check at `consul.catalog.total_nodes` as a count of all nodes registered in the cluster
 
 1.3.0 / 2018-01-10
 ==================
