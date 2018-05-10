@@ -1,43 +1,26 @@
 # CHANGELOG - haproxy
 
-1.2.1 / 2018-02-13
-==================
-### Changes
+## 1.2.1 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 
-1.2.0 / 2018-02-13
-==================
-
-### Changes
+## 1.2.0 / 2018-02-13
 
 * [FEATURE] allows the use of custom HTTP headers when requesting stats. See [#1019][]
 
-1.1.0 / 2018-01-10
-==================
-
-### Changes
+## 1.1.0 / 2018-01-10
 
 * [FEATURE] Enable tagging metrics based on a user-submitted named regex. See [#462][]
 
-1.0.2 / 2017-05-11
-==================
-
-### Changes
+## 1.0.2 / 2017-05-11
 
 * [BUGFIX] Sanitize bogus evil CSV with with linebreak in field. See [#379][]
 
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [BUGFIX] handle comma in fields. See [#281][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds haproxy integration.
 

@@ -1,16 +1,10 @@
 # CHANGELOG - win32_event_log
 
-1.1.1 / 2018-01-10
-==================
-
-### Changes
+## 1.1.1 / 2018-01-10
 
 * [FEATURE] Add parameters to set priority in event stream for all events or per instance See [#971][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds win32_event_log integration.
 

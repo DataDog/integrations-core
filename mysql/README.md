@@ -62,7 +62,7 @@ mysql> show databases like 'performance_schema';
 +-------------------------------+
 | performance_schema            |
 +-------------------------------+
-1 row in set (0.00 sec)
+## 1.row in set (0.00 sec)
 
 mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
@@ -89,7 +89,7 @@ Query OK, 0 rows affected (0.00 sec)
           schema_size_metrics: false
           disable_innodb_metrics: false
   ```
-  
+
 **Note**: Wrap your password in single quotes in case there is a special character in it.
 
   In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation][15] to enable it, otherwise set extra_performance_metrics to false.
@@ -103,7 +103,7 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 
 **Available for Agent >6.0**
 
-1. By default MySQL logs everything in /var/log/syslog which requires root access to read. To change this and have specific files for MySQL logs follow these steps:
+## 1. By default MySQL logs everything in /var/log/syslog which requires root access to read. To change this and have specific files for MySQL logs follow these steps:
 
   - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
   - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error and slow query logs:

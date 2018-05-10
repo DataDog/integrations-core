@@ -19,7 +19,7 @@ Whichever you choose, your hosts need to have cgroup memory management enabled f
 
 #### Host Installation
 
-1. Ensure Docker is running on the host.
+## 1. Ensure Docker is running on the host.
 2. Install the Agent as described in [the Agent installation instructions][3] for your host OS.
 3. Enable [the Docker integration tile in the application][4].
 4. Add the Agent user to the docker group: `usermod -a -G docker dd-agent`
@@ -31,7 +31,7 @@ Whichever you choose, your hosts need to have cgroup memory management enabled f
 
 #### Container Installation
 
-1. Ensure Docker is running on the host.
+## 1. Ensure Docker is running on the host.
 2. As per [the docker container installation instructions][6], run:
 
         docker run -d --name dd-agent \
@@ -100,7 +100,7 @@ For more information about building custom Docker containers with the Datadog Ag
 
 [Run the Agent's `status` subcommand][13] and look for `docker_daemon` under the Checks section.
 
-## Agent v6 
+## Agent v6
 
 The new docker check is named `docker`. Starting from version 6.0, the Agent won't load the `docker_daemon` check anymore, even if it is still available and maintained for Agent version 5.x. All features are ported on version >6.0 , excepted the following deprecations:
 

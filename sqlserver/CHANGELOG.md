@@ -1,48 +1,28 @@
 # CHANGELOG - sqlserver
 
-1.4.0 / Unreleased
-==================
-
-### Changes
+## 1.4.0 / 2018-05-10
 
 * [FEATURE] Add custom tag support for service checks.
 
-1.3.0 / 2018-02-13
-==================
-
-### Changes
+## 1.3.0 / 2018-02-13
 
 * [IMPROVEMENT] Allow custom connection string to connect. See [#1068][].
 
-1.2.1 / 2018-01-10
-==================
-
-### Changes
+## 1.2.1 / 2018-01-10
 
 * [BUGFIX] Allows metric collection from all instances in custom query. See [#959][].
 * [BUGFIX] Repair reporting of stats from sys.dm_os_wait_stats. See [#975][].
 
-1.2.0 / 2017-10-10
-==================
-
-### Changes
+## 1.2.0 / 2017-10-10
 
 * [FEATURE] single bulk query of all of metrics, then filter locally. See [#573][].
 
-
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] Allow calling custom proc to return metrics, and improve transaction handling. See [#357][] and [#456][], thanks [@rlaveycal][]
 * [SANITY] Fix yaml example file spacing. See [#342][], thanks [@themsquared][]
 
-
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds sqlserver integration.
 

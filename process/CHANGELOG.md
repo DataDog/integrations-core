@@ -1,46 +1,30 @@
 # CHANGELOG - process
 
-1.3.0 / 2018-02-13
-==================
+## 1.3.0 / 2018-02-13
 
 * [FEATURE] Add option to use sudo for privileged process checks on file descriptors. See [#715][], thanks [@pdecat][].
 
-1.2.0 / 2018-01-10
-==================
+## 1.2.0 / 2018-01-10
 
 * [IMPROVEMENT] Filter processes by user. See [#337][]
 
-1.1.2 / 2017-08-28
-==================
+## 1.1.2 / 2017-08-28
 
- * [IMPROVEMENT] Better logging when a process was not found. See [#609][]
+* [IMPROVEMENT] Better logging when a process was not found. See [#609][]
 
-1.1.1 / 2017-07-18
-==================
-
-### Changes
+## 1.1.1 / 2017-07-18
 
 * [BUGFIX] Make process validation case-insensitve on Windows See [#479][]
 
-1.1.0 / 2017-06-05
-==================
-
-### Changes
+## 1.1.0 / 2017-06-05
 
 * [FEATURE] Add option to collect metrics for children of matched processes. See [#425][]
 
-1.0.1 / 2017-05-11
-==================
-
-### Changes
+## 1.0.1 / 2017-05-11
 
 * [BUGFIX] Handle the case where the pidfile doesn't exist. See [#349][]
 
-
-1.0.0 / 2017-05-08
-==================
-
-### Changes
+## 1.0.0 / 2017-05-08
 
 * [FEATURE] adds process integration.
 

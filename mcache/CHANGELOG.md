@@ -1,23 +1,15 @@
 # CHANGELOG - mcache
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-05-10
 
 * [FEATURE] Add custom tag support for service check.
 * [FEATURE] Hardcode the 11211 port in the Autodiscovery template. See [#1444][] for more information.
 
-1.1.0 / 2017-11-21
-==================
-### Changes
+## 1.1.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds mcache integration.
 

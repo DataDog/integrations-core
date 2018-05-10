@@ -1,44 +1,28 @@
 # CHANGELOG - redisdb
 
-1.5.0 / Unreleased
-==================
-### Changes
+## 1.5.0 / 2018-05-10
 
 * [FEATURE] Hardcode the 6379 port in the Autodiscovery template. See [#1444][] for more information.
 
-1.4.0 / 2018-01-10
-==================
-### Changes
+## 1.4.0 / 2018-01-10
 
 * [IMPROVEMENT] keys can be expressed as patterns, see [#300][]. Thanks [@aliva][].
 * [BUGFIX] skip non-local keys. See  [#798][]. Thanks [@chadharvey][]
 
-1.3.0 / 2017-11-21
-==================
-### Changes
+## 1.3.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.2.0 / 2017-08-28
-==================
-
-### Changes
+## 1.2.0 / 2017-08-28
 
 * [IMPROVEMENT] adds "redis.net.commands.instantaneous" metric. See [#672][]
 * [IMPROVEMENT] adds "redis.mem.maxmemory" metric. See [#673][], thanks [@endzyme][]
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [IMPROVEMENT] add "redis_role:{master,slave}" tag.
 
-
-1.0.0 / 2017-02-22
-==================
-
-### Changes
+## 1.0.0 / 2017-02-22
 
 * [FEATURE] adds redisdb integration.
 

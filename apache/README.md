@@ -9,8 +9,8 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
-1. [Install the Agent][1] on your Apache servers.
-  
+## 1. [Install the Agent][1] on your Apache servers.
+
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 

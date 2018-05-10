@@ -1,24 +1,14 @@
 # CHANGELOG - tokumx
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-05-10
 
 * [FEATURE] Adds custom tag support to service checks.
 
-1.1.0 / 2017-11-21
-==================
-
-### Changes
+## 1.1.0 / 2017-11-21
 
 * [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#842][]
 
-
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds tokumx integration.
 

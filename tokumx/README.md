@@ -18,7 +18,7 @@ The TokuMX check is packaged with the Agent, so simply [install the Agent][1] on
 ### Configuration
 #### Prepare TokuMX
 
-1.  Install the Python MongoDB module on your MongoDB server using the following command:
+## 1.  Install the Python MongoDB module on your MongoDB server using the following command:
 
         sudo pip install --upgrade "pymongo<3.0"
 

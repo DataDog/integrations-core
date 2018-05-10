@@ -16,7 +16,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 ### Configuration
 
-1. First configure a Datadog role and user with your identity server
+## 1. First configure a Datadog role and user with your identity server
 
 
         openstack role create datadog_monitoring

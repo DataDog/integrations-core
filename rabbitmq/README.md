@@ -40,8 +40,8 @@ instances:
 
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
-1. the `rabbitmq.aliveness` service check
-1. the `rabbitmq.connections` metric
+## 1. the `rabbitmq.aliveness` service check
+## 1. the `rabbitmq.connections` metric
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
@@ -64,7 +64,7 @@ Configuration Options
 
 **Available for Agent >6.0**
 
-1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
+## 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
 ```
 log.dir = /var/log/rabbit
@@ -76,12 +76,12 @@ log.file = rabbit.log
     ```
     logs_enabled: true
     ```
-    
+
 3. Add this configuration setup to your `rabbitmq.yaml` file to start collecting your RabbitMQ logs:
 
 ```
 logs:
-    
+
     - type: file
       path: /var/log/rabbit/*.log
       source: rabbitmq

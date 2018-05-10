@@ -14,7 +14,7 @@ Capture HAProxy activity in Datadog to:
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:
 
-1. [Install the Agent][1] on your HAProxy servers. 
+## 1. [Install the Agent][1] on your HAProxy servers.
 
 2. Make sure that stats are enabled on your HAProxy configuration. [Read our blog post on collecting HAProxy metrics for more information][2].
 
@@ -26,7 +26,7 @@ Create a `haproxy.yaml` file in the Agent's `conf.d` directory.
 
 The Agent collects metrics via a stats endpoint:
 
-1. Configure one in your `haproxy.conf`:
+## 1. Configure one in your `haproxy.conf`:
 
   ```
   listen stats # Define a listen section called "stats"

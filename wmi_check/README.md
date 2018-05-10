@@ -12,7 +12,7 @@ Get metrics from your Windows applications/servers with Windows Management Instr
 
 If you are only collecting standard metrics from Microsoft Windows and other packaged applications, there are no installation steps. If you need to define new metrics to collect from your application, then you have a few options:
 
-1.  Submit perfomance counters using System.Diagnostics in .NET, then access them via WMI.
+## 1.  Submit perfomance counters using System.Diagnostics in .NET, then access them via WMI.
 2.  Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
 
 To learn more about using System.Diagnostics, refer to [the MSDN documentation here][1].aspx). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces you may find this tool useful: [WMI Explorer][2]. You can find the same information with Powershell [here][3]. Also review the information in the [Datadog Knowledge Base article][4].
@@ -25,7 +25,7 @@ If the metric isn't showing up in WMI, try running `winmgmt /resyncperf` to forc
 
 ## Configuration
 
-1.  Click the **Install Integration** button on the WMI Integration Tile.
+## 1.  Click the **Install Integration** button on the WMI Integration Tile.
 2.  Open the Datadog Agent Manager on the Windows server.
 3.  Edit the `Wmi Check` configuration.
 

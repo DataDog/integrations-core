@@ -1,31 +1,19 @@
 # CHANGELOG - mesos_slave
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-05-10
 
 * [BUGFIX] Add debug logs and a noisier error message.
 * [FEATURE] Adds custom tag support for service check.
 
-1.1.1 / 2018-02-13
-==================
-
-### Changes
+## 1.1.1 / 2018-02-13
 
 * [BUGFIX] Checks available metrics for backwards compatibility. See [#1066][].
 
-1.1.0 / 2017-08-21
-==================
-
-### Changes
+## 1.1.0 / 2017-08-21
 
 * [FEATURE] adds gpu metrics.
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds mesos_slave integration.
 

@@ -13,7 +13,7 @@ The check collects metrics via JMX, so you'll need a JVM on each node so the Age
 
 ### Configuration
 
-1. **Make sure that [JMX Remote is enabled][3] on your ActiveMQ server.**
+## 1. **Make sure that [JMX Remote is enabled][3] on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `${confd_help('`conf.d/activemq.yaml`')}`. See the [sample activemq.yaml][4] for all available configuration options.
 
 ```

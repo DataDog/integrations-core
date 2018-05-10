@@ -1,83 +1,59 @@
 # CHANGELOG - docker_daemon
 
-1.10.0 / Unreleased
-==================
-### Changes
+## 1.10.0 / 2018-05-10
 
 * [IMPROVEMENT] Add docker.cpu.shares metric. See [#1358][]
 
-1.9.0 / 2018-03-23
-==================
-### Changes
+## 1.9.0 / 2018-03-23
 
 * [IMPROVEMENT] add the new `exec_die` event type to default exclusion list. See [#1240][]
 
-1.8.0 / 2018-02-13
-==================
-### Changes
+## 1.8.0 / 2018-02-13
 
 * [IMPROVEMENT] Add `short_image` tag to container metrics. See [#986][]
 
-1.7.0 / 2018-01-10
-==================
-### Changes
+## 1.7.0 / 2018-01-10
 
 * [FEATURE] Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881][]
 * [IMPROVEMENT] Improve logging when cgroup metrics can't be retrieved. See [#914][]
 
-1.6.0 / 2017-11-21
-==================
-### Changes
+## 1.6.0 / 2017-11-21
 
 * [IMPROVEMENT] Add custom tags to all service checks. See [#782][]
 * [IMPROVEMENT] Add docker memory soft limit metric. See [#760][]
 * [IMPROVEMENT] Add docker.containers.running.total & docker.containers.stopped.total metrics. See [#859][]
 
-1.5.1 / 2017-11-08
-==================
-### Changes
+## 1.5.1 / 2017-11-08
 
 * [BUGFIX] Fix lost kubernetes tags in 1.5.0. See [#817][]
 
-1.5.0 / 2017-10-10
-==================
-### Changes
+## 1.5.0 / 2017-10-10
 
 * [IMPROVEMENT] Remove namespace from pod_name tag. See [#770][]
 
-1.4.0 / 2017-09-12
-==================
-### Changes
+## 1.4.0 / 2017-09-12
 
 * [FEATURE] Add an option to wait for docker if it's not ready at start time. See [#722][]
 * [FEATURE] Add client-side event filtering by event type. See [#744][]
 
-1.3.2 / 2017-08-28
-==================
-### Changes
+## 1.3.2 / 2017-08-28
 
 * [IMPROVEMENT] Add "image_name:openshift/origin-pod" to suggested exclude list. See [#641][]
 * [BUGFIX] safely check volume list before accessing. See [#544][]
 * [BUGFIX] make it a bit safer. See [#701][]
 
-1.3.1 / 2017-07-26
-==================
-### Changes
+## 1.3.1 / 2017-07-26
 
 * [BUGFIX] fix event collection on ecs and nomad. See [#616][]
 
-1.3.0 / 2017-07-18
-==================
-### Changes
+## 1.3.0 / 2017-07-18
 
 * [FEATURE] collect kube_container_name by default in docker_daemon check, like kubernetes does. See [#553][]
 * [FEATURE] add kube_container_name tag to kubernetes and docker integrations. See [#509][], thanks [@sophaskins][]
 * [IMPROVEMENT] remove NomadUtil & ECSUtil from docker_daemon, MetadataCollector proxies them. See [#486][]
 * [IMPROVEMENT] use the new orchestrator.Tagger class to retrieve the Mesos tags for docker metrics. See [#466][]
 
-1.2.0 / 2017-06-05
-==================
-### Changes
+## 1.2.0 / 2017-06-05
 
 * [FEATURE] Add option to extract docker event attibutes as tags. See [#404][]
 * [FEATURE] Add option to cap rate values to filter out cgroup CPU spikes. See [#412][]
@@ -87,17 +63,12 @@
 * [IMPROVEMENT] Add docker.cpu.usage metric for global container CPU usage. See [#385][]
 * [BUGFIX] Docker events are tagged with the image name when docker reports its checksum. See [#415][]
 
-1.1.1 / 2017-05-11
-==================
-### Changes
+## 1.1.1 / 2017-05-11
 
 * [BUGFIX] catch IOError exception when container exits in the middle of a check run. See [#408][]
 * [BUGFIX] fix image name when using sha256 for specs. See [#393][]
 
-
-1.1.0 / 2017-04-24
-==================
-### Changes
+## 1.1.0 / 2017-04-24
 
 * [FEATURE] reduce network mapping logging output. See [#348][]
 * [FEATURE] Kubernetes: catch kubeutil init exception. See [#345][]
@@ -107,9 +78,7 @@
 * [FEATURE] adds the ability to monitor for docker exits failure with service check `docker.exit`. See [#290][]
 * [FEATURE] collect rancher label container name as tag. See [#282][]
 
-1.0.0 / 2017-03-22
-==================
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds docker_daemon integration.
 

@@ -1,27 +1,23 @@
 # CHANGELOG - iis
 
-2.1.0 / Unreleased
-==================
-### Changes
+## 2.1.0 / 2018-05-10
 
 * [UPDATE] Updates to new wheel packaging and test infrastructure
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]
 
-2.0.2 / 2018-03-07
-==================
-### Changes
+## 2.0.2 / 2018-03-07
+
 * [Fix] Fixed tag initialization & reporting. See [#1185][].
 
-2.0.1 / 2018-02-13
-==================
-### Changes
+## 2.0.1 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 
-2.0.0 / 2018-01-10
-==================
+## 2.0.0 / 2018-01-10
 
-**Breaking change notice**
+* [IMPROVEMENT] Use PDH instead of WMI to collect data. [#927][]
+
+### Breaking change notice
 
 Starting from this release, when no `sites` are specified for a given host in the check configuration,
 the check collects data from all the IIS sites of that host and tags the metrics with a `site:` tag. Also, in this case, the aggregate
@@ -32,15 +28,7 @@ a `site:` tag.
 
 Please update your dashboards and monitors accordingly.
 
-### Changes
-
-* [IMPROVEMENT] Use PDH instead of WMI to collect data. [#927][]
-
-
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds iis integration.
 

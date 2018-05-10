@@ -20,11 +20,11 @@ Follow the instructions in our [blog post][1] to install the Datadog Agent on ea
 ### Configuration
 #### DC/OS
 
-1. In the DC/OS web UI, click on the **Universe** tab. Find the **datadog** package and click the Install button.
-1. Click the **Advanced Installation** button.
-1. Enter your Datadog API Key in the first field.
-1. In the Instances field, enter the number of slave nodes in your cluster (You can determine the number of nodes in your cluster by clicking the Nodes tab on the left side of the DC/OS web ui).
-1. Click **Review and Install** then **Install**
+## 1. In the DC/OS web UI, click on the **Universe** tab. Find the **datadog** package and click the Install button.
+## 1. Click the **Advanced Installation** button.
+## 1. Enter your Datadog API Key in the first field.
+## 1. In the Instances field, enter the number of slave nodes in your cluster (You can determine the number of nodes in your cluster by clicking the Nodes tab on the left side of the DC/OS web ui).
+## 1. Click **Review and Install** then **Install**
 
 #### Marathon
 

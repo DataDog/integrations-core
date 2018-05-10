@@ -251,7 +251,7 @@ class Varnish(AgentCheck):
             Current states  good:  2 threshold:  3 window:  5
             Average responsetime of good probes: 0.000000
             Oldest                                                    Newest
-            ================================================================
+            ==========
             -------------------------------------------------------------444 Good IPv4
             -------------------------------------------------------------XXX Good Xmit
             -------------------------------------------------------------RRR Good Recv
@@ -260,7 +260,7 @@ class Varnish(AgentCheck):
             Current states  good:  2 threshold:  3 window:  5
             Average responsetime of good probes: 0.000000
             Oldest                                                    Newest
-            ================================================================
+            ==========
             ----------------------------------------------------------HHH--- Happy
 
         Example output (new output format):
@@ -270,7 +270,7 @@ class Varnish(AgentCheck):
             boot.backend2                  probe      Healthy 4/4
               Current states  good:  4 threshold:  3 window:  4
               Average response time of good probes: 0.002504
-              Oldest ================================================== Newest
+              Oldest ============== Newest
               --------------------------------------------------------------44 Good IPv4
               --------------------------------------------------------------XX Good Xmit
               --------------------------------------------------------------RR Good Recv

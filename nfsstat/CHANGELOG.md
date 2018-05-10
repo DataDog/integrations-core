@@ -1,23 +1,14 @@
 # CHANGELOG - Nfsstat
 
 0.2.0 / 2018-03-23
-==================
-
-### Changes
 
 * [FEATURE] add custom tag support.
 
 0.1.1 / 2018-02-13
-==================
-
-### Changes
 
 * [BUGFIX] makes reports output stats in actual realtime. See [#974][].
 
 0.1.0 / 2017-10-10
-==================
-
-### Changes
 
 * [FEATURE] adds nfsstat integration. See [#720][].
 

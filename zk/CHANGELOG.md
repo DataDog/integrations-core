@@ -1,30 +1,20 @@
 # CHANGELOG - zk
 
-1.2.0 / 2018-01-10
-==================
+## 1.2.0 / 2018-01-10
 
 * [IMPROVEMENT] Add `zookeeper.packets.received` and `zookeeper.packets.sent` as `rate` metrics
   for the `stat` command output to correct the incorrect `zookeeper.bytes_received` and
   `zookeeper.bytes_sent` metrics. See [#816][]
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [IMPROVEMENT] Replace usage of deprecated `AgentCheck.set` method with `gauge`. See [#473][]
 
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [BUGFIX] Fix version parsing causing false positives with `3.4.10`. See [#341][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds zk integration.
 

@@ -16,7 +16,7 @@ The directory check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-1. Edit your `directory.yaml` file in the Agent's `conf.d` directory. See the [sample directory.yaml][2] for all available configuration options:
+## 1. Edit your `directory.yaml` file in the Agent's `conf.d` directory. See the [sample directory.yaml][2] for all available configuration options:
 
 ```
 init_config:

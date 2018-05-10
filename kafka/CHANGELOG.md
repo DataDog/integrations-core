@@ -1,29 +1,19 @@
 # CHANGELOG - kafka
 
-1.1.0 / Unreleased
-==================
-
-### Changes
+## 1.1.0 / 2018-05-10
 
 * [FEATURE] Added new Kafka "per topic" metrics. See [#1208][]
 * [FEATURE] Added metrics for Producers 0.11.x See [#1392][]
 
-1.0.2 / 2017-11-21
-==================
-
-### Changes
+## 1.0.2 / 2017-11-21
 
 * [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]
 
-1.0.1 / 2017-07-18
-==================
+## 1.0.1 / 2017-07-18
 
 * [IMPROVEMENT] fixes example of Kafka RequestHandlerAvgIdlePercent MBean. See [#517][], thanks [@svendx4f][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds kafka integration.
 

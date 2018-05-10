@@ -1,78 +1,47 @@
 # CHANGELOG - varnish
 
-1.2.0 / Unreleased
-==================
-### Changes
+## 1.2.0 / 2018-05-10
 
 * [IMPROVEMENT] Add custom tag support for service checks.
 
-1.1.2 / 2018-03-23
-==================
-### Changes
+## 1.1.2 / 2018-03-23
 
 * [IMPROVEMENT] Add support for collecting varnishadm service checks for Varnish 5. See [#1130][].
 
-1.1.1 / 2018-02-13
-==================
-### Changes
+## 1.1.1 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 
-1.1.0 / 2018-01-10
-==================
-
-### Changes
+## 1.1.0 / 2018-01-10
 
 * [IMPROVEMENT] Use JSON with varnishstat starting varnish 5.0.0. See [#939][].
 
-1.0.6 2017-11-21
-==================
-
-### Changes
+## 1.0.6 2017-11-21
 
 * [BUGFIX] Fixes pulling backend service check when its manually overriden. See [#][].
 
-1.0.5 2017-10-10
-==================
-
-### Changes
+## 1.0.5 2017-10-10
 
 * [BUGFIX] Fixes broken service check behavior. See [#795][].
 * [BUGFIX] Fix `varnishadm backend.list -p` parsing for newer versions of Varnish. See [#739][]. (Thanks [@philipseidel][])
 
-1.0.4 2017-08-28
-==================
+## 1.0.4 2017-08-28
 
-### Changes
+* [IMPROVEMENT] Support for passing additional parameters to varnishstat and varnishadm in order to better support service discovery. See [#498][], thanks [@philipseidel][]
 
-* [IMPROVEMENT] Support for passing additional parameters to varnishstat
-and varnishadm in order to better support service discovery. See [#498][], thanks [@philipseidel][]
-
-1.0.3 / 2017-07-18
-==================
-
-### Changes
+## 1.0.3 / 2017-07-18
 
 * [BUGFIX] Fixes an issue with retrieving the backend service checks. Special thanks to [@adongy][] for finding this! [#582][]
 
-1.0.2 / 2017-07-18
-==================
-
-### Changes
+## 1.0.2 / 2017-07-18
 
 * [IMPROVEMENT] adds ability to filter metrics using the -f option of varnishstat. See [#361][]
 
-1.0.1 / 2017-06-05
-==================
-
-### Changes
+## 1.0.1 / 2017-06-05
 
 * [IMPROVEMENT] Support varnish 4.1 for the service check using varnishadm. See [#360][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds varnish integration.
 
