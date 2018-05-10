@@ -19,13 +19,6 @@ from config import _is_affirmative
 from utils.platform import Platform
 
 
-# Main entry point is meant for checks needing privilege escalation with sudo
-if __name__ == "__main__":
-    if sys.argv[1] == "num_fds":
-        print psutil.Process(int(sys.argv[2])).num_fds()
-    sys.exit(0)
-
-
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
@@ -214,7 +207,7 @@ class ProcessCheck(AgentCheck):
             if method == 'num_fds' and Platform.is_unix() and try_sudo:
                 try:
                     # It is up the agent's packager to grant corresponding sudo policy on unix platforms
-                    result = int(subprocess.check_output(['sudo', sys.executable, __file__, method, str(process.pid)]))
+                    result = int(subprocess.check_output('sudo ls /proc/{}/fd/ | wc -l'.format(process.pid), shell=True))
                 except subprocess.CalledProcessError as e:
                     self.log.exception("running psutil method %s with sudo failed with return code %d", method, e.returncode)
                 except:
