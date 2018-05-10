@@ -1,21 +1,13 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-"""Pgbouncer check
-
-Collects metrics from the pgbouncer database.
-"""
-
-# stdlib
 import urlparse
 
-# 3p
 import psycopg2 as pg
 import psycopg2.extras as pgextras
 
-# project
 from checks import AgentCheck, CheckException
+
 
 class ShouldRestartException(Exception):
     pass
@@ -34,21 +26,21 @@ class PgBouncer(AgentCheck):
             ('database', 'db'),
         ],
         'metrics': [
-            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)), # < 1.8
-            ('total_xact_count',     ('pgbouncer.stats.transactions_per_second', RATE)), # >= 1.8
-            ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)), # >= 1.8
+            ('total_requests',       ('pgbouncer.stats.requests_per_second', RATE)),  # < 1.8
+            ('total_xact_count',     ('pgbouncer.stats.transactions_per_second', RATE)),  # >= 1.8
+            ('total_query_count',    ('pgbouncer.stats.queries_per_second', RATE)),  # >= 1.8
             ('total_received',       ('pgbouncer.stats.bytes_received_per_second', RATE)),
             ('total_sent',           ('pgbouncer.stats.bytes_sent_per_second', RATE)),
             ('total_query_time',     ('pgbouncer.stats.total_query_time', RATE)),
-            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', RATE)), # >= 1.8
-            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)), # < 1.8
-            ('avg_xact_count',       ('pgbouncer.stats.avg_transaction_count', GAUGE)), # >= 1.8
-            ('avg_query_count',      ('pgbouncer.stats.avg_query_count', GAUGE)), # >= 1.8
+            ('total_xact_time',      ('pgbouncer.stats.total_transaction_time', RATE)),  # >= 1.8
+            ('avg_req',              ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
+            ('avg_xact_count',       ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
+            ('avg_query_count',      ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
             ('avg_recv',             ('pgbouncer.stats.avg_recv', GAUGE)),
             ('avg_sent',             ('pgbouncer.stats.avg_sent', GAUGE)),
-            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)), # < 1.8
-            ('avg_xact_time',        ('pgbouncer.stats.avg_transaction_time', GAUGE)), # >= 1.8
-            ('avg_query_time',       ('pgbouncer.stats.avg_query_time', GAUGE)), # >= 1.8
+            ('avg_query',            ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
+            ('avg_xact_time',        ('pgbouncer.stats.avg_transaction_time', GAUGE)),  # >= 1.8
+            ('avg_query_time',       ('pgbouncer.stats.avg_query_time', GAUGE)),  # >= 1.8
         ],
         'query': """SHOW STATS""",
     }
