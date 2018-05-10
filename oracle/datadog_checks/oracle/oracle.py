@@ -44,7 +44,6 @@ class Oracle(AgentCheck):
         'Disk Sort Per Sec':                'oracle.disk_sorts',
         'Memory Sorts Ratio':               'oracle.memory_sorts_ratio',
         'Database Wait Time Ratio':         'oracle.database_wait_time_ratio',
-        'Enqueue Timeouts Per Sec':         'oracle.enqueue_timeouts',
         'Session Limit %':                  'oracle.session_limit_usage',
         'Session Count':                    'oracle.session_count',
         'Temp Space Used':                  'oracle.temp_space_used',
