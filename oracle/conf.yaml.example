@@ -71,7 +71,7 @@ instances:
     #       FROM tester.test_table
     #       WHERE conditions
     #     columns:
-    #       # Put this for any columns you wish to skip:
+    #       # Put this for any column you wish to skip:
     #       # - {}
     #       - name: metric1
     #         type: gauge

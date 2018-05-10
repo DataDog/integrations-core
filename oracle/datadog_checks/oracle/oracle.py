@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # stdlib
+from contextlib import closing
 
 # 3rd party
 import jaydebeapi as jdb
@@ -65,12 +66,9 @@ class Oracle(AgentCheck):
         if not server or not user:
             raise Exception("Oracle host and user are needed")
 
-        con = self._get_connection(server, user, password, service, jdbc_driver, tags)
-
-        self._get_sys_metrics(con, tags)
-        self._get_tablespace_metrics(con, tags)
-
-        con.close()
+        with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
+            self._get_sys_metrics(con, tags)
+            self._get_tablespace_metrics(con, tags)
 
     def _get_config(self, instance):
         self.server = instance.get('server', None)
@@ -134,43 +132,41 @@ class Oracle(AgentCheck):
             tags = []
         query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC " \
             "ORDER BY BEGIN_TIME"
-        cur = con.cursor()
-        cur.execute(query)
-        for row in cur.fetchall():
-            metric_name = row[0]
-            metric_value = row[1]
-            if metric_name in self.SYS_METRICS:
-                self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
-        cur.close()
+        with closing(con.cursor()) as cur:
+            cur.execute(query)
+            for row in cur.fetchall():
+                metric_name = row[0]
+                metric_value = row[1]
+                if metric_name in self.SYS_METRICS:
+                    self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
 
     def _get_tablespace_metrics(self, con, tags):
         if tags is None:
             tags = []
         query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
-        cur = con.cursor()
-        cur.execute(query)
-        for row in cur.fetchall():
-            tablespace_tag = 'tablespace:%s' % row[0]
-            if row[1] is None:
-                # mark tablespace as offline if sum(BYTES) is null
-                offline = True
-                used = 0
-            else:
-                offline = False
-                used = float(row[1])
-            if row[2] is None:
-                size = 0
-            else:
-                size = float(row[2])
-            if (used >= size):
-                in_use = 100
-            elif (used == 0) or (size == 0):
-                in_use = 0
-            else:
-                in_use = used / size * 100
+        with closing(con.cursor()) as cur:
+            cur.execute(query)
+            for row in cur.fetchall():
+                tablespace_tag = 'tablespace:%s' % row[0]
+                if row[1] is None:
+                    # mark tablespace as offline if sum(BYTES) is null
+                    offline = True
+                    used = 0
+                else:
+                    offline = False
+                    used = float(row[1])
+                if row[2] is None:
+                    size = 0
+                else:
+                    size = float(row[2])
+                if (used >= size):
+                    in_use = 100
+                elif (used == 0) or (size == 0):
+                    in_use = 0
+                else:
+                    in_use = used / size * 100
 
-            self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
-            self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
-            self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
-            self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])
-        cur.close()
+                self.gauge('oracle.tablespace.used', used, tags=tags + [tablespace_tag])
+                self.gauge('oracle.tablespace.size', size, tags=tags + [tablespace_tag])
+                self.gauge('oracle.tablespace.in_use', in_use, tags=tags + [tablespace_tag])
+                self.gauge('oracle.tablespace.offline', offline, tags=tags + [tablespace_tag])
