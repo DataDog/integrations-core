@@ -15,64 +15,41 @@ def pattern_filter(items, whitelist=None, blacklist=None, key=None):
     """This filters `items` by a regular expression `whitelist` and/or
     `blacklist`, with the `whitelist` taking precedence. An optional `key`
     function can be provided that will be passed each item.
-
-    When you have only one type of list, consider using `pattern_whitelist`
-    or `pattern_blacklist` for increased performance.
     """
-    if not (whitelist or blacklist):
-        return items
+    if whitelist:
+        key = key or __return_self
 
-    key = key or __return_self
-    whitelist = whitelist or []
-    blacklist = blacklist or []
-    whitelisted = set()
-    blacklisted = set()
+        if blacklist:
+            whitelist = whitelist or []
+            blacklist = blacklist or []
+            whitelisted = set()
+            blacklisted = set()
 
-    for item in items:
-        item_key = key(item)
-        whitelisted.update(item_key for pattern in whitelist if re.search(pattern, item_key))
-        blacklisted.update(item_key for pattern in blacklist if re.search(pattern, item_key))
+            for item in items:
+                item_key = key(item)
+                whitelisted.update(item_key for pattern in whitelist if re.search(pattern, item_key))
+                blacklisted.update(item_key for pattern in blacklist if re.search(pattern, item_key))
 
-    if blacklist:
-        # Remove any whitelisted items from the blacklist.
-        blacklisted.difference_update(whitelisted)
+            # Remove any whitelisted items from the blacklist.
+            blacklisted.difference_update(whitelisted)
+            return [item for item in items if key(item) not in blacklisted]
+        else:
+            whitelisted = {
+                key(item) for pattern in whitelist
+                for item in items
+                if re.search(pattern, key(item))
+            }
+            return [item for item in items if key(item) in whitelisted]
+    elif blacklist:
+        key = key or __return_self
+        blacklisted = {
+            key(item) for pattern in blacklist
+            for item in items
+            if re.search(pattern, key(item))
+        }
         return [item for item in items if key(item) not in blacklisted]
     else:
-        return [item for item in items if key(item) in whitelisted]
-
-
-def pattern_whitelist(items, whitelist, key=None):
-    """This filters `items` by a regular expression `whitelist`. An optional
-    `key` function can be provided that will be passed each item.
-    """
-    if not whitelist:
         return items
-
-    key = key or __return_self
-    matches = {
-        key(item) for pattern in whitelist
-        for item in items
-        if re.search(pattern, key(item))
-    }
-
-    return [item for item in items if key(item) in matches]
-
-
-def pattern_blacklist(items, blacklist, key=None):
-    """This filters `items` by a regular expression `blacklist`. An optional
-    `key` function can be provided that will be passed each item.
-    """
-    if not blacklist:
-        return items
-
-    key = key or __return_self
-    matches = {
-        key(item) for pattern in blacklist
-        for item in items
-        if re.search(pattern, key(item))
-    }
-
-    return [item for item in items if key(item) not in matches]
 
 
 def __return_self(obj):

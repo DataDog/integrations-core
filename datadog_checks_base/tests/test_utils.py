@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.utils.common import (
-    pattern_filter, pattern_whitelist, pattern_blacklist
-)
+from datadog_checks.utils.common import pattern_filter
 
 
 class Item:
@@ -52,57 +50,3 @@ class TestPatternFilter:
         assert pattern_filter(items, whitelist=whitelist, key=lambda item: item.name) == [
             Item('abc'), Item('def'), Item('abcdef')
         ]
-
-
-class TestPatternWhitelist:
-    def test_no_items(self):
-        items = []
-        whitelist = ['mock']
-
-        assert pattern_whitelist(items, whitelist) == []
-
-    def test_no_patterns(self):
-        items = ['mock']
-        whitelist = []
-
-        assert pattern_whitelist(items, whitelist) is items
-
-    def test_multiple_matches(self):
-        items = ['abc', 'def', 'abcdef', 'ghi']
-        whitelist = ['abc', 'def']
-
-        assert pattern_whitelist(items, whitelist) == ['abc', 'def', 'abcdef']
-
-    def test_key_function(self):
-        items = [Item('abc'), Item('def'), Item('abcdef'), Item('ghi')]
-        whitelist = ['abc', 'def']
-
-        assert pattern_whitelist(items, whitelist, key=lambda item: item.name) == [
-            Item('abc'), Item('def'), Item('abcdef')
-        ]
-
-
-class TestPatternBlacklist:
-    def test_no_items(self):
-        items = []
-        blacklist = ['mock']
-
-        assert pattern_blacklist(items, blacklist) == []
-
-    def test_no_patterns(self):
-        items = ['mock']
-        blacklist = []
-
-        assert pattern_blacklist(items, blacklist) is items
-
-    def test_multiple_matches(self):
-        items = ['abc', 'def', 'abcdef', 'ghi']
-        blacklist = ['abc', 'def']
-
-        assert pattern_blacklist(items, blacklist) == ['ghi']
-
-    def test_key_function(self):
-        items = [Item('abc'), Item('def'), Item('abcdef'), Item('ghi')]
-        blacklist = ['abc', 'def']
-
-        assert pattern_blacklist(items, blacklist, key=lambda item: item.name) == [Item('ghi')]
