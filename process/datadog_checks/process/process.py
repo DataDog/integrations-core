@@ -207,11 +207,13 @@ class ProcessCheck(AgentCheck):
             if method == 'num_fds' and Platform.is_unix() and try_sudo:
                 try:
                     # It is up the agent's packager to grant corresponding sudo policy on unix platforms
-                    result = int(subprocess.check_output('sudo ls /proc/{}/fd/ | wc -l'.format(process.pid), shell=True))
+                    process_ls = subprocess.check_output(['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)])
+                    result = len(process_ls.splitlines())
+                    
                 except subprocess.CalledProcessError as e:
-                    self.log.exception("running psutil method %s with sudo failed with return code %d", method, e.returncode)
+                    self.log.exception("trying to retrieve %s with sudo failed with return code %d", method, e.returncode)
                 except:
-                    self.log.exception("running psutil method %s with sudo also failed", method)
+                    self.log.exception("trying to retrieve %s with sudo also failed", method)
         except psutil.NoSuchProcess:
             self.warning("Process {0} disappeared while scanning".format(process.pid))
 
