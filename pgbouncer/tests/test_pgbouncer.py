@@ -7,7 +7,7 @@ from datadog_checks.pgbouncer import PgBouncer
 from . import common
 
 
-def test_check(pgb_service, instance, aggregator):
+def test_check(instance, aggregator):
     # add some stats
     connection = psycopg2.connect(host=common.HOST, port=common.PORT, user=common.USER, password=common.PASS,
                                   database=common.DB, connect_timeout=1)
@@ -32,9 +32,9 @@ def test_check(pgb_service, instance, aggregator):
 
     # get PgBouncer version
     ver = common.get_version()
-    assert ver is not None
+    assert ver is not None, "Unable to retrieve PgBouncer version"
 
-    pgbouncer_pre18 = not ver.startswith('1.8.')
+    pgbouncer_pre18 = ver[1] < 8
     if pgbouncer_pre18:
         aggregator.assert_metric('pgbouncer.stats.avg_req')
         aggregator.assert_metric('pgbouncer.stats.avg_query')

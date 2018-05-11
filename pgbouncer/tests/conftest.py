@@ -31,7 +31,7 @@ def wait_for(service_name, port):
     return False
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def pgb_service():
     """
     Start postgres and install pgbouncer. If there's any problem executing

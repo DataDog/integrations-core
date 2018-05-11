@@ -27,5 +27,5 @@ def get_version():
     if conn.notices:
         res = re.findall(regex, conn.notices[0])
         if res:
-            return res[0]
+            return tuple(int(s) for s in res[0].split('.'))
     return None
