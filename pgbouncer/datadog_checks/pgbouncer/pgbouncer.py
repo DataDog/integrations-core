@@ -6,7 +6,8 @@ import urlparse
 import psycopg2 as pg
 import psycopg2.extras as pgextras
 
-from checks import AgentCheck, CheckException
+from datadog_checks.checks import AgentCheck
+from datadog_checks.errors import CheckException
 
 
 class ShouldRestartException(Exception):

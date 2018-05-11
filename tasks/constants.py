@@ -40,6 +40,7 @@ AGENT_BASED_INTEGRATIONS = [
     'network',
     'nfsstat',
     'nginx',
+    'pgbouncer',
     'pdh_check',
     'postgres',
     'powerdns_recursor',
