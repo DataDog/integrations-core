@@ -1,7 +1,6 @@
 # CHANGELOG - datadog_checks
 
-1.2.2 / Unreleased
-==================
+## 1.2.2 / 2018-05-11
 
 * [FEATURE] The generic Prometheus check will now send counter as monotonic counter.
 * [BUG] Prometheus requests can use an insecure option
@@ -10,19 +9,16 @@
 * [SANITY] Clean-up export for `PDHBaseCheck` + export `WinPDHCounter`. [#1183][]
 * [IMPROVEMENT] Discard metrics with invalid values
 
-1.2.1 / 2018-03-23
-==================
+## 1.2.1 / 2018-03-23
 
 * [BUG] Correctly handle internationalized versions of Windows in the PDH library.
 * [FEATURE] Keep track of Service Checks in the Aggregator stub.
 
-1.1.0 / 2018-03-23
-==================
+## 1.1.0 / 2018-03-23
 
 * [FEATURE] Add a generic prometheus check base class & rework prometheus check using a mixin
 
-1.0.0 / 2017-03-22
-==================
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds `datadog_checks`
 

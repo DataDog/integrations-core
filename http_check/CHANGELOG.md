@@ -1,89 +1,57 @@
 # CHANGELOG - http_check
 
-2.1.0 / Unreleased
-==================
+## 2.1.0 / Unreleased
 
-### Changes
 
 * [FEATURE] Add `check_hostname` option to allow users to disable matching
   hostnames verification. See [#485][]
 * [IMPROVEMENT] Emit warning when `disable_ssl_validation` is unset in configuration
   file. See [#1999][]
 
-2.0.1 / Unreleased
-==================
-
-### Changes
+## 2.0.1 / 2018-05-11
 
 * [BUGFIX] Properly detect default certificate file for all supported Platforms. See [#1340][]
 
-2.0.0 / 2018-03-23
-==================
-
-### Changes
+## 2.0.0 / 2018-03-23
 
 * [BUGFIX] Make import of default certificate file relative rather than absolute
   Fixes loading problem on Windows, and/or allows check to be installed in other
   location
 * [DEPRECATION] Remove the `skip_event` option from the check. See [#1054][]
 
-1.4.0 / 2018-02-13
-==================
-
-### Changes
+## 1.4.0 / 2018-02-13
 
 * [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][].
 
-1.3.1 / 2018-01-17
-==================
-
-### Changes
+## 1.3.1 / 2018-01-17
 
 * [BUGFIX] Use lowercase in an `if statement` for a user defined HTTP method.
 
-1.3.0 / 2018-01-10
-==================
-
-### Changes
+## 1.3.0 / 2018-01-10
 
 * [FEATURE] Report http connect status as metrics. See #659.
 * [BUGFIX] User-defined "url" tag replaces default "url" tag. See[#301][]. (Thanks [@colinmollenhour][])
 * [FEATURE] Add configurable ssl server name for cert expiration check. See[#905][].
 
-1.2.0 / 2017-10-10
-==================
-
-### Changes
+## 1.2.0 / 2017-10-10
 
 * [FEATURE] Add support for client side certificate. See[#688][]. (Thanks [@xkrt][])
 * [IMPROVEMENT] Make tornado optional. See [#758][].
 
-1.1.2 / 2017-08-28
-==================
-
-### Changes
+## 1.1.2 / 2017-08-28
 
 * [IMPROVEMENT] Improved logging. See [#652][].
 
-1.1.1 / 2017-07-18
-==================
-
-### Changes
+## 1.1.1 / 2017-07-18
 
 * [BUGFIX] Fix response tuple arity in SSL certificate check. See[#461][].
 
-1.1.0 / 2017-06-05
-==================
-
-### Changes
+## 1.1.0 / 2017-06-05
 
 * [FEATURE] Add support for SOAP requests. See [#328][].
 * [FEATURE] Add gauge metric for ssl days left. See [#249][].
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds http_check integration.
 
