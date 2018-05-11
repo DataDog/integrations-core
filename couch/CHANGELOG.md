@@ -6,6 +6,7 @@
 ### Changes
 
 * [FEATURE] Hardcode the 5984 port in the Autodiscovery template. See [#1444][] for more information.
+* [IMPROVEMENT] Raise custom exceptions for specific errors instead of a generic `Exception.
 
 2.4.0 / 2018-02-13
 ==================

@@ -1,18 +1,16 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from urlparse import urljoin
 from urllib import quote
 import math
 
-# 3rd party
 import requests
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
-# project
-from checks import AgentCheck
-from util import headers
+from . import errors
+
 
 class CouchDb(AgentCheck):
 
@@ -37,26 +35,25 @@ class CouchDb(AgentCheck):
         request_headers = headers(self.agentConfig)
         request_headers['Accept'] = 'text/json'
 
-
         try:
             r = requests.get(url, auth=auth, headers=request_headers,
-                         timeout=int(instance.get('timeout', self.TIMEOUT)))
+                             timeout=int(instance.get('timeout', self.TIMEOUT)))
             r.raise_for_status()
             if run_check:
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                    tags=service_check_tags,
-                    message='Connection to %s was successful' % url)
+                                   tags=service_check_tags,
+                                   message='Connection to %s was successful' % url)
         except requests.exceptions.Timeout as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
+                               tags=service_check_tags, message="Request timeout: {0}, {1}".format(url, e))
             raise
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e.message))
             raise
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e))
+                               tags=service_check_tags, message=str(e))
             raise
         return r.json()
 
@@ -65,20 +62,25 @@ class CouchDb(AgentCheck):
         if self.checker is None:
             name = instance.get('name', server)
             tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
-            version = self.get(self.get_server(instance), instance, tags, True)['version']
+
+            try:
+                version = self.get(self.get_server(instance), instance, tags, True)['version']
+            except Exception:
+                raise errors.ConnectionError("Unable to talk to the server")
+
             if version.startswith('1.'):
                 self.checker = CouchDB1(self)
             elif version.startswith('2.'):
                 self.checker = CouchDB2(self)
             else:
-                raise Exception("Unkown version {0}".format(version))
+                raise errors.BadVersionError("Unkown version {0}".format(version))
 
         self.checker.check(instance)
 
     def get_server(self, instance):
         server = instance.get('server', None)
         if server is None:
-            raise Exception("A server must be specified")
+            raise errors.BadConfigError("A server must be specified")
         return server
 
     def get_config_tags(self, instance):
@@ -145,8 +147,8 @@ class CouchDB1:
 
         # Get the list of whitelisted databases.
         db_whitelist = instance.get('db_whitelist')
-        self.db_blacklist.setdefault(server,[])
-        self.db_blacklist[server].extend(instance.get('db_blacklist',[]))
+        self.db_blacklist.setdefault(server, [])
+        self.db_blacklist[server].extend(instance.get('db_blacklist', []))
         whitelist = set(db_whitelist) if db_whitelist else None
         databases = set(self.agent_check.get(url, instance, tags)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
@@ -157,19 +159,21 @@ class CouchDB1:
             databases = list(databases)[:max_dbs_per_check]
 
         for dbName in databases:
-            url = urljoin(server, quote(dbName, safe = ''))
+            url = urljoin(server, quote(dbName, safe=''))
             try:
                 db_stats = self.agent_check.get(url, instance, tags)
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
                     self.db_blacklist[server].append(dbName)
-                    self.warning('Database %s is not readable by the configured user. It will be added to the blacklist. Please restart the agent to clear.' % dbName)
+                    self.warning('Database %s is not readable by the configured user. '
+                                 'It will be added to the blacklist. Please restart the agent to clear.' % dbName)
                     del couchdb['databases'][dbName]
                     continue
             if db_stats is not None:
                 couchdb['databases'][dbName] = db_stats
         return couchdb
+
 
 class CouchDB2:
 
@@ -179,7 +183,7 @@ class CouchDB2:
         self.agent_check = agent_check
         self.gauge = agent_check.gauge
 
-    def _build_metrics(self, data, tags, prefix = 'couchdb'):
+    def _build_metrics(self, data, tags, prefix='couchdb'):
         for key, value in data.items():
             if "type" in value:
                 if value["type"] == "histogram":
@@ -217,7 +221,7 @@ class CouchDB2:
 
         self.gauge("couchdb.by_ddoc.waiting_clients", data['waiting_clients'], ddtags)
 
-    def _build_system_metrics(self, data, tags, prefix = 'couchdb.erlang'):
+    def _build_system_metrics(self, data, tags, prefix='couchdb.erlang'):
         for key, value in data.items():
             if key == "message_queues":
                 for queue, val in value.items():
@@ -227,7 +231,8 @@ class CouchDB2:
                         if 'count' in val:
                             self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
                         else:
-                            self.agent_check.log.debug("Queue %s does not have a key 'count'. It will be ignored." % queue)
+                            self.agent_check.log.debug("Queue %s does not have a key 'count'. "
+                                                       "It will be ignored." % queue)
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
             elif key == "distribution":
@@ -240,7 +245,7 @@ class CouchDB2:
             else:
                 self.gauge("{0}.{1}".format(prefix, key), value, tags)
 
-    def _build_active_tasks_metrics(self, data, tags, prefix = 'couchdb.active_tasks'):
+    def _build_active_tasks_metrics(self, data, tags, prefix='couchdb.active_tasks'):
         counts = {
             'replication': 0,
             'database_compaction': 0,
@@ -254,7 +259,15 @@ class CouchDB2:
                 for tag in ['doc_id', 'source', 'target', 'user']:
                     rtags.append("{0}:{1}".format(tag, task[tag]))
                 rtags.append("type:{0}".format('continuous' if task['continuous'] else 'one-time'))
-                for metric in ['doc_write_failures', 'docs_read', 'docs_written', 'missing_revisions_found', 'revisions_checked', 'changes_pending']:
+                metrics = [
+                    'doc_write_failures',
+                    'docs_read',
+                    'docs_written',
+                    'missing_revisions_found',
+                    'revisions_checked',
+                    'changes_pending'
+                ]
+                for metric in metrics:
                     if task[metric] is None:
                         task[metric] = 0
                     self.gauge("{0}.replication.{1}".format(prefix, metric), task[metric], rtags)
@@ -292,7 +305,11 @@ class CouchDB2:
 
     def _get_dbs_to_scan(self, server, instance, name, tags):
         dbs = self.agent_check.get(urljoin(server, "_all_dbs"), instance, tags)
-        nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+        try:
+            nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+        except KeyError:
+            return []
+
         idx = nodes.index(name)
         size = int(math.ceil(len(dbs) / float(len(nodes))))
         return dbs[(idx * size):((idx + 1) * size)]
@@ -316,8 +333,15 @@ class CouchDB2:
                     db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
                     self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
-                    for dd in self.agent_check.get("{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags)['rows']:
-                        self._build_dd_metrics(self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, db_tags), db_tags)
+                    for dd in self.agent_check.get(
+                        "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url),
+                        instance,
+                        db_tags
+                    )['rows']:
+                        self._build_dd_metrics(
+                            self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, db_tags),
+                            db_tags
+                        )
                     scanned_dbs += 1
                     if scanned_dbs >= max_dbs_per_check:
                         break

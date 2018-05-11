@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.couchbase import Couchbase
 
 from .common import (
-    HOST, CHECK_TAGS, BUCKET_NAME
+    CHECK_TAGS, BUCKET_NAME
 )
 
 
@@ -21,20 +21,6 @@ def test_service_check(aggregator, couchbase_metrics, couchbase_config):
 
 
 @pytest.mark.integration
-def test_metrics_casing(aggregator, couchbase_metrics, couchbase_config):
-    couchbase = Couchbase('couchbase', {}, {})
-    couchbase.check(couchbase_config)
-    CAMEL_CASED_METRICS = [
-        u'couchbase.hdd.used_by_data',
-        u'couchbase.ram.used_by_data',
-        u'couchbase.ram.quota_total',
-        u'couchbase.ram.quota_used',
-    ]
-    for mname in CAMEL_CASED_METRICS:
-        aggregator.assert_metric(mname, tags=CHECK_TAGS, count=1)
-
-
-@pytest.mark.integration
 def test_metrics(aggregator, couchbase_metrics, couchbase_config):
     couchbase = Couchbase('couchbase', {}, {})
     couchbase.check(couchbase_config)
@@ -43,16 +29,17 @@ def test_metrics(aggregator, couchbase_metrics, couchbase_config):
 
 
 @pytest.mark.integration
-def test_query_monitoring_metrics(aggregator, couchbase_metrics, couchbase_config):
+def test_query_monitoring_metrics(aggregator, couchbase_metrics, couchbase_query_config):
+    '''
+    Test system vitals metrics (prefixed "couchbase.query.")
+    '''
     # Add query monitoring endpoint
-    couchbase_config['query_monitoring_url'] = 'http://{0}:8093'.format(HOST)
-
     couchbase = Couchbase('couchbase', {}, {})
-    couchbase.check(couchbase_config)
+    couchbase.check(couchbase_query_config)
 
     assert_basic_couchbase_metrics(aggregator)
 
-    # assert query stats
+    # Assert 'couchbase.query.' metrics
     for mname in Couchbase.QUERY_STATS:
         aggregator.assert_metric('couchbase.query.{0}'.format(mname), tags=CHECK_TAGS, count=1)
 
@@ -62,7 +49,10 @@ def assert_basic_couchbase_metrics(aggregator):
     Assert each type of metric (buckets, nodes, totals) except query
     '''
 
-    # Loose way of asserting bucket metrics
+    # Assert 'couchbase.by_bucket.' metrics
+    #  Because some metrics are deprecated, we can just see if we get an arbitrary number
+    #  of bucket metrics. If there are more than that number, we assume that we're getting
+    #  all the bucket metrics we should be getting
     BUCKET_TAGS = ['device:{0}'.format(BUCKET_NAME), 'bucket:{0}'.format(BUCKET_NAME)]
     bucket_metric_count = 0
     for bucket_metric in aggregator.metric_names:
@@ -72,7 +62,7 @@ def assert_basic_couchbase_metrics(aggregator):
 
     assert(bucket_metric_count > 10)
 
-    # pulled directly from Datadog's documentation
+    # Assert 'couchbase.by_node.' metrics
     NODE_STATS = [
         'curr_items',
         'curr_items_tot',
@@ -82,11 +72,10 @@ def assert_basic_couchbase_metrics(aggregator):
         'couch_views_actual_disk_size',
         'vb_replica_curr_items'
     ]
-
     for mname in NODE_STATS:
         aggregator.assert_metric_has_tag_with_tagname('couchbase.by_node.{0}'.format(mname), tag_name='node', count=1)
 
-    # pulled directly from Datadog's documentation
+    # Assert 'couchbase.' metrics
     TOTAL_STATS = [
         'hdd.free',
         'hdd.used',
@@ -98,6 +87,5 @@ def assert_basic_couchbase_metrics(aggregator):
         'ram.quota_total',
         'ram.used_by_data'
     ]
-
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{0}'.format(mname), tags=CHECK_TAGS, count=1)

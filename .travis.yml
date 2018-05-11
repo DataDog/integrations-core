@@ -44,8 +44,6 @@ env:
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
     - TRAVIS_FLAVOR=docker_daemon
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
@@ -61,7 +59,6 @@ env:
     - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
     - TRAVIS_FLAVOR=kubernetes
     - TRAVIS_FLAVOR=kubernetes_state
-    - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=2.6.9
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.0.1
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
@@ -103,7 +100,6 @@ script:
   - bundle exec rake prep_travis_ci
   - if [ -e $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR/setup.py ]; then cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && pip install -r requirements.txt && python setup.py bdist_wheel && pip install . && cd - ; fi
   - bundle exec rake ci:run
-  - bundle exec rake requirements
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files
 # Since clobber only cleans the project directory,

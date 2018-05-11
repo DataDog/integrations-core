@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 HOST = get_docker_hostname()
 PORT = '8091'
+SYSTEM_VITALS_PORT = '8093'
 DATA_PORT = '11210'
 
 URL = 'http://{0}:{1}'.format(HOST, PORT)

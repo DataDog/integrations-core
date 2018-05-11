@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.5.3",
+  "version": "1.5.4",
   "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
   "public_title": "Datadog-MongoDB Integration",
   "categories":["data store", "log collection"],

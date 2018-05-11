@@ -60,7 +60,7 @@ class AggregatorStub(object):
         if count:
             assert len(candidates) == count
         else:
-            assert len(candidates) > at_least
+            assert len(candidates) >= at_least
 
     def assert_metric_has_tag_with_tagname(self, metric_name, tag_name, count=None, at_least=1):
         """

@@ -1,0 +1,7 @@
+version: '3.5'
+
+services:
+  couch:
+    image: couchdb:${COUCH_VERSION}
+    ports:
+      - ${COUCH_PORT}:5984

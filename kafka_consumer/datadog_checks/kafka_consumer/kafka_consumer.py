@@ -37,10 +37,6 @@ class BadKafkaConsumerConfiguration(Exception):
     pass
 
 
-class NoKafkaBrokersAvailable(Exception):
-    pass
-
-
 class KafkaCheck(AgentCheck):
     """
     Check the offsets and lag of Kafka consumers.
@@ -49,7 +45,6 @@ class KafkaCheck(AgentCheck):
     """
 
     SOURCE_TYPE_NAME = 'kafka'
-    LAST_ZKONLY_VERSION = (0, 8, 1, 1)
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
@@ -102,13 +97,19 @@ class KafkaCheck(AgentCheck):
 
         cli = self._get_kafka_client(instance)
         cli._maybe_refresh_metadata()
-        kafka_version = self._get_kafka_version(cli)
+
         if get_kafka_consumer_offsets:
             # For now, consumer groups are mandatory if not using ZK
             if not zk_hosts_ports and not consumer_groups:
                 raise BadKafkaConsumerConfiguration('Invalid configuration - if you\'re not collecting '
                                                     'offsets from ZK you _must_ specify consumer groups')
-            if self._kafka_compatible(kafka_version):
+            # kafka-python automatically probes the cluster for broker version
+            # and then stores it. Note that this returns the first version
+            # found, so in a mixed-version cluster this will be a
+            # non-deterministic result.
+            #
+            # Kafka 0.8.2 added support for storing consumer offsets in Kafka.
+            if cli.config.get('api_version') >= (0, 8, 2):
                 kafka_consumer_offsets, topics = self._get_kafka_consumer_offsets(instance, consumer_groups)
 
         if not topics:
@@ -178,29 +179,6 @@ class KafkaCheck(AgentCheck):
 
         return self.kafka_clients[instance_key]
 
-    def _kafka_compatible(self, version):
-        if not version:
-            self.log.debug("Unable to determine compatibility.")
-            return False
-
-        return version > self.LAST_ZKONLY_VERSION
-
-    def _get_random_node_id(self, client):
-        brokers = client.cluster.brokers()
-        if not brokers:
-            raise NoKafkaBrokersAvailable('No available brokers.')
-        node_id = random.sample(brokers, 1)[0].nodeId
-
-        return node_id
-
-    def _make_req_async(self, client, request, node_id=None, cb=None):
-        if node_id is None:
-            node_id = self._get_random_node_id(client)
-
-        future = client.send(node_id, request)
-        if cb:
-            future.add_callback(cb, request, node_id, self.current_ts)
-
     def _ensure_ready_node(self, client, node_id):
         if node_id is None:
             raise Exception("node_id is None")
@@ -208,8 +186,8 @@ class KafkaCheck(AgentCheck):
         attempts = 0
         while not client.ready(node_id):
             if attempts > DEFAULT_KAFKA_RETRIES:
-                self.log.error("unable to connect to broker id: {} after {} attempts".format(
-                    node_id, DEFAULT_KAFKA_RETRIES))
+                self.log.error("unable to connect to broker id: %i after %i attempts",
+                               node_id, DEFAULT_KAFKA_RETRIES)
                 break
             attempts = attempts + 1
             delay = (2 ** attempts) + (random.randint(0, 1000) / 1000) * 0.01  # starting at 20 ms
@@ -227,7 +205,7 @@ class KafkaCheck(AgentCheck):
 
     def _make_blocking_req(self, client, request, node_id=None):
         if node_id is None:
-            node_id = self._get_random_node_id(client)
+            node_id = client.least_loaded_node()
 
         self._ensure_ready_node(client, node_id)
 
@@ -237,17 +215,6 @@ class KafkaCheck(AgentCheck):
         response = future.value
 
         return response
-
-    def _get_kafka_version(self, client, node_id=None):
-        if node_id is not None:
-            return client.check_version(node_id=node_id)
-
-        for broker in client.cluster.brokers():
-            version = client.check_version(node_id=broker.nodeId)
-            if version:
-                return version
-
-        return None
 
     def _get_group_coordinator(self, client, group):
         request = GroupCoordinatorRequest[0](group)
@@ -336,7 +303,7 @@ class KafkaCheck(AgentCheck):
         for topic, partitions in topics_to_fetch.iteritems():
             for partition in partitions:
                 partition_leader = cli.cluster.leader_for_partition(TopicPartition(topic, partition))
-                if partition_leader is not None and partition_leader > -1:
+                if partition_leader is not None and partition_leader >= 0:
                     leader_tp[partition_leader][topic].update([partition])
 
         max_offsets = 1
@@ -498,8 +465,6 @@ class KafkaCheck(AgentCheck):
         return consumer_offsets, topics
 
     def _get_consumer_offsets(self, client, consumer_group, topic_partitions, coord_id=None):
-        # version = client.check_version(coord_id)
-
         tps = defaultdict(set)
         for topic, partitions in topic_partitions.iteritems():
             if len(partitions) == 0:
@@ -513,9 +478,10 @@ class KafkaCheck(AgentCheck):
             broker_ids = [b.nodeId for b in client.cluster.brokers()]
 
         for broker_id in broker_ids:
-            offset_request = self._get_consumer_offset_request(client)
-
-            request = offset_request(consumer_group, list(tps.iteritems()))
+            # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
+            # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
+            # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
+            request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
             response = self._make_blocking_req(client, request, node_id=broker_id)
             for (topic, partition_offsets) in response.topics:
                 for partition, offset, _, error_code in partition_offsets:
@@ -524,15 +490,6 @@ class KafkaCheck(AgentCheck):
                     consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
-
-    def _get_consumer_offset_request(self, client):
-        version = client.config.get('api_version')
-        request_idx = 1
-
-        if version < (0, 8, 2):
-            request_idx = 0
-
-        return OffsetFetchRequest[request_idx]
 
     def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
         if not kafka_collect or not interval:
