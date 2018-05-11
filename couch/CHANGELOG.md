@@ -1,62 +1,41 @@
 # CHANGELOG - couch
 
-2.5.0 / Unreleased
-==================
+## 2.5.1 / Unreleased
 
-### Changes
-
-* [FEATURE] Hardcode the 5984 port in the Autodiscovery template. See [#1444][] for more information.
 * [IMPROVEMENT] Raise custom exceptions for specific errors instead of a generic `Exception.
 
-2.4.0 / 2018-02-13
-==================
+## 2.5.0 / 2018-05-11
 
-### Changes
+* [FEATURE] Hardcode the 5984 port in the Autodiscovery template. See [#1444][] for more information.
+
+## 2.4.0 / 2018-02-13
 
 * [FEATURE] reduces by db and by dd amplification by distributing the dbs to report on the running agents
 
-2.3.0 / 2018-02-13
-==================
-
-### Changes
+## 2.3.0 / 2018-02-13
 
 * [BUGFIX] Handle the case where there is no database. See [#1029][]
 * [IMPROVEMENT] Add custom tags to metrics and service checks. See [#1034][]
 
-2.2.0 / 2018-01-10
-=================
-
-### Changes
+## 2.2.0 / 2018-01-10
 
 * [FEATURE] collects and submits CouchDB design docs metrics. See [#813][] (Thanks [@calonso][])
 * [FEATURE] collects CouchDB active tasks stats. See [#812][] (Thanks [@calonso][])
 
-2.1.0 / 2017-11-21
-=================
-
-### Changes
+## 2.1.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 * [FEATURE] collects Erlang VM stats from the `_system` endpoint. See [#793][] (Thanks [@calonso][])
 
-2.0.0 / 2017-09-01
-==================
-
-### Changes
+## 2.0.0 / 2017-09-01
 
 * [FEATURE] adds CouchDB 2.x integration.
 
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [BUGFIX] Escape database names. See [#268][] (Thanks [@bernharduw][])
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds couch integration.
 

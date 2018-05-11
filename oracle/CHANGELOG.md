@@ -1,37 +1,28 @@
 # CHANGELOG - oracle
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.3.0 / Unreleased
 
 * [FEATURE] ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459][]
+
+## 1.2.0 / 2018-05-11
+
 * [FEATURE] adds metric `oracle.tablespace.offline`. See [#1402][]
-* [BUGFIX] fix for DB with offline tablespace. See [#1402][]
+* [BUGFIX] fix for DB with offline tablespace. See #1402
 
-1.1.0 / Unreleased
-==================
-
-### Changes
+## 1.1.0 / 2018-05-11
 
 * [FEATURE] adds custom tag support to service checks.
 
-1.0.1 / Unreleased
+## 1.0.1 / 2018-05-11
 
 ### Notes
 
 The metric `oracle.gc_cr_receive_time` has been renamed to `oracle.gc_cr_block_received`
 to address an erroneous metric name. Please update your dashboards and monitors.
 
-### Changes
+* [BUGFIX] fix metric name to: `gc_cr_block_received`. See #1179
 
-* [BUGFIX] fix metric name to: `gc_cr_block_received`. See [#1179][]
-
-
-1.0.0 / 2017-10-10
-==================
-
-### Changes
+## 1.0.0 / 2017-10-10
 
 * [FEATURE] adds oracle integration. See [#680][].
 * [BUGFIX] adds oracle integration. See [#690][]. (Thanks [@dwjvaughan][])

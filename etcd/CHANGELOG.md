@@ -1,35 +1,23 @@
 # CHANGELOG - etcd
 
-1.4.0 / Unreleased
-==================
-### Changes
+## 1.4.0 / 2018-05-11
 
 * [IMPROVEMENT] Get the right metrics depending on the instance state. See [#1348][].
 * [FEATURE] Hardcode the 2379 port in the Autodiscovery template. See [#1444][] for more information.
 
-1.3.0 / 2018-01-10
-==================
-### Changes
+## 1.3.0 / 2018-01-10
 
 * [FEATURE] Add a Service Check to report whether a member node is healty or not. See [#917][], thanks [@stensonb][].
 
-1.2.0 / 2017-11-21
-==================
-### Changes
+## 1.2.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.1.0 / 2017-10-10
-==================
-
-### Changes
+## 1.1.0 / 2017-10-10
 
 * [FEATURE] Updates the Service Check tag to only use the base URL. See [#736][].
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds etcd integration.
 

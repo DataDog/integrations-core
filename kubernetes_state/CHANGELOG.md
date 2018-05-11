@@ -1,73 +1,52 @@
 # CHANGELOG - kubernetes_state
 
-2.5.0 / Unreleased
-==================
+## 2.5.0 / 2018-05-11
 
 * [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
 * [FEATURE] Add custom tag support.
 
-2.4.0 / 2018-03-23
-==================
+## 2.4.0 / 2018-03-23
 
 * [IMPROVEMENT] Add kubernetes_state.nodes.by_condition count metric [#1277][]
 
-2.3.0 / 2018-02-28
-==================
+## 2.3.0 / 2018-02-28
 
 * [BUGFIX] Fix fetching kubernetes_state.container.restarts with kube-state-metrics v1.2.0 [#1137][]
 * [BUGFIX] Fix rows with mismatch columns in metadata.csv [#1195][]
 
-2.2.0 / 2018-02-13
-==================
-### Changes
+## 2.2.0 / 2018-02-13
 
 * [IMPROVEMENT] Add option in yaml to configure which label from KSM metrics to join over [#1040][]
 * [IMPROVEMENT] Add the node label wherever the pod label is present [#1000][]
 * [IMPROVEMENT] Override hostname with the node label if present [#1000][]
 
-2.0.0 / 2018-01-10
-==================
-### Changes
+## 2.0.0 / 2018-01-10
 
 * [IMPROVEMENT] Merge kubernetes-state pod.phase.[running|succeeded|pending|failed|unknown] service checks into one actionnable service check. Will be introduced in 5.20 and will change the behavior of the service check. [#874][]
 * [IMPROVEMENT] Adding statefulset metrics. [#936][]
 * [IMPROVEMENT] Bumping protobuf to version 3.5.1. See [#965][]
 
-1.4.0 / 2017-11-21
-==================
-### Changes
+## 1.4.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 * [FEATURE] Adding HPA metrics. See [#801][]
 * [FEATURE] Add metrics for GPU, PVC, CronJobs and other added in kubernetes_state 1.1.0. See [#853][]
 
-1.3.0 / 2017-08-28
-==================
-
-### Changes
+## 1.3.0 / 2017-08-28
 
 * [FEATURE] Support for StatefulSet metrics. See [#561][]
 * [FEATURE] Support tag renaming via the labels_mapper option. See [#651][]
 * [FEATURE] Add basic Job metrics. See [#686][] and [#696][]
 
-1.2.0 / 2017-07-18
-==================
-
-### Changes
+## 1.2.0 / 2017-07-18
 
 * [FEATURE] Port to PrometheusCheck class and support for new 0.5.0 metrics
 
-1.1.0 / 2017-06-05
-==================
-
-### Changes
+## 1.1.0 / 2017-06-05
 
 * [FEATURE] Support more metrics from kube-state-metrics. See [dd-agent-3309](https://github.com/DataDog/dd-agent/pull/3309), [dd-agent-3352](https://github.com/DataDog/dd-agent/pull/3352) and [#343][]
 
-1.0.0 / 2017-02-23
-==================
-
-### Changes
+## 1.0.0 / 2017-02-23
 
 * [FEATURE] adds Kubernetes State integration.
 

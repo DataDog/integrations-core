@@ -1,16 +1,11 @@
-# CHANGELOG - exchange_server 
+# CHANGELOG - exchange_server
 
-1.1.0 / Unreleased
-==================
-### Changes
+## 1.1.0 / 2018-05-11
 
 * [Update] Migrate to new wheels packaging and test framework
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]
 
-
-1.0.0 / 2017-03-22
-==================
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds wmi_check integration.
 

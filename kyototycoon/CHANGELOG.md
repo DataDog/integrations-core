@@ -1,29 +1,18 @@
 # CHANGELOG - kyototycoon
 
-1.3.0 / Unreleased
-==================
-
-### Changes
+## 1.3.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 1978 port in the Autodiscovery template. See [#1444][] for more information.
 
-1.2.0 / 2018-03-23
-==================
-
-### Changes
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support for sericce checks.
 
-1.1.0 / 2017-11-21
-==================
-### Changes
+## 1.1.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds kyototycoon integration.
 
