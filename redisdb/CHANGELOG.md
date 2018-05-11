@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 1.5.0 / 2018-05-10
+## 1.5.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 6379 port in the Autodiscovery template. See [#1444][] for more information.
 

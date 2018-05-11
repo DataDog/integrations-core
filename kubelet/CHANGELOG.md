@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] Collect metrics directly from cadvisor, for kubenetes version older than 1.7.6. See [#1339][]
 * [FEATURE] Add instance tags to all metrics. Improve the coverage of the check. See [#1377][]

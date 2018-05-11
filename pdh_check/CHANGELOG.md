@@ -1,6 +1,6 @@
 # CHANGELOG - pdh_check
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [Update] Update to new wheels packaging and unit test framework
 * [BUGFIX] Added resilience to failed import of `WinPDHCounter`. [#1183][]

@@ -1,6 +1,6 @@
 # CHANGELOG - nginx
 
-## 2.1.0 / 2018-05-10
+## 2.1.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support to service checks.
 

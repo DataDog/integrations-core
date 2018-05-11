@@ -1,6 +1,6 @@
 # CHANGELOG - consul
 
-## 1.4.0 / 2018-05-10
+## 1.4.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8500 port in the Autodiscovery template. See [#1444][] for more information.
 

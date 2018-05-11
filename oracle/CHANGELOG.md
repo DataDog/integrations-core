@@ -1,15 +1,10 @@
 # CHANGELOG - oracle
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] adds metric `oracle.tablespace.offline`. See #1402
 * [BUGFIX] fix for DB with offline tablespace. See #1402
-
-## 1.1.0 / 2018-05-10
-
 * [FEATURE] adds custom tag support to service checks.
-
-## 1.0.1 / 2018-05-10
 
 ### Notes
 

@@ -1,6 +1,6 @@
 # CHANGELOG - Envoy
 
-## 1.1.0 / 2018-05-10
+## 1.1.0 / 2018-05-11
 
 * [FEATURE] add newly-documented metrics. See #1326
 * [IMPROVEMENT] tags can now contain the dot metric delimiter itself. See #1404

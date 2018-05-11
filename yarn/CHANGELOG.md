@@ -1,6 +1,6 @@
 # CHANGELOG - yarn
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] adds custom tag support for service checks.
 

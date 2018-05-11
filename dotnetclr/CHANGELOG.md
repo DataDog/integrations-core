@@ -1,6 +1,6 @@
 # CHANGELOG - Dotnetclr
 
-## 1.0.0 / 2018-05-10
+## 1.0.0 / 2018-05-11
 
 * [Update] Adds wheel support and integrated unit tests
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]

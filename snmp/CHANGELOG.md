@@ -1,6 +1,6 @@
 # CHANGELOG - snmp
 
-## 1.4.0 / 2018-05-10
+## 1.4.0 / 2018-05-11
 
 * [IMPROVEMENT] Enhance error handling when metrics aren't defined or device cannot be reached. See [#1406][]
 

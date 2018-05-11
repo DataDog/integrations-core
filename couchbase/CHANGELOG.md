@@ -1,6 +1,6 @@
 # CHANGELOG - couchbase
 
-## 1.3.0 / 2018-05-10
+## 1.3.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8091 port in the Autodiscovery template. See [#1444][] for more information.
 

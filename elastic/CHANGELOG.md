@@ -1,6 +1,6 @@
 # CHANGELOG - elastic
 
-## 1.6.0 / 2018-05-10
+## 1.6.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 9200 port in the Autodiscovery template. See [#1444][].
 * [FEATURE] adds `index_stats` to collect index level metrics. See [#1312][].

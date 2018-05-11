@@ -1,6 +1,6 @@
 # CHANGELOG - sqlserver
 
-## 1.4.0 / 2018-05-10
+## 1.4.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support for service checks.
 

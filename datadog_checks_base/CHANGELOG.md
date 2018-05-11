@@ -1,6 +1,6 @@
 # CHANGELOG - datadog_checks
 
-## 1.2.2 / 2018-05-10
+## 1.2.2 / 2018-05-11
 
 * [FEATURE] The generic Prometheus check will now send counter as monotonic counter.
 * [BUG] Prometheus requests can use an insecure option

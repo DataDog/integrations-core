@@ -1,6 +1,6 @@
 # CHANGELOG - mesos_slave
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [BUGFIX] Add debug logs and a noisier error message.
 * [FEATURE] Adds custom tag support for service check.

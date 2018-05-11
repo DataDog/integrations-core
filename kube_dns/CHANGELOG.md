@@ -1,6 +1,6 @@
 # CHANGELOG - Kube-dns
 
-## 1.3.0 / 2018-05-10
+## 1.3.0 / 2018-05-11
 
 * [IMPROVEMENT] Add metrics `kubedns.request_count.count`, `kubedns.error_count.count` and `cachemiss_count.count`, alternative metrics submitted as monotonic\_counts. See [#1341][]
 

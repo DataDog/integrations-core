@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.1.0 / 2018-05-10
+## 2.1.0 / 2018-05-11
 
 * [UPDATE] Updates to new wheel packaging and test infrastructure
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]

@@ -1,6 +1,6 @@
 # CHANGELOG - mcache
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support for service check.
 * [FEATURE] Hardcode the 11211 port in the Autodiscovery template. See [#1444][] for more information.

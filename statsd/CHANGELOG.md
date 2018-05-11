@@ -1,6 +1,6 @@
 # CHANGELOG - statsd
 
-## 1.1.0 / 2018-05-10
+## 1.1.0 / 2018-05-11
 
 * [FEATURE] Add timeout configuration.
 

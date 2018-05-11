@@ -1,6 +1,6 @@
 # CHANGELOG - lighttpd
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] Support digest authentication on the server status page.
 

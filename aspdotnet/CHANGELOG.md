@@ -1,6 +1,6 @@
 # CHANGELOG - Aspdotnet
 
-0.1.2 / 2018-05-10
+0.1.2 / 2018-05-11
 
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]
 

@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [IMPROVEMENT] Add custom tag support for service checks.
 

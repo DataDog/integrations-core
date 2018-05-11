@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-## 1.1.0 / 2018-05-10
+## 1.1.0 / 2018-05-11
 
 * [FEATURE] Added new Kafka "per topic" metrics. See [#1208][]
 * [FEATURE] Added metrics for Producers 0.11.x See [#1392][]

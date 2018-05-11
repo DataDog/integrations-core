@@ -1,6 +1,6 @@
 # CHANGELOG - active_directory
 
-## 1.1.0 / 2018-05-10
+## 1.1.0 / 2018-05-11
 
 * [FIX] Remove entry_points in setup.py
 * [DOCUMENTATION] Fix broken link to sample configuration file

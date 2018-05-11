@@ -1,6 +1,6 @@
 # CHANGELOG - ECS Fargate
 
-## 1.2.0 / 2018-05-10
+## 1.2.0 / 2018-05-11
 
 * [FIX] update the metadata collected from Version to Revision.
 

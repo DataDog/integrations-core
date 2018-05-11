@@ -1,6 +1,6 @@
 # CHANGELOG - exchange_server
 
-## 1.1.0 / 2018-05-10
+## 1.1.0 / 2018-05-11
 
 * [Update] Migrate to new wheels packaging and test framework
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]

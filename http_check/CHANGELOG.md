@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 2.0.1 / 2018-05-10
+## 2.0.1 / 2018-05-11
 
 * [BUGFIX] Properly detect default certificate file for all supported Platforms. See [#1340][]
 

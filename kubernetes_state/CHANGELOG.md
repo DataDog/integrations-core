@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## 2.5.0 / 2018-05-10
+## 2.5.0 / 2018-05-11
 
 * [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
 * [FEATURE] Add custom tag support.
