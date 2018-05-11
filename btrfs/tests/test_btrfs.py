@@ -19,7 +19,7 @@ def aggregator():
     return aggregator
 
 
-def mock_get_usage(mountpoint):
+def mock_get_usage():
 
     return [
         (1, 9672065024, 9093722112),
@@ -46,20 +46,24 @@ def get_mock_devices():
 
 
 @mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
-def test_check(mock_device_list, aggregator):
+@mock.patch('datadog_checks.btrfs.btrfs.BTRFS.get_usage', return_value=mock_get_usage())
+def test_check(mock_get_usage, mock_device_list, aggregator):
     """
     Testing Btrfs check.
     """
-    with mock.patch.object(
-        btrfs_check,
-        'get_usage',
-        side_effect=mock_get_usage
-    ):
+    with mock.patch.object(btrfs_check, 'get_unallocated_space', return_value=None):
         btrfs_check.check({})
 
-    aggregator.assert_metric('system.disk.btrfs.total', at_least=0)
-    aggregator.assert_metric('system.disk.btrfs.used', at_least=0)
-    aggregator.assert_metric('system.disk.btrfs.free', at_least=0)
-    aggregator.assert_metric('system.disk.btrfs.usage', at_least=0)
+    aggregator.assert_metric('system.disk.btrfs.unallocated', count=0)
 
-    assert aggregator.metrics_asserted_pct == 100
+    aggregator.reset()
+    with mock.patch.object(btrfs_check, 'get_unallocated_space', return_value=0):
+        btrfs_check.check({})
+
+    aggregator.assert_metric('system.disk.btrfs.total', count=4)
+    aggregator.assert_metric('system.disk.btrfs.used', count=4)
+    aggregator.assert_metric('system.disk.btrfs.free', count=4)
+    aggregator.assert_metric('system.disk.btrfs.usage', count=4)
+    aggregator.assert_metric('system.disk.btrfs.unallocated', count=1)
+
+    aggregator.assert_all_metrics_covered()
