@@ -1,14 +1,14 @@
 # CHANGELOG - Aspdotnet
 
-0.1.2 / 2018-05-11
+## 0.1.2 / 2018-05-11
 
 * [SANITY] Clean-up import for `PDHBaseCheck` from `datadog-checks-base` wheel. [#1183][]
 
-0.1.1 / 2018-03-07
+## 0.1.1 / 2018-03-07
 
 * [Fix] Fixed tag initialization & reporting. See [#1185][].
 
-0.1.0 / 2018-01-10
+## 0.1.0 / 2018-01-10
 
 * [FEATURE] adds aspdotnet integration.
 

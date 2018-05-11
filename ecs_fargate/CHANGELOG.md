@@ -12,4 +12,3 @@
 ## 1.0.0/ 2018-02-28
 
 * [FEATURE] adds ecs_fargate integration.
-
