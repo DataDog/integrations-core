@@ -62,6 +62,25 @@ class AggregatorStub(object):
         else:
             assert len(candidates) > at_least
 
+    def assert_metric_has_tag_with_tagname(self, metric_name, tag_name, count=None, at_least=1):
+        """
+        Assert a metric is tagged with a tag with a given tag name
+        """
+        self._asserted.add(metric_name)
+
+        candidates = []
+        for metric in self._metrics.get(metric_name, []):
+            for tag in metric.tags:
+                metric_tag_name = tag.split(':')[0]
+                if metric_tag_name == tag_name:
+                    candidates.append(metric)
+                    break
+
+        if count:
+            assert len(candidates) == count
+        else:
+            assert len(candidates) > at_least
+
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1,
                       hostname=None, metric_type=None):
         """
