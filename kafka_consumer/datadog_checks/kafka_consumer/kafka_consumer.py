@@ -323,7 +323,11 @@ class KafkaCheck(AgentCheck):
 
         return highwater_offsets, list(set(topic_partitions_without_a_leader))
 
-    def _report_consumer_metrics(self, highwater_offsets, consumer_offsets, unled_topic_partitions=[], tags=[]):
+    def _report_consumer_metrics(self, highwater_offsets, consumer_offsets, unled_topic_partitions=None, tags=None):
+        if unled_topic_partitions is None:
+            unled_topic_partitions = []
+        if tags is None:
+            tags = []
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.iteritems():
             # Report the consumer group offsets and consumer lag
             if (topic, partition) not in highwater_offsets:
