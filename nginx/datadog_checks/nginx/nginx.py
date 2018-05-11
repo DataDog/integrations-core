@@ -232,7 +232,11 @@ class Nginx(AgentCheck):
             r = self._perform_request(instance, url, ssl_validation, auth)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
+            if endpoint == "stream/server_zones" or endpoint == "stream/upstreams":
+                self.log.warning("Stream may not be initialized. "
+                                 "Error querying {} metrics at {}: {}".format(endpoint, url, e))
+            else:
+                self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
 
         return payload
 
