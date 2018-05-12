@@ -9,11 +9,7 @@ from time import sleep
 import pytest
 import requests
 
-from common import (
-    HERE, HOST, PORT, DATA_PORT, SYSTEM_VITALS_PORT,
-    URL, TAGS, BUCKET_NAME,
-    USER, PASSWORD
-)
+from .common import HERE, PORT, SYSTEM_VITALS_URL, URL, TAGS, BUCKET_NAME, USER, PASSWORD, CB_CONTAINER_NAME
 
 
 @pytest.fixture
@@ -24,13 +20,20 @@ def aggregator():
 
 
 @pytest.fixture(scope="session")
-def couchbase_metrics():
+def couchbase_service(request):
+    """
+    Spin up and initialize couchbase
+    """
+
+    # specify couchbase container name
+    env = os.environ
+    env['CB_CONTAINER_NAME'] = CB_CONTAINER_NAME
+
     args = [
         'docker-compose',
         '-f', os.path.join(HERE, 'compose', 'standalone.compose')
     ]
-
-    subprocess.check_call(args + ['up', '-d'])
+    subprocess.check_call(args + ['up', '-d'], env=env)
 
     # wait for couchbase to be up
     if not wait_for_couchbase_container():
@@ -39,50 +42,72 @@ def couchbase_metrics():
     # set up couchbase through its cli
     setup_couchbase()
 
+    # always stop and remove the container even if there's an exception at setup
+    def teardown():
+        subprocess.check_call(args + ["down"], env=env)
+    request.addfinalizer(teardown)
+
     yield
 
-    subprocess.check_call(args + ["down"])
+
+@pytest.fixture()
+def couchbase_container_ip(couchbase_service):
+    """
+    Modular fixture that depends on couchbase being initialized
+    """
+    return get_docker_ip(CB_CONTAINER_NAME)
 
 
 @pytest.fixture
 def couchbase_config():
     return {
-            'server': URL,
-            'user': USER,
-            'password': PASSWORD,
-            'timeout': 0.5,
-            'tags': TAGS
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 0.5,
+        'tags': TAGS
     }
 
 
 @pytest.fixture
 def couchbase_query_config():
     return {
-            'server': URL,
-            'user': USER,
-            'password': PASSWORD,
-            'timeout': 0.5,
-            'tags': TAGS,
-            'query_monitoring_url': 'http://{0}:{1}'.format(HOST, SYSTEM_VITALS_PORT)
+        'server': URL,
+        'user': USER,
+        'password': PASSWORD,
+        'timeout': 0.5,
+        'tags': TAGS,
+        'query_monitoring_url': SYSTEM_VITALS_URL
     }
 
 
+def get_docker_ip(container_id_or_name):
+    """
+    Get a docker container's IP address from its id or name
+    """
+    args = [
+        'docker', 'inspect',
+        '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name
+    ]
+
+    return subprocess.check_output(args).rstrip('\r\n')
+
+
 def setup_couchbase():
-    '''
+    """
     Initialize couchbase using its CLI tool
-    '''
+    """
 
     # Resources used:
     #   https://developer.couchbase.com/documentation/server/5.1/install/init-setup.html
     args = [
-        'docker', 'exec',
-        'couchbase-standalone'
+        'docker', 'exec', CB_CONTAINER_NAME
     ]
 
     # initialize the database
     init_args = args + [
-        'couchbase-cli', 'cluster-init', '-c', 'localhost:{0}'.format(PORT),
-        '--cluster-username={0}'.format(USER), '--cluster-password={0}'.format(PASSWORD),
+        'couchbase-cli', 'cluster-init', '-c', 'localhost:{}'.format(PORT),
+        '--cluster-username={}'.format(USER), '--cluster-password={}'.format(PASSWORD),
         '--services', 'data,index,fts,query',
         '--cluster-ramsize', '256', '--cluster-index-ramsize', '256', '--cluster-fts-ramsize', '256'
     ]
@@ -92,32 +117,33 @@ def setup_couchbase():
 
     # create bucket
     create_bucket_args = args + [
-        'couchbase-cli', 'bucket-create', '-c', 'localhost:{0}'.format(PORT),
+        'couchbase-cli', 'bucket-create', '-c', 'localhost:{}'.format(PORT),
         '-u', USER, '-p', PASSWORD,
         '--bucket', BUCKET_NAME, '--bucket-type', 'couchbase', '--bucket-ramsize', '100'
     ]
     subprocess.check_call(create_bucket_args)
-    if not wait_for_bucket(BUCKET_NAME):
-        raise Exception("couchbase bucket creation timed out!")
 
-    # time for couchbase to generate stats that we can collect
-    sleep(30)
+    # we need to wait for couchbase to generate stats
+    if not wait_for_bucket_stats(BUCKET_NAME):
+        raise Exception("couchbase bucket stats timed out!")
+
+    if not wait_for_node_stats():
+        raise Exception("couchbase node stats timed out!")
 
 
 def wait_for_couchbase_container():
-    '''
+    """
     Wait for couchbase to start
-    '''
-    for i in xrange(80):
+    """
+
+    for i in xrange(15):
         status_args = [
-            'docker', 'exec',
-            'couchbase-standalone',
-            'couchbase-cli', 'server-info', '-c', 'localhost:{0}'.format(PORT),
+            'docker', 'exec', CB_CONTAINER_NAME,
+            'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
             '-u', USER, '-p', PASSWORD
         ]
 
         if subprocess.call(status_args) == 0:
-            print("Container started after {0} seconds".format(str(i)))
             return True
         else:
             sleep(1)
@@ -126,35 +152,51 @@ def wait_for_couchbase_container():
 
 
 def wait_for_couchbase_init():
-    '''
+    """
     Wait for couchbase to be initialized
-    '''
-    for i in xrange(100):
-        r = requests.get('{0}/pools/default'.format(URL), auth=(USER, PASSWORD))
+    """
+
+    for i in xrange(15):
+        r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
         if r.status_code == requests.codes.ok:
             return True
-        else:
-            sleep(1)
 
     return False
 
 
-def wait_for_bucket(bucket_name):
-    '''
-    Wait for couchbase bucket to be created
-    '''
-    for i in xrange(80):
-        status_args = [
-            'docker', 'exec',
-            'couchbase-standalone',
-            'cbstats', 'localhost:{0}'.format(DATA_PORT),
-            '-b', bucket_name,
-            'uuid', '-u', USER, '-p', PASSWORD
-        ]
+def wait_for_node_stats():
+    """
+    Wait for couchbase to generate node stats
+    """
+    for i in xrange(15):
+        try:
+            r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
+            r.raise_for_status()
+            stats = r.json()
+            if all(len(node_stats['interestingStats']) > 0 for node_stats in stats['nodes']):
+                return True
+        except Exception:
+            pass
 
-        if subprocess.call(status_args) == 0:
-            return True
-        else:
-            sleep(1)
+        sleep(1)
+
+    return False
+
+
+def wait_for_bucket_stats(bucket_name):
+    """
+    Wait for couchbase to generate bucket stats
+    """
+    for i in xrange(15):
+        try:
+            r = requests.get('{}/pools/default/buckets/{}/stats'.format(URL, bucket_name), auth=(USER, PASSWORD))
+            r.raise_for_status()
+            stats = r.json()
+            if stats['op']['lastTStamp'] != 0:
+                return True
+        except Exception:
+            pass
+
+        sleep(1)
 
     return False

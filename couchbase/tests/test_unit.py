@@ -23,7 +23,7 @@ def test_camel_case_to_joined_lower():
 
     for test_input, expected_output in CAMEL_CASE_TEST_PAIRS.items():
         test_output = couchbase.camel_case_to_joined_lower(test_input)
-        assert test_output == expected_output, 'Input was {0}, expected output was {1}, actual output was {2}'.format(
+        assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
             test_input, expected_output, test_output)
 
 
@@ -39,5 +39,5 @@ def test_extract_seconds_value():
 
     for test_input, expected_output in EXTRACT_SECONDS_TEST_PAIRS.items():
         test_output = couchbase.extract_seconds_value(test_input)
-        assert test_output == expected_output, 'Input was {0}, expected output was {1}, actual output was {2}'.format(
+        assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
             test_input, expected_output, test_output)
