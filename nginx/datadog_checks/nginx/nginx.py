@@ -287,9 +287,9 @@ class Nginx(AgentCheck):
 
     @classmethod
     def _flatten_json(cls, metric_base, val, tags):
-        ''' Recursively flattens the nginx json object. Returns the following:
-            [(metric_name, value, tags)]
-        '''
+        """
+        Recursively flattens the nginx json object. Returns the following: [(metric_name, value, tags)]
+        """
         output = []
 
         if isinstance(val, dict):
