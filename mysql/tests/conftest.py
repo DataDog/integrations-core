@@ -19,7 +19,7 @@ def wait_for_mysql():
     Wait for the slave to connect to the master
     """
     connected = False
-    for i in xrange(0, 50):
+    for i in xrange(0, 100):
         try:
             pymysql.connect(
                 host=common.HOST,
@@ -38,9 +38,9 @@ def wait_for_mysql():
             connected = True
             return True
         except Exception as e:
-            pass
             log.debug("exception: {0}".format(e))
             time.sleep(2)
+            pass
 
     return connected
 
@@ -70,6 +70,18 @@ def spin_up_mysql():
     subprocess.check_call(args + ["up", "-d"], env=env)
     # wait for the cluster to be up before yielding
     if not wait_for_mysql():
+        containers = [
+            "compose_mysql-master_1",
+            "compose_mysql-slave_1",
+            "compose_mysql-setup_1",
+        ]
+        for container in containers:
+            args = [
+                "docker",
+                "logs",
+                container,
+            ]
+            subprocess.check_call(args, env=env)
         raise Exception("not working")
     yield
     subprocess.check_call(args + ["down"], env=env)
