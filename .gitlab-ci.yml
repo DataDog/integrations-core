@@ -5,7 +5,7 @@ services:
 
 before_script:
 - docker info
-- apk add --no-cache gcc linux-headers musl-dev python2-dev py-pip postgresql-dev libffi-dev
+- apk add --no-cache gcc g++ linux-headers musl-dev python2-dev py-pip postgresql-dev libffi-dev
 - pip install -q docker-compose tox invoke packaging
 
 test:
