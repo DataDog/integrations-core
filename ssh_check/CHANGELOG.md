@@ -1,46 +1,28 @@
 # CHANGELOG - ssh_check
 
-1.2.0 / 2018-03-23
-==================
-
-### Changes
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] Add custom tag support.
 
-1.1.3 / 2018-01-10 
-==================
-
-### Changes
+## 1.1.3 / 2018-01-10
 
 * [BUGFIX] Check that the private_key_file exists in the yaml configuration before attempting to access it. See [#988][]
 
-1.1.2 / 2017-11-21
-==================
+## 1.1.2 / 2017-11-21
 
-### Changes
-
-* [BUGFIX] If `ssh_check` passes and uses `None` as `exception_message`, downstream aggregator rejects it with a type error. 
+* [BUGFIX] If `ssh_check` passes and uses `None` as `exception_message`, downstream aggregator rejects it with a type error.
   Instead, specify a default message. See [#852][]
 
-1.1.1 / 2017-08-28
-==================
-
-### Changes
+## 1.1.1 / 2017-08-28
 
 * [IMPROVEMENT] drop dependency on winrandom_ctypes for windows
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [IMPROVEMENT] Drop dependency on pycrypto. See [#426][] and [#454][]
 * [BUGFIX] Fix misplaced parentheses in config validation. See [#416][], thanks [@ilkka][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds ssh_check integration.
 

@@ -17,4 +17,3 @@
 ## 1.0.0 / 2018-02-28
 
 * [FEATURE] add kubelet integration.
-

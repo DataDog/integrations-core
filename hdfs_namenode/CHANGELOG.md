@@ -1,28 +1,18 @@
 # CHANGELOG - hdfs_namenode
 
-1.2.1 / 2018-02-28
-==================
+## 1.2.1 / 2018-02-28
 
-### Changes
 * [BUGFIX] Fix regression where instance tags were required. See [#1132][]
 
-1.2.0 / 2018-02-13
-==================
+## 1.2.0 / 2018-02-13
 
-### Changes
 * [FEATURE] add instance level tags to metrics and service check. See [#1047][]
 
-1.1.0 / 2018-01-10
-==================
-
-### Changes
+## 1.1.0 / 2018-01-10
 
 * [FEATURE] adds configuration option to ignore SSL validation. See [#714][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds hdfs_namenode integration.
 
