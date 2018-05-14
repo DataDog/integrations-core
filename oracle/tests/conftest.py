@@ -43,7 +43,7 @@ def oracle_container():
     ]
 
     subprocess.check_call(args + ["down"])
-    shutil.rmtree(LOCAL_TMP_DIR)
+    shutil.rmtree(LOCAL_TMP_DIR, ignore_errors=True)
     os.makedirs(LOCAL_TMP_DIR)
     subprocess.check_call(args + ["up", "-d"])
 
