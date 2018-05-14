@@ -50,7 +50,7 @@ services:
       - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
     depends_on:
       - "mysql-slave"
-    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "setup_mysql.sh"]
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "120", "--", "setup_mysql.sh"]
 
 
 networks:
