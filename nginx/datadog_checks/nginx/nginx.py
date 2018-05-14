@@ -4,6 +4,8 @@
 import re
 import urlparse
 import time
+from itertools import chain
+
 from datetime import datetime
 
 import requests
@@ -31,6 +33,9 @@ PLUS_API_ENDPOINTS = {
     "connections": ["connections"],
     "ssl": ["ssl"],
     "slabs": ["slabs"],
+}
+
+PLUS_API_STREAM_ENDPOINTS = {
     "stream/server_zones": ["stream", "server_zones"],
     "stream/upstreams": ["stream", "upstreams"],
 }
@@ -115,7 +120,7 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
 
-            for endpoint, nest in PLUS_API_ENDPOINTS.iteritems():
+            for endpoint, nest in chain(PLUS_API_ENDPOINTS.iteritems(), PLUS_API_STREAM_ENDPOINTS.iteritems()):
                 response = self._get_plus_api_data(instance, url, ssl_validation, auth,
                                                    plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {0} `response`: {1}".format(plus_api_version, response))
@@ -232,7 +237,7 @@ class Nginx(AgentCheck):
             r = self._perform_request(instance, url, ssl_validation, auth)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
-            if endpoint == "stream/server_zones" or endpoint == "stream/upstreams":
+            if endpoint in PLUS_API_STREAM_ENDPOINTS:
                 self.log.warning("Stream may not be initialized. "
                                  "Error querying {} metrics at {}: {}".format(endpoint, url, e))
             else:
