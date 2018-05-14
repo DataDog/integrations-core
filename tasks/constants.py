@@ -20,6 +20,7 @@ AGENT_BASED_INTEGRATIONS = [
     'ceph',
     'consul',
     'couch',
+    'couchbase',
     'datadog_checks_base',
     'directory',
     'disk',

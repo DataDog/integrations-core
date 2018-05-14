@@ -1,7 +1,7 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2018
 # (C) Justin Slattery <Justin.Slattery@fzysqr.com> 2013
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 import re
@@ -10,8 +10,8 @@ import re
 import requests
 
 # project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 # Constants
 COUCHBASE_STATS_PATH = '/pools/default'
@@ -265,7 +265,8 @@ class Couchbase(AgentCheck):
                     val = self.extract_seconds_value(val)
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
-                    full_metric_name = '.'.join(['couchbase', 'query', self.camel_case_to_joined_lower(norm_metric_name)])
+                    full_metric_name = '.'.join(['couchbase', 'query',
+                                                self.camel_case_to_joined_lower(norm_metric_name)])
                     self.gauge(full_metric_name, val, tags=tags)
 
     def _get_stats(self, url, instance):
@@ -278,8 +279,7 @@ class Couchbase(AgentCheck):
         if 'user' in instance and 'password' in instance:
             auth = (instance['user'], instance['password'])
 
-        r = requests.get(url, auth=auth, headers=headers(self.agentConfig),
-            timeout=timeout)
+        r = requests.get(url, auth=auth, headers=headers(self.agentConfig), timeout=timeout)
         r.raise_for_status()
         return r.json()
 
@@ -324,15 +324,13 @@ class Couchbase(AgentCheck):
                 raise Exception("No data returned from couchbase endpoint: %s" % url)
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e.message))
+                               tags=service_check_tags, message=str(e.message))
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         couchbase['stats'] = overall_stats
 
@@ -377,7 +375,7 @@ class Couchbase(AgentCheck):
                     couchbase['query'] = query
             except requests.exceptions.HTTPError:
                 self.log.error("Error accessing the endpoint %s, make sure you're running at least "
-                    "couchbase 4.5 to collect the query monitoring metrics", url)
+                               "couchbase 4.5 to collect the query monitoring metrics", url)
 
         return couchbase
 
@@ -408,4 +406,4 @@ class Couchbase(AgentCheck):
         if unit not in self.TO_SECONDS:
             unit = 'us'
 
-        return float(val)/self.TO_SECONDS[unit]
+        return float(val) / self.TO_SECONDS[unit]
