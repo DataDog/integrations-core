@@ -1,12 +1,5 @@
 # CHANGELOG - oracle
 
-1.3.0 / Unreleased
-==================
-
-### Changes
-
-* [FEATURE] adds support for custom queries. See #1528
-
 1.2.0 / Unreleased
 ==================
 
