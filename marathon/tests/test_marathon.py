@@ -78,6 +78,7 @@ def test_empty_responses(aggregator, check, instance):
     aggregator.assert_metric('marathon.queue.size', value=0)
     aggregator.assert_metric('marathon.deployments', value=0)
 
+
 def test_ensure_queue_count(aggregator, apps, check, instance):
     def side_effect(url, timeout, auth, acs_url, verify, tags):
         if "v2/apps" in url:
