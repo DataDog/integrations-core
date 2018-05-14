@@ -1,16 +1,10 @@
 # CHANGELOG - solr
 
-1.0.1 / 2017-11-21
-==================
-
-### Changes
+## 1.0.1 / 2017-11-21
 
 * [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds solr integration.
 

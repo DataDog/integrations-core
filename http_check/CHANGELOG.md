@@ -2,7 +2,6 @@
 
 ## 2.1.0 / Unreleased
 
-
 * [FEATURE] Add `check_hostname` option to allow users to disable matching
   hostnames verification. See [#485][]
 * [IMPROVEMENT] Emit warning when `disable_ssl_validation` is unset in configuration

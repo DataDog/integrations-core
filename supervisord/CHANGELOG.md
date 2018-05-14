@@ -1,23 +1,13 @@
 # CHANGELOG - supervisord
 
-1.1.1 / 2018-01-10
-==================
-
-### Changes
+## 1.1.1 / 2018-01-10
 
 * [FEATURE] add support for tags per instance. See [#411][]. Thanks [@frederikhappel][].
 
-
-1.1.0 / 2017-09-18
-==================
-
-### Changes
+## 1.1.0 / 2017-09-18
 
 * [SECURITY] bumping supervisor dep to 3.3.3 to address [CVE-2017-11610](https://nvd.nist.gov/vuln/detail/CVE-2017-11610).
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds supervisord integration.

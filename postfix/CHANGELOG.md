@@ -1,23 +1,14 @@
 # CHANGELOG - postfix
 
-1.2.0 / 2017-10-10
-==================
+## 1.2.0 / 2017-10-10
 
 * [IMPROVEMENT] option to run the check using postqueue -p. See [#665][].
 
-
-1.1.0 / 2017-08-28
-==================
-
-### Changes
+## 1.1.0 / 2017-08-28
 
 * [IMPROVEMENT] run the check as the postfix user, not root. See [#619][] and [#702][]
 
-
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds postfix integration.
 
