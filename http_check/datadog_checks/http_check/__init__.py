@@ -1,7 +1,11 @@
-from . import http_check
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-HTTPCheck = http_check.HTTPCheck
+from .http_check import HTTPCheck
+from .__about__ import __version__
 
-__version__ = "2.1.0"
-
-__all__ = ['http_check']
+__all__ = [
+    '__version__',
+    'HTTPCheck'
+]

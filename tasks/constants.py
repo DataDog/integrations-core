@@ -33,6 +33,7 @@ AGENT_BASED_INTEGRATIONS = [
     'exchange_server',
     'haproxy',
     'hdfs_namenode',
+    'http_check',
     'iis',
     'istio',
     'kafka_consumer',
