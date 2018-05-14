@@ -1,0 +1,18 @@
+{
+  "download_in_toto_metadata": false,
+  "repositories_dir": "repositories",
+  "repository_dir": "public-integrations-core",
+  "target_path_patterns": [
+    "^https://integrations-core-wheels.s3.amazonaws.com/targets/(simple/)$$",
+    "^https://integrations-core-wheels.s3.amazonaws.com/targets/(simple/.*/)$$",
+    "^https://integrations-core-wheels.s3.amazonaws.com/targets/(simple/.*/.*\\.whl)"
+  ],
+  "repository_mirrors": {
+    "public-integrations-core": {
+      "url_prefix": "https://integrations-core-wheels.s3.amazonaws.com",
+      "metadata_path": "metadata.staged",
+      "targets_path": "targets",
+      "confined_target_dirs": [""]
+    }
+  }
+}
