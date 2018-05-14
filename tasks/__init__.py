@@ -14,7 +14,7 @@ from .manifest import manifest
 from .upgrade import upgrade
 from .test import test
 from .changelog import update_changelog
-from .release import release_check
+from .release import release_integration, release_prepare
 
 # the root namespace
 root = Collection()

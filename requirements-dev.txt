@@ -5,3 +5,4 @@ pytest
 tox
 pip-tools
 packaging
+twine
