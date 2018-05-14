@@ -106,6 +106,7 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
         payload = json.loads(response.read())
         if NO_CHANGELOG_LABEL in (l.get('name') for l in payload.get('labels', [])):
             # No changelog entry for this PR
+            print("Skipping PR #{} from changelog")
             continue
 
         author = payload.get('user', {}).get('login')
