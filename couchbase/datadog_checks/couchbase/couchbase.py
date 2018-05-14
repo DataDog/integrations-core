@@ -400,12 +400,16 @@ class Couchbase(AgentCheck):
 
     # Takes a string with a time and a unit (e.g '3.45ms') and returns the value in seconds
     def extract_seconds_value(self, value):
-        match = self.seconds_value_pattern.search(value)
+        if value == "0":
+            return value
 
-        val, unit = match.group(1, 3)
-        # They use the 'micro' symbol for microseconds so there is an encoding problem
-        # so let's assume it's microseconds if we don't find the key in unit
-        if unit not in self.TO_SECONDS:
-            unit = 'us'
+        else:
+            match = self.seconds_value_pattern.search(value)
 
-        return float(val)/self.TO_SECONDS[unit]
+            val, unit = match.group(1, 3)
+            # They use the 'micro' symbol for microseconds so there is an encoding problem
+            # so let's assume it's microseconds if we don't find the key in unit
+            if unit not in self.TO_SECONDS:
+                unit = 'us'
+
+            return float(val)/self.TO_SECONDS[unit]
