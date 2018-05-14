@@ -162,13 +162,14 @@ class Marathon(AgentCheck):
 
     def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
         response = self.get_apps_json(url, timeout, auth, acs_url, ssl_verify, tags, group)
-        if response is not None:
-            self.gauge('marathon.apps', len(response['apps']), tags=tags)
-            for app in response['apps']:
-                app_tags = self.get_app_tags(app, tags)
-                for attr in self.APP_METRICS:
-                    if attr in app:
-                        self.gauge('marathon.' + attr, app[attr], tags=app_tags)
+        if response is None:
+            return
+        self.gauge('marathon.apps', len(response['apps']), tags=tags)
+        for app in response['apps']:
+            app_tags = self.get_app_tags(app, tags)
+            for attr in self.APP_METRICS:
+                if attr in app:
+                    self.gauge('marathon.' + attr, app[attr], tags=app_tags)
 
     def process_deployments(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
         # Number of running/pending deployments
@@ -183,10 +184,13 @@ class Marathon(AgentCheck):
 
         # Number of queued applications
         self.gauge('{}.size'.format(self.QUEUE_PREFIX), len(response['queue']), tags=tags)
-        self.ensure_queue_count(response, url, timeout, auth, acs_url, ssl_verify, tags, group)
+
+        queued = set()
 
         for queue in response['queue']:
             q_tags = ['app_id:' + queue['app']['id'], 'version:' + queue['app']['version']] + tags
+
+            queued.add(queue['app']['id'])
 
             for m_type, sub_metric in self.QUEUE_METRICS.iteritems():
                 if isinstance(sub_metric, list):
@@ -218,10 +222,12 @@ class Marathon(AgentCheck):
                     except (KeyError, TypeError):
                         self.log.warn("Metric unavailable skipping: {}".format(metric_name))
 
+        self.ensure_queue_count(queued, url, timeout, auth, acs_url, ssl_verify, tags, group)
+
     def get_app_tags(self, app, tags=None):
         return ['app_id:' + app['id'], 'version:' + app['version']] + tags
 
-    def ensure_queue_count(self, queue_response, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
+    def ensure_queue_count(self, queued, url, timeout, auth, acs_url, ssl_verify, tags=None, group=None):
         """
         Ensure `marathon.queue.count` is reported as zero for apps without queued instances.
         """
@@ -230,12 +236,6 @@ class Marathon(AgentCheck):
         apps_response = self.get_apps_json(url, timeout, auth, acs_url, ssl_verify, tags, group)
 
         for app in apps_response['apps']:
-            q_tags = self.get_app_tags(app, tags)
-
-            # Check if the app has queued instances waiting to be deployed.
-            found = False
-            for queue in queue_response['queue']:
-                if app['id'] == queue['app']['id']:
-                    found = True
-            if not found:
+            if app['id'] not in queued:
+                q_tags = self.get_app_tags(app, tags)
                 self.gauge(metric_name, 0, tags=q_tags)
