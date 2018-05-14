@@ -77,3 +77,26 @@ def test_empty_responses(aggregator, check, instance):
     aggregator.assert_metric('marathon.apps', value=0)
     aggregator.assert_metric('marathon.queue.size', value=0)
     aggregator.assert_metric('marathon.deployments', value=0)
+
+def test_ensure_queue_count(aggregator, apps, check, instance):
+    def side_effect(url, timeout, auth, acs_url, verify, tags):
+        if "v2/apps" in url:
+            return apps
+        elif "v2/deployments" in url:
+            return []
+        elif "v2/queue" in url:
+            return {"queue": []}
+        elif "v2/groups" in url:
+            return {"apps": []}
+        else:
+            raise Exception("unknown url:" + url)
+
+    check.get_json = mock.MagicMock(side_effect=side_effect)
+    check.check(instance)
+
+    aggregator.assert_metric('marathon.apps', value=2)
+    aggregator.assert_metric('marathon.queue.size', value=0)
+    aggregator.assert_metric('marathon.queue.count', value=0, tags=['app_id:/my-app', 'version:2016-08-25T18:13:34.079Z',
+                                                                    'optional:tag1'])
+    aggregator.assert_metric('marathon.queue.count', value=0, tags=['app_id:/my-app-2', 'version:2016-08-25T18:13:34.079Z',
+                                                                    'optional:tag1'])
