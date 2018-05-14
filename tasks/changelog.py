@@ -6,7 +6,6 @@ import os
 import re
 import sys
 import json
-import urllib2
 from collections import namedtuple
 from datetime import datetime
 
@@ -21,6 +20,8 @@ from .utils import get_version_string, get_release_tag_string
 
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
+
+NO_CHANGELOG_LABEL = 'documentation/no-changelog'
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
 
@@ -102,6 +103,11 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
             continue
 
         payload = json.loads(response.read())
+        if NO_CHANGELOG_LABEL in (l.get('name') for l in payload.get('labels', [])):
+            # No changelog entry for this PR
+            print("Skipping PR #{} from changelog".format(pr_num))
+            continue
+
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
 
