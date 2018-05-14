@@ -47,6 +47,33 @@ def git_tag(ctx, tag_name):
 
 
 @task(help={
+        'target': "The check to tag",
+        'dry-run': "Runs the task without actually doing anything",
+})
+def tag_current_release(ctx, target, version=None, dry_run=False):
+    """
+    Tag the HEAD of the git repo with the current release number for a
+    specific check. This is a maintainance task that should be run under
+    very specific circumstances (e.g. for whatever reason the release process
+    for a check is being done manually).
+    """
+    # get the current version
+    if version is None:
+        version = get_version_string(target)
+
+    # get the tag name
+    tag = get_release_tag_string(target, version)
+    print("Tagging HEAD with {}".format(tag))
+    if dry_run:
+        return
+
+    try:
+        git_tag(ctx, tag)
+    except Exception as e:
+        print(e)
+
+
+@task(help={
         'target': "The check to release",
         'new_version': "The new version",
 })
