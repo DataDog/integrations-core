@@ -67,7 +67,7 @@ instances:
     # custom_queries:
     #   - metric_prefix: oracle.custom_query
     #     query: |  # Use the pipe if you require a multi-line script.
-    #       SELECT colums
+    #       SELECT columns
     #       FROM tester.test_table
     #       WHERE conditions
     #     columns:

@@ -136,16 +136,20 @@ class Oracle(AgentCheck):
             if not metric_prefix:
                 self.log.error('custom query field `metric_prefix` is required')
                 continue
-            metric_prefix.rstrip('.')
+            metric_prefix = metric_prefix.rstrip('.')
 
             query = custom_query.get('query')
             if not query:
-                self.log.error('custom query field `query` is required')
+                self.log.error(
+                    'custom query field `query` is required for metric_prefix `{}`'.format(metric_prefix)
+                )
                 continue
 
             columns = custom_query.get('columns')
             if not columns:
-                self.log.error('custom query field `columns` is required')
+                self.log.error(
+                    'custom query field `columns` is required for metric_prefix `{}`'.format(metric_prefix)
+                )
                 continue
 
             with closing(con.cursor()) as cursor:
@@ -169,19 +173,27 @@ class Oracle(AgentCheck):
                         if column:
                             name = column.get('name')
                             if not name:
-                                self.log.error('column field `name` is required')
+                                self.log.error(
+                                    'column field `name` is required for metric_prefix `{}`'.format(metric_prefix)
+                                )
                                 break
 
                             column_type = column.get('type')
                             if not column_type:
-                                self.log.error('column field `type` is required')
+                                self.log.error(
+                                    'column field `type` is required for column `{}` '
+                                    'of metric_prefix `{}`'.format(name, metric_prefix)
+                                )
                                 break
 
                             if column_type == 'tag':
                                 query_tags.append('{}:{}'.format(name, value))
                             else:
                                 if not hasattr(self, column_type):
-                                    self.log.error('invalid submission method: `{}`'.format(column_type))
+                                    self.log.error(
+                                        'invalid submission method `{}` for column `{}` of '
+                                        'metric_prefix `{}`'.format(column_type, name, metric_prefix)
+                                    )
                                     break
                                 try:
                                     metric_info.append((
@@ -191,7 +203,8 @@ class Oracle(AgentCheck):
                                     ))
                                 except (ValueError, TypeError):
                                     self.log.error(
-                                        'non-numeric value for metric column `{}`: {}'.format(name, value)
+                                        'non-numeric value `{}` for metric column `{}` of '
+                                        'metric_prefix `{}`'.format(value, name, metric_prefix)
                                     )
                                     break
 
