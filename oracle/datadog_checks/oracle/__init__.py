@@ -1,7 +1,11 @@
-from . import oracle
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-Oracle = oracle.Oracle
+from .oracle import Oracle
+from .__about__ import __version__
 
-__version__ = "1.3.0"
-
-__all__ = ['oracle']
+__all__ = [
+    "__version__",
+    'Oracle'
+]

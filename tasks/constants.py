@@ -42,6 +42,7 @@ AGENT_BASED_INTEGRATIONS = [
     'nfsstat',
     'nginx',
     'pgbouncer',
+    'oracle',
     'pdh_check',
     'postgres',
     'powerdns_recursor',

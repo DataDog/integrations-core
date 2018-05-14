@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  oracle:
+    image: quay.io/datadog/oracle_jdbc:${ORACLE_VERSION}
+    ports:
+      - ${ORACLE_PORT}:1521
+      - ${ORACLE_PORT_8080}:8080
+    volumes:
+      - ${ORACLE_DIR}/data:/u01/app/oracle
+      - ${RESOURCES_DIR}:/docker-entrypoint-initdb.d
+      - ${ORACLE_DIR}/driver:/driver
+    shm_size: '1024mb'
+    environment:
+      - WEB_CONSOLE=false
