@@ -217,10 +217,11 @@ def test_cull_services_list(aggregator):
     whitelist = ['service_1', 'service_2', 'service_3']
     assert set(consul_check._cull_services_list(services, whitelist, max_services=max_services)) == set(whitelist)
 
-    # blacklist should override whitelist
+    # whitelist should override blacklist
     whitelist = ['service_1', 'service_2']
     blacklist = ['service_1']
-    assert set(consul_check._cull_services_list(services, whitelist, blacklist, max_services)) == set(['service_2'])
+    assert set(consul_check._cull_services_list(services, whitelist, blacklist, max_services)) \
+        == set(['service_1', 'service_2'])
 
 
 def test_new_leader_event(aggregator):

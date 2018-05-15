@@ -12,6 +12,7 @@ from urlparse import urljoin
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.common import pattern_filter
 
 # 3p
 import requests
@@ -219,31 +220,24 @@ class ConsulCheck(AgentCheck):
 
     def _cull_services_list(self, services, service_whitelist, service_blacklist=None, max_services=MAX_SERVICES):
 
-        if not service_blacklist:
-            service_blacklist = []
-
-        print(services, service_blacklist)
+        acceptable_services = pattern_filter(services, service_whitelist, service_blacklist)
         services = {
-            s: services[s] for s in services if s not in service_blacklist
+            s: services[s] for s in services.iterkeys()
+            if s in acceptable_services
+            and (s in service_whitelist if service_whitelist else True)
         }
 
-        if service_whitelist:
-            if len(service_whitelist) > max_services:
-                self.warning('More than %d services in whitelist. Service list will be truncated.' % max_services)
-
-            services = {s: services[s] for s in [s for s in services if s in service_whitelist][:max_services]}
-        else:
+        if service_whitelist and len(service_whitelist) > max_services:
+            self.warning('More than {} services in whitelist. Service list will be truncated.'.format(max_services))
+        elif not service_whitelist:
             if len(services) <= max_services:
-                log_line = 'Consul service whitelist not defined. Agent will poll for all {0} services found'
-                log_line = log_line.format(len(services))
-                self.log.debug(log_line)
+                log_line = 'Consul service whitelist not defined. Agent will poll for all {} services found'
+                self.warning(log_line.format(len(services)))
             else:
-                log_line = 'Consul service whitelist not defined. Agent will poll for at most {0} services'
-                log_line = log_line.format(max_services)
-                self.warning(log_line)
-                services = {s: services[s] for s in list(islice(services.iterkeys(), 0, max_services))}
+                log_line = 'Consul service whitelist not defined. Agent will poll for at most {} services'
+                self.warning(log_line.format(max_services))
 
-        return services
+        return {s: services[s] for s in list(islice(services.iterkeys(), 0, max_services))}
 
     def _get_service_tags(self, service, tags):
         service_tags = ['consul_service_id:{0}'.format(service)]
