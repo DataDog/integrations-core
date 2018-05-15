@@ -1,10 +1,10 @@
 # Agent Check: Windows Service
-{{< img src="integrations/winservices/windows-service.png" alt="Windows Service Event" responsive="true" popup="true">}}
 ## Overview
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
 ## Setup
+
 ### Installation
 
 The Windows Service check is packaged with the Agent, so simply [install the Agent][1] on your Windows hosts.
@@ -26,7 +26,7 @@ instances:
 #     - wmiApSrv
 ```
 
-Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").  
+Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").
 Note: spaces are replaced by underscores in Datadog.
 
 [Restart the Agent][3] to start monitoring the services and sending service checks to Datadog.
