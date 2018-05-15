@@ -9,7 +9,7 @@ from .common import (
 )
 
 
-def testOracle(aggregator, check, oracle_container):
+def testOracle(aggregator, check):
     check.check(CONFIG)
 
     for m in TABLESPACE_METRICS + Oracle.SYS_METRICS.values():

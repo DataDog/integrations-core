@@ -8,7 +8,7 @@ import subprocess
 import shutil
 
 import pytest
-import jaydebeapi as jdb
+import cx_Oracle
 
 from datadog_checks.oracle import Oracle
 from .common import (
@@ -28,7 +28,7 @@ def check():
     return Oracle(CHECK_NAME, {}, {})
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def oracle_container():
 
     env = os.environ
@@ -49,8 +49,28 @@ def oracle_container():
 
     # wait for the cluster to be up before yielding
     if not wait_for_oracle():
+        subprocess.check_call(args + ["logs"])
         subprocess.check_call(args + ["down"])
         raise Exception("oracle container boot timed out!")
+
+    # if not os.path.exists("/etc/ld.so.conf.d"):
+    #     os.mkdir("/etc/ld.so.conf.d")
+
+    # with open("/etc/ld.so.conf.d/instant-client.conf", "w") as f:
+    #     f.write("{}/instant-client".format(LOCAL_TMP_DIR))
+
+    if not os.path.exists("{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)):
+        os.symlink(
+            "{}/instant-client/libclntsh.so.12.1".format(LOCAL_TMP_DIR),
+            "{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)
+        )
+
+    print(os.listdir("{}/instant-client".format(LOCAL_TMP_DIR)))
+    try:
+        subprocess.check_output(["ldconfig", "{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.returncode)
+        print(e.output)
 
     generate_metrics()
 
@@ -73,29 +93,24 @@ def wait_for_oracle():
 
 
 def generate_metrics():
-    connect_string = Oracle.JDBC_CONNECT_STRING.format(CONFIG["server"], CONFIG["service_name"])
-    connection = jdb.connect(
-        Oracle.ORACLE_DRIVER_CLASS,
-        connect_string,
-        [CONFIG["user"], CONFIG["password"]],
-        CONFIG["jdbc_driver_path"]
-    )
+    connect_string = Oracle.CX_CONNECT_STRING.format("cx_Oracle", "welcome", CONFIG["server"], CONFIG["service_name"])
+    connection = cx_Oracle.connect(connect_string)
 
     # mess around a bit to pupulate metrics
     cursor = connection.cursor()
     cursor.execute("select 'X' from dual")
 
     # truncate
-    cursor.execute("truncate table cx_Oracle.TestTempTable")
+    cursor.execute("truncate table TestTempTable")
 
     # insert
     rows = [(n,) for n in range(250)]
     cursor.arraysize = 100
-    statement = "insert into cx_Oracle.TestTempTable (IntCol) values (:1)"
+    statement = "insert into TestTempTable (IntCol) values (:1)"
     cursor.executemany(statement, rows)
 
     # select
-    cursor.execute("select count(*) from cx_Oracle.TestTempTable")
+    cursor.execute("select count(*) from TestTempTable")
     _, = cursor.fetchone()
 
     # wait to populate

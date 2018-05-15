@@ -1,7 +1,7 @@
 FROM sath89/oracle-12c
 
-COPY ./oracle_jdbc.jar /oracle_jdbc.jar
-RUN mkdir /driver
+COPY instant-client-basic.zip instant-client-sdk.zip /
+RUN mkdir /instant-client
+RUN apt-get update && apt-get install -y unzip
 
-ENTRYPOINT cp /oracle_jdbc.jar /driver && /entrypoint.sh
-
+ENTRYPOINT unzip /instant-client-\*.zip -d /instant-client && mv /instant-client/*/* /instant-client/ && /entrypoint.sh

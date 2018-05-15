@@ -8,8 +8,8 @@ services:
       - ${ORACLE_PORT_8080}:8080
     volumes:
       - ${ORACLE_DIR}/data:/u01/app/oracle
+      - ${ORACLE_DIR}/instant-client:/instant-client
       - ${RESOURCES_DIR}:/docker-entrypoint-initdb.d
-      - ${ORACLE_DIR}/driver:/driver
     shm_size: '1024mb'
     environment:
       - WEB_CONSOLE=false
