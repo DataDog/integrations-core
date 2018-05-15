@@ -49,9 +49,8 @@ def git_tag(ctx, tag_name):
 @task(help={
         'target': "The check to release",
         'new_version': "The new version",
-        'dry-run': "Runs the task without actually doing anything",
 })
-def release_check(ctx, target, new_version):
+def release_prepare(ctx, target, new_version):
     """
     Perform a set of operations needed to release a single check:
 
@@ -61,7 +60,7 @@ def release_check(ctx, target, new_version):
      * tag the repo with a tag in the form `check-name_0_0_1`
 
     Example invocation:
-        inv release-check redisdb 3.1.1
+        inv release-prepare redisdb 3.1.1
     """
     # sanity check on the target
     if target not in AGENT_BASED_INTEGRATIONS:
@@ -97,3 +96,32 @@ def release_check(ctx, target, new_version):
 
     # done
     print("All done, remember to open a PR to merge these changes on master")
+
+
+@task(help={
+        'target': "The check to release",
+        'dry-run': "Runs the task without publishing the package",
+})
+def release_integration(ctx, target, dry_run=False):
+    """
+    Release to PyPI a specific check as it is on the repo HEAD
+    """
+    # sanity check on the target
+    if target not in AGENT_BASED_INTEGRATIONS:
+        raise Exit("Provided target is not an Agent-based Integration")
+
+    # retrieve credentials
+    username = os.environ.get('DD_PYPI_USERNAME')
+    password = os.environ.get('DD_PYPI_PASSWORD')
+    if not (username and password):
+        raise Exit("Please set DD_PYPI_USERNAME and DD_PYPI_PASSWORD env vars and try again.")
+
+    print("Building and publishing {} on PyPI".format(target))
+    with ctx.cd(target):
+        ctx.run('python setup.py bdist_wheel', hide='stdout')
+        print("Build done, uploading the package...")
+        if not dry_run:
+            cmd = 'twine upload -u "{}" -p "{}" dist/*'.format(username, password)
+            ctx.run(cmd, warn=True)
+
+    print("Done.")
