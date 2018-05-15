@@ -3,7 +3,6 @@
 ## 1.3.1 / Unreleased
 
 * [BUGFIX] Fix missing task count metrics (tasksStaged, tasksRunning, tasksHealthy, tasksUnhealthy) when filtering by group.
-* [BUGFIX] Fixes `marathon.queue.count` metric to report 0 for apps that have no undeployed instances.
 
 ## 1.3.0 / 2018-05-11
 
