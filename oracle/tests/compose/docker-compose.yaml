@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   oracle:
-    image: quay.io/datadog/oracle_jdbc:${ORACLE_VERSION}
+    image: registry.gitlab.com/datadog/integrations-core/oracle_jdbc:${ORACLE_VERSION}
     ports:
       - ${ORACLE_PORT}:1521
       - ${ORACLE_PORT_8080}:8080
