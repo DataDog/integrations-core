@@ -16,6 +16,7 @@ consul.net.node.latency.p90,gauge,,millisecond,,p90 latency from this node to al
 consul.net.node.latency.p95,gauge,,millisecond,,p95 latency from this node to all others,-1,consul,p95 latency
 consul.net.node.latency.p99,gauge,,millisecond,,p99 latency from this node to all others,-1,consul,p99 latency
 consul.net.node.latency.max,gauge,,millisecond,,maximum latency from this node to all others,-1,consul,max latency
+consul.peers,gauge,,peer,,Number of peer in the peer set,0,consul,peer
 consul.runtime.num_goroutines,gauge,10,,,Number of running goroutines,0,consul,num goroutines
 consul.runtime.alloc_bytes,gauge,10,byte,,Current bytes allocated by the Consul process,0,consul,bytes alloc
 consul.runtime.heap_objects,gauge,10,object,,Number of objects allocated on the heap,0,consul,heap objs
