@@ -72,6 +72,10 @@ class Network(AgentCheck):
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
         self._collect_cx_state = instance.get(
             'collect_connection_state', False)
+        self._collect_rate_metrics = instance.get(
+            'collect_rate_metrics', True)
+        self._collect_count_metrics = instance.get(
+            'collect_count_metrics', False)
 
         # This decides whether we should split or combine connection states,
         # along with a few other things
@@ -228,6 +232,12 @@ class Network(AgentCheck):
                 }
             }
 
+    def _submit_netmetric(self, metric, value, tags=None):
+        if self._collect_rate_metrics:
+            self.rate(metric, value, tags=tags)
+        if self._collect_count_metrics:
+            self.monotonic_count('{}_count'.format(metric), value, tags=tags)
+
     def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
@@ -263,7 +273,7 @@ class Network(AgentCheck):
             for regex, metric in regex_list:
                 value = re.match(regex, line)
                 if value:
-                    self.rate(metric, self._parse_value(value.group(1)), tags=tags)
+                    self._submit_netmetric(metric, self._parse_value(value.group(1)), tags=tags)
 
     def _is_collect_cx_state_runnable(self, proc_location):
         """
@@ -416,7 +426,8 @@ class Network(AgentCheck):
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self.rate(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]), tags=custom_tags)
+                    self._submit_netmetric(nstat_metrics_names[k][met], self._parse_value(netstat_data[k][met]),
+                                           tags=custom_tags)
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
