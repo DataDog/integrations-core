@@ -236,7 +236,7 @@ class Network(AgentCheck):
         if self._collect_rate_metrics:
             self.rate(metric, value, tags=tags)
         if self._collect_count_metrics:
-            self.monotonic_count('{}_count'.format(metric), value, tags=tags)
+            self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
     def _submit_devicemetrics(self, iface, vals_by_metric, tags):
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):

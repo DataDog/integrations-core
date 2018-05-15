@@ -25,7 +25,7 @@ instances:
     # However, some metrics like tcp/dup retransmissions and errors are
     # better handled as counts.
     # You can choose to enable either or both types of metrics.
-    # Count metrics will have '_count' added to the metric name.
+    # Count metrics will have '.count' added to the metric name.
     # collect_rate_metrics: true
     # collect_count_metrics: false
 
