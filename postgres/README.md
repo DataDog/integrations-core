@@ -116,6 +116,9 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 
 ## Data Collected
 ### Metrics
+
+Some of the metrics listed below require additional configuration, refer to the [sample postgres.d/conf.yaml][14] for all configurable options.
+
 See [metadata.csv][18] for a list of metrics provided by this integration.
 
 ### Events
