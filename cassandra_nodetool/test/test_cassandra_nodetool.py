@@ -58,6 +58,16 @@ class TestCassandraNodetoolCheck(AgentCheckTest):
         self.assertServiceCheckOK('cassandra.nodetool.node_up', count=4)
         self.assertServiceCheckCritical('cassandra.nodetool.node_up', count=1)
 
+
+        # test port config
+        config_with_port = self.config.copy()
+        config_with_port['instances'][0]['port'] = 7199
+        self.run_check(config_with_port)
+
+        self.assertEquals(mock_output.call_args[0][0],
+                          ['docker', 'exec', CASSANDRA_CONTAINER_NAME, 'nodetool', '-h', 'localhost', '-p',
+                          '7199', '-u', 'controlRole', '-pw', 'QED', 'status', '--', 'test'])
+
     @attr(requires='cassandra_nodetool')
     def test_integration(self):
         self.run_check(self.config)
