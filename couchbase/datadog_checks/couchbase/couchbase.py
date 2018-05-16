@@ -262,15 +262,10 @@ class Couchbase(AgentCheck):
             if val is not None:
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
-<<<<<<< HEAD
                     # for query times, the unit is part of the value, we need to extract it
                     if isinstance(val, basestring):
                         val = self.extract_seconds_value(val)
                     full_metric_name = '.'.join(['couchbase', 'query', self.camel_case_to_joined_lower(norm_metric_name)])
-=======
-                    full_metric_name = '.'.join(['couchbase', 'query',
-                                                self.camel_case_to_joined_lower(norm_metric_name)])
->>>>>>> origin/master
                     self.gauge(full_metric_name, val, tags=tags)
 
     def _get_stats(self, url, instance):
@@ -415,9 +410,5 @@ class Couchbase(AgentCheck):
             # so let's assume it's microseconds if we don't find the key in unit
             if unit not in self.TO_SECONDS:
                 unit = 'us'
-
-<<<<<<< HEAD
+                
             return float(val)/self.TO_SECONDS[unit]
-=======
-        return float(val) / self.TO_SECONDS[unit]
->>>>>>> origin/master
