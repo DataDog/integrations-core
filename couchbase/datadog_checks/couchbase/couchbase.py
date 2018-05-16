@@ -403,7 +403,7 @@ class Couchbase(AgentCheck):
         # When couchbase is set up, most of values are equal to 0 and are exposed as "0" and not "0s"
         # This statement is preventing values to be searched by the pattern (and break things)
         if value == "0":
-            return value
+            return 0
 
         else:
             match = self.seconds_value_pattern.search(value)
