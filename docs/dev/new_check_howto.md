@@ -49,10 +49,16 @@ something like this:
     ├── conf.yaml.example
     ├── datadog_checks
     │   ├── __init__.py
-    │   └── my_check
+    │   └── foo_check
     │       ├── __about__.py
     │       ├── __init__.py
-    │       └── my_check.py
+    │       └── foo_check.py
+    ├── images
+    │   └── snapshot.png
+    ├── logos
+    │   ├── avatars-bot.png
+    │   ├── saas_logos-bot.png
+    │   └── saas_logos-small.png
     ├── manifest.json
     ├── metadata.csv
     ├── requirements-dev.txt
@@ -302,19 +308,19 @@ list of places where the images may appear in the web app.
 
 #### saas_logos-bot.png (200 × 128)
 
-Integration tile images at /account/settings
-Description heading at /account/settings#integrations/{integration_name}
-Integration monitor tiles and search bar results images at /monitors#create/integration
+* Integration tile images at /account/settings
+* Description heading at /account/settings#integrations/{integration_name}
+* Integration monitor tiles and search bar results images at /monitors#create/integration
 
 #### saas_logos-small.png (120 × 60)
 
-Integration dashboards list images at /dash/list
-Some integration dashboards/screenboards at /dash/integration/{integration_dash_name}
+* Integration dashboards list images at /dash/list
+* Some integration dashboards/screenboards at /dash/integration/{integration_dash_name}
 
 #### avatars-bot.png (128 × 128)
 
-Event stream at /event/stream
-Notification icons at /report/monitor
+* Event stream at /event/stream
+* Notification icons at /report/monitor
 
 ### Metadata
 
