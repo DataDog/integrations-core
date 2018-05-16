@@ -6,3 +6,4 @@ tox
 pip-tools
 packaging
 twine
+cookiecutter
