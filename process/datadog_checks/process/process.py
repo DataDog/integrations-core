@@ -11,6 +11,7 @@ import subprocess
 import sys
 # 3p
 import psutil
+import re
 
 
 # project
@@ -23,13 +24,30 @@ DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
 
+# Only including limits that match metrics we collect and are important for process survival
+LIMIT_TO_ATTR = {
+    'Max cpu time':     'run_time_limit',
+    'Max processes':    'thr_limit',
+    'Max open files':   'open_fd_limit',
+    'Max address space':'vms_limit',
+    'Max resident set': 'rss_limit'
+}
+
 ATTR_TO_METRIC = {
     'thr':              'threads',
+    'thr_limit':        'threads.limit',
+    'thr_pct':          'threads.pct',
     'cpu':              'cpu.pct',
     'rss':              'mem.rss',
+    'rss_limit':        'mem.rss.limit',
+    'rss_pct':          'mem.rss.pct',
     'vms':              'mem.vms',
+    'vms_limit':        'mem.vms_limit',
+    'vms_pct':          'mem.vms_pct',
     'real':             'mem.real',
     'open_fd':          'open_file_descriptors',
+    'open_fd_limit':    'open_file_descriptors.limit',
+    'open_fd_pct':      'open_file_descriptors.pct',
     'open_handle':      'open_handles',  # win32 only
     'r_count':          'ioread_count',  # FIXME: namespace me correctly (6.x), io.r_count
     'w_count':          'iowrite_count',  # FIXME: namespace me correctly (6.x) io.r_bytes
@@ -38,6 +56,8 @@ ATTR_TO_METRIC = {
     'ctx_swtch_vol':    'voluntary_ctx_switches',  # FIXME: namespace me correctly (6.x), ctx_swt.voluntary
     'ctx_swtch_invol':  'involuntary_ctx_switches',  # FIXME: namespace me correctly (6.x), ctx_swt.involuntary
     'run_time':         'run_time',
+    'run_time_limit':   'run_time.limit',
+    'run_time_pct':     'run_time.pct',
     'mem_pct':          'mem.pct'
 }
 
@@ -209,7 +229,7 @@ class ProcessCheck(AgentCheck):
                     # It is up the agent's packager to grant corresponding sudo policy on unix platforms
                     process_ls = subprocess.check_output(['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)])
                     result = len(process_ls.splitlines())
-                    
+
                 except subprocess.CalledProcessError as e:
                     self.log.exception("trying to retrieve %s with sudo failed with return code %d", method, e.returncode)
                 except:
@@ -302,6 +322,16 @@ class ProcessCheck(AgentCheck):
                 run_time = now - create_time
                 st['run_time'].append(run_time)
 
+            # add limits
+            limits = self.get_process_limits(p)
+            for k,v in limits.iteritems():
+                st[k].append(v)
+                base_key = k.rsplit('_',1)[0]
+                if base_key in st:
+                    base_v = st[base_key][0]
+                    pct = 100.0 * (base_v/float(v))
+                    st[base_key + "_pct"].append(pct)
+
         return st
 
     def get_pagefault_stats(self, pid):
@@ -322,6 +352,32 @@ class ProcessCheck(AgentCheck):
             return None
 
         return map(lambda i: int(i), data.split()[9:13])
+
+    def get_process_limits(self, process):
+        """Get limits for this process from /proc/<pid>/limits. As of Linux 2.6.36 this file is readable by all."""
+        result = {}
+
+        if not Platform.is_unix():
+            return result
+
+        splitter = re.compile(r'\s{2,}')
+        try:
+            process_limits = subprocess.check_output(['cat', '/proc/{}/limits'.format(process.pid)])
+            for line in process_limits.splitlines():
+                limits = splitter.split(line)
+                if limits[0] in LIMIT_TO_ATTR and limits[1] != "unlimited":
+                    key = LIMIT_TO_ATTR[limits[0]]
+                    try:
+                        result[key] = int(limits[1])
+                    except ValueError:
+                        self.log.warn("unable to parse limit line %s", line)
+
+        except subprocess.CalledProcessError as e:
+            self.log.exception("trying to cat /proc/.../limits failed with return code %d", e.returncode)
+        except:
+            self.log.exception("trying to cat /proc/.../limits failed with %s", sys.exc_info()[0])
+
+        return result
 
     def _get_child_processes(self, pids):
         children_pids = set()
