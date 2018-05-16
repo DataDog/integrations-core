@@ -265,7 +265,8 @@ class Couchbase(AgentCheck):
                     # for query times, the unit is part of the value, we need to extract it
                     if isinstance(val, basestring):
                         val = self.extract_seconds_value(val)
-                    full_metric_name = '.'.join(['couchbase', 'query', self.camel_case_to_joined_lower(norm_metric_name)])
+                    full_metric_name = '.'.join(['couchbase', 'query',
+                                                self.camel_case_to_joined_lower(norm_metric_name)])
                     self.gauge(full_metric_name, val, tags=tags)
 
     def _get_stats(self, url, instance):
