@@ -11,6 +11,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Github API url
 GITHUB_API_URL = 'https://api.github.com'
 
+# The requirements file used by the agent
+AGENT_REQ_FILE = 'requirements-agent-release.txt'
+
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'active_directory',
@@ -24,8 +27,10 @@ AGENT_BASED_INTEGRATIONS = [
     'datadog_checks_base',
     'directory',
     'disk',
+    'dotnetclr',
     'elastic',
     'envoy',
+    'exchange_server',
     'haproxy',
     'iis',
     'istio',
@@ -41,8 +46,8 @@ AGENT_BASED_INTEGRATIONS = [
     'network',
     'nfsstat',
     'nginx',
-    'pgbouncer',
     'pdh_check',
+    'pgbouncer',
     'postgres',
     'powerdns_recursor',
     'prometheus',
@@ -54,4 +59,11 @@ AGENT_BASED_INTEGRATIONS = [
     'teamcity',
     'varnish',
     'vsphere',
+]
+
+AGENT_V5_ONLY = [
+    'agent_metrics',
+    'docker_daemon',
+    'kubernetes',
+    'ntp',
 ]
