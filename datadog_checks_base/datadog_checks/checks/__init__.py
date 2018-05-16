@@ -4,10 +4,12 @@
 
 try:
     # Agent5 compatibility layer
-    from checks import AgentCheck
+    from checks import AgentCheck, NetworkCheck
 except ImportError:
     from .base import AgentCheck
+    from .network import NetworkCheck
 
 __all__ = [
     'AgentCheck',
+    'NetworkCheck',
 ]
