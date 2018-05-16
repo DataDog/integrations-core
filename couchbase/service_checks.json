@@ -7,5 +7,23 @@
         "groups": ["host"],
         "name": "Can Connect",
         "description": "Returns status after pinging your Couchbase instance. Additional information about response status at the time of collection is included in the check message."
+    },
+    {
+        "agent_version": "6.2.1",
+        "integration":"couchbase",
+        "check": "couchbase.by_node.cluster_membership",
+        "statuses": ["ok", "critical"],
+        "groups": ["node"],
+        "name": "Node Cluster Membership",
+        "description": "Returns `CRITICAL` if the node is failed over. Returns `WARNING` if the node is added to the cluster but is waiting for a rebalance to activate. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.2.1",
+        "integration":"couchbase",
+        "check": "couchbase.by_node.health_status",
+        "statuses": ["ok", "critical"],
+        "groups": ["node"],
+        "name": "Node Health Status",
+        "description": "Returns `CRITICAL` if the node is unhealthy. Returns `OK` otherwise."
     }
 ]

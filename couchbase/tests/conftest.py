@@ -33,19 +33,28 @@ def couchbase_service(request):
         'docker-compose',
         '-f', os.path.join(HERE, 'compose', 'standalone.compose')
     ]
-    subprocess.check_call(args + ['up', '-d'], env=env)
-
-    # wait for couchbase to be up
-    if not wait_for_couchbase_container():
-        raise Exception("couchbase container boot timed out!")
-
-    # set up couchbase through its cli
-    setup_couchbase()
 
     # always stop and remove the container even if there's an exception at setup
     def teardown():
         subprocess.check_call(args + ["down"], env=env)
     request.addfinalizer(teardown)
+
+    # spin up the docker container
+    subprocess.check_call(args + ['up', '-d'], env=env)
+
+    # wait for couchbase to be up
+    if not wait_for_couchbase_container(CB_CONTAINER_NAME):
+        raise Exception("couchbase container boot timed out!")
+
+    # set up couchbase through its cli
+    setup_couchbase()
+
+    # we need to wait for couchbase to generate stats
+    if not wait_for_node_stats():
+        raise Exception("couchbase node stats timed out!")
+
+    if not wait_for_bucket_stats(BUCKET_NAME):
+        raise Exception("couchbase bucket stats timed out!")
 
     yield
 
@@ -55,7 +64,7 @@ def couchbase_container_ip(couchbase_service):
     """
     Modular fixture that depends on couchbase being initialized
     """
-    return get_docker_ip(CB_CONTAINER_NAME)
+    return get_container_ip(CB_CONTAINER_NAME)
 
 
 @pytest.fixture
@@ -81,7 +90,7 @@ def couchbase_query_config():
     }
 
 
-def get_docker_ip(container_id_or_name):
+def get_container_ip(container_id_or_name):
     """
     Get a docker container's IP address from its id or name
     """
@@ -112,6 +121,7 @@ def setup_couchbase():
         '--cluster-ramsize', '256', '--cluster-index-ramsize', '256', '--cluster-fts-ramsize', '256'
     ]
     subprocess.check_call(init_args)
+
     if not wait_for_couchbase_init():
         raise Exception("couchbase initialization timed out!")
 
@@ -123,22 +133,15 @@ def setup_couchbase():
     ]
     subprocess.check_call(create_bucket_args)
 
-    # we need to wait for couchbase to generate stats
-    if not wait_for_bucket_stats(BUCKET_NAME):
-        raise Exception("couchbase bucket stats timed out!")
 
-    if not wait_for_node_stats():
-        raise Exception("couchbase node stats timed out!")
-
-
-def wait_for_couchbase_container():
+def wait_for_couchbase_container(container_name):
     """
     Wait for couchbase to start
     """
 
     for i in xrange(15):
         status_args = [
-            'docker', 'exec', CB_CONTAINER_NAME,
+            'docker', 'exec', container_name,
             'couchbase-cli', 'server-info', '-c', 'localhost:{}'.format(PORT),
             '-u', USER, '-p', PASSWORD
         ]
