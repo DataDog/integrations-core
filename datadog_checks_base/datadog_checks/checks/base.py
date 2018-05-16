@@ -11,6 +11,36 @@ import unicodedata
 
 try:
     import datadog_agent
+
+    class AgentLogHandler(logging.Handler):
+        """
+        This handler forwards every log to the Go backend allowing python checks to
+        log message within the main agent logging system.
+        """
+
+        def emit(self, record):
+            msg = self.format(record)
+            datadog_agent.log("(%s:%s) | %s" % (record.filename, record.lineno, msg), record.levelno)
+
+
+    def init_logging():
+        """
+        Initialize logging (set up forwarding to Go backend and sane defaults)
+        """
+        # Forward to Go backend
+        rootLogger = logging.getLogger()
+        rootLogger.addHandler(AgentLogHandler())
+        rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))
+
+        # `requests` (used in a lot of checks) imports `urllib3`, which logs a bunch of stuff at the info level
+        # Therefore, pre-emptively increase the default level of that logger to `WARN`
+        urllib_logger = logging.getLogger("requests.packages.urllib3")
+        urllib_logger.setLevel(logging.WARN)
+        urllib_logger.propagate = True
+
+
+    init_logging()
+
 except ImportError:
     from ..stubs import datadog_agent
 
