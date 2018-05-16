@@ -412,4 +412,4 @@ class Couchbase(AgentCheck):
             if unit not in self.TO_SECONDS:
                 unit = 'us'
 
-            return float(val)/self.TO_SECONDS[unit]
+            return float(val) / self.TO_SECONDS[unit]
