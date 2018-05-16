@@ -410,5 +410,5 @@ class Couchbase(AgentCheck):
             # so let's assume it's microseconds if we don't find the key in unit
             if unit not in self.TO_SECONDS:
                 unit = 'us'
-                
+
             return float(val)/self.TO_SECONDS[unit]
