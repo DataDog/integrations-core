@@ -1,7 +1,6 @@
-from . import ceph
+from ceph import Ceph
 
-Ceph = ceph.Ceph
-
-__version__ = "1.3.0"
-
-__all__ = ['ceph']
+__all__ = [
+    '__version__',
+    'Ceph'
+]

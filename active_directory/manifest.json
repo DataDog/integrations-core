@@ -1,19 +1,19 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.0",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.22.0",
+  "manifest_version": "1.0.0",
   "name": "active_directory",
   "short_description": "Collect and graph Microsoft Active Directory metrics",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "version": "1.0.0",
   "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
   "public_title": "Datadog-Active Directory Integration",
-  "categories":["os & system"],
+  "categories": [
+    "os & system"
+  ],
   "doc_link": "https://docs.datadoghq.com/integrations/active_directory/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "type": "check"
 }

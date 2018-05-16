@@ -1,30 +1,18 @@
 # CHANGELOG - dns_check
 
-1.1.0 / 2017-10-10
-==================
-
-### Changes
+## 1.1.0 / 2017-10-10
 
 * [FEATURE] Adds ability to specify a custom port for your nameserver. See [#756][]
 
-1.0.2 / 2017-07-18
-==================
-
-### Changes
+## 1.0.2 / 2017-07-18
 
 * [SANITY] Import `Platform` helper from `utils.platform` instead of deprecated `util`. See [#484][]
 
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [BUGFIX] use time.clock under windows. See [#330][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds dns_check integration.
 

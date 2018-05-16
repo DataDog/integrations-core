@@ -1,0 +1,2 @@
+CREATE DATABASE datadog_test;
+CREATE DATABASE dogs;

@@ -1,29 +1,29 @@
 # CHANGELOG - consul
 
-1.3.0 / 2018-01-10
-==================
+## 1.5.0 / Unreleased
+
+* [FEATURE] Introduce a check at `consul.catalog.total_nodes` as a count of all nodes registered in the cluster
+
+## 1.4.0 / 2018-05-11
+
+* [FEATURE] Hardcode the 8500 port in the Autodiscovery template. See [#1444][] for more information.
+
+## 1.3.0 / 2018-01-10
 
 * [IMPROVEMENT] Add support for Consul 1.0. See [#876][], thanks [@byronwolfman][]
 * [BUG FIX] Fixes TypeError if/when services are culled. See [#968][]
 
-
-1.2.0 2017-11-21
-==================
+## 1.2.0 2017-11-21
 
 * [FEATURE] Add service tags to metrics
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-
-1.1.0 / 2017-07-18
-==================
+## 1.1.0 / 2017-07-18
 
 * [Fix] Fix duplicate service check with same tags but different status being sent (one per Node). See [#460][]
 * [FEATURE] Support ACL token for authentication. See [#521][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds consul integration.
 

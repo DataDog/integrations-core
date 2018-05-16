@@ -4,8 +4,6 @@ from setuptools import setup
 from codecs import open
 from os import path
 
-import json
-
 HERE = path.abspath(path.dirname(__file__))
 
 
@@ -29,14 +27,6 @@ def read(*parts):
 ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "apache", "__about__.py")) as f:
     exec(f.read(), ABOUT)
-
-manifest_version = None
-with open(path.join(HERE, 'manifest.json'), encoding='utf-8') as f:
-    manifest = json.load(f)
-    manifest_version = manifest.get('version')
-
-if ABOUT["__version__"] != manifest_version:
-    raise Exception("Inconsistent versioning in module and manifest - aborting wheel build")
 
 setup(
     name='datadog-apache',
@@ -71,7 +61,7 @@ setup(
 
     # Run-time dependencies
     install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
+        'datadog_checks_base',
     ],
 
     setup_requires=['pytest-runner', ],

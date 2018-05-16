@@ -8,28 +8,50 @@ import os
 # the root of the repo
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Github API url
+GITHUB_API_URL = 'https://api.github.com'
+
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
+    'active_directory',
     'apache',
+    'aspdotnet',
     'btrfs',
-    'datadog-checks-base',
+    'ceph',
+    'consul',
+    'couch',
+    'couchbase',
+    'datadog_checks_base',
     'directory',
     'disk',
+    'elastic',
     'envoy',
+    'haproxy',
+    'iis',
     'istio',
+    'kafka_consumer',
     'kube_proxy',
     'kubelet',
+    'kyototycoon',
+    'lighttpd',
     'linkerd',
+    'marathon',
     'mcache',
+    'mysql',
     'network',
     'nfsstat',
+    'nginx',
+    'pgbouncer',
+    'pdh_check',
     'postgres',
     'powerdns_recursor',
     'prometheus',
     'redisdb',
+    'riak',
     'spark',
     'ssh_check',
     'system_core',
     'teamcity',
+    'varnish',
     'vsphere',
 ]

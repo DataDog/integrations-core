@@ -28,17 +28,43 @@ kafka.consumer.delayed_requests,gauge,10,request,,Number of delayed consumer req
 kafka.consumer.expires_per_second,gauge,10,eviction,second,Rate of delayed consumer request expiration.,-1,kafka,con expire rate
 kafka.expires_sec,gauge,10,eviction,second,Rate of delayed producer request expiration.,-1,kafka,expire rate
 kafka.follower.expires_per_second,gauge,10,eviction,second,Rate of request expiration on followers.,-1,kafka,follow expire rate
+kafka.producer.available_buffer_bytes,gauge,10,byte,,The total amount of buffer memory that is not being used (either unallocated or in the free list),-1,kafka,available buffer bytes
+kafka.producer.batch_size_avg,gauge,10,byte,,The average number of bytes sent per partition per-request.,0,kafka,avg batch size
+kafka.producer.compression_rate_avg,rate,10,record,,The average compression rate of record batches.,0,kafka,avg compression rate
+kafka.producer.bufferpool_wait_time,gauge,10,,,The fraction of time an appender waits for space allocation.,-1,kafka,bufferpool wait time
+kafka.producer.compression_rate,gauge,10,record,second,The average compression rate of record batches for a topic,1,kafka,compression rate 
 kafka.producer.delayed_requests,gauge,10,request,,Number of producer requests delayed.,-1,kafka,prod expire rate
 kafka.producer.expires_per_seconds,gauge,10,eviction,second,Rate of producer request expiration.,-1,kafka,prod req expire
+kafka.producer.batch_size_max,gauge,10,byte,,The max number of bytes sent per partition per-request.,0,kafka,max batch size
+kafka.producer.record_send_rate,gauge,10,record,second,The average number of records sent per second for a topic,1,kafka,rec send
+kafka.producer.record_retry_rate,gauge,10,record,second,The average per-second number of retried record sends for a topic,1,kafka,rec retry
+kafka.producer.record_error_rate,gauge,10,error,second,The average per-second number of retried record sends for a topic,1,kafka,rec error
+kafka.producer.records_per_request,gauge,10,record,,The average number of records sent per second.,0,kafka,rec per req
+kafka.producer.record_queue_time_avg,gauge,10,millisecond,,The average time in ms record batches spent in the record accumulator.,-1,kafka,avg record queue time
+kafka.producer.record_queue_time_max,gauge,10,millisecond,,The maximum time in ms record batches spent in the record accumulator.,-1,kafka,max record queue time
+kafka.producer.record_size_avg,gauge,10,byte,,The average record size.,0,kafka,avg record size
+kafka.producer.record_size_max,gauge,10,byte,,The maximum record size.,0,kafka,max record size
 kafka.producer.request_rate,gauge,10,request,second,Number of producer requests per second.,1,kafka,prod req
 kafka.producer.response_rate,gauge,10,response,second,Number of producer responses per second.,1,kafka,prod resp
+kafka.producer.requests_in_flight,gauge,10,request,,The current number of in-flight requests awaiting a response.,-1,kafka,req in flight
 kafka.producer.request_latency_avg,gauge,10,millisecond,,Producer average request latency.,-1,kafka,prod req latency avg
+kafka.producer.request_latency_max,gauge,10,millisecond,,The maximum request latency in ms.,-1,kafka,prod req latency max
 kafka.producer.bytes_out,gauge,10,byte,second,Producer bytes out rate.,1,kafka,prod bytes out
+kafka.producer.metadata_age,gauge,10,second,,The age in seconds of the current producer metadata being used.,-1,kafka,metadata age
 kafka.producer.message_rate,gauge,10,message,second,Producer message rate.,1,kafka,prod msg rate
+kafka.producer.buffer_bytes_total,gauge,10,byte,,The maximum amount of buffer memory the client can use (whether or not it is currently used).,1,kafka,buffer bytes
 kafka.producer.io_wait,gauge,10,nanosecond,,Producer I/O wait time.,-1,kafka,prod io wait
+kafka.producer.throttle_time_avg,gauge,10,millisecond,,The average time in ms a request was throttled by a broker.,-1,kafka,avg throttle time
+kafka.producer.throttle_time_max,gauge,10,millisecond,,The maximum time in ms a request was throttled by a broker.,-1,kafka,max throttle time
+kafka.producer.waiting_threads,gauge,10,thread,,The number of user threads blocked waiting for buffer memory to enqueue their records.,-1,kafka,waiting threads
 kafka.consumer.max_lag,gauge,10,offset,,Maximum consumer lag.,-1,kafka,con max lag
 kafka.consumer.fetch_rate,gauge,10,request,,The minimum rate at which the consumer sends fetch requests to a broker.,1,kafka,con min fetch
+kafka.consumer.fetch_size_avg,gauge,10,request,,The average number of bytes fetched per request for a specific topic.,1,kafka,con avg fetch size
+kafka.consumer.fetch_size_max,gauge,10,request,,The maximum number of bytes fetched per request for a specific topic.,1,kafka,con max fetch size
+kafka.consumer.bytes_consumed,gauge,10,byte,second,The average number of bytes consumed per second for a specific topic.,1,kafka,con bytes consumed
 kafka.consumer.bytes_in,gauge,10,byte,second,Consumer bytes in rate.,1,kafka,con bytes in
 kafka.consumer.messages_in,gauge,10,message,second,Rate of consumer message consumption.,1,kafka,con msg rate
 kafka.consumer.zookeeper_commits,gauge,10,write,second,Rate of offset commits to ZooKeeper.,1,kafka,zoo offset commit
 kafka.consumer.kafka_commits,gauge,10,write,second,Rate of offset commits to Kafka.,1,kafka,kafka offset commit
+kafka.consumer.records_consumed,gauge,10,record,second,The average number of records consumed per second for a specific topic.,1,kafka,con rec consumed
+kafka.consumer.records_per_request_avg,gauge,10,record,request,The average number of records in each request for a specific topic.,1,kafka,rec per request

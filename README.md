@@ -1,15 +1,15 @@
-[![Build Status](https://travis-ci.org/DataDog/integrations-core.svg?branch=master)](https://travis-ci.org/DataDog/integrations-core)
-[![Build status](https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true)](https://ci.appveyor.com/project/Datadog/integrations-core)
-
 # Datadog Agent Integrations - Core
 
-This repository contains the Agent Integrations (also known as checks) that Datadog
-officially develops and supports. To add a new integration, please see the [Integrations Extras](https://github.com/DataDog/integrations-extras)
-repository and the [accompanying documentation](https://docs.datadoghq.com/developers/integrations/integration_sdk/).
+[![Build Status][1]][2]
+[![Build status][3]][4]
 
-The [Datadog Agent](https://github.com/DataDog/datadog-agent) packages are equipped
+This repository contains the Agent Integrations (also known as checks) that Datadog
+officially develops and supports. To add a new integration, please see the [Integrations Extras][5]
+repository and the [accompanying documentation][6].
+
+The [Datadog Agent][7] packages are equipped
 with all the checks from this repository, so to get started using them, you can
-simply [install the Agent](https://docs.datadoghq.com/agent/) for your operating
+simply [install the Agent][8] for your operating
 system.
 
 General documentation about the project can be [found here](docs/index.md)
@@ -45,38 +45,30 @@ integration, but at the moment you can't upgrade or downgrade between releases.
 
 Working with integrations is easy, the main page of the [development docs](docs/dev/README.md)
 contains all the info you need to get your dev enviroment up and running in minutes
-to run, test and build core Checks.
+to run, test and build a Check.
 
-**Note:** the instructions are only valid for a subset of the Checks in this
+**Important:** the instructions are only valid for a subset of the Checks in this
 repository. Making all the checks work with the new build and test strategy is
-a work in progress, this is the list of the supported checks:
+a work in progress. You can find the list of the checks already updated [here][20]
 
-* [apache](apache)
-* [btrfs](btrfs)
-* [directory](directory)
-* [disk](disk)
-* [envoy](envoy)
-* [istio](istio)
-* [kube_proxy](kube_proxy)
-* [kubelet](kubelet)
-* [linkerd](linkerd)
-* [mcache](mcache)
-* [network](network)
-* [nfsstat](nfsstat)
-* [postgres](postgres)
-* [powerdns_recursor](powerdns_recursor)
-* [prometheus](prometheus)
-* [redisdb](redisdb)
-* [spark](spark)
-* [ssh_check](ssh_check)
-* [system_core](system_core)
-* [teamcity](teamcity)
-* [vsphere](vsphere)
+## Reporting Issues
 
-For checks that are not listed here, please refer to [Legacy development Setup](docs/dev/legacy.md).
+For more information on integrations, please reference our [documentation][11]
+and [knowledge base][12]. You can also visit our
+[help page][13] to connect with us.
 
-# Reporting Issues
-
-For more information on integrations, please reference our [documentation](http://docs.datadoghq.com)
-and [knowledge base](https://help.datadoghq.com/hc/en-us). You can also visit our
-[help page](http://docs.datadoghq.com/help/) to connect with us.
+[1]: https://travis-ci.org/DataDog/integrations-core.svg?branch=master
+[2]: https://travis-ci.org/DataDog/integrations-core
+[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
+[4]: https://ci.appveyor.com/project/Datadog/integrations-core
+[5]: https://github.com/DataDog/integrations-extras
+[6]: https://docs.datadoghq.com/developers/integrations/integration_sdk/
+[7]: https://github.com/DataDog/datadog-agent
+[8]: https://docs.datadoghq.com/agent/
+[9]: https://docs.pytest.org/en/latest/
+[10]: https://packaging.python.org/tutorials/distributing-packages/
+[11]: http://docs.datadoghq.com
+[12]: https://help.datadoghq.com/hc/en-us
+[13]: http://docs.datadoghq.com/help/
+[14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
+[20]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15

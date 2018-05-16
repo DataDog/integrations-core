@@ -1,55 +1,40 @@
 # CHANGELOG - elastic
 
-1.5.0 / 2018-02-13
-==================
+## 1.6.0 / 2018-05-11
 
-### Changes
+* [FEATURE] Hardcode the 9200 port in the Autodiscovery template. See [#1444][].
+* [FEATURE] adds `index_stats` to collect index level metrics. See [#1312][].
 
-* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. [#1050][].
+## 1.5.0 / 2018-02-13
+
+* [IMPROVEMENT] Adds `admin_forwarder` option to keep URL intact when using forwarder. See [#1050][].
 * [BUG] Fixes bug that causes poor failovers when authentication fails. See [#1026][].
 * [IMPROVEMENT] Adds `cluster_name` tag to the `elasticsearch.cluster_health` service check. See [#1038][].
 
-1.4.0 / 2018-01-10
-==================
-
-### Changes
+## 1.4.0 / 2018-01-10
 
 * [BUG] Fix missing fs metrics for elastic >= 5. See [#997][].
 
-1.3.0 / 2018-01-10
-==================
-
-### Changes
+## 1.3.0 / 2018-01-10
 
 * [FEATURE] adds `pshard_graceful_timeout` that will skip pshard_stats if TO. See [#463][]
 * [IMPROVEMENT] get rid of pretty json. See [#893][].
 
-1.2.0 / 2017-11-21
-==================
-### Changes
+## 1.2.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.1.0 / 2017-11-21
-==================
-
-### Changes
+## 1.1.0 / 2017-11-21
 
 * [BUG] Fixes bug for retreiving indices count. See [#806][]
 * [FEATURE] Added more JVM metrics. See [#695][]
-* [FEATURE] Add metric on the average time spent by tasks in the pending queue. See[#820][]
+* [FEATURE] Add metric on the average time spent by tasks in the pending queue. See [#820][]
 
-1.0.1 / 2017-08-28
-==================
-
-### Changes
+## 1.0.1 / 2017-08-28
 
 * [FEATURE] Add metric for index count. See [#617][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds elastic integration.
 
@@ -63,3 +48,5 @@
 [#893]: https://github.com/DataDog/integrations-core/issues/893
 [#1026]: https://github.com/DataDog/integrations-core/issues/1026
 [#1050]: https://github.com/DataDog/integrations-core/issues/1050
+[#1312]: https://github.com/DataDog/integrations-core/issues/1312
+[#1444]: https://github.com/DataDog/integrations-core/issues/1444

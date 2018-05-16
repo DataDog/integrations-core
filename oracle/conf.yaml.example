@@ -1,10 +1,12 @@
 init_config:
 
 instances:
-  # The Oracle check requires access to the `cx_Oracle` Python
-  # module. Due to restrictions on installation, this requires
-  # the following steps in order to be included with the agent
-  #
+  # The Oracle check requires either access to the `cx_Oracle`
+  # Python module, or the Oracle JDBC Driver. 
+  # Due to restrictions on installation, this requires the
+  # following steps in order to be included with the agent
+  # 
+  # Steps for cx_Oracle python module
   # 1. Download the relevant Oracle Instant Client:
   #    http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
   #    Both the basic client and the client sdk will be required
@@ -14,22 +16,24 @@ instances:
   #       mkdir -p /opt/oracle/ && cd /opt/oracle/
   #       unzip ~/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
   #       unzip ~/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
-  # 3. Set required env variables for cx_Oracle installation
-  #       export LD_RUN_PATH=/opt/oracle/instantclient_12_1
-  #       export ORACLE_HOME=/opt/oracle/instantclient_12_1
-  # 4. Install instant client in agent's virtual environment
-  #       /opt/datadog-agent/embedded/bin/pip install cx_Oracle
-  # 5. Following cx_Oracle installation, ensure LD_LIBRARY_PATH points
+  # 3. Ensure LD_LIBRARY_PATH points
   #    to this directory when starting/restarting the agent
   #       export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1
   #
   # NOTE: connection string used will have the format:
   #        user/password@//server/service_name
   #
+  # Steps for Oracle JDBC Driver
+  # 1. Download the JDBC Driver:
+  #    http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+  # 2. Add the path to the downloaded jar to your $CLASSPATH, or add it to the instance configuration
+  #    under the key `jdbc_driver_path`
+  #
   # - server: 127.0.0.1
   #   service_name: my_sid
   #   user: my_username
   #   password: my_password
+  #   jdbc_driver_path: "/path/to/driver.jar" # Optional: set if you are not using the oracle native client. You can also add it to your $CLASSPATH instead.
   #
   - server: localhost:1521
     service_name: my_sid
@@ -37,3 +41,43 @@ instances:
     password: my_password
     tags:
       - my_tag
+
+    # Providing custom queries is also supported. Each query must have 3 fields:
+    #
+    # 1. metric_prefix - This is what each metric will start with.
+    # 2. query - This is the SQL to execute. It can be a simple statement or a
+    #            multi-line script. Only the first row of the result is read.
+    # 3. columns - This is a list representing each column, ordered sequentially
+    #              from left to right. There are 2 required pieces of data:
+    #                a. type - This is the submission method (gauge, count, etc.).
+    #                b. name - This is the suffix to append to the metric_prefix
+    #                          in order to form the full metric name. If `type` is
+    #                          `tag`, this column will instead be considered a tag
+    #                          and will be applied to every metric collected by
+    #                          this particular query.
+    # 4. tags (optional) - A list of tags to apply to each metric.
+    #
+    # This:
+    #
+    #  self.gauge('oracle.custom_query.metric1', value, tags=['tester:oracle', 'tag1:value'])
+    #  self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:value'])
+    #
+    # is what the following example configuration would become.
+    #
+    # custom_queries:
+    #   - metric_prefix: oracle.custom_query
+    #     query: |  # Use the pipe if you require a multi-line script.
+    #       SELECT columns
+    #       FROM tester.test_table
+    #       WHERE conditions
+    #     columns:
+    #       # Put this for any column you wish to skip:
+    #       # - {}
+    #       - name: metric1
+    #         type: gauge
+    #       - name: tag1
+    #         type: tag
+    #       - name: metric2
+    #         type: count
+    #     tags:
+    #       - tester:oracle

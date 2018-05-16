@@ -7,54 +7,41 @@ The Agent's KyotoTycoon check tracks get, set, and delete operations, and lets y
 ## Setup
 ### Installation
 
-The KyotoTycoon check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your KyotoTycoon servers.
+The KyotoTycoon check is packaged with the Agent, so simply [install the Agent][1] on your KyotoTycoon servers.
 
 ### Configuration
 
-Create a file `kyototycoon.yaml` in the Agent's `conf.d` directory. See the [sample kyototycoon.yaml](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/conf.yaml.example) for all available configuration options:
+1. Edit the `kyototycoon.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+    See the [sample kyototycoon.d/conf.yaml][2] for all available configuration options:
 
-```
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-#  Each instance needs a report URL.
-#  name, and optionally tags keys. The report URL should
-#  be a URL to the Kyoto Tycoon "report" RPC endpoint.
-#
-#  Complete example:
-#
-- report_url: http://localhost:1978/rpc/report
-#   name: my_kyoto_instance
-#   tags:
-#     foo: bar
-#     baz: bat
-```
+    instances:
+        #  Each instance needs a report URL.
+        #  name, and optionally tags keys. The report URL should
+        #  be a URL to the Kyoto Tycoon "report" RPC endpoint.
+        #
+        #  Complete example:
+        #
+        - report_url: http://localhost:1978/rpc/report
+        #   name: my_kyoto_instance
+        #   tags:
+        #     foo: bar
+        #     baz: bat
+    ```
+
+2. [Restart the Agent][7] to begin sending Kong metrics to Datadog.
+
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `kyototycoon` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    kyototycoon
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The KyotoTycoon check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][3] and look for `kyototycoon` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
 The KyotoTycoon check does not include any event at this time.
@@ -66,7 +53,16 @@ The KyotoTycoon check does not include any event at this time.
 Returns CRITICAL if the Agent cannot connect to KyotoTycoon to collect metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

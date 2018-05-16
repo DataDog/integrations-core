@@ -2,41 +2,45 @@
 
 ## Overview
 
-Get metrics from Microsoft Active Directory
-
-* Visualize and monitor Active Directory performance
+Get metrics from Microsoft Active Directory to visualize and monitor its performances.
 
 ## Setup
 ### Installation
 
-Install the `dd-check-active_directory` package manually or with your favorite configuration manager
+The Agent's Active directory check is packaged with the Agent, so simply [install the Agent][4] on your servers.
 
 ### Configuration
 
-Edit the `active_directory.yaml` file to collect Active Directory performance data. See the [sample active_directory.yaml](https://github.com/DataDog/integrations-core/blob/master/active_directory/conf.yaml.example) for all available configuration options.
+1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Active Directory performance data.  
+
+    See the [sample active_directory.d/conf.yaml][1] for all available configuration options.
+
+2. [Restart the Agent][7]
 
 ### Validation
 
-[Run the Agent's `info` subcommand](https://help.datadoghq.com/hc/en-us/articles/203764635-Agent-Status-and-Information) and look for `active_directory` under the Checks section:
-
-    Checks
-    ======
-
-        active_directory
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
-
-## Compatibility
-
-The ative_directory check is compatible with Windows.
+[Run the Agent's `info` subcommand][2] and look for `active_directory` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Events
 The active directory check does not include any event at this time.
 
 ### Service Checks
 The active directory check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support][5].
+
+## Further Reading
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
+
+[1]: https://github.com/DataDog/integrations-core/blob/master/active_directory/conf.yaml.example
+[2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[3]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
+[4]: https://app.datadoghq.com/account/settings#agent
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

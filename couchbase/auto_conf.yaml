@@ -4,6 +4,6 @@ ad_identifiers:
 init_config:
 
 instances:
-  - server: http://%%host%%:%%port%%
+  - server: http://%%host%%:8091
     user: Administrator
     password: password

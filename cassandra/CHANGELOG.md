@@ -1,31 +1,19 @@
 # CHANGELOG - cassandra
 
-1.2.1 / 2018-03-23
-==================
-
-### Changes
+## 1.2.1 / 2018-03-23
 
 * [IMPROVEMENT] Adjusted comment whitespacing to avoid confusion around indent level for `user` and `password`. See [#1075][]
 
-1.2.0 / 2017-11-21
-==================
-
-### Changes
+## 1.2.0 / 2017-11-21
 
 * [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]
 * [IMPROVEMENT] Adjustments to the default `cassandra.yaml`. See [#726][] (Thanks [@arodrime][])
 
-1.1.0 / 2017-08-28
-==================
-
-### Changes
+## 1.1.0 / 2017-08-28
 
 * [IMPROVEMENT] Add more MBeans in the default `cassandra.yaml`. See [#615][] and [#657][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds cassandra integration.
 

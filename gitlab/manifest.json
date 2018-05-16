@@ -14,8 +14,12 @@
   ],
   "version": "1.1.0",
   "public_title": "Datadog-Gitlab Integration",
-  "categories":["web", "network"],
+  "categories": [
+    "web",
+    "network"
+  ],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "type": "check"
 }

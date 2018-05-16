@@ -6,11 +6,11 @@ services:
 before_script:
 - docker info
 - apk add --no-cache gcc linux-headers musl-dev python2-dev py-pip postgresql-dev libffi-dev
-- pip install -q docker-compose tox invoke
+- pip install -q docker-compose tox invoke packaging
 
 test:
   script:
-  - export DOCKER_HOSTNAME=docker
   - export DOCKER_HOST="tcp://docker:2375"
   - export INVOKE_RUN_SHELL="/bin/ash"
+  - inv manifest --include-extras
   - inv test --changed-only

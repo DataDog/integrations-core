@@ -5,10 +5,16 @@ instances:
   # a list of tags.
 
   - lighttpd_status_url: http://localhost/server-status?auto
+  #   auth: basic
+  #   user: username
+  #   password: password
   #   tags:
   #     - instance:foo
   #
   # - lighttpd_status_url: http://example2.com:1234/server-status?auto
+  #   auth: digest
+  #   user: username
+  #   password: password
   #   tags:
   #     - instance:bar
   #

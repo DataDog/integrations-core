@@ -203,23 +203,24 @@ class HTTPCheck(NetworkCheck):
         if not url:
             raise Exception("Bad configuration. You must specify a url")
         include_content = _is_affirmative(instance.get('include_content', False))
-        ssl = _is_affirmative(instance.get('disable_ssl_validation', True))
+        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
         ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
+        check_hostname = _is_affirmative(instance.get('check_hostname', True))
         skip_proxy = _is_affirmative(
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
-            headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
-            weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
+            headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs,\
+            weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
         addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
-            ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
+            ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
 
         def send_status_up(logMsg):
@@ -242,9 +243,13 @@ class HTTPCheck(NetworkCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s" % addr)
+
             if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
-                self.warning("Skipping SSL certificate validation for %s based on configuration"
-                             % addr)
+                if 'disable_ssl_validation' in instance:
+                    self.warning("Skipping SSL certificate validation for {0} based on configuration".format(addr))
+                else:
+                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(addr))
+
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
@@ -359,7 +364,7 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname)
 
             tags_list = list(tags)
             tags_list.append('url:%s' % addr)
@@ -399,7 +404,7 @@ class HTTPCheck(NetworkCheck):
                            message=msg
                            )
 
-    def check_cert_expiration(self, instance, timeout, instance_ca_certs):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname):
         warning_days = int(instance.get('days_warning', 14))
         critical_days = int(instance.get('days_critical', 7))
         url = instance.get('url')
@@ -416,14 +421,17 @@ class HTTPCheck(NetworkCheck):
             sock.connect((host, port))
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_REQUIRED
-            context.check_hostname = True
+            context.check_hostname = check_hostname
             context.load_verify_locations(instance_ca_certs)
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
+        except ssl.CertificateError as e:
+            self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
+            return Status.CRITICAL, 0, str(e)
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-            return Status.DOWN, 0, "%s" % (str(e))
+            return Status.DOWN, 0, str(e)
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()

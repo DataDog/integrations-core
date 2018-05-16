@@ -3,6 +3,7 @@ consul.catalog.nodes_critical,gauge,,node,,Number of nodes with service status `
 consul.catalog.nodes_passing,gauge,,node,,Number of nodes with service status `passing` from those registered,1,consul,nodes pass
 consul.catalog.nodes_up,gauge,,node,,Number of nodes,0,consul,nodes up
 consul.catalog.nodes_warning,gauge,,node,,Number of nodes with service status `warning` from those registered,-1,consul,nodes warn
+consul.catalog.total_nodes,gauge,,node,,Number of nodes registered in the consul cluster,0,consul,total nodes
 consul.catalog.services_critical,gauge,,service,,Total critical services on nodes,-1,consul,svc crit
 consul.catalog.services_passing,gauge,,service,,Total passing services on nodes,1,consul,svc pass
 consul.catalog.services_up,gauge,,service,,Total services registered on nodes,0,consul,svc up

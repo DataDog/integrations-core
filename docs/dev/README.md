@@ -83,6 +83,8 @@ or invoke [Pytest](https://docs.pytest.org/en/latest/) directly:
 cd {integration} && py.test
 ```
 
+If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
+
 ### Building
 
 `setup.py` provides the setuptools setup script that will help us package and

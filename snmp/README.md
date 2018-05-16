@@ -7,13 +7,13 @@ This check lets you collect SNMP metrics from your network devices.
 ## Setup
 ### Installation
 
-The SNMP check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on any host where you want to run the check.
+The SNMP check is packaged with the Agent, so simply [install the Agent][1] on any host where you want to run the check.
 
 ### Configuration
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example `snmp.yaml`. See the [sample snmp.yaml](https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example) for all available configuration options:
+Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -106,28 +106,11 @@ Put all your pysnmp mibs into a folder and specify this folder's path in ```snmp
 
 ---
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending SNMP metrics to Datadog.
+[Restart the Agent][3] to start sending SNMP metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `snmp` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    snmp
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The snmp check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][4] and look for `snmp` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -144,12 +127,21 @@ The SNMP check does not include any event at this time.
 Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][5].
 
 ## Further Reading
 ### Datadog Blog
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][6]
 
 ### Knowledge Base
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ](https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids)
+* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ][7]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: http://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/
+[7]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids

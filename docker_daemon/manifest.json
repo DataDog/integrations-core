@@ -6,17 +6,22 @@
   "name": "docker_daemon",
   "short_description": "Correlate container performance with that of the services running inside them.",
   "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "version": "1.9.0",
+  "version": "1.10.0",
   "public_title": "Datadog-Docker Integration",
-  "categories":["containers", "log collection"],
-  "type":"check",
+  "categories": [
+    "containers",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/docker_daemon/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/docker"]
+  "aliases": [
+    "/integrations/docker"
+  ]
 }

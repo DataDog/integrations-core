@@ -323,23 +323,23 @@ class MongoDb(AgentCheck):
     https://docs.mongodb.org/v3.0/reference/command/top/
     """
     TOP_METRICS = {
-        "commands.count": GAUGE,
+        "commands.count": RATE,
         "commands.time": GAUGE,
-        "getmore.count": GAUGE,
+        "getmore.count": RATE,
         "getmore.time": GAUGE,
-        "insert.count": GAUGE,
+        "insert.count": RATE,
         "insert.time": GAUGE,
-        "queries.count": GAUGE,
+        "queries.count": RATE,
         "queries.time": GAUGE,
-        "readLock.count": GAUGE,
+        "readLock.count": RATE,
         "readLock.time": GAUGE,
-        "remove.count": GAUGE,
+        "remove.count": RATE,
         "remove.time": GAUGE,
-        "total.count": GAUGE,
+        "total.count": RATE,
         "total.time": GAUGE,
-        "update.count": GAUGE,
+        "update.count": RATE,
         "update.time": GAUGE,
-        "writeLock.count": GAUGE,
+        "writeLock.count": RATE,
         "writeLock.time": GAUGE,
     }
 
@@ -777,80 +777,81 @@ class MongoDb(AgentCheck):
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        try:
-            data = {}
-            dbnames = []
+        if _is_affirmative(instance.get('replica_check', True)):
+            try:
+                data = {}
+                dbnames = []
 
-            replSet = admindb.command('replSetGetStatus')
-            if replSet:
-                primary = None
-                current = None
+                replSet = admindb.command('replSetGetStatus')
+                if replSet:
+                    primary = None
+                    current = None
 
-                # need a new connection to deal with replica sets
-                setname = replSet.get('set')
-                cli_rs = pymongo.mongo_client.MongoClient(
-                    server,
-                    socketTimeoutMS=timeout,
-                    connectTimeoutMS=timeout,
-                    serverSelectionTimeoutMS=timeout,
-                    replicaset=setname,
-                    read_preference=pymongo.ReadPreference.NEAREST,
-                    **ssl_params)
+                    # need a new connection to deal with replica sets
+                    setname = replSet.get('set')
+                    cli_rs = pymongo.mongo_client.MongoClient(
+                        server,
+                        socketTimeoutMS=timeout,
+                        connectTimeoutMS=timeout,
+                        serverSelectionTimeoutMS=timeout,
+                        replicaset=setname,
+                        read_preference=pymongo.ReadPreference.NEAREST,
+                        **ssl_params)
 
-                if do_auth:
-                    if auth_source:
-                        self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
-                    else:
-                        self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
+                    if do_auth:
+                        if auth_source:
+                            self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
+                        else:
+                            self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
 
-                # Replication set information
-                replset_name = replSet['set']
-                replset_state = self.get_state_name(replSet['myState']).lower()
+                    # Replication set information
+                    replset_name = replSet['set']
+                    replset_state = self.get_state_name(replSet['myState']).lower()
 
-                tags.extend([
-                    u"replset_name:{0}".format(replset_name),
-                    u"replset_state:{0}".format(replset_state),
-                ])
+                    tags.extend([
+                        u"replset_name:{0}".format(replset_name),
+                        u"replset_state:{0}".format(replset_state),
+                    ])
 
-                # Find nodes: master and current node (ourself)
-                for member in replSet.get('members'):
-                    if member.get('self'):
-                        current = member
-                    if int(member.get('state')) == 1:
-                        primary = member
+                    # Find nodes: master and current node (ourself)
+                    for member in replSet.get('members'):
+                        if member.get('self'):
+                            current = member
+                        if int(member.get('state')) == 1:
+                            primary = member
 
-                # Compute a lag time
-                if current is not None and primary is not None:
-                    if 'optimeDate' in primary and 'optimeDate' in current:
-                        lag = primary['optimeDate'] - current['optimeDate']
-                        data['replicationLag'] = total_seconds(lag)
+                    # Compute a lag time
+                    if current is not None and primary is not None:
+                        if 'optimeDate' in primary and 'optimeDate' in current:
+                            lag = primary['optimeDate'] - current['optimeDate']
+                            data['replicationLag'] = total_seconds(lag)
 
-                if current is not None:
-                    data['health'] = current['health']
+                    if current is not None:
+                        data['health'] = current['health']
 
-                data['state'] = replSet['myState']
+                    data['state'] = replSet['myState']
 
-                if current is not None:
-                    total = 0.0
-                    cfg = cli_rs['local']['system.replset'].find_one()
-                    for member in cfg.get('members'):
-                        total += member.get('votes', 1)
-                        if member['_id'] == current['_id']:
-                            data['votes'] = member.get('votes', 1)
-                    data['voteFraction'] = data['votes'] / total
+                    if current is not None:
+                        total = 0.0
+                        cfg = cli_rs['local']['system.replset'].find_one()
+                        for member in cfg.get('members'):
+                            total += member.get('votes', 1)
+                            if member['_id'] == current['_id']:
+                                data['votes'] = member.get('votes', 1)
+                        data['voteFraction'] = data['votes'] / total
 
-                status['replSet'] = data
+                    status['replSet'] = data
 
-                # Submit events
-                self._report_replica_set_state(
-                    data['state'], clean_server_name, replset_name, self.agentConfig
-                )
+                    # Submit events
+                    self._report_replica_set_state(
+                        data['state'], clean_server_name, replset_name, self.agentConfig
+                    )
 
-        except Exception as e:
-            if "OperationFailure" in repr(e) and ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
-                pass
-            else:
-                raise e
+            except Exception as e:
+                if "OperationFailure" in repr(e) and ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
+                    pass
+                else:
+                    raise e
 
         # If these keys exist, remove them for now as they cannot be serialized
         try:
@@ -965,6 +966,9 @@ class MongoDb(AgentCheck):
                         submit_method, metric_name_alias = \
                             self._resolve_metric(m, metrics_to_collect, prefix="usage")
                         submit_method(self, metric_name_alias, value, tags=ns_tags)
+                        # Keep old incorrect metric
+                        if metric_name_alias.endswith('countps'):
+                            GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s' % str(e))
 

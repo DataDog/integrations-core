@@ -13,13 +13,16 @@ And more.
 ## Setup
 ### Installation
 
-The Tomcat check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Tomcat servers.
+The Tomcat check is packaged with the Agent, so simply [install the Agent][13] on your Tomcat servers.
 
-This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation](http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html) to do that.
+This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][14] to do that.
 
 ### Configuration
 
-Create a file `tomcat.yaml` in the Agent's `conf.d` directory. 
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
+
+2. [Restart the Agent][16]
 
 #### Metric Collection
 
@@ -98,9 +101,9 @@ init_config:
           metric_type: counter
 ```
 
-See the [JMX Check documentation](http://docs.datadoghq.com/integrations/java/) for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+See the [JMX Check documentation][15] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Tomcat metrics to Datadog.
+[Restart the Agent][16] to start sending Tomcat metrics to Datadog.
 
 Configuration Options:
 
@@ -124,7 +127,7 @@ Your metric will be mydomain (or some variation depending on the attribute insid
 
 If you specify an alias in an `include` key that is formatted as *camel case*, it will be converted to *snake case*. For example, `MyMetricName` will be shown in Datadog as `my_metric_name`.
 
-  See the [sample tomcat.yaml](https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example) for all available configuration options.
+  See the [sample tomcat.yaml][17] for all available configuration options.
 
 ##### The `attribute` filter
 
@@ -165,8 +168,8 @@ In that case you can specify an alias for the metric that will become the metric
 
 In that case:
 
-  * The metric type will be a gauge
-  * The metric name will be jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]
+  * The metric type is a gauge
+  * The metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`
 
 Here is another filtering example:
 
@@ -254,17 +257,16 @@ log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/hos
   INFO, HOST-MANAGER
 ```
 
-Check Tomcat [logging documentation](http://tomcat.apache.org/tomcat-7.0-doc/logging.html) for more information about Tomcat logging capabilities.
+Check Tomcat [logging documentation][18] for more information about Tomcat logging capabilities.
 
 By default, our integration pipeline support the following conversion patterns:
 
-   ```
+  ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
   %d [%t] %-5p %c - %m%n
-  
   ```
 
-Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.com/logs/processing/#integration-pipelines) if you have a different format.
+Make sure you clone and edit the [integration pipeline][19] if you have a different format.
 
 * Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
 
@@ -272,7 +274,7 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `tomcat.yaml` file to start collecting your Tomcat Logs:
+* Add this configuration setup to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
 
   ```
   logs:
@@ -288,33 +290,16 @@ Make sure you clone and edit the [integration pipeline](https://docs.datadoghq.c
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-    see the [sample tomcat.yaml](https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example) for all available configuration options.
-    * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent). 
+    see the [sample tomcat.yaml][17] for all available configuration options.
+    * [Restart the Agent][16]. 
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `tomcat` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    tomcat
-    -------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 0 service checks
-
-    [...]
-```
-
-## Compatibility
-
-The tomcat check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][20] and look for `tomcat` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv) for a list of metrics provided by this check.
+See [metadata.csv][21] for a list of metrics provided by this check.
 
 ### Events
 The Tomcat check does not include any event at this time.
@@ -346,4 +331,16 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 
 ## Further Reading
 
-* [Monitor Tomcat metrics with Datadog](https://www.datadoghq.com/blog/monitor-tomcat-metrics/)
+* [Monitor Tomcat metrics with Datadog][22]
+
+
+[13]: https://app.datadoghq.com/account/settings#agent
+[14]: http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[15]: http://docs.datadoghq.com/integrations/java/
+[16]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example
+[18]: http://tomcat.apache.org/tomcat-7.0-doc/logging.html
+[19]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
+[22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/

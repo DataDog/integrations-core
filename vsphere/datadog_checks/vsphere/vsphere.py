@@ -355,10 +355,12 @@ class VSphereCheck(AgentCheck):
 
             return tags
 
-        def _get_all_objs(content, vimtype, regexes=None, include_only_marked=False, tags=[]):
+        def _get_all_objs(content, vimtype, regexes=None, include_only_marked=False, tags=None):
             """
             Get all the vsphere objects associated with a given type
             """
+            if tags is None:
+                tags = []
             obj_list = []
             container = content.viewManager.CreateContainerView(
                 content.rootFolder,

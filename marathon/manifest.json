@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "marathon",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",
   "support": "core",
@@ -10,7 +8,6 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.3.0",
   "guid": "6af353ff-ecca-420a-82c0-a0e84cf0a35e",
   "public_title": "Datadog-Marathon Integration",
   "categories":["configuration & deployment", "containers"],

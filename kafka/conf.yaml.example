@@ -138,6 +138,131 @@ init_config:
             alias: kafka.producer.io_wait
 
     #
+    # Producers (v0.11.x)
+    #
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka.producer:type=producer-metrics,client-id=([-.\w]+)'
+        attribute:
+          - waiting-threads:
+              metric_type: gauge
+              alias: kafka.producer.waiting_threads
+          - buffer-total-bytes:
+              metric_type: gauge
+              alias: kafka.producer.buffer_bytes_total
+          - buffer-available-bytes:
+              metric_type: gauge
+              alias: kafka.producer.available_buffer_bytes
+          - bufferpool-wait-time:
+              metric_type: gauge
+              alias: kafka.producer.bufferpool_wait_time
+          - batch-size-avg:
+              metric_type: gauge
+              alias: kafka.producer.batch_size_avg
+          - batch-size-max:
+              metric_type: gauge
+              alias: kafka.producer.batch_size_max
+          - compression-rate-avg:
+              metric_type: rate
+              alias: kafka.producer.compression_rate_avg
+          - record-queue-time-avg:
+              metric_type: gauge
+              alias: kafka.producer.record_queue_time_avg
+          - record-queue-time-max:
+              metric_type: gauge
+              alias: kafka.producer.record_queue_time_max
+          - request-latency-avg:
+              metric_type: gauge
+              alias: kafka.producer.request_latency_avg
+          - request-latency-max:
+              metric_type: gauge
+              alias: kafka.producer.request_latency_max
+          - record-send-rate:
+              metric_type: rate
+              alias: kafka.producer.records_send_rate
+          - records-per-request-avg:
+              metric_type: gauge
+              alias: kafka.producer.records_per_request
+          - record-retry-rate:
+              metric_type: rate
+              alias: kafka.producer.record_retry_rate
+          - record-error-rate:
+              metric_type: rate
+              alias: kafka.producer.record_error_rate
+          - record-size-max:
+              metric_type: gauge
+              alias: kafka.producer.record_size_max
+          - record-size-avg:
+              metric_type: gauge
+              alias: kafka.producer.record_size_avg
+          - requests-in-flight:
+              metric_type: gauge
+              alias: kafka.producer.requests_in_flight
+          - metadata-age:
+              metric_type: gauge
+              alias: kafka.producer.metadata_age
+          - produce-throttle-time-max:
+              metric_type: gauge
+              alias: kafka.producer.throttle_time_max
+          - produce-throttle-time-avg:
+              metric_type: gauge
+              alias: kafka.producer.throttle_time_avg
+
+    #
+    # Producers: Per Topic Metrics
+    #
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          byte-rate:
+            metric_type: gauge
+            alias: kafka.producer.bytes_out
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          record-send-rate:
+            metric_type: gauge
+            alias: kafka.producer.record_send_rate
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          compression-rate:
+            metric_type: gauge
+            alias: kafka.producer.compression_rate
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          record-retry-rate:
+            metric_type: gauge
+            alias: kafka.producer.record_retry_rate
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.producer'
+        bean_regex: 'kafka\.producer:type=producer-topic-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          record-error-rate:
+            metric_type: gauge
+            alias: kafka.producer.record_error_rate
+        tags:
+          client: $1
+          topic: $2
+          
+    #
     # Consumers (only v0.8.2.x)
     #
     - include:
@@ -203,6 +328,61 @@ init_config:
             metric_type: gauge
             alias: kafka.consumer.messages_in
 
+    #
+    # Consumers: Per Topic Metrics
+    #
+
+    - include:
+        domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          fetch-size-avg:
+            metric_type: gauge
+            alias: kafka.consumer.fetch_size_avg
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          fetch-size-max:
+            metric_type: gauge
+            alias: kafka.consumer.fetch_size_max
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          bytes-consumed-rate:
+            metric_type: gauge
+            alias: kafka.consumer.bytes_consumed
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          records-per-request-avg:
+            metric_type: gauge
+            alias: kafka.consumer.records_per_request_avg
+        tags:
+          client: $1
+          topic: $2
+    - include:
+        domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
+        attribute:
+          records-consumed-rate:
+            metric_type: gauge
+            alias: kafka.consumer.records_consumed
+        tags:
+          client: $1
+          topic: $2
+            
     #
     # Aggregate cluster stats
     #
