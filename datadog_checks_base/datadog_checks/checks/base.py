@@ -11,7 +11,8 @@ import unicodedata
 
 try:
     import datadog_agent
-    import ..log
+    from ..log import init_logging
+    init_logging()
 except ImportError:
     from ..stubs import datadog_agent
 
