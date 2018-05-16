@@ -12,7 +12,10 @@ def get_version_string(check_name):
     Get the version string for the given check.
     """
     about = {}
-    about_path = os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
+    if check_name in ('datadog_checks_base', 'datadog-checks-test-helper'):
+        about_path = os.path.join(ROOT, check_name, "datadog_checks", "__about__.py")
+    else:
+        about_path = os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
     with open(about_path) as f:
         exec(f.read(), about)
 
