@@ -1,9 +1,5 @@
 # CHANGELOG - tomcat
 
-# 1.1.0 / Unreleased
-
-* [Update] Update auto_conf template.
-
 ## 1.0.1 / 2017-11-21
 
 * [IMPROVEMENT] Added `metrics.yaml` file. See [#863][]
