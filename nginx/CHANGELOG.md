@@ -1,41 +1,29 @@
 # CHANGELOG - nginx
 
-2.1.0 / Unreleased
-==================
+## 2.2.0 / Unreleased
 
-### Changes
+* [FEATURE] Add support for VTS module. See [#1295](https://github.com/DataDog/integrations-core/pull/1295). Thanks [mattjbray](https://github.com/mattjbray)
+* [IMPROVEMENT] Log a warning instead of an exception when trying to collect stream metrics but stream may not be configured.
+
+## 2.1.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support to service checks.
-* [FEATURE] Add support for VTS module. See [#1295](https://github.com/DataDog/integrations-core/pull/1295). Thanks [mattjbray](https://github.com/mattjbray)
 
-2.0.0 / 2018-03-23
-==================
-
-### Changes
+## 2.0.0 / 2018-03-23
 
 * [IMPROVEMENT] Better process status output for good metric names. Breaking if using the badly named metrics in app. See [#1053][]
 
-
-1.2.0 / 2018-02-13
-==================
-
-### Changes
+## 1.2.0 / 2018-02-13
 
 * [IMPROVEMENT] Make the check compatible with the new Plus API. [#1013][]
 * [DOC] Adding configuration for log collection in `conf.yaml`
 * [FEATURE] allows the bypassing of proxy settings. See [#1051][].
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [BUGFIX] adds duplicate nginx.upstream.peers.response.*xx_count metrics with type count. [#559][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds nginx integration.
 

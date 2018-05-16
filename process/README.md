@@ -37,7 +37,15 @@ You can also configure the check to find any process by exact PID (`pid`) or pid
 
 To have the check search for processes in a path other than `/proc`, set `procfs_path: <your_proc_path>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent](https://github.com/DataDog/docker-dd-agent)) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to monitor processes running _in_ your containers; the [Docker check][5] monitors those.  
 
-See the [example configuration][3] for more details on configuration options.  
+Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved.
+Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric.
+As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting.
+Note: the appropriate sudoers rules have to be configured for this to work
+```
+dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
+```
+
+See the [example configuration][3] for more details on configuration options.
 
 [Restart the Agent][6] to start sending process metrics and service checks to Datadog.
 

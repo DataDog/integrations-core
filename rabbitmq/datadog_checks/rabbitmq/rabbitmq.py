@@ -255,7 +255,9 @@ class RabbitMQ(AgentCheck):
             for vhost in self.cached_vhosts.get(base_url, []):
                 self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
 
-    def _get_data(self, url, auth=None, ssl_verify=True, proxies={}):
+    def _get_data(self, url, auth=None, ssl_verify=True, proxies=None):
+        if proxies is None:
+            proxies = {}
         try:
             r = requests.get(url, auth=auth, proxies=proxies, timeout=self.default_integration_http_timeout, verify=ssl_verify)
             r.raise_for_status()

@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.20.0",
+  "manifest_version": "1.0.0",
   "name": "kyototycoon",
   "short_description": "Track get, set, and delete operations; monitor replication lag.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.3.0",
   "guid": "2661668b-d804-4c8d-96a7-8019525add8c",
   "public_title": "Datadog-Kyoto Tycoon Integration",
   "categories":["data store"],
