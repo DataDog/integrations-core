@@ -13,8 +13,7 @@ Those requirements are used during the code review process as a checklist and th
 
 ## Prerequisites
 
-Python 2.7 needs to be available on your system, see [this page][ThisPage] if
-you need guidance for setting it up along with a virtual environment manager.
+Python 2.7 needs to be available on your system, see [this page][ThisPage] if you need guidance for setting it up along with a virtual environment manager.
 
 **Note:** before starting, we suggest to create and activate a [Python virtual environment][5] so that all the packages we're going to install will be isolated from the system wide installation.
 
@@ -38,8 +37,7 @@ We use [cookiecutter][1] to create the skeleton for a new integration, just run
 cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
 ```
 
-and answer the questions when prompted. Once done, you should end up with
-something like this:
+and answer the questions when prompted. Once done, you should end up with something like this:
 
 ```
     my_check
@@ -120,8 +118,7 @@ That's pretty much all the code we need, to see what the base class can do,  rea
 
 ### Writing tests
 
-We use [pytest][3] and [tox][4] to run the tests. Write unit tests for
-specific parts of the code and integration tests, that execute the `check` method and verify that certain metrics were collected with specific tags or values, let's see an example of both.
+We use [pytest][3] and [tox][4] to run the tests. Write unit tests for specific parts of the code and integration tests, that execute the `check` method and verify that certain metrics were collected with specific tags or values, let's see an example of both.
 
 The first part of our `check` method retrieves two pieces of information we need from the configuration file: this is a good candidate for a quick unit test. Open the file at `my_check/tests/test_check.py` and replace the contents with something like this:
 
@@ -151,14 +148,13 @@ def test_config():
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-The cookiecutter template has already setup `tox` to run tests located at
-`my_check/tests` so we should be able to run the test simply running:
+The cookiecutter template has already setup `tox` to run tests located at `my_check/tests` so we should be able to run the test simply running:
 
-    cd my_check && tox
+```
+cd my_check && tox
+```
 
-The test we just wrote doesn't check our collection logic though, let's add
-an integration test. We'll use docker-compose to spin up a Nginx container and
-we'll let the check get the welcome page. Let's create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
+The test we just wrote doesn't check our collection logic though, let's add an integration test. We use docker-compose to spin up a Nginx container and let the check get the welcome page. Let's create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: '3'
@@ -169,9 +165,7 @@ services:
       - "8000:80"
 ```
 
-Now we can add a dedicated tox environment to run our integration tests. This
-way we could selectively run one testsuite or another, or both depending on the
-use case. The CI always runs all the tox environments. Change your `tox.ini` file to this:
+Now we can add a dedicated tox environment to run our integration tests. This way we could selectively run one testsuite or another, or both depending on the use case. The CI always runs all the tox environments. Change your `tox.ini` file to this:
 
 ```ini
 [tox]
@@ -205,11 +199,7 @@ exclude = .eggs,.tox
 max-line-length = 120
 ```
 
-You might notice that when invoking `pytest` we now pass an extra argument,
-`-m"integration"` in one case and `-m"not integration"` in another. These are
-called _attributes_ in pytest terms and `-m"integration"` tells pytest to
-only run tests that are marked with the `integration` attribute, or the other
-way around if `not integration` is specified.
+You might notice that when invoking `pytest` we now pass an extra argument, `-m"integration"` in one case and `-m"not integration"` in another. These are called _attributes_ in pytest terms and `-m"integration"` tells pytest to only run tests that are marked with the `integration` attribute, or the other way around if `not integration` is specified.
 
 Let's add the integration test to our `my_check/tests/test_check.py` module:
 
@@ -255,10 +245,11 @@ def test_service_check(aggregator):
     aggregator.assert_service_check('my_check.all_good', MyCheck.CRITICAL)
 ```
 
-Again, we could run all the tests but let's run only the integration tests for
-faster iterations:
+Again, we could run all the tests but let's run only the integration tests for faster iterations:
 
-    tox -e integrations
+```
+tox -e integrations
+```
 
 Our check is almost done, let's add the final touches.
 
@@ -280,10 +271,7 @@ This is the expected directory structure for images and logos:
         ├── saas_logos-bot.png
         └── saas_logos-small.png
 
-The `images` folder is meant to contain any images that are needed in the
-integration tile. To be used as such, they should be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as markdown images using their public URLs.
-Because the integrations-core and integrations-extras repositories are public,
-a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`.
+The `images` folder is meant to contain any images that are needed in the integration tile. To be used as such, they should be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as markdown images using their public URLs. Because the integrations-core and integrations-extras repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`.
 
 The `logos` folder should contain **three** images with filenames and sizes that exactly match the following specifications. Underneath each specification is a list of places where the images may appear in the web app.
 
@@ -305,10 +293,7 @@ The `logos` folder should contain **three** images with filenames and sizes that
 
 ### Metadata
 
-Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog
-in particular can't be automatically generated at the moment so it's a crucial
-part of the release process. Our check doesn't send any metric so in this case
-we can leave it empty.
+Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog in particular can't be automatically generated at the moment so it's a crucial part of the release process. Our check doesn't send any metric so in this case we can leave it empty.
 
 Our check sends a Service Check though, so we need to add it to the `service_checks.json` file:
 
