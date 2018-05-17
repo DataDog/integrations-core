@@ -82,7 +82,8 @@ class KafkaCheck(AgentCheck):
 
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         consumer_groups = None
-        if instance.get('monitor_unlisted_consumer_groups', False):
+        monitor_unlisted = instance.get('monitor_unlisted_consumer_groups', False)
+        if monitor_unlisted:
             consumer_groups = None
         elif 'consumer_groups' in instance:
             consumer_groups = instance.get('consumer_groups')
@@ -107,7 +108,8 @@ class KafkaCheck(AgentCheck):
 
         if get_kafka_consumer_offsets:
             # If not using ZK, get consumer groups from Kafka (only for versions after 0.9)
-            if not zk_hosts_ports and not consumer_groups and cli.config.get('api_version') >= (0, 9):
+            if not zk_hosts_ports and not consumer_groups and\
+                cli.config.get('api_version') >= (0, 9) and monitor_unlisted:
                 consumer_groups = self._get_kafka_consumer_groups(cli, kafka_conn_str)
                 self._validate_explicit_consumer_groups(consumer_groups)
 

@@ -49,6 +49,8 @@ instances:
     # ssl_keyfile: /path/to/key/file
     # ssl_password: password1
 
+    # Set monitor_unlisted_consumer_groups and kafka_consumer_offsets to True
+    # to collect consumer groups stored in Kafka (only for versions >0.9)
     # kafka_consumer_offsets: false
     consumer_groups:
       my_consumer:  # consumer group name

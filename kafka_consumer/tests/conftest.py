@@ -245,5 +245,6 @@ def kafka_only_instance():
     return {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'kafka_consumer_offsets': True,
-        'tags': ['optional:tag1']
+        'tags': ['optional:tag1'],
+        'monitor_unlisted_consumer_groups': True
     }
