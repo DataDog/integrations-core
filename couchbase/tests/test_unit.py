@@ -35,6 +35,7 @@ def test_extract_seconds_value():
         '12ms': .012,
         '700.5us': .0007005,
         u'733.364\u00c2s': .000733364,
+        '0': 0,
     }
 
     for test_input, expected_output in EXTRACT_SECONDS_TEST_PAIRS.items():
