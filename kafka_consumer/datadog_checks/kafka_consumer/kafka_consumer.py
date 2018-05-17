@@ -107,7 +107,7 @@ class KafkaCheck(AgentCheck):
 
         if get_kafka_consumer_offsets:
             # If not using ZK, get consumer groups from Kafka (only for versions after 0.9)
-            if not zk_hosts_ports and not consumer_groups and cli.config.get('api_version') >= (0, 9, 0):
+            if not zk_hosts_ports and not consumer_groups and cli.config.get('api_version') >= (0, 9):
                 consumer_groups = self._get_kafka_consumer_groups(cli, kafka_conn_str)
                 self._validate_explicit_consumer_groups(consumer_groups)
 

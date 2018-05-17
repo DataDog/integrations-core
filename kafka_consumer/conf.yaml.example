@@ -29,8 +29,6 @@ instances:
   # If you wish to only collect consumer offsets from kafka, because
   # you're using the new style consumers, you can comment out all
   # zk_* configuration elements below.
-  # Please note that unlisted consumer groups are not supported at
-  # the moment when zookeeper consumer offset collection is disabled.
   - kafka_connect_str:
       - localhost:9092
       - another_kafka_broker:9092
