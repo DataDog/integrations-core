@@ -18,6 +18,7 @@ class NodeNotFound(Exception):
 
 ESInstanceConfig = namedtuple(
     'ESInstanceConfig', [
+        'admin_forwarder',
         'pshard_stats',
         'pshard_graceful_to',
         'cluster_stats',
@@ -432,6 +433,7 @@ class ESCheck(AgentCheck):
         timeout = instance.get('timeout') or self.DEFAULT_TIMEOUT
 
         config = ESInstanceConfig(
+            admin_forwarder=admin_forwarder,
             pshard_stats=pshard_stats,
             pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
@@ -452,7 +454,7 @@ class ESCheck(AgentCheck):
 
     def check(self, instance):
         config = self.get_instance_config(instance)
-        admin_forwarder = instance.get("admin_forwarder", False)
+        admin_forwarder = config.admin_forwarder
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
@@ -504,7 +506,7 @@ class ESCheck(AgentCheck):
 
         if config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(config, use_admin_forwarder)
+                self._get_index_metrics(config, admin_forwarder)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
@@ -546,9 +548,9 @@ class ESCheck(AgentCheck):
         else:
             return urlparse.urljoin(base, url)
 
-    def _get_index_metrics(self, config, use_admin_forwarder):
+    def _get_index_metrics(self, config, admin_forwarder):
         cat_url = '/_cat/indices?format=json&bytes=b'
-        index_url = self._join_url(config.url, cat_url, use_admin_forwarder)
+        index_url = self._join_url(config.url, cat_url, admin_forwarder)
         index_resp = self._get_data(index_url, config)
         index_stats_metrics = self.INDEX_STATS_METRICS
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
