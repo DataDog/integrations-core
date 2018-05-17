@@ -7,3 +7,5 @@ instances:
 #   passive_checks_events: True            # default is False
 #   collect_host_performance_data: True    # default is False
 #   collect_service_performance_data: True # default is False
+#   tags:								   # default is []
+#     - optional:tag1

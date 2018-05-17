@@ -11,16 +11,19 @@ import time
 import requests
 
 # project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.config import _is_affirmative
+from datadog_checks.checks import AgentCheck
 
 
 class TeamCityCheck(AgentCheck):
     HEADERS = {'Accept': 'application/json'}
     DEFAULT_TIMEOUT = 10
-    NEW_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-    LAST_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
-    NEW_BUILD_URL_AUTHENTICATED = "http://{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
+    NEW_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/" +\
+                    "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
+    LAST_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/" +\
+                     "?locator=buildType:{build_conf},count:1"
+    NEW_BUILD_URL_AUTHENTICATED = "http://{server}/httpAuth/app/rest/builds/" +\
+                                  "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
     LAST_BUILD_URL_AUTHENTICATED = "http://{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -92,8 +95,9 @@ class TeamCityCheck(AgentCheck):
             event_dict['event_type'] = "build"
             event_dict['msg_title'] = "Build for {0} successful".format(instance_name)
 
-            event_dict['msg_text'] = "Build Number: {0}\nDeployed To: {1}\n\nMore Info: {2}".format(new_build["number"],
-                                                                                                    host, new_build["webUrl"])
+            event_dict['msg_text'] = "Build Number: {0}\nDeployed To: {1}\n\nMore Info: {2}".format(
+                                        new_build["number"],
+                                        host, new_build["webUrl"])
             event_dict['tags'].append('build')
 
         if tags:
@@ -138,7 +142,8 @@ class TeamCityCheck(AgentCheck):
             )
 
         try:
-            resp = requests.get(new_build_url, timeout=self.DEFAULT_TIMEOUT, headers=self.HEADERS, verify=ssl_validation)
+            resp = requests.get(new_build_url, timeout=self.DEFAULT_TIMEOUT,
+                                headers=self.HEADERS, verify=ssl_validation)
             resp.raise_for_status()
 
             new_builds = resp.json()

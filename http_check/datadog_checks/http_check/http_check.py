@@ -27,7 +27,7 @@ from requests.packages.urllib3.packages.ssl_match_hostname import \
     match_hostname
 
 # project
-from checks.network_checks import EventType, NetworkCheck, Status
+from checks.network_checks import NetworkCheck, Status
 from config import _is_affirmative
 from util import headers as agent_headers
 
@@ -131,7 +131,25 @@ def get_ca_certs_path():
     """
     Get a path to the trusted certificates of the system
     """
-    ca_certs = ['/opt/datadog-agent/embedded/ssl/certs/cacert.pem']
+    """
+    check is installed via pip to:
+    Windows: embedded/lib/site-packages/datadog_checks/http_check
+    Linux: embedded/lib/python2.7/site-packages/datadog_checks/http_check
+    certificate is installed to   embedded/ssl/certs/cacert.pem
+
+    walk up to embedded, and back down to ssl/certs to find the certificate file
+    """
+
+    ca_certs = []
+
+    embedded_root = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(10):
+        if os.path.basename(embedded_root) == 'embedded':
+            ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
+            break
+        embedded_root = os.path.dirname(embedded_root)
+    else:
+        raise OSError('Unable to locate `embedded` directory. Please specify ca_certs in your http yaml configuration file.')
 
     try:
         import tornado
@@ -185,23 +203,24 @@ class HTTPCheck(NetworkCheck):
         if not url:
             raise Exception("Bad configuration. You must specify a url")
         include_content = _is_affirmative(instance.get('include_content', False))
-        ssl = _is_affirmative(instance.get('disable_ssl_validation', True))
+        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
         ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
+        check_hostname = _is_affirmative(instance.get('check_hostname', True))
         skip_proxy = _is_affirmative(
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
-            headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
-            weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
+            headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs,\
+            weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
         addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
-            ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
+            ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
 
         def send_status_up(logMsg):
@@ -224,9 +243,13 @@ class HTTPCheck(NetworkCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s" % addr)
+
             if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
-                self.warning("Skipping SSL certificate validation for %s based on configuration"
-                             % addr)
+                if 'disable_ssl_validation' in instance:
+                    self.warning("Skipping SSL certificate validation for {0} based on configuration".format(addr))
+                else:
+                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, defaults to true'.format(addr))
+
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
@@ -341,7 +364,7 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname)
 
             tags_list = list(tags)
             tags_list.append('url:%s' % addr)
@@ -352,83 +375,6 @@ class HTTPCheck(NetworkCheck):
             ))
 
         return service_checks
-
-    # FIXME: 5.3 drop this function
-    def _create_status_event(self, sc_name, status, msg, instance):
-        # Create only this deprecated event for old check
-        if sc_name != self.SC_STATUS:
-            return
-        # Get the instance settings
-        url = instance.get('url', None)
-        name = instance.get('name', None)
-        nb_failures = self.statuses[name][sc_name].count(Status.DOWN)
-        nb_tries = len(self.statuses[name][sc_name])
-        tags = instance.get('tags', [])
-        tags_list = []
-        tags_list.extend(tags)
-
-        # Only add the URL tag if it's not already present
-        if not filter(re.compile('^url:').match, tags_list):
-            tags_list.append('url:%s' % url)
-
-        # Get a custom message that will be displayed in the event
-        custom_message = instance.get('message', "")
-        if custom_message:
-            custom_message += " \n"
-
-        # Let the possibility to override the source type name
-        instance_source_type_name = instance.get('source_type', None)
-        if instance_source_type_name is None:
-            source_type = "%s.%s" % (NetworkCheck.SOURCE_TYPE_NAME, name)
-        else:
-            source_type = "%s.%s" % (NetworkCheck.SOURCE_TYPE_NAME, instance_source_type_name)
-
-        # Get the handles you want to notify
-        notify = instance.get('notify', self.init_config.get('notify', []))
-        notify_message = ""
-        if notify:
-            notify_list = []
-            for handle in notify:
-                notify_list.append("@%s" % handle.strip())
-            notify_message = " ".join(notify_list) + " \n"
-
-        if status == Status.DOWN:
-            # format the HTTP response body into the event
-            if isinstance(msg, tuple):
-                code, reason, content = msg
-
-                # truncate and html-escape content
-                if len(content) > 200:
-                    content = content[:197] + '...'
-
-                msg = u"%d %s\n\n%s" % (code, reason, content)
-                msg = msg.rstrip()
-
-            title = "[Alert] %s reported that %s is down" % (self.hostname, name)
-            alert_type = "error"
-            msg = u"%s %s %s reported that %s (%s) failed %s time(s) within %s last attempt(s)."\
-                " Last error: %s" % (notify_message, custom_message, self.hostname,
-                                     name, url, nb_failures, nb_tries, msg)
-            event_type = EventType.DOWN
-
-        else:  # Status is UP
-            title = "[Recovered] %s reported that %s is up" % (self.hostname, name)
-            alert_type = "success"
-            msg = u"%s %s %s reported that %s (%s) recovered" \
-                % (notify_message, custom_message, self.hostname, name, url)
-            event_type = EventType.UP
-
-        return {
-            'timestamp': int(time.time()),
-            'event_type': event_type,
-            'host': self.hostname,
-            'msg_text': msg,
-            'msg_title': title,
-            'alert_type': alert_type,
-            "source_type_name": source_type,
-            "event_object": name,
-            "tags": tags_list
-        }
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
@@ -458,7 +404,7 @@ class HTTPCheck(NetworkCheck):
                            message=msg
                            )
 
-    def check_cert_expiration(self, instance, timeout, instance_ca_certs):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname):
         warning_days = int(instance.get('days_warning', 14))
         critical_days = int(instance.get('days_critical', 7))
         url = instance.get('url')
@@ -475,14 +421,17 @@ class HTTPCheck(NetworkCheck):
             sock.connect((host, port))
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_REQUIRED
-            context.check_hostname = True
+            context.check_hostname = check_hostname
             context.load_verify_locations(instance_ca_certs)
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
+        except ssl.CertificateError as e:
+            self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
+            return Status.CRITICAL, 0, str(e)
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-            return Status.DOWN, 0, "%s" % (str(e))
+            return Status.DOWN, 0, str(e)
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()

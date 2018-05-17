@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
-from datetime import datetime
 
 import pytest
 import mock
@@ -11,8 +10,8 @@ from mock import MagicMock
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.vsphere import MORLIST, INTERVAL, METRICS_METADATA
 from datadog_checks.vsphere.common import SOURCE_TYPE
-from .utils import create_topology, assertMOR
-from .utils import MockedContainer, MockedMOR
+from .utils import assertMOR, MockedMOR
+from .utils import disable_thread_pool, get_mocked_server
 
 
 @pytest.fixture
@@ -20,7 +19,7 @@ def instance():
     """
     Return a default instance
     """
-    return {'name': 'vsphere_mock'}
+    return {'name': 'vsphere_mock', 'tags': ['foo:bar']}
 
 
 @pytest.fixture
@@ -28,28 +27,21 @@ def vsphere():
     """
     Provide a check instance with mocked parts
     """
-    # create topology from a fixture file
-    vcenter_topology = create_topology('vsphere_topology.json')
-    # mock pyvmomi stuff
-    view_mock = MockedContainer(topology=vcenter_topology)
-    viewmanager_mock = MagicMock(**{'CreateContainerView.return_value': view_mock})
-    event_mock = MagicMock(createdTime=datetime.now())
-    eventmanager_mock = MagicMock(latestEvent=event_mock)
-    content_mock = MagicMock(viewManager=viewmanager_mock, eventManager=eventmanager_mock)
-    # assemble the mocked server
-    server_mock = MagicMock()
-    server_mock.configure_mock(**{
-        'RetrieveContent.return_value': content_mock,
-        'content': content_mock,
-    })
+    # mock the server
+    server_mock = get_mocked_server()
     # create a check instance
     check = VSphereCheck('disk', {}, {}, [instance()])
     # patch the check instance
     check._get_server_instance = MagicMock(return_value=server_mock)
-    # disable the thread pool
-    check.pool = MagicMock(apply_async=lambda func, args: func(*args))
-    check.pool_started = True  # otherwise the mock will be overwritten
-    return check
+    # return the check after disabling the thread pool
+    return disable_thread_pool(check)
+
+
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
 
 
 def test_init():
@@ -61,7 +53,7 @@ def test_init():
         'refresh_morlist_interval': -99,
         'refresh_metrics_metadata_interval': -99,
     }
-    check = VSphereCheck('disk', init_config, {}, [{'name': 'vsphere_foo'}])
+    check = VSphereCheck('vsphere', init_config, {}, [{'name': 'vsphere_foo'}])
     assert check.time_started > 0
     assert check.pool_started is False
     assert len(check.jobs_status) == 0
@@ -139,12 +131,13 @@ def test__discover_mor(vsphere, instance):
         ```
     """
     # Samples
-    tags = ["toto"]
+    tags = ["toto", "optional:tag1"]
     include_regexes = {
         'host_include': "host[2-9]",
         'vm_include': "vm[^2]",
     }
     include_only_marked = True
+    instance["tags"] = ["optional:tag1"]
 
     # Discover hosts and virtual machines
     vsphere._discover_mor(instance, tags, include_regexes, include_only_marked)
@@ -157,13 +150,13 @@ def test__discover_mor(vsphere, instance):
     tags = [
         "toto", "vsphere_folder:rootFolder", "vsphere_datacenter:datacenter1",
         "vsphere_compute:compute_resource1", "vsphere_cluster:compute_resource1",
-        "vsphere_type:host"
+        "vsphere_type:host", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="host2", spec="host", tags=tags)
     tags = [
         "toto", "vsphere_folder:rootFolder", "vsphere_folder:folder1",
         "vsphere_datacenter:datacenter2", "vsphere_compute:compute_resource2",
-        "vsphere_cluster:compute_resource2", "vsphere_type:host"
+        "vsphere_cluster:compute_resource2", "vsphere_type:host", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="host3", spec="host", tags=tags)
 
@@ -172,7 +165,7 @@ def test__discover_mor(vsphere, instance):
     tags = [
         "toto", "vsphere_folder:folder1", "vsphere_datacenter:datacenter2",
         "vsphere_compute:compute_resource2", "vsphere_cluster:compute_resource2",
-        "vsphere_host:host3", "vsphere_type:vm"
+        "vsphere_host:host3", "vsphere_type:vm", "optional:tag1"
     ]
     assertMOR(vsphere, instance, name="vm4", spec="vm", subset=True, tags=tags)
 
@@ -220,3 +213,51 @@ def test_check(vsphere, instance):
                                     'vsphere_datacenter:datacenter1', 'vsphere_cluster:compute_resource1',
                                     'vsphere_compute:compute_resource1', 'vsphere_type:host'
                          ]}) in all_the_tags
+
+
+def test_service_check_ko(aggregator, instance):
+    check = disable_thread_pool(VSphereCheck('disk', {}, {}, [instance]))
+
+    with mock.patch('datadog_checks.vsphere.vsphere.connect.SmartConnect') as SmartConnect:
+        # SmartConnect fails
+        SmartConnect.side_effect = Exception()
+
+        with pytest.raises(Exception) as e:
+            check.check(instance)
+
+        # FIXME: the check should raise a more meaningful exception so we don't
+        # need to check the message
+        assert "Connection to None failed:" in str(e.value)
+        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) == 1
+        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
+        assert sc.status == check.CRITICAL
+        assert 'foo:bar' in sc.tags
+
+        aggregator.reset()
+
+        # SmartConnect succeeds, RetrieveContent fails
+        server = MagicMock()
+        server.RetrieveContent.side_effect = Exception()
+        SmartConnect.side_effect = None
+        SmartConnect.return_value = server
+
+        with pytest.raises(Exception) as e:
+            check.check(instance)
+
+        assert "Connection to None died unexpectedly:" in str(e.value)
+        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) == 1
+        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
+        assert sc.status == check.CRITICAL
+        assert 'foo:bar' in sc.tags
+
+
+def test_service_check_ok(aggregator, instance):
+    check = disable_thread_pool(VSphereCheck('disk', {}, {}, [instance]))
+
+    with mock.patch('datadog_checks.vsphere.vsphere.connect.SmartConnect') as SmartConnect:
+        SmartConnect.return_value = get_mocked_server()
+        check.check(instance)
+        assert len(aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)) > 0
+        sc = aggregator.service_checks(VSphereCheck.SERVICE_CHECK_NAME)[0]
+        assert sc.status == check.OK
+        assert 'foo:bar' in sc.tags

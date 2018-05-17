@@ -1,0 +1,10 @@
+ad_identifiers:
+  - tomcat
+
+init_config:
+  - is_jmx: true
+    collect_default_metrics: true
+
+instances:
+  - url: "%%host%%"
+    port: "9012"

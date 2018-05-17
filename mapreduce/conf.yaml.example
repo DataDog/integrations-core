@@ -25,6 +25,10 @@ instances:
     #   - key:value
     #   - instance:production
 
+    # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+    # need to set to false when using self-signed certs
+    # ssl_verify: true
+
 init_config:
   #
   # Optional metrics can be specified for counters. For more information on

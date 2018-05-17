@@ -1,4 +1,8 @@
-./datadog-checks-base
+./datadog_checks_base
+invoke
 mock==2.0.0
 pytest
 tox
+pip-tools
+packaging
+twine

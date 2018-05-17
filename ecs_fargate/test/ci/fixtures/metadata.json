@@ -2,7 +2,7 @@
 	"Cluster": "pierrem-test-fargate",
 	"TaskARN": "arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
 	"Family": "redis-datadog",
-	"Version": "1",
+	"Revision": "1",
 	"DesiredStatus": "RUNNING",
 	"KnownStatus": "RUNNING",
 	"Containers": [{

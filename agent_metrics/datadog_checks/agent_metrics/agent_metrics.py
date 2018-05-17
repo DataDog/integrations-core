@@ -68,7 +68,9 @@ class AgentMetrics(AgentCheck):
         stats = AgentCheck._collect_internal_stats(methods)
         return stats, names_to_metric_types
 
-    def _send_single_metric(self, metric_name, metric_value, metric_type, tags=[]):
+    def _send_single_metric(self, metric_name, metric_value, metric_type, tags=None):
+        if tags is None:
+            tags = []
         if metric_type == GAUGE:
             self.gauge(metric_name, metric_value, tags=tags)
         elif metric_type == RATE:
@@ -76,7 +78,7 @@ class AgentMetrics(AgentCheck):
         else:
             raise UnsupportedMetricType(metric_name, metric_type)
 
-    def _register_psutil_metrics(self, stats, names_to_metric_types, tags=[]):
+    def _register_psutil_metrics(self, stats, names_to_metric_types, tags=None):
         """
         Saves sample metrics from psutil
 
@@ -94,6 +96,8 @@ class AgentMetrics(AgentCheck):
          key in `stats`, and key_2 is a nested key.
          E.g. datadog.agent.collector.memory_info.rss
         """
+        if tags is None:
+            tags = []
         base_metric = 'datadog.agent.collector.{0}.{1}'
         # TODO: May have to call self.normalize(metric_name) to get a compliant name
         for k, v in stats.iteritems():

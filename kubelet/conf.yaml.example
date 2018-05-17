@@ -1,8 +1,21 @@
 init_config:
 
 instances:
+  - ###
+    ### Common additional tags for all metrics from this check
+    ###
+    #
+    # tags:
+    #   - 'mytag1:myValue1'
+    #
+    ###
+    ### 1.7.6+ clusters expose container metrics in the prometheus format.
+    ### This is the default setting. See next section for legacy clusters.
+    ###
+    #
     # url of the kubelet metrics endpoint
-  - {}
+    # Pass an empty string, or set the cadvisor_port option to disable
+    # prometheus metrics collection
     # metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
     #
     # The histogram buckets can be noisy and generate a lot of tags.
@@ -10,8 +23,20 @@ instances:
     #
     # send_histograms_buckets: True
     #
-    # Like all checks based on the PrometheusCheck class, you can add tags
-    # to the instance that will be added to all the metrics of this check instance.
+    ###
+    ### Metric collection for legacy (< 1.7.6) clusters via the kubelet's
+    ### cadvisor port.
+    ### This port is closed by default on k8s 1.7+ and OpenShift, enable it
+    ### via the `--cadvisor-port=4194` kubelet option.
+    ###
     #
-    # tags:
-    #   - 'mytag1:myValue1'
+    # Port to connect to, uncomment and set accordingly to enable collection.
+    # cadvisor_port: 4194
+    #
+    # Whitelist of metrics to collect from cadvisor, these are the default
+    #
+    # enabled_rates:
+    #   - cpu.*
+    #   - network.*
+    # enabled_gauges:
+    #   - filesystem.*

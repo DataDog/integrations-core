@@ -1,7 +1,7 @@
-# (C) Datadog, Inc. 2010-2017
-# (C) Dan Crosta <dcrosta@late.am> 2013
+# (C) Datadog, Inc. 2018
+# (C) Dan Crosta <dcrosta@late.am> 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from collections import defaultdict
@@ -11,7 +11,7 @@ import re
 import requests
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 db_stats = re.compile(r'^db_(\d)+$')
 whitespace = re.compile(r'\s')
@@ -43,6 +43,7 @@ class KyotoTycoonCheck(AgentCheck):
         'count':              'records',
         'size':               'size',
     }
+
     TOTALS = {
         'cnt_get':            'ops.get.total',
         'cnt_get_misses':     'ops.get.total',
@@ -57,33 +58,29 @@ class KyotoTycoonCheck(AgentCheck):
         if not url:
             raise Exception('Invalid Kyoto Tycoon report url %r' % url)
 
-        tags = instance.get('tags', {})
+        tags = instance.get('tags', [])
         name = instance.get('name')
+        service_check_tags = []
+        service_check_tags.extend(tags)
 
-        # generate the formatted list of tags
-        tags = ['%s:%s' % (k, v) for k, v in tags.items()]
         if name is not None:
             tags.append('instance:%s' % name)
 
-        service_check_tags = []
         if name is not None:
             service_check_tags.append('instance:%s' % name)
-
 
         try:
             r = requests.get(url)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e.message))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags,
+                               message=str(e.message))
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                tags=service_check_tags, message=str(e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         body = r.content
 

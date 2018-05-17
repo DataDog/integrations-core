@@ -1,25 +1,20 @@
 # CHANGELOG - ceph
 
-1.2.0 / 2018-01-10
-==================
+## 1.3.0 / 2018-03-23
 
-### Changes
+* [FEATURE] Add custom tag support for service checks.
+
+## 1.2.0 / 2018-01-10
 
 * [FEATURE] Update the check to make it work with ceph luminous. See [#926][]
 * [FEATURE] Allow sending specific service checks using to the more detailed luminous health checks. See [#926][]
 * [IMPROVEMENT] Add metric for number of active monitors. See [#956][]
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] Add option to define the cluster name. See [#438][], thanks [@borisroman][]
 
-1.0.0 / 2017-02-22
-==================
-
-### Changes
+## 1.0.0 / 2017-02-22
 
 * [FEATURE] adds ceph integration.
 

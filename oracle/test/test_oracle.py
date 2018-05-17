@@ -34,6 +34,7 @@ CONFIG = {
         'user': 'system',
         'password': 'oracle',
         'service_name': 'xe',
+        'tags': ['optional:tag1']
     }]
 }
 
@@ -42,6 +43,7 @@ METRICS = [
     'oracle.tablespace.used',
     'oracle.tablespace.size',
     'oracle.tablespace.in_use',
+    'oracle.tablespace.offline',
     'oracle.buffer_cachehit_ratio',
     'oracle.cursor_cachehit_ratio',
     'oracle.library_cachehit_ratio',
@@ -49,7 +51,7 @@ METRICS = [
     'oracle.physical_reads',
     'oracle.physical_writes',
     'oracle.enqueue_timeouts',
-    'oracle.gc_cr_receive_time',
+    'oracle.gc_cr_block_received',
     'oracle.cache_blocks_corrupt',
     'oracle.cache_blocks_lost',
     'oracle.logons',
@@ -67,6 +69,7 @@ METRICS = [
     'oracle.session_count',
     'oracle.temp_space_used',
 ]
+
 
 @attr(requires='oracle')
 class TestOracle(AgentCheckTest):
@@ -104,5 +107,5 @@ class TestOracle(AgentCheckTest):
         for m in METRICS:
             self.assertMetric(m, at_least=1)
 
-        self.assertServiceCheck(SERVICE_CHECK_NAME)
+        self.assertServiceCheck(SERVICE_CHECK_NAME, tags=['optional:tag1', 'server:localhost:1521'])
         self.coverage_report()

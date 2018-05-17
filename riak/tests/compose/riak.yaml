@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  redis-standalone:
+    image: "tutum/riak"
+    volumes:
+      - ${RIAK_CONFIG}/app.config:/etc/riak/app.config
+      - ${RIAK_CONFIG}/riak.conf:/etc/riak/riak.conf
+    ports:
+      - "18098:8098"
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: riak_default

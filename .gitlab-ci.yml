@@ -1,6 +1,16 @@
-image: python:2.7
+image: docker:git
+
+services:
+- docker:dind
+
+before_script:
+- docker info
+- apk add --no-cache gcc linux-headers musl-dev python2-dev py-pip postgresql-dev libffi-dev
+- pip install -q docker-compose tox invoke packaging
 
 test:
   script:
-  - pip install -q tox flake8 invoke
+  - export DOCKER_HOST="tcp://docker:2375"
+  - export INVOKE_RUN_SHELL="/bin/ash"
+  - inv manifest --include-extras
   - inv test --changed-only

@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-kubernetes.cpu.capacity,gauge,,,,The number of cores in this machine.,0,kubernetes,k8s.cpu.capacity
-kubernetes.cpu.usage.total,gauge,,percent_nano,,The percentage of CPU time used,-1,kubernetes,k8s.cpu
-kubernetes.cpu.limits,gauge,,cpu,,The limit of cpu cores set,0,kubernetes,k8s.cpu.limits
-kubernetes.cpu.requests,gauge,,cpu,,The requested cpu cores,0,kubernetes,k8s.cpu.requests
+kubernetes.cpu.capacity,gauge,,core,,The number of cores in this machine,0,kubernetes,k8s.cpu.capacity
+kubernetes.cpu.usage.total,gauge,,nanocore,,The number of cores used,-1,kubernetes,k8s.cpu
+kubernetes.cpu.limits,gauge,,core,,The limit of cpu cores set,0,kubernetes,k8s.cpu.limits
+kubernetes.cpu.requests,gauge,,core,,The requested cpu cores,0,kubernetes,k8s.cpu.requests
 kubernetes.filesystem.usage,gauge,,byte,,The amount of disk used,-1,kubernetes,k8s.disk.usage
 kubernetes.filesystem.usage_pct,gauge,,fraction,,The percentage of disk used,-1,kubernetes,k8s.disk.used_pct
 kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubernetes,k8s.mem.capacity
@@ -12,3 +12,4 @@ kubernetes.memory.usage,gauge,,byte,,The amount of memory used,-1,kubernetes,k8s
 kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubernetes,k8s.net.rx
 kubernetes.network.tx_bytes,gauge,,byte,second,The amount of bytes per second transmitted,0,kubernetes,k8s.net.tx
 kubernetes.network_errors,gauge,,error,second,The amount of network errors per second,-1,kubernetes,k8s.net.errors
+kubernetes.diskio.io_service_bytes.stats.total,gauge,,byte,,The amount of disk space the container uses.,-1,kubernetes,k8s.disk.total

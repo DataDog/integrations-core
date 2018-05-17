@@ -131,12 +131,11 @@ class MapReduceCheck(AgentCheck):
 
         collect_task_metrics = _is_affirmative(instance.get('collect_task_metrics', False))
 
+        ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
+
         # Get additional tags from the conf file
-        tags = instance.get('tags', [])
-        if tags is None:
-            tags = []
-        else:
-            tags = list(set(tags))
+        custom_tags = instance.get('tags') or []  # this handles the case when the YAML `tags` key has an empty value
+        tags = list(set(custom_tags)) if custom_tags else []
 
         # Get the cluster name from the conf file
         cluster_name = instance.get('cluster_name')
@@ -147,23 +146,23 @@ class MapReduceCheck(AgentCheck):
         tags.append('cluster_name:%s' % cluster_name)
 
         # Get the running MR applications from YARN
-        running_apps = self._get_running_app_ids(rm_address)
+        running_apps = self._get_running_app_ids(rm_address, ssl_verify=ssl_verify)
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:%s' % rm_address],
+            tags=['url:%s' % rm_address] + custom_tags,
             message='Connection to ResourceManager "%s" was successful' % rm_address)
 
         # Get the applications from the application master
-        running_jobs = self._mapreduce_job_metrics(running_apps, tags)
+        running_jobs = self._mapreduce_job_metrics(running_apps, tags, ssl_verify=ssl_verify)
 
         # # Get job counter metrics
-        self._mapreduce_job_counters_metrics(running_jobs, tags)
+        self._mapreduce_job_counters_metrics(running_jobs, tags, ssl_verify=ssl_verify)
 
         # Get task metrics
         if collect_task_metrics:
-            self._mapreduce_task_metrics(running_jobs, tags)
+            self._mapreduce_task_metrics(running_jobs, tags, ssl_verify=ssl_verify)
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
@@ -172,7 +171,7 @@ class MapReduceCheck(AgentCheck):
 
             self.service_check(MAPREDUCE_SERVICE_CHECK,
                 AgentCheck.OK,
-                tags=['url:%s' % am_address],
+                tags=['url:%s' % am_address] + custom_tags,
                 message='Connection to ApplicationManager "%s" was successful' % am_address)
 
     def _parse_general_counters(self, init_config):
@@ -269,7 +268,7 @@ class MapReduceCheck(AgentCheck):
 
         return job_counter
 
-    def _get_running_app_ids(self, rm_address, **kwargs):
+    def _get_running_app_ids(self, rm_address, ssl_verify=False, **kwargs):
         '''
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running MapReduce applications
         '''
@@ -277,7 +276,8 @@ class MapReduceCheck(AgentCheck):
             YARN_APPS_PATH,
             YARN_SERVICE_CHECK,
             states=YARN_APPLICATION_STATES,
-            applicationTypes=YARN_APPLICATION_TYPES)
+            applicationTypes=YARN_APPLICATION_TYPES,
+            ssl_verify=ssl_verify)
 
         running_apps = {}
 
@@ -294,7 +294,7 @@ class MapReduceCheck(AgentCheck):
 
         return running_apps
 
-    def _mapreduce_job_metrics(self, running_apps, addl_tags):
+    def _mapreduce_job_metrics(self, running_apps, addl_tags, ssl_verify=True):
         '''
         Get metrics for each MapReduce job.
         Return a dictionary for each MapReduce job
@@ -312,7 +312,8 @@ class MapReduceCheck(AgentCheck):
 
             metrics_json = self._rest_request_to_json(tracking_url,
                 MAPREDUCE_JOBS_PATH,
-                MAPREDUCE_SERVICE_CHECK)
+                MAPREDUCE_SERVICE_CHECK,
+                ssl_verify=ssl_verify)
 
             if metrics_json.get('jobs'):
                 if metrics_json['jobs'].get('job'):
@@ -340,7 +341,7 @@ class MapReduceCheck(AgentCheck):
 
         return running_jobs
 
-    def _mapreduce_job_counters_metrics(self, running_jobs, addl_tags):
+    def _mapreduce_job_counters_metrics(self, running_jobs, addl_tags, ssl_verify=True):
         '''
         Get custom metrics specified for each counter
         '''
@@ -353,7 +354,9 @@ class MapReduceCheck(AgentCheck):
 
                 metrics_json = self._rest_request_to_json(job_metrics['tracking_url'],
                     'counters',
-                    MAPREDUCE_SERVICE_CHECK)
+                    MAPREDUCE_SERVICE_CHECK,
+                    tags=addl_tags,
+                    ssl_verify=ssl_verify)
 
                 if metrics_json.get('jobCounters'):
                     if metrics_json['jobCounters'].get('counterGroup'):
@@ -392,7 +395,7 @@ class MapReduceCheck(AgentCheck):
                                                     counter,
                                                     MAPREDUCE_JOB_COUNTER_METRICS)
 
-    def _mapreduce_task_metrics(self, running_jobs, addl_tags):
+    def _mapreduce_task_metrics(self, running_jobs, addl_tags, ssl_verify=True):
         '''
         Get metrics for each MapReduce task
         Return a dictionary of {task_id: 'tracking_url'} for each MapReduce task
@@ -401,7 +404,9 @@ class MapReduceCheck(AgentCheck):
 
             metrics_json = self._rest_request_to_json(job_stats['tracking_url'],
                     'tasks',
-                    MAPREDUCE_SERVICE_CHECK)
+                    MAPREDUCE_SERVICE_CHECK,
+                    tags=addl_tags,
+                    ssl_verify=ssl_verify)
 
             if metrics_json.get('tasks'):
                 if metrics_json['tasks'].get('task'):
@@ -447,13 +452,13 @@ class MapReduceCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown' % (metric_type))
 
-    def _rest_request_to_json(self, address, object_path, service_name, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, service_name, tags=[], ssl_verify=True, *args, **kwargs):
         '''
         Query the given URL and return the JSON response
         '''
         response_json = None
 
-        service_check_tags = ['url:%s' % self._get_url_base(address)]
+        service_check_tags = ['url:%s' % self._get_url_base(address)] + tags
 
         url = address
 
@@ -473,7 +478,7 @@ class MapReduceCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout)
+            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=ssl_verify)
             response.raise_for_status()
             response_json = response.json()
 

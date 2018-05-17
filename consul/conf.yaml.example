@@ -54,8 +54,28 @@ instances:
       #   - gunicorn
       #   - redis
 
+      # If you'd rather not maintain a whitelist, you can increase the maximum
+      # number of queried services
+      # max_services: 50
+
       # Additional tags to apply to the metrics, events and service checks
       # You should always specify tags when multiple instances of the check run
       # on the same agent.
       # tags:
       #   - 'consul_server:server1'
+
+## Log Section (Available for Agent >=6.0)
+
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+    # - type: file
+    #   path: /var/log/consul_server.log
+    #   source: consul
+    #   service: myservice

@@ -103,8 +103,8 @@ class MesosSlave(AgentCheck):
             if not ssl_verify and parsed_url.scheme == 'https':
                 self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
 
-    def _get_json(self, url, timeout, verify):
-        tags = ["url:%s" % url]
+    def _get_json(self, url, timeout, verify, tags=None):
+        tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
         try:
@@ -123,32 +123,33 @@ class MesosSlave(AgentCheck):
             msg = str(e)
             status = AgentCheck.CRITICAL
         finally:
+            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             if self.service_check_needed:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
             if status is AgentCheck.CRITICAL:
-                raise CheckException("Cannot connect to mesos, please check your configuration.")
+                raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
 
         if r.encoding is None:
             r.encoding = 'UTF8'
 
         return r.json()
 
-    def _get_state(self, url, timeout, verify):
-        return self._get_json(url + '/state.json', timeout, verify)
+    def _get_state(self, url, timeout, verify, tags):
+        return self._get_json(url + '/state.json', timeout, verify, tags)
 
-    def _get_stats(self, url, timeout, verify):
+    def _get_stats(self, url, timeout, verify, tags):
         if self.version >= [0, 22, 0]:
             endpoint = '/metrics/snapshot'
         else:
             endpoint = '/stats.json'
-        return self._get_json(url + endpoint, timeout, verify)
+        return self._get_json(url + endpoint, timeout, verify, tags)
 
-    def _get_constant_attributes(self, url, timeout, master_port, verify):
+    def _get_constant_attributes(self, url, timeout, master_port, verify, tags):
         state_metrics = None
         parsed_url = urlparse(url)
         if self.cluster_name is None:
-            state_metrics = self._get_state(url, timeout, verify)
+            state_metrics = self._get_state(url, timeout, verify, tags)
             if state_metrics is not None:
                 self.version = map(int, state_metrics['version'].split('.'))
 
@@ -158,7 +159,8 @@ class MesosSlave(AgentCheck):
                                                state_metrics['master_hostname'],
                                                master_port),
                         timeout,
-                        verify
+                        verify,
+                        tags
                     )
                     if master_state is not None:
                         self.cluster_name = master_state.get('cluster')
@@ -171,17 +173,19 @@ class MesosSlave(AgentCheck):
 
         url = instance['url']
         instance_tags = instance.get('tags', [])
+        if instance_tags is None:
+            instance_tags = []
         tasks = instance.get('tasks', [])
         default_timeout = self.init_config.get('default_timeout', 5)
         timeout = float(instance.get('timeout', default_timeout))
         master_port = instance.get("master_port", DEFAULT_MASTER_PORT)
         ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
 
-        state_metrics = self._get_constant_attributes(url, timeout, master_port, ssl_verify)
+        state_metrics = self._get_constant_attributes(url, timeout, master_port, ssl_verify, instance_tags)
         tags = None
 
         if state_metrics is None:
-            state_metrics = self._get_state(url, timeout, ssl_verify)
+            state_metrics = self._get_state(url, timeout, ssl_verify, instance_tags)
         if state_metrics:
             tags = [
                 'mesos_pid:{0}'.format(state_metrics['pid']),
@@ -201,7 +205,7 @@ class MesosSlave(AgentCheck):
                                 for key_name, (metric_name, metric_func) in self.TASK_METRICS.iteritems():
                                     metric_func(self, metric_name, t['resources'][key_name], tags=task_tags)
 
-        stats_metrics = self._get_stats(url, timeout, ssl_verify)
+        stats_metrics = self._get_stats(url, timeout, ssl_verify, instance_tags)
         if stats_metrics:
             tags = tags if tags else instance_tags
             metrics = [self.SLAVE_TASKS_METRICS, self.SYSTEM_METRICS, self.SLAVE_RESOURCE_METRICS,

@@ -1,0 +1,37 @@
+version: '3.5'
+
+services:
+  consul-leader:
+    image: "consul:${CONSUL_VERSION}"
+    volumes:
+      - ${CONSUL_CONFIG_PATH}:/consul/config/server.json:ro
+    ports:
+      - "${CONSUL_PORT}:8500"
+    networks:
+      - network1
+    command: agent -dev -bootstrap -bind=0.0.0.0 -client=0.0.0.0
+
+  consul-follower-1:
+    image: "consul:${CONSUL_VERSION}"
+    volumes:
+      - ${CONSUL_CONFIG_PATH}:/consul/config/server.json:ro
+    networks:
+      - network1
+    depends_on:
+      - "consul-leader"
+    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0"]
+
+  consul-follower-2:
+    image: "consul:${CONSUL_VERSION}"
+    networks:
+      - network1
+    volumes:
+      - ${CONSUL_CONFIG_PATH}:/consul/config/server.json:ro
+    depends_on:
+      - "consul-follower-1"
+    command: ["/bin/sh", "-c", "sleep 5 && consul agent -dev -join=consul-leader -bind=0.0.0.0"]
+
+
+networks:
+  network1:
+    name: consul_default

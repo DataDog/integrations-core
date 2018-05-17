@@ -1,24 +1,14 @@
 # CHANGELOG - agent_metrics
 
-1.1.0 / Unreleased
-==================
-
-### Changes
+## 1.1.0 / 2018-03-23
 
 * [FEATURE] Add custom tag support.
 
-1.0.1 / 2017-07-18
-==================
-
-### Changes
+## 1.0.1 / 2017-07-18
 
 * [IMPROVEMENT] Remove usage of `metric_types.MetricTypes`. See [#474][]
 
-
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds agent_metrics integration.
 

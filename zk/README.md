@@ -7,14 +7,14 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 ## Setup
 ### Installation
 
-The Zookeeper check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Zookeeper servers.
-
-
-If you need the newest version of the Zookeeper check, install the `dd-check-zk` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The Zookeeper check is packaged with the Agent, so simply [install the Agent][13] on your Zookeeper servers.
 
 ### Configuration
 
-Create a file `zk.yaml` in the Agent's `conf.d` directory. 
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+  See the [sample zk.d/conf.yaml][14] for all available configuration options.
+
+2. [Restart the Agent][15]
 
 #### Metric Collection
 
@@ -29,13 +29,13 @@ instances:
     timeout: 3
 ```
 
-* See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options.
+* See the [sample zk.yaml][14] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Zookeeper metrics to Datadog.
+* [Restart the Agent][15] to start sending Zookeeper metrics to Datadog.
 
 #### Log Collection
 
-**Available for Agent >6.0** 
+**Available for Agent >6.0**
 
 Zookeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
 
@@ -62,7 +62,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
   ```
   logs_enabled: true
   ```
-   
+
 * Add this configuration setup to your `zk.yaml` file to start collecting your Zookeeper Logs:
 
   ```
@@ -78,30 +78,13 @@ Make sure you clone and edit the integration pipeline if you have a different fo
       #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
   ```
 
-* See the [sample zk.yaml](https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example) for all available configuration options.
+* See the [sample zk.yaml][14] for all available configuration options.
 
-* [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start sending Zookeeper Logs to Datadog.
+* [Restart the Agent][15] to start sending Zookeeper Logs to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `zk` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    zk
-    -------
-      - instance #0 [OK]
-      - Collected 14 metrics, 0 events & 1 service check
-
-    [...]
-```
-
-## Compatibility
-
-The Zookeeper check is compatible with all major platforms.
+[Run the Agent's `status` subcommand][16] and look for `zk` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -125,7 +108,7 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 | `zookeeper.num_alive_connections` | `zookeeper.connections` |
 | `zookeeper.znode_count` | `zookeeper.nodes` |
 
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv)
+See [metadata.csv][17]
 for a list of metrics provided by this check.
 
 #### Deprecated metrics
@@ -142,14 +125,23 @@ The Zookeeper check does not include any event at this time.
 
 **zookeeper.ruok**:
 
-Returns CRITICAL if Zookeeper does not respond to the Agent's 'ruok' request, otherwise OK.
+Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
 
 **zookeeper.mode**:
 
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns OK when Zookeeper's actual mode matches `expected_mode`, otherwise CRITICAL.
+The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][18].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+Learn more about infrastructure monitoring and all our integrations on [our blog][19]
+
+
+[13]: https://app.datadoghq.com/account/settings#agent
+[14]: https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example
+[15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
+[18]: http://docs.datadoghq.com/help/
+[19]: https://www.datadoghq.com/blog/

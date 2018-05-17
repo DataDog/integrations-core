@@ -1,31 +1,22 @@
 # CHANGELOG - pgbouncer
 
-1.1.0 / 2018-02-13
-==================
+## 1.2.0 / 2018-05-11
 
-### Changes
+* [FEATURE] Added custom tag support to service check.
+
+## 1.1.0 / 2018-02-13
 
 * [FEATURE] Added new metrics for PGBouncer 1.8 `SHOW STATS` and `SHOW POOLS` See [#1016][]
 
-
-1.0.2 / [2017-11-21]
-==================
-
-### Changes
+## 1.0.2 / [2017-11-21]
 
 * [BUGFIX] Fixed newest versions failing checks due to extra field. See [#735][]
 
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [DEPENDENCY] bump psycopg2 to 2.7.1. See [#295][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds pgbouncer integration.
 

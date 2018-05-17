@@ -1,7 +1,7 @@
-from . import pgbouncer
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .pgbouncer import PgBouncer
+from .__about__ import __version__
 
-PgBouncer = pgbouncer.PgBouncer
-
-__version__ = "1.1.0"
-
-__all__ = ['pgbouncer']
+__all__ = ['PgBouncer', '__version__']

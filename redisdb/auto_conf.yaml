@@ -5,4 +5,4 @@ init_config:
 
 instances:
   - host: "%%host%%"
-    port: "%%port%%"
+    port: "6379"

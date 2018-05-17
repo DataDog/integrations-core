@@ -1,7 +1,11 @@
-from . import kyototycoon
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-KyotoTycoonCheck = kyototycoon.KyotoTycoonCheck
+from .kyototycoon import KyotoTycoonCheck
+from .__about__ import __version__
 
-__version__ = "1.1.0"
-
-__all__ = ['kyototycoon']
+__all__ = [
+    '__version__',
+    'KyotoTycoonCheck'
+]

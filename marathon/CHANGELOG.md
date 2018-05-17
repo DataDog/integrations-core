@@ -1,30 +1,26 @@
 # CHANGELOG - marathon
 
-1.2.1 / 2018-01-10
-==================
+## 1.3.1 / Unreleased
 
-### Changes
+* [BUGFIX] Fix missing task count metrics (tasksStaged, tasksRunning, tasksHealthy, tasksUnhealthy) when filtering by group.
+
+## 1.3.0 / 2018-05-11
+
+* [FEATURE] Adds custom tag support for service checks.
+
+## 1.2.1 / 2018-01-10
 
 * [BUGFIX] Fix duplicate `app:` tags on app-level metrics. See [#987][], thanks [@emil-applause][]
 
-1.2.0 / 2017-08-28
-==================
-
-### Changes
+## 1.2.0 / 2017-08-28
 
 * [FEATURE] Adds v2 queue metrics. See [#464][]
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] Add gauge for queue size. See [#321][], thanks [@jangie][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds marathon integration.
 

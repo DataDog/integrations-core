@@ -7,8 +7,11 @@
 from collections import defaultdict
 import time
 import os
+import subprocess
+import sys
 # 3p
 import psutil
+
 
 # project
 from checks import AgentCheck
@@ -164,7 +167,7 @@ class ProcessCheck(AgentCheck):
             self.last_ad_cache_ts[name] = time.time()
         return matching_pids
 
-    def psutil_wrapper(self, process, method, accessors, *args, **kwargs):
+    def psutil_wrapper(self, process, method, accessors, try_sudo, *args, **kwargs):
         """
         A psutil wrapper that is calling
         * psutil.method(*args, **kwargs) and returns the result
@@ -201,12 +204,22 @@ class ProcessCheck(AgentCheck):
             self.log.debug("psutil method %s not implemented", method)
         except psutil.AccessDenied:
             self.log.debug("psutil was denied acccess for method %s", method)
+            if method == 'num_fds' and Platform.is_unix() and try_sudo:
+                try:
+                    # It is up the agent's packager to grant corresponding sudo policy on unix platforms
+                    process_ls = subprocess.check_output(['sudo', 'ls', '/proc/{}/fd/'.format(process.pid)])
+                    result = len(process_ls.splitlines())
+                    
+                except subprocess.CalledProcessError as e:
+                    self.log.exception("trying to retrieve %s with sudo failed with return code %d", method, e.returncode)
+                except:
+                    self.log.exception("trying to retrieve %s with sudo also failed", method)
         except psutil.NoSuchProcess:
             self.warning("Process {0} disappeared while scanning".format(process.pid))
 
         return result
 
-    def get_process_state(self, name, pids):
+    def get_process_state(self, name, pids, try_sudo):
         st = defaultdict(list)
 
         # Remove from cache the processes that are not in `pids`
@@ -234,36 +247,36 @@ class ProcessCheck(AgentCheck):
 
             p = self.process_cache[name][pid]
 
-            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'])
+            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'], try_sudo)
             st['rss'].append(meminfo.get('rss'))
             st['vms'].append(meminfo.get('vms'))
 
-            mem_percent = self.psutil_wrapper(p, 'memory_percent', None)
+            mem_percent = self.psutil_wrapper(p, 'memory_percent', None, try_sudo)
             st['mem_pct'].append(mem_percent)
 
             # will fail on win32 and solaris
-            shared_mem = self.psutil_wrapper(p, 'memory_info_ex', ['shared']).get('shared')
+            shared_mem = self.psutil_wrapper(p, 'memory_info_ex', ['shared'], try_sudo).get('shared')
             if shared_mem is not None and meminfo.get('rss') is not None:
                 st['real'].append(meminfo['rss'] - shared_mem)
             else:
                 st['real'].append(None)
 
-            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'])
+            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'], try_sudo)
             st['ctx_swtch_vol'].append(ctxinfo.get('voluntary'))
             st['ctx_swtch_invol'].append(ctxinfo.get('involuntary'))
 
-            st['thr'].append(self.psutil_wrapper(p, 'num_threads', None))
+            st['thr'].append(self.psutil_wrapper(p, 'num_threads', None, try_sudo))
 
-            cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None)
+            cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None, try_sudo)
             if not new_process:
                 # psutil returns `0.` for `cpu_percent` the first time it's sampled on a process,
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
 
-            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None))
-            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None))
+            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
+            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
-            ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
+            ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'], try_sudo)
             st['r_count'].append(ioinfo.get('read_count'))
             st['w_count'].append(ioinfo.get('write_count'))
             st['r_bytes'].append(ioinfo.get('read_bytes'))
@@ -283,7 +296,7 @@ class ProcessCheck(AgentCheck):
                 st['cmajflt'].append(None)
 
             #calculate process run time
-            create_time = self.psutil_wrapper(p, 'create_time', None)
+            create_time = self.psutil_wrapper(p, 'create_time', None, try_sudo)
             if create_time is not None:
                 now = time.time()
                 run_time = now - create_time
@@ -333,6 +346,7 @@ class ProcessCheck(AgentCheck):
         pid_file = instance.get('pid_file')
         collect_children = _is_affirmative(instance.get('collect_children', False))
         user = instance.get('user', False)
+        try_sudo = instance.get('try_sudo', False)
 
         if self._conflicting_procfs:
             self.warning('The `procfs_path` defined in `process.yaml` is different from the one defined in '
@@ -384,7 +398,7 @@ class ProcessCheck(AgentCheck):
         if user:
             pids = self._filter_by_user(user, pids)
 
-        proc_state = self.get_process_state(name, pids)
+        proc_state = self.get_process_state(name, pids, try_sudo)
 
         # FIXME 6.x remove the `name` tag
         tags.extend(['process_name:%s' % name, name])

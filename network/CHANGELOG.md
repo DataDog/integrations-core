@@ -1,50 +1,34 @@
 # CHANGELOG - network
 
-1.4.0 / 2018-02-13
-==================
+## 1.5.0 / 2018-03-23
+
+* [FEATURE] Add custom tag support.
+
+## 1.4.0 / 2018-02-13
 
 * [FEATURE] Get some host network stats when the agent is running inside a container and not in the host network namespace. See [#994][]
 
-
-1.3.0 / 2017-09-01
-==================
-
-### Changes
+## 1.3.0 / 2017-09-01
 
 * [FEATURE] Collects TCPRetransFail metric from /proc/net/netstat, See [#697][]
 
-1.2.2 / 2017-08-28
-==================
-
-### Changes
+## 1.2.2 / 2017-08-28
 
 * [BUGFIX] Fix incorrect `log.error` call in BSD check. See [#698][]
 
-1.2.1 / 2017-07-18
-==================
-
-### Changes
+## 1.2.1 / 2017-07-18
 
 * [BUGFIX] Fix TCP6 metrics overriding TCP4 metrics when monitoring non combines socket states. See [#501][]
 
-1.2.0 / 2017-06-05
-==================
-
-### Changes
+## 1.2.0 / 2017-06-05
 
 * [FEATURE] Adds metrics from `/proc/net/netstat` in addition to the existing ones from `/proc/net/snmp`. See [#299][] and [#452][], thanks [@cory-stripe][]
 
-1.1.0 / 2017-05-03
-==================
-
-### Changes
+## 1.1.0 / 2017-05-03
 
 * [BUGFIX] Work around `ss -atun` bug not differentiating tcp and udp. See [#296][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds network integration.
 

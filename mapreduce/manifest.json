@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
+  "version": "1.2.0",
   "guid": "1c143492-84ac-42d2-89d5-a45c718092b0",
   "public_title": "Datadog-Map Reduce Integration",
   "categories":["processing"],

@@ -3,6 +3,9 @@ kubedns.response_size.bytes.sum,gauge,,byte,,Size of the returns response in byt
 kubedns.response_size.bytes.count,gauge,,response,,Number of responses on which the kubedns.response_size.bytes.sum metric is evaluated.,0,kube_dns,response size sample count
 kubedns.request_duration.seconds.sum,gauge,,second,second,Time (in seconds) each request took to resolve.,-1,kube_dns,request duration time
 kubedns.request_duration.seconds.count,gauge,,request,,Number of requests on which the kubedns.request_duration.seconds.sum metric is evaluated.,0,kube_dns,request duration sample
-kubedns.request_count,gauge,,request,,Number of DNS requests made.,0,kube_dns,total requests
+kubedns.request_count,gauge,,request,,Total number of DNS requests made.,0,kube_dns,total requests
+kubedns.request_count.count,count,30,request,,Instant number of DNS requests made.,0,kube_dns,requests
 kubedns.error_count,gauge,,error,,Number of DNS requests resulting in an error.,-1,kube_dns,requests errors
-kubedns.cachemiss_count,gauge,,request,,Number of DNS requests that result in a cache miss.,-1,kube_dns,cache miss
+kubedns.error_count.count,count,30,error,,Instant number of DNS requests made resulting in an error.,-1,kube_dns,requests errors
+kubedns.cachemiss_count,gauge,,request,,Number of DNS requests resulting in a cache miss.,-1,kube_dns,cache miss
+kubedns.cachemiss_count.count,count,30,request,,Instant number of DNS requests made resulting in a cache miss.,-1,kube_dns,cache miss

@@ -59,7 +59,6 @@ class SnmpCheck(NetworkCheck):
         for instance in instances:
             if 'name' not in instance:
                 instance['name'] = self._get_instance_key(instance)
-            instance['skip_event'] = True
 
         self.generators = {}
 
@@ -302,7 +301,13 @@ class SnmpCheck(NetworkCheck):
                         message = "{0} for instance {1}".format(error_status.prettyPrint(),
                                                                 instance["ip_address"])
                         instance["service_check_error"] = message
-                        self.warning(message)
+
+                        # submit CRITICAL service check if we can't connect to device
+                        if 'unknownUserName' in message:
+                            instance["service_check_severity"] = Status.CRITICAL
+                            self.log.error(message)
+                        else:
+                            self.warning(message)
 
                     for table_row in var_binds_table:
                         complete_results.extend(table_row)
@@ -341,6 +346,9 @@ class SnmpCheck(NetworkCheck):
         '''
 
         cmd_generator, ip_address, tags, metrics, timeout, retries, enforce_constraints = self._load_conf(instance)
+
+        if not metrics:
+            raise Exception('Metrics list must contain at least one metric')
 
         tags += ['snmp_device:{0}'.format(ip_address)]
 

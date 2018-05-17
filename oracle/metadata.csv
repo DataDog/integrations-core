@@ -6,7 +6,7 @@ oracle.shared_pool_free,gauge,,percent,,shared pool free memory %,0,oracle,share
 oracle.physical_reads,gauge,,reads,sec,physical reads per sec,0,oracle,phys reads
 oracle.physical_writes,gauge,,writes,sec,physical writes per sec,0,oracle,phys reads
 oracle.enqueue_timeouts,gauge,,timeouts,sec,enqueue timeouts per sec,0,oracle,enqueue timeouts
-oracle.gc_cr_receive_time,gauge,,blocks,sec,GC CR receive time,0,oracle,gc cr receive time
+oracle.gc_cr_block_received,gauge,,blocks,sec,GC CR block received,0,oracle,gc cr block rcv 
 oracle.cache_blocks_corrupt,gauge,,blocks,,corrupt cache blocks,0,oracle,corrupt cache blocks
 oracle.cache_blocks_lost,gauge,,blocks,,lost cache blocks,0,oracle,lost cache blocks
 oracle.logons,gauge,,attempts,,number of logon attempts,0,oracle,logons
@@ -25,3 +25,4 @@ oracle.temp_space_used,gauge,,bytes,,temp space used,0,oracle,temp space used
 oracle.tablespace.used,gauge,,bytes,,tablespace used,0,oracle,tablespace used
 oracle.tablespace.size,gauge,,bytes,,tablespace size,0,oracle,tablespace size
 oracle.tablespace.in_use,gauge,,fraction,,tablespace in-use,0,oracle,tablespace in-use
+oracle.tablespace.offline,gauge,,boolean,,tablespace offline,0,oracle,tablespace offline

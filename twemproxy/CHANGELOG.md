@@ -1,16 +1,14 @@
 # CHANGELOG - twemproxy
 
-1.1.0 / 2017-07-18
-==================
+## 1.2.0 / 2018-05-11
 
-### Changes
+* [FEATURE] Add custom tag support for service checks.
+
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] Add `can_connect` service check. See [#420][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds twemproxy integration.
 

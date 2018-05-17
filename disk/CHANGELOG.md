@@ -1,38 +1,23 @@
 # CHANGELOG - disk
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] Adds custom tag support
 
-1.1.0 / 2018-02-13
-==================
-
-### Changes
+## 1.1.0 / 2018-02-13
 
 * [FEATURE] Adds additional device/mount tagging based on regex
 * [IMPROVEMENT] Allows disk latency metrics to be collected for non-Windows. See [#1018][].
 
-1.0.2 / 2017-10-10
-==================
-
-### Changes
+## 1.0.2 / 2017-10-10
 
 * [BUGFIX] Skip now works with NFS secure mounts too. See [#470][].
 
-1.0.1 / 2017-07-18
-==================
-
-### Changes
+## 1.0.1 / 2017-07-18
 
 * [SANITY] Import `Platform` helper from `utils.platform` instead of deprecated `util`. See [#484][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds disk integration.
 

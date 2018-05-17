@@ -1,26 +1,18 @@
 # CHANGELOG - directory
 
-1.2.0 / Unreleased
-==================
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] adds custom tag support. See [#1165][]
 
-1.1.1 / 2018-02-13
-==================
+## 1.1.1 / 2018-02-13
 
 * [FEATURE] adds option to ignore missing configured directories. See [#1045][] (Thanks [@oeuftete][])
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] adds pattern matching against files' relative paths. See [#429][] (Thanks [@cmatteri][])
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds directory integration.
 

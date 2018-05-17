@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "5.5.0",
+        "integration":"consul",
+        "groups": ["host", "check", "service", "consul_service_id"],
+        "check": "consul.check",
+        "statuses": ["ok", "warning", "critical"],
+        "name": "Health check",
+        "description": "Returns ok if the service is up, warning if there is an issue and critical when down."
+    }
+]

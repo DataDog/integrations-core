@@ -1,0 +1,4 @@
+include README.md
+include requirements.in
+include requirements.txt
+graft datadog_test_libs

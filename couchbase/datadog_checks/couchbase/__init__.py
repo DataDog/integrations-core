@@ -1,7 +1,10 @@
-from . import couchbase
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .couchbase import Couchbase
+from .__about__ import __version__
 
-Couchbase = couchbase.Couchbase
-
-__version__ = "1.2.0"
-
-__all__ = ['couchbase']
+__all__ = [
+    '__version__',
+    'Couchbase'
+]

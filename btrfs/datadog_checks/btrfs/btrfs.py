@@ -14,7 +14,7 @@ import struct
 import psutil
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 MIXED = "mixed"
 DATA = "data"
@@ -27,7 +27,7 @@ RAID10 = "raid10"
 DUP = "dup"
 UNKNOWN = "unknown"
 
-FLAGS_MAPPER = defaultdict(lambda:  (SINGLE, UNKNOWN),{
+FLAGS_MAPPER = defaultdict(lambda:  (SINGLE, UNKNOWN), {
     1: (SINGLE, DATA),
     2: (SINGLE, SYSTEM),
     4: (SINGLE, METADATA),
@@ -82,9 +82,14 @@ class FileDescriptor(object):
 class BTRFS(AgentCheck):
 
     def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
+        AgentCheck.__init__(
+            self, name, init_config,
+            agentConfig, instances=instances
+        )
         if instances is not None and len(instances) > 1:
-            raise Exception("BTRFS check only supports one configured instance.")
+            raise Exception(
+                "BTRFS check only supports one configured instance."
+            )
 
     def get_usage(self, mountpoint):
         results = []
@@ -98,8 +103,10 @@ class BTRFS(AgentCheck):
             _, total_spaces = TWO_LONGS_STRUCT.unpack(ret)
 
             # Allocate it
-            buffer_size = (TWO_LONGS_STRUCT.size
-                        + total_spaces * THREE_LONGS_STRUCT.size)
+            buffer_size = (
+                TWO_LONGS_STRUCT.size + total_spaces
+                * THREE_LONGS_STRUCT.size
+            )
 
             data = sized_array(buffer_size)
             TWO_LONGS_STRUCT.pack_into(data, 0, total_spaces, 0)
@@ -111,7 +118,7 @@ class BTRFS(AgentCheck):
                              THREE_LONGS_STRUCT.size):
 
             # https://github.com/spotify/linux/blob/master/fs/btrfs/ioctl.h#L40-L44
-            flags, total_bytes, used_bytes = THREE_LONGS_STRUCT.unpack_from(data, offset)
+            flags, total_bytes, used_bytes =THREE_LONGS_STRUCT.unpack_from(data, offset) # noqa E501
             results.append((flags, total_bytes, used_bytes))
 
         return results
@@ -141,7 +148,19 @@ class BTRFS(AgentCheck):
                 free = total_bytes - used_bytes
                 usage = float(used_bytes) / float(total_bytes)
 
-                self.gauge('system.disk.btrfs.total', total_bytes, tags=tags, device_name=device)
-                self.gauge('system.disk.btrfs.used', used_bytes, tags=tags, device_name=device)
-                self.gauge('system.disk.btrfs.free', free, tags=tags, device_name=device)
-                self.gauge('system.disk.btrfs.usage', usage, tags=tags, device_name=device)
+                self.gauge(
+                    'system.disk.btrfs.total', total_bytes,
+                    tags=tags, device_name=device
+                )
+                self.gauge(
+                    'system.disk.btrfs.used', used_bytes,
+                    tags=tags, device_name=device
+                )
+                self.gauge(
+                    'system.disk.btrfs.free',
+                    free, tags=tags, device_name=device
+                )
+                self.gauge(
+                    'system.disk.btrfs.usage',
+                    usage, tags=tags, device_name=device
+                )

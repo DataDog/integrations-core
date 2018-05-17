@@ -1,16 +1,13 @@
 {
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "name": "couch",
   "display_name": "couch",
-  "version": "2.4.0",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.20.0",
   "short_description": "Track and graph your CouchDB activity and performance metrics.",
   "description": "Apache CouchDB is a document-oriented database that can be queried and indexed using JavaScript in a MapReduce fashion.",
   "guid": "9e7ed68c-669a-40f0-8564-548d49aa8098",

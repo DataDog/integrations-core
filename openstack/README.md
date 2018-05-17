@@ -10,7 +10,7 @@ Get metrics from openstack service in real time to:
 ## Setup
 ### Installation
 
-To capture OpenStack metrics you need to [install the Agent](https://app.datadoghq.com/account/settings#agent) on your hosts running hypervisors.
+To capture OpenStack metrics you need to [install the Agent][1] on your hosts running hypervisors.
 
 **Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, please visit our Billing FAQ.
 
@@ -18,15 +18,15 @@ To capture OpenStack metrics you need to [install the Agent](https://app.datadog
 
 1. First configure a Datadog role and user with your identity server
 
-
-        openstack role create datadog_monitoring
-        openstack user create datadog \
-            --password my_password \
-            --project my_project_name
-        openstack role add datadog_monitoring \
-            --project my_project_name \
-            --user datadog
-
+    ```
+    openstack role create datadog_monitoring
+    openstack user create datadog \
+        --password my_password \
+        --project my_project_name
+    openstack role add datadog_monitoring \
+        --project my_project_name \
+        --user datadog
+    ```
 
 2. Update your policy.json files to grant the needed permissions.
 ```role:datadog_monitoring``` requires access to the following operations:
@@ -71,43 +71,60 @@ To capture OpenStack metrics you need to [install the Agent](https://app.datadog
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
 
-3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit `openstack.yaml`. You can find a sample configuration in the conf.d directory in your agent install. See the [sample openstack.yaml](https://github.com/DataDog/integrations-core/blob/master/openstack/conf.yaml.example) for all available configuration options.
+3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
 
-4. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
+4. [Restart the Agent][3]
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `openstack` under the Checks section:
-
-    Checks
-    ======
-
-        openstack
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
-
-## Compatibility
-
-The openstack check is compatible with all major platforms
+[Run the Agent's `status` subcommand][4] and look for `openstack` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Openstack check does not include any event at this time.
 
 ### Service Checks
-The Openstack check does not include any service check at this time.
+**openstack.neutron.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
+
+**openstack.keystone.api.up**
+
+Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
+
+**openstack.nova.hypervisor.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
+
+**openstack.neutron.network.up**
+
+Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts](https://www.datadoghq.com/blog/openstack-monitoring-nova/) about it.
+To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts][7] about it.
 
 See also our blog posts:
 
-* [Install OpenStack in two commands for dev and test](https://www.datadoghq.com/blog/install-openstack-in-two-commands/)
-* [OpenStack: host aggregates, flavors, and availability zones](https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/)
+* [Install OpenStack in two commands for dev and test][8]
+* [OpenStack: host aggregates, flavors, and availability zones][9]
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/openstack/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
+[6]: http://docs.datadoghq.com/help/
+[7]: https://www.datadoghq.com/blog/openstack-monitoring-nova/
+[8]: https://www.datadoghq.com/blog/install-openstack-in-two-commands/
+[9]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/

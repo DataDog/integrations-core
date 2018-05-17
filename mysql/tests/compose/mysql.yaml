@@ -1,0 +1,45 @@
+version: '3.5'
+
+services:
+  mysql-master:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - network1
+
+  mysql-slave:
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MASTER_HOST=mysql-master
+      - MASTER_PORT=3306
+    ports:
+      - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
+    networks:
+      - network1
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "replication-entrypoint.sh", "mysqld"]
+    depends_on:
+      - "mysql-master"
+
+  mysql-setup:
+    image: "mysql:${MYSQL_VERSION}"
+    environment:
+      - MYSQL_SCRIPT_OPTIONS=${MYSQL_SCRIPT_OPTIONS}
+    networks:
+      - network1
+    volumes:
+      - ${MYSQL_SHELL_SCRIPT}:/usr/local/bin/setup_mysql.sh
+      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
+    depends_on:
+      - "mysql-slave"
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "setup_mysql.sh"]
+
+
+networks:
+  network1:
+    name: mysql_default

@@ -10,11 +10,13 @@ environment:
   SKIP_LINT: true
   DD_AGENT_BRANCH: master
   SDK_TESTING: true
-  PYTHON: C:\\Python27-x64
+  PYTHON: C:\Python27-x64
   PYTHON_VERSION: 2.7.13
   PYTHON_ARCH: 64
   PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
   PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
+init:
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 cache:
   - C:\projects\integrations-core\.cache
   - C:\projects\integrations-core\vendor\cache
@@ -35,57 +37,32 @@ install:
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
   - ps: mkdir -p $(python -m site --user-site)
   - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
+  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
   - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install simplejson)
-  - cd datadog-checks-base
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
+  - ps: choco install docker-compose
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install packaging)
+  - cd datadog_checks_base
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r ./requirements.txt)
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd iis
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd windows_service
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd pdh_check
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd aspdotnet 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd dotnetclr 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd exchange_server 
-  - ps: (& "$env:PYTHON/python.exe" setup.py bdist_wheel)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
 build: off
 test_script:
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - bundle exec rake ci:run[default]
   - bundle exec rake ci:run[sqlserver]
-  - bundle exec rake ci:run[iis]
-  - bundle exec rake ci:run[aspdotnet]
-  - bundle exec rake ci:run[dotnetclr]
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
-  - bundle exec rake ci:run[pdh_check]
+  - inv test --targets="datadog_checks_base,datadog_checks_tests_helper,aspdotnet,active_directory,dotnetclr,exchange_server,iis,pdh_check"

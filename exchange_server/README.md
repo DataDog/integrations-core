@@ -9,36 +9,34 @@ Get metrics from Microsoft Exchange Server
 ## Setup
 ### Installation
 
-The Exchange check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your servers.
-
-If you need the newest version of the Exchange check, install the `dd-check-exchange_server` package; this package's check overrides the one packaged with the Agent. See the [integrations-core repository README.md for more details](https://docs.datadoghq.com/agent/faq/install-core-extra/).
+The Exchange check is packaged with the Agent, so simply [install the Agent][1] on your servers.
 
 ### Configuration
 
-Edit the `exchange_server.yaml` file to collect Exchange Server performance data. See the [sample exchange_server.yaml](https://github.com/DataDog/integrations-core/blob/master/exchange_server/conf.yaml.example) for all available configuration options.
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Exchange Server performance data.  
+    See the [sample exchange_server.d/conf.yaml][2] for all available configuration options.
+
+2. [Restart the Agent][5]
 
 ### Validation
 
-[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `exchange_server` under the Checks section:
-
-    Checks
-    ======
-
-        exchange_server
-        -----------
-          - instance #0 [OK]
-          - Collected 39 metrics, 0 events & 7 service checks
-
-## Compatibility
-
-The exchange_server check is compatible with Windows.
+[Run the Agent's `status` subcommand][3] and look for `exchange_server` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv) for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 The exchange server check does not include any events at this time.
 
 ### Service Checks
 The exchange server check does not include any service check at this time.
+
+
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/conf.yaml.example
+[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
+[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+
+

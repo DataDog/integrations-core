@@ -1,23 +1,14 @@
 # CHANGELOG - rabbitmq
 
-1.5.1 / Unreleased
-==================
-
-### Changes
+## 1.5.1 / 2018-03-23
 
 * [BUGFIX] URL encode queue names that might have special characters like '#'. See [#1100][], thanks [@sylr][].
 
-1.5.0 / 2018-02-13
-==================
-
-### Changes
+## 1.5.0 / 2018-02-13
 
 * [IMPROVEMENT] begin deprecation of `no_proxy` config flag in favor of `skip_proxy`. See [#1057][].
 
-1.4.0 / 2018-01-10
-==================
-
-### Changes
+## 1.4.0 / 2018-01-10
 
 * [FEATURE] Add data collection for exchanges. See [#176][]. (Thanks [@wholroyd][])
 * [FEATURE] Add a metric illustrating the available disk space. See [#902][]. (Thanks [@dnavre][])
@@ -25,44 +16,28 @@
 * [IMPROVEMENT] If vhosts are listed in the config, the check will only query for those specific vhosts, rather than querying for all of them. See [#910][].
 * [FEATURE] Add metrics to monitor a cluster. See [#924][]
 
-1.3.1 / 2017-10-10
-==================
-
-### Changes
+## 1.3.1 / 2017-10-10
 
 * [BUGFIX] Add a key check before updating connection state metric. See [#729][]. (Thanks [@ian28223][])
 
-1.3.0 / 2017-08-28
-==================
-
-### Changes
+## 1.3.0 / 2017-08-28
 
 * [FEATURE] Add a metric to get the number of bindings for a queue. See [#674][]
 * [BUGFIX] Set aliveness service to CRITICAL if the rabbitmq server is down. See[#635][]
 
-1.2.0 / 2017-07-18
-==================
-
-### Changes
+## 1.2.0 / 2017-07-18
 
 * [FEATURE] Add a metric about the number of connections to rabbitmq. See [#504][]
 * [FEATURE] Add custom tags to metrics, event and service checks. See [#506][]
 * [FEATURE] Add a metric about the number of each connection states. See [#514][] (Thanks [@jamescarr][])
 
-1.1.0 / 2017-06-05
-==================
-
-### Changes
+## 1.1.0 / 2017-06-05
 
 * [IMPROVEMENT] Disable proxy if so-desired. See [#407][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds rabbitmq integration.
-
 
 [#407]: https://github.com/DataDog/integrations-core/issues/407
 [#504]: https://github.com/DataDog/integrations-core/issues/504

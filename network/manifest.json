@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "network",
   "short_description": "Track bytes and packets in/out, connection states, round trip times, and more.",
   "support": "core",
@@ -11,11 +9,13 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.4.0",
   "guid": "43631795-8a1f-404d-83ae-397639a84050",
   "public_title": "Datadog-Network Integration",
-  "categories":["web", "network"],
-  "type":"check",
+  "categories": [
+    "web",
+    "network"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/network/",
   "is_public": true,
   "has_logo": true

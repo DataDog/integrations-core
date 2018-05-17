@@ -1,63 +1,39 @@
 # CHANGELOG - kafka_consumer
 
-1.3.0 / Unreleased
-==================
+## 1.3.0 / 2018-03-23
 
-### Changes
-
+* [FEATURE] Add SSL as a connect option.
 * [FEATURE] Add custom tag support.
 
-1.2.2 / 2018-02-13
-==================
-
-### Changes
+## 1.2.2 / 2018-02-13
 
 * [BUGFIX] Check explicitly that node_id is None instead of 0. See [#1022][]
 
-1.2.1 / 2017-11-29
-==================
-
-### Changes
+## 1.2.1 / 2017-11-29
 
 * [BUGFIX] Use instance key to retrieve cached kafka_client, See [#904][]
 
-1.2.0 / 2017-11-21
-==================
-
-### Changes
+## 1.2.0 / 2017-11-21
 
 * [FEATURE] Support collection of consumer offsets from Kafka, in addition to ZK. See [#654][]
 
-1.1.0 / 2017-10-10
-==================
-
-### Changes
+## 1.1.0 / 2017-10-10
 
 * [FEATURE] discovery of groups, topics and partitions. See [#633][] (Thanks [@jeffwidman][])
 * [SANITY] set upper bound on number of contexts. Submit "broker available" metrics. See [#753][]
 * [SANITY] Remove usage of `AgentCheck.read_config` (deprecated method). See [#733][]
 
-1.0.2 / 2017-08-28
-==================
-
-### Changes
+## 1.0.2 / 2017-08-28
 
 * [IMPROVEMENT] Bump Kazoo dependency to 2.4.0. See [#623][], thanks [@jeffwidman][]
 * [IMPROVEMENT] Bump kafka-python to 1.3.4. See [#684][], thanks [@jeffwidman][]
 * [IMPROVEMENT] Switch ZK example from string to list. See [#624][], thanks [@jeffwidman][]
 
-
-1.0.1 / 2017-04-24
-==================
-
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [DEPENDENCY] bumping kafka-python to 0.3.3. See [#272][] (Thanks [@jeffwidman][])
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds kafka_consumer integration.
 

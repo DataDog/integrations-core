@@ -4,4 +4,4 @@ ad_identifiers:
 init_config:
 
 instances:
-  - report_url: http://%%host%%:%%port%%/rpc/report
+  - report_url: http://%%host%%:1978/rpc/report
