@@ -245,13 +245,21 @@ class HTTPCheck(NetworkCheck):
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s" % addr)
 
-            if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
-                # Emit a warning if disable_ssl_validation is unset
-                if 'disable_ssl_validation' in instance:
-                    self.warning("Skipping SSL certificate validation for {0} based on configuration".format(addr))
+            suppress_warning = False
+            if disable_ssl_validation and parsed_uri.scheme == "https":
+                explicit_validation = 'disable_ssl_validation' in instance
+                if ignore_ssl_warning:
+                    if explicit_validation:
+                        suppress_warning = True
                 else:
-                    self.warning('Parameter disable_ssl_validation for {0} is not explicitly set, '
-                                 'defaults to true'.format(addr))
+                    # Log if we're skipping SSL validation for HTTPS URLs
+                    if explicit_validation:
+                        self.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
+
+                    # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
+                    else:
+                        self.warning('Parameter disable_ssl_validation for {} is not explicitly set, '
+                                     'defaults to true'.format(addr))
 
 
             instance_proxy = self.get_instance_proxy(instance, addr)
@@ -266,20 +274,21 @@ class HTTPCheck(NetworkCheck):
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 sess.mount(base_addr, WeakCiphersAdapter())
-                self.log.debug("Weak Ciphers will be used for {0}. Suppoted Cipherlist: {1}".format(
-                    base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS))
+                self.log.debug("Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                               base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS))
 
             with warnings.catch_warnings():
-                # Suppress warnings from urllib3 if bypassing ssl validation
-                if disable_ssl_validation:
+                # Suppress warnings from urllib3 only if disable_ssl_validation is explicitly set to True
+                #  and ignore_ssl_warning is True
+                if suppress_warning:
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
-                                 proxies = instance_proxy, allow_redirects=allow_redirects,
+                                 proxies=instance_proxy, allow_redirects=allow_redirects,
                                  verify=False if disable_ssl_validation else instance_ca_certs,
-                                 json = data if method.lower() == 'post' and isinstance(data, dict) else None,
-                                 data = data if method.lower() == 'post' and isinstance(data, basestring) else None,
-                                 cert = (client_cert, client_key) if client_cert and client_key else None)
+                                 json=data if method.lower() == 'post' and isinstance(data, dict) else None,
+                                 data=data if method.lower() == 'post' and isinstance(data, basestring) else None,
+                                 cert=(client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
