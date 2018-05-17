@@ -51,11 +51,7 @@ agent - both strategies carry on a long list of issues.
 ### Versioning
 
 Despite having separated the checks from the agent, the two codebases are still
-strongly coupled when it comes to versioning. Checks are supposed to be released
-in standalone mode, without a corresponding agent release, and in a manual
-fashion: we decide when a new release for a check is needed and we trigger the
-release process. This means we might have changes piling up on `master` between
-one release and another which is fine but doesn’t play well when an agent
+strongly coupled when it comes to versioning. Checks are supposed to be released in standalone mode, without a corresponding agent release, and in a manual fashion: we decide when a new release for a check is needed and we trigger the release process. This means we might have changes piling up on `master` between one release and another which is fine but doesn’t play well when an agent
 release falls in the middle: when we release the agent, we embed all the checks
 we find on `master` in `integrations-core`, leaving the check in an inconsistent
 state: “not released as standalone but released with an agent”. A workaround to
@@ -293,3 +289,4 @@ Integration tests should be adjusted as well.
 ### Appendix
 
 Wheels documentation: https://packaging.python.org/tutorials/distributing-packages/#wheels
+

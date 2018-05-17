@@ -1,47 +1,47 @@
 # How to create a new integration
 
-To consider an Agent based integration complete, thus ready to be included in the
-core repository and bundled with the Agent package, a number of requisites have
-to be met:
+To consider an Agent based integration complete, thus ready to be included in the core repository and bundled with the Agent package, a number of requisites have to be met:
 
-* a `README.md` file with the right format has been provided
-* a battery of tests checking that metrics are collected is present
-* a set of images to be used in the UI tile is provided
-* the `metadata.csv` file lists all the metrics collected by the integration
-* the `manifest.json` file is filled with all the relevant information
-* if the integration collects Service Checks, the `service_checks.json` contains the right metadata
+* A `README.md` file with the right format has been provided
+* A battery of tests checking that metrics are collected is present
+* A set of images to be used in the UI tile is provided
+* The `metadata.csv` file lists all the metrics collected by the integration
+* The `manifest.json` file is filled with all the relevant information
+* If the integration collects Service Checks, the `service_checks.json` contains the right metadata
 
-Those requirements will be used during the code review process as a checklist and
-this howto will show you how to implement one by one all the requirements for a
-brand new integration.
+Those requirements are used during the code review process as a checklist and this *howto* shows you how to implement one by one all the requirements for a brand new integration.
 
 ## Prerequisites
 
-Python 2.7 needs to be available on your system, see [this page](python.md) if
+Python 2.7 needs to be available on your system, see [this page][ThisPage] if
 you need guidance for setting it up along with a virtual environment manager.
 
-**Note:** before starting, we suggest to create and activate a Python virtual environment
-so that all the packages we're going to install will be isolated from the system
-wide installation.
+**Note:** before starting, we suggest to create and activate a [Python virtual environment][5] so that all the packages we're going to install will be isolated from the system wide installation.
 
 ## Setup
 
-Clone the [integrations extras repository](https://github.com/DataDog/integrations-extras)
-and point your shell at the root:
+Clone the [integrations extras repository][IntegrationsExtrasRepository] and point your shell at the root:
 
-    git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
+```
+git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
+```
 
 Install the Python packages needed to work on Agent integrations:
 
-    pip install -r requirements-dev.txt
+```
+pip install -r requirements-dev.txt
+```
 
 We use [cookiecutter][1] to create the skeleton for a new integration, just run
 
-    cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
+```
+cookiecutter https://github.com/DataDog/cookiecutter-datadog-check.git
+```
 
 and answer the questions when prompted. Once done, you should end up with
 something like this:
 
+```
     my_check
     ├── CHANGELOG.md
     ├── MANIFEST.in
@@ -71,6 +71,7 @@ something like this:
     │   ├── conftest.py
     │   └── test_check.py
     └── tox.ini
+```
 
 ## Write the check
 
@@ -81,17 +82,11 @@ A Check is a Python class with the following requirements:
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
-Checks are organized in regular Python packages under the `datadog_checks` namespace,
-so your code should live under `my_check/datadog_checks/my_check`. The only requirement
-is that the name of the package has to be the same as the check name, `my_check`
-in this case. The name of the Python modules within that package and the name of
-the class implementing the check can be whatever instead.
+Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `my_check/datadog_checks/my_check`. The only requirement is that the name of the package has to be the same as the check name, `my_check` in this case. The name of the Python modules within that package and the name of the class implementing the check can be whatever instead.
 
 ### Implement check logic
 
-Let's say we want to collect a service check that sends `OK` when we are able to
-find a certain string in the body of a web page, `WARNING` if we can access the
-page but can't find the string and `CRITICAL` if we can't reach the page at all.
+Let's say we want to collect a service check that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string and `CRITICAL` if we can't reach the page at all.
 
 The code would look like this:
 
@@ -121,20 +116,14 @@ class MyCheck(AgentCheck):
             self.service_check(self.CRITICAL, e)
 ```
 
-That's pretty much all the code we need, to see what the base class can do you can
-read [some docs here][2]. Now let's write some tests and see if that works.
+That's pretty much all the code we need, to see what the base class can do,  read [some docs here][2]. Now let's write some tests and see if that works.
 
 ### Writing tests
 
-We use [pytest][3] and [tox][4] to run the tests. You can write unit tests for
-specific parts of the code and integration tests, that execute the `check` method
-and verify that certain metrics were collected with specific tags or values, let's
-see an example of both.
+We use [pytest][3] and [tox][4] to run the tests. Write unit tests for
+specific parts of the code and integration tests, that execute the `check` method and verify that certain metrics were collected with specific tags or values, let's see an example of both.
 
-The first part of our `check` method retrieves two pieces of information we need from the
-configuration file: this is a good candidate for a quick unit test. Open the
-file at `my_check/tests/test_check.py` and replace the contents with something
-like this:
+The first part of our `check` method retrieves two pieces of information we need from the configuration file: this is a good candidate for a quick unit test. Open the file at `my_check/tests/test_check.py` and replace the contents with something like this:
 
 ```python
 import pytest
@@ -167,10 +156,9 @@ The cookiecutter template has already setup `tox` to run tests located at
 
     cd my_check && tox
 
-The test we just wrote doesn't check our collection logic though, so let's add
+The test we just wrote doesn't check our collection logic though, let's add
 an integration test. We'll use docker-compose to spin up a Nginx container and
-we'll let the check get the welcome page. Let's create a compose file at
-`my_check/tests/docker-compose.yml` with the following contents:
+we'll let the check get the welcome page. Let's create a compose file at `my_check/tests/docker-compose.yml` with the following contents:
 
 ```yaml
 version: '3'
@@ -183,8 +171,7 @@ services:
 
 Now we can add a dedicated tox environment to run our integration tests. This
 way we could selectively run one testsuite or another, or both depending on the
-use case. The CI will always run all the tox environments. Change your `tox.ini`
-file to this:
+use case. The CI always runs all the tox environments. Change your `tox.ini` file to this:
 
 ```ini
 [tox]
@@ -220,7 +207,7 @@ max-line-length = 120
 
 You might notice that when invoking `pytest` we now pass an extra argument,
 `-m"integration"` in one case and `-m"not integration"` in another. These are
-called _attributes_ in pytest terms and `-m"integration"` will tell pytest to
+called _attributes_ in pytest terms and `-m"integration"` tells pytest to
 only run tests that are marked with the `integration` attribute, or the other
 way around if `not integration` is specified.
 
@@ -279,10 +266,7 @@ Our check is almost done, let's add the final touches.
 
 ### Fill the README
 
-The readme file as provided by our cookiecutter template has already the right
-format, all you need to do is filling out the relevant sections, in particular
-you're supposed to write something in place of the `[...]` strings you'll find
-in the file.
+The `README.md` file as provided by our cookiecutter template has already the right format, just fill  out the relevant sections, in particular you're supposed to write something in place of the `[...]` strings you'll find in the file.
 
 ### Add images and logos
 
@@ -297,14 +281,11 @@ This is the expected directory structure for images and logos:
         └── saas_logos-small.png
 
 The `images` folder is meant to contain any images that are needed in the
-integration tile. To be used as such, they should be referenced in the `## Overview`
-and/or `## Setup` sections in `README.md` as markdown images using their public URLs.
+integration tile. To be used as such, they should be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as markdown images using their public URLs.
 Because the integrations-core and integrations-extras repositories are public,
 a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`.
 
-The `logos` folder should contain **three** images with filenames and sizes that
-exactly match the following specifications. Underneath each specification is a
-list of places where the images may appear in the web app.
+The `logos` folder should contain **three** images with filenames and sizes that exactly match the following specifications. Underneath each specification is a list of places where the images may appear in the web app.
 
 #### saas_logos-bot.png (200 × 128)
 
@@ -329,8 +310,7 @@ in particular can't be automatically generated at the moment so it's a crucial
 part of the release process. Our check doesn't send any metric so in this case
 we can leave it empty.
 
-Our check sends a Service Check though, so we need to add it to the `service_checks.json`
-file:
+Our check sends a Service Check though, so we need to add it to the `service_checks.json` file:
 
 ```json
 [
@@ -351,3 +331,6 @@ file:
 [2]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
 [3]: https://docs.pytest.org/en/latest/
 [4]: http://tox.readthedocs.io/en/latest/
+[ThisPage]: python.md
+[IntegrationsExtrasRepository]: https://github.com/DataDog/integrations-extras
+[5]: https://virtualenv.pypa.io/en/stable/
