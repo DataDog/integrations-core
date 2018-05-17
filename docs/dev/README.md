@@ -9,7 +9,7 @@ within Datadog. There are currently three options to get data into Datadog:
 * Crawl the data source's API
 * Have the Datadog Agent pick up the information from the source
 
-This guide covers the latter option, providing the informations needed to work
+This guide covers the latter option, providing the information needed to work
 with the Agent based integrations, also referred to as Checks. Checks make the Agent
 able to collect and send metrics, events and service checks to Datadog.
 
@@ -49,23 +49,17 @@ general.
 The project comes with a requirements file you can pass to `pip` to install all
 the dependencies needed to work with any check. From the root of the repo, run:
 
-```
-pip install -r requirements-dev.txt
-```
+  pip install -r requirements-dev.txt
 
 To work with a specific check you need to install its own dependencies. The easiest
 way to iterate on a check development is installing the wheel itself in editable mode.
 For example, if you want to do this for the `disk` check run the following:
 
-```
-cd disk && pip install -e .
-```
+  cd disk && pip install -e .
 
 To double check everything is working as expected you can run:
 
-```
-python -c"from datadog_checks.disk import Disk"
-```
+  python -c"from datadog_checks.disk import Disk"
 
 if the commands ends without errors, you're good to go!
 
@@ -73,15 +67,11 @@ if the commands ends without errors, you're good to go!
 
 To run the testsuite for a given check you can either use `tox`, like:
 
-```
-cd {integration} && tox
-```
+  cd {integration} && tox
 
 or invoke [Pytest](https://docs.pytest.org/en/latest/) directly:
 
-```
-cd {integration} && py.test
-```
+  cd {integration} && py.test
 
 If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
 
@@ -93,7 +83,5 @@ look at the official python documentation [here](https://packaging.python.org/tu
 
 Once your setup.py is ready, creating a wheel is a easy as:
 
-```
-cd {integration}
-python setup.py bdist_wheel
-```
+  cd {integration}
+  python setup.py bdist_wheel

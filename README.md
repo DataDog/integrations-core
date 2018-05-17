@@ -49,7 +49,7 @@ to run, test and build a Check.
 
 **Important:** the instructions are only valid for a subset of the Checks in this
 repository. Making all the checks work with the new build and test strategy is
-a work in progress. You can find the list of the checks already updated [here][20]
+a work in progress. You can find the list of the checks already updated [here][14]
 
 ## Reporting Issues
 
@@ -71,4 +71,3 @@ and [knowledge base][12]. You can also visit our
 [12]: https://help.datadoghq.com/hc/en-us
 [13]: http://docs.datadoghq.com/help/
 [14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15
-[20]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15

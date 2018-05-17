@@ -8,8 +8,8 @@ to be met:
 * a battery of tests checking that metrics are collected is present
 * a set of images to be used in the UI tile is provided
 * the `metadata.csv` file lists all the metrics collected by the integration
-* the `manifest.json` file is filled with all the relevant informations
-* if the integration collects Service Checks, the `service_checks.md` contains the right metadata
+* the `manifest.json` file is filled with all the relevant information
+* if the integration collects Service Checks, the `service_checks.json` contains the right metadata
 
 Those requirements will be used during the code review process as a checklist and
 this howto will show you how to implement one by one all the requirements for a
@@ -26,7 +26,7 @@ wide installation.
 
 ## Setup
 
-Clone the [integrations extras respository](https://github.com/DataDog/integrations-extras)
+Clone the [integrations extras repository](https://github.com/DataDog/integrations-extras)
 and point your shell at the root:
 
     git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
@@ -81,7 +81,7 @@ A Check is a Python class with the following requirements:
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
-Checks are organized in regular Python packages under the `datadog_check` namespace,
+Checks are organized in regular Python packages under the `datadog_checks` namespace,
 so your code should live under `my_check/datadog_checks/my_check`. The only requirement
 is that the name of the package has to be the same as the check name, `my_check`
 in this case. The name of the Python modules within that package and the name of
@@ -131,7 +131,7 @@ specific parts of the code and integration tests, that execute the `check` metho
 and verify that certain metrics were collected with specific tags or values, let's
 see an example of both.
 
-The first part of our `check` method retrieves two informations we need from the
+The first part of our `check` method retrieves two pieces of information we need from the
 configuration file: this is a good candidate for a quick unit test. Open the
 file at `my_check/tests/test_check.py` and replace the contents with something
 like this:
@@ -201,7 +201,7 @@ deps =
 [testenv:unit]
 commands =
     pip install --require-hashes -r requirements.txt
-    pytest -v
+    pytest -v -m"not integration"
 
 [testenv:integration]
 commands =
@@ -300,7 +300,7 @@ The `images` folder is meant to contain any images that are needed in the
 integration tile. To be used as such, they should be referenced in the `## Overview`
 and/or `## Setup` sections in `README.md` as markdown images using their public URLs.
 Because the integrations-core and integrations-extras repositories are public,
-a public URL can be gotten for any of these files via `https://raw.githubusercontent.com`.
+a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`.
 
 The `logos` folder should contain **three** images with filenames and sizes that
 exactly match the following specifications. Underneath each specification is a
@@ -341,7 +341,7 @@ file:
         "statuses": ["ok", "warning", "critical"],
         "groups": ["host", "port"],
         "name": "All Good!",
-        "description": "Returns `CRITICAL` if the can't access the page."
+        "description": "Returns `CRITICAL` if the check can't access the page."
     }
 ]
 ```
