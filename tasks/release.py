@@ -168,14 +168,27 @@ def compile_requirements(ctx, dest_path=None):
     all the agent based integrations pinned at the version they currently
     have in HEAD.
     """
-    all_platforms = sorted(['linux', 'mac_os', 'windows'])
+    # maps the Python platform strings to the ones we have in the manifest
+    platforms_to_py = {
+        'windows': 'win32',
+        'mac_os': 'darwin',
+        'linux': 'linux2',
+    }
+    all_platforms = sorted(platforms_to_py.keys())
 
     entries = []
     for i in AGENT_BASED_INTEGRATIONS:
         if i in AGENT_V5_ONLY:
             print("Integration {} is only shipped with version 5 of the Agent, skip...")
             continue
+
         version = get_version_string(i)
+
+        # base check and siblings have no manifest
+        if i in ('datadog_checks_base', 'datadog_checks_tests_helper'):
+            entries.append('{}=={}'.format(i, version))
+            continue
+
         m = load_manifest(i)
         platforms = sorted(m.get('supported_os', []))
         # all platforms
@@ -183,14 +196,14 @@ def compile_requirements(ctx, dest_path=None):
             entries.append('{}=={}'.format(i, version))
         # one specific platform
         elif len(platforms) == 1:
-            entries.append("{}=={}; sys_platform == '{}'".format(i, version, platforms[0]))
+            entries.append("{}=={}; sys_platform == '{}'".format(i, version, platforms_to_py.get(platforms[0])))
         # assuming linux+mac here for brevity
-        elif 'windows' not in platforms:
-            entries.append("{}=={}; sys_platform != 'windows'".format(i, version))
+        elif platforms and 'windows' not in platforms:
+            entries.append("{}=={}; sys_platform != 'win32'".format(i, version))
         else:
             print("Can't parse the 'supported_os' list for the check {}: {}".format(i, platforms))
 
-    output = '\n'.join(entries)
+    output = '\n'.join(sorted(entries))  # sorting in case AGENT_BASED_INTEGRATIONS is out of order
 
     if dest_path:
         with open(dest_path, 'w') as f:
