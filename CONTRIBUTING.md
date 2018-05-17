@@ -23,9 +23,7 @@ when submitting your PR:
 * have a [proper commit history](#commits) (we advise you to rebase if needed).
 * write tests for the code you wrote.
 * make sure that all tests pass locally.
-* summarize your PR with an explanatory title and a message describing your
-  changes, cross-referencing any related bugs/PRs. **Please note PR title will
-  be used to compile the CHANGELOG file, so it has to be concise but explanatory**.
+* summarize your PR with a meaningful title, [see later on this doc](#pull-request-title).
 
 Your pull request must pass all CI tests before we will merge it. If you're seeing
 an error and don't think it's your fault, it may not be! [Join us on Slack][slack]
@@ -35,6 +33,21 @@ or send  us an email, and together we'll get it sorted out.
 
 Avoid changing too many things at once. For instance if you're fixing two different
 checks at once, it makes reviewing harder and the _time-to-release_ longer.
+
+### Pull Request title
+
+Unless the PR is marked with the proper exclusion label, the title will be used
+to automatically fill the changelog entries. For this reason the title must be
+concise but explanatory and possibly marked with one of the following prefixes:
+
+* `[Added]` for new features.
+* `[Changed]` for changes in existing functionality.
+* `[Deprecated]` for soon-to-be removed features.
+* `[Removed]` for now removed features.
+* `[Fixed]` for any bug fixes.
+* `[Security]` in case of vulnerabilities.
+
+See [here](https://keepachangelog.com/en/1.0.0/) for more details about changelogs.
 
 ### Commit Messages
 
