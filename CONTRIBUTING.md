@@ -1,4 +1,4 @@
-# Contributing to Datadog Agent
+# Contributing
 
 First of all, thanks for contributing!
 
