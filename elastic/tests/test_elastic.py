@@ -80,13 +80,19 @@ def test_bad_port(aggregator, spin_up_elastic):
     with pytest.raises(Exception):
         elastic_check.check(BAD_CONFIG)
 
-def test_url_join(aggregator): 
+
+def test_url_join(aggregator):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
-    adm_forwarder_joined_url = elastic_check._join_url("https://localhost:9444/elasticsearch-admin", "/stats", admin_forwarder=True)
+    adm_forwarder_joined_url = elastic_check._join_url(
+        "https://localhost:9444/elasticsearch-admin",
+        "/stats",
+        admin_forwarder=True
+    )
     assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
 
     joined_url = elastic_check._join_url("https://localhost:9444/elasticsearch-admin", "/stats")
     assert joined_url == "https://localhost:9444/stats"
+
 
 def test_check(aggregator, spin_up_elastic):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
