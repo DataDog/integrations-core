@@ -21,7 +21,7 @@ from .utils import get_version_string, get_release_tag_string
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
 
-NO_CHANGELOG_LABEL = 'documentation/no-changelog'
+NO_CHANGELOG_LABEL = 'no-changelog'
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
 
