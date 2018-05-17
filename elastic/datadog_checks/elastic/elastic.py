@@ -18,6 +18,7 @@ class NodeNotFound(Exception):
 
 ESInstanceConfig = namedtuple(
     'ESInstanceConfig', [
+        'admin_forwarder',
         'pshard_stats',
         'pshard_graceful_to',
         'cluster_stats',
@@ -432,6 +433,7 @@ class ESCheck(AgentCheck):
         timeout = instance.get('timeout') or self.DEFAULT_TIMEOUT
 
         config = ESInstanceConfig(
+            admin_forwarder=admin_forwarder,
             pshard_stats=pshard_stats,
             pshard_graceful_to=pshard_graceful_to,
             cluster_stats=cluster_stats,
@@ -452,6 +454,7 @@ class ESCheck(AgentCheck):
 
     def check(self, instance):
         config = self.get_instance_config(instance)
+        admin_forwarder = config.admin_forwarder
 
         # Check ES version for this instance and define parameters
         # (URLs and metrics) accordingly
@@ -467,7 +470,7 @@ class ESCheck(AgentCheck):
         # Load stats data.
         # This must happen before other URL processing as the cluster name
         # is retreived here, and added to the tag list.
-        stats_url = urlparse.urljoin(config.url, stats_url)
+        stats_url = self._join_url(config.url, stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url, config)
         if stats_data['cluster_name']:
             # retreive the cluster name from the data, and append it to the
@@ -481,7 +484,7 @@ class ESCheck(AgentCheck):
         # Note: this is a cluster-wide query, might TO.
         if config.pshard_stats:
             send_sc = bubble_ex = not config.pshard_graceful_to
-            pshard_stats_url = urlparse.urljoin(config.url, pshard_stats_url)
+            pshard_stats_url = self._join_url(config.url, pshard_stats_url, admin_forwarder)
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, config, send_sc=send_sc)
                 self._process_pshard_stats_data(pshard_stats_data, config, pshard_stats_metrics)
@@ -491,19 +494,19 @@ class ESCheck(AgentCheck):
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
 
         # Load the health data.
-        health_url = urlparse.urljoin(config.url, health_url)
+        health_url = self._join_url(config.url, health_url, admin_forwarder)
         health_data = self._get_data(health_url, config)
         self._process_health_data(health_data, config)
 
         if config.pending_task_stats:
             # Load the pending_tasks data.
-            pending_tasks_url = urlparse.urljoin(config.url, pending_tasks_url)
+            pending_tasks_url = self._join_url(config.url, pending_tasks_url, admin_forwarder)
             pending_tasks_data = self._get_data(pending_tasks_url, config)
             self._process_pending_tasks_data(pending_tasks_data, config)
 
         if config.index_stats and version >= [1, 0, 0]:
             try:
-                self._get_index_metrics(config)
+                self._get_index_metrics(config, admin_forwarder)
             except requests.ReadTimeout as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
@@ -537,9 +540,17 @@ class ESCheck(AgentCheck):
         self.log.debug("Elasticsearch version is %s" % version)
         return version
 
-    def _get_index_metrics(self, config):
+    def _join_url(self, base, url, admin_forwarder=False):
+        # overrides `urlparse.urljoin` since it removes base url path
+        # https://docs.python.org/2/library/urlparse.html#urlparse.urljoin
+        if admin_forwarder:
+            return base + url
+        else:
+            return urlparse.urljoin(base, url)
+
+    def _get_index_metrics(self, config, admin_forwarder):
         cat_url = '/_cat/indices?format=json&bytes=b'
-        index_url = urlparse.urljoin(config.url, cat_url)
+        index_url = self._join_url(config.url, cat_url, admin_forwarder)
         index_resp = self._get_data(index_url, config)
         index_stats_metrics = self.INDEX_STATS_METRICS
         health_stat = {'green': 0, 'yellow': 1, 'red': 2}
