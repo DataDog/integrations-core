@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import print_function, unicode_literals
 import os
+import json
 
 from .constants import ROOT
 
@@ -35,3 +36,14 @@ def get_release_tag_string(check_name, version_string):
     Compose a string to use for release tags
     """
     return '{}-{}'.format(check_name, version_string)
+
+
+def load_manifest(check_name):
+    """
+    Load the manifest file into a dictionary
+    """
+    manifest_path = os.path.join(ROOT, check_name, 'manifest.json')
+    if os.path.exists(manifest_path):
+        with open(manifest_path) as f:
+            return json.load(f)
+    return {}
