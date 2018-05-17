@@ -12,9 +12,11 @@ from kafka.client import KafkaClient
 import kafka.errors as KafkaErrors
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy
+from kafka.protocol import admin
 from kafka.structs import TopicPartition
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
+import kafka
 
 # project
 from datadog_checks.checks import AgentCheck
@@ -98,11 +100,17 @@ class KafkaCheck(AgentCheck):
         cli = self._get_kafka_client(instance)
         cli._maybe_refresh_metadata()
 
+        kafka_conn_str = instance.get('kafka_connect_str')
+        if not isinstance(kafka_conn_str, (basestring, list)):
+            raise BadKafkaConsumerConfiguration(
+                    'kafka_connect_str should be string or list of strings')
+
         if get_kafka_consumer_offsets:
-            # For now, consumer groups are mandatory if not using ZK
-            if not zk_hosts_ports and not consumer_groups:
-                raise BadKafkaConsumerConfiguration('Invalid configuration - if you\'re not collecting '
-                                                    'offsets from ZK you _must_ specify consumer groups')
+            # If not using ZK, get consumer groups from Kafka (only for versions after 0.9)
+            if not zk_hosts_ports and not consumer_groups and cli.config.get('api_version') >= (0, 9, 0):
+                consumer_groups = self._get_kafka_consumer_groups(cli, kafka_conn_str)
+                self._validate_explicit_consumer_groups(consumer_groups)
+
             # kafka-python automatically probes the cluster for broker version
             # and then stores it. Note that this returns the first version
             # found, so in a mixed-version cluster this will be a
@@ -237,6 +245,42 @@ class KafkaCheck(AgentCheck):
                 coord_id = None
 
         return coord_id
+
+    def _get_kafka_consumer_groups(self, client, kafka_conn_str):
+        # Until kafka-python implements the adminClient that
+        # can retrieve list of consumer groups we will be using this
+        # method adapted from https://github.com/amoma-com/zabbix-kafka-consumers-monitor
+        group_request = admin.ListGroupsRequest_v0(
+            timeout=self._kafka_timeout
+        )
+        consumer_group = {}
+        kafka_broker_ids = [broker.nodeId for broker in client.cluster.brokers()]
+        for b_id in kafka_broker_ids:
+            tries = 0
+            max_tries = 5
+            data_from_node = False
+
+            while not data_from_node and tries <= max_tries:
+                future = client.send(b_id, group_request)
+                client.poll(timeout_ms=self._kafka_timeout, future=future)
+                if future.value is not None:
+                    results = future.value.groups
+
+                    for r in results:
+                        topics = {}
+                        # Get topics for a consumer group
+                        consumer = kafka.KafkaConsumer(group_id=r[0], bootstrap_servers=[kafka_conn_str])
+                        for topic in consumer.topics():
+                            # Get partitions for topic
+                            partitions = list(client.cluster.available_partitions_for_topic(topic))
+                            topics[topic] = partitions
+                            consumer_group[r[0]] = topics  # {topic: [x, y, z]}
+                    data_from_node = True
+                else:
+                    tries += 1
+                    sleep(0.5)
+
+        return consumer_group
 
     def _process_highwater_offsets(self, request, instance, node_id, response):
         highwater_offsets = {}

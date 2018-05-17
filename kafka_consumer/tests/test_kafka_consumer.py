@@ -51,3 +51,31 @@ def test_check_kafka(kafka_cluster, kafka_producer, kafka_consumer, kafka_instan
 
     # let's reassert for the __consumer_offsets - multiple partitions
     aggregator.assert_metric('kafka.broker_offset', at_least=1)
+
+
+@pytest.mark.kafka
+def test_check_kafka_default_groups(kafka_cluster, kafka_producer, kafka_consumer, kafka_only_instance, aggregator):
+    """
+    Test kafka check with default consumer groups
+    """
+    if not is_supported(['kafka']):
+        pytest.skip("kafka consumer offsets not supported in current environment")
+
+    if not kafka_producer.is_alive():
+        kafka_producer.start()
+        time.sleep(5)
+
+    if not kafka_consumer.is_alive():
+        kafka_consumer.start()
+        time.sleep(5)
+
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
+    kafka_consumer_check.check(kafka_only_instance)
+
+    for mname in BROKER_METRICS:
+        aggregator.assert_metric(mname, at_least=1)
+    for mname in CONSUMER_METRICS:
+        aggregator.assert_metric(mname, at_least=1)
+
+    # let's reassert for the __consumer_offsets - multiple partitions
+    aggregator.assert_metric('kafka.broker_offset', at_least=1)
