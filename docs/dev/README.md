@@ -59,12 +59,6 @@ To run the test suite for a given check, either use `tox`, like:
 cd {integration} && tox
 ```
 
-or invoke [Pytest][8] directly:
-
-```
-cd {integration} && py.test
-```
-
 If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
 
 ### Building
