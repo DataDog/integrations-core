@@ -20,10 +20,20 @@ Have you fixed a bug or written a new check and want to share it? Many thanks!
 In order to ease/speed up our review, here are some items you can check/improve
 when submitting your PR:
 
-* have a [proper commit history](#commits) (we advise you to rebase if needed).
-* write tests for the code you wrote.
-* make sure that all tests pass locally.
-* summarize your PR with a meaningful title, [see later on this doc](#pull-request-title).
+* Have a [proper commit history](#commits) (we advise you to rebase if needed).
+* Write tests for the code you wrote.
+* Make sure that all tests pass locally.
+* Summarize your PR with a meaningful title, [see later on this doc](#pull-request-title).
+* Add the most suitable changelog label choosing one of the following:
+  * `changelog/Added` for new features.
+  * `changelog/Changed` for changes in existing functionality.
+  * `changelog/Deprecated` for soon-to-be removed features.
+  * `changelog/Removed` for now removed features.
+  * `changelog/Fixed` for any bug fixes.
+  * `changelog/Security` in case of vulnerabilities.
+  * `changelog/no-changelog` in case this PR should not appear in the changelog at all.
+
+See [here](https://keepachangelog.com/en/1.0.0/) for more details about changelogs.
 
 Your pull request must pass all CI tests before we will merge it. If you're seeing
 an error and don't think it's your fault, it may not be! [Join us on Slack][slack]
@@ -38,16 +48,7 @@ checks at once, it makes reviewing harder and the _time-to-release_ longer.
 
 Unless the PR is marked with the proper exclusion label, the title will be used
 to automatically fill the changelog entries. For this reason the title must be
-concise but explanatory and possibly marked with one of the following prefixes:
-
-* `[Added]` for new features.
-* `[Changed]` for changes in existing functionality.
-* `[Deprecated]` for soon-to-be removed features.
-* `[Removed]` for now removed features.
-* `[Fixed]` for any bug fixes.
-* `[Security]` in case of vulnerabilities.
-
-See [here](https://keepachangelog.com/en/1.0.0/) for more details about changelogs.
+concise but explanatory.
 
 ### Commit Messages
 
