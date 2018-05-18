@@ -1,7 +1,12 @@
-from . import kafka_consumer
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-KafkaCheck = kafka_consumer.KafkaCheck
+from .kafka_consumer import KafkaCheck
+from .__about__ import __version__
 
-__version__ = "1.3.0"
 
-__all__ = ['kafka_consumer']
+__all__ = [
+    '__version__',
+    'KafkaCheck'
+]
