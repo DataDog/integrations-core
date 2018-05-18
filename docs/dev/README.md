@@ -19,7 +19,7 @@ Overall, the largest deciding factor in what integrations we build is what our c
 * [Reach out to support@datadoghq.com][5] and tell us what metrics you would like to see from a given source.
 * Implement the integration yourself and submit the code to the [official extras repository][6].
 
-If you want to create a new Check from scratch, start by looking at the [howto](new_check_howto.md) documentation.
+If you want to create a new Check from scratch, start by looking at the [howto][10] documentation.
 
 ## Development guide
 
@@ -75,9 +75,10 @@ Once your setup.py is ready, creating a wheel is a easy as:
 [1]: https://docs.datadoghq.com/developers/metrics/
 [2]: https://docs.datadoghq.com/api/
 [3]: https://docs.datadoghq.com/developers/libraries/
+[4]: https://github.com/DataDog/integrations-core
 [5]: https://docs.datadoghq.com/help/
 [6]: https://github.com/DataDog/integrations-extras
-[7]: python.md
+[7]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [8]: https://docs.pytest.org/en/latest/
 [9]: https://packaging.python.org/tutorials/distributing-packages/
-[4]: https://github.com/DataDog/integrations-core
+[10]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/new_check_howto.md 
