@@ -7,7 +7,13 @@ from .mixins import PrometheusScraper
 from .. import AgentCheck
 from ...errors import CheckException
 
+
 class Scraper(PrometheusScraper):
+    """
+    This class scrapes a prometheus endpoint and submits the metrics on behalf of a check. This class
+    is used by checks that scrape more than one prometheus endpoint.
+    """
+
     def __init__(self, check):
         super(Scraper, self).__init__()
         self.check = check
@@ -65,7 +71,7 @@ class Scraper(PrometheusScraper):
 
 class GenericPrometheusCheck(AgentCheck):
     """
-    GenericPrometheusCheck is a class that helps instanciating PrometheusCheck only
+    GenericPrometheusCheck is a class that helps instantiating PrometheusCheck only
     with YAML configurations. As each check has it own states it maintains a map
     of all checks so that the one corresponding to the instance is executed
 

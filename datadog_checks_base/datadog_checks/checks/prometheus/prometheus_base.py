@@ -10,7 +10,7 @@ from .. import AgentCheck
 #
 # It must be noted that if the check implementing this class is not officially
 # supported
-# its metrics will count as cutom metrics and WILL impact billing.
+# its metrics will count as custom metrics and WILL impact billing.
 #
 # Minimal config for checks based on this class include:
 #   - implementing the check method
