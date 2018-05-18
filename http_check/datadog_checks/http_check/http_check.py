@@ -21,6 +21,7 @@ from requests.packages import urllib3
 from requests.packages.urllib3.util import ssl_
 
 from requests.packages.urllib3.exceptions import (
+    InsecureRequestWarning,
     SecurityWarning,
 )
 from requests.packages.urllib3.packages.ssl_match_hostname import \
@@ -203,23 +204,24 @@ class HTTPCheck(NetworkCheck):
         if not url:
             raise Exception("Bad configuration. You must specify a url")
         include_content = _is_affirmative(instance.get('include_content', False))
-        ssl = _is_affirmative(instance.get('disable_ssl_validation', True))
+        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', True))
         ssl_expire = _is_affirmative(instance.get('check_certificate_expiration', True))
         instance_ca_certs = instance.get('ca_certs', self.ca_certs)
         weakcipher = _is_affirmative(instance.get('weakciphers', False))
         ignore_ssl_warning = _is_affirmative(instance.get('ignore_ssl_warning', False))
+        check_hostname = _is_affirmative(instance.get('check_hostname', True))
         skip_proxy = _is_affirmative(
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
         return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content,\
-            headers, response_time, content_match, reverse_content_match, tags, ssl, ssl_expire, instance_ca_certs,\
-            weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects
+            headers, response_time, content_match, reverse_content_match, tags, disable_ssl_validation, ssl_expire, instance_ca_certs,\
+            weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects
 
     def _check(self, instance):
         addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, include_content, headers,\
             response_time, content_match, reverse_content_match, tags, disable_ssl_validation,\
-            ssl_expire, instance_ca_certs, weakcipher, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
+            ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, skip_proxy, allow_redirects = self._load_conf(instance)
         start = time.time()
 
         def send_status_up(logMsg):
@@ -242,9 +244,23 @@ class HTTPCheck(NetworkCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s" % addr)
-            if disable_ssl_validation and parsed_uri.scheme == "https" and not ignore_ssl_warning:
-                self.warning("Skipping SSL certificate validation for %s based on configuration"
-                             % addr)
+
+            suppress_warning = False
+            if disable_ssl_validation and parsed_uri.scheme == "https":
+                explicit_validation = 'disable_ssl_validation' in instance
+                if ignore_ssl_warning:
+                    if explicit_validation:
+                        suppress_warning = True
+                else:
+                    # Log if we're skipping SSL validation for HTTPS URLs
+                    if explicit_validation:
+                        self.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
+
+                    # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
+                    else:
+                        self.warning('Parameter disable_ssl_validation for {} is not explicitly set, '
+                                     'defaults to true'.format(addr))
+
 
             instance_proxy = self.get_instance_proxy(instance, addr)
             self.log.debug("Proxies used for %s - %s", addr, instance_proxy)
@@ -258,15 +274,21 @@ class HTTPCheck(NetworkCheck):
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 sess.mount(base_addr, WeakCiphersAdapter())
-                self.log.debug("Weak Ciphers will be used for {0}. Suppoted Cipherlist: {1}".format(
-                    base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS))
+                self.log.debug("Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                               base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS))
 
-            r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
-                             proxies = instance_proxy, allow_redirects=allow_redirects,
-                             verify=False if disable_ssl_validation else instance_ca_certs,
-                             json = data if method.lower() == 'post' and isinstance(data, dict) else None,
-                             data = data if method.lower() == 'post' and isinstance(data, basestring) else None,
-                             cert = (client_cert, client_key) if client_cert and client_key else None)
+            with warnings.catch_warnings():
+                # Suppress warnings from urllib3 only if disable_ssl_validation is explicitly set to True
+                #  and ignore_ssl_warning is True
+                if suppress_warning:
+                    warnings.simplefilter('ignore', InsecureRequestWarning)
+
+                r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
+                                 proxies=instance_proxy, allow_redirects=allow_redirects,
+                                 verify=False if disable_ssl_validation else instance_ca_certs,
+                                 json=data if method.lower() == 'post' and isinstance(data, dict) else None,
+                                 data=data if method.lower() == 'post' and isinstance(data, basestring) else None,
+                                 cert=(client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
@@ -359,7 +381,7 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left,msg = self.check_cert_expiration(instance, timeout, instance_ca_certs)
+            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname)
 
             tags_list = list(tags)
             tags_list.append('url:%s' % addr)
@@ -399,7 +421,7 @@ class HTTPCheck(NetworkCheck):
                            message=msg
                            )
 
-    def check_cert_expiration(self, instance, timeout, instance_ca_certs):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname):
         warning_days = int(instance.get('days_warning', 14))
         critical_days = int(instance.get('days_critical', 7))
         url = instance.get('url')
@@ -416,14 +438,17 @@ class HTTPCheck(NetworkCheck):
             sock.connect((host, port))
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_REQUIRED
-            context.check_hostname = True
+            context.check_hostname = check_hostname
             context.load_verify_locations(instance_ca_certs)
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
+        except ssl.CertificateError as e:
+            self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
+            return Status.CRITICAL, 0, str(e)
         except Exception as e:
             self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
-            return Status.DOWN, 0, "%s" % (str(e))
+            return Status.DOWN, 0, str(e)
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         days_left = exp_date - datetime.utcnow()

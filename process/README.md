@@ -39,16 +39,10 @@ To have the check search for processes in a path other than `/proc`, set `procfs
 
 Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved.
 Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric.
-As of now, only the `open_fd` metric on Unix platforms is taking advantage of this setting.
-Note: the appropriate sudoers rules have to be configured for this to work, e.g. if packaged as a wheel archive with the datadog agent
+As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting.
+Note: the appropriate sudoers rules have to be configured for this to work
 ```
-dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks/process/process.py num_fds *
-dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks/process/process.pyc num_fds *
-```
-Before agent v5.22 and v6.0, integrations were not packaged as wheel archives and the path to the check was a little different:
-```
-dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/agent/checks.d/process.py num_fds *
-dd-agent ALL=NOPASSWD: /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/agent/checks.d/process.pyc num_fds *
+dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
 ```
 
 See the [example configuration][3] for more details on configuration options.

@@ -81,6 +81,19 @@ def test_bad_port(aggregator, spin_up_elastic):
         elastic_check.check(BAD_CONFIG)
 
 
+def test_url_join(aggregator):
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    adm_forwarder_joined_url = elastic_check._join_url(
+        "https://localhost:9444/elasticsearch-admin",
+        "/stats",
+        admin_forwarder=True
+    )
+    assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
+
+    joined_url = elastic_check._join_url("https://localhost:9444/elasticsearch-admin", "/stats")
+    assert joined_url == "https://localhost:9444/stats"
+
+
 def test_check(aggregator, spin_up_elastic):
     elastic_check = ESCheck(CHECK_NAME, {}, {})
     default_tags = ["url:http://{0}:{1}".format(HOST, PORT)]
@@ -209,6 +222,7 @@ def test_config_parser(aggregator, spin_up_elastic):
     c = elastic_check.get_instance_config(instance)
     assert c.username == "user"
     assert c.password == "pass"
+    assert c.admin_forwarder is False
     assert c.cluster_stats is True
     assert c.url == "http://foo.bar"
     assert c.tags == ["url:http://foo.bar", "a", "b:c"]
@@ -234,10 +248,12 @@ def test_config_parser(aggregator, spin_up_elastic):
         "ssl_verify": "true",
         "ssl_cert": "/path/to/cert.pem",
         "ssl_key": "/path/to/cert.key",
+        "admin_forwarder": "1"
     }
     c = elastic_check.get_instance_config(instance)
     assert c.username == "user"
     assert c.password == "pass"
+    assert c.admin_forwarder is True
     assert c.cluster_stats is False
     assert c.url == "https://foo.bar:9200"
     assert c.tags == ["url:https://foo.bar:9200"]

@@ -1,34 +1,23 @@
 # CHANGELOG - apache
 
-1.2.0 / 2018-03-23
-==================
-### Changes
+## 1.2.0 / 2018-03-23
 
 * [FEATURE] Add custom tag to service check.
 
-1.1.2 / 2018-02-28
-==================
-### Changes
+## 1.1.2 / 2018-02-28
 
 * [BUGFIX] revert metric collection fix for `bytes_per_s` and `request_per_s`. See [#1145][].
 
-1.1.1 / 2018-02-13
-==================
-### Changes
+## 1.1.1 / 2018-02-13
 
 * [BUGFIX] fixes metric collection for `bytes_per_s` and `request_per_s`. See [#1071][].
 * [DOC] Adding configuration for log collection in `conf.yaml`.
 
-1.1.0 / 2017-11-21
-==================
-### Changes
+## 1.1.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds apache integration.
 

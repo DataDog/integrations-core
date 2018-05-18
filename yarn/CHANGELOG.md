@@ -1,24 +1,15 @@
 # CHANGELOG - yarn
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-05-11
 
 * [FEATURE] adds custom tag support for service checks.
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] adds configuration option to choose whether to collect yarn.app.* metrics. See [#505][]
 * [FEATURE] adds yarn capacityScheduler integration. See [#286][], thanks [@alanbover][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds yarn integration.
 

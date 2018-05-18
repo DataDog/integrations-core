@@ -1,36 +1,22 @@
 # CHANGELOG - couchbase
 
-1.3.0 / Unreleased
-==================
-
-### Changes
+## 1.3.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8091 port in the Autodiscovery template. See [#1444][] for more information.
 
-1.2.0 / 2017-11-21
-==================
-### Changes
+## 1.2.0 / 2017-11-21
 
 * [UPDATE] Update auto_conf template to support agent 6 and 5.20+. See [#860][]
 
-1.1.1 / 2017-09-12
-==================
-
-### Changes
+## 1.1.1 / 2017-09-12
 
 * [BUGFIX] Fix the conversion of request_time* metrics. See [#705][]
 
-1.1.0 / 2017-07-18
-==================
-
-### Changes
+## 1.1.0 / 2017-07-18
 
 * [FEATURE] Add new metrics for query monitoring ([#405][])
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds couchbase integration.
 

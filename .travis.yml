@@ -38,14 +38,9 @@ env:
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=activemq_xml FLAVOR_VERSION=5.11.1
-    - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.0.17
-    - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.1.14
-    - TRAVIS_FLAVOR=cassandra FLAVOR_VERSION=2.2.10
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.0.17
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.1.14
     - TRAVIS_FLAVOR=cassandra_nodetool FLAVOR_VERSION=2.2.10
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=1.6.1
-    - TRAVIS_FLAVOR=couch FLAVOR_VERSION=2.0-dev
     - TRAVIS_FLAVOR=docker_daemon
     - TRAVIS_FLAVOR=etcd FLAVOR_VERSION=2.0.5
     - TRAVIS_FLAVOR=fluentd FLAVOR_VERSION=v0.12.22
@@ -54,14 +49,10 @@ env:
     - TRAVIS_FLAVOR=gitlab_runner MASTER_FLAVOR_VERSION=latest RUNNER_FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=gunicorn FLAVOR_VERSION=19.6.0
     - TRAVIS_FLAVOR=go_expvar FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=0.10.1.0-1
-    # - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=1.0.1-1
-    # - TRAVIS_FLAVOR=kafka FLAVOR_VERSION=1.1.0-1
     - TRAVIS_FLAVOR=kong FLAVOR_VERSION=0.9.0
     - TRAVIS_FLAVOR=kube_dns FLAVOR_VERSION=0.1.0
     - TRAVIS_FLAVOR=kubernetes
     - TRAVIS_FLAVOR=kubernetes_state
-    - TRAVIS_FLAVOR=kyototycoon FLAVOR_VERSION=0.9.56
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=2.6.9
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.0.1
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.2.10
@@ -69,21 +60,16 @@ env:
     - TRAVIS_FLAVOR=mongo FLAVOR_VERSION=3.5
     - TRAVIS_FLAVOR=openstack
     # - TRAVIS_FLAVOR=oracle FLAVOR_VERSION=latest
-    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.5
-    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.7
-    - TRAVIS_FLAVOR=pgbouncer FLAVOR_VERSION=1.8
     - TRAVIS_FLAVOR=php_fpm FLAVOR_VERSION=5.5
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.5.0
     - TRAVIS_FLAVOR=rabbitmq FLAVOR_VERSION=3.6.0
     # this is just too flaky to stay here, suspending while we find a fix
     # - TRAVIS_FLAVOR=snmp
-    - TRAVIS_FLAVOR=solr FLAVOR_VERSION=6.2
     - TRAVIS_FLAVOR=sqlserver FLAVOR_VERSION=2017-GA
     - TRAVIS_FLAVOR=statsd
     - TRAVIS_FLAVOR=supervisord FLAVOR_VERSION=3.3.0
     - TRAVIS_FLAVOR=tcp_check
     - TRAVIS_FLAVOR=tokumx
-    - TRAVIS_FLAVOR=tomcat FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=twemproxy FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=squid FLAVOR_VERSION=latest
     - TRAVIS_FLAVOR=ecs_fargate FLAVOR_VERSION=latest
@@ -103,7 +89,6 @@ script:
   - bundle exec rake prep_travis_ci
   - if [ -e $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR/setup.py ]; then cd $TRAVIS_BUILD_DIR/$TRAVIS_FLAVOR && pip install -r requirements.txt && python setup.py bdist_wheel && pip install . && cd - ; fi
   - bundle exec rake ci:run
-  - bundle exec rake requirements
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files
 # Since clobber only cleans the project directory,

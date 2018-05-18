@@ -5,9 +5,13 @@
 try:
     # Agent5 compatibility layer
     from checks import AgentCheck
+    from checks.network_checks import NetworkCheck, Status
 except ImportError:
     from .base import AgentCheck
+    from .network import NetworkCheck, Status
 
 __all__ = [
     'AgentCheck',
+    'NetworkCheck',
+    'Status',
 ]

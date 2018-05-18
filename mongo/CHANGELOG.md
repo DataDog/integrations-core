@@ -1,75 +1,51 @@
 # CHANGELOG - mongo
 
-1.5.4 / Unreleased
-==================
-### Changes
+## 1.5.4 / Unreleased
 
 * [IMPROVEMENT] Allow disabling of replica access. See #1516
 
-1.5.3 / Unreleased
-==================
-### Changes
+## 1.5.3 / 2018-05-11
 
-* [BUGFIX] Added `top` metrics ending in `countsps` that properly submit as `rate`s. See #1491
+* [BUGFIX] Added `top` metrics ending in `countps` that properly submit as `rate`s. See #1491
 
-1.5.2 / 2018-02-13
-==================
-### Changes
+## 1.5.2 / 2018-02-13
 
 * [DOC] Adding configuration for log collection in `conf.yaml`
 * [BUGFIX] Pass replica set metric collection if `replSetGetStatus` command not available. See [#1092][]
 
-1.5.1 / 2018-01-10
-==================
-### Changes
+## 1.5.1 / 2018-01-10
 
 * [BUGFIX] Pass replica set metric collection if not running standalone instance instead of raising exception. See [#915][]
 
-1.5.0 / 2017-11-21
-==================
-### Changes
+## 1.5.0 / 2017-11-21
 
 * [FEATURE] Collect metrics about indexes usage. See [#823][]
 * [IMPROVEMENT] Upgrading pymongo to version 3.5. See [#747][]
 * [IMPROVEMENT] Filter out oplog entries without a timestamp. See [#406][], thanks [@hindmanj][]
 
-
-1.4.0 / 2017-10-10
-==================
-### Changes
+## 1.4.0 / 2017-10-10
 
 * [IMPROVEMENT] Started monitoring the wiredTiger cache page read/write statistics. See [#769][] (Thanks [@dnavre][])
 
-1.3.0 / 2017-08-28
-==================
-### Changes
+## 1.3.0 / 2017-08-28
 
 * [FEATURE] Add support for `authSource` parameter in mongo URL. See [#691][]
 * [IMPROVEMENT] Simplify "system.namespaces" usage. See [#625][], thanks [@dtbartle][]
 * [BUGFIX] Don't overwrite the higher-level `cli`/`db` for replset stats. See [#627][], thanks [@dtbartle][]
 
-1.2.0 / 2017-07-18
-==================
-### Changes
+## 1.2.0 / 2017-07-18
 
 * [IMPROVEMENT] Add support for `mongo.oplog.*` metrics for Mongo versions  3.x. See [#491][]
 
-1.1.0 / 2017-06-05
-==================
-### Changes
+## 1.1.0 / 2017-06-05
 
 * [IMPROVEMENT] Set connectTimeout & serverSelectionTimeout to timeout in config. See [#352][]
 
-1.0.1 / 2017-04-24
-==================
-### Changes
+## 1.0.1 / 2017-04-24
 
 * [BUGFIX] Redact username/password in logs, etc. See [#326][] and [#347][]
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds mongo integration.
 

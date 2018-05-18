@@ -1,24 +1,15 @@
 # CHANGELOG - mesos_master
 
-1.2.0 / Unreleased
-==================
-
-### Changes
+## 1.2.0 / 2018-05-11
 
 * [BUGFIX] Add debug logs and a noisier error message.
 * [FEATURE] adds custom tag support for service checks.
 
-1.1.0 / 2017-08-21
-==================
-
-### Changes
+## 1.1.0 / 2017-08-21
 
 * [FEATURE] adds gpu metrics. See [#694][]. (Thanks [@ksauzz][])
 
-1.0.0 / 2017-03-22
-==================
-
-### Changes
+## 1.0.0 / 2017-03-22
 
 * [FEATURE] adds mesos_master integration.
 

@@ -56,6 +56,3 @@ def init_logging():
     urllib_logger = logging.getLogger("requests.packages.urllib3")
     urllib_logger.setLevel(logging.WARN)
     urllib_logger.propagate = True
-
-
-init_logging()

@@ -6,7 +6,6 @@ import os
 import re
 import sys
 import json
-import urllib2
 from collections import namedtuple
 from datetime import datetime
 
@@ -14,33 +13,26 @@ from six.moves.urllib.request import urlopen
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
+from packaging import version
 
-from .constants import ROOT, GITHUB_API_URL
-
+from .constants import ROOT, GITHUB_API_URL, AGENT_BASED_INTEGRATIONS
+from .utils import get_version_string, get_release_tag_string
 
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
 
+CHANGELOG_LABEL_PREFIX = 'changelog/'
+CHANGELOG_TYPE_NONE = 'no-changelog'
+CHANGELOG_TYPES = [
+    'Added',
+    'Changed',
+    'Deprecated',
+    'Fixed',
+    'Removed',
+    'Security',
+]
+
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
-
-
-def get_version_string(check_name):
-    """
-    Get the version string for the given check.
-    """
-    about = {}
-    about_path = os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
-    with open(about_path) as f:
-        exec(f.read(), about)
-
-    return about.get('__version__')
-
-
-def get_release_tag_string(check_name, version_string):
-    """
-    Compose a string to use for release tags
-    """
-    return '{}-{}'.format(check_name, version_string)
 
 
 def parse_pr_numbers(git_log_lines):
@@ -79,14 +71,27 @@ def update_changelog(ctx, target, new_version, dry_run=False):
     Example invocation:
         inv update-changelog redisdb 3.1.1
     """
-    # get the current version
-    version_string = get_version_string(target)
-    if not version_string:
-        raise Exit("Unable to get version for check {}".format(target))
-    print("Current version of check {}: {}".format(target, version_string))
+    # sanity check on the target
+    if target not in AGENT_BASED_INTEGRATIONS:
+        raise Exit("Provided target is not an Agent-based Integration")
 
+    # sanity check on the version provided
+    p_version = version.parse(new_version)
+    p_current = version.parse(get_version_string(target))
+    if p_version <= p_current:
+        raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
+    print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
+
+    do_update_changelog(ctx, target, str(p_current), new_version, dry_run)
+
+
+def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
+    """
+    Actually perform the operations needed to update the changelog, this
+    method is supposed to be used by other tasks and not directly.
+    """
     # get the name of the current release tag
-    target_tag = get_release_tag_string(target, version_string)
+    target_tag = get_release_tag_string(target, cur_version)
 
     # get the diff from HEAD
     target_path = os.path.join(ROOT, target)
@@ -107,10 +112,29 @@ def update_changelog(ctx, target, new_version, dry_run=False):
             continue
 
         payload = json.loads(response.read())
+        changelog_labels = []
+        for l in payload.get('labels', []):
+            name = l.get('name')
+            if name.startswith(CHANGELOG_LABEL_PREFIX):
+                # only add the name, e.g. for `changelog/Added` it's just `Added`
+                changelog_labels.append(name.split(CHANGELOG_LABEL_PREFIX)[1])
+
+        if not changelog_labels:
+            raise Exit("No valid changelog labels found attached to PR #{}, please add one".format(pr_num))
+        elif len(changelog_labels) > 1:
+            raise Exit("Multiple changelog labels found attached to PR #{}, please use only one".format(pr_num))
+
+        changelog_type = changelog_labels[0]
+        if changelog_type == CHANGELOG_TYPE_NONE:
+            # No changelog entry for this PR
+            print("Skipping PR #{} from changelog".format(pr_num))
+            continue
+
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
+        title = '[{}] {}'.format(changelog_type, payload.get('title'))
 
-        entry = ChangelogEntry(pr_num, payload.get('title'), payload.get('html_url'),
+        entry = ChangelogEntry(pr_num, title, payload.get('html_url'),
                                author, author_url, is_contributor(payload))
 
         entries.append(entry)

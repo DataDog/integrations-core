@@ -51,12 +51,35 @@ def _get_consul_mocks():
         '_get_cluster_leader': mock_get_cluster_leader_A,
         '_get_coord_datacenters': mock_get_coord_datacenters,
         '_get_coord_nodes': mock_get_coord_nodes,
+        '_get_all_nodes': mock_get_all_nodes,
     }
 
 
 def _get_random_ip():
     rand_int = int(15 * random.random()) + 10
     return "10.0.2.{0}".format(rand_int)
+
+
+def mock_get_all_nodes(instance):
+    return [{
+        'Address': _get_random_ip(),
+        'CreateIndex': 25010951,
+        'Datacenter': 'dc1',
+        'ID': 'node-1',
+        'Meta': {},
+        'ModifyIndex': 25011022,
+        'Node': 'node-1',
+        'TaggedAddresses': {'lan': '1.1.1.1', 'wan': '2.2.2.2'}
+    }, {
+        'Address': _get_random_ip(),
+        'CreateIndex': 25010940,
+        'Datacenter': 'dc1',
+        'ID': 'node-2',
+        'Meta': {},
+        'ModifyIndex': 25011010,
+        'Node': 'node-2',
+        'TaggedAddresses': {'lan': '1.1.1.1', 'wan': '2.2.2.2'}
+    }]
 
 
 def mock_get_peers_in_cluster(instance):

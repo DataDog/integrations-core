@@ -48,7 +48,7 @@ instances:
 #      warning if 1, 2, 6, 7 sshd processes are running
 #      warning: [3, 5]
 #      ok if 3, 4, 5 processes are running
-#.   try_sudo: False
+#   try_sudo: False
 #
 #  - name: postgres
 #    search_string: ['postgres']
