@@ -52,7 +52,7 @@ EXPECTED_METRICS_COMMON = [
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
-    # /metrics/cadvisor
+    # cadvisor metrics
     'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
@@ -61,7 +61,7 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.io.write_bytes',
     'kubernetes.io.read_bytes',
 
-    # /metrics
+    # kubelet metrics
     'kubernetes.kubelet.etcd.cache.entry.count',
     'kubernetes.kubelet.etcd.cache.hit.count',
     'kubernetes.kubelet.etcd.cache.miss.count',

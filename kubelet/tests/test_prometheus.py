@@ -9,6 +9,7 @@ from collections import namedtuple
 import pytest
 from datadog_checks.kubelet import KubeletCheck
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
+from datadog_checks.kubelet.prometheus import KubeletPrometheusScraper
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -31,13 +32,32 @@ def mock_from_file(fname):
         return f.read()
 
 
-def test_default_options():
+@pytest.fixture
+def check():
+    return KubeletCheck('kubelet', None, {}, [{}])
+
+
+@pytest.fixture
+def cadvisor_scraper(check):
+    scraper = CadvisorPrometheusScraper(check)
+    scraper.pod_list = json.loads(mock_from_file('pods.json'))
+
+    return scraper
+
+
+def test_cadvisor_default_options():
     check = KubeletCheck('kubelet', None, {}, [{}])
     scraper = CadvisorPrometheusScraper(check)
     assert scraper.NAMESPACE == 'kubernetes'
     assert scraper.fs_usage_bytes == {}
     assert scraper.mem_usage_bytes == {}
     assert scraper.metrics_mapper == {'kubelet_runtime_operations_errors': 'kubelet.runtime.errors'}
+
+
+def test_kubelet_default_options():
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    scraper = KubeletPrometheusScraper(check)
+    assert scraper.NAMESPACE == 'kubernetes'
 
 
 def test_is_container_metric():
@@ -138,33 +158,23 @@ def test_get_pod_uid():
     assert CadvisorPrometheusScraper._get_pod_uid([]) is None
 
 
-def test_is_pod_host_networked(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-
-    scraper = CadvisorPrometheusScraper(check)
-    scraper.pod_list = json.loads(mock_from_file('pods.json'))
-
-    assert len(scraper.pod_list) == 4
-    assert scraper._is_pod_host_networked("not-here") is False
-    assert scraper._is_pod_host_networked('260c2b1d43b094af6d6b4ccba082c2db') is True
-    assert scraper._is_pod_host_networked('2edfd4d9-10ce-11e8-bd5a-42010af00137') is False
+def test_is_pod_host_networked(monkeypatch, cadvisor_scraper):
+    assert len(cadvisor_scraper.pod_list) == 4
+    assert cadvisor_scraper._is_pod_host_networked("not-here") is False
+    assert cadvisor_scraper._is_pod_host_networked('260c2b1d43b094af6d6b4ccba082c2db') is True
+    assert cadvisor_scraper._is_pod_host_networked('2edfd4d9-10ce-11e8-bd5a-42010af00137') is False
 
 
-def test_get_pod_by_metric_label(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-
-    scraper = CadvisorPrometheusScraper(check)
-    scraper.pod_list = json.loads(mock_from_file('pods.json'))
-
-    assert len(scraper.pod_list) == 4
-    kube_proxy = scraper._get_pod_by_metric_label([
+def test_get_pod_by_metric_label(monkeypatch, cadvisor_scraper):
+    assert len(cadvisor_scraper.pod_list) == 4
+    kube_proxy = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
               value="/kubepods/burstable/"
                     "pod260c2b1d43b094af6d6b4ccba082c2db/"
                     "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
     ])
-    fluentd = scraper._get_pod_by_metric_label([
+    fluentd = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("id",
               value="/kubepods/burstable/"
