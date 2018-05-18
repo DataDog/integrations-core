@@ -84,12 +84,6 @@ To run the testsuite for a given check you can either use `tox`, like:
 cd {integration} && tox
 ```
 
-or invoke [Pytest][9] directly:
-
-```shell
-cd {integration} && py.test
-```
-
 **Note:** only a subset of the checks can be tested like this. Porting all the
 checks to Pytest is a work in progress. There is an [updated list][14] of the
 checks supporting the new testing approach, for checks that are not listed there
