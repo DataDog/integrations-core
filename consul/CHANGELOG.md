@@ -7,6 +7,7 @@
 ## 1.4.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8500 port in the Autodiscovery template. See [#1444][] for more information.
+* [FEATURE] Include consul_datacenter tag in service checks
 
 ## 1.3.0 / 2018-01-10
 

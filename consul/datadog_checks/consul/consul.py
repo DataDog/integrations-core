@@ -269,7 +269,7 @@ class ConsulCheck(AgentCheck):
         else:
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:leader"])
 
-        service_check_tags = ['consul_url:{0}'.format(instance.get('url'))]
+        service_check_tags = main_tags + ['consul_url:{0}'.format(instance.get('url'))]
         perform_catalog_checks = instance.get('catalog_checks',
                                               self.init_config.get('catalog_checks'))
         perform_network_latency_checks = instance.get('network_latency_checks',
