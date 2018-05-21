@@ -4,7 +4,7 @@
   "max_agent_version": "6.0.0",
   "min_agent_version": "5.18.0",
   "name": "windows_service",
-  "display_name": "windows_service",
+  "display_name": "Windows Service",
   "creates_events": true,
   "short_description": "Monitor the state of your Windows services.",
   "support": "core",
