@@ -759,9 +759,9 @@ class DockerDaemon(AgentCheck):
                         m_func(self, "docker.net.bytes_rcvd", long(x[0]), net_tags)
                         m_func(self, "docker.net.bytes_sent", long(x[8]), net_tags)
 
-        except Exception as e:
+        except IOError as e:
             # It is possible that the container got stopped between the API call and now
-            self.warning("Failed to report IO metrics from file {0}. Exception: {1}".format(proc_net_file, e))
+            self.log.debug("Cannot read network interface file, container likely raced to finish : {0}".format(e))
 
     def _invalidate_network_mapping_cache(self, api_events):
         for ev in api_events:
