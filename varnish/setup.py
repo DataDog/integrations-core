@@ -60,7 +60,6 @@ setup(
         "datadog_checks_base",
     ],
 
-    setup_requires=["pytest-runner"],
     # Testing setup and dependencies
     tests_require=get_requirements("requirements-dev.txt"),
 
