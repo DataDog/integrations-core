@@ -55,6 +55,7 @@ AGENT_BASED_INTEGRATIONS = [
     'riak',
     'spark',
     'ssh_check',
+    'squid',
     'system_core',
     'teamcity',
     'varnish',

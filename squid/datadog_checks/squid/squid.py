@@ -2,13 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# stdlib
-
-# 3rd party
 import requests
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -68,6 +65,7 @@ SQUID_COUNTERS = [
     "swap.files_cleaned",
     "aborted_requests",
 ]
+
 
 class SquidCheck(AgentCheck):
 
