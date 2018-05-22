@@ -21,7 +21,16 @@ from .utils import get_version_string, get_release_tag_string
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(\#(\d+)\)')
 
-NO_CHANGELOG_LABEL = 'documentation/no-changelog'
+CHANGELOG_LABEL_PREFIX = 'changelog/'
+CHANGELOG_TYPE_NONE = 'no-changelog'
+CHANGELOG_TYPES = [
+    'Added',
+    'Changed',
+    'Deprecated',
+    'Fixed',
+    'Removed',
+    'Security',
+]
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
 
@@ -103,15 +112,29 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
             continue
 
         payload = json.loads(response.read())
-        if NO_CHANGELOG_LABEL in (l.get('name') for l in payload.get('labels', [])):
+        changelog_labels = []
+        for l in payload.get('labels', []):
+            name = l.get('name')
+            if name.startswith(CHANGELOG_LABEL_PREFIX):
+                # only add the name, e.g. for `changelog/Added` it's just `Added`
+                changelog_labels.append(name.split(CHANGELOG_LABEL_PREFIX)[1])
+
+        if not changelog_labels:
+            raise Exit("No valid changelog labels found attached to PR #{}, please add one".format(pr_num))
+        elif len(changelog_labels) > 1:
+            raise Exit("Multiple changelog labels found attached to PR #{}, please use only one".format(pr_num))
+
+        changelog_type = changelog_labels[0]
+        if changelog_type == CHANGELOG_TYPE_NONE:
             # No changelog entry for this PR
             print("Skipping PR #{} from changelog".format(pr_num))
             continue
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
+        title = '[{}] {}'.format(changelog_type, payload.get('title'))
 
-        entry = ChangelogEntry(pr_num, payload.get('title'), payload.get('html_url'),
+        entry = ChangelogEntry(pr_num, title, payload.get('html_url'),
                                author, author_url, is_contributor(payload))
 
         entries.append(entry)

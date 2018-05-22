@@ -260,11 +260,12 @@ class Couchbase(AgentCheck):
 
         for metric_name, val in data['query'].items():
             if val is not None:
-                # for query times, the unit is part of the value, we need to extract it
-                if isinstance(val, basestring):
-                    val = self.extract_seconds_value(val)
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in self.QUERY_STATS:
+                    # for query times, the unit is part of the value, we need to extract it
+                    if isinstance(val, basestring):
+                        val = self.extract_seconds_value(val)
+
                     full_metric_name = '.'.join(['couchbase', 'query',
                                                 self.camel_case_to_joined_lower(norm_metric_name)])
                     self.gauge(full_metric_name, val, tags=tags)
@@ -398,6 +399,12 @@ class Couchbase(AgentCheck):
 
     # Takes a string with a time and a unit (e.g '3.45ms') and returns the value in seconds
     def extract_seconds_value(self, value):
+
+        # When couchbase is set up, most of values are equal to 0 and are exposed as "0" and not "0s"
+        # This statement is preventing values to be searched by the pattern (and break things)
+        if value == '0':
+            return 0
+
         match = self.seconds_value_pattern.search(value)
 
         val, unit = match.group(1, 3)

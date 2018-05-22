@@ -65,7 +65,10 @@ def test_integration(aggregator, consul_cluster):
     aggregator.assert_metric('consul.peers', value=3)
 
     aggregator.assert_service_check('consul.check')
-    aggregator.assert_service_check('consul.up')
+    aggregator.assert_service_check('consul.up', tags=[
+        'consul_datacenter:dc1',
+        'consul_url:{}'.format(common.URL)
+    ])
 
 
 @pytest.mark.integration
