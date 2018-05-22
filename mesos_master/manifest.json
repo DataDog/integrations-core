@@ -13,7 +13,7 @@
   "version": "1.2.0",
   "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc",
   "public_title": "Datadog-Mesos Master Integration",
-  "categories":["configuration & deployment", "containers", "orchestration"],
+  "categories":["configuration & deployment", "containers", "orchestration", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/mesos_master/",
   "is_public": true,
