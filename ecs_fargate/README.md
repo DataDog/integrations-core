@@ -11,10 +11,11 @@ Get metrics from all your containers running in ECS Fargate:
 ### Installation
 
 The ECS Fargate check is packaged with the Agent, so simply [run the Agent][1] with your containers.
+Additional details are available in our [AWS Fargate guide](https://docs.datadoghq.com/integrations/ecs_fargate/).
 
 ### Configuration
 
-1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your ECS Fargate performance data.  
+1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your ECS Fargate performance data.
     See the [sample ecs_fargate.d/conf.yaml][6] for all available configuration options.
 
 2. [Restart the Agent][5]
