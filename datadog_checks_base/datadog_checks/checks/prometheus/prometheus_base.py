@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .mixins import PrometheusScraper
+from .mixins import PrometheusScraperMixin
 from .. import AgentCheck
 
 # Prometheus check is a parent class providing a structure and some helpers
@@ -21,7 +21,7 @@ from .. import AgentCheck
 #     it will be called in `process_metric`
 #
 
-class PrometheusCheck(PrometheusScraper, AgentCheck):
+class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
 

@@ -13,6 +13,7 @@ import requests
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.errors import CheckException
+from datadog_checks.checks.prometheus import PrometheusScraper
 from kubeutil import get_connection_info
 from tagger import get_tags
 
@@ -20,8 +21,6 @@ from tagger import get_tags
 from .common import CADVISOR_DEFAULT_PORT, ContainerFilter
 from .cadvisor import CadvisorScraper
 from .prometheus import CadvisorPrometheusScraper
-from .prometheus import KubeletPrometheusScraper
-
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
@@ -54,7 +53,7 @@ log = logging.getLogger('collector')
 
 class KubeletCheck(AgentCheck, CadvisorScraper):
     """
-    Collect container metrics from Kubelet.
+    Collect metrics from Kubelet.
     """
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -66,23 +65,37 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
             raise Exception('Kubelet check only supports one configured instance.')
         inst = instances[0] if instances else None
 
-        self.kube_node_labels = inst.get('node_labels_to_host_tags', {})
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
 
         self.cadvisor_scraper = CadvisorPrometheusScraper(self)
 
-        self.kubelet_scraper = KubeletPrometheusScraper(self)
+        self.kubelet_scraper = PrometheusScraper(self)
+        self.kubelet_scraper.NAMESPACE = 'kubernetes'
+        self.kubelet_scraper.metrics_mapper = {
+            'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+            'etcd_helper_cache_entry_count': 'etcd.cache.entry.count',
+            'etcd_helper_cache_hit_count': 'etcd.cache.hit.count',
+            'etcd_helper_cache_miss_count': 'etcd.cache.miss.count',
+            'rest_client_requests_total': 'rest.client.requests',
+            'kubelet_runtime_operations': 'kubelet.runtime.operations',
+            'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+        }
 
     def check(self, instance):
         self.kubelet_conn_info = get_connection_info()
         endpoint = self.kubelet_conn_info.get('url')
         if endpoint is None:
-            raise CheckException("Unable to find metrics_endpoint in config "
-                                 "file or detect the kubelet URL automatically.")
+            raise CheckException("Unable to detect the kubelet URL automatically.")
 
-        self.cadvisor_metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
-        self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
+        if 'cadvisor_metrics_endpoint' in instance:
+            self.cadvisor_metrics_url = \
+                instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+        else:
+            self.cadvisor_metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+
+        self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)

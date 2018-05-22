@@ -9,7 +9,6 @@ from collections import namedtuple
 import pytest
 from datadog_checks.kubelet import KubeletCheck
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
-from datadog_checks.kubelet.prometheus import KubeletPrometheusScraper
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -51,13 +50,7 @@ def test_cadvisor_default_options():
     assert scraper.NAMESPACE == 'kubernetes'
     assert scraper.fs_usage_bytes == {}
     assert scraper.mem_usage_bytes == {}
-    assert scraper.metrics_mapper == {'kubelet_runtime_operations_errors': 'kubelet.runtime.errors'}
-
-
-def test_kubelet_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    scraper = KubeletPrometheusScraper(check)
-    assert scraper.NAMESPACE == 'kubernetes'
+    assert scraper.metrics_mapper == {}
 
 
 def test_is_container_metric():

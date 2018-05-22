@@ -8,6 +8,8 @@ import sys
 import mock
 import pytest
 from datadog_checks.kubelet import KubeletCheck
+from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
+from datadog_checks.checks.prometheus import PrometheusScraper
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -52,7 +54,6 @@ EXPECTED_METRICS_COMMON = [
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
-    # cadvisor metrics
     'kubernetes.memory.usage_pct',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
@@ -60,12 +61,13 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.network.tx_errors',
     'kubernetes.io.write_bytes',
     'kubernetes.io.read_bytes',
-
-    # kubelet metrics
-    'kubernetes.kubelet.etcd.cache.entry.count',
-    'kubernetes.kubelet.etcd.cache.hit.count',
-    'kubernetes.kubelet.etcd.cache.miss.count',
-    'kubernetes.kubelet.goroutines',
+    'kubernetes.apiserver.certificate.expiration',
+    'kubernetes.etcd.cache.entry.count',
+    'kubernetes.etcd.cache.hit.count',
+    'kubernetes.etcd.cache.miss.count',
+    'kubernetes.rest.client.requests',
+    'kubernetes.kubelet.runtime.operations',
+    'kubernetes.kubelet.runtime.errors'
 ]
 
 
@@ -120,6 +122,16 @@ def test_parse_quantity():
         assert KubeletCheck.parse_quantity(raw) == res
 
 
+def test_kubelet_default_options():
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.NAMESPACE = 'kubernetes'
+    assert check.cadvisor_scraper.NAMESPACE == 'kubernetes'
+    assert check.kubelet_scraper.NAMESPACE == 'kubernetes'
+
+    assert isinstance(check.cadvisor_scraper, CadvisorPrometheusScraper)
+    assert isinstance(check.kubelet_scraper, PrometheusScraper)
+
+
 def test_kubelet_check_prometheus(monkeypatch, aggregator):
     instance_with_tag = {"tags": ["instance:tag"]}
     check = mock_kubelet_check(monkeypatch, [instance_with_tag])
@@ -151,7 +163,7 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     monkeypatch.setattr(check, 'rate', mock.Mock())
 
     with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
-        check.check({"metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": "http://dummy"})
+        check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly:
     # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
@@ -172,17 +184,18 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
         assert c not in check.rate.mock_calls
 
 
-def test_kubelet_check_neither(monkeypatch, aggregator):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
-    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+def test_kubelet_check_instance_config(monkeypatch):
+    def mock_kubelet_check_no_prom():
+        check = mock_kubelet_check(monkeypatch, [{}])
 
-    monkeypatch.setattr(check.cadvisor_scraper, 'process', mock.Mock(return_value=None))
-    monkeypatch.setattr(check.kubelet_scraper, 'process', mock.Mock(return_value=None))
-    monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
+        monkeypatch.setattr(check.cadvisor_scraper, 'process', mock.Mock(return_value=None))
+        monkeypatch.setattr(check.kubelet_scraper, 'process', mock.Mock(return_value=None))
+        monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
-    check.check({"cadvisor_port": 0, "metrics_endpoint": "", "kubelet_metrics_endpoint": ""})
+        return check
+
+    check = mock_kubelet_check_no_prom()
+    check.check({"cadvisor_port": 0, "cadvisor_metrics_endpoint": "", "kubelet_metrics_endpoint": ""})
 
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
@@ -191,6 +204,12 @@ def test_kubelet_check_neither(monkeypatch, aggregator):
     check.process_cadvisor.assert_not_called()
     check.cadvisor_scraper.process.assert_not_called()
     check.kubelet_scraper.process.assert_not_called()
+
+    check = mock_kubelet_check_no_prom()
+    check.check({"cadvisor_port": 0, "metrics_endpoint": "", "kubelet_metrics_endpoint": "http://dummy"})
+
+    check.cadvisor_scraper.process.assert_not_called()
+    check.kubelet_scraper.process.assert_called()
 
 
 def mocked_get_tags(entity, _):

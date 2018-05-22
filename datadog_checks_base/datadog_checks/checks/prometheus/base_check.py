@@ -2,20 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from .mixins import PrometheusScraper
+from .mixins import PrometheusScraperMixin
 
 from .. import AgentCheck
 from ...errors import CheckException
 
 
-class Scraper(PrometheusScraper):
+class PrometheusScraper(PrometheusScraperMixin):
     """
     This class scrapes a prometheus endpoint and submits the metrics on behalf of a check. This class
     is used by checks that scrape more than one prometheus endpoint.
     """
 
     def __init__(self, check):
-        super(Scraper, self).__init__()
+        super(PrometheusScraper, self).__init__()
         self.check = check
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
@@ -133,7 +133,7 @@ class GenericPrometheusCheck(AgentCheck):
             return self.scrapers_map[endpoint]
 
         # Otherwise we create the scraper
-        scraper = Scraper(self)
+        scraper = PrometheusScraper(self)
         scraper.NAMESPACE = namespace
         # Metrics are preprocessed if no mapping
         metrics_mapper = {}

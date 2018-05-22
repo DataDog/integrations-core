@@ -3,18 +3,18 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # project
+from datadog_checks.checks.prometheus import PrometheusScraper
 from tagger import get_tags
 
 # check
 from .common import is_static_pending_pod, get_pod_by_uid
-from datadog_checks.checks.prometheus import Scraper
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 # container-specific metrics should have all these labels
 CONTAINER_LABELS = ['container_name', 'namespace', 'pod_name', 'name', 'image', 'id']
 
 
-class CadvisorPrometheusScraper(Scraper):
+class CadvisorPrometheusScraper(PrometheusScraper):
     """
     This class scrapes metrics for the kubelet "/metrics/cadvisor" prometheus endpoint and submits
     them on behalf of a check.
@@ -24,10 +24,6 @@ class CadvisorPrometheusScraper(Scraper):
         super(CadvisorPrometheusScraper, self).__init__(check)
 
         self.NAMESPACE = 'kubernetes'
-
-        self.metrics_mapper = {
-            'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-        }
 
         self.ignore_metrics = [
             'container_cpu_cfs_periods_total',
@@ -385,22 +381,3 @@ class CadvisorPrometheusScraper(Scraper):
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
             return
         self._process_limit_metric(metric_name, message, self.mem_usage_bytes, pct_m_name)
-
-
-class KubeletPrometheusScraper(Scraper):
-    """
-    This class scrapes metrics for the kubelet "/metrics" prometheus endpoint and submits them on
-    behalf of a check.
-    """
-
-    def __init__(self, check):
-        super(KubeletPrometheusScraper, self).__init__(check)
-
-        self.NAMESPACE = 'kubernetes'
-
-        self.metrics_mapper = {
-            'etcd_helper_cache_entry_count': 'kubelet.etcd.cache.entry.count',
-            'etcd_helper_cache_hit_count': 'kubelet.etcd.cache.hit.count',
-            'etcd_helper_cache_miss_count': 'kubelet.etcd.cache.miss.count',
-            'go_goroutines': 'kubelet.goroutines',
-        }
