@@ -350,13 +350,10 @@ class KubernetesState(PrometheusCheck):
         # More details about the phase in the message of the check.
         check_basename = self.NAMESPACE + '.pod.phase'
         for metric in message.metric:
-            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
-                                         tags=[self._label_to_tag("pod", metric.label),
-                                               self._label_to_tag("namespace", metric.label)] + self.custom_tags)
-            # More verbose tagging for gauge vs service check
-            tags = [self._format_tag(label.name, label.value) for label in metric.label] + self.custom_tags
-            val = getattr(metric, METRIC_TYPES[message.type]).value
-            self.gauge(metric_name, val, tags)
+            tags = [self._label_to_tag("pod", metric.label), self._label_to_tag("namespace", metric.label),
+                    self._label_to_tag("phase", metric.label)] + self.custom_tags
+            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status, tags=tags)
+            self.gauge(metric_name, 1, tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'

@@ -158,15 +158,15 @@ class TestKubernetesState(AgentCheckTest):
         self.assertServiceCheck(NAMESPACE + '.node.network_unavailable', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.node.disk_pressure', self.check.OK)
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
-                                tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1'])  # Running
+                                tags=['namespace:default', 'pod:task-pv-pod', 'optional:tag1', 'phase:Running'])  # Running
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.WARNING,
-                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1'])  # Pending
+                                tags=['namespace:default', 'pod:failingtest-f585bbd4-2fsml', 'optional:tag1', 'phase:Pending'])  # Pending
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.OK,
-                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1'])  # Succeeded
+                                tags=['namespace:default', 'pod:hello-1509998340-k4f8q', 'optional:tag1', 'phase:Succeeded'])  # Succeeded
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.CRITICAL,
-                                tags=['namespace:default', 'pod:should-run-once', 'optional:tag1'])  # Failed
+                                tags=['namespace:default', 'pod:should-run-once', 'optional:tag1', 'phase:Failed'])  # Failed
         self.assertServiceCheck(NAMESPACE + '.pod.phase', self.check.UNKNOWN,
-                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1'])  # Unknown
+                                tags=['namespace:default', 'pod:hello-1509998460-tzh8k', 'optional:tag1', 'phase:Unknown'])  # Unknown
 
         # Make sure we send counts for all statuses to avoid no-data graphing issues
         self.assertMetric(NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:true', 'optional:tag1'], value=1)
