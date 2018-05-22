@@ -94,7 +94,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         else:
             self.cadvisor_metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
 
-        self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+        self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -130,6 +130,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
+            self.log.debug('processing legacy cadvisor metrics')
             self.process_cadvisor(
                 instance,
                 self.cadvisor_legacy_url,
@@ -137,6 +138,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
                 self.container_filter
             )
         elif self.cadvisor_metrics_url:  # Prometheus
+            self.log.debug('processing cadvisor metrics')
             self.cadvisor_scraper.process(
                 self.cadvisor_metrics_url,
                 send_histograms_buckets=send_buckets,
@@ -146,6 +148,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
             )
 
         if self.kubelet_metrics_url:  # Prometheus
+            self.log.debug('processing kubelet metrics')
             self.kubelet_scraper.process(
                 self.kubelet_metrics_url,
                 send_histograms_buckets=send_buckets,
