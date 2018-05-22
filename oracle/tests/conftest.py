@@ -1,19 +1,15 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
 import time
 import subprocess
-import shutil
 
 import pytest
 import cx_Oracle
 
 from datadog_checks.oracle import Oracle
-from .common import (
-    CHECK_NAME, PORT, PORT_8080, LOCAL_TMP_DIR, RESOURCES_DIR, HERE, CONFIG
-)
+from .common import CHECK_NAME, LOCAL_TMP_DIR, RESOURCES_DIR, HERE, CONFIG
 
 
 @pytest.fixture
@@ -28,23 +24,23 @@ def check():
     return Oracle(CHECK_NAME, {}, {})
 
 
-@pytest.fixture(scope="session", autouse=True)
-def oracle_container():
-
-    env = os.environ
-    env['ORACLE_PORT'] = PORT
-    env['ORACLE_PORT_8080'] = PORT_8080
-    env['ORACLE_DIR'] = LOCAL_TMP_DIR
-    env['RESOURCES_DIR'] = RESOURCES_DIR
-
-    args = [
+def get_compose_args():
+    return [
         "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'docker-compose.yaml')
+        "-f", os.path.join(HERE, 'docker-compose.yml')
     ]
 
-    subprocess.check_call(args + ["down"])
-    shutil.rmtree(LOCAL_TMP_DIR, ignore_errors=True)
-    os.makedirs(LOCAL_TMP_DIR)
+
+@pytest.fixture(scope="session", autouse=True)
+def oracle_container():
+    """
+    Spin up a Docker container running Oracle
+    """
+    env = os.environ
+    env['LOCAL_TMP_DIR'] = LOCAL_TMP_DIR
+    env['RESOURCES_DIR'] = RESOURCES_DIR
+
+    args = get_compose_args()
     subprocess.check_call(args + ["up", "-d"])
 
     # wait for the cluster to be up before yielding
@@ -53,40 +49,24 @@ def oracle_container():
         subprocess.check_call(args + ["down"])
         raise Exception("oracle container boot timed out!")
 
-    # if not os.path.exists("/etc/ld.so.conf.d"):
-    #     os.mkdir("/etc/ld.so.conf.d")
-
-    # with open("/etc/ld.so.conf.d/instant-client.conf", "w") as f:
-    #     f.write("{}/instant-client".format(LOCAL_TMP_DIR))
-
-    if not os.path.exists("{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)):
-        os.symlink(
-            "{}/instant-client/libclntsh.so.12.1".format(LOCAL_TMP_DIR),
-            "{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)
-        )
-
-    print(os.listdir("{}/instant-client".format(LOCAL_TMP_DIR)))
-    try:
-        subprocess.check_output(["ldconfig", "{}/instant-client/libclntsh.so".format(LOCAL_TMP_DIR)], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        print(e.returncode)
-        print(e.output)
-
     generate_metrics()
 
     yield
 
     subprocess.check_call(args + ["down"])
-    shutil.rmtree(LOCAL_TMP_DIR)
 
 
 def wait_for_oracle():
+    args = get_compose_args()
     # it can be a loooong wait (800s TO)...
-    for _ in xrange(800):
-        out = subprocess.check_output(["docker", "logs", "compose_oracle_1"])
+    for i in xrange(800):
+        out = subprocess.check_output(args + ["logs", "oracle"])
         if "Database ready to use" in out:
             return True
         else:
+            # log every 10 seconds
+            if i and i % 10 == 0:
+                print("Elapsed time: {}s, waiting for Oracle to be up...".format(i))
             time.sleep(1)
 
     return False
