@@ -6,5 +6,5 @@ init_config:
   collect_default_metrics: true
 
 instances:
-  - url: "%%host%%"
+  - host: "%%host%%"
     port: "9012"
