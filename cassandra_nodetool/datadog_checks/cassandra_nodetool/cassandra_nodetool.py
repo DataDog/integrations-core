@@ -58,7 +58,7 @@ class CassandraNodetoolCheck(AgentCheck):
 
         for keyspace in keyspaces:
             # Build the nodetool command
-            cmd = nodetool_cmd + ['-h', host, '-p', port]
+            cmd = nodetool_cmd + ['-h', host, '-p', str(port)]
             if username and password:
                 cmd += ['-u', username, '-pw', password]
             cmd += ['status', '--', keyspace]
