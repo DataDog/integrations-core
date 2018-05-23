@@ -9,6 +9,7 @@ Use the Datadog Agent to monitor how well Istio is performing.
 * Understand istio's resource consumption
 
 ## Setup
+
 ### Installation
 
 Istio is included in the Datadog Agent. So, just [install the Agent][1] on your istio servers or in your cluster and point it at Istio.
@@ -39,6 +40,7 @@ Both endpoints need to be connected to the check for it to work. To learn more a
 [Run the Agent's `info` subcommand][4] and look for `istio` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this check.
