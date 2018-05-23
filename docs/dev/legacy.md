@@ -1,4 +1,7 @@
-# Legacy development Setup
+---
+title: Legacy development Setup
+kind: documentation
+---
 
 ## Requirements
 

@@ -1,4 +1,7 @@
-# Working with Agent based integrations
+---
+title: Working with Agent based integrations
+kind: documentation
+---
 
 ## Overview
 
