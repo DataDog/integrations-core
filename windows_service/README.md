@@ -7,11 +7,11 @@ This check monitors the state of any Windows Service and submits a service check
 
 ### Installation
 
-The Windows Service check is packaged with the Agent, so simply [install the Agent][1] on your Windows hosts.
+The Windows Service check is packaged with the Agent, so simply [install the Agent](https://app.datadoghq.com/account/settings#agent) on your Windows hosts.
 
 ### Configuration
 
-Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample windows_service.d/conf.yaml][2] for all available configuration options:
+Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample windows_service.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.example) for all available configuration options:
 
 ```
 init_config:
@@ -29,11 +29,11 @@ instances:
 Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").
 Note: spaces are replaced by underscores in Datadog.
 
-[Restart the Agent][3] to start monitoring the services and sending service checks to Datadog.
+[Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to start monitoring the services and sending service checks to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `windows_service` under the Checks section.
+[Run the Agent's `status` subcommand](https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information) and look for `windows_service` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -60,20 +60,12 @@ The Agent submits this service check for each Windows service configured in `ser
 |Unknown|UNKNOWN|
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][5].
+Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 
 ## Further Reading
 
-* [Monitoring Windows Server 2012][6]
-* [How to collect Windows Server 2012 metrics][7]
-* [Monitoring Windows Server 2012 with Datadog][8]
+* [Monitoring Windows Server 2012](https://www.datadoghq.com/blog/monitoring-windows-server-2012/)
+* [How to collect Windows Server 2012 metrics](https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/)
+* [Monitoring Windows Server 2012 with Datadog](https://www.datadoghq.com/blog/windows-server-monitoring/)
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: http://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/monitoring-windows-server-2012/
-[7]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
-[8]: https://www.datadoghq.com/blog/windows-server-monitoring/
