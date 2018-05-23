@@ -42,6 +42,7 @@ install:
   # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
   - ps: choco install docker-compose
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
