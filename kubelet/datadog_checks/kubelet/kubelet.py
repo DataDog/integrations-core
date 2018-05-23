@@ -94,6 +94,9 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         else:
             self.cadvisor_metrics_url = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
 
+        if 'metrics_endpoint' in instance:
+            self.log.warning('metrics_endpoint is deprecated, please specify cadvisor_metrics_endpoint instead.')
+
         self.kubelet_metrics_url = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
