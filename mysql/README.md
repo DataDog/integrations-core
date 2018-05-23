@@ -2,24 +2,24 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from MySQL databases, including:
+The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
 
 * Query throughput
-* Query performance (average query run time, slow queries, etc)
-* Connections (currently open connections, aborted connections, errors, etc)
-* InnoDB (buffer pool metrics, etc)
+* Query performance (e.g. average query run time, slow queries, etc.)
+* Connections (e.g. currently open connections, aborted connections, errors, etc.)
+* InnoDB (e.g. buffer pool metrics, etc.)
 
-And many more. You can also invent your own metrics using custom SQL queries.
+You can also create your own metrics using custom SQL queries.
 
 ## Setup
+
 ### Installation
 
-The MySQL check is included in the Datadog Agent package, so simply [install the Agent][13] on your MySQL servers.
+The MySQL check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your MySQL servers.
 
 ### Configuration
 
-Edit the `mysql.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory, to connect it to the MySQL server and start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample mysql.d/conf.yaml][16] for all available configuration options.
+Edit `conf.d/mysql.d/conf.yaml` in the root of your Agent's directory in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -30,10 +30,10 @@ mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-Please note that `@'localhost'` is only for local connections, use the hostname/IP of your Agent for remote connections, learn more [here][14]
+Please note that `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][14].
 
 
-Verify that the user was created successfully using the following command, replacing ```<UNIQUEPASSWORD>``` with the password above:
+Verify that the user was created successfully using the following command - replace ```<UNIQUEPASSWORD>``` with the password you created above:
 
 ```
 mysql -u datadog --password=<UNIQUEPASSWORD> -e "show status" | \
@@ -44,7 +44,7 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 ```
 
-The Agent needs a few privileges to collect metrics. Grant its user ONLY the following privileges:
+The Agent needs a few privileges in order to collect metrics. Grant the user the following limited privileges ONLY:
 
 ```
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
@@ -54,7 +54,7 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-If the MySQL server has the `performance_schema` database enabled and you want to collect metrics from it, the Agent's user needs one more `GRANT`. Check that `performance_schema` exists and run the `GRANT` if so:
+If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
 
 ```
 mysql> show databases like 'performance_schema';
@@ -71,7 +71,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 #### Metric Collection
 
-* Add this configuration setup to your `mysql.d/conf.yaml` file to start gathering your [MySQL metrics](#metrics):
+* Add this configuration block to your `mysql.d/conf.yaml` in order to start gathering your [MySQL metrics](#metrics):
 
   ```
   init_config:
@@ -91,23 +91,24 @@ Query OK, 0 rows affected (0.00 sec)
           disable_innodb_metrics: false
   ```
   
-**Note**: Wrap your password in single quotes in case there is a special character in it.
+**Note**: Wrap your password in single quotes in case a special character is present.
 
-  In order to gather extra_performance_metrics, your MySQL server must have performance_schema enabled. [Reference the MySQL documentation][15] to enable it, otherwise set extra_performance_metrics to false.
-  See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
+In order to gather `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, [see the MySQL documentation][15].
 
-The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
+Note that the `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
 
-* [Restart the Agent][17] to start sending MySQL metrics to Datadog.
+See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
+
+[Restart the Agent][17] to start sending MySQL metrics to Datadog.
 
 #### Log Collection
 
 **Available for Agent >6.0**
 
-1. By default MySQL logs everything in /var/log/syslog which requires root access to read. To change this and have specific files for MySQL logs follow these steps:
+1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. In order to make the logs more accessible, follow these steps:
 
   - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
-  - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error and slow query logs:
+  - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
 
     ```
     [mysqld_safe]
@@ -123,8 +124,8 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 
   - Save the file and restart MySQL using following commands:
     `service mysql restart`
-  - Make sure the Agent has read access on those files (and the `/var/log/mysql` directory) and double check your logrotate configuration to make sure those files are taken into account and permissions are correctly set as well.
-  - In `/etc/logrotate.d/mysql-serverthere` should be something similar to:
+  - Make sure the Agent has read access on the `/var/log/mysql` directory and all of the files within. Double-check your logrotate configuration to make sure those files are taken into account and that the permissions are correctly set there as well.
+  - In `/etc/logrotate.d/mysql-server` there should be something similar to:
 
     ```
     /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
@@ -136,7 +137,7 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
     }
     ```
 
-2. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+2. Collecting logs is disabled by default in the Datadog Agent, so you need to enable it in `datadog.yaml`:
 
     ```
     logs_enabled: true
@@ -173,18 +174,19 @@ The `datadog` user should be set up in the MySQL integration configuration as `h
 
 4. [Restart the Agent][17].
 
-**Learn more about log collection [on the log documentation][18]**
+**Learn more about log collection [in the log documentation][18]**
 
 ### Validation
 
 [Run the Agent's `status` subcommand][19] and look for `mysql` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][20] for a list of metrics provided by this integration.
 
-The check does not collect all metrics by default. Set the following boolean configuration options to `true` to enable its metrics:
+The check does not collect all metrics by default. Set the following boolean configuration options to `true` in order to enable the respective metrics:
 
 `extra_status_metrics` adds the following metrics:
 
@@ -328,7 +330,8 @@ The check does not collect all metrics by default. Set the following boolean con
 | mysql.info.schema.size | GAUGE |
 
 ### Events
-The MySQL check does not include any event at this time.
+
+The MySQL check does not include any events.
 
 ### Service Checks
 
