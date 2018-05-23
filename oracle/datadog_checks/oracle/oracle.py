@@ -16,6 +16,10 @@ from datadog_checks.checks import AgentCheck
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 
 
+class OracleConfigError(Exception):
+    pass
+
+
 class Oracle(AgentCheck):
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
@@ -51,6 +55,11 @@ class Oracle(AgentCheck):
 
     def check(self, instance):
         self.use_oracle_client = True
+        server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
+
+        if not server or not user:
+            raise OracleConfigError("Oracle host and user are needed")
+
         try:
             # Check if the instantclient is available
             cx_Oracle.clientversion()
@@ -59,11 +68,6 @@ class Oracle(AgentCheck):
             # Fallback to JDBC
             self.use_oracle_client = False
             self.log.info('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
-
-        server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
-
-        if not server or not user:
-            raise Exception("Oracle host and user are needed")
 
         with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
             self._get_sys_metrics(con, tags)
