@@ -60,6 +60,8 @@ class Varnish(AgentCheck):
                 self.rate(m_name, long(self._current_value), tags=tags)
             elif self._current_type in ("i", "g"):
                 self.gauge(m_name, long(self._current_value), tags=tags)
+                if 'n_purges' in m_name:
+                    self.rate('varnish.n_purgesps', long(self._current_value), tags=tags)
             else:
                 # Unsupported data type, ignore
                 self._reset()
@@ -203,7 +205,6 @@ class Varnish(AgentCheck):
 
         Bitmaps are not supported.
         """
-
         tags = tags or []
         # FIXME: this check is processing an unbounded amount of data
         # we should explicitly list the metrics we want to get from the check
@@ -228,6 +229,8 @@ class Varnish(AgentCheck):
                     self.rate(self.normalize(name, prefix="varnish"), long(value), tags=tags)
                 elif metric["flag"] in ("g", "i"):
                     self.gauge(self.normalize(name, prefix="varnish"), long(value), tags=tags)
+                    if 'n_purges' in self.normalize(name, prefix="varnish"):
+                        self.rate('varnish.n_purgesps', long(value), tags=tags)
         elif varnishstat_format == "text":
             for line in output.split("\n"):
                 self.log.debug("Parsing varnish results: %s" % line)
@@ -242,6 +245,8 @@ class Varnish(AgentCheck):
                     # col 2 matters
                     self.log.debug("Varnish (gauge) %s %d" % (metric_name, int(gauge_val)))
                     self.gauge(metric_name, int(gauge_val), tags=tags)
+                    if 'n_purges' in metric_name:
+                        self.rate('varnish.n_purgesps', float(gauge_val), tags=tags)
                 else:
                     # col 3 has a rate (since restart)
                     self.log.debug("Varnish (rate) %s %d" % (metric_name, int(gauge_val)))

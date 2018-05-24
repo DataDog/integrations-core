@@ -340,3 +340,4 @@ varnish.vsm_free,gauge,,byte,,"Free space in the shared memory used to communica
 varnish.vsm_overflow,gauge,,byte,,"Data which does not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflow
 varnish.vsm_overflowed,gauge,,byte,second,"Total data which did not fit in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm overflowed
 varnish.vsm_used,gauge,,byte,,"Used space in the shared memory used to communicate with tools like varnishstat, varnishlog etc. This metric is only provided by varnish 4.x.",0,varnish,vsm used
+varnish.n_purgesps,rate,,event,,Purges executed. This metric is only provided by varnish 4.x.,0,varnish,n purges
