@@ -74,9 +74,6 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         self.kubelet_scraper.NAMESPACE = 'kubernetes'
         self.kubelet_scraper.metrics_mapper = {
             'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-            'etcd_helper_cache_entry_count': 'etcd.cache.entry.count',
-            'etcd_helper_cache_hit_count': 'etcd.cache.hit.count',
-            'etcd_helper_cache_miss_count': 'etcd.cache.miss.count',
             'rest_client_requests_total': 'rest.client.requests',
             'kubelet_runtime_operations': 'kubelet.runtime.operations',
             'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',

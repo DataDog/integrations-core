@@ -63,9 +63,6 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.io.read_bytes',
     'kubernetes.apiserver.certificate.expiration.count',
     'kubernetes.apiserver.certificate.expiration.sum',
-    'kubernetes.etcd.cache.entry.count',
-    'kubernetes.etcd.cache.hit.count',
-    'kubernetes.etcd.cache.miss.count',
     'kubernetes.rest.client.requests',
     'kubernetes.kubelet.runtime.operations',
     'kubernetes.kubelet.runtime.errors'
