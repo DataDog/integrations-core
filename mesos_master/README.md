@@ -36,14 +36,13 @@ Unless your masters' API uses a self-signed certificate. In that case, set `disa
 
 ### Log Collection
 
-Datadog Agent version 6 and greater can collect logs from containers. 
-You can then choose to collect all the logs from all your environment container or to filter by container image name or container label to cherry pick what logs should be collected.
+Datadog Agent version 6 and greater can collect logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
 
-To start collecting logs, those extra variable should be added to the Datadog Agent run command:
+Add those extra variables to the Datadog Agent run command to start collecting logs:
 
-* `-e DD_LOGS_ENABLED=true`: this parameter enables the log collection when set to true. The Agent now looks for log instructions in configuration files or container labels
-* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this parameter add a log configuration that enabled log collection for all containers 
-* `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: mount the directory we created to store pointer on each container logs to make sure we do not lose any.
+* `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
+* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers 
+* `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
 
 This gives the following command:
 
@@ -61,7 +60,7 @@ docker run -d --name datadog-agent \
   datadog/agent:latest
 ```
 
-You can then leverage [autodiscovery feature][105] for logs to override the service and source attribute to make sure you benefit from integration automatic setup.
+Use the [autodiscovery feature][105] for logs to override the `service` and `source` attribute to make sure you benefit from integration automatic setup.
 
 ### Validation
 
