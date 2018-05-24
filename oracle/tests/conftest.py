@@ -10,12 +10,6 @@ from datadog_checks.oracle import Oracle
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_NAME = "oracle"
-TABLESPACE_METRICS = [
-    'oracle.tablespace.used',
-    'oracle.tablespace.size',
-    'oracle.tablespace.in_use',
-    'oracle.tablespace.offline',
-]
 
 
 @pytest.fixture

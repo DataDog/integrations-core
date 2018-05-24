@@ -221,8 +221,7 @@ class Oracle(AgentCheck):
     def _get_sys_metrics(self, con, tags):
         if tags is None:
             tags = []
-        query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC " \
-            "ORDER BY BEGIN_TIME"
+        query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC ORDER BY BEGIN_TIME"
         with closing(con.cursor()) as cur:
             cur.execute(query)
             for row in cur.fetchall():
