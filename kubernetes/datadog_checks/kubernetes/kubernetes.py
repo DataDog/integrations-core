@@ -376,8 +376,11 @@ class Kubernetes(AgentCheck):
 
         if subcontainer.get("spec", {}).get("has_filesystem") and stats.get('filesystem', []) != []:
             fs = stats['filesystem'][-1]
-            fs_utilization = float(fs['usage'])/float(fs['capacity'])
-            self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
+            if fs['capacity'] > 0:
+                fs_utilization = float(fs['usage'])/float(fs['capacity'])
+                self.publish_gauge(self, NAMESPACE + '.filesystem.usage_pct', fs_utilization, tags)
+            else:
+                self.log.debug("Filesystem capacity is 0: cannot report usage metrics.")
 
         if subcontainer.get("spec", {}).get("has_network"):
             net = stats['network']
