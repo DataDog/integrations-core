@@ -9,7 +9,7 @@ You can also create your own metrics by having the check run custom queries.
 ## Setup
 ### Installation
 
-The SQL Server check is packaged with the Agent, so simply [install the Agent][1] on your SQL Server instances.  
+The SQL Server check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your SQL Server instances.  
 
 Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties.
 **Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**

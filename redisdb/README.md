@@ -8,7 +8,7 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 ### Installation
 
-The Redis check is packaged with the Agent, so simply [install the Agent][1] on your Redis servers.
+The Redis check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Redis servers.
 
 ### Configuration
 
@@ -17,7 +17,7 @@ See the [sample redis.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
 
-Add this configuration setup to your `redisdb.d/conf.yaml` file to start gathering your [Redis metrics](#metrics):
+Add this configuration block to your `redisdb.d/conf.yaml` file to start gathering your [Redis metrics](#metrics):
 
 ```
 init_config:
@@ -54,7 +54,7 @@ See the [sample redisdb.d/conf.yaml][2] for all available configuration options.
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
+* Add this configuration block to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
 
   ```
     logs:

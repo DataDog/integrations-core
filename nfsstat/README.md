@@ -7,7 +7,7 @@ The NFS integration collects metrics about mount points on the NFS client as it 
 ## Setup
 ### Installation
 
-The NFSstat check is packaged with the Agent, so simply [install the Agent][2] on your servers.
+The NFSstat check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 

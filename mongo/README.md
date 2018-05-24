@@ -10,7 +10,7 @@ Connect MongoDB to Datadog in order to:
 ## Setup
 ### Installation
 
-The MongoDB check is packaged with the Agent, so simply [install the Agent][1] on your MongoDB masters.
+The MongoDB check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your MongoDB masters.
 
 ### Configuration
 
@@ -42,7 +42,7 @@ db.createUser({
 
 #### Metric Collection
 
-* Add this configuration setup to your `mongodb.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.d/conf.yaml][2] for all available configuration options:
+* Add this configuration block to your `mongodb.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.d/conf.yaml][2] for all available configuration options:
 
   ```
   init_config:
@@ -68,7 +68,7 @@ db.createUser({
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `mongodb.d/conf.yaml` file to start collecting your MongoDB Logs:
+* Add this configuration block to your `mongodb.d/conf.yaml` file to start collecting your MongoDB Logs:
 
   ```
   logs:
@@ -82,7 +82,7 @@ db.createUser({
 
 * [Restart the Agent][3].
 
-**Learn more about log collection [on the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**
 
 ### Validation
 

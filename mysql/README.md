@@ -143,7 +143,7 @@ See our [sample mysql.yaml][16] for all available configuration options, includi
     logs_enabled: true
     ```
 
-3. Add this configuration setup to your `mysql.d/conf.yaml` file to start collecting your MySQL logs:
+3. Add this configuration block to your `mysql.d/conf.yaml` file to start collecting your MySQL logs:
 
     ```
     logs:

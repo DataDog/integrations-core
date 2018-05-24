@@ -10,7 +10,7 @@ The Agent's Marathon check lets you:
 ## Setup
 ### Installation
 
-The Marathon check is packaged with the Agent, so simply [install the Agent][1] on your Marathon master.
+The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.
 
 ### Configuration
 

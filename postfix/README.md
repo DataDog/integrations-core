@@ -7,7 +7,7 @@ This check monitors the size of all your Postfix queues.
 ## Setup
 ### Installation
 
-The Postfix check is packaged with the Agent, so simply [install the Agent][1] on your Postfix servers.
+The Postfix check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Postfix servers.
 
 ## Configuration
 This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.

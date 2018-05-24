@@ -7,7 +7,7 @@ The Agent's Kong check tracks total requests, response codes, client connections
 ## Setup
 ### Installation
 
-The Kong check is packaged with the Agent, so simply [install the Agent][1] on your Kong servers.
+The Kong check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Kong servers.
 
 ### Configuration
 

@@ -14,7 +14,7 @@ To collect Kafka consumer metrics, see the [kafka_consumer check][14].
 ## Setup
 ### Installation
 
-The Agent's Kafka check is packaged with the Agent, so simply [install the Agent][15] on your Kafka nodes.
+The Agent's Kafka check is included in the [Datadog Agent][15] package, so you don't need to install anything else on your Kafka nodes.
 
 The check collects metrics via JMX, so you'll need a JVM on each kafka node so the Agent can fork [jmxfetch][16]. You can use the same JVM that Kafka uses.
 
@@ -60,7 +60,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `kafka.d/conf.yaml` file to start collecting your Kafka Logs:
+* Add this configuration block to your `kafka.d/conf.yaml` file to start collecting your Kafka Logs:
 
   ```
   logs:
@@ -80,7 +80,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
 
 * [Restart the Agent][19]. 
 
-**Learn more about log collection [on the log documentation][21]**
+**Learn more about log collection [in the log documentation][21]**
 
 ### Validation
 

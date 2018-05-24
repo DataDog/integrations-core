@@ -7,7 +7,7 @@ The Agent's lighttpd check tracks uptime, bytes served, requests per second, res
 ## Setup
 ### Installation
 
-The lighttpd check is packaged with the Agent, so simply [install the Agent][1] on your lighttpd servers.
+The lighttpd check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your lighttpd servers.
 
 In addition, install `mod_status` on your Lighttpd servers.
 

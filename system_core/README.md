@@ -7,7 +7,7 @@ This check collects the number of CPU cores on a host and CPU times (i.e. system
 ## Setup
 ### Installation
 
-The system_core check is packaged with the Agent, so simply [install the Agent][1] on any host.
+The system_core check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

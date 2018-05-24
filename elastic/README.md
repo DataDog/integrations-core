@@ -10,7 +10,7 @@ The Datadog Agent's Elasticsearch check collects metrics for search and indexing
 ## Setup
 ### Installation
 
-The Elasticsearch check is packaged with the Datadog Agent, so simply [install the Agent][1] on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
+The Elasticsearch check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
 
 ### Configuration
 
@@ -21,7 +21,7 @@ The Elasticsearch check is packaged with the Datadog Agent, so simply [install t
 
 #### Metric Collection
 
-*  Add this configuration setup to your `elastic.yaml` file to start gathering your [ElasticSearch metrics](#metrics):
+*  Add this configuration block to your `elastic.yaml` file to start gathering your [ElasticSearch metrics](#metrics):
 
 ```yaml
 init_config:
@@ -53,7 +53,7 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
   logs_enabled: true
   ```
 
-* Then add this configuration setup to your `apache.yaml` file to start collecting your Elasticsearch Logs:
+* Then Add this configuration block to your `apache.yaml` file to start collecting your Elasticsearch Logs:
 
   ```yaml
     logs:
@@ -67,7 +67,7 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
   
 * [Restart the Agent][3] to begin sending Elasticsearch logs to Datadog.
   
-**Learn more about log collection [on the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**
   
 ### Validation
 

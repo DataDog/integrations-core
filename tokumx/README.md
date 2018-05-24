@@ -13,7 +13,7 @@ And more.
 ## Setup
 ### Installation
 
-The TokuMX check is packaged with the Agent, so simply [install the Agent][1] on your TokuMX servers.
+The TokuMX check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your TokuMX servers.
 
 ### Configuration
 #### Prepare TokuMX

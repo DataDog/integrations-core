@@ -5,9 +5,10 @@
 Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can detect bad response codes (e.g. 404), identify soon-to-expire SSL certificates, search responses for specific text, and much more. The check also submits HTTP response times as a metric.
 
 ## Setup
+
 ### Installation
 
-The HTTP check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
+The HTTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on the servers from which you will probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
 ### Configuration
 
@@ -66,6 +67,7 @@ When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent]
 [Run the Agent's `status` subcommand][6] and look for `http_check` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.

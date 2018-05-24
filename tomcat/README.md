@@ -13,7 +13,7 @@ And more.
 ## Setup
 ### Installation
 
-The Tomcat check is packaged with the Agent, so simply [install the Agent][13] on your Tomcat servers.
+The Tomcat check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your Tomcat servers.
 
 This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][14] to do that.
 
@@ -26,7 +26,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 #### Metric Collection
 
-*  Add this configuration setup to your `tomcat.yaml` file to start gathering your [Tomcat metrics](#metrics):
+*  Add this configuration block to your `tomcat.yaml` file to start gathering your [Tomcat metrics](#metrics):
 
 ```
 instances:
@@ -274,7 +274,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
+* Add this configuration block to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
 
   ```
   logs:

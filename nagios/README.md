@@ -13,7 +13,7 @@ The check emits events for service flaps, host state changes, passive service ch
 ## Setup
 ### Installation
 
-The Nagios check is packaged with the Agent, so simply [install the Agent][1] on your Nagios servers.
+The Nagios check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Nagios servers.
 
 ### Configuration
 

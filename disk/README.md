@@ -7,7 +7,7 @@ Collect metrics related to disk usage and IO.
 ## Setup
 ### Installation
 
-The disk check is packaged with the Agent, so simply [install the Agent][1] anywhere you wish to use it.
+The disk check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

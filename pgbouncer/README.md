@@ -7,7 +7,7 @@ The PgBouncer check tracks connection pool metrics and lets you monitor traffic 
 ## Setup
 ### Installation
 
-The PgBouncer check is packaged with the Agent, so simply [install the Agent][1] on your PgBouncer nodes.
+The PgBouncer check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your PgBouncer nodes.
 
 ### Configuration
 

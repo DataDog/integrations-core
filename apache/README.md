@@ -22,7 +22,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 #### Metric Collection
 
-1. Add this configuration setup to your `apache.d/conf.yaml` file to start gathering your [Apache Metrics](#metrics):
+1. Add this configuration block to your `apache.d/conf.yaml` file to start gathering your [Apache Metrics](#metrics):
 
     ```yaml
     init_config:
@@ -48,7 +48,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     logs_enabled: true
     ```
 
-2. Add this configuration setup to your `apache.yaml` file to start collecting your Apache Logs:
+2. Add this configuration block to your `apache.yaml` file to start collecting your Apache Logs:
 
     ```yaml
       logs:
@@ -70,7 +70,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 3. [Restart the Agent][3].
 
-**Learn more about log collection [on the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**
 
 ### Validation
 

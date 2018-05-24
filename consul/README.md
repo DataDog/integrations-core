@@ -22,7 +22,7 @@ Finally, in addition to metrics, the Datadog Agent also sends a service check fo
 ## Setup
 ### Installation
 
-The Datadog Agent's Consul Check is included in the Agent package, so simply [install the Agent][1] on your Consul nodes.
+The Datadog Agent's Consul check is included in the [Datadog Agent][4] package, so you don't need to install anything else on yourConsul nodes.
 
 ### Configuration
 
@@ -31,7 +31,7 @@ See the [sample consul.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
 
-1. Add this configuration setup to your `consul.d/conf.yaml` file to start gathering your [Consul Metrics](#metrics):
+1. Add this configuration block to your `consul.d/conf.yaml` file to start gathering your [Consul Metrics](#metrics):
 
     ```yaml
     init_config:
@@ -82,7 +82,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
     logs_enabled: true
     ```
 
-2. Add this configuration setup to your `consul.yaml` file to start collecting your Consul Logs:
+2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
 
     ```yaml
       logs:
@@ -96,7 +96,7 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 3. [Restart the Agent][3].
 
-**Learn more about log collection [on the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**
 
 ### Validation
 
