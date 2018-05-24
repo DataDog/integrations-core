@@ -34,6 +34,34 @@ If you passed the correct Master URL when starting datadog-agent, the Agent is a
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
+### Log Collection
+
+Datadog Agent version 6 and greater can collect logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
+
+Add those extra variables to the Datadog Agent run command to start collecting logs:
+
+* `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
+* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers 
+* `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
+
+This gives the following command:
+
+```
+docker run -d --name datadog-agent \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc/:/host/proc/:ro \
+  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+  -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
+  -e DD_API_KEY=<YOUR_DATADOG_API_KEY> \
+  -e MESOS_MASTER=yes \
+  -e MARATHON_URL=http://leader.mesos:8080 \
+  -e DD_LOGS_ENABLED=true \
+  -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
+  datadog/agent:latest
+```
+
+Use the [autodiscovery feature][105] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
+
 ### Validation
 
 In the Datadog app, search for `mesos.cluster` in the Metrics Explorer.
@@ -64,3 +92,4 @@ Need help? Contact [Datadog Support][103].
 [102]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
 [103]: http://docs.datadoghq.com/help/
 [104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
+[105]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
