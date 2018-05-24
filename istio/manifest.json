@@ -8,6 +8,8 @@
     "mac_os",
     "windows"
   ],
+  "metric_prefix": "istio.",
+  "metric_to_check": "istio.process.cpu_seconds_total",
   "maintainer": "help@datadoghq.com",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "description": "The istio integration collects data from the istio service mesh and mixer.",
@@ -17,6 +19,7 @@
     "monitor_editor": "resources/monitor_mysql.png",
     "my_image": "resources/mysql.png"
   },
+  "creates_events": false,
   "guid": "d8bd53c0-0884-4357-9517-11858bf6aa9d",
   "public_title": "Datadog-Istio Integration",
   "categories":["data store"],
