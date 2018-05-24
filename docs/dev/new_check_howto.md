@@ -1,6 +1,9 @@
 ---
-title: How to create a new integration
+title: Create a new integration
 kind: documentation
+aliases:
+    - /developers/integrations/integration_sdk/
+    - /developers/integrations/testing/
 ---
 
 To consider an Agent based integration complete, thus ready to be included in the core repository and bundled with the Agent package, a number of requisites have to be met:

@@ -1,7 +1,9 @@
 ---
-title: Legacy development Setup
+title: Legacy
 kind: documentation
 ---
+
+This documentation explains how to create an Agent check for the Datadog Agent v5. Please [refer to the dedicated documentation for creating an Agent check for the Datadog Agent v6 doc][21].
 
 ## Requirements
 
@@ -299,3 +301,4 @@ In our experience building integrations, we've also faced a number of challenges
 [CurrentCategoriesCanBeFoundOnIntegrations]: /integrations
 [ForAnExampleOfTheManifestFile]: https://github.com/DataDog/integrations-core/blob/master/activemq/manifest.json
 [OfficialMysqlContainer]: https://hub.docker.com/_/mysql/
+[21]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/new_check_howto.md
