@@ -63,6 +63,8 @@ COMMON_METRICS = [
     "varnish.LCK.vcl.creat",
     "varnish.LCK.vcl.destroy",
     "varnish.LCK.vcl.locks",
+    "varnish.n_purges",
+    "varnish.n_purgesps",
 ]
 
 VARNISH_DEFAULT_VERSION = "4.1.7"
