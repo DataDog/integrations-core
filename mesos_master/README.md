@@ -60,7 +60,7 @@ docker run -d --name datadog-agent \
   datadog/agent:latest
 ```
 
-Use the [autodiscovery feature][105] for logs to override the `service` and `source` attribute to make sure you benefit from integration automatic setup.
+Use the [autodiscovery feature][105] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
 
 ### Validation
 
