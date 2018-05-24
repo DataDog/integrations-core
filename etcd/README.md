@@ -11,7 +11,7 @@ Collect etcd metrics to:
 ## Setup
 ### Installation
 
-The etcd check is packaged with the Agent, so simply [install the Agent][1] on your etcd instance(s).
+The etcd check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your etcd instance(s).
 
 ### Configuration
 

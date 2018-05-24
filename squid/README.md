@@ -8,7 +8,7 @@ This integration lets you monitor your Squid metrics from the Cache Manager dire
 
 ### Installation
 
-The Agent's Squid integration is packaged with the Agent, so simply [install the agent][1] on your Squid server.  
+The Agent's Squid check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Squid server.  
 
 ## Configuration
 

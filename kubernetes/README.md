@@ -14,7 +14,7 @@ Agent6 uses a new set of integrations, see [the update instructions][1] and the 
 ## Setup (Agent5 only)
 ### Installation
 
-The Kubernetes check is packaged with the Agent, so simply [install the Agent][3] on your Kubernetes servers.
+The Kubernetes check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Kubernetes servers.
 
 ### Configuration
 

@@ -9,7 +9,7 @@ Use this check (hdfs_namenode) and its counterpart check (hdfs_datanode), not th
 ## Setup
 ### Installation
 
-The HDFS NameNode check is packaged with the Agent, so simply [install the Agent][1] on your NameNodes.
+The HDFS NameNode check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your NameNodes.
 
 ### Configuration
 #### Prepare the NameNode

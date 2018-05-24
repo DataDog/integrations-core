@@ -2,15 +2,15 @@
 {{< img src="integrations/cassandra/cassandra.png" alt="Cassandra default dashboard" responsive="true" popup="true">}}
 ## Overview
 
-Get metrics from cassandra service in real time to:
+Get metrics from Cassandra service in real time to:
 
-* Visualize and monitor cassandra states
-* Be notified about cassandra failovers and events.
+* Visualize and monitor Cassandra states
+* Be notified about Cassandra failovers and events.
 
 ## Setup
 ### Installation
 
-The Cassandra check is packaged with the Agent, so simply [install the Agent][101] on your Cassandra nodes.
+The Cassandra check is included in the [Datadog Agent][101] package, so you don't need to install anything else on your Cassandra nodes.
 
 We recommend the use of Oracle's JDK for this integration.
 
@@ -36,7 +36,7 @@ See the [sample  cassandra.d/conf.yaml][103] for all available configuration opt
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
+* Add this configuration block to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
 
   ```yaml
     logs:

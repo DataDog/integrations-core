@@ -7,7 +7,7 @@ This check monitors the uptime, status, and number of processes running under su
 ## Setup
 ### Installation
 
-The Supervisor check is packaged with the Agent, so simply [install the Agent][1] on any servers that use Supervisor to manage processes.
+The Supervisor check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server that use Supervisor to manage processes.
 
 ### Configuration
 #### Prepare supervisord

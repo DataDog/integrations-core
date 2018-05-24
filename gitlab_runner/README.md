@@ -13,7 +13,7 @@ more information about Gitlab Runner and its integration with Prometheus
 ## Setup
 ### Installation
 
-The Gitlab Runner check is packaged with the Agent, so simply [install the Agent][1] on your Gitlab servers.
+The Gitlab Runner check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Gitlab servers.
 
 ### Configuration
 

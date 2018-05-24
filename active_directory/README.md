@@ -7,7 +7,7 @@ Get metrics from Microsoft Active Directory to visualize and monitor its perform
 ## Setup
 ### Installation
 
-The Agent's Active directory check is packaged with the Agent, so simply [install the Agent][4] on your servers.
+The Agent's Active directory check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 

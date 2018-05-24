@@ -9,7 +9,7 @@ This integration gets container metrics from kubelet
 
 ## Installation
 
-The Kubelet check is packaged with the Agent, so simply [install the Agent][3] on your servers.
+The Kubelet check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers.
 
 ## Configuration
 

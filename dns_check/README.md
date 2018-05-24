@@ -7,7 +7,8 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 ## Setup
 ### Installation
 
-The DNS check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your DNS servers.  
+The DNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server from which you want to probe your DNS servers.  
+
 Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
 ### Configuration

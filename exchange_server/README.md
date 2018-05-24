@@ -9,7 +9,7 @@ Get metrics from Microsoft Exchange Server
 ## Setup
 ### Installation
 
-The Exchange check is packaged with the Agent, so simply [install the Agent][1] on your servers.
+The Exchange check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
 ### Configuration
 

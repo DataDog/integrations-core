@@ -15,7 +15,7 @@ It also submits service checks for the health of each backend.
 ## Setup
 ### Installation
 
-The Varnish check is packaged with the Agent, so simply [install the Agent][1] on your Varnish servers.
+The Varnish check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Varnish servers.
 
 ### Configuration
 
@@ -30,7 +30,7 @@ If you're running Varnish 4.1+, add the dd-agent system user to the Varnish grou
 
 #### Metric Collection
 
-* Add this configuration setup to your `varnish.d/conf.yaml` file to start gathering your [Varnish metrics](#metrics):
+* Add this configuration block to your `varnish.d/conf.yaml` file to start gathering your [Varnish metrics](#metrics):
 
   ```
   init_config:
@@ -80,7 +80,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `varnish.d/conf.yaml` file to start collecting your Varnish logs:
+* Add this configuration block to your `varnish.d/conf.yaml` file to start collecting your Varnish logs:
 
   ```
   logs:
@@ -95,7 +95,7 @@ DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
 
 * [Restart the Agent][3].
 
-**Learn more about log collection [on the log documentation][4]**
+**Learn more about log collection [in the log documentation][4]**
 
 ### Validation
 

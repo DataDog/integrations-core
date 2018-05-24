@@ -7,7 +7,7 @@ The network check collects TCP/IP stats from the host operating system.
 ## Setup
 ### Installation
 
-The network check is packaged with the Agent, so simply [install the Agent][1] on any host.
+The network check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

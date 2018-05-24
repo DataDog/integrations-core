@@ -12,7 +12,7 @@ The Spark check collects metrics for:
 ## Setup
 ### Installation
 
-The Spark check is packaged with the Agent, so simply [install the Agent][1] on your:
+The Spark check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your:
 
 - Mesos master (if you're running Spark on Mesos),
 - YARN ResourceManager (if you're running Spark on YARN), or

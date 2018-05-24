@@ -7,7 +7,7 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 ### Installation
 
-The Envoy check is packaged with the Agent, so simply [install the Agent][2] on your server.
+The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

@@ -7,7 +7,7 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 ## Setup
 ### Installation
 
-The HTTP check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
+The HTTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers from which you want to probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
 ### Configuration
 

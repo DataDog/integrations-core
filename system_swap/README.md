@@ -7,7 +7,7 @@ This check monitors the number of bytes a host has swapped in and swapped out.
 ## Setup
 ### Installation
 
-The system swap check is packaged with the Agent, so simply [install the Agent][1] on any host.
+The system swap check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

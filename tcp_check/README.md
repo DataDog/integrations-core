@@ -7,7 +7,7 @@ Monitor TCP connectivity and response time for any host and port.
 ## Setup
 ### Installation
 
-The TCP check is packaged with the Agent, so simply [install the Agent][1] on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
+The TCP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on any host from which you want to probe TCP ports. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you'll probably want to run this check from hosts that do not run the monitored TCP services, i.e. to test remote connectivity.
 
 ### Configuration
 

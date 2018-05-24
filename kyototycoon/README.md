@@ -7,7 +7,7 @@ The Agent's KyotoTycoon check tracks get, set, and delete operations, and lets y
 ## Setup
 ### Installation
 
-The KyotoTycoon check is packaged with the Agent, so simply [install the Agent][1] on your KyotoTycoon servers.
+The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your KyotoTycoon servers.
 
 ### Configuration
 

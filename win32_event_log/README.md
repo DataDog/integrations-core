@@ -7,7 +7,7 @@ This check watches for events in the Windows Event Log and forwards them to Data
 ## Setup
 ### Installation
 
-The Windows Event Log check is packaged with the Agent, so simply [install the Agent][1] on your Windows hosts.
+The Windows Event Log check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Windows hosts.
 
 ### Configuration
 

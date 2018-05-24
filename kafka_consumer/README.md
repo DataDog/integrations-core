@@ -9,7 +9,7 @@ This check fetches the highwater offsets from the Kafka brokers, consumer offset
 ## Setup
 ### Installation
 
-The Agent's Kafka consumer check is packaged with the Agent, so simply [install the Agent][101] on your Kafka nodes.
+The Agent's Kafka consumer check is included in the [Datadog Agent][101] package, so you don't need to install anything else on your Kafka nodes.
 
 ### Configuration
 

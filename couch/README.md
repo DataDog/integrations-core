@@ -12,7 +12,7 @@ For performance reasons, the CouchDB version you're using is cached, so you cann
 ## Setup
 ### Installation
 
-The CouchDB check is packaged with the Agent, so simply [install the Agent][1] on your CouchDB servers.
+The CouchDB check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your CouchDB servers.
 
 ### Configuration
 

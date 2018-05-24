@@ -89,7 +89,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
   logs_enabled: true
   ```
 
-*  Add this configuration setup to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
+*  Add this configuration block to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
 
   ```
   logs:
@@ -109,7 +109,7 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
 
 * [Restart the Agent][15].
 
-**Learn more about log collection [on the log documentation][16]**
+**Learn more about log collection [in the log documentation][16]**
 ### Validation
 
 [Run the Agent's `status` subcommand][17] and look for `postgres` under the Checks section.

@@ -2,17 +2,17 @@
 {{< img src="integrations/yarn/yarndashboard.png" alt="Hadoop Yarn" responsive="true" popup="true">}}
 ## Overview
 
-This check collects metrics from your YARN ResourceManager, including:
+This check collects metrics from your YARN ResourceManager, including (but not limited to)::
 
-* Cluster-wide metrics: number of running apps, running containers, unhealthy nodes, etc
-* Per-application metrics: app progress, elapsed running time, running containers, memory use, etc
-* Node metrics: available vCores, time of last health update, etc
+* Cluster-wide metrics (e.g. number of running apps, running containers, unhealthy nodes, etc.)
+* Per-application metrics (e.g. app progress, elapsed running time, running containers, memory use, etc.)
+* Node metrics (e.g. available vCores, time of last health update, etc/)
 
-And more.
+
 ## Setup
 ### Installation
 
-The YARN check is packaged with the Agent, so simply [install the Agent][1] on your YARN ResourceManager.
+The YARN check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your YARN ResourceManager.
 
 ### Configuration
 

@@ -7,7 +7,7 @@ The Zookeeper check tracks client connections and latencies, monitors the number
 ## Setup
 ### Installation
 
-The Zookeeper check is packaged with the Agent, so simply [install the Agent][13] on your Zookeeper servers.
+The Zookeeper check is included in the [Datadog Agent][13] package, so you don't need to install anything else on your Zookeeper servers.
 
 ### Configuration
 
@@ -18,7 +18,7 @@ The Zookeeper check is packaged with the Agent, so simply [install the Agent][13
 
 #### Metric Collection
 
-*  Add this configuration setup to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
+*  Add this configuration block to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
 
 ```
 init_config:
@@ -63,7 +63,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `zk.yaml` file to start collecting your Zookeeper Logs:
+* Add this configuration block to your `zk.yaml` file to start collecting your Zookeeper Logs:
 
   ```
   logs:

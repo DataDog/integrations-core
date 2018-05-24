@@ -10,7 +10,7 @@ The process check lets you:
 ## Setup
 ### Installation
 
-The process check is packaged with the Agent, so simply [install the Agent][2] anywhere you want to use the check.
+The process check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 

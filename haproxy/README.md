@@ -44,7 +44,7 @@ The Agent collects metrics via a stats endpoint:
 
 #### Metric Collection
 
-Add this configuration setup to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
+Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
   ```yaml
   init_config:
@@ -68,7 +68,7 @@ Add this configuration setup to your `haproxy.d/conf.yaml` file to start gatheri
   logs_enabled: true
   ```
 
-* Add this configuration setup to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
+* Add this configuration block to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
   ```
   logs:
@@ -82,7 +82,7 @@ Add this configuration setup to your `haproxy.d/conf.yaml` file to start gatheri
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
-**Learn more about log collection [on the log documentation][6]**
+**Learn more about log collection [in the log documentation][6]**
 
 ### Validation
 

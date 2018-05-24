@@ -3,22 +3,22 @@
 
 ## Overview
 
-The Datadog Agent can collect many metrics from NGINX instances, including:
+The Datadog Agent can collect many metrics from NGINX instances, including (but not limited to)::
 
 * Total requests
-* Connections (accepted, handled, active)
+* Connections (e.g. accepted, handled, active)
 
 For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
-* Errors (4xx codes, 5xx codes)
-* Upstream servers (active connections, 5xx codes, health checks, etc)
-* Caches (size, hits, misses, etc)
-* SSL (handshakes, failed handshakes, etc)
+* Errors (e.g. 4xx codes, 5xx codes)
+* Upstream servers (e.g. active connections, 5xx codes, health checks, etc/)
+* Caches (e.g. size, hits, misses, etc.)
+* SSL (e.g. handshakes, failed handshakes, etc.)
 
 ## Setup
 ### Installation
 
-The NGINX check is packaged with the Agent, so simply [install the Agent][1] on your NGINX servers.
+The NGINX check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your NGINX servers.
 
 #### NGINX status module
 
@@ -80,7 +80,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 #### Metric Collection
 
-* Add this configuration setup to your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics):
+* Add this configuration block to your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics):
 
   ```
   init_config:
@@ -105,7 +105,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
   logs_enabled: true
   ```
 
-*  Add this configuration setup to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
+*  Add this configuration block to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
 
   ```
   logs:
@@ -126,7 +126,7 @@ Reload NGINX to enable the status endpoint. (There's no need for a full restart)
 
 * [Restart the Agent][6]
 
-**Learn more about log collection [on the log documentation][7]**
+**Learn more about log collection [in the log documentation][7]**
 
 ### Validation
 

@@ -15,7 +15,7 @@ And many more.
 ## Setup
 ### Installation
 
-The PowerDNS Recursor check is packaged with the Agent, so simply [install the Agent][1] on your recursors.
+The PowerDNS Recursor check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your recursors.
 
 ### Configuration
 #### Prepare PowerDNS
