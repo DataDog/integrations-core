@@ -28,7 +28,7 @@ istio.mixer.go.memstats.alloc_bytes,gauge,,byte,,,0,istio,
 istio.mixer.go.memstats.alloc_bytes_total,gauge,,byte,,,0,istio,
 istio.mixer.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
 istio.mixer.go.memstats.frees_total,gauge,,,,,0,istio,
-istio.mixer.go.memstats.gc_cpu_fraction,gauge,,percentage,,CPU taken up by GC,0,istio,CPU taken up by gc
+istio.mixer.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
 istio.mixer.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,istio,
 istio.mixer.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,istio,
 istio.mixer.go.memstats.heap_idle_bytes,gauge,,byte,,Number of idle bytes in the heap,0,istio,
