@@ -11,11 +11,12 @@ The Datadog Agent can collect many metrics from NGINX instances, including (but 
 For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
 * Errors (e.g. 4xx codes, 5xx codes)
-* Upstream servers (e.g. active connections, 5xx codes, health checks, etc/)
+* Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
 * Caches (e.g. size, hits, misses, etc.)
 * SSL (e.g. handshakes, failed handshakes, etc.)
 
 ## Setup
+
 ### Installation
 
 The NGINX check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your NGINX servers.
