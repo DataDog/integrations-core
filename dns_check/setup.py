@@ -9,26 +9,36 @@ import re
 
 here = path.abspath(path.dirname(__file__))
 
+def parse_req_line(line):
+    line = line.strip()
+    if not line or line.startswith('--hash') or line[0] == '#':
+        return None
+    req = line.rpartition('#')
+    if len(req[1]) == 0:
+        line = req[2].strip()
+    else:
+        line = req[1].strip()
+
+    if '--hash=' in line:
+        line = line[:line.find('--hash=')].strip()
+    if ';' in line:
+        line = line[:line.find(';')].strip()
+    if '\\' in line:
+        line = line[:line.find('\\')].strip()
+
+    return line
+
 # get the long description from the readme file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# Parse requirements
 runtime_reqs = ['datadog_checks_base']
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     for line in f.readlines():
-        line = line.strip()
-        if not line or line.startswith('--hash') or line[0] == '#':
-            continue
-        req = line.rpartition('#')
-        if not len(req[1]):
-            if '--hash=' in req[2]:
-                tokens = req[2].split()
-                if len(tokens) > 1:
-                    runtime_reqs.append(tokens[0])
-            elif ';' in req[2]:
-                runtime_reqs.append(req[2])
-        else:
-            runtime_reqs.append(req[0])
+        req = parse_req_line(line)
+        if req:
+            runtime_reqs.append(req)
 
 def read(*parts):
     with open(path.join(here, *parts), 'r') as fp:
