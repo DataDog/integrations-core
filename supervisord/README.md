@@ -5,11 +5,13 @@
 This check monitors the uptime, status, and number of processes running under supervisord.
 
 ## Setup
+
 ### Installation
 
-The Supervisor check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server that use Supervisor to manage processes.
+The Supervisor check is included in the [Datadog Agent][1] package, so you don't need to install anything else on servers where Supervisor is running.
 
 ### Configuration
+
 #### Prepare supervisord
 
 The Agent can collect data from Supervisor via HTTP server or UNIX socket. The Agent collects the same data no matter which collection method you configure.
@@ -84,6 +86,7 @@ See the [example check configuration][2] for comprehensive descriptions of other
 [Run the Agent's `status` subcommand][4] and look for `supervisord` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this check.
