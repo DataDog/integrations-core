@@ -1,5 +1,5 @@
 ---
-title: Setup Python to work on Agent based integrations
+title: Prepare your Python environment for Agent integration development
 kind: documentation
 ---
 
