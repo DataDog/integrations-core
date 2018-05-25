@@ -31,7 +31,6 @@ def spin_up_squid():
     for _ in xrange(10):
         try:
             res = requests.get(common.URL)
-            print "!!!!!!!", res
             res.raise_for_status()
             break
         except Exception:
@@ -43,3 +42,13 @@ def spin_up_squid():
 
     yield
     subprocess.check_call(args + ["down"], env=env)
+
+
+@pytest.fixture
+def instance():
+    instance = {
+        "name": "ok_instance",
+        "tags": ["custom_tag"],
+        "host": common.HOST
+    }
+    return instance

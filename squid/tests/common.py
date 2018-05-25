@@ -9,19 +9,8 @@ CHECK_NAME = "squid"
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 PORT = '3128'
-URL = 'http://{0}:{1}/squid-internal-mgr/counters'.format(HOST, PORT)
-OK = 0
-CRIT = 1
+URL = 'http://{}:{}/squid-internal-mgr/counters'.format(HOST, PORT)
 SERVICE_CHECK = "squid.can_connect"
-CHECK_CONFIG = {
-        "name": "ok_instance",
-        "tags": ["custom_tag"]
-}
-
-BAD_CONFIG = {
-        "name": "fail_instance",
-        "host": "bad_host"
-}
 
 EXPECTED_METRICS = [
     "client_http.requests",
