@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "Oracle",
   "display_name": "Oracle Database",
   "short_description": "Oracle relational database system designed for enterprise grid computing",
@@ -15,7 +13,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.3.0",
   "guid": "6c4ddc46-2763-4c56-8b71-c838b7f82d7b",
   "public_title": "Datadog-Oracle Integration",
   "categories": [

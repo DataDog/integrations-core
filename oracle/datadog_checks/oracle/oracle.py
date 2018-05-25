@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from contextlib import closing
@@ -11,16 +11,20 @@ import jpype
 import cx_Oracle
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 
-ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
-JDBC_CONNECT_STRING = "jdbc:oracle:thin:@//{}/{}"
-CX_CONNECT_STRING = "{}/{}@//{}/{}"
+
+class OracleConfigError(Exception):
+    pass
 
 
 class Oracle(AgentCheck):
+
+    ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
+    JDBC_CONNECT_STRING = "jdbc:oracle:thin:@//{}/{}"
+    CX_CONNECT_STRING = "{}/{}@//{}/{}"
 
     SERVICE_CHECK_NAME = 'oracle.can_connect'
     SYS_METRICS = {
@@ -51,6 +55,11 @@ class Oracle(AgentCheck):
 
     def check(self, instance):
         self.use_oracle_client = True
+        server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
+
+        if not server or not user:
+            raise OracleConfigError("Oracle host and user are needed")
+
         try:
             # Check if the instantclient is available
             cx_Oracle.clientversion()
@@ -59,11 +68,6 @@ class Oracle(AgentCheck):
             # Fallback to JDBC
             self.use_oracle_client = False
             self.log.info('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
-
-        server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
-
-        if not server or not user:
-            raise Exception("Oracle host and user are needed")
 
         with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
             self._get_sys_metrics(con, tags)
@@ -88,9 +92,9 @@ class Oracle(AgentCheck):
         ] + tags
 
         if self.use_oracle_client:
-            connect_string = CX_CONNECT_STRING.format(user, password, server, service)
+            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
         else:
-            connect_string = JDBC_CONNECT_STRING.format(server, service)
+            connect_string = self.JDBC_CONNECT_STRING.format(server, service)
 
         try:
             if self.use_oracle_client:
@@ -101,9 +105,9 @@ class Oracle(AgentCheck):
                         jpype.attachThreadToJVM()
                         jpype.java.lang.Thread.currentThread().setContextClassLoader(
                             jpype.java.lang.ClassLoader.getSystemClassLoader())
-                    con = jdb.connect(ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
+                    con = jdb.connect(self.ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
                 except jpype.JException(jpype.java.lang.RuntimeException) as e:
-                    if "Class {} not found".format(ORACLE_DRIVER_CLASS) in str(e):
+                    if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
                         is available.
                         For the Oracle instant client, see:
@@ -217,8 +221,7 @@ class Oracle(AgentCheck):
     def _get_sys_metrics(self, con, tags):
         if tags is None:
             tags = []
-        query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC " \
-            "ORDER BY BEGIN_TIME"
+        query = "SELECT METRIC_NAME, VALUE, BEGIN_TIME FROM GV$SYSMETRIC ORDER BY BEGIN_TIME"
         with closing(con.cursor()) as cur:
             cur.execute(query)
             for row in cur.fetchall():

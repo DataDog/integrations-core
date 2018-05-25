@@ -48,6 +48,7 @@ AGENT_BASED_INTEGRATIONS = [
     'nginx',
     'pdh_check',
     'pgbouncer',
+    'oracle',
     'postgres',
     'powerdns_recursor',
     'prometheus',
