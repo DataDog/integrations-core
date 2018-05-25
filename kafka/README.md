@@ -99,8 +99,6 @@ The Kafka check does not include any event at this time.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance.
 Returns `OK` otherwise.
 
-
-
 ## Troubleshooting
 
 * [Troubleshooting and Deep Dive for Kafka][24]
