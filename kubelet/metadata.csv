@@ -5,6 +5,8 @@ kubernetes.cpu.limits,gauge,,core,,The limit of cpu cores set,0,kubelet,k8s.cpu.
 kubernetes.cpu.requests,gauge,,core,,The requested cpu cores,0,kubelet,k8s.cpu.requests
 kubernetes.filesystem.usage,gauge,,byte,,The amount of disk used,-1,kubelet,k8s.disk.usage
 kubernetes.filesystem.usage_pct,gauge,,fraction,,The percentage of disk used,-1,kubelet,k8s.disk.used_pct
+kubernetes.io.read_bytes,gauge,,byte,,The amount of bytes read from the disk,0,kubelet,k8_io_read_bytes
+kubernetes.io.write_bytes,gauge,,byte,,The amount of bytes written to the disk,0,kubelet,k8_io_write_bytes
 kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubelet,k8s.mem.capacity
 kubernetes.memory.limits,gauge,,byte,,The limit of memory set,0,kubelet,k8s.mem.limits
 kubernetes.memory.requests,gauge,,byte,,The requested memory,0,kubelet,k8s.mem.requests
