@@ -47,7 +47,7 @@ See the [sample http_check.d/conf.yaml][2] for a full list and description of av
 | `http_response_status_code` | A string or Python regular expression for an HTTP status code. This check will report DOWN for any status code that does not match. This defaults to 1xx, 2xx and 3xx HTTP status codes. For example: `401` or `4\d\d`.|
 | `include_content` | When set to `true`, the check will include the first 200 characters of the HTTP response body in notifications. The default value is `false`. |
 | `collect_response_time` | By default, the check will collect the response time (in seconds) as the metric `network.http.response_time`. To disable, set this value to `false`. |
-| `disable_ssl_validation` | This setting will skip SSL certificate validation and is enabled by default. If you require SSL certificate validation, set this to `false`. |
+| `disable_ssl_validation` | This setting will skip SSL certificate validation and is enabled by default. If you require SSL certificate validation, set this to `false`. This option is only used when gathering the response time/aliveness from the specified endpoint. Note this setting doesn't apply to the `check_certificate_expiration` option. |
 | `ignore_ssl_warning` | When SSL certificate validation is enabled (see setting above), this setting will allow you to disable security warnings. |
 | `ca_certs` | This setting will allow you to override the default certificate path as specified in `init_config` |
 | `check_certificate_expiration` | When `check_certificate_expiration` is enabled, the service check will check the expiration date of the SSL certificate. Note that this will cause the SSL certificate to be validated, regardless of the value of the `disable_ssl_validation` setting. |
