@@ -76,12 +76,12 @@ Configuration Options
     ```
     logs_enabled: true
     ```
-    
+
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
   ```
   logs:
-      
+
       - type: file
         path: /var/log/rabbit/*.log
         source: rabbitmq
@@ -89,7 +89,7 @@ Configuration Options
         log_processing_rules:
           - type: multi_line
             name: logs_starts_with_equal_sign
-            pattern: =
+            pattern: "="
   ```
 
   See the [sample rabbitmq.yaml][3] for all available configuration options.

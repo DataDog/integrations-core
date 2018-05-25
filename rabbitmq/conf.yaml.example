@@ -69,7 +69,7 @@ instances:
     # tags:
     #   - "key:value"
     #   - "instance:production"
-    
+
 ## Log Section (Available for Agent >=6.0)
 #logs:
 
@@ -79,7 +79,7 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
-    
+
    # - type: file
    #   path: /var/log/rabbit/*.log
    #   source: rabbitmq
@@ -87,4 +87,4 @@ instances:
    #   log_processing_rules:
    #     - type: multi_line
    #       name: logs_starts_with_equal_sign
-   #       pattern: =
+   #       pattern: "="
