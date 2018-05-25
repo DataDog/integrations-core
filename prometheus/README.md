@@ -30,5 +30,30 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 
 [Run the Agent's `status` subcommand][1] and look for `prometheus` under the Checks section.
 
+## Data Collected
+### Metrics
+
+All metrics collected by the prometheus check are forwared to Datadog as custom metrics.
+
+### Events
+The Prometheus check does not include any event at this time.
+
+### Service Checks
+
+The Prometheus check does not include any service check at this time.
+
+## Troubleshooting
+Need help? Contact [Datadog Support][3].
+
+## Further Reading
+
+* [Introducing Prometheus support for Datadog Agent 6][4]
+* [Configuring a Prometheus Check][5]
+* [Writing a custom Prometheus Check][6]
+
 [1]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
 [2]: https://docs.datadoghq.com/agent/prometheus/
+[3]: https://docs.datadoghq.com/help/
+[4]: https://www.datadoghq.com/blog/monitor-prometheus-metrics/
+[5]: https://docs.datadoghq.com/agent/prometheus/
+[6]: https://docs.datadoghq.com/developers/prometheus/
