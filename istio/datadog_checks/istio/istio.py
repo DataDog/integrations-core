@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.checks.prometheus import Scraper, PrometheusCheck
+from datadog_checks.checks.prometheus import PrometheusScraper, PrometheusCheck
 
 
 class Istio(PrometheusCheck):
@@ -57,7 +57,7 @@ class Istio(PrometheusCheck):
         if self._scrapers.get(endpoint, None):
             return self._scrapers.get(endpoint)
 
-        scraper = Scraper(self)
+        scraper = PrometheusScraper(self)
         self._scrapers[endpoint] = scraper
         scraper.NAMESPACE = self.MESH_NAMESPACE
         scraper.metrics_mapper = {
@@ -81,7 +81,7 @@ class Istio(PrometheusCheck):
         if self._scrapers.get(endpoint, None):
             return self._scrapers.get(endpoint)
 
-        scraper = Scraper(self)
+        scraper = PrometheusScraper(self)
         self._scrapers[endpoint] = scraper
         scraper.NAMESPACE = self.MIXER_NAMESPACE
         scraper.metrics_mapper = {

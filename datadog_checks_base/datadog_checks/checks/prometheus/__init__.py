@@ -14,12 +14,12 @@ except ImportError:
     from .prometheus_base import PrometheusCheck
     from .base_check import GenericPrometheusCheck
 
-from .base_check import Scraper
+from .base_check import PrometheusScraper
 
 __all__ = [
     'PrometheusFormat',
     'UnknownFormatError',
     'PrometheusCheck',
     'GenericPrometheusCheck',
-    'Scraper'
+    'PrometheusScraper',
 ]

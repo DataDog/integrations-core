@@ -13,10 +13,17 @@ instances:
     ### This is the default setting. See next section for legacy clusters.
     ###
     #
-    # url of the kubelet metrics endpoint
-    # Pass an empty string, or set the cadvisor_port option to disable
-    # prometheus metrics collection
+    # DEPRECATED: please specify `cadvisor_metrics_endpoint` instead
     # metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
+    #
+    # url of the cadvisor metrics prometheus endpoint
+    # Pass an empty string, or set the cadvisor_port option to disable
+    # cadvisor metrics collection
+    # cadvisor_metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
+    #
+    # url of the kubelet metrics prometheus endpoint
+    # Pass an empty string to disable kubelet metrics collection
+    # kubelet_metrics_endpoint: http://10.8.0.1:10255/metrics
     #
     # The histogram buckets can be noisy and generate a lot of tags.
     # send_histograms_buckets controls whether or not you want to pull them.

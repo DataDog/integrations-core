@@ -30,7 +30,7 @@ class UnknownFormatError(TypeError):
     pass
 
 
-class PrometheusScraper(object):
+class PrometheusScraperMixin(object):
     # pylint: disable=E1101
     # This class is not supposed to be used by itself, it provides scraping behavior but
     # need to be within a check in the end
@@ -39,7 +39,7 @@ class PrometheusScraper(object):
     REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
 
     def __init__(self, *args, **kwargs):
-        super(PrometheusScraper, self).__init__(*args, **kwargs)
+        super(PrometheusScraperMixin, self).__init__(*args, **kwargs)
 
         # The scraper needs its own logger
         self.log = logging.getLogger(__name__)
@@ -228,10 +228,10 @@ class PrometheusScraper(object):
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
         expected_labels = set([(k, v) for k, v in _metric["labels"].iteritems()
-                               if k not in PrometheusScraper.UNWANTED_LABELS])
+                               if k not in PrometheusScraperMixin.UNWANTED_LABELS])
         for elt in messages[metric_name]:
             current_labels = set([(k, v) for k, v in elt["labels"].iteritems()
-                                  if k not in PrometheusScraper.UNWANTED_LABELS])
+                                  if k not in PrometheusScraperMixin.UNWANTED_LABELS])
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
                 return float(elt["value"])

@@ -11,7 +11,7 @@ import pytest
 
 # project
 from datadog_checks.istio import Istio
-from datadog_checks.checks.prometheus import Scraper
+from datadog_checks.checks.prometheus import PrometheusScraper
 
 
 MESH_METRICS = ['istio.mesh.request.count',
@@ -183,7 +183,7 @@ def mesh_mixture_fixture():
     with open(mixer_file_path, 'rb') as f:
         responses.append(f.read())
 
-    p = mock.patch('datadog_checks.checks.prometheus.Scraper.poll',
+    p = mock.patch('datadog_checks.checks.prometheus.PrometheusScraper.poll',
                    return_value=MockResponse(responses, 'text/plain'),
                    __name__="poll")
     yield p.start()
@@ -229,8 +229,8 @@ def test_scraper_creator():
     assert istio_mesh_scraper == istio_mesh_scraper_dict
     assert mixer_scraper == mixer_scraper_dict
 
-    assert isinstance(istio_mesh_scraper, Scraper)
-    assert isinstance(mixer_scraper, Scraper)
+    assert isinstance(istio_mesh_scraper, PrometheusScraper)
+    assert isinstance(mixer_scraper, PrometheusScraper)
 
     assert istio_mesh_scraper.NAMESPACE == 'istio.mesh'
     assert mixer_scraper.NAMESPACE == 'istio.mixer'

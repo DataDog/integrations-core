@@ -4,11 +4,12 @@
 import json
 import os
 import sys
-from collections import namedtuple
 
 import mock
 import pytest
 from datadog_checks.kubelet import KubeletCheck
+from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
+from datadog_checks.checks.prometheus import PrometheusScraper
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -59,17 +60,13 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.network.tx_dropped',
     'kubernetes.network.tx_errors',
     'kubernetes.io.write_bytes',
-    'kubernetes.io.read_bytes'
+    'kubernetes.io.read_bytes',
+    'kubernetes.apiserver.certificate.expiration.count',
+    'kubernetes.apiserver.certificate.expiration.sum',
+    'kubernetes.rest.client.requests',
+    'kubernetes.kubelet.runtime.operations',
+    'kubernetes.kubelet.runtime.errors'
 ]
-
-Label = namedtuple('Label', 'name value')
-
-
-class MockMetric(object):
-    def __init__(self, name, labels=None, value=None):
-        self.name = name
-        self.label = labels if labels else []
-        self.value = value
 
 
 @pytest.fixture
@@ -77,6 +74,35 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
+
+def mock_kubelet_check(monkeypatch, instances):
+    """
+    Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
+    and node spec.
+    """
+    check = KubeletCheck('kubelet', None, {}, instances)
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+
+    # Mock response for "/metrics/cadvisor"
+    attrs = {
+        'close.return_value': True,
+        'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n')
+    }
+    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+    monkeypatch.setattr(check.cadvisor_scraper, 'poll', mock.Mock(return_value=mock_resp))
+
+    # Mock response for "/metrics"
+    attrs = {
+        'close.return_value': True,
+        'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n')
+    }
+    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+    monkeypatch.setattr(check.kubelet_scraper, 'poll', mock.Mock(return_value=mock_resp))
+
+    return check
 
 
 def mock_from_file(fname):
@@ -89,34 +115,25 @@ def test_bad_config():
         KubeletCheck('kubelet', None, {}, [{}, {}])
 
 
-def test_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    assert check.NAMESPACE == 'kubernetes'
-    assert check.kube_node_labels == {}
-    assert check.fs_usage_bytes == {}
-    assert check.mem_usage_bytes == {}
-    assert check.metrics_mapper == {'kubelet_runtime_operations_errors': 'kubelet.runtime.errors'}
-
-
 def test_parse_quantity():
     for raw, res in QUANTITIES.iteritems():
         assert KubeletCheck.parse_quantity(raw) == res
 
 
+def test_kubelet_default_options():
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.NAMESPACE = 'kubernetes'
+    assert check.cadvisor_scraper.NAMESPACE == 'kubernetes'
+    assert check.kubelet_scraper.NAMESPACE == 'kubernetes'
+
+    assert isinstance(check.cadvisor_scraper, CadvisorPrometheusScraper)
+    assert isinstance(check.kubelet_scraper, PrometheusScraper)
+
+
 def test_kubelet_check_prometheus(monkeypatch, aggregator):
     instance_with_tag = {"tags": ["instance:tag"]}
-    check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
-    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    check = mock_kubelet_check(monkeypatch, [instance_with_tag])
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
-
-    attrs = {
-        'close.return_value': True,
-        'iter_lines.return_value': mock_from_file('metrics.txt').split('\n')
-    }
-    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-    monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
 
     check.check(instance_with_tag)
 
@@ -124,7 +141,8 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
-    check.poll.assert_called_once()
+    check.cadvisor_scraper.poll.assert_called_once()
+    check.kubelet_scraper.poll.assert_called_once()
     check.process_cadvisor.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
@@ -139,21 +157,11 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
 
 
 def test_prometheus_cpu_summed(monkeypatch, aggregator):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
-    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+    check = mock_kubelet_check(monkeypatch, [{}])
     monkeypatch.setattr(check, 'rate', mock.Mock())
 
-    attrs = {
-        'close.return_value': True,
-        'iter_lines.return_value': mock_from_file('metrics.txt').split('\n')
-    }
-    mock_resp = mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-    monkeypatch.setattr(check, 'poll', mock.Mock(return_value=mock_resp))
-
-    with mock.patch("datadog_checks.kubelet.kubelet.get_tags", side_effect=mocked_get_tags):
-        check.check({"metrics_endpoint": "http://dummy"})
+    with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
+        check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
 
     # Make sure we submit the summed rates correctly:
     # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
@@ -174,174 +182,32 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
         assert c not in check.rate.mock_calls
 
 
-def test_kubelet_check_neither(monkeypatch, aggregator):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
-    monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
+def test_kubelet_check_instance_config(monkeypatch):
+    def mock_kubelet_check_no_prom():
+        check = mock_kubelet_check(monkeypatch, [{}])
 
-    monkeypatch.setattr(check, 'process', mock.Mock(return_value=None))
-    monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
+        monkeypatch.setattr(check.cadvisor_scraper, 'process', mock.Mock(return_value=None))
+        monkeypatch.setattr(check.kubelet_scraper, 'process', mock.Mock(return_value=None))
+        monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
-    check.check({"cadvisor_port": 0, "metrics_endpoint": ""})
+        return check
+
+    check = mock_kubelet_check_no_prom()
+    check.check({"cadvisor_port": 0, "cadvisor_metrics_endpoint": "", "kubelet_metrics_endpoint": ""})
 
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.process_cadvisor.assert_not_called()
-    check.process.assert_not_called()
+    check.cadvisor_scraper.process.assert_not_called()
+    check.kubelet_scraper.process.assert_not_called()
 
+    check = mock_kubelet_check_no_prom()
+    check.check({"cadvisor_port": 0, "metrics_endpoint": "", "kubelet_metrics_endpoint": "http://dummy"})
 
-def test_is_container_metric():
-    false_metrics = [
-        MockMetric('foo', []),
-        MockMetric(
-            'bar',
-            [
-                Label(name='container_name', value='POD'),  # POD --> False
-                Label(name='namespace', value='default'),
-                Label(name='pod_name', value='pod0'),
-                Label(name='name', value='foo'),
-                Label(name='image', value='foo'),
-                Label(name='id', value='deadbeef'),
-            ]
-        ),
-        MockMetric(  # missing container_name
-            'foobar',
-            [
-                Label(name='namespace', value='default'),
-                Label(name='pod_name', value='pod0'),
-                Label(name='name', value='foo'),
-                Label(name='image', value='foo'),
-                Label(name='id', value='deadbeef'),
-            ]
-        ),
-    ]
-    for metric in false_metrics:
-        assert KubeletCheck._is_container_metric(metric) is False
-
-    true_metric = MockMetric(
-        'foo',
-        [
-            Label(name='container_name', value='ctr0'),
-            Label(name='namespace', value='default'),
-            Label(name='pod_name', value='pod0'),
-            Label(name='name', value='foo'),
-            Label(name='image', value='foo'),
-            Label(name='id', value='deadbeef'),
-        ]
-    )
-    assert KubeletCheck._is_container_metric(true_metric) is True
-
-
-def test_is_pod_metric():
-    false_metrics = [
-        MockMetric('foo', []),
-        MockMetric('bar', [Label(name='container_name', value='ctr0')]),
-        MockMetric('foobar', [Label(name='container_name', value='ctr0'), Label(name='id', value='deadbeef')]),
-    ]
-
-    true_metrics = [
-        MockMetric('foo', [Label(name='container_name', value='POD')]),
-        MockMetric('bar', [Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
-        MockMetric('foobar', [
-            Label(name='container_name', value='POD'),
-            Label(name='id', value='/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb')]),
-    ]
-
-    for metric in false_metrics:
-        assert KubeletCheck._is_pod_metric(metric) is False
-
-    for metric in true_metrics:
-        assert KubeletCheck._is_pod_metric(metric) is True
-
-
-def test_get_container_label():
-    labels = [
-        Label("container_name", value="POD"),
-        Label("id", value="/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb"),
-    ]
-    assert KubeletCheck._get_container_label(labels, "container_name") == "POD"
-    assert KubeletCheck._get_container_label([], "not-in") is None
-
-
-def test_get_container_id():
-    labels = [
-        Label("container_name", value="datadog-agent"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "podc2319815-10d0-11e8-bd5a-42010af00137/"
-                    "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
-    ]
-    assert KubeletCheck._get_container_id(labels) == "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
-    assert KubeletCheck._get_container_id([]) is None
-
-
-def test_get_pod_uid():
-    labels = [
-        Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
-                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
-    ]
-    assert KubeletCheck._get_pod_uid(labels) == "260c2b1d43b094af6d6b4ccba082c2db"
-    assert KubeletCheck._get_pod_uid([]) is None
-
-
-def test_is_pod_host_networked(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    check.pod_list = check.retrieve_pod_list()
-
-    assert len(check.pod_list) == 4
-    assert check._is_pod_host_networked("not-here") is False
-    assert check._is_pod_host_networked('260c2b1d43b094af6d6b4ccba082c2db') is True
-    assert check._is_pod_host_networked('2edfd4d9-10ce-11e8-bd5a-42010af00137') is False
-
-
-def test_get_pod_by_metric_label(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    check.pod_list = check.retrieve_pod_list()
-
-    assert len(check.pod_list) == 4
-    kube_proxy = check._get_pod_by_metric_label([
-        Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
-                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
-    ])
-    fluentd = check._get_pod_by_metric_label([
-        Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod2edfd4d9-10ce-11e8-bd5a-42010af00137/"
-                    "7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
-    ])
-    assert kube_proxy["metadata"]["name"] == "kube-proxy-gke-haissam-default-pool-be5066f1-wnvn"
-    assert fluentd["metadata"]["name"] == "fluentd-gcp-v2.0.10-9q9t4"
-
-
-def test_get_kube_container_name():
-    tags = KubeletCheck._get_kube_container_name([
-        Label("container_name", value="datadog-agent"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "podc2319815-10d0-11e8-bd5a-42010af00137/"
-                    "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
-        Label("image",
-              value="datadog/agent-dev@sha256:894fb66f89be0332a47388d7219ab8b365520ff0e3bbf597bd0a378b19efa7ee"),
-        Label("name", value="k8s_datadog-agent_datadog-agent-jbm2k_default_c2319815-10d0-11e8-bd5a-42010af00137_0"),
-        Label("namespace", value="default"),
-        Label("pod_name", value="datadog-agent-jbm2k"),
-    ])
-    assert tags == ["kube_container_name:datadog-agent"]
-
-    tags = KubeletCheck._get_kube_container_name([])
-    assert tags == []
+    check.cadvisor_scraper.process.assert_not_called()
+    check.kubelet_scraper.process.assert_called()
 
 
 def mocked_get_tags(entity, _):
