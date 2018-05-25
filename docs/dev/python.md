@@ -1,4 +1,7 @@
-# Setup Python to work on Agent based integrations
+---
+title: Prepare your Python environment for Agent integration development
+kind: documentation
+---
 
 This doc covers all steps to prepare the perfect Python environment to work on Agent based integrations, from installing the interpreter to install and the dependencies needed.
 
