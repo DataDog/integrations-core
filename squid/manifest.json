@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "squid",
   "short_description": "Track metrics from your squid-cache servers with Datadog",
   "guid": "e7d4b233-b32a-46f9-8cb2-c582ee8fd251",
@@ -12,7 +10,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
   "public_title": "Datadog-Squid Integration",
   "categories": ["web", "caching"],
   "type": "check",

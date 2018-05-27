@@ -1,7 +1,10 @@
-from . import squid
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .squid import SquidCheck
+from .__about__ import __version__
 
-SquidCheck = squid.SquidCheck
-
-__version__ = "1.0.0"
-
-__all__ = ['SquidCheck']
+__all__ = [
+    'SquidCheck',
+    '__version__'
+]

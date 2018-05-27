@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  squid:
+    image: "datadog/squid:${SQUID_VERSION}"
+    ports:
+      - "3128:3128"
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf
+    networks:
+      - default_squid
+
+networks:
+  default_squid:
+    name: squid
