@@ -12,6 +12,8 @@ Identify busy buckets, track cache miss ratios, and more. This Agent check colle
 
 And many more.
 
+![Couchbase Bytes Read](https://raw.githubusercontent.com/DataDog/documentation/9cca18a10dc34066a8722a23fb2cd7086ac86bd1/src/images/integrations/couchbase/couchbase_graph.png)
+
 ## Setup
 
 ### Installation
@@ -23,14 +25,14 @@ The Couchbase check is included in the [Datadog Agent](https://app.datadoghq.com
 1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Couchbase performance data.  
 	See the [sample couchbase.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example) for all available configuration options.
 
-	```yaml
-      init_config:
+```
+init_config:
 
-      instances:
-    - server: http://localhost:8091 # or wherever your Couchbase is listening
-          #user: <your_username>
-          #password: <your_password>
-	```
+instances:
+  - server: http://localhost:8091 # or wherever your Couchbase is listening
+    #user: <your_username>
+    #password: <your_password>
+```
 
 2. [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent) to begin sending Couchbase metrics to Datadog.
 
