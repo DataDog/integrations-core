@@ -8,7 +8,7 @@ import requests
 from datadog_checks.checks import AgentCheck
 
 from .errors import UnknownMetric, UnknownTags
-from .parser import parse_metric, parse_histogram
+from .parser import parse_histogram, parse_metric
 
 
 class Envoy(AgentCheck):
