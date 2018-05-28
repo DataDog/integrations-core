@@ -20,6 +20,7 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
 env:
   - CHECK=datadog_checks_base
+  - CHECK=envoy
 install:
   - pip install -U pip setuptools
   - pip install invoke pip-tools packaging tox docker-compose
