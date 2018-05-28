@@ -18,6 +18,7 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
+env:
   - CHECK=datadog_checks_base
 install:
   - pip install -U pip setuptools
