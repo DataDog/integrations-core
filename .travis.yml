@@ -20,13 +20,55 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
 env:
   - CHECK=datadog_checks_base
+  - CHECK=active_directory
+  - CHECK=apache
+  - CHECK=aspdotnet
+  - CHECK=btrfs
+  - CHECK=ceph
+  - CHECK=consul
+  - CHECK=couch
+  - CHECK=couchbase
+  - CHECK=directory
+  - CHECK=disk
+  - CHECK=dotnetclr
+  - CHECK=elastic
   - CHECK=envoy
+  - CHECK=exchange_server
+  - CHECK=haproxy
+  - CHECK=hdfs_namenode
+  - CHECK=iis
+  - CHECK=istio
+  - CHECK=kafka_consumer
+  - CHECK=kube_proxy
+  - CHECK=kubelet
+  - CHECK=kyototycoon
+  - CHECK=lighttpd
+  - CHECK=linkerd
+  - CHECK=marathon
+  - CHECK=mcache
+  - CHECK=mysql
+  - CHECK=network
+  - CHECK=nfsstat
+  - CHECK=nginx
+  - CHECK=oracle
+  - CHECK=pdh_check
+  - CHECK=pgbouncer
+  - CHECK=postgres
+  - CHECK=powerdns_recursor
+  - CHECK=prometheus
+  - CHECK=redisdb
+  - CHECK=riak
+  - CHECK=spark
+  - CHECK=ssh_check
+  - CHECK=squid
+  - CHECK=system_core
+  - CHECK=teamcity
+  - CHECK=varnish
+  - CHECK=vsphere
 install:
   - pip install -U pip setuptools
   - pip install invoke pip-tools packaging tox docker-compose
 script:
-  - docker-machine env
-  - echo $DOCKER_HOST
   - if [[ $CHECK == "datadog_checks_base" ]]; then inv manifest --include-extras; fi
   - inv test --targets=${CHECK}
 # we should clean generated files before we save the cache
