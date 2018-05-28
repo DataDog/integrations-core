@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import unicode_literals
+
 # stdlib
 from datetime import datetime
 import _strptime # noqa
@@ -352,20 +354,20 @@ class HTTPCheck(NetworkCheck):
                 content = r.text if type(content_match) is unicode else r.content
                 if re.search(content_match, content, re.UNICODE):
                     if reverse_content_match:
-                        send_status_down(u'{} is found in return content with the reverse_content_match option'
+                        send_status_down('{} is found in return content with the reverse_content_match option'
                                          .format(content_match),
-                                         u'Content "{}" found in response with the reverse_content_match'
+                                         'Content "{}" found in response with the reverse_content_match'
                                          .format(content_match))
                     else:
-                        send_status_up(u"{} is found in return content".format(content_match))
+                        send_status_up("{} is found in return content".format(content_match))
 
                 else:
                     if reverse_content_match:
-                        send_status_up(u"{} is not found in return content with the reverse_content_match option"
+                        send_status_up("{} is not found in return content with the reverse_content_match option"
                                        .format(content_match))
                     else:
-                        send_status_down(u"{} is not found in return content".format(content_match),
-                                         u'Content "{}" not found in response.'.format(content_match))
+                        send_status_down("{} is not found in return content".format(content_match),
+                                         'Content "{}" not found in response.'.format(content_match))
 
             else:
                 send_status_up("{} is UP".format(addr))
@@ -409,7 +411,7 @@ class HTTPCheck(NetworkCheck):
                 if len(content) > 200:
                     content = content[:197] + '...'
 
-                msg = u"{:d} {}\n\n{}" % (code, reason, content)
+                msg = "{:d} {}\n\n{}" % (code, reason, content)
                 msg = msg.rstrip()
 
         self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
