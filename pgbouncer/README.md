@@ -30,12 +30,12 @@ instances:
 
 **Note**: `database_url` parameter value should point to PgBouncer stats database.
 
-In your PGBouncer userlist.txt file add
+In your PgBouncer userlist.txt file add
 ```
   "datadog" "<your_pass>"
 ```
 
-Next, in your PGBouncer pgbouncer.ini file add
+Next, in your PgBouncer pgbouncer.ini file add
 ```
 stats_users = datadog
 ```
@@ -50,10 +50,10 @@ stats_users = datadog
 ### Metrics
 See [metadata.csv][5] for a list of metrics provided by this check.
 
-Note: Not all metrics are available with all versions of PGBouncer.
+Note: Not all metrics are available with all versions of PgBouncer.
 
 ### Events
-The PGBouncer check does not include any events at this time.
+The PgBouncer check does not include any events at this time.
 
 ### Service Checks
 
