@@ -15,10 +15,10 @@ etcd.store.compareanddelete.success,gauge,,request,second,Rate of compare and de
 etcd.store.compareanddelete.fail,gauge,,request,second,Rate of compare and delete requests failure,-1,etcd,compare and delete failure
 etcd.store.expire.count,gauge,,eviction,second,Rate of expired keys,0,etcd,expired keys
 etcd.store.watchers,gauge,,,,Rate of watchers,0,etcd,watcher number
-etcd.self.send.pkgrate,gauge,,packet,second,Rate of packets received,0,etcd,packets received
-etcd.self.send.bandwidthrate,gauge,,byte,second,Rate of bytes received,0,etcd,bytes received
-etcd.self.recv.pkgrate,gauge,,packet,second,Rate of packets sent,0,etcd,packets sent
-etcd.self.recv.bandwidthrate,gauge,,byte,second,Rate of bytes sent,0,etcd,bytes sent
+etcd.self.send.pkgrate,gauge,,packet,second,Rate of packets sent,0,etcd,packets received
+etcd.self.send.bandwidthrate,gauge,,byte,second,Rate of bytes sent,0,etcd,bytes received
+etcd.self.recv.pkgrate,gauge,,packet,second,Rate of packets received,0,etcd,packets sent
+etcd.self.recv.bandwidthrate,gauge,,byte,second,Rate of bytes received,0,etcd,bytes sent
 etcd.self.recv.appendrequest.count,gauge,,request,second,Rate of append requests this node has processed,0,etcd,append requests received
 etcd.self.send.appendrequest.count,gauge,,request,second,Rate of append requests this node has sent,0,etcd,append requests sent
 etcd.leader.counts.fail,gauge,,request,second,Rate of failed Raft RPC requests,-1,etcd,raft success
