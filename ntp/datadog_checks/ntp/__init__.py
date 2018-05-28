@@ -1,7 +1,7 @@
-from . import ntp
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+from .ntp import NtpCheck
+from .__about__ import __version__
 
-NtpCheck = ntp.NtpCheck
-
-__version__ = "1.2.0"
-
-__all__ = ['ntp']
+__all__ = ['NtpCheck', '__version__']
