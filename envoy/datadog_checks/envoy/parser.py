@@ -1,7 +1,23 @@
+import re
+
 from six.moves import range, zip
 
 from .errors import UnknownMetric, UnknownTags
 from .metrics import METRIC_PREFIX, METRIC_TREE, METRICS
+
+
+HISTOGRAM = re.compile(r'([P0-9.]+)\(([^,]+)')
+PERCENTILE_SUFFIX = {
+    'P0': '.0percentile',
+    'P25': '.25percentile',
+    'P50': '.50percentile',
+    'P75': '.75percentile',
+    'P90': '.90percentile',
+    'P95': '.95percentile',
+    'P99': '.99percentile',
+    'P99.9': '.99_9percentile',
+    'P100': '.100percentile',
+}
 
 
 def parse_metric(metric, metric_mapping=METRIC_TREE):
@@ -88,3 +104,16 @@ def construct_tags(tag_builder, num_tags):
 
     # Return an iterator in the original order.
     return reversed(tags)
+
+
+def parse_histogram(metric, histogram):
+    """Iterates over histogram data, yielding metric-value pairs."""
+    for match in HISTOGRAM.finditer(histogram):
+        percentile, value = match.groups()
+
+        try:
+            yield metric + PERCENTILE_SUFFIX[percentile], float(value)
+
+        # In case Envoy adds more
+        except KeyError:
+            yield '{}.{}'.format(metric, percentile.replace('.', '_')), float(value)
