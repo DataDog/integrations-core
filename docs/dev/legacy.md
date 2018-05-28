@@ -3,7 +3,7 @@ title: Legacy
 kind: documentation
 ---
 
-This documentation explains how to create an Agent check for the Datadog Agent v5 which has been superceded by agent v6. It is still possible to write checks for v5 however no new integrations for v5 will be considered upstream. To learn more about creating an integrations for agent v6 [refer to the dedicated documentation for creating an Agent check for the Datadog Agent v6][21].
+This documentation explains how to create an Agent check for the Datadog Agent v5, which has been superceded by Agent v6. It is still possible to write checks for v5, however no new integrations for v5 will be considered upstream. To learn more about creating integrations for Agent v6, [refer to the dedicated documentation for creating an Agent check for Datadog Agent v6][21].
 
 ## Requirements
 
