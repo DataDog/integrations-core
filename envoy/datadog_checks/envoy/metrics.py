@@ -11,7 +11,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'server.uptime': {
         'tags': (
@@ -74,28 +74,28 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'filesystem.write_completed': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'filesystem.flushed_by_timer': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'filesystem.reopen_failed': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'filesystem.write_total_buffered': {
         'tags': (
@@ -109,28 +109,28 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'runtime.override_dir_not_exists': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'runtime.override_dir_exists': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'runtime.load_success': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'runtime.num_keys': {
         'tags': (
@@ -145,7 +145,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cds.update_attempt': {
         'tags': (
@@ -153,7 +153,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cds.update_success': {
         'tags': (
@@ -161,7 +161,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cds.update_failure': {
         'tags': (
@@ -169,7 +169,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cds.version': {
         'tags': (
@@ -184,35 +184,35 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.no_cluster': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rq_redirect': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rq_direct_response': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rq_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_1xx': {
         'tags': (
@@ -220,7 +220,7 @@ METRICS = {
             ('virtual_cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_2xx': {
         'tags': (
@@ -228,7 +228,7 @@ METRICS = {
             ('virtual_cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_3xx': {
         'tags': (
@@ -236,7 +236,7 @@ METRICS = {
             ('virtual_cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_4xx': {
         'tags': (
@@ -244,7 +244,7 @@ METRICS = {
             ('virtual_cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_5xx': {
         'tags': (
@@ -252,7 +252,7 @@ METRICS = {
             ('virtual_cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'vhost.vcluster.upstream_rq_time': {
         'tags': (
@@ -268,7 +268,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.ratelimit.error': {
         'tags': (
@@ -276,7 +276,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.ratelimit.over_limit': {
         'tags': (
@@ -284,7 +284,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.ip_tagging.hit': {
         'tags': (
@@ -292,7 +292,7 @@ METRICS = {
             ('tag_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.ip_tagging.no_hit': {
         'tags': (
@@ -300,7 +300,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.ip_tagging.total': {
         'tags': (
@@ -308,7 +308,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.grpc.success': {
         'tags': (
@@ -316,7 +316,7 @@ METRICS = {
             ('grpc_service', 'grpc_method', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.grpc.failure': {
         'tags': (
@@ -324,7 +324,7 @@ METRICS = {
             ('grpc_service', 'grpc_method', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.grpc.total': {
         'tags': (
@@ -332,7 +332,7 @@ METRICS = {
             ('grpc_service', 'grpc_method', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.dynamodb.operation.upstream_rq_total': {
         'tags': (
@@ -341,7 +341,7 @@ METRICS = {
             ('operation_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.dynamodb.operation.upstream_rq_time': {
         'tags': (
@@ -359,7 +359,7 @@ METRICS = {
             ('table_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.dynamodb.table.upstream_rq_time': {
         'tags': (
@@ -376,7 +376,7 @@ METRICS = {
             (),
             ('table_name', 'error_type', ),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.dynamodb.error.BatchFailureUnprocessedKeys': {
         'tags': (
@@ -385,7 +385,7 @@ METRICS = {
             ('table_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.buffer.rq_timeout': {
         'tags': (
@@ -393,7 +393,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rds.config_reload': {
         'tags': (
@@ -401,7 +401,7 @@ METRICS = {
             ('route_config_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rds.update_attempt': {
         'tags': (
@@ -409,7 +409,7 @@ METRICS = {
             ('route_config_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rds.update_success': {
         'tags': (
@@ -417,7 +417,7 @@ METRICS = {
             ('route_config_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rds.update_failure': {
         'tags': (
@@ -425,7 +425,7 @@ METRICS = {
             ('route_config_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.rds.version': {
         'tags': (
@@ -440,21 +440,21 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'tcp.downstream_cx_no_route': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'tcp.downstream_cx_tx_bytes_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'tcp.downstream_cx_tx_bytes_buffered': {
         'tags': (
@@ -468,14 +468,14 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'tcp.downstream_flow_control_resumed_reading_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.update_success': {
         'tags': (
@@ -483,7 +483,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.update_failure': {
         'tags': (
@@ -491,7 +491,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.auth_no_ssl': {
         'tags': (
@@ -499,7 +499,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.auth_ip_white_list': {
         'tags': (
@@ -507,7 +507,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.auth_digest_match': {
         'tags': (
@@ -515,7 +515,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.auth_digest_no_match': {
         'tags': (
@@ -523,7 +523,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'auth.clientssl.total_principals': {
         'tags': (
@@ -538,35 +538,35 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'ratelimit.error': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'ratelimit.over_limit': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'ratelimit.ok': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'ratelimit.cx_closed': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'ratelimit.active': {
         'tags': (
@@ -587,7 +587,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.downstream_cx_rx_bytes_buffered': {
         'tags': (
@@ -601,14 +601,14 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.downstream_cx_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.downstream_cx_tx_bytes_buffered': {
         'tags': (
@@ -622,14 +622,14 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.downstream_cx_drain_close': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.downstream_rq_active': {
         'tags': (
@@ -643,7 +643,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.splitter.invalid_request': {
         'tags': (
@@ -651,7 +651,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.splitter.unsupported_command': {
         'tags': (
@@ -659,7 +659,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'redis.command.total': {
         'tags': (
@@ -667,98 +667,98 @@ METRICS = {
             ('command', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.decoding_error': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.delay_injected': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_get_more': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_insert': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_kill_cursors': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_tailable_cursor': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_no_cursor_timeout': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_await_data': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_exhaust': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_no_max_time': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_scatter_get': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_multi_get': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_query_active': {
         'tags': (
@@ -772,49 +772,49 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_reply_cursor_not_found': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_reply_query_failure': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.op_reply_valid_cursor': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.cx_destroy_local_with_active_rq': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.cx_destroy_remote_with_active_rq': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.cx_drain_close': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.cmd.total': {
         'tags': (
@@ -822,7 +822,7 @@ METRICS = {
             ('cmd', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.cmd.reply_num_docs': {
         'tags': (
@@ -855,7 +855,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.query.scatter_get': {
         'tags': (
@@ -864,7 +864,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.query.multi_get': {
         'tags': (
@@ -873,7 +873,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.query.reply_num_docs': {
         'tags': (
@@ -910,7 +910,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.callsite.query.scatter_get': {
         'tags': (
@@ -920,7 +920,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.callsite.query.multi_get': {
         'tags': (
@@ -930,7 +930,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'mongo.collection.callsite.query.reply_num_docs': {
         'tags': (
@@ -967,14 +967,14 @@ METRICS = {
             ('address', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.downstream_cx_destroy': {
         'tags': (
             ('address', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.downstream_cx_active': {
         'tags': (
@@ -996,7 +996,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.handshake': {
         'tags': (
@@ -1004,7 +1004,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.session_reused': {
         'tags': (
@@ -1012,7 +1012,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.no_certificate': {
         'tags': (
@@ -1020,7 +1020,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.fail_no_sni_match': {
         'tags': (
@@ -1028,7 +1028,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.fail_verify_no_cert': {
         'tags': (
@@ -1036,7 +1036,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.fail_verify_error': {
         'tags': (
@@ -1044,7 +1044,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.fail_verify_san': {
         'tags': (
@@ -1052,7 +1052,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.fail_verify_cert_hash': {
         'tags': (
@@ -1060,7 +1060,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.ssl.cipher': {
         'tags': (
@@ -1068,42 +1068,42 @@ METRICS = {
             (),
             ('cipher', ),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.listener_added': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.listener_modified': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.listener_removed': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.listener_create_success': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.listener_create_failure': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener_manager.total_listeners_warming': {
         'tags': (
@@ -1131,77 +1131,77 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_ssl_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_http1_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_websocket_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_http2_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy_remote': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy_local': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy_active_rq': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy_local_active_rq': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_destroy_remote_active_rq': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_active': {
         'tags': (
@@ -1243,7 +1243,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_length_ms': {
         'tags': (
@@ -1257,7 +1257,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_rx_bytes_buffered': {
         'tags': (
@@ -1271,7 +1271,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_tx_bytes_buffered': {
         'tags': (
@@ -1285,49 +1285,49 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_idle_timeout': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_flow_control_paused_reading_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_flow_control_resumed_reading_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_http1_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_http2_total': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_active': {
         'tags': (
@@ -1341,77 +1341,77 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_rx_reset': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_tx_reset': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_non_relative_path': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_too_large': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_1xx': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_2xx': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_3xx': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_4xx': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_5xx': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_ws_on_non_ws_route': {
         'tags': (
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.downstream_rq_time': {
         'tags': (
@@ -1425,7 +1425,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.user_agent.downstream_cx_total': {
         'tags': (
@@ -1433,7 +1433,7 @@ METRICS = {
             ('user_agent', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.user_agent.downstream_cx_destroy_remote_active_rq': {
         'tags': (
@@ -1441,7 +1441,7 @@ METRICS = {
             ('user_agent', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.user_agent.downstream_rq_total': {
         'tags': (
@@ -1449,7 +1449,7 @@ METRICS = {
             ('user_agent', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.http.downstream_rq_1xx': {
         'tags': (
@@ -1457,7 +1457,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.http.downstream_rq_2xx': {
         'tags': (
@@ -1465,7 +1465,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.http.downstream_rq_3xx': {
         'tags': (
@@ -1473,7 +1473,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.http.downstream_rq_4xx': {
         'tags': (
@@ -1481,7 +1481,7 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'listener.http.downstream_rq_5xx': {
         'tags': (
@@ -1489,49 +1489,49 @@ METRICS = {
             ('stat_prefix', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.rx_reset': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.tx_reset': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.header_overflow': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.trailers': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.headers_cb_no_stream': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http2.too_many_header_frames': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.tracing.random_sampling': {
         'tags': (
@@ -1539,7 +1539,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.tracing.service_forced': {
         'tags': (
@@ -1547,7 +1547,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.tracing.client_enabled': {
         'tags': (
@@ -1555,7 +1555,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.tracing.not_traceable': {
         'tags': (
@@ -1563,7 +1563,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'http.tracing.health_check': {
         'tags': (
@@ -1571,28 +1571,28 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cluster_added': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cluster_modified': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.cluster_removed': {
         'tags': (
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster_manager.active_clusters': {
         'tags': (
@@ -1613,7 +1613,7 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_active': {
         'tags': (
@@ -1627,42 +1627,42 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_http2_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_fail': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_timeout': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_attempts_exceeded': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_overflow': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_connect_ms': {
         'tags': (
@@ -1683,56 +1683,56 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_with_active_rq': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_local_with_active_rq': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_destroy_remote_with_active_rq': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_close_notify': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_rx_bytes_buffered': {
         'tags': (
@@ -1746,7 +1746,7 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_tx_bytes_buffered': {
         'tags': (
@@ -1760,28 +1760,28 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_max_requests': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_none_healthy': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_active': {
         'tags': (
@@ -1795,21 +1795,21 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_overflow': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_failure_eject': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_pending_active': {
         'tags': (
@@ -1823,98 +1823,98 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_maintenance_mode': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_timeout': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_per_try_timeout': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_rx_reset': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_tx_reset': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_success': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_retry_overflow': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_paused_reading_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_resumed_reading_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_backed_up_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_flow_control_drained_total': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.membership_change': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.membership_healthy': {
         'tags': (
@@ -1935,42 +1935,42 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.config_reload': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.update_attempt': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.update_success': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.update_failure': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.update_empty': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.version': {
         'tags': (
@@ -1991,7 +1991,7 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.attempt': {
         'tags': (
@@ -1999,7 +1999,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.success': {
         'tags': (
@@ -2007,7 +2007,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.failure': {
         'tags': (
@@ -2015,7 +2015,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.passive_failure': {
         'tags': (
@@ -2023,7 +2023,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.network_failure': {
         'tags': (
@@ -2031,7 +2031,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.verify_cluster': {
         'tags': (
@@ -2039,7 +2039,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.health_check.healthy': {
         'tags': (
@@ -2055,7 +2055,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_active': {
         'tags': (
@@ -2071,7 +2071,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_5xx': {
         'tags': (
@@ -2079,7 +2079,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_detected_consecutive_5xx': {
         'tags': (
@@ -2087,7 +2087,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_enforced_success_rate': {
         'tags': (
@@ -2095,7 +2095,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_detected_success_rate': {
         'tags': (
@@ -2103,7 +2103,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_enforced_consecutive_gateway_failure': {
         'tags': (
@@ -2111,7 +2111,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.outlier_detection.ejections_detected_consecutive_gateway_failure': {
         'tags': (
@@ -2119,42 +2119,42 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_1xx': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_2xx': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_3xx': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_4xx': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_5xx': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.upstream_rq_time': {
         'tags': (
@@ -2169,7 +2169,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_2xx': {
         'tags': (
@@ -2177,7 +2177,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_3xx': {
         'tags': (
@@ -2185,7 +2185,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_4xx': {
         'tags': (
@@ -2193,7 +2193,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_5xx': {
         'tags': (
@@ -2201,7 +2201,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_time': {
         'tags': (
@@ -2217,7 +2217,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.internal.upstream_rq_2xx': {
         'tags': (
@@ -2225,7 +2225,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.internal.upstream_rq_3xx': {
         'tags': (
@@ -2233,7 +2233,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.internal.upstream_rq_4xx': {
         'tags': (
@@ -2241,7 +2241,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.internal.upstream_rq_5xx': {
         'tags': (
@@ -2249,7 +2249,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.internal.upstream_rq_time': {
         'tags': (
@@ -2265,7 +2265,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_2xx': {
         'tags': (
@@ -2273,7 +2273,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_3xx': {
         'tags': (
@@ -2281,7 +2281,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_4xx': {
         'tags': (
@@ -2289,7 +2289,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_5xx': {
         'tags': (
@@ -2297,7 +2297,7 @@ METRICS = {
             (),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_time': {
         'tags': (
@@ -2313,7 +2313,7 @@ METRICS = {
             ('from_zone', 'to_zone', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.zone.upstream_rq_2xx': {
         'tags': (
@@ -2321,7 +2321,7 @@ METRICS = {
             ('from_zone', 'to_zone', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.zone.upstream_rq_3xx': {
         'tags': (
@@ -2329,7 +2329,7 @@ METRICS = {
             ('from_zone', 'to_zone', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.zone.upstream_rq_4xx': {
         'tags': (
@@ -2337,7 +2337,7 @@ METRICS = {
             ('from_zone', 'to_zone', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.zone.upstream_rq_5xx': {
         'tags': (
@@ -2345,7 +2345,7 @@ METRICS = {
             ('from_zone', 'to_zone', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.zone.upstream_rq_time': {
         'tags': (
@@ -2360,63 +2360,63 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_healthy_panic': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_cluster_too_small': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_all_directly': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_sampled': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_routing_cross_zone': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_local_cluster_not_ok': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_number_differs': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_zone_no_capacity_left': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_subsets_active': {
         'tags': (
@@ -2430,28 +2430,28 @@ METRICS = {
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_subsets_removed': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_subsets_selected': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
     'cluster.lb_subsets_fallback': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
-        'method': 'count',
+        'method': 'monotonic_count',
     },
 }
 
