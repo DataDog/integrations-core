@@ -17,7 +17,7 @@ env:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
 matrix:
-    fast_finish: true
+    #fast_finish: true
     - CHECK=datadog_checks_base
 install:
   - pip install -U pip setuptools
