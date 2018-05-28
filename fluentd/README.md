@@ -62,7 +62,7 @@ Follow [those instructions][4] to forward logs to Datadog with Fluentd.
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
-The FluentD check does not include any event at this time.
+The FluentD check does not include any events at this time.
 
 ### Service Checks
 

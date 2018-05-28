@@ -36,11 +36,11 @@ If you are monitoring an off-the-shelf software and you think it would deserve a
 All metrics collected by the prometheus check are forwared to Datadog as custom metrics.
 
 ### Events
-The Prometheus check does not include any event at this time.
+The Prometheus check does not include any events at this time.
 
 ### Service Checks
 
-The Prometheus check does not include any service check at this time.
+The Prometheus check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][3].

@@ -74,7 +74,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The HTTP check does not include any event at this time.
+The HTTP check does not include any events at this time.
 
 ### Service Checks
 

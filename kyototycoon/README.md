@@ -44,7 +44,7 @@ The KyotoTycoon check is included in the [Datadog Agent][1] package, so you don'
 See [metadata.csv][4] for a list of metrics provided by this check.
 
 ### Events
-The KyotoTycoon check does not include any event at this time.
+The KyotoTycoon check does not include any events at this time.
 
 ### Service Checks
 

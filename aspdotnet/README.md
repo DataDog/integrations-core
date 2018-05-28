@@ -32,7 +32,7 @@ The ASP.NET check does not include any metrics at this time.
 All ASP.NET events and failovers are sent to your [Datadog event stream][4]
 
 ### Service Checks
-The ASP.NET check does not include any service check at this time.
+The ASP.NET check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].

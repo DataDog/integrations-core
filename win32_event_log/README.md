@@ -30,13 +30,13 @@ This minimal file will capture all events from localhost, but you can configure 
 
 ## Data Collected
 ### Metrics
-The Win32 Event log check does not include any metric at this time.
+The Win32 Event log check does not include any metrics at this time.
 
 ### Events
 All Windows Event are forwarded to your Datadog application
 
 ### Service Checks
-The Win32 Event log check does not include any service check at this time.
+The Win32 Event log check does not include any service checks at this time.
 
 ## Troubleshooting
 

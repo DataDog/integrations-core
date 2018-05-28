@@ -25,7 +25,7 @@ Edit the `mapreduce.d/conf.yaml` file, in the `conf.d/` folder at the root of yo
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Mapreduce check does not include any event at this time.
+The Mapreduce check does not include any events at this time.
 
 ### Service Checks
 **mapreduce.resource_manager.can_connect**

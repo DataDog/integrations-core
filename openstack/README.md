@@ -84,7 +84,7 @@ You may need to restart your Keystone, Neutron and Nova API services to ensure t
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Openstack check does not include any event at this time.
+The Openstack check does not include any events at this time.
 
 ### Service Checks
 **openstack.neutron.api.up**

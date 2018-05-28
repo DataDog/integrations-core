@@ -92,7 +92,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 The ActiveMQ check does not include any metrics at this time.
 
 ### Events
-The Activemq check does not include any event at this time.
+The Activemq check does not include any events at this time.
 
 ### Service Checks
 **activemq.can_connect**:

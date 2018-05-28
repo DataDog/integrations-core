@@ -36,10 +36,10 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 Depending on the platform, the check may collect other CPU time metrics, e.g. `system.core.interrupt` on Windows, `system.core.iowait` on Linux, etc.
 
 ### Events
-The System Core check does not include any event at this time.
+The System Core check does not include any events at this time.
 
 ### Service Checks
-The System Core check does not include any service check at this time.
+The System Core check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].

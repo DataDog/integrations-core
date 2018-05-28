@@ -44,7 +44,7 @@ The Couchbase check is included in the [Datadog Agent][1] package, so you don't 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Couchbase check does not include any event at this time.
+The Couchbase check does not include any events at this time.
 
 ### Service Checks
 

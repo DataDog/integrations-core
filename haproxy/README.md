@@ -93,7 +93,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
-The Haproxy check does not include any event at this time.
+The Haproxy check does not include any events at this time.
 
 ### Service Checks
 **haproxy.backend_up**

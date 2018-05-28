@@ -46,10 +46,10 @@ Both endpoints need to be connected to the check for it to work. To learn more a
 See [metadata.csv](https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv) for a list of metrics provided by this check.
 
 ### Events
-The Istio check does not include any event at this time.
+The Istio check does not include any events at this time.
 
 ### Service Checks
-The Istio check does not include any service check at this time.
+The Istio check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).

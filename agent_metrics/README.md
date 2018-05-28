@@ -29,10 +29,10 @@ The Agent Metrics check is included in the [Datadog Agent][1] package, so you do
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Agent_metrics check does not include any event at this time.
+The Agent_metrics check does not include any events at this time.
 
 ### Service Checks
-The Agent_metrics check does not include any service check at this time.
+The Agent_metrics check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].

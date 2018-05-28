@@ -28,10 +28,10 @@ The Agent's Active Directory check is included in the [Datadog Agent][4] package
 See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Events
-The active directory check does not include any event at this time.
+The active directory check does not include any events at this time.
 
 ### Service Checks
-The active directory check does not include any service check at this time.
+The active directory check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].

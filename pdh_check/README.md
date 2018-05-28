@@ -24,10 +24,10 @@ Edit the `pdh_check.d/conf.yaml` file, in the `conf.d/` folder at the root of yo
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The PDH check does not include any event at this time.
+The PDH check does not include any events at this time.
 
 ### Service Checks
-The PDH check does not include any service check at this time.
+The PDH check does not include any service checks at this time.
 
 
 [1]: https://app.datadoghq.com/account/settings#agent

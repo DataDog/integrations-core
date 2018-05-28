@@ -118,7 +118,7 @@ Put all your pysnmp mibs into a folder and specify this folder's path in ```snmp
 The SNMP check will submits specified metrics under the `snmp.*` namespace.
 
 ### Events
-The SNMP check does not include any event at this time.
+The SNMP check does not include any events at this time.
 
 ### Service Checks
 

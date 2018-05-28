@@ -62,7 +62,7 @@ Restart the recursor to enable the statistics API.
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The PowerDns check does not include any event at this time.### Service Checks
+The PowerDns check does not include any events at this time.### Service Checks
 
 ### Service Checks
 **`powerdns.recursor.can_connect`**:

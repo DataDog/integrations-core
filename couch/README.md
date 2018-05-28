@@ -47,7 +47,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
-The Couch check does not include any event at this time.
+The Couch check does not include any events at this time.
 
 ### Service Checks
 

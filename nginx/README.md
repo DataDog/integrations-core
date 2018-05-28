@@ -163,7 +163,7 @@ Finally, these metrics have no good equivalent:
 | nginx.net.writing | The current number of connections where nginx is writing the response back to the client. |
 
 ### Events
-The NGINX check does not include any event at this time.
+The NGINX check does not include any events at this time.
 
 ### Service Checks
 
