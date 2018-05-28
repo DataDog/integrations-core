@@ -1,11 +1,11 @@
 ---
-title: Working with Agent based integrations
+title: Working with Agent-based integrations
 kind: documentation
 ---
 
 ## Overview
 
-Being able to see all of your metrics from across your infrastructure is key within Datadog. There are currently three options to get data into Datadog:
+Being able to see all of your metrics from across your infrastructure is key within Datadog. There are currently three ways to get data into Datadog:
 
 1. Push data from the source to Datadog
 2. Crawl the data source's API
