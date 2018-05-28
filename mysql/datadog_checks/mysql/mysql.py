@@ -789,10 +789,10 @@ class MySql(AgentCheck):
                 self.warning("Error while reading mysql (pid: %s) procfs data\n%s"
                              % (pid, traceback.format_exc()))
 
-    def _get_server_pid(self, db):
-        pid = None
-
-        # Try to get pid from pid file, it can fail for permission reason
+    def _get_pid_file_variable(self, db):
+        """
+        Get the `pid_file` variable
+        """
         pid_file = None
         try:
             with closing(db.cursor()) as cursor:
@@ -801,6 +801,13 @@ class MySql(AgentCheck):
         except Exception:
             self.warning("Error while fetching pid_file variable of MySQL.")
 
+        return pid_file
+
+    def _get_server_pid(self, db):
+        pid = None
+
+        # Try to get pid from pid file, it can fail for permission reason
+        pid_file = self._get_pid_file_variable(db)
         if pid_file is not None:
             self.log.debug("pid file: %s" % str(pid_file))
             try:
@@ -812,12 +819,14 @@ class MySql(AgentCheck):
 
         # If pid has not been found, read it from ps
         if pid is None and PSUTIL_AVAILABLE:
-            try:
-                for proc in psutil.process_iter():
+            for proc in psutil.process_iter():
+                try:
                     if proc.name() == "mysqld":
                         pid = proc.pid
-            except Exception:
-                self.log.exception("Error while fetching mysql pid from psutil")
+                except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
+                    continue
+                except Exception:
+                    self.log.exception("Error while fetching mysql pid from psutil")
 
         return pid
 
