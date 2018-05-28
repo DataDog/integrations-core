@@ -254,11 +254,11 @@ class HTTPCheck(NetworkCheck):
                 else:
                     # Log if we're skipping SSL validation for HTTPS URLs
                     if explicit_validation:
-                        self.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
+                        self.log.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
 
                     # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
                     else:
-                        self.warning('Parameter disable_ssl_validation for {} is not explicitly set, '
+                        self.log.warning('Parameter disable_ssl_validation for {} is not explicitly set, '
                                      'defaults to true'.format(addr))
 
 
