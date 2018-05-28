@@ -1,4 +1,5 @@
 import re
+from math import isnan
 
 from six.moves import range, zip
 
@@ -110,10 +111,12 @@ def parse_histogram(metric, histogram):
     """Iterates over histogram data, yielding metric-value pairs."""
     for match in HISTOGRAM.finditer(histogram):
         percentile, value = match.groups()
+        value = float(value)
 
-        try:
-            yield metric + PERCENTILE_SUFFIX[percentile], float(value)
+        if not isnan(value):
+            try:
+                yield metric + PERCENTILE_SUFFIX[percentile], value
 
-        # In case Envoy adds more
-        except KeyError:
-            yield '{}.{}'.format(metric, percentile.replace('.', '_')), float(value)
+            # In case Envoy adds more
+            except KeyError:
+                yield '{}.{}percentile'.format(metric, percentile[1:].replace('.', '_')), value
