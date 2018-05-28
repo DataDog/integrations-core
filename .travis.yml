@@ -12,13 +12,13 @@ git:
 branches:
   only:
     - master
+matrix:
+  fast_finish: true
 env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-matrix:
-    #fast_finish: true
-    - CHECK=datadog_checks_base
+  - CHECK=datadog_checks_base
 install:
   - pip install -U pip setuptools
   - pip install invoke packaging tox docker-compose
