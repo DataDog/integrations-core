@@ -32,7 +32,7 @@ def postgres_standalone():
     # waiting for PG to start
     attempts = 0
     while True:
-        if attempts > 10:
+        if attempts > 90:
             subprocess.check_call(args + ["down"], env=env)
             raise Exception("PostgreSQL boot timed out!")
 
