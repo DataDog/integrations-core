@@ -23,6 +23,7 @@ install:
   - pip install -U pip setuptools
   - pip install invoke packaging tox docker-compose
 script:
+  - echo ${CHECK}
   - if [[ $CHECK == "datadog_checks_base" ]]; then inv manifest --include-extras; fi
   - inv test --targets=${CHECK}
 # we should clean generated files before we save the cache
