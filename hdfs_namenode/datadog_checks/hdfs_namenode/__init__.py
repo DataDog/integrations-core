@@ -1,7 +1,10 @@
-from . import hdfs_namenode
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .hdfs_namenode import HDFSNameNode
+from .__about__ import __version__
 
-HDFSNameNode = hdfs_namenode.HDFSNameNode
-
-__version__ = "1.2.1"
-
-__all__ = ['hdfs_namenode']
+__all__ = [
+    '__version__',
+    'HDFSNameNode'
+]

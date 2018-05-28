@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 
 '''
@@ -40,7 +40,7 @@ from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
 from simplejson import JSONDecodeError
 
 # Project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # Service check names
 JMX_SERVICE_CHECK = 'hdfs.namenode.jmx.can_connect'
@@ -59,33 +59,34 @@ GAUGE = 'gauge'
 
 # HDFS metrics
 HDFS_NAME_SYSTEM_STATE_METRICS = {
-    'CapacityTotal' : ('hdfs.namenode.capacity_total',  GAUGE),
-    'CapacityUsed' : ('hdfs.namenode.capacity_used',  GAUGE),
-    'CapacityRemaining' : ('hdfs.namenode.capacity_remaining',  GAUGE),
-    'TotalLoad' : ('hdfs.namenode.total_load',  GAUGE),
-    'FsLockQueueLength' : ('hdfs.namenode.fs_lock_queue_length',  GAUGE),
-    'BlocksTotal' : ('hdfs.namenode.blocks_total',  GAUGE),
-    'MaxObjects' : ('hdfs.namenode.max_objects',  GAUGE),
-    'FilesTotal' : ('hdfs.namenode.files_total',  GAUGE),
-    'PendingReplicationBlocks' : ('hdfs.namenode.pending_replication_blocks',  GAUGE),
-    'UnderReplicatedBlocks' : ('hdfs.namenode.under_replicated_blocks',  GAUGE),
-    'ScheduledReplicationBlocks' : ('hdfs.namenode.scheduled_replication_blocks',  GAUGE),
-    'PendingDeletionBlocks' : ('hdfs.namenode.pending_deletion_blocks',  GAUGE),
-    'NumLiveDataNodes' : ('hdfs.namenode.num_live_data_nodes',  GAUGE),
-    'NumDeadDataNodes' : ('hdfs.namenode.num_dead_data_nodes',  GAUGE),
-    'NumDecomLiveDataNodes' : ('hdfs.namenode.num_decom_live_data_nodes',  GAUGE),
-    'NumDecomDeadDataNodes' : ('hdfs.namenode.num_decom_dead_data_nodes',  GAUGE),
-    'VolumeFailuresTotal' : ('hdfs.namenode.volume_failures_total',  GAUGE),
-    'EstimatedCapacityLostTotal' : ('hdfs.namenode.estimated_capacity_lost_total',  GAUGE),
-    'NumDecommissioningDataNodes' : ('hdfs.namenode.num_decommissioning_data_nodes',  GAUGE),
-    'NumStaleDataNodes' : ('hdfs.namenode.num_stale_data_nodes',  GAUGE),
-    'NumStaleStorages' : ('hdfs.namenode.num_stale_storages',  GAUGE),
+    'CapacityTotal': ('hdfs.namenode.capacity_total',  GAUGE),
+    'CapacityUsed': ('hdfs.namenode.capacity_used',  GAUGE),
+    'CapacityRemaining': ('hdfs.namenode.capacity_remaining',  GAUGE),
+    'TotalLoad': ('hdfs.namenode.total_load',  GAUGE),
+    'FsLockQueueLength': ('hdfs.namenode.fs_lock_queue_length',  GAUGE),
+    'BlocksTotal': ('hdfs.namenode.blocks_total',  GAUGE),
+    'MaxObjects': ('hdfs.namenode.max_objects',  GAUGE),
+    'FilesTotal': ('hdfs.namenode.files_total',  GAUGE),
+    'PendingReplicationBlocks': ('hdfs.namenode.pending_replication_blocks',  GAUGE),
+    'UnderReplicatedBlocks': ('hdfs.namenode.under_replicated_blocks',  GAUGE),
+    'ScheduledReplicationBlocks': ('hdfs.namenode.scheduled_replication_blocks',  GAUGE),
+    'PendingDeletionBlocks': ('hdfs.namenode.pending_deletion_blocks',  GAUGE),
+    'NumLiveDataNodes': ('hdfs.namenode.num_live_data_nodes',  GAUGE),
+    'NumDeadDataNodes': ('hdfs.namenode.num_dead_data_nodes',  GAUGE),
+    'NumDecomLiveDataNodes': ('hdfs.namenode.num_decom_live_data_nodes',  GAUGE),
+    'NumDecomDeadDataNodes': ('hdfs.namenode.num_decom_dead_data_nodes',  GAUGE),
+    'VolumeFailuresTotal': ('hdfs.namenode.volume_failures_total',  GAUGE),
+    'EstimatedCapacityLostTotal': ('hdfs.namenode.estimated_capacity_lost_total',  GAUGE),
+    'NumDecommissioningDataNodes': ('hdfs.namenode.num_decommissioning_data_nodes',  GAUGE),
+    'NumStaleDataNodes': ('hdfs.namenode.num_stale_data_nodes',  GAUGE),
+    'NumStaleStorages': ('hdfs.namenode.num_stale_storages',  GAUGE),
 }
 
 HDFS_NAME_SYSTEM_METRICS = {
-    'MissingBlocks' : ('hdfs.namenode.missing_blocks', GAUGE),
-    'CorruptBlocks' : ('hdfs.namenode.corrupt_blocks', GAUGE)
+    'MissingBlocks': ('hdfs.namenode.missing_blocks', GAUGE),
+    'CorruptBlocks': ('hdfs.namenode.corrupt_blocks', GAUGE)
 }
+
 
 class HDFSNameNode(AgentCheck):
 
@@ -100,26 +101,21 @@ class HDFSNameNode(AgentCheck):
         tags = list(set(tags))
 
         # Get metrics from JMX
-        self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation,
-            HDFS_NAME_SYSTEM_STATE_BEAN,
-            HDFS_NAME_SYSTEM_STATE_METRICS, tags)
+        self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation, HDFS_NAME_SYSTEM_STATE_BEAN,
+                                    HDFS_NAME_SYSTEM_STATE_METRICS, tags)
 
-        self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation,
-            HDFS_NAME_SYSTEM_BEAN,
-            HDFS_NAME_SYSTEM_METRICS, tags)
+        self._hdfs_namenode_metrics(jmx_address, disable_ssl_validation, HDFS_NAME_SYSTEM_BEAN,
+                                    HDFS_NAME_SYSTEM_METRICS, tags)
 
-        self.service_check(JMX_SERVICE_CHECK,
-            AgentCheck.OK,
-            tags=tags,
-            message='Connection to %s was successful' % jmx_address)
+        self.service_check(JMX_SERVICE_CHECK, AgentCheck.OK, tags=tags,
+                           message='Connection to %s was successful' % jmx_address)
 
     def _hdfs_namenode_metrics(self, jmx_uri, disable_ssl_validation, bean_name, metrics, tags):
         '''
         Get HDFS namenode metrics from JMX
         '''
-        response = self._rest_request_to_json(jmx_uri, disable_ssl_validation,
-            JMX_PATH,
-            query_params={'qry':bean_name}, tags=tags)
+        response = self._rest_request_to_json(jmx_uri, disable_ssl_validation, JMX_PATH,
+                                              query_params={'qry': bean_name}, tags=tags)
 
         beans = response.get('beans', [])
 
@@ -169,38 +165,30 @@ class HDFSNameNode(AgentCheck):
         self.log.debug('Attempting to connect to "%s"' % url)
 
         try:
-            response = requests.get(url, timeout=self.default_integration_http_timeout, verify=not disable_ssl_validation)
+            response = requests.get(url, timeout=self.default_integration_http_timeout,
+                                    verify=not disable_ssl_validation)
             response.raise_for_status()
             response_json = response.json()
 
         except Timeout as e:
-            self.service_check(JMX_SERVICE_CHECK,
-                AgentCheck.CRITICAL,
-                tags=tags,
-                message="Request timeout: {0}, {1}".format(url, e))
+            self.service_check(JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags,
+                               message="Request timeout: {}, {}".format(url, e))
             raise
 
         except (HTTPError,
                 InvalidURL,
                 ConnectionError) as e:
-            self.service_check(JMX_SERVICE_CHECK,
-                AgentCheck.CRITICAL,
-                tags=tags,
-                message="Request failed: {0}, {1}".format(url, e))
+            self.service_check(JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags,
+                               message="Request failed: {}, {}".format(url, e))
             raise
 
         except JSONDecodeError as e:
-            self.service_check(JMX_SERVICE_CHECK,
-                AgentCheck.CRITICAL,
-                tags=tags,
-                message='JSON Parse failed: {0}, {1}'.format(url, e))
+            self.service_check(JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags,
+                               message='JSON Parse failed: {}, {}'.format(url, e))
             raise
 
         except ValueError as e:
-            self.service_check(JMX_SERVICE_CHECK,
-                AgentCheck.CRITICAL,
-                tags=tags,
-                message=str(e))
+            self.service_check(JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message=str(e))
             raise
 
         return response_json
