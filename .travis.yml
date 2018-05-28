@@ -65,6 +65,9 @@ env:
   - CHECK=teamcity
   - CHECK=varnish
   - CHECK=vsphere
+before_install:
+  - sudo service postgresql stop
+  - while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do sleep 1; done
 install:
   - pip install -U pip setuptools
   - pip install invoke pip-tools packaging tox docker-compose
