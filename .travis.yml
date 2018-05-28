@@ -70,7 +70,7 @@ install:
   - pip install invoke pip-tools packaging tox docker-compose
 script:
   - if [[ $CHECK == "datadog_checks_base" ]]; then inv manifest --include-extras; fi
-  - inv test --targets=${CHECK}
+  - travis_retry inv test --targets=${CHECK}
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:

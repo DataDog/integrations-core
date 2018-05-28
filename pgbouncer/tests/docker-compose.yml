@@ -8,7 +8,7 @@ services:
     volumes:
       - ${TEST_RESOURCES_PATH}/pg:/docker-entrypoint-initdb.d
     ports:
-      - "54320:5432"
+      - "5432"
 
   pgbouncer:
     image: "datadog/docker-library:pgbouncer_${PGBOUNCER_VERSION}"
@@ -16,7 +16,7 @@ services:
       PG_ENV_POSTGRESQL_USER: postgres
       PG_ENV_POSTGRESQL_PASS: datadog
       PG_PORT_5432_TCP_ADDR: postgres
-      PG_PORT_5432_TCP_PORT: 54320
+      PG_PORT_5432_TCP_PORT: 5432
       PG_ENV_POSTGRESQL_ADMIN_USERS: postgres
     ports:
       - "6432:6432"

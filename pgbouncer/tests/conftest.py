@@ -46,7 +46,7 @@ def pgb_service():
 
     subprocess.check_call(args + ["up", "-d"], env=env)
 
-    if not wait_for("Postgres", '54320'):
+    if not wait_for("Postgres", '5432'):
         subprocess.check_call(args + ["logs"], env=env)
         subprocess.check_call(args + ["down"])
         raise Exception("Postgres boot timed out!")
