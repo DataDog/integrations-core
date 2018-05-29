@@ -14,7 +14,7 @@ Overall, the largest deciding factor in what integrations we build is what our c
 
 ## Development basics
 
-The remainder of this document introduces you to the base knowledge and setup required to start working on your own Integration. Once you're comfortable with this content, you can move on to the [technical specifics of Integration development][10].
+The remainder of this document introduces you to the base knowledge and setup required to start working on your own Integration. If you're comfortable with this content already, move on to the [technical specifics of Integration development][10] directly - otherwise, read on.
 
 ### Prerequisites
 
@@ -54,9 +54,9 @@ If you updated the test requirements for a check, run `tox --recreate` for your 
 
 ### Building
 
-`setup.py` provides the setuptools setup script that will help us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
+`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
 
-Once your `setup.py` is ready, creating a wheel is one command:
+Once your `setup.py` is ready, create a wheel:
 
 ```
   cd {integration}
@@ -65,7 +65,7 @@ Once your `setup.py` is ready, creating a wheel is one command:
 
 ## Writing your own
 
-Now that you're comfortable with the basics, you can move on to the [technical specifics of Integration development][10].
+Now that you're comfortable with the basics, move on to the [technical specifics of Integration development][10].
 
 [1]: https://docs.datadoghq.com/developers/metrics/
 [2]: https://docs.datadoghq.com/api/

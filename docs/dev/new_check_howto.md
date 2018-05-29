@@ -84,7 +84,7 @@ A Check is a Python class with the following requirements:
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
-Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `my_check/datadog_checks/my_check`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor the the name of the class implementing the check.
+Checks are organized in regular Python packages under the `datadog_checks` namespace, so your code should live under `my_check/datadog_checks/my_check`. The only requirement is that the name of the package has to be the same as the check name. There are no particular restrictions on the name of the Python modules within that package, nor on the name of the class implementing the check.
 
 ### Implement check logic
 
