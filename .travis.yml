@@ -19,10 +19,10 @@ env:
 matrix:
   fast_finish: true
   include:
-    - if: head_branch =~ "ofek/travis"
+    - if: head_branch = ofek/travis
       env:
         - CHECK=datadog_checks_base
-    - if: head_branch =~ ofek/travis
+    - if: head_branch = ofek/travis
       env:
         - CHECK=active_directory
 before_install:
