@@ -12,11 +12,9 @@ Overall, the largest deciding factor in what integrations we build is what our c
 * [Reach out to support@datadoghq.com][5] and tell us what metrics you would like to see from a given source.
 * Implement the integration yourself and submit the code to the [official extras repository][6].
 
-If you want to create a new Check from scratch, start by looking at the [howto][10] documentation.
+## Development basics
 
-## Development guide
-
-Follow these instructions to get a working copy of any check in your local Python environment; this is mostly useful to run tests or for tinkering in general.
+The remainder of this document introduces you to the base knowledge and setup required to start working on your own Integration. Once you're comfortable with this content, you can move on to the [technical specifics of Integration development][10].
 
 ### Prerequisites
 
@@ -64,6 +62,10 @@ Once your `setup.py` is ready, creating a wheel is one command:
   cd {integration}
   python setup.py bdist_wheel
 ```
+
+## Writing your own
+
+Now that you're comfortable with the basics, you can move on to the [technical specifics of Integration development][10].
 
 [1]: https://docs.datadoghq.com/developers/metrics/
 [2]: https://docs.datadoghq.com/api/
