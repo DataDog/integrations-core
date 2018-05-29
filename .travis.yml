@@ -16,16 +16,17 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-    - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
 matrix:
   fast_finish: true
   include:
     - if: env(BRANCH) = ofek/travis OR env(CHANGED) =~ ^datadog_checks_base/
       env:
+        - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
         - CHECK=datadog_checks_base
         - CHANGED=$(git diff --name-only master...)
     - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
       env:
+        - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
         - CHECK=active_directory
         - CHANGED=$(git diff --name-only master...)
 before_install:
