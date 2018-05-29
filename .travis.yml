@@ -66,8 +66,8 @@ env:
   - CHECK=varnish
   - CHECK=vsphere
 before_install:
-  - chmod +x .travis/install.sh
-  - .travis/install.sh
+  - chmod +x .travis/prepare.sh
+  - .travis/prepare.sh
 install:
   - pip install -U pip setuptools
   - pip install invoke pip-tools packaging tox docker-compose
