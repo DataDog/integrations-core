@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "hdfs_datanode",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
@@ -10,7 +8,6 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.2.0",
   "guid": "c1409bbd-ff4a-4616-9948-6dc7f4910942",
   "public_title": "Datadog-HDFS Datanode Integration",
   "categories":["processing", "os & system"],

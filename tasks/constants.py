@@ -32,6 +32,7 @@ AGENT_BASED_INTEGRATIONS = [
     'envoy',
     'exchange_server',
     'haproxy',
+    'hdfs_datanode',
     'hdfs_namenode',
     'iis',
     'istio',
