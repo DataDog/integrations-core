@@ -38,9 +38,8 @@ def wait_for_mysql():
             connected = True
             return True
         except Exception as e:
-            log.debug("exception: {0}".format(e))
+            log.debug("exception: {}".format(e))
             time.sleep(2)
-            pass
 
     return connected
 
