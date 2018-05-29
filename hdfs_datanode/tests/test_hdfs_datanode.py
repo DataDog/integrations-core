@@ -7,7 +7,7 @@ from datadog_checks.hdfs_datanode import HDFSDataNode
 from .common import HDFS_DATANODE_CONFIG, HDFS_DATANODE_METRICS_VALUES, HDFS_DATANODE_METRIC_TAGS
 
 
-def test_check(aggregator, mocked_request):
+def test_check(aggregator):
     """
     Test that we get all the metrics we're supposed to get
     """

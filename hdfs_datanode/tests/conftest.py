@@ -20,7 +20,7 @@ def aggregator():
     return aggregator
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='session', autouse=True)
 def mocked_request():
     patcher = patch('requests.get', new=requests_get_mock)
     patcher.start()
