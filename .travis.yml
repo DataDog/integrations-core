@@ -22,7 +22,7 @@ matrix:
   include:
     - if: env(CHANGED) =~ "e"
       env:
-        - CHANGED=$(git diff --name-only master...)
+        - CHANGED="$(git diff --name-only master...)"
         - CHECK=datadog_checks_base
     - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
       env:
