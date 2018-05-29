@@ -17,16 +17,17 @@ env:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
     - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
-    - CHANGED=$(git diff --name-only master...)
 matrix:
   fast_finish: true
   include:
     - if: env(BRANCH) = master OR env(CHANGED) =~ ^datadog_checks_base/
       env:
         - CHECK=datadog_checks_base
+        - CHANGED=$(git diff --name-only master...)
     - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
       env:
         - CHECK=active_directory
+        - CHANGED=$(git diff --name-only master...)
 before_install:
   - echo $CHECK
   - echo $CHANGED
