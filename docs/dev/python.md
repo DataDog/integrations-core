@@ -1,33 +1,31 @@
 ---
-title: Prepare your Python environment for Agent integration development
+title: Python environment for Agent integration development
 kind: documentation
 ---
 
-This doc covers all steps to prepare the perfect Python environment to work on Agent based integrations, from installing the interpreter to install and the dependencies needed.
+This document covers how to setup a Python environment to work on Agent-based Integrations, including installing the interpreter and ensuring all of the required dependencies are present.
 
 ## Python2 or Python3?
 
-Integrations are supposed to be deployed in the Datadog Agent's Python embedded environment, that happens to be *version 2.7.14* at the moment (check this info out [here][1]). To try to locally reproduce a check behavior, we recommended to use the same version of the Agent but we'll [eventually][2] move to Python3, so having code capable to run with both versions can't hurt.
+Integrations run only within the Agent's embedded Python environment, or within the testing environment, the current version of which is recorded in the [Omnibus code][1]. The Agent and testing environments are Python2, but an eventual upgrade to Python3 is inevitable, thus new Integrations must be compatible with both versions.
 
 ## Install Python
 
-Most operating systems come with Python already installed so chances are you might not need to do anything.
-
-In case your Python is too old or if you don't have one, please see the following instructions for your Operating System.
+Many operating systems come with Python pre-installed. If your system Python is too old, or if it is not pre-installed, follow the instructions for your OS below.
 
 ### macOS
 
-Any recent version of MacOS comes with some Python installed that might be older than the version used in the Agent and might also lack of some pieces in terms of tools and dependencies that you might need. For these reasons we recommend to install a fresh, dedicated Python interpreter you can manage without the App Store, following either of the methods listed in this paragraph.
+Any recent version of macOS comes with Python pre-installed; however, it might be older than the version used in the Agent, and might also lack required tools and dependencies. We recommend installing a fresh, dedicated Python interpreter tat you can manage without the App Store, following either of the methods listed in this paragraph.
 
-#### Option 1: install Python with Homebrew
+#### Option 1: Install Python with Homebrew
 
-[`Homebrew`][3] is a package manager for macOS that makes a lot easier installing software on macOS, specially from the command line. There's already an awesome guide about how to install Python with Homebrew in [the Hitchhiker’s Guide to Python][4] we recommend to read.
+[`Homebrew`][3] is a package manager for macOS that makes a lot easier installing software on macOS, specially from the command line. Follow the "Doing it Right" instructions in [the Hitchhiker’s Guide to Python][4].
 
-#### Option 2: install Python with miniconda
+#### Option 2: Install Python with miniconda
 
-Miniconda is the lightweight version of [`Anaconda`][5], a Python distribution specifically designed for data processing and scientific computing. Miniconda maintains the awesome Conda package manager and provides a full fledged Python environment along with development libraries and a tool for managing virtual environments, all without cargo loading any library or package you'd find in Anaconda.
+Miniconda is the lightweight version of [`Anaconda`][5], a Python distribution specifically designed for data processing and scientific computing. Miniconda maintains the Conda package manager, and provides a fully-fledged Python environment along with development libraries and a tool for managing virtual environments - all without cargo loading any library or package normally present in Anaconda.
 
-[Download Miniconda][6] and install it following [these instructions][7]. Miniconda is extremely self contained at the point you uninstall it with `rm -r`  and might be a good option if you don't want/need a full fledged Python environment installed system wide, or if you just want to give Python a spin.
+[Download Miniconda][6] and install it following [the Conda installation instructions][7]. Miniconda is extremely self contained: `rm -r` uninstalls it completely. This is a good option if you don't want or need a complete Python environment installed system wide, or if you just want to give Python a spin.
 
 ### Linux
 
@@ -39,11 +37,11 @@ TODO
 
 ## Install a virtual environment manager
 
-Each integration has its own set of dependencies that must be added to Python in order to run the tests or just try out the collection code; to avoid polluting your Python installation with libraries and packages that would only be used by an integration, use the so called "virtual enviroments". A virtual environment is a self contained directory tree that contains an isolated Python installation - when a virtual enviroment is active, any package you install goes into that directory, without hitting the system wide Python installation tree.
+Each integration has its own set of dependencies that must be added to Python in order to run the tests, or just to try out the collection code. To avoid polluting your Python installation with libraries and packages that would only be used by an Integration, use a "virtual environment". A virtual environment is a self contained directory tree that contains an isolated Python installation. When a virtual environment is active, any package you install goes into that directory without affecting the system wide Python installation.
 
 ### Virtualenv and Virtualenvwrapper
 
-We recommend using [Virtualenv][8] to manage virtual Python environments and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker’s Guide to Python describing how to setup these two tools.
+We recommend using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker’s Guide to Python describing how to set up these two tools.
 
 ### Miniconda
 
