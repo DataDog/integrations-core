@@ -20,5 +20,7 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/haproxy/",
   "is_public": true,
-  "has_logo": true
+  "has_logo": true,
+  "creates_events": true,
+  "metric_to_check": "haproxy.frontend.bytes.in_rate"
 }
