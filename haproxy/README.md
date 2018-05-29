@@ -1,5 +1,4 @@
 # Haproxy Integration
-{{< img src="integrations/haproxy/haproxydash.png" alt="HAProxy default dashboard" responsive="true" popup="true">}}
 
 ## Overview
 
@@ -8,6 +7,8 @@ Capture HAProxy activity in Datadog to:
 * Visualize HAProxy load-balancing performance.
 * Know when a server goes down.
 * Correlate the performance of HAProxy with the rest of your applications.
+
+![HAProxy Default Dash](https://raw.githubusercontent.com/DataDog/integrations-core/5f2e05610c38400bfe3141c9d06de4c346f01b0f/haproxy/images/haproxy-dash.png)
 
 ## Setup
 
@@ -55,7 +56,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
         username: <your_username>
         password: <your_password>
   ```
-  
+
   See the [sample haproxy.yaml][4] for all available configuration options.
 
 *  [Restart the Agent][5].
