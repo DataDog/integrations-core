@@ -2,6 +2,7 @@
 
 set -ex
 
+# Stop any services that bind to ports we need.
 case $CHECK in
     couchbase|mcache)
         sudo service memcached stop
