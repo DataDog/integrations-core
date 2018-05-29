@@ -21,7 +21,7 @@ env:
 matrix:
   fast_finish: true
   include:
-    - if: (env(BRANCH) = ofek/travis) OR (env(CHANGED) =~ ^datadog_checks_base/)
+    - if: (env(BRANCH) = master) OR (env(CHANGED) =~ ^datadog_checks_base/)
       env:
         - CHECK=datadog_checks_base
     - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
