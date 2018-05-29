@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.0.0",
   "name": "haproxy",
-  "display_name": "haproxy",
+  "display_name": "HAProxy",
   "support": "core",
   "maintainer": "help@datadoghq.com",
   "supported_os": [
