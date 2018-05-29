@@ -21,15 +21,13 @@ env:
 matrix:
   fast_finish: true
   include:
-    - if: env(BRANCH) = ofek/travis
+    - if: env(BRANCH) =~ "ofek/travis"
       env:
         - CHECK=datadog_checks_base
-    - if: env(BRANCH) = ofek/travis
+    - if: env(BRANCH) =~ "ofek/travis"
       env:
-        - CHECK=$CHANGED
+        - CHECK=active_directory
 before_install:
-  - echo $CHANGED
-  - echo $CHECK
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
 install:
