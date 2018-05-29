@@ -16,14 +16,13 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-    - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
 matrix:
   fast_finish: true
   include:
-    - if: env(BRANCH) =~ "ofek/travis"
+    - if: head_branch =~ "ofek/travis"
       env:
         - CHECK=datadog_checks_base
-    - if: env(BRANCH) =~ ofek/travis
+    - if: head_branch =~ ofek/travis
       env:
         - CHECK=active_directory
 before_install:
