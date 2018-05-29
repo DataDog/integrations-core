@@ -1,6 +1,8 @@
 #!/bin/bash
 
-case "${CHECK}" in
+set -ex
+
+case $CHECK in
     couchbase|mcache)
         sudo service postgresql stop
         while sudo lsof -Pi :5432 -sTCP:LISTEN -t; do sleep 1; done
@@ -10,3 +12,5 @@ case "${CHECK}" in
         while sudo lsof -Pi :11211 -sTCP:LISTEN -t; do sleep 1; done
         ;;
 esac
+
+set +ex
