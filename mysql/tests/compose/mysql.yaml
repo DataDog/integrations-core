@@ -22,7 +22,7 @@ services:
       - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
     networks:
       - network1
-    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "replication-entrypoint.sh", "mysqld"]
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "120", "--", "replication-entrypoint.sh", "mysqld"]
     depends_on:
       - "mysql-master"
 
@@ -37,7 +37,7 @@ services:
       - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
     depends_on:
       - "mysql-slave"
-    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "setup_mysql.sh"]
+    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "120", "--", "setup_mysql.sh"]
 
 
 networks:
