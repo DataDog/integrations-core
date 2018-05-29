@@ -21,10 +21,10 @@ env:
 matrix:
   fast_finish: true
   include:
-    - if: (env(BRANCH) = master) OR (env(CHANGED) =~ ^datadog_checks_base/)
+    - if: (env(BRANCH) = master)
       env:
         - CHECK=datadog_checks_base
-    - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
+    - if: branch = master
       env:
         - CHECK=$CHANGED
 before_install:
