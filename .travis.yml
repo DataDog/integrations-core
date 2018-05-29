@@ -23,7 +23,12 @@ matrix:
     - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
       env:
         - CHECK=datadog_checks_base
+    - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
+      env:
+        - CHECK=active_directory
 before_install:
+  - echo $CHECK
+  - echo $CHANGED
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
 install:
