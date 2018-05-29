@@ -1,23 +1,13 @@
 ---
-title: Working with Agent-based integrations
+title: Introduction to Agent-based Integrations
 kind: documentation
 ---
 
-## Overview
-
-Being able to see all of your metrics from across your infrastructure is key within Datadog. There are currently three ways to get data into Datadog:
-
-1. Push data from the source to Datadog
-2. Crawl the data source's API
-3. Have the Datadog Agent pick up the information from the source
-
-This guide covers the latter option, providing the information needed to work with the Agent based integrations, also referred to as Checks. Checks make the Agent able to collect and send metrics, events and service checks to Datadog.
-
-## Create a new integration
+## Why create an Integration?
 
 While we do have guides to submit [custom metrics][1] via our [API][2] and [code instrumentation][3], it's possible you might want to see a certain source become an integration available in the [official core repository][4] and bundled into the Agent package.
 
-Overall, the largest deciding factor in what integrations we build is what our clients request. You have two options to propose an integration:
+Overall, the largest deciding factor in what integrations we build is what our clients request. There are two ways to propose an integration:
 
 * [Reach out to support@datadoghq.com][5] and tell us what metrics you would like to see from a given source.
 * Implement the integration yourself and submit the code to the [official extras repository][6].
@@ -26,7 +16,7 @@ If you want to create a new Check from scratch, start by looking at the [howto][
 
 ## Development guide
 
-Follow these instructions to get a working copy of any check on your local Python environment; this is mostly useful to run tests or for tinkering in general.
+Follow these instructions to get a working copy of any check in your local Python environment; this is mostly useful to run tests or for tinkering in general.
 
 ### Prerequisites
 
@@ -34,41 +24,41 @@ Follow these instructions to get a working copy of any check on your local Pytho
 
 ### Quickstart
 
-The project comes with a requirements file, pass it to `pip` to install all the dependencies needed to work with any check. From the root of the repo, run:
+The project comes with a requirements file usable by `pip` to install all the dependencies needed to work with any Check. From the root of the repo, run:
 
 ```
 pip install -r requirements-dev.txt
 ```
 
-To work with a specific check you need to install its own dependencies. The easiest way to iterate on a check development is installing the wheel itself in editable mode. For example, if you want to do this for the `disk` check run the following:
+You must install the dependencies of a specific Check in order to work with it. The easiest way to iterate during development is by installing the wheel itself in editable mode. Consider the `disk` Check as an example:
 
 ```
 cd disk && pip install -e .
 ```
 
-To double check everything is working as expected run:
+Verify that everything is working as expected:
 
 ```
 python -c"from datadog_checks.disk import Disk"
 ```
 
-if the commands ends without errors, you're good to go!
+If the command exits without errors, you're good to go!
 
 ### Testing
 
-To run the test suite for a given check, either use `tox`, like:
+Use `tox` to run the test suite for a given Check:
 
 ```
 cd {integration} && tox
 ```
 
-If you updated the test requirements for a check, run `tox --recreate` for changes to be effective.
+If you updated the test requirements for a check, run `tox --recreate` for your changes to become effective.
 
 ### Building
 
-`setup.py` provides the setuptools setup script that will help us package and build the wheel. To learn more about python packaging take a look at [the official python documentation][9]
+`setup.py` provides the setuptools setup script that will help us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
 
-Once your setup.py is ready, creating a wheel is a easy as:
+Once your `setup.py` is ready, creating a wheel is one command:
 
 ```
   cd {integration}
