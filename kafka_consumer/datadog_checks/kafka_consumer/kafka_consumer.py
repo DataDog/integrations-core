@@ -217,25 +217,13 @@ class KafkaCheck(AgentCheck):
         return response
 
     def _get_group_coordinator(self, client, group):
-        request = GroupCoordinatorRequest[0](group)
-
-        # not all brokers might return a good response... Try all of them
         coord_id = None
-        for _ in range(self._broker_retries):
-            for broker in client.cluster.brokers():
-                try:
-                    coord_resp = self._make_blocking_req(client, request, node_id=broker.nodeId)
-                    # 0 means that there is no error
-                    if coord_resp and coord_resp.error_code is 0:
-                        client.cluster.add_group_coordinator(group, coord_resp)
-                        coord_id = client.cluster.coordinator_for_group(group)
-                        if coord_id is not None and coord_id >= 0:
-                            return coord_id
-                except AssertionError:
-                    continue
-            else:
-                coord_id = None
-
+        request = GroupCoordinatorRequest[0](group)
+        coord_resp = self._make_blocking_req(client, request, node_id=broker.nodeId)
+        if coord_resp.error_code is 0:  # 0 means that there is no error
+            client.cluster.add_group_coordinator(group, coord_resp)
+            coord_id = client.cluster.coordinator_for_group(group)
+            assert coord_id is not None and coord_id >= 0
         return coord_id
 
     def _process_highwater_offsets(self, request, instance, node_id, response):
@@ -446,29 +434,31 @@ class KafkaCheck(AgentCheck):
         in kafka (__consumer_offsets topic) rather than in zookeeper
         """
         consumer_offsets = {}
-        topics = defaultdict(set)
+        topics = defaultdict(set)  # {'topic': (1, 2, 3)}
 
         cli = self._get_kafka_client(instance)
 
         for consumer_group, topic_partitions in consumer_groups.iteritems():
             try:
                 coordinator_id = self._get_group_coordinator(cli, consumer_group)
-                if coordinator_id:
-                    offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions, coordinator_id)
-                else:
-                    offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions)
-                    self.log.info("unable to find group coordinator for %s", consumer_group)
-
+                if coordinator_id is None:
+                    # Cannot fetch offsets for a consumer group without a
+                    # known coordinator. This should only happen in the middle
+                    # of GroupCoordinator failover.
+                    continue
+                offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions, coordinator_id)
                 for (topic, partition), offset in offsets.iteritems():
                     topics[topic].update([partition])
                     key = (consumer_group, topic, partition)
                     consumer_offsets[key] = offset
             except Exception:
-                self.log.exception('Could not read consumer offsets from kafka.')
-
+                self.log.exception(
+                    'Could not read consumer offsets from kafka for group.',
+                    consumer_group)
         return consumer_offsets, topics
 
-    def _get_consumer_offsets(self, client, consumer_group, topic_partitions, coord_id=None):
+    def _get_consumer_offsets(self, client, consumer_group, topic_partitions, coord_id):
+        assert coord_id is not None and coord_id >= 0
         tps = defaultdict(set)
         for topic, partitions in topic_partitions.iteritems():
             if len(partitions) == 0:
@@ -476,23 +466,16 @@ class KafkaCheck(AgentCheck):
             tps[topic] = tps[unicode(topic)].union(set(partitions))
 
         consumer_offsets = {}
-        if coord_id is not None and coord_id >= 0:
-            broker_ids = [coord_id]
-        else:
-            broker_ids = [b.nodeId for b in client.cluster.brokers()]
-
-        for broker_id in broker_ids:
-            # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
-            # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
-            # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
-            request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
-            response = self._make_blocking_req(client, request, node_id=broker_id)
-            for (topic, partition_offsets) in response.topics:
-                for partition, offset, _, error_code in partition_offsets:
-                    if error_code is not 0:
-                        continue
-                    consumer_offsets[(topic, partition)] = offset
-
+        # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
+        # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
+        # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
+        request = OffsetFetchRequest[1](consumer_group, list(tps.iteritems()))
+        response = self._make_blocking_req(client, request, node_id=coord_id)
+        for (topic, partition_offsets) in response.topics:
+            for partition, offset, _, error_code in partition_offsets:
+                if error_code is not 0:
+                    continue
+                consumer_offsets[(topic, partition)] = offset
         return consumer_offsets
 
     def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
