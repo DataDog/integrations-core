@@ -11,7 +11,6 @@ from datadog_checks.ntp import NtpCheck
 def instance():
     return {
         'host': 'foo.com',
-        'port': 'bar',
         'version': 42,
         'timeout': 13.37,
         'tags': ['mytag'],
@@ -56,12 +55,13 @@ def test_instance(check, ntp_client, instance):
     """
     Test what was sent to the NTP client when config was passed
     """
+    instance['port'] = 'Boo!'
     with mock.patch('datadog_checks.ntp.ntp.ntplib.NTPClient') as c:
         c.return_value = ntp_client
         check.check(instance)
         args, kwargs = ntp_client.request.call_args
         assert 'foo.com' in kwargs.get('host', '')
-        assert kwargs.get('port') == 'bar'
+        assert kwargs.get('port') == 123
         assert kwargs.get('timeout') == 13.37
         assert kwargs.get('version') == 42
         check.gauge.assert_called_once_with('ntp.offset', 1042, tags=['mytag'], timestamp=4242)
@@ -111,3 +111,12 @@ def test_service_check_ko(check, ntp_client, instance):
         check.service_check.assert_called_once_with('ntp.in_sync', NtpCheck.CRITICAL,
                                                     message='Offset 1042 secs higher than offset threshold (60 secs)',
                                                     tags=['mytag'], timestamp=4242)
+
+
+def test__get_service_port(check, instance):
+    """
+    Test the fallback procedure to get the service port
+    """
+    assert check._get_service_port(instance) == 'ntp'
+    instance['port'] = 'foo'
+    assert check._get_service_port(instance) == 123

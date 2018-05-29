@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import random
+import socket
 
 import ntplib
 from datadog_checks.checks import AgentCheck
@@ -12,11 +13,27 @@ DEFAULT_HOST = '{}.datadog.pool.ntp.org'.format(random.randint(0, 3))
 DEFAULT_VERSION = 3
 DEFAULT_TIMEOUT = 1.0  # in seconds
 DEFAULT_PORT = 'ntp'
+DEFAULT_PORT_NUM = 123
 
 
 class NtpCheck(AgentCheck):
 
     DEFAULT_MIN_COLLECTION_INTERVAL = 900  # in seconds
+
+    def _get_service_port(self, instance):
+        """
+        Get the ntp server port
+        """
+        host = instance.get('host', DEFAULT_HOST)
+        port = instance.get('port', DEFAULT_PORT)
+        # default port is the name of the service but lookup would fail
+        # if the /etc/services file is missing. In that case, fallback to numeric
+        try:
+            socket.getaddrinfo(host, port)
+        except socket.gaierror:
+            port = DEFAULT_PORT_NUM
+
+        return port
 
     def check(self, instance):
         service_check_msg = None
@@ -30,7 +47,7 @@ class NtpCheck(AgentCheck):
 
         req_args = {
             'host': instance.get('host', DEFAULT_HOST),
-            'port': instance.get('port', DEFAULT_PORT),
+            'port': self._get_service_port(instance),
             'version': int(instance.get('version', DEFAULT_VERSION)),
             'timeout': float(instance.get('timeout', DEFAULT_TIMEOUT)),
         }
