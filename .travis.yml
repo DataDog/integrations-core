@@ -12,59 +12,17 @@ git:
 branches:
   only:
     - master
-matrix:
-  fast_finish: true
 env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-env:
-  - CHECK=datadog_checks_base
-  - CHECK=active_directory
-  - CHECK=apache
-  - CHECK=aspdotnet
-  - CHECK=btrfs
-  - CHECK=ceph
-  - CHECK=consul
-  - CHECK=couch
-  - CHECK=couchbase
-  - CHECK=directory
-  - CHECK=disk
-  - CHECK=dotnetclr
-  - CHECK=elastic
-  - CHECK=envoy
-  - CHECK=exchange_server
-  - CHECK=haproxy
-  - CHECK=hdfs_namenode
-  - CHECK=iis
-  - CHECK=istio
-  - CHECK=kafka_consumer
-  - CHECK=kube_proxy
-  - CHECK=kubelet
-  - CHECK=kyototycoon
-  - CHECK=lighttpd
-  - CHECK=linkerd
-  - CHECK=marathon
-  - CHECK=mcache
-  # - CHECK=mysql
-  - CHECK=network
-  - CHECK=nfsstat
-  - CHECK=nginx
-  - CHECK=oracle
-  - CHECK=pdh_check
-  - CHECK=pgbouncer
-  # - CHECK=postgres
-  - CHECK=powerdns_recursor
-  - CHECK=prometheus
-  - CHECK=redisdb
-  - CHECK=riak
-  - CHECK=spark
-  - CHECK=ssh_check
-  - CHECK=squid
-  - CHECK=system_core
-  - CHECK=teamcity
-  - CHECK=varnish
-  - CHECK=vsphere
+    - CHANGED=$(git diff --name-only master...)
+matrix:
+  fast_finish: true
+  include:
+    - if: branch = master OR env(CHANGED) =~ "^${CHECK}/"
+      env:
+        - CHECK=datadog_checks_base
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
