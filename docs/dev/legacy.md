@@ -1,19 +1,19 @@
 ---
-title: Legacy
+title: Legacy Agent v5
 kind: documentation
 ---
 
-This documentation explains how to create an Agent check for the Datadog Agent v5, which has been superceded by Agent v6. It is still possible to write checks for v5, however no new integrations for v5 will be considered upstream. To learn more about creating integrations for Agent v6, [refer to the dedicated documentation for creating an Agent check for Datadog Agent v6][21].
+This documentation explains how to create an Agent check for Datadog Agent v5, which has been superseded by Agent v6. It is still possible to write your own local checks for v5, however no new integrations for v5 will be considered upstream. To learn more about creating integrations for Agent v6, [refer to the dedicated documentation for creating an Agent check for Datadog Agent v6][21].
 
 ## Requirements
 
-You need a working [Ruby][16] environment. For more information on installing Ruby, reference [the Ruby installation documentation][17].
+You need a working [Ruby][16] environment. For more information on installing Ruby, see the [Ruby installation documentation][17].
 
 You also need [Wget][18]. Wget is already installed on most Linux systems. Use [Homebrew][19] on Mac or [Chocolatey][20] on Windows.
 
 ## Setup
 
-We've written [a gem][AGem] and a set of scripts to help you get set up, ease development, and provide testing. To begin:
+There is [a gem][AGem] and a set of scripts to help you get set up, ease development, and provide testing. To begin:
 
 1. Fork the [integrations-extras repository][1] on Github and clone the repository to your dev environment.
 2. Run `gem install bundler`
@@ -25,19 +25,19 @@ Once the required Ruby gems have been installed by Bundler, create a Python envi
 
 2. Run `source venv/bin/activate` to activate the installed Python virtual environment. To exit the virtual environment, run `deactivate`. Learn more about the Python virtual environment on the [Virtualenv documentation][15].
 
-## Building an integration
+## Building an Integration
 
-Use rake to generate the skeleton for a new integration by running: `rake generate:skeleton[my_integration]`, where "my_integration" is the name of your new integration (note: enclose your integration name in square brackets).
+Use rake to generate the skeleton for a new Integration by running: `rake generate:skeleton[my_integration]`, where _my_integration_ is the name of your new Integration (note: enclose your Integration name in square brackets).
 
-This creates a new directory, `my_integration`, that contains all the files required for your new integration. This also creates an entry for your new integration in our `.travis.yml` and `circle.yml` continuous integration files to ensure that your tests are run whenever new builds are created.
+This creates a new directory, `my_integration`, that contains all the files required for your new Integration. This also creates an entry for your new Integration in the `.travis.yml` and `circle.yml` continuous integration files to ensure that your tests are run whenever new builds are created.
 
 ### Integration files
 
-New integrations should contain the following files:
+New Integrations should contain the following files:
 
 #### `README.md`
 
-Your README file should provide the following sections:
+The README file must provide the following sections:
 
 - **Overview** (required): Let others know what they can expect to do with your integration.
 - **Installation** (required): Provide information about how to install your integration.
@@ -53,7 +53,7 @@ Your README file should provide the following sections:
 
 #### `check.py`
 
-The file where your check logic should reside. The skeleton function boilerplates an integration class for your integration, including a `check` method where you should place your check logic.
+The file where your check logic should reside. The skeleton function boilerplates an Integration class for your Integration, including a `check` method where you should place your check logic.
 
 For example:
 
@@ -114,7 +114,7 @@ A note about terminology: You may notice the variable `flavor` in this file and 
 
 #### `conf.yaml.example`
 
-In order to install your integration, users need to configure the integration for their specific instances. To do this, they'll copy the `conf.yaml.example` file that you provide into their Agent's `conf.d` directory, then update it with their instance specific information.
+In order to install your Integration, users need to configure the Integration for their specific instances. To do this, they'll copy the `conf.yaml.example` file that you provide into their Agent's `conf.d` directory, then update it with their instance specific information.
 
 Your `conf.yaml.example` file should provide two sections:
 
@@ -250,9 +250,9 @@ For example in our MySQL integration, the [`ci/mysql.rake` file][10] uses the [o
 3. `before_script` - This task first ensures that the MySQL server is running, then connects to the server to perform some setup tasks. We highly recommend that you keep setup tasks in your `test_integration.py` file when possible, but we recognize that sometimes setup and configurations need to be performed prior to the python test script.
 4. `cleanup` - After the tests are complete, the Docker test environment is stopped and removed.
 
-### Installing your integration locally
+### Installing your Integration locally
 
-When your integration is merged into the `integrations-extras` repository, we generate packages so that others can easily install your integration (see the [Installing Core & Extra Integrations guide][11]. However, you may want to install your integration locally before it's merged.
+When your Integration is merged into the `integrations-extras` repository, we generate packages so that others can easily install your Integration (see the [Installing Core & Extra Integrations guide][11]. However, you may want to install your Integration locally before it's merged.
 
 To run locally, first copy your `check.py` file into the Datadog Agent's `checks.d` directory and rename it to `my_integration.py` (using the actual name of your integration).
 
@@ -264,11 +264,11 @@ See the Agent check guide for more information about the [Datadog Agent director
 
 When you have finished building your integration, run `rake clean_env` to remove the Python virtual environment.
 
-## Submitting Your integration
+## Submitting your Integration
 
-Once you have completed the development of your integration, submit a [pull request][12] to have Datadog review your integration. After we've reviewed your integration, we approve and merge your pull request or provide feedback and next steps required for approval.
+Once you have completed the development of your integration, submit a [pull request][12] to have Datadog review your Integration. After we've reviewed your Integration, we approve and merge your pull request or provide feedback and next steps required for approval.
 
-### Other Considerations
+### Other considerations
 
 In our experience building integrations, we've also faced a number of challenges. As your write your tests, here are a few things to consider:
 
