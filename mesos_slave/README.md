@@ -97,7 +97,7 @@ If you are not using DC/OS, then datadog-agent is in the list of running applica
 See [metadata.csv][3] for a list of metrics provided by this integration.
 
 ### Events
-The Mesos-slave check does not include any event at this time.
+The Mesos-slave check does not include any events at this time.
 
 ### Service Check
 

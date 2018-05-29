@@ -91,7 +91,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
 See [metadata.csv][23] for a list of metrics provided by this check.
 
 ### Events
-The Kafka check does not include any event at this time.
+The Kafka check does not include any events at this time.
 
 ### Service Checks
 **kafka.can_connect**

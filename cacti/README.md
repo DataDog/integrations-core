@@ -70,10 +70,10 @@ fi'
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Cacti check does not include any event at this time.
+The Cacti check does not include any events at this time.
 
 ### Service Checks
-The Cacti check does not include any service check at this time.
+The Cacti check does not include any service checks at this time.
 
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].

@@ -92,7 +92,7 @@ See the [example check configuration][2] for comprehensive descriptions of other
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The Supervisord check does not include any event at this time.
+The Supervisord check does not include any events at this time.
 
 ### Service Checks
 

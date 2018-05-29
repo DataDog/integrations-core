@@ -53,10 +53,10 @@ metadata:
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Kube-DNS check does not include any event at this time.
+The Kube-DNS check does not include any events at this time.
 
 ### Service Checks
-The Kube-DNS check does not include any service check at this time.
+The Kube-DNS check does not include any service checks at this time.
 
 ## Troubleshooting  
 Need help? Contact [Datadog Support][5].    

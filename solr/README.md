@@ -212,7 +212,7 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
-The Solr check does not include any event at this time.
+The Solr check does not include any events at this time.
 
 ### Service Checks
 **solr.can_connect**

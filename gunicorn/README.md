@@ -62,7 +62,7 @@ udp        0      0 127.0.0.1:38374         127.0.0.1:8125          ESTABLISHED 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
-The Gunicorn check does not include any event at this time.
+The Gunicorn check does not include any events at this time.
 
 ### Service Checks
 

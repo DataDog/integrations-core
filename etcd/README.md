@@ -39,7 +39,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
 
 ### Events
-The Etcd check does not include any event at this time.
+The Etcd check does not include any events at this time.
 
 ### Service Checks
 

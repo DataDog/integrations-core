@@ -119,7 +119,7 @@ Following metrics are still sent but will be removed eventually:
  * `zookeeper.bytes_outstanding`
 
 ### Events
-The Zookeeper check does not include any event at this time.
+The Zookeeper check does not include any events at this time.
 
 ### Service Checks
 

@@ -25,7 +25,7 @@ Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the roo
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Kubernetes-state check does not include any event at this time.
+The Kubernetes-state check does not include any events at this time.
 
 ### Service Checks
 **kubernetes_state.node.ready**

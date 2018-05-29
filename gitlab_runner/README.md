@@ -33,7 +33,7 @@ See the [sample gitlab_runner.d/conf.yaml][2] for all available configuration op
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
-The Gitlab Runner check does not include any event at this time.
+The Gitlab Runner check does not include any events at this time.
 
 ### Service Checks
 The Gitlab Runner check currently provides a service check to ensure that the Runner can talk to the Gitlab master and another one to ensure that the

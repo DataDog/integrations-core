@@ -2,7 +2,7 @@
 
 ## Overview
 
-Track the performance of your PowerDNS recursors and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
+Track the performance of your PowerDNS Recursor and monitor strange or worrisome traffic. This Agent check collects a wealth of metrics from your recursors, including those for:
 
 * Query answer times — see how many responses take less than 1ms, 10ms, 100ms, 1s, and greater than 1s
 * Query timeouts
@@ -20,7 +20,7 @@ The PowerDNS Recursor check is included in the [Datadog Agent][1] package, so yo
 ### Configuration
 #### Prepare PowerDNS
 
-This check collects performance statistics via pdns_recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. /etc/powerdns/recursor.conf):
+This check collects performance statistics via pdns_recursor's statistics API. Versions of pdns_recursor before 4.1 do not enable the stats API by default. If you're running an older version, enable it by adding the following to your recursor config file (e.g. `/etc/powerdns/recursor.conf`):
 
 ```
 webserver=yes
@@ -62,7 +62,7 @@ Restart the recursor to enable the statistics API.
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The PowerDns check does not include any event at this time.### Service Checks
+The PowerDNS Recursor check does not include any events at this time.### Service Checks
 
 ### Service Checks
 **`powerdns.recursor.can_connect`**:

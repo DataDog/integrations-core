@@ -43,7 +43,7 @@ The check only collects `memcache.slabs.*` metrics if you set `options.slabs: tr
 
 
 ### Events
-The Mcache check does not include any event at this time.
+The Mcache check does not include any events at this time.
 
 ### Service Checks
 

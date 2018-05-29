@@ -66,7 +66,7 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
 ### Events
-The Process check does not include any event at this time.
+The Process check does not include any events at this time.
 
 ### Service Checks
 **process.up**:

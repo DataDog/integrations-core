@@ -141,7 +141,7 @@ Here's an example of configuration that would check the current machine and a re
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
-The IIS check does not include any event at this time.
+The IIS check does not include any events at this time.
 
 ### Service Checks
 

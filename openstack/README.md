@@ -2,10 +2,10 @@
 {{< img src="integrations/openstack/openstack.png" alt="OpenStack default dashboard" responsive="true" popup="true">}}
 ## Overview
 
-Get metrics from openstack service in real time to:
+Get metrics from OpenStack service in real time to:
 
-* Visualize and monitor openstack states
-* Be notified about openstack failovers and events.
+* Visualize and monitor OpenStack states
+* Be notified about OpenStack failovers and events.
 
 ## Setup
 ### Installation
@@ -33,7 +33,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 **Nova**
 
-```json
+```
 {
     "compute_extension": "aggregates",
     "compute_extension": "hypervisors",
@@ -53,7 +53,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 **Neutron**
 
-```json
+```
 {
     "get_network": "rule:admin_or_owner or rule:shared or rule:external or rule:context_is_advsvc or role:datadog_monitoring"
 }
@@ -61,7 +61,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 **Keystone**
 
-```json
+```
 {
     "identity:get_project": "rule:admin_required or project_id:%(target.project.id)s or role:datadog_monitoring",
     "identity:list_projects": "rule:admin_required or role:datadog_monitoring"
@@ -69,7 +69,6 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 ```
 
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
-
 
 3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
 
@@ -84,7 +83,7 @@ You may need to restart your Keystone, Neutron and Nova API services to ensure t
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The Openstack check does not include any event at this time.
+The OpenStack check does not include any events at this time.
 
 ### Service Checks
 **openstack.neutron.api.up**

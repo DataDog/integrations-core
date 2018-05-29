@@ -48,7 +48,7 @@ Configuration Options:
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
-The PHP-FPM check does not include any event at this time.
+The PHP-FPM check does not include any events at this time.
 
 ### Service Checks
 
