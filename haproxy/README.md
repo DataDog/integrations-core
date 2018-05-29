@@ -10,6 +10,7 @@ Capture HAProxy activity in Datadog to:
 * Correlate the performance of HAProxy with the rest of your applications.
 
 ## Setup
+
 ### Installation
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:
@@ -46,7 +47,7 @@ The Agent collects metrics via a stats endpoint:
 
 Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
-  ```yaml
+  ```
   init_config:
 
   instances:
@@ -54,6 +55,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
         username: <your_username>
         password: <your_password>
   ```
+  
   See the [sample haproxy.yaml][4] for all available configuration options.
 
 *  [Restart the Agent][5].
