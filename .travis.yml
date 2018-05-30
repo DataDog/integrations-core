@@ -16,61 +16,68 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
+env:
+  - CHECK=datadog_checks_base
+  - CHECK=active_directory
+  - CHECK=apache
+  - CHECK=aspdotnet
+  - CHECK=btrfs
+  - CHECK=ceph
+  - CHECK=consul
+  - CHECK=couch
+  - CHECK=couchbase
+  - CHECK=directory
+  - CHECK=disk
+  - CHECK=dotnetclr
+  - CHECK=elastic
+  - CHECK=envoy
+  - CHECK=exchange_server
+  - CHECK=haproxy
+  - CHECK=hdfs_namenode
+  - CHECK=iis
+  - CHECK=istio
+  - CHECK=kafka_consumer
+  - CHECK=kube_proxy
+  - CHECK=kubelet
+  - CHECK=kyototycoon
+  - CHECK=lighttpd
+  - CHECK=linkerd
+  - CHECK=marathon
+  - CHECK=mcache
+  # - CHECK=mysql
+  - CHECK=network
+  - CHECK=nfsstat
+  - CHECK=nginx
+  - CHECK=oracle
+  - CHECK=pdh_check
+  - CHECK=pgbouncer
+  # - CHECK=postgres
+  - CHECK=powerdns_recursor
+  - CHECK=prometheus
+  - CHECK=redisdb
+  - CHECK=riak
+  - CHECK=spark
+  - CHECK=ssh_check
+  - CHECK=squid
+  - CHECK=system_core
+  - CHECK=teamcity
+  - CHECK=varnish
+  - CHECK=vsphere
 jobs:
   fast_finish: true
   include:
     - stage: manifest
       script: inv manifest --include-extras
-    - stage: test_all
-      if: (branch = master) AND (type = pull_request)
-      script: travis_retry inv test --targets=${CHECK}
       env:
-        - CHECK=datadog_checks_base
-        - CHECK=active_directory
-        - CHECK=apache
-        - CHECK=aspdotnet
-        - CHECK=btrfs
-        - CHECK=ceph
-        - CHECK=consul
-        - CHECK=couch
-        - CHECK=couchbase
-        - CHECK=directory
-        - CHECK=disk
-        - CHECK=dotnetclr
-        - CHECK=elastic
-        - CHECK=envoy
-        - CHECK=exchange_server
-        - CHECK=haproxy
-        - CHECK=hdfs_namenode
-        - CHECK=iis
-        - CHECK=istio
-        - CHECK=kafka_consumer
-        - CHECK=kube_proxy
-        - CHECK=kubelet
-        - CHECK=kyototycoon
-        - CHECK=lighttpd
-        - CHECK=linkerd
-        - CHECK=marathon
-        - CHECK=mcache
-        # - CHECK=mysql
-        - CHECK=network
-        - CHECK=nfsstat
-        - CHECK=nginx
-        - CHECK=oracle
-        - CHECK=pdh_check
-        - CHECK=pgbouncer
-        # - CHECK=postgres
-        - CHECK=powerdns_recursor
-        - CHECK=prometheus
-        - CHECK=redisdb
-        - CHECK=riak
-        - CHECK=spark
-        - CHECK=ssh_check
-        - CHECK=squid
-        - CHECK=system_core
-        - CHECK=teamcity
-        - CHECK=varnish
-        - CHECK=vsphere
+        - CHECK=none
+    - stage: test_changed
+      if: type = pull_request
+      script: inv test --changed-only
+      env:
+        - CHECK=none
+    - stage: test_all
+      if: (branch = master) AND (type != pull_request)
+      script: travis_retry inv test --targets=${CHECK}
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
