@@ -16,24 +16,74 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-matrix:
+stages:
+  - manifest
+  - test_changed
+    if: type = pull_request
+  - test_all
+    if: (branch = master) AND (type != pull_request)
+jobs:
   fast_finish: true
   include:
-    - if: (branch = master) AND (type = push)
+    - stage: manifest
+      script: inv manifest --include-extras
+    - stage: test_changed
+      script: inv test --changed-only
+    - stage: test_all
+      script: travis_retry inv test --targets=${CHECK}
       env:
         - CHECK=datadog_checks_base
-    - if: (branch = master) AND (type = push)
-      env:
         - CHECK=active_directory
+        - CHECK=apache
+        - CHECK=aspdotnet
+        - CHECK=btrfs
+        - CHECK=ceph
+        - CHECK=consul
+        - CHECK=couch
+        - CHECK=couchbase
+        - CHECK=directory
+        - CHECK=disk
+        - CHECK=dotnetclr
+        - CHECK=elastic
+        - CHECK=envoy
+        - CHECK=exchange_server
+        - CHECK=haproxy
+        - CHECK=hdfs_namenode
+        - CHECK=iis
+        - CHECK=istio
+        - CHECK=kafka_consumer
+        - CHECK=kube_proxy
+        - CHECK=kubelet
+        - CHECK=kyototycoon
+        - CHECK=lighttpd
+        - CHECK=linkerd
+        - CHECK=marathon
+        - CHECK=mcache
+        # - CHECK=mysql
+        - CHECK=network
+        - CHECK=nfsstat
+        - CHECK=nginx
+        - CHECK=oracle
+        - CHECK=pdh_check
+        - CHECK=pgbouncer
+        # - CHECK=postgres
+        - CHECK=powerdns_recursor
+        - CHECK=prometheus
+        - CHECK=redisdb
+        - CHECK=riak
+        - CHECK=spark
+        - CHECK=ssh_check
+        - CHECK=squid
+        - CHECK=system_core
+        - CHECK=teamcity
+        - CHECK=varnish
+        - CHECK=vsphere
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
 install:
   - pip install -U pip setuptools
   - pip install invoke pip-tools packaging tox docker-compose
-script:
-  - if [[ $CHECK == "datadog_checks_base" ]]; then inv manifest --include-extras; fi
-  - travis_retry inv test --targets=${CHECK}
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:
