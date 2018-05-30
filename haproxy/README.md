@@ -1,5 +1,7 @@
 # Haproxy Integration
 
+{{< img src="https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png" alt="HAProxy default dashboard" responsive="true" popup="true">}}
+
 ## Overview
 
 Capture HAProxy activity in Datadog to:
@@ -81,7 +83,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
         source: haproxy
         sourcecategory: http_web_access
   ```
-  
+
   Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
