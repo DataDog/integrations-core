@@ -75,6 +75,8 @@ jobs:
     - stage: test
       env: CHECK=haproxy
     - stage: test
+      env: CHECK=hdfs_datanode
+    - stage: test
       env: CHECK=hdfs_namenode
     - stage: test
       env: CHECK=iis
