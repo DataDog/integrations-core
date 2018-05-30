@@ -14,8 +14,6 @@ services:
       - MARIADB_DATABASE=my_database
     ports:
       - "${MYSQL_PORT}:3306"
-    networks:
-      - network1
 
   mysql-slave:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
@@ -31,28 +29,5 @@ services:
       - MARIADB_MASTER_ROOT_PASSWORD=master_root_password
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
-    volumes:
-      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
-    networks:
-      - network1
-    # command: ["wait-for-it.sh", "mysql-master:3306", "-t", "30", "--", "/app-entrypoint.sh", "/run.sh"]
     depends_on:
       - "mysql-master"
-
-  mysql-setup:
-    image: "mysql:latest"
-    environment:
-      - MYSQL_SCRIPT_OPTIONS=${MYSQL_SCRIPT_OPTIONS}
-    networks:
-      - network1
-    volumes:
-      - ${MYSQL_SHELL_SCRIPT}:/usr/local/bin/setup_mysql.sh
-      - ${WAIT_FOR_IT_SCRIPT_PATH}:/usr/local/bin/wait-for-it.sh
-    depends_on:
-      - "mysql-slave"
-    command: ["wait-for-it.sh", "mysql-master:3306", "-t", "120", "--", "setup_mysql.sh"]
-
-
-networks:
-  network1:
-    name: mysql_default

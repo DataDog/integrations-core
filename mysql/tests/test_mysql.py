@@ -5,7 +5,6 @@ from os import environ
 import logging
 import copy
 import subprocess
-from threading import Timer
 
 import mock
 import pytest
@@ -214,20 +213,24 @@ def test__get_server_pid():
     mysql_check.log = mock.MagicMock()
     dummy_proc = subprocess.Popen(["python"])
 
+    p_iter = psutil.process_iter
+
     def process_iter():
         """
         Wrap `psutil.process_iter` with a func killing a running process
-        while iterating to reproduce a bug in the pid detection
+        while iterating to reproduce a bug in the pid detection.
+        We don't use psutil directly here because at the time this will be
+        invoked, `psutil.process_iter` will be mocked. Instead we assign it to
+        `p_iter` which is then part of the closure (see line above).
         """
-        for p in psutil.process_iter():
+        for p in p_iter():
             if dummy_proc.pid == p.pid:
                 dummy_proc.terminate()
                 dummy_proc.wait()
             # continue as the original `process_iter` function
             yield p
 
-    with mock.patch('datadog_checks.mysql.mysql.psutil.process_iter') as pi:
-        pi = process_iter
+    with mock.patch('datadog_checks.mysql.mysql.psutil.process_iter', process_iter):
         # the pid should be none but without errors
         assert mysql_check._get_server_pid(None) is None
         assert mysql_check.log.exception.call_count == 0
