@@ -21,6 +21,7 @@ stages:
     if: type = pull_request
   - name: test
     if: (branch = master) AND (type = pull_request)
+    script: travis_retry inv test --targets=${CHECK}
 jobs:
   fast_finish: true
   include:
@@ -34,140 +35,15 @@ jobs:
         - travis_retry inv test --targets=${CHECK}
       env: CHECK=datadog_checks_base
     - stage: test
-      script: travis_retry inv test --targets=${CHECK}
       env: CHECK=active_directory
     - stage: test
-      script: travis_retry inv test --targets=${CHECK}
       env: CHECK=apache
     - stage: test
-      script: travis_retry inv test --targets=${CHECK}
       env: CHECK=aspdotnet
     - stage: test
-      script: travis_retry inv test --targets=${CHECK}
       env: CHECK=btrfs
     - stage: test
-      script: travis_retry inv test --targets=${CHECK}
       env: CHECK=ceph
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=consul
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=couch
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=couchbase
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=directory
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=disk
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=dotnetclr
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=elastic
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=envoy
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=exchange_server
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=haproxy
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=hdfs_namenode
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=iis
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=istio
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=kafka_consumer
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=kube_proxy
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=kubelet
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=kyototycoon
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=lighttpd
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=linkerd
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=marathon
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=mcache
-    # - stage: test
-    #   script: travis_retry inv test --targets=${CHECK}
-    #   env: CHECK=mysql
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=network
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=nfsstat
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=nginx
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=oracle
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=pdh_check
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=pgbouncer
-    # - stage: test
-    #   script: travis_retry inv test --targets=${CHECK}
-    #   env: CHECK=postgres
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=powerdns_recursor
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=prometheus
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=redisdb
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=riak
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=spark
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=ssh_check
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=squid
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=system_core
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=teamcity
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=varnish
-    - stage: test
-      script: travis_retry inv test --targets=${CHECK}
-      env: CHECK=vsphere
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
