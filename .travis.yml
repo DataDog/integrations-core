@@ -16,12 +16,15 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
+
 stages:
   - name: test_changed
     if: type = pull_request
   - name: test
     if: (branch = master) AND (type = pull_request)
+
 script: travis_retry inv test --targets=${CHECK}
+
 jobs:
   fast_finish: true
   include:
@@ -30,10 +33,10 @@ jobs:
        - inv manifest --include-extras
        - inv test --changed-only
     - stage: test
+      env: CHECK=datadog_checks_base
       script:
         - inv manifest --include-extras
         - travis_retry inv test --targets=${CHECK}
-      env: CHECK=datadog_checks_base
     - stage: test
       env: CHECK=active_directory
     - stage: test
@@ -44,6 +47,86 @@ jobs:
       env: CHECK=btrfs
     - stage: test
       env: CHECK=ceph
+    - stage: test
+      env: CHECK=consul
+    - stage: test
+      env: CHECK=couch
+    - stage: test
+      env: CHECK=couchbase
+    - stage: test
+      env: CHECK=directory
+    - stage: test
+      env: CHECK=disk
+    - stage: test
+      env: CHECK=dotnetclr
+    - stage: test
+      env: CHECK=elastic
+    - stage: test
+      env: CHECK=envoy
+    - stage: test
+      env: CHECK=exchange_server
+    - stage: test
+      env: CHECK=haproxy
+    - stage: test
+      env: CHECK=hdfs_namenode
+    - stage: test
+      env: CHECK=iis
+    - stage: test
+      env: CHECK=istio
+    - stage: test
+      env: CHECK=kafka_consumer
+    - stage: test
+      env: CHECK=kube_proxy
+    - stage: test
+      env: CHECK=kubelet
+    - stage: test
+      env: CHECK=kyototycoon
+    - stage: test
+      env: CHECK=lighttpd
+    - stage: test
+      env: CHECK=linkerd
+    - stage: test
+      env: CHECK=marathon
+    - stage: test
+      env: CHECK=mcache
+    # - stage: test
+    #   env: CHECK=mysql
+    - stage: test
+      env: CHECK=network
+    - stage: test
+      env: CHECK=nfsstat
+    - stage: test
+      env: CHECK=nginx
+    - stage: test
+      env: CHECK=oracle
+    - stage: test
+      env: CHECK=pdh_check
+    - stage: test
+      env: CHECK=pgbouncer
+    # - stage: test
+    #   env: CHECK=postgres
+    - stage: test
+      env: CHECK=powerdns_recursor
+    - stage: test
+      env: CHECK=prometheus
+    - stage: test
+      env: CHECK=redisdb
+    - stage: test
+      env: CHECK=riak
+    - stage: test
+      env: CHECK=spark
+    - stage: test
+      env: CHECK=ssh_check
+    - stage: test
+      env: CHECK=squid
+    - stage: test
+      env: CHECK=system_core
+    - stage: test
+      env: CHECK=teamcity
+    - stage: test
+      env: CHECK=varnish
+    - stage: test
+      env: CHECK=vsphere
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
