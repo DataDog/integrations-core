@@ -16,12 +16,6 @@ env:
   global:
     - SKIP_CLEANUP=true
     - PIP_CACHE=$HOME/.cache/pip
-stages:
-  - manifest
-  - test_changed
-    if: type = pull_request
-  - test_all
-    if: (branch = master) AND (type != pull_request)
 jobs:
   fast_finish: true
   include:
@@ -30,10 +24,12 @@ jobs:
       env:
         - CHECK=none
     - stage: test_changed
+      if: type = pull_request
       script: inv test --changed-only
       env:
         - CHECK=none
     - stage: test_all
+      if: (branch = master) AND (type != pull_request)
       script: travis_retry inv test --targets=${CHECK}
       env:
         - CHECK=datadog_checks_base
