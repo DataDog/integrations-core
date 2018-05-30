@@ -24,6 +24,17 @@ def get_subprocess_output(command, log, raise_on_empty_output=True):
     """
     Run the given subprocess command and return its output. Raise an Exception
     if an error occurs.
+
+    :param command: The command to run. Using a list of strings is recommended. The command
+                    will be run in a subprocess without using a shell, as such shell features like
+                    shell pipes, wildcard expansion, environment variable expansion, etc., are
+                    not supported.
+    :type command: list(str) or str
+    :param logging.Logger log: The log object to use
+    :param bool raise_on_empty_output: Whether to raise a SubprocessOutputEmptyError exception when
+                                       the subprocess doesn't output anything to its stdout.
+    :returns: The stdout contents, stderr contents and status code of the command
+    :rtype: tuple(str, str, int)
     """
 
     cmd_args = []
