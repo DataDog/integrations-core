@@ -20,7 +20,7 @@ stages:
   - name: test_changed
     if: type = pull_request
   - name: test
-    if: (branch = master) AND (type != pull_request)
+    if: (branch = master) AND (type = pull_request)
 jobs:
   fast_finish: true
   include:
