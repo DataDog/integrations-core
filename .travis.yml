@@ -27,8 +27,12 @@ jobs:
   include:
     - stage: manifest
       script: inv manifest --include-extras
+      env:
+        - CHECK=none
     - stage: test_changed
       script: inv test --changed-only
+      env:
+        - CHECK=none
     - stage: test_all
       script: travis_retry inv test --targets=${CHECK}
       env:
