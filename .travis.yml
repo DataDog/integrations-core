@@ -21,11 +21,8 @@ jobs:
   include:
     - stage: manifest
       script: inv manifest --include-extras
-    - stage: test_changed
-      if: type = pull_request
-      script: inv test --changed-only
     - stage: test_all
-      if: (branch = master) AND (type != pull_request)
+      if: (branch = master) AND (type = pull_request)
       script: travis_retry inv test --targets=${CHECK}
       env:
         - CHECK=datadog_checks_base
