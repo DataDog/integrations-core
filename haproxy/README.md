@@ -1,5 +1,5 @@
 # Haproxy Integration
-![HAProxy Out of the box Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png)
+![HAProxy Out of the box Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png)
 
 ## Overview
 
