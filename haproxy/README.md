@@ -1,6 +1,5 @@
 # Haproxy Integration
-
-{{< img src="https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png" alt="HAProxy default dashboard" responsive="true" popup="true">}}
+![HAProxy Out of the box Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png)
 
 ## Overview
 
