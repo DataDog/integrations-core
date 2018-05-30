@@ -75,7 +75,7 @@ jobs:
       script: inv test --changed-only
       env:
         - CHECK=none
-    - stage: test_all
+    - stage: test
       if: (branch = master) AND (type != pull_request)
       script: travis_retry inv test --targets=${CHECK}
 before_install:
