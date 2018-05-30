@@ -25,6 +25,13 @@ stages:
 
 script: travis_retry inv test --targets=${CHECK}
 
+# Conditional jobs are currently buggy and verbose.
+#
+# https://github.com/travis-ci/beta-features/issues/28
+# https://github.com/travis-ci/beta-features/issues/40
+# https://github.com/travis-ci/travis-ci/issues/8295
+# https://github.com/travis-ci/travis-conditions/pull/1
+# https://github.com/travis-ci/travis-ci/issues/6652
 jobs:
   fast_finish: true
   include:
