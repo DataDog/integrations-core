@@ -10,8 +10,6 @@ Capture HAProxy activity in Datadog to:
 * Know when a server goes down.
 * Correlate the performance of HAProxy with the rest of your applications.
 
-![HAProxy Default Dash](https://raw.githubusercontent.com/DataDog/integrations-core/5f2e05610c38400bfe3141c9d06de4c346f01b0f/haproxy/images/haproxy-dash.png)
-
 ## Setup
 
 ### Installation
@@ -44,7 +42,7 @@ The Agent collects metrics via a stats endpoint:
     stats auth Username:Password  # Authentication credentials
     ```
 
-2. [Restart HAProxy to enable the stats endpoint][3].
+2. [Restart HAProxy to enable the stats endpoint](https://www.haproxy.org/download/1.7/doc/management.txt).
 
 #### Metric Collection
 
