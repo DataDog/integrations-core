@@ -2,7 +2,7 @@ import pytest
 
 from datadog_checks.envoy.errors import UnknownMetric, UnknownTags
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
-from datadog_checks.envoy.parser import parse_metric
+from datadog_checks.envoy.parser import parse_histogram, parse_metric
 
 
 class TestParseMetric:
@@ -483,3 +483,48 @@ class TestParseMetric:
             ['{}:{}'.format(tags[0], tag0)],
             METRICS[untagged_metric]['method']
         )
+
+
+class TestParseHistogram:
+    def test_no_match(self):
+        metric = 'envoy.http.downstream_rq_time'
+        value = 'No recorded values'
+
+        assert list(parse_histogram(metric, value)) == []
+
+    def test_ignore_nan(self):
+        metric = 'envoy.http.downstream_rq_time'
+        value = 'P0(0,0) P25(nan,0)'
+
+        assert list(parse_histogram(metric, value)) == [
+            ('envoy.http.downstream_rq_time.0percentile', 0.0),
+        ]
+
+    def test_correct(self):
+        metric = 'envoy.http.downstream_rq_time'
+        value = (
+            'P0(0,0) P25(25,0) P50(50,0) P75(75,0) P90(90,1.06) P95(95,1.08) '
+            'P99(99,1.096) P99.9(99.9,1.0996) P100(100,1.1)'
+        )
+
+        assert list(parse_histogram(metric, value)) == [
+            ('envoy.http.downstream_rq_time.0percentile', 0.0),
+            ('envoy.http.downstream_rq_time.25percentile', 25.0),
+            ('envoy.http.downstream_rq_time.50percentile', 50.0),
+            ('envoy.http.downstream_rq_time.75percentile', 75.0),
+            ('envoy.http.downstream_rq_time.90percentile', 90.0),
+            ('envoy.http.downstream_rq_time.95percentile', 95.0),
+            ('envoy.http.downstream_rq_time.99percentile', 99.0),
+            ('envoy.http.downstream_rq_time.99_9percentile', 99.9),
+            ('envoy.http.downstream_rq_time.100percentile', 100.0),
+        ]
+
+    def test_correct_unknown_percentile(self):
+        metric = 'envoy.http.downstream_rq_time'
+        value = 'P0(0,0) P25(25,0) P55.5(55.5,0)'
+
+        assert list(parse_histogram(metric, value)) == [
+            ('envoy.http.downstream_rq_time.0percentile', 0.0),
+            ('envoy.http.downstream_rq_time.25percentile', 25.0),
+            ('envoy.http.downstream_rq_time.55_5percentile', 55.5),
+        ]

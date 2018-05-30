@@ -9,6 +9,8 @@ instances:
   # supply a list of tags. The admin endpoint must be accessible.
   # https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 
+  # Add a `?usedonly` on the end if you wish to ignore
+  # unused metrics instead of reporting them as `0`.
   - stats_url: http://localhost:80/stats
 
   #   tags:

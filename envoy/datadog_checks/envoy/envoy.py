@@ -8,7 +8,7 @@ import requests
 from datadog_checks.checks import AgentCheck
 
 from .errors import UnknownMetric, UnknownTags
-from .parser import parse_metric
+from .parser import parse_histogram, parse_metric
 
 
 class Envoy(AgentCheck):
@@ -38,7 +38,7 @@ class Envoy(AgentCheck):
         timeout = int(instance.get('timeout', 20))
 
         try:
-            request = requests.get(
+            response = requests.get(
                 stats_url, auth=auth, verify=verify_ssl, proxies=proxies, timeout=timeout
             )
         except requests.exceptions.Timeout:
@@ -52,8 +52,8 @@ class Envoy(AgentCheck):
             self.log.exception(msg)
             return
 
-        if request.status_code != 200:
-            msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(stats_url, request.status_code)
+        if response.status_code != 200:
+            msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(stats_url, response.status_code)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.warning(msg)
             return
@@ -61,18 +61,10 @@ class Envoy(AgentCheck):
         # Avoid repeated global lookups.
         get_method = getattr
 
-        for line in request.content.decode().splitlines():
+        for line in response.content.decode().splitlines():
             try:
                 envoy_metric, value = line.split(': ')
             except ValueError:
-                continue
-
-            try:
-                value = int(value)
-            except (ValueError, TypeError):
-                self.log.debug(
-                    'Unable to parse value `{}` as an integer for metric `{}`'.format(value, envoy_metric)
-                )
                 continue
 
             try:
@@ -90,7 +82,14 @@ class Envoy(AgentCheck):
                     self.unknown_tags[tag] += 1
                 continue
 
-            tags.extend(custom_tags)
-            get_method(self, method)(metric, value, tags=tags)
+            try:
+                value = int(value)
+                tags.extend(custom_tags)
+                get_method(self, method)(metric, value, tags=tags)
+
+            # If the value isn't an integer assume it's pre-computed histogram data.
+            except (ValueError, TypeError):
+                for metric, value in parse_histogram(metric, value):
+                    self.gauge(metric, value, tags=tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=custom_tags)
