@@ -96,8 +96,8 @@ jobs:
       env: CHECK=marathon
     - stage: test
       env: CHECK=mcache
-    # - stage: test
-    #   env: CHECK=mysql
+    - stage: test
+      env: CHECK=mysql
     - stage: test
       env: CHECK=network
     - stage: test
