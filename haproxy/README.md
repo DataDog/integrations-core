@@ -31,7 +31,7 @@ The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
-    ```
+```
     listen stats # Define a listen section called "stats"
     bind :9000 # Listen on localhost:9000
     mode http
@@ -40,7 +40,7 @@ The Agent collects metrics via a stats endpoint:
     stats realm Haproxy\ Statistics  # Title text for popup window
     stats uri /haproxy_stats  # Stats URI
     stats auth Username:Password  # Authentication credentials
-    ```
+```
 
 2. [Restart HAProxy to enable the stats endpoint](https://www.haproxy.org/download/1.7/doc/management.txt).
 
@@ -48,18 +48,18 @@ The Agent collects metrics via a stats endpoint:
 
 Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
-  ```
+```
   init_config:
 
   instances:
       - url: https://localhost:9000/haproxy_stats
         username: <your_username>
         password: <your_password>
-  ```
+```
 
-  See the [sample haproxy.yaml][4] for all available configuration options.
+  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
-*  [Restart the Agent][5].
+*  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 #### Log Collection
 
@@ -67,20 +67,20 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
 
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-  ```
+```
   logs_enabled: true
-  ```
+```
 
 * Add this configuration block to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
-  ```
+```
   logs:
       - type: udp
         port: 514
         service: haproxy
         source: haproxy
         sourcecategory: http_web_access
-  ```
+```
 
   Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
 
