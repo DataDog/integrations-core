@@ -4,7 +4,7 @@ set -ex
 
 # Stop any services that bind to ports we need.
 case $CHECK in
-    couchbase|mcache|)
+    couchbase|mcache|"")
         sudo service memcached stop
         while sudo lsof -Pi :11211 -sTCP:LISTEN -t; do sleep 1; done
         ;;
