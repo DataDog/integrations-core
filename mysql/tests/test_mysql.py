@@ -231,6 +231,7 @@ def test__get_server_pid():
             yield p
 
     with mock.patch('datadog_checks.mysql.mysql.psutil.process_iter', process_iter):
-        # the pid should be none but without errors
-        assert mysql_check._get_server_pid(None) is None
-        assert mysql_check.log.exception.call_count == 0
+        with mock.patch('datadog_checks.mysql.mysql.PROC_NAME', 'this_shouldnt_exist'):
+            # the pid should be none but without errors
+            assert mysql_check._get_server_pid(None) is None
+            assert mysql_check.log.exception.call_count == 0

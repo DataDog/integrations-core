@@ -25,6 +25,7 @@ GAUGE = "gauge"
 RATE = "rate"
 COUNT = "count"
 MONOTONIC = "monotonic_count"
+PROC_NAME = 'mysqld'
 
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {
@@ -821,7 +822,7 @@ class MySql(AgentCheck):
         if pid is None and PSUTIL_AVAILABLE:
             for proc in psutil.process_iter():
                 try:
-                    if proc.name() == "mysqld":
+                    if proc.name() == PROC_NAME:
                         pid = proc.pid
                 except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
                     continue
