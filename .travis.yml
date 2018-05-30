@@ -21,13 +21,9 @@ jobs:
   include:
     - stage: manifest
       script: inv manifest --include-extras
-      env:
-        - CHECK=none
     - stage: test_changed
       if: type = pull_request
       script: inv test --changed-only
-      env:
-        - CHECK=none
     - stage: test_all
       if: (branch = master) AND (type != pull_request)
       script: travis_retry inv test --targets=${CHECK}
