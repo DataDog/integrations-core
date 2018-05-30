@@ -21,7 +21,7 @@ stages:
     if: type = pull_request
   - name: test
     if: (branch = master) AND (type = pull_request)
-    script: travis_retry inv test --targets=${CHECK}
+script: travis_retry inv test --targets=${CHECK}
 jobs:
   fast_finish: true
   include:
