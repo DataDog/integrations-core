@@ -1,20 +1,18 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-import pytest
+from os import environ
 import logging
 import copy
+import subprocess
 
-from os import environ
-
+import mock
+import pytest
+import psutil
 from datadog_checks.mysql import MySql
 from datadog_checks.utils.platform import Platform
 
-import common
-import variables
-import tags
-import common_config
+from . import common, variables, tags, common_config
 
 log = logging.getLogger('test_mysql')
 
@@ -203,3 +201,37 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
     after = len(aggregator.not_asserted())
 
     assert before - after > at_least
+
+
+@pytest.mark.unit
+def test__get_server_pid():
+    """
+    Test the logic looping through the processes searching for `mysqld`
+    """
+    mysql_check = MySql(common.CHECK_NAME, {}, {})
+    mysql_check._get_pid_file_variable = mock.MagicMock(return_value=None)
+    mysql_check.log = mock.MagicMock()
+    dummy_proc = subprocess.Popen(["python"])
+
+    p_iter = psutil.process_iter
+
+    def process_iter():
+        """
+        Wrap `psutil.process_iter` with a func killing a running process
+        while iterating to reproduce a bug in the pid detection.
+        We don't use psutil directly here because at the time this will be
+        invoked, `psutil.process_iter` will be mocked. Instead we assign it to
+        `p_iter` which is then part of the closure (see line above).
+        """
+        for p in p_iter():
+            if dummy_proc.pid == p.pid:
+                dummy_proc.terminate()
+                dummy_proc.wait()
+            # continue as the original `process_iter` function
+            yield p
+
+    with mock.patch('datadog_checks.mysql.mysql.psutil.process_iter', process_iter):
+        with mock.patch('datadog_checks.mysql.mysql.PROC_NAME', 'this_shouldnt_exist'):
+            # the pid should be none but without errors
+            assert mysql_check._get_server_pid(None) is None
+            assert mysql_check.log.exception.call_count == 0
