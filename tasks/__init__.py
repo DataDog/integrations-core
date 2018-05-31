@@ -7,16 +7,18 @@ Invoke entrypoint, import here all the tasks we want to make available
 from __future__ import print_function, unicode_literals
 
 from invoke import Collection
+from colorama import init
 
-# task functions are added to the root namespace automatically
-from .cleanup import cleanup
-from .manifest import manifest
-from .upgrade import upgrade
-from .test import test
-from .changelog import update_changelog
-from .release import (
+# Task functions are added to the root namespace automatically.
+# Ignore "imported but unused" flake8 errors for these imports.
+from .cleanup import cleanup  # noqa: F401
+from .manifest import manifest  # noqa: F401
+from .upgrade import upgrade  # noqa: F401
+from .test import test  # noqa: F401
+from .changelog import update_changelog  # noqa: F401
+from .release import (  # noqa: F401
     release_integration, release_prepare, tag_current_release,
-    compile_requirements
+    compile_requirements, release_show_pending
 )
 
 # the root namespace
@@ -29,3 +31,6 @@ root.configure({
         'encoding': 'utf-8',
     }
 })
+
+# init colorama
+init(autoreset=True)

@@ -141,7 +141,7 @@ before_install:
   - .travis/prepare.sh
 install:
   - pip install -U pip setuptools
-  - pip install invoke pip-tools packaging tox docker-compose
+  - pip install -r requirements-dev.txt
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:

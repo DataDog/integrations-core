@@ -3,52 +3,23 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import print_function, unicode_literals
 import os
+import sys
 
 from packaging import version
 from invoke import task
 from invoke.exceptions import Exit
+from colorama import Fore
 
-from .constants import (
-    AGENT_BASED_INTEGRATIONS, ROOT, AGENT_REQ_FILE, AGENT_V5_ONLY
+from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY
+from .utils.git import (
+    get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
-from .utils import (
-    get_version_string, get_current_branch, get_release_tag_string,
-    load_manifest
+from .utils.common import (
+    load_manifest, get_version_string, get_release_tag_string,
+    update_version_module
 )
+from .utils.github import get_changelog_types, get_pr
 from .changelog import do_update_changelog
-
-
-def update_version_module(check_name, old_ver, new_ver):
-    """
-    Change the Python code in the __about__.py module so that `__version__`
-    contains the new value.
-    """
-    about_module = os.path.join(ROOT, check_name, 'datadog_checks', check_name, '__about__.py')
-    with open(about_module, 'r') as f:
-        contents = f.read()
-
-    contents = contents.replace(old_ver, new_ver)
-    with open(about_module, 'w') as f:
-        f.write(contents)
-
-
-def git_commit(ctx, target, message):
-    """
-    Commit the current changes.
-    """
-    target_path = os.path.join(ROOT, target)
-    cmd = 'git add ' + target_path
-    ctx.run(cmd)
-    cmd = 'git commit -m"{}"'.format(message)
-    ctx.run(cmd)
-
-
-def git_tag(ctx, tag_name):
-    """
-    Tag the repo using an annotated tag.
-    """
-    cmd = 'git tag -a {} -m"{}"'.format(tag_name, tag_name)
-    ctx.run(cmd)
 
 
 @task(help={
@@ -76,6 +47,51 @@ def tag_current_release(ctx, target, version=None, dry_run=False):
         git_tag(ctx, tag)
     except Exception as e:
         print(e)
+
+
+@task(help={
+    'target': "List the pending changes for the target check.",
+})
+def release_show_pending(ctx, target):
+    """
+    Print all the pending PRs for a given check.
+
+    Example invocation:
+        inv release-show-pending mysql
+    """
+    # sanity check on the target
+    if target not in AGENT_BASED_INTEGRATIONS:
+        raise Exit("Provided target is not an Agent-based Integration")
+
+    # get the name of the current release tag
+    cur_version = get_version_string(target)
+    target_tag = get_release_tag_string(target, cur_version)
+
+    # get the diff from HEAD
+    diff_lines = get_diff(ctx, target, target_tag)
+
+    # for each PR get the title, we'll use it to populate the changelog
+    pr_numbers = parse_pr_numbers(diff_lines)
+    print("Found {} PRs merged since tag: {}".format(len(pr_numbers), target_tag))
+    for pr_num in pr_numbers:
+        try:
+            payload = get_pr(pr_num)
+        except Exception as e:
+            sys.stderr.write("Unable to fetch info for PR #{}\n: {}".format(pr_num, e))
+            continue
+
+        changelog_types = get_changelog_types(payload)
+        if not changelog_types:
+            changelog_status = Fore.RED + 'WARNING! No changelog labels attached.'
+        elif len(changelog_types) > 1:
+            changelog_status = Fore.RED + 'WARNING! Too many changelog labels attached: {}'.format(','.join(changelog_types))
+        else:
+            changelog_status = Fore.GREEN + changelog_types[0]
+
+        print(payload.get('title'))
+        print(" * Url: {}".format(payload.get('html_url')))
+        print(" * Changelog status: {}".format(changelog_status))
+        print("")
 
 
 @task(help={
