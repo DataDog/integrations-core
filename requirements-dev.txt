@@ -7,3 +7,5 @@ pip-tools
 packaging
 twine
 cookiecutter
+colorama
+requests

@@ -8,9 +8,6 @@ import os
 # the root of the repo
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Github API url
-GITHUB_API_URL = 'https://api.github.com'
-
 # The requirements file used by the agent
 AGENT_REQ_FILE = 'requirements-agent-release.txt'
 

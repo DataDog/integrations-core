@@ -3,23 +3,19 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import print_function, unicode_literals
 import os
-import re
 import sys
-import json
 from collections import namedtuple
 from datetime import datetime
 
-from six.moves.urllib.request import urlopen
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
 from packaging import version
 
-from .constants import ROOT, GITHUB_API_URL, AGENT_BASED_INTEGRATIONS
-from .utils import get_version_string, get_release_tag_string
-
-# match something like `(#1234)` and return `1234` in a group
-PR_REG = re.compile(r'\(\#(\d+)\)')
+from .constants import ROOT, AGENT_BASED_INTEGRATIONS
+from .utils.common import get_version_string, get_release_tag_string
+from .utils.git import parse_pr_numbers, get_diff
+from .utils.github import get_changelog_types, from_contributor, get_pr
 
 CHANGELOG_LABEL_PREFIX = 'changelog/'
 CHANGELOG_TYPE_NONE = 'no-changelog'
@@ -32,31 +28,7 @@ CHANGELOG_TYPES = [
     'Security',
 ]
 
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, is_contributor')
-
-
-def parse_pr_numbers(git_log_lines):
-    """
-    Parse PR numbers from commit messages. At GitHub those have the format:
-
-        `here is the message (#1234)`
-
-    being `1234` the PR number.
-    """
-    prs = []
-    for line in git_log_lines:
-        match = re.search(PR_REG, line)
-        if match:
-            prs.append(match.group(1))
-    return prs
-
-
-def is_contributor(payload):
-    """
-    If the PR comes from a fork, we can safely assumed it's from an
-    external contributor.
-    """
-    return payload.get('head', {}).get('repo', {}).get('fork') is True
+ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 @task(help={
@@ -94,30 +66,20 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
     target_tag = get_release_tag_string(target, cur_version)
 
     # get the diff from HEAD
-    target_path = os.path.join(ROOT, target)
-    cmd = 'git log --pretty=%s {}... {}'.format(target_tag, target_path)
-    diff_lines = ctx.run(cmd, hide='out').stdout.split('\n')
+    diff_lines = get_diff(ctx, target, target_tag)
 
     # for each PR get the title, we'll use it to populate the changelog
-    endpoint = GITHUB_API_URL + '/repos/DataDog/integrations-core/pulls/{}'
     pr_numbers = parse_pr_numbers(diff_lines)
     print("Found {} PRs merged since tag: {}".format(len(pr_numbers), target_tag))
-
     entries = []
     for pr_num in pr_numbers:
         try:
-            response = urlopen(endpoint.format(pr_num))
+            payload = get_pr(pr_num)
         except Exception as e:
             sys.stderr.write("Unable to fetch info for PR #{}\n: {}".format(pr_num, e))
             continue
 
-        payload = json.loads(response.read())
-        changelog_labels = []
-        for l in payload.get('labels', []):
-            name = l.get('name')
-            if name.startswith(CHANGELOG_LABEL_PREFIX):
-                # only add the name, e.g. for `changelog/Added` it's just `Added`
-                changelog_labels.append(name.split(CHANGELOG_LABEL_PREFIX)[1])
+        changelog_labels = get_changelog_types(payload)
 
         if not changelog_labels:
             raise Exit("No valid changelog labels found attached to PR #{}, please add one".format(pr_num))
@@ -135,7 +97,7 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
         title = '[{}] {}'.format(changelog_type, payload.get('title'))
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'),
-                               author, author_url, is_contributor(payload))
+                               author, author_url, from_contributor(payload))
 
         entries.append(entry)
 
@@ -150,7 +112,7 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
     new_entry.write("\n")
     for entry in entries:
         thanknote = ""
-        if entry.is_contributor:
+        if entry.from_contributor:
             thanknote = " Thanks [{}]({}).".format(entry.author, entry.author_url)
         new_entry.write("* {}. See [#{}]({}).{}\n".format(entry.title, entry.number, entry.url, thanknote))
     new_entry.write("\n")
