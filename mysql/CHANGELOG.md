@@ -1,5 +1,10 @@
 # CHANGELOG - mysql
 
+### 1.2.1 / 2018-05-31
+
+* [Fixed] Fix replication data extraction when replication channel is set. See [#1639](https://github.com/DataDog/integrations-core/pull/1639).
+* [Fixed] Fix error while fetching mysql pid from psutil . See [#1620](https://github.com/DataDog/integrations-core/pull/1620).
+
 ## 1.2.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support to service checks.
