@@ -1,6 +1,7 @@
 {
   "maintainer": "help@datadoghq.com",
   "name": "openstack",
+  "manifest_version": "1.0.0",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "support": "core",
   "supported_os": [
