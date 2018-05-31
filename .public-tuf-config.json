@@ -1,0 +1,16 @@
+{
+  "repositories_dir": "repositories",
+  "repository_dir": "public-integrations-core",
+  "target_path_patterns": [
+    "^.+/(simple/datadog-.+/.*)",
+    "^.+/(simple/datadog_.+/.*)"
+  ],
+  "repository_mirrors": {
+    "public-integrations-core": {
+      "url_prefix": "https://integrations-core-wheels.s3.amazonaws.com",
+      "metadata_path": "metadata.staged",
+      "targets_path": "targets",
+      "confined_target_dirs": [""]
+    }
+  }
+}
