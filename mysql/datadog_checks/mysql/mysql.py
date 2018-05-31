@@ -10,6 +10,7 @@ from contextlib import closing, contextmanager
 from collections import defaultdict
 
 # 3p
+from six import iteritems
 import pymysql
 try:
     import psutil
@@ -878,7 +879,7 @@ class MySql(AgentCheck):
             return False
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
-        replica_results = {}
+        replica_results = defaultdict(dict)
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
                 if is_mariadb and replication_channel:
@@ -889,24 +890,13 @@ class MySql(AgentCheck):
                 else:
                     cursor.execute("SHOW SLAVE STATUS;")
 
-                if replication_channel:
-                    slave_results = cursor.fetchone()
-                else:
-                    slave_results = cursor.fetchall()
-
-                if slave_results:
-                    if replication_channel:
-                        replica_results.update(slave_results)
-                    elif len(slave_results) > 0:
-                        for slave_result in slave_results:
-                            # MySQL <5.7 does not have Channel_Name.
-                            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                            channel = slave_result.get('Channel_Name') or 'default'
-                            for key in slave_result:
-                                if slave_result[key] is not None:
-                                    if key not in replica_results:
-                                        replica_results[key] = {}
-                                    replica_results[key]["channel:{0}".format(channel)] = slave_result[key]
+                for slave_result in cursor.fetchall():
+                    # MySQL <5.7 does not have Channel_Name.
+                    # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                    channel = replication_channel or slave_result.get('Channel_Name') or 'default'
+                    for key, value in iteritems(slave_result):
+                        if value is not None:
+                            replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(replication_channel):
