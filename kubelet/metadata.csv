@@ -19,8 +19,8 @@ kubernetes.network.tx_bytes,gauge,,byte,second,The amount of bytes per second tr
 kubernetes.network.tx_dropped,gauge,,packet,second,The amount of tx packets dropped per second,-1,kubelet,k8s.net.tx.drop
 kubernetes.network.tx_errors,gauge,,error,second,The amount of tx errors per second,-1,kubelet,k8s.net.tx.errors
 kubernetes.diskio.io_service_bytes.stats.total,gauge,,byte,,The amount of disk space the container uses,-1,kubelet,k8s.disk.total
-kubernetes.apiserver.certificate.expiration.count,gauge,,second,,The count of remaining lifetime on the certificate used to authenticate a request,,1,kubelet,
-kubernetes.apiserver.certificate.expiration.sum,gauge,,second,,The sum of remaining lifetime on the certificate used to authenticate a request,,1,kubelet,
-kubernetes.rest.client.requests,gauge,,operation,,The number of HTTP requests,,0,kubelet,
-kubernetes.kubelet.runtime.operations,gauge,,operation,,The number of runtime operations,,0,kubelet,
-kubernetes.kubelet.runtime.errors,gauge,,operation,,The number of runtime operations errors,,-1,kubelet,
+kubernetes.apiserver.certificate.expiration.count,gauge,,second,,The count of remaining lifetime on the certificate used to authenticate a request,1,kubelet,
+kubernetes.apiserver.certificate.expiration.sum,gauge,,second,,The sum of remaining lifetime on the certificate used to authenticate a request,1,kubelet,
+kubernetes.rest.client.requests,gauge,,operation,,The number of HTTP requests,0,kubelet,
+kubernetes.kubelet.runtime.operations,gauge,,operation,,The number of runtime operations,0,kubelet,
+kubernetes.kubelet.runtime.errors,gauge,,operation,,The number of runtime operations errors,-1,kubelet,
