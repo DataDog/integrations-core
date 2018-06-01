@@ -126,6 +126,10 @@ def do_update_changelog(ctx, target, cur_version, new_version=None, dry_run=Fals
     # Determine what the new version should be based on the changelog labels
     new_version = bump_version(cur_version, current_highest_version_label)
 
+    # Lets exit here if we didn't get any interesting PRs worth releasing for:
+    if current_highest_version_label == -1:
+        raise Exit("No PRs were found with a changelog.")
+
     # store the new changelog in memory
     new_entry = StringIO()
 
@@ -184,12 +188,10 @@ def update_current_highest_version_label_version(current_highest_version_label, 
 
 def bump_version(cur_version, version_to_bump):
     new_version = cur_version
-    print("Bumping version")
     if version_to_bump == 0:
         new_version = semver.bump_bugfix(cur_version)
     elif version_to_bump == 1:
         new_version = semver.bump_minor(cur_version)
     elif version_to_bump == 2:
         new_version = semver.bump_major(cur_version)
-    print("Bumped version")
     return new_version
