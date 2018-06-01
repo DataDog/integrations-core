@@ -11,7 +11,7 @@ import copy
 import requests
 import simplejson as json
 
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
