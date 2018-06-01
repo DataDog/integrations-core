@@ -55,9 +55,12 @@ def git_commit(ctx, target, message):
     ctx.run(cmd)
 
 
-def git_tag(ctx, tag_name):
+def git_tag(ctx, tag_name, push=False):
     """
     Tag the repo using an annotated tag.
     """
     cmd = 'git tag -a {} -m"{}"'.format(tag_name, tag_name)
     ctx.run(cmd)
+    if push:
+        cmd = 'git push --tags'
+        ctx.run(cmd)

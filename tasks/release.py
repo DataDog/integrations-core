@@ -24,14 +24,17 @@ from .changelog import do_update_changelog
 
 @task(help={
     'target': "The check to tag",
+    'version': "The desired version, defaults to the one from setup.py",
     'dry-run': "Runs the task without actually doing anything",
 })
-def tag_current_release(ctx, target, version=None, dry_run=False):
+def release_tag(ctx, target, version=None, dry_run=False, push=True):
     """
     Tag the HEAD of the git repo with the current release number for a
-    specific check. This is a maintainance task that should be run under
-    very specific circumstances (e.g. for whatever reason the release process
-    for a check is being done manually).
+    specific check. The tag is pushed to origin by default.
+
+    Notice: specifying a different version than the one in setup.py is
+    a maintainance task that should be run under very specific circumstances
+    (e.g. re-align an old release performed on the wrong commit).
     """
     # get the current version
     if version is None:
@@ -44,7 +47,7 @@ def tag_current_release(ctx, target, version=None, dry_run=False):
         return
 
     try:
-        git_tag(ctx, tag)
+        git_tag(ctx, tag, push)
     except Exception as e:
         print(e)
 
@@ -105,7 +108,6 @@ def release_prepare(ctx, target, new_version):
      * update the version in __about__.py
      * update the changelog
      * commit the above changes
-     * tag the repo with a tag in the form `check-name_0_0_1`
 
     Example invocation:
         inv release-prepare redisdb 3.1.1
@@ -134,23 +136,18 @@ def release_prepare(ctx, target, new_version):
     do_update_changelog(ctx, target, cur_version, new_version)
 
     # commit the changes
-    msg = "Bumped version to {}".format(new_version)
+    msg = "Bumped {} version to {}".format(target, new_version)
     git_commit(ctx, target, msg)
 
-    # tagging
-    tag = get_release_tag_string(target, new_version)
-    print("Tagging repo with tag: {}".format(tag))
-    git_tag(ctx, tag)
-
     # done
-    print("All done, remember to open a PR to merge these changes on master")
+    print("All done, remember to push to origin and open a PR to merge these changes on master")
 
 
 @task(help={
     'target': "The check to release",
     'dry-run': "Runs the task without publishing the package",
 })
-def release_integration(ctx, target, dry_run=False):
+def release_upload(ctx, target, dry_run=False):
     """
     Release to PyPI a specific check as it is on the repo HEAD
     """
