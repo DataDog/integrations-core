@@ -45,9 +45,10 @@ Each Datadog Agent release will continue to ship a set of the most up to date st
 
 **Note** The release process is currently in flux as we move toward the ability to ship wheels independently of Agent releases. Due to this, the Changelog may show a version and release that isn't yet available to download. Please check the below table to see which Integration versions are shipped with your Agent install. 
 
-| Agent Version | List of Shipped Integration Versions                                                      |   |   |   |
-|---------------|-------------------------------------------------------------------------------------------|---|---|---|
-| 6.2.1         | https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt | 
+
+| Agent Version | List of Shipped Integration Versions                                                      |
+|---------------|-------------------------------------------------------------------------------------------|
+| 6.2.1         | https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt |
 
 ## Quick Start
 
