@@ -7,3 +7,4 @@ twine
 cookiecutter
 colorama
 requests
+semver
