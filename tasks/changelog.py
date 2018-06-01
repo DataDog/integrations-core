@@ -10,7 +10,6 @@ from datetime import datetime
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
-from packaging import version
 import semver
 
 from .constants import ROOT, AGENT_BASED_INTEGRATIONS
@@ -63,8 +62,8 @@ def update_changelog(ctx, target, new_version=None, dry_run=False):
     # sanity check on the version provided
     # The new_version is allowed to be none since we can auto detect it later
     if new_version is not None:
-        p_version = version.parse(new_version)
-        p_current = version.parse(get_version_string(target))
+        p_version = semver.parse(new_version)
+        p_current = semver.parse(get_version_string(target))
         if p_version <= p_current:
             raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
         print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))

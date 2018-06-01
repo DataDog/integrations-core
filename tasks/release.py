@@ -5,10 +5,10 @@ from __future__ import print_function, unicode_literals
 import os
 import sys
 
-from packaging import version
 from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
+import semver
 
 from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY
 from .utils.git import (
@@ -122,10 +122,10 @@ def release_prepare(ctx, target, new_version=None):
 
     # sanity check on the version provided
     cur_version = get_version_string(target)
-    p_current = version.parse(cur_version)
+    p_current = semver.parse(cur_version)
 
     if new_version is not None:
-        p_version = version.parse(new_version)
+        p_version = semver.parse(new_version)
         if p_version <= p_current:
             raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
 
@@ -136,7 +136,7 @@ def release_prepare(ctx, target, new_version=None):
 
     if new_version is None:
         new_version = auto_detected_new_ver
-        p_version = version.parse(new_version)
+        p_version = semver.parse(new_version)
 
     # update the version number
     print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
