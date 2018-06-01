@@ -41,6 +41,14 @@ to idiomatic Python package delivery.
 Agent releases starting from version 5.21 bundle the latest wheels for any
 integration, but at the moment you can't upgrade or downgrade between releases.
 
+Each Datadog Agent release will continue to ship a set of the most up to date stable integrations available. The `requirements-integration-core.txt` file at the root of this repo is the best place to check what Integration version is shipped with each Agent. 
+
+**Note** The release process is currently in flux as we move toward the ability to ship wheels independently of Agent releases. Due to this, the Changelog may show a version and release that isn't yet available to download. Please check the below table to see which Integration versions are shipped with your Agent install. 
+
+| Agent Version | List of Shipped Integration Versions                                                      |   |   |   |
+|---------------|-------------------------------------------------------------------------------------------|---|---|---|
+| 6.2.1         | https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt | 
+
 ## Quick Start
 
 Working with integrations is easy, the main page of the [development docs](docs/dev/README.md)
