@@ -15,7 +15,7 @@ Many operating systems come with Python pre-installed. If your system Python is 
 
 ### macOS
 
-Any recent version of macOS comes with Python pre-installed; however, it might be older than the version used in the Agent, and might also lack required tools and dependencies. We recommend installing a fresh, dedicated Python interpreter tat you can manage without the App Store, following either of the methods listed in this paragraph.
+Any recent version of macOS comes with Python pre-installed; however, it might be older than the version used in the Agent, and might also lack required tools and dependencies. We recommend installing a fresh, dedicated Python interpreter that you can manage without the App Store, following either of the methods listed in this paragraph.
 
 #### Option 1: Install Python with Homebrew
 
