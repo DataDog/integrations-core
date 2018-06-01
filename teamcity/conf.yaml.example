@@ -28,11 +28,12 @@ instances:
     # rather than just that a successful build happened
     # is_deployment: true
 
+    # Optional, this allows you to connect to your server through HTTPS. Defaults to False.
+    # use_https: false
+
     # Optional, this turns off ssl certificate validation. Defaults to True.
-    # ssl_validation: false
+    # ssl_validation: true
 
     # Optional, any additional tags you'd like to add to the event
     # tags:
     #   - test
-
-

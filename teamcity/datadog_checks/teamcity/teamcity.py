@@ -16,15 +16,19 @@ from datadog_checks.checks import AgentCheck
 
 
 class TeamCityCheck(AgentCheck):
+
     HEADERS = {'Accept': 'application/json'}
     DEFAULT_TIMEOUT = 10
-    NEW_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/" +\
+
+    NEW_BUILD_URL = "{protocol}://{server}/guestAuth/app/rest/builds/" +\
                     "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-    LAST_BUILD_URL = "http://{server}/guestAuth/app/rest/builds/" +\
+    LAST_BUILD_URL = "{protocol}://{server}/guestAuth/app/rest/builds/" +\
                      "?locator=buildType:{build_conf},count:1"
-    NEW_BUILD_URL_AUTHENTICATED = "http://{server}/httpAuth/app/rest/builds/" +\
+
+    NEW_BUILD_URL_AUTHENTICATED = "{protocol}://{server}/httpAuth/app/rest/builds/" +\
                                   "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
-    LAST_BUILD_URL_AUTHENTICATED = "http://{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
+    LAST_BUILD_URL_AUTHENTICATED = "{protocol}://{server}/httpAuth/app/rest/builds/" +\
+                                   "?locator=buildType:{build_conf},count:1"
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -32,7 +36,8 @@ class TeamCityCheck(AgentCheck):
         # Keep track of last build IDs per instance
         self.last_build_ids = {}
 
-    def _initialize_if_required(self, instance_name, server, build_conf, ssl_validation, basic_http_authentication):
+    def _initialize_if_required(self, instance_name, protocol, server, build_conf, ssl_validation,
+                                basic_http_authentication):
         # Already initialized
         if instance_name in self.last_build_ids:
             return
@@ -40,15 +45,10 @@ class TeamCityCheck(AgentCheck):
         self.log.debug("Initializing {0}".format(instance_name))
 
         if basic_http_authentication:
-            build_url = self.LAST_BUILD_URL_AUTHENTICATED.format(
-                server=server,
-                build_conf=build_conf
-            )
+            build_url = self.LAST_BUILD_URL_AUTHENTICATED.format(protocol=protocol, server=server,
+                                                                 build_conf=build_conf)
         else:
-            build_url = self.LAST_BUILD_URL.format(
-                server=server,
-                build_conf=build_conf
-            )
+            build_url = self.LAST_BUILD_URL.format(protocol=protocol, server=server, build_conf=build_conf)
         try:
             resp = requests.get(build_url, timeout=self.DEFAULT_TIMEOUT, headers=self.HEADERS, verify=ssl_validation)
             resp.raise_for_status()
@@ -57,26 +57,19 @@ class TeamCityCheck(AgentCheck):
         except requests.exceptions.HTTPError:
             if resp.status_code == 401:
                 self.log.error("Access denied. You must enable guest authentication")
-            self.log.error(
-                "Failed to retrieve last build ID with code {0} for instance '{1}'"
-                .format(resp.status_code, instance_name)
-            )
+            self.log.error("Failed to retrieve last build ID with code {} for instance '{}'"
+                           .format(resp.status_code, instance_name))
             raise
         except Exception:
-            self.log.exception(
-                "Unhandled exception to get last build ID for instance '{0}'"
-                .format(instance_name)
-            )
+            self.log.exception("Unhandled exception to get last build ID for instance '{}'"
+                               .format(instance_name))
             raise
 
-        self.log.debug(
-            "Last build id for instance {0} is {1}."
-            .format(instance_name, last_build_id)
-        )
+        self.log.debug("Last build id for instance {} is {}.".format(instance_name, last_build_id))
         self.last_build_ids[instance_name] = last_build_id
 
     def _build_and_send_event(self, new_build, instance_name, is_deployment, host, tags):
-        self.log.debug("Found new build with id {0}, saving and alerting.".format(new_build["id"]))
+        self.log.debug("Found new build with id {}, saving and alerting.".format(new_build["id"]))
         self.last_build_ids[instance_name] = new_build["id"]
 
         event_dict = {
@@ -110,6 +103,13 @@ class TeamCityCheck(AgentCheck):
         if instance_name is None:
             raise Exception("Each instance must have a unique name")
 
+        # Use HTTP or HTTPS
+        protocol = 'http'
+        use_https = _is_affirmative(instance.get('use_https', False))
+        if use_https:
+            protocol = 'https'
+
+        # Verify SSL
         ssl_validation = _is_affirmative(instance.get('ssl_validation', True))
 
         server = instance.get('server')
@@ -125,25 +125,21 @@ class TeamCityCheck(AgentCheck):
         is_deployment = _is_affirmative(instance.get('is_deployment', False))
         basic_http_authentication = _is_affirmative(instance.get('basic_http_authentication', False))
 
-        self._initialize_if_required(instance_name, server, build_conf, ssl_validation, basic_http_authentication)
+        self._initialize_if_required(instance_name, protocol, server, build_conf, ssl_validation,
+                                     basic_http_authentication)
 
         # Look for new successful builds
         if basic_http_authentication:
-            new_build_url = self.NEW_BUILD_URL_AUTHENTICATED.format(
-                server=server,
-                build_conf=build_conf,
-                since_build=self.last_build_ids[instance_name]
-            )
+            new_build_url = self.NEW_BUILD_URL_AUTHENTICATED.format(protocol=protocol, server=server,
+                                                                    build_conf=build_conf,
+                                                                    since_build=self.last_build_ids[instance_name])
         else:
-            new_build_url = self.NEW_BUILD_URL.format(
-                server=server,
-                build_conf=build_conf,
-                since_build=self.last_build_ids[instance_name]
-            )
+            new_build_url = self.NEW_BUILD_URL.format(protocol=protocol, server=server, build_conf=build_conf,
+                                                      since_build=self.last_build_ids[instance_name])
 
         try:
-            resp = requests.get(new_build_url, timeout=self.DEFAULT_TIMEOUT,
-                                headers=self.HEADERS, verify=ssl_validation)
+            resp = requests.get(new_build_url, timeout=self.DEFAULT_TIMEOUT, headers=self.HEADERS,
+                                verify=ssl_validation)
             resp.raise_for_status()
 
             new_builds = resp.json()
@@ -153,13 +149,8 @@ class TeamCityCheck(AgentCheck):
             else:
                 self._build_and_send_event(new_builds["build"][0], instance_name, is_deployment, host, tags)
         except requests.exceptions.HTTPError:
-            self.log.exception(
-                "Couldn't fetch last build, got code {0}"
-                .format(resp.status_code)
-            )
+            self.log.exception("Couldn't fetch last build, got code {}".format(resp.status_code))
             raise
         except Exception:
-            self.log.exception(
-                "Couldn't fetch last build, unhandled exception"
-            )
+            self.log.exception("Couldn't fetch last build, unhandled exception")
             raise
