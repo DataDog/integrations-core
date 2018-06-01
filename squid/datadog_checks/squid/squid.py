@@ -94,7 +94,7 @@ class SquidCheck(AgentCheck):
             raise
 
         # Each line is a counter in the form 'counter_name = value'
-        raw_counters = res.text.split("\n")
+        raw_counters = res.text.strip().split("\n")
         counters = {}
         for line in raw_counters:
             counter, value = self.parse_counter(line)
