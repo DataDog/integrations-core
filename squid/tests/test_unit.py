@@ -1,15 +1,12 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
+import mock
 import pytest
-import common
-from datadog_checks.squid import SquidCheck
 
 
-def test_parse_counter(aggregator):
-    squid_check = SquidCheck(common.CHECK_NAME, {}, {})
-
+@pytest.mark.unit
+def test_parse_counter(aggregator, squid_check):
     # Good format
     line = "counter = 0\n"
     counter, value = squid_check.parse_counter(line)
@@ -23,9 +20,8 @@ def test_parse_counter(aggregator):
     assert value is None
 
 
-def test_parse_instance(aggregator):
-    squid_check = SquidCheck(common.CHECK_NAME, {}, {})
-
+@pytest.mark.unit
+def test_parse_instance(aggregator, squid_check):
     # instance with defaults
     instance = {
         "name": "ok_instance"
@@ -63,3 +59,20 @@ def test_parse_instance(aggregator):
     }
     with pytest.raises(Exception):
         squid_check.parse_instance(instance)
+
+
+@pytest.mark.unit
+def test_get_counters(squid_check):
+    """
+    Squid can return a trailing newline at the end of its metrics and it would be
+    treated as a metric line: an error would be raised attempting to parse the line
+    due to a missing = character.
+    See https://github.com/DataDog/integrations-core/pull/1643
+    """
+    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+        g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
+        squid_check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+        squid_check.get_counters('host', 'port', 'user', 'pass', [])
+        # we assert `parse_counter` was called only once despite the raw text
+        # containing multiple `\n` chars
+        squid_check.parse_counter.assert_called_once()

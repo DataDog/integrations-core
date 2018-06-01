@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import os
 import sys
 import subprocess
-import requests
 import time
-import logging
-import common
 
-log = logging.getLogger('test_squid')
+import pytest
+import requests
+
+from datadog_checks.squid import SquidCheck
+from . import common
 
 
 @pytest.fixture
@@ -18,6 +18,11 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
+
+@pytest.fixture
+def squid_check():
+    return SquidCheck(common.CHECK_NAME, {}, {})
 
 
 @pytest.fixture(scope="session")
