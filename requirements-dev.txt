@@ -1,7 +1,7 @@
 invoke
 pip-tools
 tox
-docker-compose
+docker-compose; sys_platform !='win32'
 twine
 cookiecutter
 colorama
