@@ -45,8 +45,6 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements-dev.txt)
-  # dd-agent requires an older version of docker-py and our requirements-dev.txt installs the latest
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install docker-py==1.10.6)
   - cd datadog_checks_base
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
