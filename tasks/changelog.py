@@ -104,8 +104,7 @@ def do_update_changelog(ctx, target, cur_version, new_version=None, dry_run=Fals
             raise Exit("No valid changelog labels found attached to PR #{}, please add one".format(pr_num))
         elif len(changelog_labels) > 1:
             raise Exit("Multiple changelog labels found attached to PR #{}, please use only one".format(pr_num))
-        current_highest_version_label = update_current_highest_version_label_version(current_highest_version_label, changelog_labels)
-        print(changelog_labels)
+        current_highest_version_label = update_highest_found_version(current_highest_version_label, changelog_labels[0])
 
         changelog_type = changelog_labels[0]
         if changelog_type == CHANGELOG_TYPE_NONE:
@@ -126,7 +125,7 @@ def do_update_changelog(ctx, target, cur_version, new_version=None, dry_run=Fals
     new_version = bump_version(cur_version, current_highest_version_label)
 
     # Lets exit here if we didn't get any interesting PRs worth releasing for:
-    if current_highest_version_label == -1:
+    if new_version == cur_version:
         raise Exit("No PRs were found with a changelog.")
 
     # store the new changelog in memory
@@ -175,10 +174,10 @@ def do_update_changelog(ctx, target, cur_version, new_version=None, dry_run=Fals
 
     return new_version
 
-def update_current_highest_version_label_version(current_highest_version_label, changelog_label):
+def update_highest_found_version(current_highest_version_label, changelog_label):
     if changelog_label in CHANGELOG_MAJOR_VERSION:
         current_highest_version_label = 2
-    elif changelog_label in CHANGELOG_MAJOR_VERSION and current_highest_version_label <= 1:
+    elif changelog_label in CHANGELOG_MINOR_VERSION and current_highest_version_label <= 1:
         current_highest_version_label = 1
     elif changelog_label in CHANGELOG_BUGFIX_VERSION and current_highest_version_label <= 0:
         current_highest_version_label = 0
