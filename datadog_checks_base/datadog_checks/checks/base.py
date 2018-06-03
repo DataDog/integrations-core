@@ -241,16 +241,13 @@ class AgentCheck(object):
         - normalize tags to type `str`
         - always return a list
         """
-        if tags is None:
-            normalized_tags = []
-        else:
-            normalized_tags = list(tags)  # normalize to `list` type, and make a copy
+        normalized_tags = self._normalize_tags_type(tags)
 
         if device_name:
             self._log_deprecation("device_name")
             normalized_tags.append("device:%s" % device_name)
 
-        return self._normalize_tags_type(normalized_tags)
+        return normalized_tags
 
     def _normalize_tags_type(self, tags):
         """
@@ -260,18 +257,24 @@ class AgentCheck(object):
         normalized_tags = []
         if tags is not None:
             for tag in tags:
-                if not isinstance(tag, basestring):
+                # Common case
+                try:
+                    tag = tag.encode('utf-8')
+
+                # Unexpected type like an int
+                except Exception:
                     try:
                         tag = str(tag)
                     except Exception:
                         self.log.warning("Error converting tag to string, ignoring tag")
                         continue
-                else:
+
                     try:
-                        tag = ensure_bytes(tag)
-                    except UnicodeError:
+                        tag = tag.encode('utf-8')
+                    except Exception:
                         self.log.warning("Error encoding unicode tag to utf-8 encoded string, ignoring tag")
                         continue
+
                 normalized_tags.append(tag)
 
         return normalized_tags
