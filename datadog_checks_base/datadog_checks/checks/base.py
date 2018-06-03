@@ -37,7 +37,7 @@ class AgentCheck(object):
         args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
         """
         self.metrics = defaultdict(list)
-        self.check_id = None
+        self.check_id = ''
         self.instances = kwargs.get('instances', [])
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
