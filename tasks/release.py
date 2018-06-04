@@ -52,6 +52,28 @@ def release_tag(ctx, target, version=None, dry_run=False, push=True):
         print(e)
 
 
+@task
+def print_shippable(ctx, quiet=False):
+    """
+    Print all the checks that can be released.
+    """
+    for target in AGENT_BASED_INTEGRATIONS:
+        # get the name of the current release tag
+        cur_version = get_version_string(target)
+        target_tag = get_release_tag_string(target, cur_version)
+
+        # get the diff from HEAD
+        diff_lines = get_diff(ctx, target, target_tag)
+
+        # for each PR get the title, we'll use it to populate the changelog
+        pr_numbers = parse_pr_numbers(diff_lines)
+        if pr_numbers:
+            if quiet:
+                print(target)
+            else:
+                print("Check {} has {} merged PRs that could be released".format(target, len(pr_numbers)))
+
+
 @task(help={
     'target': "List the pending changes for the target check.",
 })
