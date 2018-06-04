@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # 3p
 from mock import MagicMock, patch
@@ -29,6 +29,7 @@ def aggregator():
     return aggregator
 
 
+@pytest.mark.integration
 def test_build_event(aggregator):
     teamcity = TeamCityCheck('teamcity', {}, {})
 
