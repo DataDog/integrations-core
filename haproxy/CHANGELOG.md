@@ -1,8 +1,9 @@
 # CHANGELOG - haproxy
 
-## 1.3.0 / Unreleased
+## 1.3.0 / 2018-06-04
 
-* [IMPROVEMENT] Add optional 'active' tag to metrics. (Thanks @gabetax!) See [#1478][]
+* [Added] Add optional 'active' tag to metrics. See [#1478](https://github.com/DataDog/integrations-core/pull/1478).
+* [Changed] Upgrade requests dependency to 2.18.4. See [#1264](https://github.com/DataDog/integrations-core/pull/1264).
 
 ## 1.2.1 / 2018-02-13
 
