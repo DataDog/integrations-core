@@ -18,17 +18,13 @@ class TeamCityCheck(AgentCheck):
     HEADERS = {"Accept": "application/json"}
     DEFAULT_TIMEOUT = 10
 
-    # E
     NEW_BUILD_URL = (
-        "{server}/guestAuth/app/rest/builds/"
-        + "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
+        "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
     )
-    LAST_BUILD_URL = "{server}/guestAuth/app/rest/builds/" + "?locator=buildType:{build_conf},count:1"
+    LAST_BUILD_URL = "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
 
-    # HTTP Authenticated Endpoints
     NEW_BUILD_URL_AUTHENTICATED = (
-        "{server}/httpAuth/app/rest/builds/"
-        + "?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
+        "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
     )
     LAST_BUILD_URL_AUTHENTICATED = "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
 
