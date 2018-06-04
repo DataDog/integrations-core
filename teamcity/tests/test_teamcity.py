@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # 3p
 from mock import MagicMock, patch
@@ -9,20 +9,17 @@ import pytest
 # project
 from datadog_checks.teamcity import TeamCityCheck
 
-CHECK_NAME = 'nfsstat'
-
-INIT_CONFIG = {}
-INSTANCES = [
-    {
+CONFIG = {
+    'instances': [{
         'name': 'One test build',
         'server': 'localhost:8111',
         'build_configuration': 'TestProject_TestBuild',
         'host_affected': 'buildhost42.dtdg.co',
         'basic_http_authentication': False,
         'is_deployment': False,
-        'tags': ['one:tag', 'one:test']
-    }
-]
+        'tags': ['one:tag', 'one:test'],
+    }]
+}
 
 
 @pytest.fixture
@@ -30,6 +27,36 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
+
+
+@pytest.mark.integration
+def test_build_event(aggregator):
+    teamcity = TeamCityCheck('teamcity', {}, {})
+
+    with patch('requests.get', get_mock_first_build):
+        teamcity.check(CONFIG['instances'][0])
+
+    assert len(aggregator.metric_names) == 0
+    assert len(aggregator.events) == 0
+    aggregator.reset()
+
+    with patch('requests.get', get_mock_one_more_build):
+        teamcity.check(CONFIG['instances'][0])
+
+    events = aggregator.events
+    assert len(events) == 1
+    assert events[0]['msg_title'] == "Build for One test build successful"
+    assert events[0]['msg_text'] == "Build Number: 2\nDeployed To: buildhost42.dtdg.co\n\nMore Info: " + \
+                                    "http://localhost:8111/viewLog.html?buildId=2&buildTypeId=TestProject_TestBuild"
+    assert events[0]['tags'] == ['build', 'one:tag', 'one:test']
+    assert events[0]['host'] == "buildhost42.dtdg.co"
+    aggregator.reset()
+
+    # One more check should not create any more events
+    with patch('requests.get', get_mock_one_more_build):
+        teamcity.check(CONFIG['instances'][0])
+
+    assert len(aggregator.events) == 0
 
 
 def get_mock_first_build(url, *args, **kwargs):
@@ -91,36 +118,3 @@ def get_mock_one_more_build(url, *args, **kwargs):
 
     mock_resp.json.return_value = json
     return mock_resp
-
-
-def test_build_event(aggregator):
-    agent_config = {
-        'version': '0.1',
-        'api_key': 'toto'
-    }
-    check = TeamCityCheck('teamcity', {}, agent_config, INSTANCES)
-
-    with patch('requests.get', get_mock_first_build):
-        check.check(check.instances[0])
-
-    assert len(aggregator.metric_names) == 0
-    assert len(aggregator.events) == 0
-    aggregator.reset()
-
-    with patch('requests.get', get_mock_one_more_build):
-        check.check(check.instances[0])
-
-    events = aggregator.events
-    assert len(events) == 1
-    assert events[0]['msg_title'] == "Build for One test build successful"
-    assert events[0]['msg_text'] == "Build Number: 2\nDeployed To: buildhost42.dtdg.co\n\nMore Info: " + \
-                                    "http://localhost:8111/viewLog.html?buildId=2&buildTypeId=TestProject_TestBuild"
-    assert events[0]['tags'] == ['build', 'one:tag', 'one:test']
-    assert events[0]['host'] == "buildhost42.dtdg.co"
-    aggregator.reset()
-
-    # One more check should not create any more events
-    with patch('requests.get', get_mock_one_more_build):
-        check.check(check.instances[0])
-
-    assert len(aggregator.events) == 0

@@ -10,8 +10,8 @@ instances:
     # Specify the server name of your teamcity instance here
     # Guest authentication must be on if you want the check to be able to get data
     # When using the optional basic_http_authentication use
-    # server: user:password@teamcity.mycompany.com
-    server: teamcity.mycompany.com
+    # server: http://user:password@teamcity.mycompany.com
+    server: http://teamcity.mycompany.com
 
     # This is the internal build ID of the build configuration you wish to track.
     # You can find it labelled as "Build configuration ID" when editing the configuration in question.
@@ -29,10 +29,8 @@ instances:
     # is_deployment: true
 
     # Optional, this turns off ssl certificate validation. Defaults to True.
-    # ssl_validation: false
+    # ssl_validation: true
 
     # Optional, any additional tags you'd like to add to the event
     # tags:
     #   - test
-
-
