@@ -18,7 +18,7 @@ from .test import test  # noqa: F401
 from .changelog import update_changelog  # noqa: F401
 from .release import (  # noqa: F401
     release_prepare, release_tag, release_upload,
-    compile_requirements, release_show_pending
+    compile_requirements, release_show_pending, print_shippable
 )
 
 # the root namespace
