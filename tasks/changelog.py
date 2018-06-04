@@ -105,7 +105,7 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
     new_entry = StringIO()
 
     # the header contains version and date
-    header = "### {} / {}\n".format(new_version, datetime.now().strftime("%Y-%m-%d"))
+    header = "## {} / {}\n".format(new_version, datetime.now().strftime("%Y-%m-%d"))
     new_entry.write(header)
 
     # one bullet point for each PR
