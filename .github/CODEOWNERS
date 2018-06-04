@@ -1,0 +1,6 @@
+# See https://help.github.com/articles/about-codeowners/ for syntax
+# Rules are matched bottom-to-top, so one team can own subdirectories
+# and another the rest of the directory.
+
+*       @DataDog/agent-integrations
+/docs/  @DataDog/baklava
