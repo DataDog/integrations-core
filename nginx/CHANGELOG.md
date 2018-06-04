@@ -1,9 +1,9 @@
 # CHANGELOG - nginx
 
-## 2.2.0 / Unreleased
+## 2.2.0 / 2018-06-04
 
-* [FEATURE] Add support for VTS module. See [#1295](https://github.com/DataDog/integrations-core/pull/1295). Thanks [mattjbray](https://github.com/mattjbray)
-* [IMPROVEMENT] Log a warning instead of an exception when trying to collect stream metrics but stream may not be configured.
+* [Changed] Log warning, not exception, when trying to collect stream metrics. See [#1536](https://github.com/DataDog/integrations-core/pull/1536).
+* [Added] Add support for VTS module. See [#1295](https://github.com/DataDog/integrations-core/pull/1295). Thanks [mattjbray](https://github.com/mattjbray)
 
 ## 2.1.0 / 2018-05-11
 
