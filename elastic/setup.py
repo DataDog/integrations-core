@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open
 from os import path
@@ -22,6 +23,7 @@ def get_requirements(fpath):
 ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "elastic", "__about__.py")) as f:
     exec(f.read(), ABOUT)
+
 
 setup(
     name='datadog-elastic',
@@ -62,6 +64,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.elastic': ['conf.yaml.example']},
+    package_data={b'datadog_checks.elastic': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 # Always prefer setuptools over distutils
 from setuptools import setup
 # To use a consistent encoding
@@ -28,10 +32,11 @@ ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "apache", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
+
 setup(
     name='datadog-apache',
     version=ABOUT["__version__"],
-    description='The Apache check',
+    description='The Apache Check',
     long_description=long_description,
     keywords='datadog agent apache check',
 
@@ -51,7 +56,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -67,6 +72,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.apache': ['conf.yaml.example']},
+    package_data={b'datadog_checks.apache': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

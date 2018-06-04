@@ -64,6 +64,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.kyototycoon': ['conf.yaml.example', 'autoconf.yaml']},
+    package_data={b'datadog_checks.kyototycoon': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

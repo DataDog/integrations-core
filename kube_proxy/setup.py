@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
@@ -25,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-kube-proxy',
     version=ABOUT["__version__"],
-    description='The kube_proxy check',
+    description='The kube_proxy Check',
     long_description=long_description,
     keywords='datadog agent kube_proxy check',
 
@@ -37,7 +38,7 @@ setup(
     author_email='packages@datadoghq.com',
 
     # License
-    license='New BSD',
+    license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -45,7 +46,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -62,6 +63,6 @@ setup(
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.kube_proxy': ['conf.yaml.default']},
+    package_data={'datadog_checks.kube_proxy': ['conf.yaml.default', 'auto_conf.yaml']},
     include_package_data=True,
 )

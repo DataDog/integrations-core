@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open
 from os import path
@@ -26,7 +27,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-riak',
     version=ABOUT["__version__"],
-    description='The Riak check',
+    description='The Riak Check',
     long_description=long_description,
     keywords='datadog agent riak check',
 
@@ -46,7 +47,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -61,6 +62,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.riak': ['conf.yaml.example']},
+    package_data={b'datadog_checks.riak': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )
