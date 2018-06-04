@@ -23,11 +23,16 @@ SYSTEM = "system"
 SINGLE = "single"
 RAID0 = "raid0"
 RAID1 = "raid1"
+RAID5 = "raid5"
+RAID6 = "raid6"
 RAID10 = "raid10"
 DUP = "dup"
 UNKNOWN = "unknown"
+GLB_RSV = "globalreserve"
 
-FLAGS_MAPPER = defaultdict(lambda:  (SINGLE, UNKNOWN), {
+# https://github.com/torvalds/linux/blob/98820a7e244b17b8a4d9e9d1ff9d3b4e5bfca58b/include/uapi/linux/btrfs_tree.h#L829-L840
+# https://github.com/torvalds/linux/blob/98820a7e244b17b8a4d9e9d1ff9d3b4e5bfca58b/include/uapi/linux/btrfs_tree.h#L879
+FLAGS_MAPPER = defaultdict(lambda: (SINGLE, UNKNOWN), {
     1: (SINGLE, DATA),
     2: (SINGLE, SYSTEM),
     4: (SINGLE, METADATA),
@@ -48,7 +53,15 @@ FLAGS_MAPPER = defaultdict(lambda:  (SINGLE, UNKNOWN), {
     66: (RAID10, SYSTEM),
     68: (RAID10, METADATA),
     69: (RAID10, MIXED),
-
+    129: (RAID5, DATA),
+    130: (RAID5, SYSTEM),
+    132: (RAID5, METADATA),
+    133: (RAID5, MIXED),
+    257: (RAID6, DATA),
+    258: (RAID6, SYSTEM),
+    260: (RAID6, METADATA),
+    261: (RAID6, MIXED),
+    562949953421312: (SINGLE, GLB_RSV)
 })
 
 BTRFS_IOC_SPACE_INFO = 0xc0109414
