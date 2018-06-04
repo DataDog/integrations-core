@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open
 from os import path
@@ -26,7 +27,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-redisdb',
     version=ABOUT["__version__"],
-    description='The Redis check',
+    description='The Redis Check',
     long_description=long_description,
     keywords='datadog agent Redis check',
     url='https://github.com/DataDog/integrations-core',
@@ -54,6 +55,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.redisdb': ['conf.yaml.example']},
+    package_data={'datadog_checks.redisdb': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )
