@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 1.4.0 / 2018-06-04
+
+* [Changed] Bump to kafka-python 1.4.3. See [#1627](https://github.com/DataDog/integrations-core/pull/1627). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 1.3.0 / 2018-03-23
 
 * [FEATURE] Add SSL as a connect option.
