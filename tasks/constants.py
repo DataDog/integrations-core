@@ -18,6 +18,7 @@ AGENT_BASED_INTEGRATIONS = [
     'aspdotnet',
     'btrfs',
     'ceph',
+    'cisco_aci',
     'consul',
     'couch',
     'couchbase',
