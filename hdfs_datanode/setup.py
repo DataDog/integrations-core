@@ -63,6 +63,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.hdfs_datanode': ['conf.yaml.example', 'autoconf.yaml']},
+    package_data={b'datadog_checks.hdfs_datanode': ['conf.yaml.example']},
     include_package_data=True,
 )
