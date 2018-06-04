@@ -65,7 +65,7 @@ def print_shippable(ctx, quiet=False):
         # get the diff from HEAD
         diff_lines = get_diff(ctx, target, target_tag)
 
-        # for each PR get the title, we'll use it to populate the changelog
+        # get the number of PRs that could be potentially released
         pr_numbers = parse_pr_numbers(diff_lines)
         if pr_numbers:
             if quiet:
