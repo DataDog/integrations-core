@@ -16,16 +16,15 @@ from .common import HERE
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def mocked_request():
-    patcher = patch('requests.get', new=requests_get_mock)
-    patcher.start()
-    yield
-    patcher.stop()
+    with patch("requests.get", new=requests_get_mock):
+        yield
 
 
 def requests_get_mock(*args, **kwargs):
@@ -40,7 +39,7 @@ def requests_get_mock(*args, **kwargs):
         def raise_for_status(self):
             return True
 
-    datanode_beans_file_path = os.path.join(HERE, 'fixtures', 'hdfs_datanode_jmx')
-    with open(datanode_beans_file_path, 'r') as f:
+    datanode_beans_file_path = os.path.join(HERE, "fixtures", "hdfs_datanode_jmx")
+    with open(datanode_beans_file_path, "r") as f:
         body = f.read()
         return MockResponse(body, 200)

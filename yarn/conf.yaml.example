@@ -26,6 +26,11 @@ instances:
     #   - "key:value"
     #   - "instance:production"
 
+    # If your service uses basic HTTP authentication, you can optionally
+    # specify a username and password that will be used in the check.
+    # username: user
+    # password: pass
+
     # Optional tags retrieved from the application data to be applied to the
     # application metrics.
     # application_tags:

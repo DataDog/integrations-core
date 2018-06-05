@@ -25,6 +25,11 @@ instances:
     #   - key:value
     #   - instance:production
 
+    # If your service uses basic HTTP authentication, you can optionally
+    # specify a username and password that will be used in the check.
+    # username: user
+    # password: pass
+
     # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
     # need to set to false when using self-signed certs
     # ssl_verify: true

@@ -40,6 +40,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kyototycoon',
     'lighttpd',
     'linkerd',
+    'mapreduce',
     'marathon',
     'mcache',
     'mysql',
@@ -61,6 +62,7 @@ AGENT_BASED_INTEGRATIONS = [
     'teamcity',
     'varnish',
     'vsphere',
+    'yarn',
 ]
 
 AGENT_V5_ONLY = [
