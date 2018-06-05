@@ -19,7 +19,7 @@ further_reading:
 ---
 
 
-![EKS Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/???/amazon_eks/images/eks_screenboard.png)
+![EKS Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/96a000c36117d8fb4da41c47168bb10b13a8bb16/amazon_eks/images/eks_screenboard.png)
 
 ## Overview
 
