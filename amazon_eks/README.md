@@ -18,7 +18,6 @@ further_reading:
   text: Understand what is going on at any level of your system
 ---
 
-
 ![EKS Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/a30e284214e465844d18b7ac06c7c2b1dab8b43a/amazon_eks/images/eks_screenboard.png)
 
 ## Overview
