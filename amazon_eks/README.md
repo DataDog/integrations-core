@@ -34,7 +34,7 @@ Monitoring EKS requires that you set up the Datadog integrations for:
 * [AWS](https://docs.datadoghq.com/integrations/amazon_web_services/)
 * [AWS EC2](https://docs.datadoghq.com/integrations/amazon_ec2/)
 
-along with integrations for any other AWS services you're running with EKS (e.g., [ELB](https://docs.datadoghq.com/integrations/amazon_elb/).)
+along with integrations for any other AWS services you're running with EKS (e.g., [ELB](https://docs.datadoghq.com/integrations/amazon_elb/))
 
 ## Further Reading
 
