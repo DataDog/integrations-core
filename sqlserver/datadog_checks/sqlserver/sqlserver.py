@@ -96,6 +96,8 @@ class SQLServer(AgentCheck):
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
     valid_connectors = ['adodbapi']
+    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL']
+    default_adoprovider = 'SQLOLEDB'
     if pyodbc is not None:
         valid_connectors.append('odbc')
     valid_tables = [
@@ -120,11 +122,17 @@ class SQLServer(AgentCheck):
             'rate' : self.rate,
             'histogram': self.histogram
         }
+        self.adoprovider = self.default_adoprovider
 
         self.connector = init_config.get('connector', 'adodbapi')
         if not self.connector.lower() in self.valid_connectors:
             self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
             self.connector = 'adodbapi'
+
+        self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
+        if not self.adoprovider.upper() in self.valid_adoproviders:
+            self.log.error("Invalid ADODB provider string %s, defaulting to %s" % (self.adoprovider, self.default_adoprovider))
+            self.adoprovider = self.default_adoprovider
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
@@ -335,6 +343,18 @@ class SQLServer(AgentCheck):
                 self.log.debug("Overriding default connector for %s with %s", instance['host'], connector)
         return connector
 
+    def _get_adoprovider(self, instance):
+        provider = instance.get('adoprovider', self.default_adoprovider)
+        if provider != self.adoprovider:
+            if not provider.upper() in self.valid_adoproviders:
+                self.log.warning("Invalid ADO provider %s using default %s", 
+                    provider, self.adoprovider)
+                provider = self.adoprovider
+            else:
+                self.log.debug("Overriding default ADO provider for %s with %s",
+                    instance['host'], provider)
+        return provider
+
     def _get_access_info(self, instance, db_key, db_name=None):
         ''' Convenience method to extract info from instance
         '''
@@ -393,8 +413,8 @@ class SQLServer(AgentCheck):
             _, host, username, password, database, _ = self._get_access_info(instance, db_key, db_name)
         elif conn_key:
             _, host, username, password, database, _ = conn_key.split(":")
-        conn_str = 'Provider=SQLOLEDB;Data Source=%s;Initial Catalog=%s;' \
-            % (host, database)
+        conn_str = 'Provider=%s;Data Source=%s;Initial Catalog=%s;' \
+            % (self._get_adoprovider(instance), host, database)
         if username:
             conn_str += 'User ID=%s;' % (username)
         if password:
