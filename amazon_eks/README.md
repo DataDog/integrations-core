@@ -30,17 +30,12 @@ Because Datadog already integrates with Kubernetes and AWS, it is ready-made to 
 
 Monitoring EKS requires that you set up the Datadog integrations for:
 
-* [Kubernetes][1]
-* [AWS][2]
-* [AWS EC2][3]
+* [Kubernetes](https://docs.datadoghq.com/integrations/kubernetes/)
+* [AWS](https://docs.datadoghq.com/integrations/amazon_web_services/)
+* [AWS EC2](https://docs.datadoghq.com/integrations/amazon_ec2/)
 
-along with integrations for any other AWS services you're running with EKS (e.g., [ELB][4]).
+along with integrations for any other AWS services you're running with EKS (e.g., [ELB]https://docs.datadoghq.com/integrations/amazon_elb/).
 
 ## Further Reading
 
 {{< partial name="whats-next/whats-next.html" >}}
-
-[1]: /integrations/kubernetes
-[2]: /integrations/amazon_web_services
-[3]: /integrations/amazon_ec2
-[4]: /integrations/amazon_elb
