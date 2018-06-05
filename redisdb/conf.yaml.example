@@ -57,7 +57,12 @@ instances:
 
     # Collect INFO COMMANDSTATS output as metrics.
     # command_stats: False
- 
+
+    # Disable connections cache.
+    # The check attempts to reuse the same Redis connections at every collection
+    # cycle, this behaviour can be disabled to prevent stale connections.
+    # disable_connection_cache: False
+
 ## Log Section (Available for Agent >=6.0)
 
 #logs:
@@ -68,11 +73,11 @@ instances:
     #   source : (mandatory) attribute that defines which integration is sending the logs
     #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
     #   tags: (optional) add tags to each logs collected
-    
+
     # - type: file
     #   path: /var/log/redis_6379.log
     #   source: redis
     #   sourcecategory: database
     #   service: myapplication
-       
+
 
