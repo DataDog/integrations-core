@@ -7,7 +7,7 @@
   ],
   "repository_mirrors": {
     "public-integrations-core": {
-      "url_prefix": "https://integrations-core-wheels.s3.amazonaws.com",
+      "url_prefix": "https://dd-integrations-core-wheels-build-stable.s3.amazonaws.com",
       "metadata_path": "metadata.staged",
       "targets_path": "targets",
       "confined_target_dirs": [""]
