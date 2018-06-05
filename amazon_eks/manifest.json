@@ -9,7 +9,7 @@
   "support": "core",
   "supported_os": [
     "linux",
-    "windows"
+    "mac_os"
   ],
   "version": "1.0.0",
   "public_title": "Datadog-Amazon-EKS Integration",
@@ -19,6 +19,7 @@
     "orchestration"
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/amazon_eks/",
+  "type": "check",
   "is_public": true,
   "has_logo": true
 }
