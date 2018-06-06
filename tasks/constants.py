@@ -40,6 +40,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kyototycoon',
     'lighttpd',
     'linkerd',
+    'mapreduce',
     'marathon',
     'mcache',
     'mysql',
