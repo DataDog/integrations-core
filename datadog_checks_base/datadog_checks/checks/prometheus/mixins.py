@@ -423,7 +423,11 @@ class PrometheusScraperMixin(object):
                 except KeyError:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
-                        getattr(self, message.name)(message, **kwargs)
+                        handler = getattr(self, message.name)
+                        try:
+                            handler(message, **kwargs)
+                        except Exception as err:
+                            self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
                     else:
                         # build the wildcard list if first pass
                         if self._metrics_wildcards is None:
