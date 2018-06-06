@@ -10,8 +10,11 @@ instances:
     # Optional params:
     #
     # host: pool.ntp.org
-    # port: ntp
     # version: 3
+    
+    # Agent v5 only optional params:
+    #
+    # port: ntp
     # timeout: 5
     # tags:
     #   - optional:tag1
