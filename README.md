@@ -23,11 +23,8 @@ where everything falls into place in the new approach.
 
 | FORMER LOCATION | NEW LOCATION |
 | --------------- | ------------ |
-| {integration}/check.py | {integration}/datadog_checks/{integration}/{integration}.py |
-| {integration}/conf.yaml.example | {integration}/datadog_checks/{integration}/conf.yaml.example |
-| n/a | {integration}/datadog_checks/{integration}/\_\_init\_\_.py |
-| {integration}/test_check.py | {integration}/test/test_{integration}.py |
-| n/a | {integration}/test/\_\_init\_\_.py |
+| {integration}/check.py | {integration}/datadog_checks/{integration}/*.py |
+| {integration}/test_check.py | {integration}/tests/*.py |
 | n/a | {integration}/setup.py |
 
 ## A note about installing
