@@ -1,8 +1,9 @@
 # CHANGELOG - mapreduce
 
-## 1.2.0 / Unreleased
+## 1.2.0 / 2018-06-06
 
-* [FEATURE] Adds an SSL verification option
+* [Added] Add support for HTTP authentication. See [#1678](https://github.com/DataDog/integrations-core/pull/1678).
+* [Added] Adds skip ssl validation. See [#1470](https://github.com/DataDog/integrations-core/pull/1470).
 
 ## 1.1.0 / 2018-03-23
 
