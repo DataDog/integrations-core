@@ -637,9 +637,6 @@ def test_mesos(aggregator):
         c = SparkCheck('spark', None, {}, [MESOS_CONFIG])
         c.check(MESOS_CONFIG)
 
-        for m in aggregator._service_checks.items():
-            print(m)
-
         # Check the running job metrics
         for metric, value in SPARK_JOB_RUNNING_METRIC_VALUES.iteritems():
             aggregator.assert_metric(
