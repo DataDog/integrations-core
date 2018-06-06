@@ -138,3 +138,72 @@ class ContainerFilter(object):
         excluded = is_excluded(ctr.get("name"), ctr.get("image"))
         self.cache[cid] = excluded
         return excluded
+
+
+class KubeletCredentials(object):
+    """
+    Holds the configured credentials to connect to the Kubelet.
+    """
+    def __init__(self, kubelet_conn_info):
+        """
+        Parses the kubelet_conn_info dict and computes credentials
+        :param kubelet_conn_info: dict from kubeutil.get_connection_info()
+        """
+        self._token = None
+        self._ssl_verify = None
+        self._ssl_cert = None
+        self._ssl_private_key = None
+
+        if kubelet_conn_info.get('verify_tls') == 'false':
+            self._ssl_verify = False
+        else:
+            self._ssl_verify = kubelet_conn_info.get('ca_cert')
+
+        cert = kubelet_conn_info.get('client_crt')
+        key = kubelet_conn_info.get('client_key')
+        if cert and key:
+            self._ssl_cert = cert
+            self._ssl_private_key = key
+            return  # Don't import the token if we have valid certs
+
+        if 'token' in kubelet_conn_info:
+            self._token = kubelet_conn_info['token']
+
+    def cert_pair(self):
+        """
+        Returns the client certificates
+        :return: tuple (crt,key) or None
+        """
+        if self._ssl_cert and self._ssl_private_key:
+            return (self._ssl_cert, self._ssl_private_key)
+        else:
+            return None
+
+    def headers(self, url):
+        """
+        Returns the https headers with credentials, if token is used and url is https
+        :param url: url to be queried, including scheme
+        :return: dict or None
+        """
+        if self._token and url.lower().startswith('https'):
+            return {'Authorization': 'Bearer {}'.format(self._token)}
+        else:
+            return None
+
+    def verify(self):
+        """
+        Returns the SSL verification parameters
+        :return: CA cert path, None or False (SSL verification explicitly disabled)
+        """
+        return self._ssl_verify
+
+    def configure_scraper(self, scraper, endpoint):
+        """
+        Configures a PrometheusScaper object with query credentials
+        :param scraper: valid PrometheusScaper object
+        :param endpoint: url that will be scraped
+        """
+        scraper.ssl_ca_cert = self._ssl_verify
+        scraper.ssl_cert = self._ssl_cert
+        scraper.ssl_private_key = self._ssl_private_key
+        scraper.extra_headers = self.headers(endpoint) or {}

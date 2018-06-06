@@ -8,7 +8,8 @@ import mock
 import pytest
 import json
 
-from datadog_checks.kubelet import ContainerFilter, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.kubelet import ContainerFilter, KubeletCredentials, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.checks.prometheus import PrometheusScraper
 
 from .test_kubelet import mock_from_file
 
@@ -98,3 +99,66 @@ def test_is_static_pod():
     pod = get_pod_by_uid("2edfd4d9-10ce-11e8-bd5a-42010af00137", podlist)
     assert pod is not None
     assert is_static_pending_pod(pod) is False
+
+
+def test_credentials_empty():
+    creds = KubeletCredentials({})
+    assert creds.verify() is None
+    assert creds.cert_pair() is None
+    assert creds.headers("https://dummy") is None
+
+    scraper = PrometheusScraper(None)
+    creds.configure_scraper(scraper, "https://dummy")
+    assert scraper.ssl_ca_cert is None
+    assert scraper.ssl_cert is None
+    assert scraper.ssl_private_key is None
+    assert scraper.extra_headers == {}
+
+
+def test_credentials_certificates():
+    creds = KubeletCredentials({
+        "verify_tls": "true",
+        "ca_cert": "ca_cert",
+        "client_crt": "crt",
+        "client_key": "key",
+        "token": "ignore_me"
+    })
+    assert creds.verify() == "ca_cert"
+    assert creds.cert_pair() == ("crt", "key")
+    assert creds.headers("https://dummy") is None
+
+    scraper = PrometheusScraper(None)
+    creds.configure_scraper(scraper, "https://dummy")
+    assert scraper.ssl_ca_cert == "ca_cert"
+    assert scraper.ssl_cert == "crt"
+    assert scraper.ssl_private_key == "key"
+    assert scraper.extra_headers == {}
+
+
+def test_credentials_token_noverify():
+    expected_headers = {'Authorization': 'Bearer mytoken'}
+    creds = KubeletCredentials({
+        "verify_tls": "false",
+        "ca_cert": "ca_cert",
+        "client_crt": "ignore_me",
+        "token": "mytoken"
+    })
+    assert creds.verify() is False
+    assert creds.cert_pair() is None
+    assert creds.headers("https://dummy") == expected_headers
+    # Make sure we don't leak the token over http
+    assert creds.headers("http://dummy") is None
+
+    scraper = PrometheusScraper(None)
+    creds.configure_scraper(scraper, "https://dummy")
+    assert scraper.ssl_ca_cert is False
+    assert scraper.ssl_cert is None
+    assert scraper.ssl_private_key is None
+    assert scraper.extra_headers == expected_headers
+
+    # Make sure we don't leak the token over http
+    creds.configure_scraper(scraper, "http://dummy")
+    assert scraper.ssl_ca_cert is False
+    assert scraper.ssl_cert is None
+    assert scraper.ssl_private_key is None
+    assert scraper.extra_headers == {}
