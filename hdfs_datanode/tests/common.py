@@ -8,11 +8,29 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 DATANODE_URI = 'http://localhost:50070/'
 
+CUSTOM_TAGS = ['optional:tag1']
+
+TEST_USERNAME = 'AzureDiamond'
+TEST_PASSWORD = 'hunter2'
+
 HDFS_DATANODE_CONFIG = {
-    'instances': [{
-        'hdfs_datanode_jmx_uri': DATANODE_URI,
-        'tags': ['optional:tag1']
-    }]
+    'instances': [
+        {
+            'hdfs_datanode_jmx_uri': DATANODE_URI,
+            'tags': list(CUSTOM_TAGS)
+        }
+    ]
+}
+
+HDFS_DATANODE_AUTH_CONFIG = {
+    'instances': [
+        {
+            'hdfs_datanode_jmx_uri': DATANODE_URI,
+            'tags': list(CUSTOM_TAGS),
+            'username': TEST_USERNAME,
+            'password': TEST_PASSWORD,
+        }
+    ]
 }
 
 HDFS_DATANODE_METRICS_VALUES = {
@@ -31,5 +49,4 @@ HDFS_DATANODE_METRICS_VALUES = {
 
 HDFS_DATANODE_METRIC_TAGS = [
     'datanode_url:{}'.format(DATANODE_URI),
-    'optional:tag1'
 ]

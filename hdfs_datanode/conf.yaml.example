@@ -11,8 +11,16 @@ instances:
   #
   - hdfs_datanode_jmx_uri: http://localhost:50075
 
+  # If your service uses basic HTTP authentication, you can optionally
+  # specify a username and password that will be used in the check.
+  # username: user
+  # password: pass
+
   # Optionally disable SSL validation. Sometimes when using proxies or self-signed certs
   # we'll want to override validation.
   # disable_ssl_validation: false
+
+  # Optional tags to be applied to every emitted metric and service check.
   # tags:
   #   - optional:tags1
+  #   - optional:tags2
