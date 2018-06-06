@@ -23,11 +23,8 @@ where everything falls into place in the new approach.
 
 | FORMER LOCATION | NEW LOCATION |
 | --------------- | ------------ |
-| {integration}/check.py | {integration}/datadog_checks/{integration}/{integration}.py |
-| {integration}/conf.yaml.example | {integration}/datadog_checks/{integration}/conf.yaml.example |
-| n/a | {integration}/datadog_checks/{integration}/\_\_init\_\_.py |
-| {integration}/test_check.py | {integration}/test/test_{integration}.py |
-| n/a | {integration}/test/\_\_init\_\_.py |
+| {integration}/check.py | {integration}/datadog_checks/{integration}/*.py |
+| {integration}/test_check.py | {integration}/tests/*.py |
 | n/a | {integration}/setup.py |
 
 ## A note about installing
@@ -41,14 +38,13 @@ to idiomatic Python package delivery.
 Agent releases starting from version 5.21 bundle the latest wheels for any
 integration, but at the moment you can't upgrade or downgrade between releases.
 
-Each Datadog Agent release will continue to ship a set of the most up to date stable integrations available. The `requirements-integration-core.txt` file at the root of this repo is the best place to check what Integration version is shipped with each Agent. 
+Each Datadog Agent release will continue to ship a set of the most up to date stable integrations available. The `requirements-agent-release.txt` file at the root of this repo is the best place to check what Integration version is shipped with each Agent.
 
-**Note** The release process is currently in flux as we move toward the ability to ship wheels independently of Agent releases. Due to this, the Changelog may show a version and release that isn't yet available to download. Please check the below table to see which Integration versions are shipped with your Agent install. 
+**Note** The release process is currently in flux as we move toward the ability to ship wheels independently of Agent releases. Due to this, the Changelog may show a version and release that isn't yet available to download. Please check the below table to see which Integration versions are shipped with your Agent install.
 
-
-| Agent Version | List of Shipped Integration Versions                                                      |
-|---------------|-------------------------------------------------------------------------------------------|
-| 6.2.1         | https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt |
+| Agent Version | List of Shipped Integration Versions |
+|---------------|--------------------------------------|
+| 6.2.1         | [Link](https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt) |
 
 ## Quick Start
 
