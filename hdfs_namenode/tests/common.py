@@ -16,12 +16,31 @@ NAME_SYSTEM_STATE_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FS
 # Namesystem url
 NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesystem'
 
+CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
+
+# Authentication Parameters
+TEST_USERNAME = 'Picard'
+TEST_PASSWORD = 'NCC-1701'
+
 HDFS_NAMENODE_CONFIG = {
-    'instances': [{
-        'hdfs_namenode_jmx_uri': NAMENODE_URI,
-        'tags': ['cluster_name:hdfs_dev', 'cluster_name:hdfs_dev', 'instance:level_tags'],
-        }]
-    }
+    'instances': [
+        {
+            'hdfs_namenode_jmx_uri': NAMENODE_URI,
+            'tags': list(CUSTOM_TAGS)
+        }
+    ]
+}
+
+HDFS_NAMENODE_AUTH_CONFIG = {
+    'instances': [
+        {
+            'hdfs_namenode_jmx_uri': NAMENODE_URI,
+            'tags': list(CUSTOM_TAGS),
+            'username': TEST_USERNAME,
+            'password': TEST_PASSWORD,
+        }
+    ]
+}
 
 HDFS_NAMESYSTEM_STATE_METRICS_VALUES = {
     'hdfs.namenode.capacity_total': 41167421440,
@@ -56,8 +75,4 @@ HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES = {
     'hdfs.namenode.capacity_in_use': None
 }
 
-HDFS_NAMESYSTEM_METRIC_TAGS = [
-    'namenode_url:' + NAMENODE_URI,
-    'cluster_name:hdfs_dev',
-    'instance:level_tags',
-]
+HDFS_NAMESYSTEM_METRIC_TAGS = ['namenode_url:' + NAMENODE_URI]
