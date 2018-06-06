@@ -22,6 +22,9 @@ instances:
   # The use of `resourcemanager_uri` has been deprecated, but is still functional.
   - spark_url: http://localhost:8088
 
+    # A Required friendly name for the cluster.
+    # cluster_name: MySparkCluster
+
     # To enable monitoring of a Standalone Spark cluster, the spark cluster
     # mode must be set. Uncomment the cluster mode that applies.
     # spark_cluster_mode: spark_yarn_mode
@@ -43,13 +46,15 @@ instances:
     # If you have enabled the spark UI proxy, you may set this to `true`
     # spark_proxy_enabled: false
 
-    # A Required friendly name for the cluster.
-    # cluster_name: MySparkCluster
-
     # Optional tags to be applied to every emitted metric.
     # tags:
     #   - key:value
     #   - instance:production
+
+    # If your service uses basic HTTP authentication, you can optionally
+    # specify a username and password that will be used in the check.
+    # username: user
+    # password: pass
 
     # SSL configuration.
     # ssl_verify: false
