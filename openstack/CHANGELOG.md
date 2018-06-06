@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.3.0 / 2018-06-06
+
+* [Added]  Added support for unscoped access, implemented caching mechanism to reduce API calls to Nova. See [#1276](https://github.com/DataDog/integrations-core/pull/1276).
+
 ## 1.2.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support to service check and metrics.
