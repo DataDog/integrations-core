@@ -24,6 +24,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         super(CadvisorPrometheusScraper, self).__init__(check)
 
         self.NAMESPACE = 'kubernetes'
+        self.instance_tags = []
 
         self.ignore_metrics = [
             'container_cpu_cfs_periods_total',
