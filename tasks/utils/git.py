@@ -44,12 +44,15 @@ def get_diff(ctx, check_name, target_tag):
     return ctx.run(cmd, hide='out').stdout.split('\n')
 
 
-def git_commit(ctx, target, message):
+def git_commit(ctx, targets, message):
     """
-    Commit the current changes.
+    Commit the changes for the given targets.
     """
-    target_path = os.path.join(ROOT, target)
-    cmd = 'git add ' + target_path
+    target_paths = []
+    for t in targets:
+        target_paths.append(os.path.join(ROOT, t))
+
+    cmd = 'git add ' + " ".join(target_paths)
     ctx.run(cmd)
     cmd = 'git commit -m"{}"'.format(message)
     ctx.run(cmd)
