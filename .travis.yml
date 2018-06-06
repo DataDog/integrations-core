@@ -47,6 +47,8 @@ jobs:
     - stage: test
       env: CHECK=active_directory
     - stage: test
+      env: CHECK=activemq_xml
+    - stage: test
       env: CHECK=apache
     - stage: test
       env: CHECK=aspdotnet
