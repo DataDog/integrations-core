@@ -1,5 +1,10 @@
 # CHANGELOG - redisdb
 
+## 1.6.0 / 2018-06-06
+
+* [Added] Add a config option to disable connection cache. See [#1668](https://github.com/DataDog/integrations-core/pull/1668).
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+
 ## 1.5.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 6379 port in the Autodiscovery template. See [#1444][] for more information.
