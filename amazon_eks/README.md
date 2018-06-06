@@ -18,4 +18,5 @@ along with integrations for any other AWS services you're running with EKS (e.g.
 
 ## Further Reading
 
-{{< partial name="whats-next/whats-next.html" >}}
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+
