@@ -10,15 +10,15 @@ from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
 
-from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY
+from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY, ROOT, AGENT_REQ_FILE
 from .utils.git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
 from .utils.common import (
-    load_manifest, get_version_string, get_release_tag_string,
-    update_version_module
+    get_version_string, get_release_tag_string, update_version_module
 )
 from .utils.github import get_changelog_types, get_pr
+from .utils.requirements import get_requirement_line, update_requirements
 from .changelog import do_update_changelog
 
 
@@ -129,6 +129,7 @@ def release_prepare(ctx, target, new_version):
 
      * update the version in __about__.py
      * update the changelog
+     * update the AGENT_REQ_FILE file
      * commit the above changes
 
     Example invocation:
@@ -157,9 +158,14 @@ def release_prepare(ctx, target, new_version):
     print("Updating the changelog")
     do_update_changelog(ctx, target, cur_version, new_version)
 
+    # update the global requirements file
+    req_file = os.path.join(ROOT, AGENT_REQ_FILE)
+    print("Updating the requirements file {}".format(req_file))
+    update_requirements(req_file, target, get_requirement_line(target, new_version))
+
     # commit the changes
     msg = "Bumped {} version to {}".format(target, new_version)
-    git_commit(ctx, target, msg)
+    git_commit(ctx, [target, AGENT_REQ_FILE], msg)
 
     # done
     print("All done, remember to push to origin and open a PR to merge these changes on master")
@@ -203,40 +209,18 @@ def compile_requirements(ctx, dest_path=None):
     all the agent based integrations pinned at the version they currently
     have in HEAD.
     """
-    # maps the Python platform strings to the ones we have in the manifest
-    platforms_to_py = {
-        'windows': 'win32',
-        'mac_os': 'darwin',
-        'linux': 'linux2',
-    }
-    all_platforms = sorted(platforms_to_py.keys())
-
     entries = []
     for i in AGENT_BASED_INTEGRATIONS:
         if i in AGENT_V5_ONLY:
             print("Integration {} is only shipped with version 5 of the Agent, skip...")
             continue
 
-        version = get_version_string(i)
-
-        # base check and siblings have no manifest
-        if i in ('datadog_checks_base', 'datadog_checks_tests_helper'):
-            entries.append('{}=={}'.format(i, version))
+        try:
+            version = get_version_string(i)
+            entries.append(get_requirement_line(i, version))
+        except Exception as e:
+            print(Fore.RED + "Error generating line: {}".format(e))
             continue
-
-        m = load_manifest(i)
-        platforms = sorted(m.get('supported_os', []))
-        # all platforms
-        if platforms == all_platforms:
-            entries.append('{}=={}'.format(i, version))
-        # one specific platform
-        elif len(platforms) == 1:
-            entries.append("{}=={}; sys_platform == '{}'".format(i, version, platforms_to_py.get(platforms[0])))
-        # assuming linux+mac here for brevity
-        elif platforms and 'windows' not in platforms:
-            entries.append("{}=={}; sys_platform != 'win32'".format(i, version))
-        else:
-            print("Can't parse the 'supported_os' list for the check {}: {}".format(i, platforms))
 
     output = '\n'.join(sorted(entries))  # sorting in case AGENT_BASED_INTEGRATIONS is out of order
 
