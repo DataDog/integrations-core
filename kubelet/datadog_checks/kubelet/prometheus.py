@@ -180,6 +180,10 @@ class CadvisorPrometheusScraper(PrometheusScraper):
 
         super(CadvisorPrometheusScraper, self).process(endpoint, **kwargs)
 
+        # Free up memory
+        self.pod_list = None
+        self.container_filter = None
+
     def _process_container_rate(self, metric_name, message):
         """Takes a simple metric about a container, reports it as a rate."""
         if message.type >= len(METRIC_TYPES):
