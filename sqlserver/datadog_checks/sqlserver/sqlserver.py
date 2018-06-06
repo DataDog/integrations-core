@@ -659,7 +659,7 @@ class SqlServerMetric(object):
         self.cfg_instance = cfg_instance
         self.datadog_name = cfg_instance['name']
         self.metric_type = cfg_instance.get('metric_type', 'counter_name')
-        self.sql_name = cfg_instance.get(metric_type, '')
+        self.sql_name = cfg_instance.get(self.metric_type, '')
         self.base_name = base_name
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
