@@ -74,7 +74,7 @@ ssh_check==1.2.0
 system_core==1.0.0
 system_swap==1.1.0
 tcp_check==2.0.0
-teamcity==1.0.0
+teamcity==1.1.0
 tokumx==1.2.0
 twemproxy==1.2.0
 varnish==1.2.0
