@@ -37,21 +37,6 @@ The ActiveMQ XML check does not include any service checks at this time.
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].
 
-## Development
-
-Please refer to the [main documentation][8] for more details about how to test and develop Agent based integrations.
-
-### Testing Guidelines
-
-If you are on macOS and encounter the following error while running the tests, simply go to `Docker -> Preferences... -> File Sharing` and add the folder `/var/folders`.
-
-```
-Cannot start service activemq_xml: b'Mounts denied:
-The path /var/folders/... is not shared from OS X and is not known to Docker.
-You can configure shared paths from Docker -> Preferences... -> File Sharing.
-See https://docs.docker.com/docker-for-mac/osxfs/#namespaces for more info.'
-```
-
 ## Further Reading
 
 * [Monitor ActiveMQ metrics and performance][6]

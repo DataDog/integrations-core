@@ -23,7 +23,8 @@ def aggregator():
 
 @pytest.fixture(scope="session", autouse=True)
 def activemq_xml_container():
-    tmp_dir = tempfile.mkdtemp()
+    # use os.path.realpath to avoid mounting issues of symlinked /var -> /private/var in Docker on macOS
+    tmp_dir = os.path.realpath(tempfile.mkdtemp())
     fixture_dir = os.path.join(HERE, "fixtures")
     activemq_data_dir = os.path.join(tmp_dir, "data")
     copytree(fixture_dir, activemq_data_dir)
