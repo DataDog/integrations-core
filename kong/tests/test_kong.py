@@ -63,7 +63,7 @@ def wait_for_cluster():
     return False
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True))
 def kong_cluster():
     """
     Start a kong cluster
@@ -77,10 +77,9 @@ def kong_cluster():
     ]
     subprocess.check_call(args + ["up", "-d"])
     if not wait_for_cluster():
-        subprocess.check_call(["docker", "logs", "compose_kong_1"])
         raise Exception("Kong cluster boot timed out!")
     yield
-    # subprocess.check_call(args + ["down"])
+    subprocess.check_call(args + ["down"])
 
 
 @pytest.fixture
@@ -95,7 +94,7 @@ def aggregator():
     return aggregator
 
 
-def test_check(aggregator, kong_cluster, check):
+def test_check(aggregator, check):
     for stub in CONFIG_STUBS:
         check.check(stub)
         expected_tags = stub['tags']
@@ -115,7 +114,7 @@ def test_check(aggregator, kong_cluster, check):
         aggregator.all_metrics_asserted()
 
 
-def test_connection_failure(aggregator, kong_cluster, check):
+def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
     aggregator.assert_service_check('kong.can_connect', status=AgentCheck.CRITICAL,
