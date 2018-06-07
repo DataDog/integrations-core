@@ -67,7 +67,7 @@ redisdb==1.6.0
 riak==1.3.0
 riak==1.3.0
 snmp==1.4.0
-spark==1.2.0
+spark==1.4.0
 sqlserver==1.4.0; sys_platform == 'win32'
 squid==1.0.0
 ssh_check==1.2.0
