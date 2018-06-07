@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 1.3.0 / 2018-06-07
+
+* [Added] Support custom queries. See [#1528](https://github.com/DataDog/integrations-core/pull/1528).
+* [Added] [oracle]  Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459](https://github.com/DataDog/integrations-core/pull/1459).
+
 ## 1.3.0 / Unreleased
 
 * [FEATURE] ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459][]
