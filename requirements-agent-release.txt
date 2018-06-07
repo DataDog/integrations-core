@@ -30,7 +30,7 @@ hdfs_datanode==1.3.0; sys_platform != 'win32'
 hdfs_namenode==1.3.0; sys_platform != 'win32'
 http_check==2.1.0
 iis==2.1.0; sys_platform == 'win32'
-istio==1.0.0
+istio==1.1.0
 kafka_consumer==1.4.0; sys_platform != 'win32'
 kong==1.2.0
 kube_dns==1.3.0
