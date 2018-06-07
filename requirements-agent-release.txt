@@ -1,6 +1,6 @@
 active_directory==1.1.0; sys_platform == 'win32'
 activemq_xml==1.0.0
-apache==1.2.0
+apache==1.3.0
 aspdotnet==0.1.2; sys_platform == 'win32'
 btrfs==1.1.0; sys_platform != 'win32'
 cacti==1.1.0; sys_platform != 'win32'
