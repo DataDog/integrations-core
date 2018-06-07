@@ -81,6 +81,11 @@ TAGS = {
         'condition:MemoryPressure', 'condition:DiskPressure',
         'condition:OutOfDisk', 'condition:Ready',
         'status:true', 'status:false', 'status:unknown',
+    ],
+    NAMESPACE + '.container.status_report.count.waiting': [
+        'reason:CrashLoopBackoff',
+        'reason:ErrImagePull',
+        'reason:ImagePullBackoff'
     ]
 }
 
