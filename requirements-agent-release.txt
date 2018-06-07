@@ -39,7 +39,7 @@ kubelet==1.3.0; sys_platform == 'linux2'
 kubernetes_state==2.5.0; sys_platform != 'win32'
 kyototycoon==1.3.0
 lighttpd==1.2.0
-linkerd==1.0.0
+linkerd==1.1.0
 linux_proc_extras==1.0.0; sys_platform == 'linux'
 mapreduce==1.2.0
 marathon==1.3.0; sys_platform != 'win32'
