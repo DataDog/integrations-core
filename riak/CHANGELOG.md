@@ -1,5 +1,9 @@
 # CHANGELOG - riak
 
+## 1.3.0 / 2018-06-07
+
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+
 ## 1.2.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8098 port in the Autodiscovery template. See [#1444][] for more information.
