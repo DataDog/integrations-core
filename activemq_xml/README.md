@@ -14,7 +14,7 @@ The Activemq XML check is included in the [Datadog Agent][1] package, so you don
 
 ### Configuration
 
-1. Edit the `activemq_xml.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor.  
+1. Edit the `activemq_xml.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor.
 
     See the [sample activemq_xml.d/conf.yaml][2] for all available configuration options.
 
@@ -37,6 +37,21 @@ The ActiveMQ XML check does not include any service checks at this time.
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].
 
+## Development
+
+Please refer to the [main documentation][8] for more details about how to test and develop Agent based integrations.
+
+### Testing Guidelines
+
+If you are on macOS and encounter the following error while running the tests, simply go to `Docker -> Preferences... -> File Sharing` and add the folder `/var/folders`.
+
+```
+Cannot start service activemq_xml: b'Mounts denied:
+The path /var/folders/... is not shared from OS X and is not known to Docker.
+You can configure shared paths from Docker -> Preferences... -> File Sharing.
+See https://docs.docker.com/docker-for-mac/osxfs/#namespaces for more info.'
+```
+
 ## Further Reading
 
 * [Monitor ActiveMQ metrics and performance][6]
@@ -49,3 +64,4 @@ Need help? Contact [Datadog Support][5].
 [5]: http://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://github.com/DataDog/integrations-core/blob/master/docs/index.md
