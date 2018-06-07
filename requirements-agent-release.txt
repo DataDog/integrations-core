@@ -34,7 +34,7 @@ istio==1.1.0
 kafka_consumer==1.4.0; sys_platform != 'win32'
 kong==1.2.0
 kube_dns==1.3.0
-kube_proxy==1.0.0
+kube_proxy==1.1.0
 kubelet==1.2.0; sys_platform == 'linux2'
 kubernetes_state==2.5.0; sys_platform != 'win32'
 kyototycoon==1.3.0
