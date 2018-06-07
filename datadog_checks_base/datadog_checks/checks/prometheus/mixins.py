@@ -423,7 +423,7 @@ class PrometheusScraperMixin(object):
                 except KeyError:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
-                        handler = getattr(self, message.name)
+                        handler = getattr(self, message.name)  # Lookup will throw AttributeError if not found
                         try:
                             handler(message, **kwargs)
                         except Exception as err:
