@@ -15,7 +15,7 @@ disk==1.2.0
 dns_check==1.1.0
 dotnetclr==1.0.0; sys_platform == 'win32'
 ecs_fargate==1.2.0
-elastic==1.6.0
+elastic==1.7.0
 envoy==1.1.0
 etcd==1.4.0
 exchange_server==1.1.0; sys_platform == 'win32'
