@@ -1,6 +1,6 @@
 # CHANGELOG - cisco_aci
 
-Unreleased
+## 1.4.0 / 2018-06-07
 ==================
 
 ### Changes
