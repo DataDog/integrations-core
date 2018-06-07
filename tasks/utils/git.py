@@ -65,5 +65,5 @@ def git_tag(ctx, tag_name, push=False):
     cmd = 'git tag -a {} -m"{}"'.format(tag_name, tag_name)
     ctx.run(cmd)
     if push:
-        cmd = 'git push --tags'
+        cmd = 'git push origin {}'.format(tag_name)
         ctx.run(cmd)
