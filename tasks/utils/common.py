@@ -5,12 +5,14 @@ from __future__ import print_function, unicode_literals
 import os
 import json
 
-from ..constants import ROOT
+from ..constants import ROOT, JMX_INTEGRATIONS
 
 
 def get_version_file(check_name):
     if check_name in ('datadog_checks_base', 'datadog_checks_test_helper'):
         return os.path.join(ROOT, check_name, "datadog_checks", "__about__.py")
+    elif check_name in JMX_INTEGRATIONS:
+        return os.path.join(ROOT, check_name, "manifest.json")
     else:
         return os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
 
@@ -20,10 +22,13 @@ def get_version_string(check_name):
     Get the version string for the given check.
     """
     about = {}
-    with open(get_version_file(check_name)) as f:
-        exec(f.read(), about)
-
-    return about.get('__version__')
+    if check_name in JMX_INTEGRATIONS:
+        manifest_content = load_manifest(check_name)
+        return manifest_content.get('version')
+    else:
+        with open(get_version_file(check_name)) as f:
+            exec(f.read(), about)
+        return about.get('__version__')
 
 
 def get_release_tag_string(check_name, version_string):

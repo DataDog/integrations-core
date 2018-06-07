@@ -676,7 +676,6 @@ class Network(AgentCheck):
         Gather metrics about connections states and interfaces counters
         using psutil facilities
         """
-        # import pdb; pdb.set_trace()
         custom_tags = instance.get('tags', [])
         if self._collect_cx_state:
             self._cx_state_psutil(tags=custom_tags)

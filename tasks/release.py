@@ -10,7 +10,7 @@ from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
 
-from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY, ROOT, AGENT_REQ_FILE
+from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY, ROOT, AGENT_REQ_FILE, JMX_INTEGRATIONS
 from .utils.git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
@@ -57,7 +57,7 @@ def print_shippable(ctx, quiet=False):
     """
     Print all the checks that can be released.
     """
-    for target in AGENT_BASED_INTEGRATIONS:
+    for target in AGENT_BASED_INTEGRATIONS + JMX_INTEGRATIONS:
         # get the name of the current release tag
         cur_version = get_version_string(target)
         target_tag = get_release_tag_string(target, cur_version)
@@ -85,7 +85,7 @@ def release_show_pending(ctx, target):
         inv release-show-pending mysql
     """
     # sanity check on the target
-    if target not in AGENT_BASED_INTEGRATIONS:
+    if target not in AGENT_BASED_INTEGRATIONS and target not in JMX_INTEGRATIONS:
         raise Exit("Provided target is not an Agent-based Integration")
 
     # get the name of the current release tag
@@ -128,6 +128,7 @@ def release_prepare(ctx, target, new_version):
     Perform a set of operations needed to release a single check:
 
      * update the version in __about__.py
+     * For JMX Integrations, update the version in manifest.json instead
      * update the changelog
      * update the AGENT_REQ_FILE file
      * commit the above changes
@@ -136,7 +137,7 @@ def release_prepare(ctx, target, new_version):
         inv release-prepare redisdb 3.1.1
     """
     # sanity check on the target
-    if target not in AGENT_BASED_INTEGRATIONS:
+    if target not in AGENT_BASED_INTEGRATIONS and target not in JMX_INTEGRATIONS:
         raise Exit("Provided target is not an Agent-based Integration")
 
     # don't run the task on the master branch
@@ -180,7 +181,7 @@ def release_upload(ctx, target, dry_run=False):
     Release to PyPI a specific check as it is on the repo HEAD
     """
     # sanity check on the target
-    if target not in AGENT_BASED_INTEGRATIONS:
+    if target not in AGENT_BASED_INTEGRATIONS and target not in JMX_INTEGRATIONS:
         raise Exit("Provided target is not an Agent-based Integration")
 
     # retrieve credentials

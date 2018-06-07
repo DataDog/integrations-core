@@ -73,3 +73,13 @@ AGENT_V5_ONLY = [
     'kubernetes',
     'ntp',
 ]
+
+JMX_INTEGRATIONS = [
+   'activemq',
+    'activemq_58',
+    'cassandra',
+    'jmx',
+    'solr',
+    'tomcat',
+    'kafka',
+]
