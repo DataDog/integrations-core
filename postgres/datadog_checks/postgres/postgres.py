@@ -292,14 +292,14 @@ WITH overloaded_funcs AS (
  HAVING COUNT(*) > 1
 )
 SELECT s.schemaname,
-       CASE WHEN o.funcname is null THEN p.proname
-            else p.proname || '_' || array_to_string(p.proargnames, '_')
+       CASE WHEN o.funcname IS NULL OR p.proargnames IS NULL THEN p.proname
+            ELSE p.proname || '_' || array_to_string(p.proargnames, '_')
         END funcname,
         %s
   FROM pg_proc p
   JOIN pg_stat_user_functions s
     ON p.oid = s.funcid
-  LEFT join overloaded_funcs o
+  LEFT JOIN overloaded_funcs o
     ON o.funcname = s.funcname;
 """,
         'relation': False
