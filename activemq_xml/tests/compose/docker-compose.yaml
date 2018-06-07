@@ -9,4 +9,4 @@ services:
     environment:
       - ACTIVEMQ_DATA=/var/activemq/data
     volumes:
-      - ${ACTIVEMQ_DATA_DIR}:/var/activemq/data 
+      - ${ACTIVEMQ_DATA_DIR}:/var/activemq/data

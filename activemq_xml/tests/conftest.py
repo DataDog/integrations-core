@@ -54,12 +54,13 @@ def wait_for_container():
     """
     Wait for the activemq_xml container to be reachable
     """
-    for i in xrange(60):
+    for i in xrange(100):
         print("Waiting for service to come up")
         try:
             requests.get(URL).raise_for_status()
             return True
-        except Exception:
+        except Exception as e:
+            print e
             sleep(1)
 
     return False
