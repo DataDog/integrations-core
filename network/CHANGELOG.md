@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.6.0 / 2018-06-07
+
+* [Added] Add monotonic counts for some metrics. See [#1551](https://github.com/DataDog/integrations-core/pull/1551). Thanks [jalaziz](https://github.com/jalaziz).
+
 ## 1.5.0 / 2018-03-23
 
 * [FEATURE] Add custom tag support.
