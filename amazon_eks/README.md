@@ -8,6 +8,8 @@ Elastic Container Service for Kubernetes (EKS) is the latest addition to AWS, a 
 
 Because Datadog already integrates with Kubernetes and AWS, it is ready-made to monitor EKS. If you're running the Agent in a Kubernetes cluster and plan to migrate to EKS, you can continue monitoring your cluster with Datadog. 
 
+### Metric Collection
+
 Monitoring EKS requires that you set up the Datadog integrations for:
 
 * [Kubernetes](https://docs.datadoghq.com/integrations/kubernetes/)
@@ -16,7 +18,17 @@ Monitoring EKS requires that you set up the Datadog integrations for:
 
 along with integrations for any other AWS services you're running with EKS (e.g., [ELB](https://docs.datadoghq.com/integrations/amazon_elb/))
 
+### Log Collection
+
+**Available for Agent >6.0**
+
+The setup is exactly the same as for Kubernetes. To start collecting logs from all your containers, only two environment variables needs to be set on your Datadog Agent.
+
+Take advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes][1]. Otherwise follow the [container log collection steps][2] to set those environment variables and learn about more advanced setup options.
+
 ## Further Reading
 
 Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
 
+[1]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
+[2]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
