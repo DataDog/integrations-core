@@ -5,7 +5,6 @@
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
 * [Added] Include consul_datacenter tag in service checks. See [#1526](https://github.com/DataDog/integrations-core/pull/1526). Thanks [TylerLubeck](https://github.com/TylerLubeck).
 * [Added] Add a check to count all nodes in a consul cluster. See [#1479](https://github.com/DataDog/integrations-core/pull/1479). Thanks [TylerLubeck](https://github.com/TylerLubeck).
-* [Added] Introduce a check at `consul.catalog.total_nodes` as a count of all nodes registered in the cluster
 
 ## 1.4.0 / 2018-05-11
 
