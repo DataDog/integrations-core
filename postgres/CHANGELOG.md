@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 2.1.2 / 2018-06-07
+
+* [Fixed] Fix function metrics tagging issue for no-args functions. See [#1452](https://github.com/DataDog/integrations-core/pull/1452). Thanks [zorgz](https://github.com/zorgz).
+* [Security] Update psycopg2 for security fixes. See [#1538](https://github.com/DataDog/integrations-core/pull/1538).
+
 ## 2.1.1 / 2018-05-11
 
 * [BUGFIX] Adding db rollback when transaction fails in postgres metrics collection. See[#1193][].
