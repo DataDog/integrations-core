@@ -55,6 +55,8 @@ jobs:
     - stage: test
       env: CHECK=ceph
     - stage: test
+      env: CHECK=cisco_aci
+    - stage: test
       env: CHECK=consul
     - stage: test
       env: CHECK=couch
