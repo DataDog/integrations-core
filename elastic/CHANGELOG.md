@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.7.0 / 2018-06-07
+
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+* [Fixed] [FIXED] Ensure base url path isn't removed when admin_forwarder is used. See [#1202](https://github.com/DataDog/integrations-core/pull/1202).
+
 ## 1.6.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 9200 port in the Autodiscovery template. See [#1444][].

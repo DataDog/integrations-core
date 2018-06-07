@@ -1,5 +1,10 @@
 # CHANGELOG - couchbase
 
+## 1.4.0 / 2018-06-07
+
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+* [Fixed] Couchbase integration was not working during server set up. See [#1571](https://github.com/DataDog/integrations-core/pull/1571).
+
 ## 1.3.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 8091 port in the Autodiscovery template. See [#1444][] for more information.

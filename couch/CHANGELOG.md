@@ -1,8 +1,9 @@
 # CHANGELOG - couch
 
-## 2.5.1 / Unreleased
+## 2.6.0 / 2018-06-07
 
-* [IMPROVEMENT] Raise custom exceptions for specific errors instead of a generic `Exception.
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+* [Added] Raise custom exceptions for specific errors instead of a generic `Exception`.
 
 ## 2.5.0 / 2018-05-11
 
