@@ -7,7 +7,7 @@ import sys
 
 import mock
 import pytest
-from datadog_checks.kubelet import KubeletCheck
+from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
 from datadog_checks.checks.prometheus import PrometheusScraper
 
@@ -290,7 +290,7 @@ class MockResponse(mock.Mock):
 def test_perform_kubelet_check(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
-    check.kubelet_conn_info = {}
+    check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
     instance_tags = ["one:1"]

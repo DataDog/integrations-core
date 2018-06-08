@@ -18,7 +18,7 @@ from kubeutil import get_connection_info
 from tagger import get_tags
 
 # check
-from .common import CADVISOR_DEFAULT_PORT, ContainerFilter
+from .common import CADVISOR_DEFAULT_PORT, ContainerFilter, KubeletCredentials
 from .cadvisor import CadvisorScraper
 from .prometheus import CadvisorPrometheusScraper
 
@@ -80,8 +80,8 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         }
 
     def check(self, instance):
-        self.kubelet_conn_info = get_connection_info()
-        endpoint = self.kubelet_conn_info.get('url')
+        kubelet_conn_info = get_connection_info()
+        endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
             raise CheckException("Unable to detect the kubelet URL automatically.")
 
@@ -99,6 +99,17 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
+
+        # Kubelet credentials handling
+        self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
+        self.kubelet_credentials.configure_scraper(
+            self.cadvisor_scraper,
+            self.cadvisor_metrics_url
+        )
+        self.kubelet_credentials.configure_scraper(
+            self.kubelet_scraper,
+            self.kubelet_metrics_url
+        )
 
         # Legacy cadvisor support
         try:
@@ -164,28 +175,14 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        headers = None
-        cert = (self.kubelet_conn_info.get('client_crt'), self.kubelet_conn_info.get('client_key'))
-        if not cert[0] or not cert[1]:
-            cert = None
-        else:
-            # prometheus check settings
-            self.ssl_cert = cert[0]
-            self.ssl_private_key = cert[1]
-
-        if self.kubelet_conn_info.get('verify_tls') == 'false':
-            verify = False
-        else:
-            verify = self.kubelet_conn_info.get('ca_cert')
-        self.ssl_ca_cert = verify  # prometheus check setting
-
-        # if cert-based auth is enabled, don't use the token.
-        if not cert and url.lower().startswith('https') and 'token' in self.kubelet_conn_info:
-            headers = {'Authorization': 'Bearer {}'.format(self.kubelet_conn_info['token'])}
-            self.extra_headers = headers  # prometheus check setting
-
-        return requests.get(url, timeout=timeout, verify=verify,
-                            cert=cert, headers=headers, params={'verbose': verbose})
+        return requests.get(
+            url,
+            timeout=timeout,
+            verify=self.kubelet_credentials.verify(),
+            cert=self.kubelet_credentials.cert_pair(),
+            headers=self.kubelet_credentials.headers(url),
+            params={'verbose': verbose}
+        )
 
     def retrieve_pod_list(self):
         return self.perform_kubelet_query(self.pod_list_url).json()
