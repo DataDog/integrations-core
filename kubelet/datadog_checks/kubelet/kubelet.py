@@ -124,13 +124,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         else:
             send_buckets = True
 
-        try:
-            self.pod_list = self.retrieve_pod_list()
-            if self.pod_list.get("items") is None:
-                # Sanitize input: if no pod are running, 'items' is a NoneObject
-                self.pod_list['items'] = []
-        except Exception:
-            self.pod_list = None
+        self.pod_list = self.retrieve_pod_list()
 
         self.container_filter = ContainerFilter(self.pod_list)
 
@@ -185,7 +179,16 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
         )
 
     def retrieve_pod_list(self):
-        return self.perform_kubelet_query(self.pod_list_url).json()
+        try:
+            pod_list = self.perform_kubelet_query(self.pod_list_url).json()
+            if pod_list.get("items") is None:
+                # Sanitize input: if no pod are running, 'items' is a NoneObject
+                pod_list['items'] = []
+            return pod_list
+        except Exception as e:
+            self.log.debug('failed to retrieve pod list from the kubelet at %s : %s'
+                           % (self.pod_list_url, str(e)))
+            return None
 
     def _retrieve_node_spec(self):
         """

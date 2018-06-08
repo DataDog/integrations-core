@@ -315,3 +315,33 @@ def test_report_node_metrics(monkeypatch):
         mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar'])
     ]
     check.gauge.assert_has_calls(calls, any_order=False)
+
+
+def test_retrieve_pod_list_success(monkeypatch):
+    class MockResponse:
+        def __init__(self, json_data):
+            self.json_data = json_data
+
+        def json(self):
+            return (json.loads(self.json_data))
+
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat'))))
+
+    retrieved = check.retrieve_pod_list()
+    expected = json.loads(mock_from_file("pod_list_raw.json"))
+    assert (json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True))
+
+
+def test_retrieved_pod_list_failure(monkeypatch):
+    def mock_perform_kubelet_query(s):
+        raise Exception("network error")
+
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
+
+    retrieved = check.retrieve_pod_list()
+    assert retrieved is None
