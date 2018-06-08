@@ -188,7 +188,9 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
                 # Sanitize input: if no pod are running, 'items' is a NoneObject
                 pod_list['items'] = []
             return pod_list
-        except Exception:
+        except Exception as e:
+            self.log.debug('failed to retrieve pod list from the kubelet at %s : %s'
+                           % (self.pod_list_url, str(e)))
             return None
 
     def _retrieve_node_spec(self):
