@@ -6,6 +6,7 @@ import os
 import subprocess
 from shutil import rmtree, copytree
 import stat
+import tarfile
 import tempfile
 from time import sleep
 
@@ -26,13 +27,15 @@ def aggregator():
 def activemq_xml_container():
     # use os.path.realpath to avoid mounting issues of symlinked /var -> /private/var in Docker on macOS
     tmp_dir = os.path.realpath(tempfile.mkdtemp())
-    fixture_dir = os.path.join(HERE, "fixtures")
     activemq_data_dir = os.path.join(tmp_dir, "data")
-    copytree(fixture_dir, activemq_data_dir)
+    fixture_archive = os.path.join(HERE, "fixtures", "apache-activemq-kahadb.tar.gz")
+    os.mkdir(activemq_data_dir)
+    with tarfile.open(fixture_archive, "r:gz") as f:
+        f.extractall(path=activemq_data_dir)
     os.chmod(os.path.join(activemq_data_dir, "kahadb"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db-1.log"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    # os.chmod(os.path.join(activemq_data_dir, "kahadb", "db-1.log"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
     os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.data"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.redo"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    # os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.redo"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
     env = os.environ
     env["ACTIVEMQ_DATA_DIR"] = activemq_data_dir
