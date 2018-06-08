@@ -56,7 +56,6 @@ def activemq_xml_container():
 
     yield
 
-    subprocess.check_call(args + ["logs"])
     rmtree(tmp_dir, ignore_errors=True)
     subprocess.check_call(args + ["down"])
 
