@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "solr",
   "short_description": "Monitor request rate, handler errors, cache misses and evictions, and more.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.1",
   "guid": "0235124a-0207-44dd-aede-f578a6d46b26",
   "public_title": "Datadog-Solr Integration",
   "categories":["data store", "search"],
