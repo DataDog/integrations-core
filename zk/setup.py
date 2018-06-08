@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-zk',
     version=ABOUT['__version__'],
-    description='The zk check',
+    description='The ZooKeeper check',
     long_description=long_description,
     keywords='datadog agent zk check',
 

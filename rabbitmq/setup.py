@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-rabbitmq',
     version=ABOUT['__version__'],
-    description='The rabbitmq check',
+    description='The RabbitMQ check',
     long_description=long_description,
     keywords='datadog agent rabbitmq check',
 

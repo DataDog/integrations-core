@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-agent_metrics',
     version=ABOUT['__version__'],
-    description='The agent_metrics check',
+    description='The Agent Metrics check',
     long_description=long_description,
     keywords='datadog agent agent_metrics check',
 
@@ -63,6 +63,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.agent_metrics': ['conf.yaml.example']},
+    package_data={'datadog_checks.agent_metrics': ['conf.yaml.default']},
     include_package_data=True,
 )

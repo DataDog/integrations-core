@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-cacti',
     version=ABOUT['__version__'],
-    description='The cacti check',
+    description='The Cacti check',
     long_description=long_description,
     keywords='datadog agent cacti check',
 

@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-snmp',
     version=ABOUT['__version__'],
-    description='The snmp check',
+    description='The SNMP check',
     long_description=long_description,
     keywords='datadog agent snmp check',
 

@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-cassandra_nodetool',
     version=ABOUT['__version__'],
-    description='The cassandra_nodetool check',
+    description='The Cassandra Nodetool check',
     long_description=long_description,
     keywords='datadog agent cassandra_nodetool check',
 

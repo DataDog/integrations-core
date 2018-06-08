@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-win32_event_log',
     version=ABOUT['__version__'],
-    description='The win32_event_log check',
+    description='The Win32 Event Log check',
     long_description=long_description,
     keywords='datadog agent win32_event_log check',
 

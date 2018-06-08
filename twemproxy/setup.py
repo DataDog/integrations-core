@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-twemproxy',
     version=ABOUT['__version__'],
-    description='The twemproxy check',
+    description='The Twemproxy check',
     long_description=long_description,
     keywords='datadog agent twemproxy check',
 

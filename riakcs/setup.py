@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-riakcs',
     version=ABOUT['__version__'],
-    description='The riakcs check',
+    description='The Riak CS check',
     long_description=long_description,
     keywords='datadog agent riakcs check',
 

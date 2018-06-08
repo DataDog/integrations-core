@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-statsd',
     version=ABOUT['__version__'],
-    description='The statsd check',
+    description='The StatsD check',
     long_description=long_description,
     keywords='datadog agent statsd check',
 

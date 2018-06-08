@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-system_swap',
     version=ABOUT['__version__'],
-    description='The system_swap check',
+    description='The System Swap check',
     long_description=long_description,
     keywords='datadog agent system_swap check',
 

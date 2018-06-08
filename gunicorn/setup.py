@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-gunicorn',
     version=ABOUT['__version__'],
-    description='The gunicorn check',
+    description='The Gunicorn check',
     long_description=long_description,
     keywords='datadog agent gunicorn check',
 

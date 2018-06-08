@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-process',
     version=ABOUT['__version__'],
-    description='The process check',
+    description='The Process check',
     long_description=long_description,
     keywords='datadog agent process check',
 

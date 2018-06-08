@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-gearmand',
     version=ABOUT['__version__'],
-    description='The gearmand check',
+    description='The Gearmand check',
     long_description=long_description,
     keywords='datadog agent gearmand check',
 

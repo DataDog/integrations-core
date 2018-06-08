@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-php_fpm',
     version=ABOUT['__version__'],
-    description='The php_fpm check',
+    description='The PHP FPM check',
     long_description=long_description,
     keywords='datadog agent php_fpm check',
 
