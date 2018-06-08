@@ -4,7 +4,7 @@
 
 import os
 import subprocess
-from shutil import rmtree, copytree
+from shutil import rmtree
 import stat
 import tarfile
 import tempfile
@@ -33,9 +33,9 @@ def activemq_xml_container():
     with tarfile.open(fixture_archive, "r:gz") as f:
         f.extractall(path=activemq_data_dir)
     os.chmod(os.path.join(activemq_data_dir, "kahadb"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    # os.chmod(os.path.join(activemq_data_dir, "kahadb", "db-1.log"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db-1.log"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
     os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.data"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    # os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.redo"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.redo"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
     env = os.environ
     env["ACTIVEMQ_DATA_DIR"] = activemq_data_dir
