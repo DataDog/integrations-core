@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "cassandra",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",
   "support": "core",
@@ -11,7 +9,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.1",
   "guid": "03ba454d-425c-4f61-9e9c-54682c3ebce5",
   "public_title": "Datadog-Cassandra Integration",
   "categories":["data store", "log collection"],
