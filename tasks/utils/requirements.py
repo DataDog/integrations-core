@@ -49,7 +49,8 @@ def update_requirements(req_file, check, newline):
 
     with open(req_file, 'w') as f:
         for line in lines:
-            if line.startswith(check):
+            check_name = line.split("==")[0]
+            if check_name == check:
                 f.write(newline + '\n')
             else:
                 f.write(line)
