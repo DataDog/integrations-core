@@ -1,7 +1,10 @@
-from . import rabbitmq
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .rabbitmq import RabbitMQ
 
-RabbitMQ = rabbitmq.RabbitMQ
-
-__version__ = "1.5.1"
-
-__all__ = ['rabbitmq']
+__all__ = [
+    '__version__',
+    'RabbitMQ'
+]

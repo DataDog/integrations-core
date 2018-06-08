@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "gearmand",
   "short_description": "Track the number of jobs queued and running - in total or by task.",
   "support": "core",
@@ -10,13 +8,16 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.1.0",
   "guid": "bdd65394-92ff-4d51-bbe3-ba732663fdb2",
   "public_title": "Datadog-Gearman Integration",
-  "categories":["processing"],
-  "type":"check",
+  "categories": [
+    "processing"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/gearmand/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/gearman"]
+  "aliases": [
+    "/integrations/gearman"
+  ]
 }

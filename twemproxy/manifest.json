@@ -1,9 +1,7 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "name": "twemproxy",
-  "min_agent_version": "5.6.3",
-  "max_agent_version": "6.0.0",
   "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
   "support": "core",
   "supported_os": [
@@ -11,11 +9,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "a5cca58a-9984-4226-ad1c-8dff73c9d6ac",
   "public_title": "Datadog-Twemproxy Integration",
-  "categories":["web"],
-  "type":"check",
+  "categories": [
+    "web"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/twemproxy/",
   "is_public": true,
   "has_logo": true

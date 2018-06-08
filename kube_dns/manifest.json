@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.20.0",
+  "manifest_version": "1.0.0",
   "name": "kube_dns",
   "short_description": "Track all your Kube DNS metrics with Datadog",
   "guid": "3c05ed97-bf34-4061-83c4-e742d7daa5f8",
@@ -12,7 +10,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.3.0",
   "public_title": "Datadog-Kube DNS Integration",
   "categories": [
     "web",

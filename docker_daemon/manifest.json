@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.22.0",
+  "manifest_version": "1.0.0",
   "name": "docker_daemon",
   "short_description": "Correlate container performance with that of the services running inside them.",
   "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
@@ -11,7 +9,6 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.10.0",
   "public_title": "Datadog-Docker Integration",
   "categories": [
     "containers",

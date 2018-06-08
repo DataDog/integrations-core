@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "riakcs",
   "short_description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
   "support": "core",
@@ -11,11 +9,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
   "guid": "55ba6b94-8eeb-486b-aa94-6366a044fdf0",
   "public_title": "Datadog-Riak CS Integration",
-  "categories":["data store"],
-  "type":"check",
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/riakcs/",
   "is_public": true,
   "has_logo": true

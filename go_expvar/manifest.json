@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "go_expvar",
   "short_description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
   "support": "core",
@@ -11,13 +9,17 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.3",
   "guid": "33557f7a-5f24-43f3-9551-78432894e539",
   "public_title": "Datadog-Go-Expvar Integration",
-  "categories":["languages", "log collection"],
-  "type":"check",
+  "categories": [
+    "languages",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/go_expvar/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/goexpvar"]
+  "aliases": [
+    "/integrations/goexpvar"
+  ]
 }
