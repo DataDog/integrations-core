@@ -5,6 +5,7 @@
 import os
 import subprocess
 from shutil import rmtree, copytree
+import stat
 import tempfile
 from time import sleep
 
@@ -28,6 +29,10 @@ def activemq_xml_container():
     fixture_dir = os.path.join(HERE, "fixtures")
     activemq_data_dir = os.path.join(tmp_dir, "data")
     copytree(fixture_dir, activemq_data_dir)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db-1.log"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.data"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+    os.chmod(os.path.join(activemq_data_dir, "kahadb", "db.redo"), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
     env = os.environ
     env["ACTIVEMQ_DATA_DIR"] = activemq_data_dir
@@ -48,6 +53,7 @@ def activemq_xml_container():
 
     yield
 
+    subprocess.check_call(args + ["logs"])
     rmtree(tmp_dir, ignore_errors=True)
     subprocess.check_call(args + ["down"])
 
@@ -56,7 +62,7 @@ def wait_for_container():
     """
     Wait for the activemq_xml container to be reachable
     """
-    for i in xrange(100):
+    for i in xrange(30):
         print("Waiting for service to come up")
         try:
             requests.get(URL).raise_for_status()

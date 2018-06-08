@@ -17,16 +17,20 @@ def test_check(aggregator):
 
     tags = ["url:{}".format(URL)]
 
+    print(1)
     # Test metrics
     for mname in GENERAL_METRICS:
         aggregator.assert_metric(mname, count=1, tags=tags)
 
+    print(2)
     for mname in QUEUE_METRICS:
         aggregator.assert_metric(mname, count=1, tags=tags + ["queue:my_queue"])
 
+    print(3)
     for mname, tname in product(TOPIC_METRICS, ["my_topic", "ActiveMQ.Advisory.MasterBroker"]):
         aggregator.assert_metric(mname, count=1, tags=tags + ["topic:{}".format(tname)])
 
+    print(4)
     for mname in SUBSCRIBER_METRICS:
         subscriber_tags = tags + [
             "clientId:my_client",
@@ -38,4 +42,5 @@ def test_check(aggregator):
         ]
         aggregator.assert_metric(mname, count=1, tags=subscriber_tags)
 
+    print(5)
     aggregator.assert_all_metrics_covered()
