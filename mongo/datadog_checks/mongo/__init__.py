@@ -1,7 +1,10 @@
-from . import mongo
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .mongo import MongoDb
 
-MongoDb = mongo.MongoDb
-
-__version__ = "1.5.4"
-
-__all__ = ['mongo']
+__all__ = [
+    '__version__',
+    'MongoDb'
+]

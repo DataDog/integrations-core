@@ -1,23 +1,3 @@
----
-display_name: Amazon EKS
-doc_link: https://docs.datadoghq.com/integrations/amazon_eks/
-has_logo: true
-integration_title: Amazon EKS
-is_public: true
-kind: integration
-name: amazon_eks
-public_title: Datadog-Amazon EKS Integration
-categories:
-- aws
-- containers
-- orchestration
-further_reading:
-- link: "graphing/infrastructure/livecontainers"
-  text: List and explore all containers in your EKS cluster
-- link: "graphing/infrastructure/process"
-  text: Understand what is going on at any level of your system
----
-
 ![EKS Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/a30e284214e465844d18b7ac06c7c2b1dab8b43a/amazon_eks/images/eks_screenboard.png)
 
 ## Overview
@@ -38,4 +18,5 @@ along with integrations for any other AWS services you're running with EKS (e.g.
 
 ## Further Reading
 
-{{< partial name="whats-next/whats-next.html" >}}
+Learn more about infrastructure monitoring and all our integrations on [our blog](https://www.datadoghq.com/blog/)
+

@@ -1,7 +1,10 @@
-from . import kube_dns
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .kube_dns import KubeDNSCheck
 
-KubeDNSCheck = kube_dns.KubeDNSCheck
-
-__version__ = "1.3.0"
-
-__all__ = ['kube_dns']
+__all__ = [
+    '__version__',
+    'KubeDNSCheck'
+]

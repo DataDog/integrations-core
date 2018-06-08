@@ -1,5 +1,9 @@
 # CHANGELOG - kyototycoon
 
+## 1.4.0 / 2018-06-07
+
+* [Feature] Package `auto_conf.yaml` for appropriate integrations
+
 ## 1.3.0 / 2018-05-11
 
 * [FEATURE] Hardcode the 1978 port in the Autodiscovery template. See [#1444][] for more information.

@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 1.3.0 / 2018-06-07
+
+* [Added] Support for gathering metrics from prometheus endpoint for the kubelet itself.. See [#1581](https://github.com/DataDog/integrations-core/pull/1581).
+
 ## 1.2.0 / 2018-05-11
 
 * [FEATURE] Collect metrics directly from cadvisor, for kubenetes version older than 1.7.6. See [#1339][]

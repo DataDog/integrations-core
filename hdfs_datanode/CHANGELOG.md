@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.3.0 / 2018-06-07
+
+* [Added] Add support for HTTP authentication. See [#1674](https://github.com/DataDog/integrations-core/pull/1674).
+
 ## 1.2.0 / 2018-03-23
 
 * [FEATURE] adds custom tag support.

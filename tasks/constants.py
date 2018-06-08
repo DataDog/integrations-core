@@ -19,6 +19,7 @@ AGENT_BASED_INTEGRATIONS = [
     'aspdotnet',
     'btrfs',
     'ceph',
+    'cisco_aci',
     'consul',
     'couch',
     'couchbase',
@@ -64,6 +65,7 @@ AGENT_BASED_INTEGRATIONS = [
     'teamcity',
     'varnish',
     'vsphere',
+    'yarn',
 ]
 
 AGENT_V5_ONLY = [

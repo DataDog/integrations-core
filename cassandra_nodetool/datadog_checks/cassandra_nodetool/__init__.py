@@ -1,7 +1,10 @@
-from . import cassandra_nodetool
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .cassandra_nodetool import CassandraNodetoolCheck
 
-CassandraNodetoolCheck = cassandra_nodetool.CassandraNodetoolCheck
-
-__version__ = "0.1.1"
-
-__all__ = ['cassandra_nodetool']
+__all__ = [
+    '__version__',
+    'CassandraNodetoolCheck'
+]

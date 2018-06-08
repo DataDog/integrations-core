@@ -1,7 +1,10 @@
-from . import docker_daemon
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .docker_daemon import DockerDaemon
 
-DockerDaemon = docker_daemon.DockerDaemon
-
-__version__ = "1.10.0"
-
-__all__ = ['docker_daemon']
+__all__ = [
+    '__version__',
+    'DockerDaemon'
+]

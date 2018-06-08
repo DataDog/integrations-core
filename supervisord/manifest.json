@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "supervisord",
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",
@@ -11,13 +9,16 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.1.0",
   "guid": "2b81259b-723e-47be-8612-87e1f64152e9",
   "public_title": "Datadog-Supervisord Integration",
-  "categories":["os & system"],
-  "type":"check",
+  "categories": [
+    "os & system"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/supervisord/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/supervisor"]
+  "aliases": [
+    "/integrations/supervisor"
+  ]
 }

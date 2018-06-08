@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks
 
+## 1.3.0 / 2018-06-07
+
+* [Fixed] change default value of AgentCheck.check_id for Agent 6. See [#1652](https://github.com/DataDog/integrations-core/pull/1652).
+* [Added] Support for gathering metrics from prometheus endpoint for the kubelet itself.. See [#1581](https://github.com/DataDog/integrations-core/pull/1581).
+* [Added] include wmi for compat. See [#1565](https://github.com/DataDog/integrations-core/pull/1565).
+* [Added] added missing tailfile util. See [#1566](https://github.com/DataDog/integrations-core/pull/1566).
+* [Fixed] [base] when running A6, mirror logging behavior. See [#1561](https://github.com/DataDog/integrations-core/pull/1561).
+
 ## 1.2.2 / 2018-05-11
 
 * [FEATURE] The generic Prometheus check will now send counter as monotonic counter.

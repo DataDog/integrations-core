@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.2.0 / 2018-06-07
+
+* [Added] support histograms, fix count submission. See [#1616](https://github.com/DataDog/integrations-core/pull/1616).
+
 ## 1.1.0 / 2018-05-11
 
 * [FEATURE] add newly-documented metrics. See #1326

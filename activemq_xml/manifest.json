@@ -11,8 +11,11 @@
   ],
   "guid": "0433d687-68d3-42db-ad5c-6c232d881619",
   "public_title": "Datadog-ActiveMQ XML Integration",
-  "categories":["processing", "messaging"],
-  "type":"check",
+  "categories": [
+    "processing",
+    "messaging"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/activemq_xml/",
   "is_public": true,
   "has_logo": true

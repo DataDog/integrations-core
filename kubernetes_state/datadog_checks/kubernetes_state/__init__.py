@@ -1,7 +1,10 @@
-from . import kubernetes_state
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .kubernetes_state import KubernetesState
 
-KubernetesState = kubernetes_state.KubernetesState
-
-__version__ = "2.5.0"
-
-__all__ = ['kubernetes_state']
+__all__ = [
+    '__version__',
+    'KubernetesState'
+]

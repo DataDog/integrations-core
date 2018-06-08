@@ -1,8 +1,9 @@
 # CHANGELOG - marathon
 
-## 1.3.1 / Unreleased
+## 1.4.0 / 2018-06-07
 
-* [BUGFIX] Fix missing task count metrics (tasksStaged, tasksRunning, tasksHealthy, tasksUnhealthy) when filtering by group.
+* [Fixed] Ensure marathon queue count reports 0 for apps not in queue. See [#1548](https://github.com/DataDog/integrations-core/pull/1548).
+* [Changed] [marathon] add task counts metrics for groups. See [#1513](https://github.com/DataDog/integrations-core/pull/1513).
 
 ## 1.3.0 / 2018-05-11
 

@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.14.0",
+  "manifest_version": "1.0.0",
   "name": "rabbitmq",
   "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
   "support": "core",
@@ -11,11 +9,13 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.5.1",
   "guid": "a790a556-fbaa-4208-9d39-c42c3d57084b",
   "public_title": "Datadog-RabbitMQ Integration",
-  "categories":["processing", "log collection"],
-  "type":"check",
+  "categories": [
+    "processing",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/rabbitmq/",
   "is_public": true,
   "has_logo": true

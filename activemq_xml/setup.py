@@ -4,8 +4,7 @@
 
 # Always prefer setuptools over distutils
 from setuptools import setup
-# To use a consistent encoding
-from codecs import open
+from codecs import open  # To use a consistent encoding
 from os import path
 
 HERE = path.abspath(path.dirname(__file__))
@@ -48,7 +47,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
@@ -63,6 +62,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.activemq_xml': ['conf.yaml.example']},
+    package_data={'datadog_checks.activemq_xml': ['conf.yaml.example']},
     include_package_data=True,
 )

@@ -1,19 +1,18 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "cacti",
   "short_description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
   "support": "core",
   "supported_os": [
     "linux"
   ],
-  "version": "1.1.0",
   "guid": "566466b0-1422-44ef-b14f-493a64e7b58a",
   "public_title": "Datadog-Cacti Integration",
-  "categories":["monitoring"],
-  "type":"check",
+  "categories": [
+    "monitoring"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/cacti/",
   "is_public": true,
   "has_logo": true

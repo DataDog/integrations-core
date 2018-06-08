@@ -1,7 +1,10 @@
-from . import etcd
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .etcd import Etcd
 
-Etcd = etcd.Etcd
-
-__version__ = "1.4.0"
-
-__all__ = ['etcd']
+__all__ = [
+    '__version__',
+    'Etcd'
+]

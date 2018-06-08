@@ -9,22 +9,27 @@ from mock import patch
 # 3rd party
 import json
 
-from .common import HERE, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL
+from .common import HERE, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_USERNAME, TEST_PASSWORD
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def mocked_request():
-    patcher = patch('requests.get', new=requests_get_mock)
-    patcher.start()
-    yield
-    patcher.stop()
+    with patch("requests.get", new=requests_get_mock):
+        yield
+
+
+@pytest.fixture
+def mocked_auth_request():
+    with patch("requests.get", new=requests_auth_mock):
+        yield
 
 
 def requests_get_mock(*args, **kwargs):
@@ -50,3 +55,14 @@ def requests_get_mock(*args, **kwargs):
         with open(system_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
+
+
+def requests_auth_mock(*args, **kwargs):
+    # Make sure we're passing in authentication
+    assert 'auth' in kwargs, "Error, missing authentication"
+
+    # Make sure we've got the correct username and password
+    assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
+
+    # Return mocked request.get(...)
+    return requests_get_mock(*args, **kwargs)

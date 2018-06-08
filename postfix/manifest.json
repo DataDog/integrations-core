@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "postfix",
   "short_description": "Monitor the size of all your Postfix queues.",
   "support": "core",
@@ -10,11 +8,12 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.1.0",
   "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4",
   "public_title": "Datadog-Postfix Integration",
-  "categories":["Collaboration"],
-  "type":"check",
+  "categories": [
+    "Collaboration"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/postfix/",
   "is_public": true,
   "has_logo": true
