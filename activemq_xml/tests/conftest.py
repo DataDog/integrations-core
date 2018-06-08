@@ -42,6 +42,7 @@ def activemq_xml_container():
 
     # wait for the cluster to be up before yielding
     if not wait_for_container():
+        subprocess.check_call(args + ["logs"])
         subprocess.check_call(args + ["down"])
         raise Exception("activemq_xml container boot timed out!")
 
