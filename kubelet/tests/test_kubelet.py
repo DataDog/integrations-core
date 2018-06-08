@@ -130,12 +130,23 @@ def test_kubelet_default_options():
     assert isinstance(check.kubelet_scraper, PrometheusScraper)
 
 
-def test_kubelet_check_prometheus(monkeypatch, aggregator):
-    instance_with_tag = {"tags": ["instance:tag"]}
-    check = mock_kubelet_check(monkeypatch, [instance_with_tag])
+def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, ["instance:tag"])
+
+
+def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, None)
+
+
+def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
+    instance = {}
+    if instance_tags:
+        instance["tags"] = instance_tags
+
+    check = mock_kubelet_check(monkeypatch, [instance])
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
-    check.check(instance_with_tag)
+    check.check(instance)
 
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
@@ -146,13 +157,17 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     check.process_cadvisor.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
-    check.check(instance_with_tag)
+    check.check(instance)
     for metric in EXPECTED_METRICS_COMMON:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, "instance:tag")
+        if instance_tags:
+            for tag in instance_tags:
+                aggregator.assert_metric_has_tag(metric, tag)
     for metric in EXPECTED_METRICS_PROMETHEUS:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, "instance:tag")
+        if instance_tags:
+            for tag in instance_tags:
+                aggregator.assert_metric_has_tag(metric, tag)
     assert aggregator.metrics_asserted_pct == 100.0
 
 

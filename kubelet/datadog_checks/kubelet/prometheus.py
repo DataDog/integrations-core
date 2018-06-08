@@ -24,6 +24,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         super(CadvisorPrometheusScraper, self).__init__(check)
 
         self.NAMESPACE = 'kubernetes'
+        self.instance_tags = []
 
         self.ignore_metrics = [
             'container_cpu_cfs_periods_total',
@@ -179,6 +180,10 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             self.instance_tags = instance.get('tags', [])
 
         super(CadvisorPrometheusScraper, self).process(endpoint, **kwargs)
+
+        # Free up memory
+        self.pod_list = None
+        self.container_filter = None
 
     def _process_container_rate(self, metric_name, message):
         """Takes a simple metric about a container, reports it as a rate."""
