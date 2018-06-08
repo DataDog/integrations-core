@@ -51,6 +51,7 @@ instances:
     #   cert: /path/to/my/cert.file
     #   ca: /path/to/my/ca.file
 
+    # max_custom_queries: 20 # Optional
     # queries:               # Optional
     #  - # Sample Custom metric
     #    query: SELECT TIMESTAMPDIFF(second,MAX(create_time),NOW()) as last_accessed FROM requests
