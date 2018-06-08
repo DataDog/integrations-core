@@ -9,12 +9,13 @@ from time import sleep
 import pytest
 import requests
 
-from .common import HERE, PORT, SYSTEM_VITALS_URL, URL, TAGS, BUCKET_NAME, USER, PASSWORD, CB_CONTAINER_NAME
+from .common import HERE, PORT, URL, BUCKET_NAME, USER, PASSWORD, CB_CONTAINER_NAME
 
 
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
+
     aggregator.reset()
     return aggregator
 
@@ -65,29 +66,6 @@ def couchbase_container_ip(couchbase_service):
     Modular fixture that depends on couchbase being initialized
     """
     return get_container_ip(CB_CONTAINER_NAME)
-
-
-@pytest.fixture
-def couchbase_config():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 0.5,
-        'tags': TAGS
-    }
-
-
-@pytest.fixture
-def couchbase_query_config():
-    return {
-        'server': URL,
-        'user': USER,
-        'password': PASSWORD,
-        'timeout': 0.5,
-        'tags': TAGS,
-        'query_monitoring_url': SYSTEM_VITALS_URL
-    }
 
 
 def get_container_ip(container_id_or_name):

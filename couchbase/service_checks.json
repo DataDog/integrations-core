@@ -12,7 +12,7 @@
         "agent_version": "6.2.1",
         "integration":"couchbase",
         "check": "couchbase.by_node.cluster_membership",
-        "statuses": ["ok", "critical"],
+        "statuses": ["ok", "warning", "critical"],
         "groups": ["node"],
         "name": "Node Cluster Membership",
         "description": "Returns `CRITICAL` if the node is failed over. Returns `WARNING` if the node is added to the cluster but is waiting for a rebalance to activate. Returns `OK` otherwise."

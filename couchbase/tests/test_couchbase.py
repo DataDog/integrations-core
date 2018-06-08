@@ -6,19 +6,19 @@
 import pytest
 
 from datadog_checks.couchbase import Couchbase
-from .common import CHECK_TAGS, BUCKET_NAME, PORT
+from .common import CONFIG, CONFIG_QUERY, CHECK_TAGS, BUCKET_NAME, PORT
 
 
 @pytest.mark.integration
-def test_service_check(aggregator, couchbase_container_ip, couchbase_config):
+def test_service_check(aggregator, couchbase_container_ip):
     """
     Assert the OK service check
     """
     couchbase = Couchbase('couchbase', {}, {})
-    couchbase.check(couchbase_config)
+    couchbase.check(CONFIG['instances'][0])
 
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
-    NODE_TAGS = ['device_name:{}'.format(NODE_HOST), 'node:{}'.format(NODE_HOST)]
+    NODE_TAGS = ['node:{}'.format(NODE_HOST)]
 
     aggregator.assert_service_check(Couchbase.SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
     aggregator.assert_service_check(Couchbase.NODE_CLUSTER_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS,
@@ -28,26 +28,26 @@ def test_service_check(aggregator, couchbase_container_ip, couchbase_config):
 
 
 @pytest.mark.integration
-def test_metrics(aggregator, couchbase_container_ip, couchbase_config):
+def test_metrics(aggregator, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
 
     couchbase = Couchbase('couchbase', {}, {})
-    couchbase.check(couchbase_config)
+    couchbase.check(CONFIG['instances'][0])
 
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
 
 
 @pytest.mark.integration
-def test_query_monitoring_metrics(aggregator, couchbase_container_ip, couchbase_query_config):
+def test_query_monitoring_metrics(aggregator, couchbase_container_ip):
     """
     Test system vitals metrics (prefixed "couchbase.query.")
     """
 
     # Add query monitoring endpoint
     couchbase = Couchbase('couchbase', {}, {})
-    couchbase.check(couchbase_query_config)
+    couchbase.check(CONFIG_QUERY['instances'][0])
 
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
 
@@ -65,7 +65,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
     #  Because some metrics are deprecated, we can just see if we get an arbitrary number
     #  of bucket metrics. If there are more than that number, we assume that we're getting
     #  all the bucket metrics we should be getting
-    BUCKET_TAGS = ['device_name:{}'.format(BUCKET_NAME), 'bucket:{}'.format(BUCKET_NAME)]
+    BUCKET_TAGS = ['device:{}'.format(BUCKET_NAME), 'bucket:{}'.format(BUCKET_NAME)]
     bucket_metric_count = 0
     for bucket_metric in aggregator.metric_names:
         if bucket_metric.find('couchbase.by_bucket.') == 0:
@@ -76,7 +76,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
 
     # Assert 'couchbase.by_node.' metrics
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
-    NODE_TAGS = ['device_name:{}'.format(NODE_HOST), 'node:{}'.format(NODE_HOST)]
+    NODE_TAGS = ['device:{}'.format(NODE_HOST), 'node:{}'.format(NODE_HOST)]
     NODE_STATS = [
         'curr_items',
         'curr_items_tot',
