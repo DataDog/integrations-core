@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "cassandra_nodetool",
   "short_description": "monitor cassandra using the nodetool utility",
   "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
@@ -12,7 +10,6 @@
     "mac_os",
     "windows"
   ],
-  "version": "0.1.1",
   "public_title": "Datadog-Cassandra Nodetool Integration",
   "categories": [
     "data store"

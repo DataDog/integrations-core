@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "activemq_xml",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
@@ -11,11 +9,13 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
   "guid": "0433d687-68d3-42db-ad5c-6c232d881619",
   "public_title": "Datadog-ActiveMQ XML Integration",
-  "categories":["processing", "messaging"],
-  "type":"check",
+  "categories": [
+    "processing",
+    "messaging"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/activemq_xml/",
   "is_public": true,
   "has_logo": true

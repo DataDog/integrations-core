@@ -1,7 +1,10 @@
-from . import win32_event_log
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .win32_event_log import Win32EventLogWMI
 
-Win32EventLogWMI = win32_event_log.Win32EventLogWMI
-
-__version__ = "1.1.1"
-
-__all__ = ['win32_event_log']
+__all__ = [
+    '__version__',
+    'Win32EventLogWMI'
+]

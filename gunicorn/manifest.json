@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "gunicorn",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",
@@ -10,11 +8,12 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.2.0",
   "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
   "public_title": "Datadog-Gunicorn Integration",
-  "categories":["web"],
-  "type":"check",
+  "categories": [
+    "web"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",
   "is_public": true,
   "has_logo": true

@@ -1,7 +1,10 @@
-from . import gunicorn
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .gunicorn import GUnicornCheck
 
-GUnicornCheck = gunicorn.GUnicornCheck
-
-__version__ = "1.2.0"
-
-__all__ = ['gunicorn']
+__all__ = [
+    '__version__',
+    'GUnicornCheck'
+]

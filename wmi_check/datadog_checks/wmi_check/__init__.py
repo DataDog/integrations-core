@@ -1,7 +1,10 @@
-from . import wmi_check
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .wmi_check import WMICheck
 
-WMICheck = wmi_check.WMICheck
-
-__version__ = "1.1.1"
-
-__all__ = ['wmi_check']
+__all__ = [
+    '__version__',
+    'WMICheck'
+]

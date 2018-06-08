@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "zk",
   "short_description": "Track client connections and latencies, and know when requests are backing up.",
   "support": "core",
@@ -10,13 +8,18 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.2.0",
   "guid": "5519c110-5183-438e-85ad-63678c072ac7",
   "public_title": "Datadog-Zookeeper Integration",
-  "categories":["orchestration", "notification", "log collection"],
-  "type":"check",
+  "categories": [
+    "orchestration",
+    "notification",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/zk/",
   "is_public": true,
   "has_logo": true,
-  "aliases":["/integrations/zookeeper"]
+  "aliases": [
+    "/integrations/zookeeper"
+  ]
 }

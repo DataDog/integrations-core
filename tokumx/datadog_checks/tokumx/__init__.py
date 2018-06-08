@@ -1,7 +1,10 @@
-from . import tokumx
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .tokumx import TokuMX
 
-TokuMX = tokumx.TokuMX
-
-__version__ = "1.2.0"
-
-__all__ = ['tokumx']
+__all__ = [
+    '__version__',
+    'TokuMX'
+]

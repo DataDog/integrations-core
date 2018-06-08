@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "fluentd",
   "short_description": "Monitor buffer queues and retry counts for each Fluentd plugin you've enabled.",
   "support": "core",
@@ -11,11 +9,13 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.0.0",
   "guid": "68100352-b993-43e6-9dc8-5ecd498e160b",
   "public_title": "Datadog-FluentD Integration",
-  "categories":["logging", "log collection"],
-  "type":"check",
+  "categories": [
+    "logging",
+    "log collection"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
   "is_public": true,
   "has_logo": true

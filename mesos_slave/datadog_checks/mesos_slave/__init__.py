@@ -1,7 +1,10 @@
-from . import mesos_slave
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .mesos_slave import MesosSlave
 
-MesosSlave = mesos_slave.MesosSlave
-
-__version__ = "1.2.0"
-
-__all__ = ['mesos_slave']
+__all__ = [
+    '__version__',
+    'MesosSlave'
+]
