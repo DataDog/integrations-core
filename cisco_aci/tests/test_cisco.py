@@ -14,12 +14,13 @@ from datadog_checks.cisco_aci.api import SessionWrapper, Api
 
 from datadog_checks.utils.containers import hash_mutable
 
+from .common import FIXTURE_LIST_FILE_MAP
+
 log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
-
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -50,6 +51,7 @@ class FakeSess(SessionWrapper):
         mock_path = mock_path.replace('[', '_')
         mock_path = mock_path.replace(']', '_')
         mock_path = mock_path.replace('|', '_')
+        mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
         mock_path = os.path.join(FIXTURES_DIR, mock_path)
         mock_path += '.txt'
 
