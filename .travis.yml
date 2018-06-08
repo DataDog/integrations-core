@@ -75,6 +75,8 @@ jobs:
     - stage: test
       env: CHECK=exchange_server
     - stage: test
+      env: CHECK=gitlab
+    - stage: test
       env: CHECK=haproxy
     - stage: test
       env: CHECK=hdfs_datanode
