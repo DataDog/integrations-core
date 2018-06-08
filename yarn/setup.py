@@ -28,7 +28,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-yarn',
     version=ABOUT['__version__'],
-    description='The Yarn Check',
+    description='The Yarn check',
     long_description=long_description,
     keywords='datadog agent yarn check',
 

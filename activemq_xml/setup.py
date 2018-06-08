@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-activemq_xml',
     version=ABOUT['__version__'],
-    description='The activemq_xml check',
+    description='The ActiveMQ XML check',
     long_description=long_description,
     keywords='datadog agent activemq_xml check',
 

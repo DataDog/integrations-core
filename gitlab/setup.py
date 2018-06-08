@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-gitlab',
     version=ABOUT['__version__'],
-    description='The gitlab check',
+    description='The Gitlab check',
     long_description=long_description,
     keywords='datadog agent gitlab check',
 

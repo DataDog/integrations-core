@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-mesos_slave',
     version=ABOUT['__version__'],
-    description='The mesos_slave check',
+    description='The Mesos slave check',
     long_description=long_description,
     keywords='datadog agent mesos_slave check',
 

@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-kube_dns',
     version=ABOUT['__version__'],
-    description='The kube_dns check',
+    description='The KubeDNS check',
     long_description=long_description,
     keywords='datadog agent kube_dns check',
 
@@ -63,6 +63,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.kube_dns': ['conf.yaml.example']},
+    package_data={'datadog_checks.kube_dns': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

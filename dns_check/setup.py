@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-dns_check',
     version=ABOUT['__version__'],
-    description='The dns_check check',
+    description='The DNS check',
     long_description=long_description,
     keywords='datadog agent dns_check check',
 

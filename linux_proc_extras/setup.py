@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-linux_proc_extras',
     version=ABOUT['__version__'],
-    description='The linux_proc_extras check',
+    description='The Linux Proc Extras check',
     long_description=long_description,
     keywords='datadog agent linux_proc_extras check',
 

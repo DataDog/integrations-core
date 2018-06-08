@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-mongo',
     version=ABOUT['__version__'],
-    description='The mongo check',
+    description='The Mongo check',
     long_description=long_description,
     keywords='datadog agent mongo check',
 

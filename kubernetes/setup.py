@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-kubernetes',
     version=ABOUT['__version__'],
-    description='The kubernetes check',
+    description='The Kubernetes check',
     long_description=long_description,
     keywords='datadog agent kubernetes check',
 

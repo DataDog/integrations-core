@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-windows_service',
     version=ABOUT['__version__'],
-    description='The windows_service check',
+    description='The Windows Service check',
     long_description=long_description,
     keywords='datadog agent windows_service check',
 

@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-go_expvar',
     version=ABOUT['__version__'],
-    description='The go_expvar check',
+    description='The Go Expvar check',
     long_description=long_description,
     keywords='datadog agent go_expvar check',
 

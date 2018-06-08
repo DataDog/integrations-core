@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-sqlserver',
     version=ABOUT['__version__'],
-    description='The sqlserver check',
+    description='The SQL Server check',
     long_description=long_description,
     keywords='datadog agent sqlserver check',
 

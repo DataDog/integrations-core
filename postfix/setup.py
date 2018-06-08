@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-postfix',
     version=ABOUT['__version__'],
-    description='The postfix check',
+    description='The Postfix check',
     long_description=long_description,
     keywords='datadog agent postfix check',
 

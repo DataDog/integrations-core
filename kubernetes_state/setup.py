@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-kubernetes_state',
     version=ABOUT['__version__'],
-    description='The kubernetes_state check',
+    description='The Kubernetes State check',
     long_description=long_description,
     keywords='datadog agent kubernetes_state check',
 
@@ -63,6 +63,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.kubernetes_state': ['conf.yaml.example']},
+    package_data={'datadog_checks.kubernetes_state': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

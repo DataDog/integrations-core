@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-tokumx',
     version=ABOUT['__version__'],
-    description='The tokumx check',
+    description='The TokuMX check',
     long_description=long_description,
     keywords='datadog agent tokumx check',
 

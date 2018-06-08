@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-tcp_check',
     version=ABOUT['__version__'],
-    description='The tcp_check check',
+    description='The TCP check',
     long_description=long_description,
     keywords='datadog agent tcp_check check',
 

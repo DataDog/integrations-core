@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-nagios',
     version=ABOUT['__version__'],
-    description='The nagios check',
+    description='The Nagios check',
     long_description=long_description,
     keywords='datadog agent nagios check',
 

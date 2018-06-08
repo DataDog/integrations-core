@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-supervisord',
     version=ABOUT['__version__'],
-    description='The supervisord check',
+    description='The Supervisord check',
     long_description=long_description,
     keywords='datadog agent supervisord check',
 

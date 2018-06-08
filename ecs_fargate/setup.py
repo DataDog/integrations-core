@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-ecs_fargate',
     version=ABOUT['__version__'],
-    description='The ecs_fargate check',
+    description='The ECS Fargate check',
     long_description=long_description,
     keywords='datadog agent ecs_fargate check',
 

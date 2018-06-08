@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-docker_daemon',
     version=ABOUT['__version__'],
-    description='The docker_daemon check',
+    description='The Docker Daemon check',
     long_description=long_description,
     keywords='datadog agent docker_daemon check',
 

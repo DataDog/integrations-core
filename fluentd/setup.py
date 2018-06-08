@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-fluentd',
     version=ABOUT['__version__'],
-    description='The fluentd check',
+    description='The Fluentd check',
     long_description=long_description,
     keywords='datadog agent fluentd check',
 

@@ -26,7 +26,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-wmi_check',
     version=ABOUT['__version__'],
-    description='The wmi_check check',
+    description='The WMI check',
     long_description=long_description,
     keywords='datadog agent wmi_check check',
 
