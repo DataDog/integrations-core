@@ -29,6 +29,7 @@ AGENT_BASED_INTEGRATIONS = [
     'elastic',
     'envoy',
     'exchange_server',
+    'gitlab_runner',
     'haproxy',
     'hdfs_datanode',
     'hdfs_namenode',
