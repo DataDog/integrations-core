@@ -5,7 +5,7 @@ from __future__ import print_function, unicode_literals
 import os
 import sys
 
-from packaging import version
+from semver import parse_version_info
 from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
@@ -145,8 +145,8 @@ def release_prepare(ctx, target, new_version):
 
     # sanity check on the version provided
     cur_version = get_version_string(target)
-    p_version = version.parse(new_version)
-    p_current = version.parse(cur_version)
+    p_version = parse_version_info(new_version)
+    p_current = parse_version_info(cur_version)
     if p_version <= p_current:
         raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
 

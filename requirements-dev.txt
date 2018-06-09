@@ -1,6 +1,6 @@
 invoke
 pip-tools
-packaging
+semver
 tox
 docker-compose
 twine
