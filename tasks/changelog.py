@@ -10,7 +10,7 @@ from datetime import datetime
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
-from packaging import version
+from semver import parse_version_info
 
 from .constants import ROOT, AGENT_BASED_INTEGRATIONS
 from .utils.common import get_version_string, get_release_tag_string
@@ -48,13 +48,12 @@ def update_changelog(ctx, target, new_version, dry_run=False):
         raise Exit("Provided target is not an Agent-based Integration")
 
     # sanity check on the version provided
-    p_version = version.parse(new_version)
-    p_current = version.parse(get_version_string(target))
-    if p_version <= p_current:
-        raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
-    print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
+    cur_version = get_version_string(target)
+    if parse_version_info(new_version) <= parse_version_info(cur_version):
+        raise Exit("Current version is {}, can't bump to {}".format(cur_version, new_version))
 
-    do_update_changelog(ctx, target, str(p_current), new_version, dry_run)
+    print("Current version of check {}: {}, bumping to: {}".format(target, cur_version, new_version))
+    do_update_changelog(ctx, target, cur_version, new_version, dry_run)
 
 
 def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
