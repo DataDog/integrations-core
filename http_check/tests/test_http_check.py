@@ -10,8 +10,8 @@ import mock
 from datadog_checks.http_check import HTTPCheck
 from datadog_checks.utils.headers import headers as agent_headers
 from .common import (
-    FAKE_CERT, CONFIG, CONFIG_HTTP_HEADERS, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME, CONFIG_POST_METHOD,
-    CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME, CONFIG_POST_SOAP, CONFIG_DONT_CHECK_EXP
+    FAKE_CERT, CONFIG, CONFIG_HTTP_HEADERS, CONFIG_SSL_ONLY, CONFIG_EXPIRED_SSL, CONFIG_CUSTOM_NAME, CONFIG_DATA_METHOD,
+    CONFIG_HTTP_REDIRECTS, CONFIG_UNORMALIZED_INSTANCE_NAME, CONFIG_DONT_CHECK_EXP
 )
 
 
@@ -185,11 +185,10 @@ def test_dont_check_expiration(aggregator, http_check):
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, tags=url_tag + instance_tag, count=0)
 
 
-def test_post_method(aggregator, http_check):
+def test_data_methods(aggregator, http_check):
 
     # Run the check once for both POST configs
-    POST_CONFIGS = CONFIG_POST_METHOD['instances'] + CONFIG_POST_SOAP['instances']
-    for instance in POST_CONFIGS:
+    for instance in CONFIG_DATA_METHOD['instances']:
         http_check.check(instance)
 
         url_tag = ['url:{}'.format(instance.get('url'))]
