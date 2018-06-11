@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from xml.etree import ElementTree
@@ -9,8 +9,8 @@ from xml.etree import ElementTree
 import requests
 
 # project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 QUEUE_URL = "/admin/xml/queues.jsp"
 TOPIC_URL = "/admin/xml/topics.jsp"

@@ -14,6 +14,7 @@ AGENT_REQ_FILE = 'requirements-agent-release.txt'
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'active_directory',
+    'activemq_xml',
     'apache',
     'aspdotnet',
     'btrfs',
@@ -29,6 +30,7 @@ AGENT_BASED_INTEGRATIONS = [
     'elastic',
     'envoy',
     'exchange_server',
+    'gitlab',
     'gitlab_runner',
     'haproxy',
     'hdfs_datanode',

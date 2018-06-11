@@ -7,7 +7,7 @@ import sys
 
 import mock
 import pytest
-from datadog_checks.kubelet import KubeletCheck
+from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
 from datadog_checks.checks.prometheus import PrometheusScraper
 
@@ -130,12 +130,23 @@ def test_kubelet_default_options():
     assert isinstance(check.kubelet_scraper, PrometheusScraper)
 
 
-def test_kubelet_check_prometheus(monkeypatch, aggregator):
-    instance_with_tag = {"tags": ["instance:tag"]}
-    check = mock_kubelet_check(monkeypatch, [instance_with_tag])
+def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, ["instance:tag"])
+
+
+def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, None)
+
+
+def _test_kubelet_check_prometheus(monkeypatch, aggregator, instance_tags):
+    instance = {}
+    if instance_tags:
+        instance["tags"] = instance_tags
+
+    check = mock_kubelet_check(monkeypatch, [instance])
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
-    check.check(instance_with_tag)
+    check.check(instance)
 
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
@@ -146,13 +157,17 @@ def test_kubelet_check_prometheus(monkeypatch, aggregator):
     check.process_cadvisor.assert_not_called()
 
     # called twice so pct metrics are guaranteed to be there
-    check.check(instance_with_tag)
+    check.check(instance)
     for metric in EXPECTED_METRICS_COMMON:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, "instance:tag")
+        if instance_tags:
+            for tag in instance_tags:
+                aggregator.assert_metric_has_tag(metric, tag)
     for metric in EXPECTED_METRICS_PROMETHEUS:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, "instance:tag")
+        if instance_tags:
+            for tag in instance_tags:
+                aggregator.assert_metric_has_tag(metric, tag)
     assert aggregator.metrics_asserted_pct == 100.0
 
 
@@ -275,7 +290,7 @@ class MockResponse(mock.Mock):
 def test_perform_kubelet_check(monkeypatch):
     check = KubeletCheck('kubelet', None, {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
-    check.kubelet_conn_info = {}
+    check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
     instance_tags = ["one:1"]
@@ -300,3 +315,33 @@ def test_report_node_metrics(monkeypatch):
         mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar'])
     ]
     check.gauge.assert_has_calls(calls, any_order=False)
+
+
+def test_retrieve_pod_list_success(monkeypatch):
+    class MockResponse:
+        def __init__(self, json_data):
+            self.json_data = json_data
+
+        def json(self):
+            return (json.loads(self.json_data))
+
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query',
+                        mock.Mock(return_value=MockResponse(mock_from_file('pod_list_raw.dat'))))
+
+    retrieved = check.retrieve_pod_list()
+    expected = json.loads(mock_from_file("pod_list_raw.json"))
+    assert (json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True))
+
+
+def test_retrieved_pod_list_failure(monkeypatch):
+    def mock_perform_kubelet_query(s):
+        raise Exception("network error")
+
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
+
+    retrieved = check.retrieve_pod_list()
+    assert retrieved is None

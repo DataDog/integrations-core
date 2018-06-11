@@ -47,6 +47,8 @@ jobs:
     - stage: test
       env: CHECK=active_directory
     - stage: test
+      env: CHECK=activemq_xml
+    - stage: test
       env: CHECK=apache
     - stage: test
       env: CHECK=aspdotnet
@@ -99,6 +101,8 @@ jobs:
     - stage: test
       env: CHECK=linkerd
     - stage: test
+      env: CHECK=mapreduce
+    - stage: test
       env: CHECK=marathon
     - stage: test
       env: CHECK=mcache
@@ -110,6 +114,10 @@ jobs:
       env: CHECK=nfsstat
     - stage: test
       env: CHECK=nginx
+    - stage: test
+      env: CHECK=ntp
+    - stage: test
+      env: CHECK=openstack
     - stage: test
       env: CHECK=oracle
     - stage: test
@@ -140,6 +148,8 @@ jobs:
       env: CHECK=varnish
     - stage: test
       env: CHECK=vsphere
+    - stage: test
+      env: CHECK=yarn
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
