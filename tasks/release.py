@@ -172,7 +172,7 @@ def release_dev(ctx, branch=None, dry_run=False):
 
     if not dry_run:
         ctx.run('git add --all')
-        ctx.run('git commit')
+        ctx.run('git commit -m "Dev version update for revision {}"'.format(current_rev))
 
 
 @task(help={
