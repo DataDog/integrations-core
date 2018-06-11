@@ -220,8 +220,13 @@ class SQLServer(AgentCheck):
                 self.log.error('%s has an invalid table name: %s', row['name'], db_table)
                 continue
 
-            metric_type = 'counter_name' if 'counter_name' in row else 'object_name'
-            row['metric_type'] = metric_type
+            if 'counter_name' in row:
+                row['metric_type'] = 'counter_name'
+            elif 'object_name' in row:
+                row['metric_type'] = 'object_name'
+            else:
+                self.log.error('Field counter_name or object_name is required for {}'.format(row['name']))
+                continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
                 user_type = row.get('type')
