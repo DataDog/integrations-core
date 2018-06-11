@@ -22,12 +22,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from requests.packages.urllib3.util import ssl_
 
-from requests.packages.urllib3.exceptions import (
-    InsecureRequestWarning,
-    SecurityWarning,
-)
-from requests.packages.urllib3.packages.ssl_match_hostname import \
-    match_hostname
+from requests.packages.urllib3.exceptions import InsecureRequestWarning, SecurityWarning
+from requests.packages.urllib3.packages.ssl_match_hostname import match_hostname
 
 # project
 from datadog_checks.checks import NetworkCheck, Status
@@ -36,6 +32,8 @@ from datadog_checks.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = "(1|2|3)\d\d"
 CONTENT_LENGTH = 200
+
+DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 
 class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
@@ -97,8 +95,7 @@ class WeakCiphersHTTPSConnection(urllib3.connection.VerifiedHTTPSConnection):
                 )
             match_hostname(cert, self.assert_hostname or hostname)
 
-        self.is_verified = (resolved_cert_reqs == ssl.CERT_REQUIRED
-                            or self.assert_fingerprint is not None)
+        self.is_verified = (resolved_cert_reqs == ssl.CERT_REQUIRED or self.assert_fingerprint is not None)
 
 
 class WeakCiphersHTTPSConnectionPool(urllib3.connectionpool.HTTPSConnectionPool):
@@ -290,8 +287,8 @@ class HTTPCheck(NetworkCheck):
                 r = sess.request(method.upper(), addr, auth=auth, timeout=timeout, headers=headers,
                                  proxies=instance_proxy, allow_redirects=allow_redirects,
                                  verify=False if disable_ssl_validation else instance_ca_certs,
-                                 json=data if method.lower() == 'post' and isinstance(data, dict) else None,
-                                 data=data if method.lower() == 'post' and isinstance(data, basestring) else None,
+                                 json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                                 data=data if method.upper() in DATA_METHODS and isinstance(data, basestring) else None,
                                  cert=(client_cert, client_key) if client_cert and client_key else None)
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
