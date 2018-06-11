@@ -122,14 +122,15 @@ def release_show_pending(ctx, target):
 
 
 @task
-def release_dev(ctx, branch=None, dry_run=False):
+def release_dev(ctx, branch=None, commit=True, push=False, force=False, dry_run=False):
     """Updates the dev version of any check that was modified in the most
     recent commit to the master branch. This command is idempotent given
     the same state of master and ignores release commits.
     """
+    branch = branch or 'master'
     current_rev, previous_rev = (
         line.strip() for line in ctx.run(
-            'git rev-list --abbrev-commit --max-count=2 {}'.format(branch or 'master'),
+            'git rev-list --abbrev-commit --max-count=2 {}'.format(branch),
             hide='out'
         ).stdout.splitlines() if line
     )
@@ -170,9 +171,11 @@ def release_dev(ctx, branch=None, dry_run=False):
         else:
             update_version_module(check, full_version, new_version)
 
-    if not dry_run:
+    if not dry_run and commit:
         ctx.run('git add --all')
         ctx.run('git commit -m "Dev version update for revision {}"'.format(current_rev))
+        if push:
+            ctx.run('git push{} -u origin {}'.format(' -f' if force else '', branch))
 
 
 @task(help={
