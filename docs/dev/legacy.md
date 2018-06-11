@@ -252,7 +252,7 @@ For example in our MySQL integration, the [`ci/mysql.rake` file][10] uses the [o
 
 ### Installing your Integration locally
 
-When your Integration is merged into the `integrations-extras` repository, we generate packages so that others can easily install your Integration (see the [Installing Core & Extra Integrations guide][11]. However, you may want to install your Integration locally before it's merged.
+When your Integration is merged into the `integrations-extras` repository, we generate packages so that others can easily install your Integration. However, you may want to install your Integration locally before it's merged.
 
 To run locally, first copy your `check.py` file into the Datadog Agent's `checks.d` directory and rename it to `my_integration.py` (using the actual name of your integration).
 
@@ -276,7 +276,7 @@ In our experience building integrations, we've also faced a number of challenges
 * Consider generating calculated metrics in addition to raw metrics. For example, many databases have slow, but less frequently run queries. So it's often useful to look at percentiles. For example, our MySQL integration includes a calculated metric for the [95th percentile query execution time][16].
 
 [1]: https://github.com/DataDog/integrations-extras
-[2]: /agent/agent_checks/
+[2]: https://docs.datadoghq.com/developers/agent_checks/
 [3]: https://github.com/DataDog/dd-agent/blob/master/tests/README.md#integration-tests
 [4]: https://github.com/DataDog/dd-agent/blob/master/ci/common.rb
 [5]: https://github.com/DataDog/dd-agent/blob/master/CONTRIBUTING.md#submitting-issues
@@ -284,8 +284,7 @@ In our experience building integrations, we've also faced a number of challenges
 [7]: https://github.com/DataDog/dd-agent/blob/master/tests/checks/common.py
 [8]: https://github.com/DataDog/dd-agent
 [9]: https://github.com/DataDog/dd-agent/tree/master/utils
-[10]: https://github.com/DataDog/integrations-core/blob/master/mysql/test/ci/mysql.rake
-[11]: /agent/faq/install-core-extra
+[10]: https://github.com/DataDog/integrations-core/blob/5.19.x/mysql/ci/mysql.rake
 [12]: https://github.com/DataDog/integrations-extras/compare
 [13]: https://github.com/DataDog/integrations-core/tree/master/mongo/test/ci
 [14]: https://github.com/DataDog/integrations-core/blob/master/mysql/check.py#L1169

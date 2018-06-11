@@ -229,5 +229,5 @@ Read our [series of blog posts][8] about how to monitor your Redis servers with 
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [6]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
-[7]: https://github.com/DataDog/integrations-core/blob/master/docs/index.md
+[7]: https://docs.datadoghq.com/developers/integrations/
 [8]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics/
