@@ -10,7 +10,7 @@ from datetime import datetime
 from six import StringIO
 from invoke import task
 from invoke.exceptions import Exit
-from packaging import version
+import semver
 
 from .constants import ROOT, AGENT_BASED_INTEGRATIONS
 from .utils.common import get_version_string, get_release_tag_string
@@ -27,6 +27,18 @@ CHANGELOG_TYPES = [
     'Removed',
     'Security',
 ]
+CHANGELOG_MAJOR_VERSION = [
+    'Removed',
+    'Changed'
+]
+CHANGELOG_MINOR_VERSION = [
+    'Added',
+    'Deprecated',
+    'Security'
+]
+CHANGELOG_BUGFIX_VERSION = [
+    'Fixed'
+]
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
@@ -35,7 +47,7 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
     'target': "The check to compile the changelog for",
     'dry-run': "Runs the task without actually doing anything",
 })
-def update_changelog(ctx, target, new_version, dry_run=False):
+def update_changelog(ctx, target, new_version=None, dry_run=False):
     """
     Update the changelog for the given check with the changes
     since the current release.
@@ -48,20 +60,27 @@ def update_changelog(ctx, target, new_version, dry_run=False):
         raise Exit("Provided target is not an Agent-based Integration")
 
     # sanity check on the version provided
-    p_version = version.parse(new_version)
-    p_current = version.parse(get_version_string(target))
-    if p_version <= p_current:
-        raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
-    print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
+    # The new_version is allowed to be none since we can auto detect it later
+    if new_version is not None:
+        p_version = semver.parse(new_version)
+        p_current = semver.parse(get_version_string(target))
+        if p_version <= p_current:
+            raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
+        print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
 
     do_update_changelog(ctx, target, str(p_current), new_version, dry_run)
 
 
-def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
+def do_update_changelog(ctx, target, cur_version, new_version=None, dry_run=False):
     """
     Actually perform the operations needed to update the changelog, this
     method is supposed to be used by other tasks and not directly.
     """
+
+    # Store the highest version we need to update:
+    # -1 = No changes for this check, 0 = bugfix, 1 = minor, 2 = major
+    current_highest_version_label = -1
+
     # get the name of the current release tag
     target_tag = get_release_tag_string(target, cur_version)
 
@@ -85,6 +104,7 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
             raise Exit("No valid changelog labels found attached to PR #{}, please add one".format(pr_num))
         elif len(changelog_labels) > 1:
             raise Exit("Multiple changelog labels found attached to PR #{}, please use only one".format(pr_num))
+        current_highest_version_label = update_highest_found_version(current_highest_version_label, changelog_labels[0])
 
         changelog_type = changelog_labels[0]
         if changelog_type == CHANGELOG_TYPE_NONE:
@@ -100,6 +120,13 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
                                author, author_url, from_contributor(payload))
 
         entries.append(entry)
+
+    # Determine what the new version should be based on the changelog labels
+    new_version = bump_version(cur_version, current_highest_version_label)
+
+    # Lets exit here if we didn't get any interesting PRs worth releasing for:
+    if new_version == cur_version:
+        raise Exit("No PRs were found with a changelog.")
 
     # store the new changelog in memory
     new_entry = StringIO()
@@ -144,3 +171,25 @@ def do_update_changelog(ctx, target, cur_version, new_version, dry_run=False):
     # overwrite the old changelog
     with open(changelog_path, 'w') as f:
         f.write(changelog.getvalue())
+
+    return new_version
+
+def update_highest_found_version(current_highest_version_label, changelog_label):
+    if changelog_label in CHANGELOG_MAJOR_VERSION:
+        current_highest_version_label = 2
+    elif changelog_label in CHANGELOG_MINOR_VERSION and current_highest_version_label <= 1:
+        current_highest_version_label = 1
+    elif changelog_label in CHANGELOG_BUGFIX_VERSION and current_highest_version_label <= 0:
+        current_highest_version_label = 0
+
+    return current_highest_version_label
+
+def bump_version(cur_version, version_to_bump):
+    new_version = cur_version
+    if version_to_bump == 0:
+        new_version = semver.bump_bugfix(cur_version)
+    elif version_to_bump == 1:
+        new_version = semver.bump_minor(cur_version)
+    elif version_to_bump == 2:
+        new_version = semver.bump_major(cur_version)
+    return new_version

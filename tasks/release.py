@@ -5,10 +5,10 @@ from __future__ import print_function, unicode_literals
 import os
 import sys
 
-from packaging import version
 from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
+import semver
 
 from .constants import AGENT_BASED_INTEGRATIONS, AGENT_V5_ONLY, ROOT, AGENT_REQ_FILE
 from .utils.git import (
@@ -123,7 +123,7 @@ def release_show_pending(ctx, target):
     'target': "The check to release",
     'new_version': "The new version",
 })
-def release_prepare(ctx, target, new_version):
+def release_prepare(ctx, target, new_version=None):
     """
     Perform a set of operations needed to release a single check:
 
@@ -145,18 +145,26 @@ def release_prepare(ctx, target, new_version):
 
     # sanity check on the version provided
     cur_version = get_version_string(target)
-    p_version = version.parse(new_version)
-    p_current = version.parse(cur_version)
-    if p_version <= p_current:
-        raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
+    p_current = semver.parse(cur_version)
+
+    if new_version is not None:
+        p_version = semver.parse(new_version)
+        if p_version <= p_current:
+            raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
+
+
+    # update the CHANGELOG
+    print("Updating the changelog")
+    auto_detected_new_ver = do_update_changelog(ctx, target, cur_version, new_version)
+
+    if new_version is None:
+        new_version = auto_detected_new_ver
+        p_version = semver.parse(new_version)
 
     # update the version number
     print("Current version of check {}: {}, bumping to: {}".format(target, p_current, p_version))
     update_version_module(target, cur_version, new_version)
 
-    # update the CHANGELOG
-    print("Updating the changelog")
-    do_update_changelog(ctx, target, cur_version, new_version)
 
     # update the global requirements file
     req_file = os.path.join(ROOT, AGENT_REQ_FILE)
