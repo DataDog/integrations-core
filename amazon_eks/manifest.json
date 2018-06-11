@@ -16,7 +16,8 @@
   "categories": [
     "aws",
     "containers",
-    "orchestration"
+    "orchestration",
+    "log collection"
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/amazon_eks/",
   "type": "check",
