@@ -70,7 +70,10 @@ def update_version_module(check_name, old_ver, new_ver):
     Change the Python code in the __about__.py module so that `__version__`
     contains the new value.
     """
-    contents = read_version_file(check_name)
+    version_file = get_version_file(check_name)
+    with open(version_file, 'r') as f:
+        contents = f.read()
+
     contents = contents.replace(old_ver, new_ver)
-    with open(about_module, 'w') as f:
+    with open(version_file, 'w') as f:
         f.write(contents)

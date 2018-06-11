@@ -155,8 +155,8 @@ def release_dev(ctx, dry_run=False):
                 break
 
     for check in sorted(to_modify):
-        full_version = get_version_string(target, release=False)
-        release_version = parse_release_version(cur_version)
+        full_version = get_version_string(check, release=False)
+        release_version = parse_release_version(full_version)
         new_version = make_dev_version(release_version, current_rev)
 
         if dry_run:
