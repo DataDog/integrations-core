@@ -154,6 +154,10 @@ def release_dev(ctx, dry_run=False):
                 del to_modify[check]
                 break
 
+    # If there's no check to bump indicate no committing is necessary.
+    if not to_modify:
+        Exit(code=2)
+
     for check in sorted(to_modify):
         full_version = get_version_string(check, release=False)
         release_version = parse_release_version(full_version)
