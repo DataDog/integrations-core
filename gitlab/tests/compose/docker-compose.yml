@@ -1,0 +1,11 @@
+version: '2'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    volumes:
+      - ./config/gitlab.rb:/etc/gitlab/gitlab.rb
+    ports:
+      - "${GITLAB_LOCAL_PORT}:80"
+      - "${GITLAB_LOCAL_PROMETHEUS_PORT}:9090"
+    environment:
+      - GITLAB_ROOT_PASSWORD=${GITLAB_TEST_PASSWORD}
