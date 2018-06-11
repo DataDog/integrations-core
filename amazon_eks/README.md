@@ -25,7 +25,7 @@ along with integrations for any other AWS services you're running with EKS (e.g.
 The setup is exactly the same as for Kubernetes. 
 To start collecting logs from all your containers, use your Datadog Agent [environment variables](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup).
 
-Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup). 
+Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation). 
 
 Follow the [container log collection steps](https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation) to learn more about those environment variables and discover more advanced setup options.
 
