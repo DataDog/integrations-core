@@ -31,6 +31,7 @@ AGENT_BASED_INTEGRATIONS = [
     'envoy',
     'exchange_server',
     'gitlab',
+    'gitlab_runner',
     'haproxy',
     'hdfs_datanode',
     'hdfs_namenode',
