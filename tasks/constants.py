@@ -73,3 +73,11 @@ AGENT_V5_ONLY = [
     'kubernetes',
     'ntp',
 ]
+
+# If a file changes in a PR with any of these file extensiosn, a test will run against the check containing the file
+FILE_EXTENSIONS_TO_TEST = [
+    '.py',
+    '.rake',
+    '.ini',
+    '.txt',
+]
