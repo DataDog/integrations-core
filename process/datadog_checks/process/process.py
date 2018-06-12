@@ -25,6 +25,7 @@ DEFAULT_PID_CACHE_DURATION = 120
 ATTR_TO_METRIC = {
     'thr':              'threads',
     'cpu':              'cpu.pct',
+    'cpu_norm':         'cpu.normalized_pct',
     'rss':              'mem.rss',
     'vms':              'mem.vms',
     'real':             'mem.real',
@@ -207,7 +208,7 @@ class ProcessCheck(AgentCheck):
         except (NotImplementedError, AttributeError):
             self.log.debug("psutil method %s not implemented", method)
         except psutil.AccessDenied:
-            self.log.debug("psutil was denied acccess for method %s", method)
+            self.log.debug("psutil was denied access for method %s", method)
             if method == 'num_fds' and Platform.is_unix() and try_sudo:
                 try:
                     # It is up the agent's packager to grant
@@ -275,12 +276,14 @@ class ProcessCheck(AgentCheck):
             st['thr'].append(self.psutil_wrapper(p, 'num_threads', None, try_sudo))
 
             cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None, try_sudo)
+            # cpu_count = self.psutil_wrapper(p, 'cpu_count', None, try_sudo)
+            cpu_count = psutil.cpu_count()
             if not new_process:
                 # psutil returns `0.` for `cpu_percent` the
                 # first time it's sampled on a process,
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
-
+                st['cpu_norm'].append(cpu_count)
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
