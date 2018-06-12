@@ -75,9 +75,8 @@ AGENT_V5_ONLY = [
 ]
 
 # If a file changes in a PR with any of these file extensiosn, a test will run against the check containing the file
-FILE_EXTENSIONS_TO_TEST = [
+TESTABLE_FILE_EXTENSIONS = [
     '.py',
-    '.rake',
     '.ini',
     '.txt',
 ]
