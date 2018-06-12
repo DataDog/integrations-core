@@ -6,10 +6,6 @@ Send events from your Nagios-monitored infrastructure to Datadog for richer aler
 
 This check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. The check can also send Nagios Perfdata as metrics to Datadog.
 
-* Watches your Nagios server's logs and sends events to your Datadog event stream. It emits eve
-
-The check emits events for service flaps, host state changes, passive service checks, host and service downtimes, and more. It can also send Nagios Perfdata to Datadog as metrics.
-
 ## Setup
 ### Installation
 
