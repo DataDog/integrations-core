@@ -276,14 +276,16 @@ class ProcessCheck(AgentCheck):
             st['thr'].append(self.psutil_wrapper(p, 'num_threads', None, try_sudo))
 
             cpu_percent = self.psutil_wrapper(p, 'cpu_percent', None, try_sudo)
-            # cpu_count = self.psutil_wrapper(p, 'cpu_count', None, try_sudo)
             cpu_count = psutil.cpu_count()
             if not new_process:
                 # psutil returns `0.` for `cpu_percent` the
                 # first time it's sampled on a process,
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
-                st['cpu_norm'].append(cpu_count)
+                if cpu_count > 0:
+                    st['cpu_norm'].append(cpu_percent/cpu_count)
+                else:
+                    self.log.debug('could not calculate normalized_pct, cpu_count: %s' % (cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
