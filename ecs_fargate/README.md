@@ -43,13 +43,13 @@ Need help? Contact [Datadog Support][3].
 
 ## Further Reading
 
-* [Monitor AWS Fargate applications with Datadog](https://www.datadoghq.com/blog/monitor-aws-fargate/)
+* [Monitor AWS Fargate applications with Datadog][4]
 
 
 [1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [2]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [3]: http://docs.datadoghq.com/help/
-[4]: 
+[4]: https://www.datadoghq.com/blog/monitor-aws-fargate/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/conf.yaml.example
 [7]: https://docs.datadoghq.com/integrations/ecs_fargate/
