@@ -15,14 +15,14 @@ def testable_files(files):
     """
     Given a list of files, return the files that have an extension listed in FILE_EXTENSIONS_TO_TEST
     """
-    return [f for f in files if f.endswith(tuple(TESTABLE_FILE_EXTENSIONS))]
+    return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS)]
 
 
 def files_changed(ctx):
     """
     Return the list of file changed in the current branch compared to `master`
     """
-    changed_files = ctx.run('git diff --name-only master...', hide='out').stdout.split('\n')
+    changed_files = ctx.run('git diff --name-only master...', hide='out').stdout.splitlines()
 
     # Remove empty lines
     return [f for f in changed_files if f]
