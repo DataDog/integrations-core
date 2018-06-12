@@ -8,14 +8,24 @@ import sys
 from invoke import task
 from invoke.exceptions import Exit
 
-from .constants import AGENT_BASED_INTEGRATIONS, ROOT
+from .constants import AGENT_BASED_INTEGRATIONS, ROOT, TESTABLE_FILE_EXTENSIONS
+
+
+def testable_files(files):
+    """
+    Given a list of files, return the files that have an extension listed in FILE_EXTENSIONS_TO_TEST
+    """
+    return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS)]
 
 
 def files_changed(ctx):
     """
     Return the list of file changed in the current branch compared to `master`
     """
-    return ctx.run('git diff --name-only master...', hide='out').stdout
+    changed_files = ctx.run('git diff --name-only master...', hide='out').stdout.splitlines()
+
+    # Remove empty lines
+    return [f for f in changed_files if f]
 
 
 def run_tox(ctx, target, bench, dry_run):
@@ -95,14 +105,20 @@ def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
     elif isinstance(targets, basestring):
         targets = [t for t in targets.split(',') if t in AGENT_BASED_INTEGRATIONS]
 
-    # get the list of the files that changed compared to `master`
+    # determine the integrations we need to test based on the changed files
     changed_files = []
     if changed_only:
-        changed_files = files_changed(ctx).split('\n')
+        # get the list of the files that changed compared to `master`
+        changed_files = files_changed(ctx)
+
+        # get the list of files that can change the implementation of a check
+        files_requiring_tests = testable_files(changed_files)
+
+        # get the integrations associated with changed files
         changed_checks = set()
-        for line in changed_files:
-            if line:
-                changed_checks.add(line.split('/')[0])
+        for line in files_requiring_tests:
+            changed_checks.add(line.split('/')[0])
+
         targets = list(set(targets) & changed_checks)
 
     if bench:
