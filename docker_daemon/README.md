@@ -8,7 +8,7 @@ Configure this Agent check to get metrics from docker_daemon service in real tim
 * Visualize and monitor docker_daemon states
 * Be notified about docker_daemon failovers and events.
 
-**Note**: The Docker check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents <v6**. To learn how to use it with the Agent v6 [Consult our dedicated agent v6 setup](#agent-v6).
+**Note**: The Docker check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents <v6**. To learn how to use it with the Agent v6 [Consult our dedicated agent v6 setup][27].
 
 ## Setup
 ### Installation
@@ -94,7 +94,7 @@ For example, the first version of the Docker image that will bundle the Datadog 
 
 #### Custom containers and additional information
 
-For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, please reference [our `docker-dd-agent` project on Github](https://github.com/DataDog/docker-dd-agent).
+For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, please reference [our `docker-dd-agent` project on Github][1].
 
 ### Validation
 
@@ -202,3 +202,4 @@ We've also written several other in-depth blog posts to help you get the most ou
 [24]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs/
 [25]: https://www.datadoghq.com/blog/docker-performance-datadog/
 [26]: https://www.datadoghq.com/blog/monitor-docker-datadog/
+[27]: #agent-v6

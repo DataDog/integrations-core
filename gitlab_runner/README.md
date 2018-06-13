@@ -7,7 +7,7 @@ Integration that allows to:
 * Visualize and monitor metrics collected via Gitlab Runners through Prometheus
 * Validate that the Gitlab Runner can connect to Gitlab
 
-See https://docs.gitlab.com/runner/monitoring/README.html for
+See the [Gitlab Runner documentation][7] for
 more information about Gitlab Runner and its integration with Prometheus
 
 ## Setup
@@ -52,3 +52,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [4]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/metadata.csv
 [5]: http://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/
+[7]: https://docs.gitlab.com/runner/monitoring/README.html
