@@ -52,7 +52,7 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | TAGS | Sets host tags as a comma delimited string. You can pass both simple tags and key-value tags. For example, `-e TAGS="simple-tag, tag-key:tag-value"`. |
 | EC2_TAGS | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, set the value to "yes", for example, `-e EC2_TAGS=yes`. Note that this feature requires an [IAM role][8] associated with the instance. |
 | NON_LOCAL_TRAFFIC | Enabling this feature will allow statsd reporting from any external IP. For example, `-e NON_LOCAL_TRAFFIC=yes`. This can be used to report metrics from other containers or systems. See [network configuration][9] for more details.
-| PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation][7] |
+| HTTP_PROXY, HTTPS_PROXY, NO_PROXY | Standard UNIX environment variables can be use to set the agent proxy (`NO_PROXY` is a coma-separated list of domain). For more information, see the [Agent proxy documentation][7] |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide][11]. |
 
 **Note**: Add `--restart=unless-stopped` if you want your agent to be resistant to restarts.
