@@ -4,6 +4,7 @@
 from __future__ import print_function, unicode_literals
 
 import os
+from io import open
 
 from invoke import task
 from invoke.exceptions import Exit
@@ -80,6 +81,7 @@ def upgrade(ctx, package=None, version=None, verbose=False):
             with ctx.cd(check_dir):
                 ctx.run(
                     'pip-compile '
+                    '--upgrade '
                     '--generate-hashes '
                     '--output-file requirements.txt '
                     'requirements.in',
