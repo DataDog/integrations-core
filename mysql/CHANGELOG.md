@@ -1,9 +1,5 @@
 # CHANGELOG - mysql
 
-## 1.3.0 / 2018-06-08
-
-* [Added] Make the max custom queries configurable in the yaml file. See [#1713](https://github.com/DataDog/integrations-core/pull/1713).
-
 ### 1.2.1 / 2018-05-31
 
 * [Fixed] Fix replication data extraction when replication channel is set. See [#1639](https://github.com/DataDog/integrations-core/pull/1639).
