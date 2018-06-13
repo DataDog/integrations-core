@@ -21,7 +21,7 @@ The HAProxy check is packaged with the Agent. To start gathering your HAProxy me
 
 ### Configuration
 
-Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your HAProxy [metrics][4] and [logs][5].
+Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample haproxy.d/conf.yaml][6] for all available configuration options.
 
 #### Prepare HAProxy
@@ -45,7 +45,7 @@ The Agent collects metrics via a stats endpoint:
 
 #### Metric Collection
 
-Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics][8]:
+Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
 ```
   init_config:
@@ -117,11 +117,8 @@ Need help? Contact [Datadog Support][14].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
-[4]: #metric-collection
-[5]: #log-collection
 [6]: https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example
 [7]: https://www.haproxy.org/download/1.7/doc/management.txt
-[8]: #metrics
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [11]: https://docs.datadoghq.com/logs
 [12]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
