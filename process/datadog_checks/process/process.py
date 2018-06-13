@@ -285,7 +285,8 @@ class ProcessCheck(AgentCheck):
                 if cpu_count > 0:
                     st['cpu_norm'].append(cpu_percent/cpu_count)
                 else:
-                    self.log.debug('could not calculate normalized_pct, cpu_count: %s' % (cpu_count))
+                    self.log.debug('could not calculate the normalized \
+                                    cpu pct, cpu_count: %s' %(cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
