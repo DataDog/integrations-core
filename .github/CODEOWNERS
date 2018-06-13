@@ -2,5 +2,17 @@
 # Rules are matched bottom-to-top, so one team can own subdirectories
 # and another the rest of the directory.
 
-*       @DataDog/agent-integrations
-/docs/  @DataDog/baklava
+# All your base
+*                  @DataDog/agent-integrations
+
+# Documentation
+/docs/             @DataDog/baklava
+
+# Container monitoring
+/docker_daemon/    @DataDog/kenafeh
+/ecs_fargate/      @DataDog/kenafeh
+/kube_dns/         @DataDog/kenafeh
+/kube_proxy/       @DataDog/kenafeh
+/kubelet/          @DataDog/kenafeh
+/kubernetes/       @DataDog/kenafeh
+/kubernetes_state/ @DataDog/kenafeh
