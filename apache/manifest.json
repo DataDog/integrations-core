@@ -1,5 +1,6 @@
 {
   "manifest_version": "1.0.0",
+  "creates_events": "false",
   "name": "Apache",
   "display_name": "Apache",
   "support": "core",

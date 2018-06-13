@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "redisdb",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
