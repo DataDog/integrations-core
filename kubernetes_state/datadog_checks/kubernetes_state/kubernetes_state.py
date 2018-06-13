@@ -17,7 +17,7 @@ except ImportError:
 
 METRIC_TYPES = ['counter', 'gauge']
 WHITELISTED_WAITING_REASONS = ['ErrImagePull']
-WHITELISTED_TERMINATED_REASONS = ['OOMKilled','ContainerCannotRun','Error']
+WHITELISTED_TERMINATED_REASONS = ['OOMKilled', 'ContainerCannotRun', 'Error']
 
 
 class KubernetesState(PrometheusCheck):
@@ -81,8 +81,8 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
             'kube_pod_container_resource_requests_memory_bytes': 'container.memory_requested',
             'kube_pod_container_status_ready': 'container.ready',
-            'kube_pod_container_status_restarts': 'container.restarts', # up to kube-state-metrics 1.1.x
-            'kube_pod_container_status_restarts_total': 'container.restarts', # from kube-state-metrics 1.2.0
+            'kube_pod_container_status_restarts': 'container.restarts',   # up to kube-state-metrics 1.1.x
+            'kube_pod_container_status_restarts_total': 'container.restarts',  # from kube-state-metrics 1.2.0
             'kube_pod_container_status_running': 'container.running',
             'kube_pod_container_resource_requests_nvidia_gpu_devices': 'container.gpu.request',
             'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
@@ -167,7 +167,8 @@ class KubernetesState(PrometheusCheck):
             }
         }
 
-        extra_labels = instances[0].get("label_joins", {}) # We do not support more than one instance of kube-state-metrics
+        # We do not support more than one instance of kube-state-metrics
+        extra_labels = instances[0].get("label_joins", {})
         self.label_joins.update(extra_labels)
         hostname_override = instances[0].get('hostname_override', True)
         if hostname_override:
@@ -235,8 +236,8 @@ class KubernetesState(PrometheusCheck):
         """
         Metrics from kube-state-metrics have changed
         For example:
-        kube_node_status_condition{condition="Ready",node="ip-172-33-39-189.eu-west-1.compute.internal",status="true"} 1
-        kube_node_status_condition{condition="OutOfDisk",node="ip-172-33-57-130.eu-west-1.compute.internal",status="false"} 1
+        kube_node_status_condition{condition="Ready",node="ip-172-33-39-189.eu-west-1.compute",status="true"} 1
+        kube_node_status_condition{condition="OutOfDisk",node="ip-172-33-57-130.eu-west-1.compute",status="false"} 1
         metric {
           label { name: "condition", value: "true"
           }
@@ -255,27 +256,45 @@ class KubernetesState(PrometheusCheck):
         mapping = condition_map['mapping']
 
         if base_sc_name == 'kubernetes_state.pod.phase':
-            message = "%s is currently reporting %s" % (self._label_to_tag('pod', metric.label), self._label_to_tag('phase', metric.label))
+            message = "{} is currently reporting {}".format(self._label_to_tag('pod', metric.label),
+                                                            self._label_to_tag('phase', metric.label))
         else:
-            message = "%s is currently reporting %s" % (self._label_to_tag('node', metric.label), self._label_to_tag('condition', metric.label))
+            message = "{} is currently reporting {}".format(self._label_to_tag('node', metric.label),
+                                                            self._label_to_tag('condition', metric.label))
 
         if condition_map['service_check_name'] is None:
-            self.log.debug("Unable to handle %s - unknown condition %s" % (service_check_name, label_value))
+            self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
         else:
             self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
-            self.log.debug("%s %s %s" % (service_check_name, mapping[label_value], tags))
+            self.log.debug("{} {} {}".format(service_check_name, mapping[label_value], tags))
 
     def _get_metric_condition_map(self, base_sc_name, labels):
         if base_sc_name == 'kubernetes_state.node':
             switch = {
-                'Ready': {'service_check_name': base_sc_name + '.ready', 'mapping': self.condition_to_status_positive},
-                'OutOfDisk': {'service_check_name': base_sc_name + '.out_of_disk', 'mapping': self.condition_to_status_negative},
-                'DiskPressure': {'service_check_name': base_sc_name + '.disk_pressure', 'mapping': self.condition_to_status_negative},
-                'NetworkUnavailable': {'service_check_name': base_sc_name + '.network_unavailable', 'mapping': self.condition_to_status_negative},
-                'MemoryPressure': {'service_check_name': base_sc_name + '.memory_pressure', 'mapping': self.condition_to_status_negative}
+                'Ready': {
+                    'service_check_name': base_sc_name + '.ready',
+                    'mapping': self.condition_to_status_positive
+                },
+                'OutOfDisk': {
+                    'service_check_name': base_sc_name + '.out_of_disk',
+                    'mapping': self.condition_to_status_negative
+                },
+                'DiskPressure': {
+                    'service_check_name': base_sc_name + '.disk_pressure',
+                    'mapping': self.condition_to_status_negative
+                },
+                'NetworkUnavailable': {
+                    'service_check_name': base_sc_name + '.network_unavailable',
+                    'mapping': self.condition_to_status_negative
+                },
+                'MemoryPressure': {
+                    'service_check_name': base_sc_name + '.memory_pressure',
+                    'mapping': self.condition_to_status_negative
+                }
             }
             label_value = self._extract_label_value('status', labels)
-            return label_value, switch.get(self._extract_label_value('condition', labels), {'service_check_name': None, 'mapping': None})
+            return label_value, switch.get(self._extract_label_value('condition', labels),
+                                           {'service_check_name': None, 'mapping': None})
 
         elif base_sc_name == 'kubernetes_state.pod.phase':
             label_value = self._extract_label_value('phase', labels)
@@ -376,7 +395,9 @@ class KubernetesState(PrometheusCheck):
             on_schedule = int(metric.gauge.value) - curr_time
             tags = [self._format_tag(label.name, label.value) for label in metric.label] + self.custom_tags
             if on_schedule < 0:
-                message = "The service check scheduled at %s is %s seconds late" % (time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(metric.gauge.value))), on_schedule)
+                message = "The service check scheduled at {} is {} seconds late".format(
+                    time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(metric.gauge.value))), on_schedule
+                )
                 self.service_check(check_basename, self.CRITICAL, tags=tags, message=message)
             else:
                 self.service_check(check_basename, self.OK, tags=tags)
@@ -415,7 +436,6 @@ class KubernetesState(PrometheusCheck):
                 else:
                     tags.append(self._format_tag(label.name, label.value))
             self.job_failed_count[frozenset(tags)] += metric.gauge.value
-
 
     def kube_job_status_succeeded(self, message, **kwargs):
         for metric in message.metric:
@@ -512,7 +532,7 @@ class KubernetesState(PrometheusCheck):
 
     def kube_limitrange(self, message, **kwargs):
         """ Resource limits by consumer type. """
-        # type's cardinality is low: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3872-L3879
+        # type's cardinality's low: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3872-L3879
         # idem for resource: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3342-L3352
         # idem for constraint: https://github.com/kubernetes/kubernetes/blob/v1.6.1/pkg/api/v1/types.go#L3882-L3901
         metric_base_name = self.NAMESPACE + '.limitrange.{}.{}'

@@ -91,6 +91,8 @@ jobs:
     - stage: test
       env: CHECK=kubelet
     - stage: test
+      env: CHECK=kubernetes_state
+    - stage: test
       env: CHECK=kyototycoon
     - stage: test
       env: CHECK=lighttpd

@@ -178,7 +178,11 @@ def resourcequota_was_collected(aggregator):
     return False
 
 
+<<<<<<< HEAD
 def test_update_kube_state_metrics(aggregator, instance, check):
+=======
+def test__update_kube_state_metrics(aggregator, instance, check):
+>>>>>>> 054f0ee9... Move tests to pytest (#1731)
     # run check twice to have pod/node mapping
     for _ in range(2):
         check.check(instance)
@@ -223,7 +227,11 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     # assert resourcequota_was_collected(aggregator)
 
 
+<<<<<<< HEAD
 def test_update_kube_state_metrics_v040(aggregator, instance, check):
+=======
+def test__update_kube_state_metrics_v040(aggregator, instance, check):
+>>>>>>> 054f0ee9... Move tests to pytest (#1731)
     # run check twice to have pod/node mapping
     for _ in range(2):
         check.check(instance)
@@ -239,7 +247,11 @@ def test_update_kube_state_metrics_v040(aggregator, instance, check):
     # assert resourcequota_was_collected(aggregator)
 
 
+<<<<<<< HEAD
 def test_join_custom_labels(aggregator, instance, check):
+=======
+def test__join_custom_labels(aggregator, instance, check):
+>>>>>>> 054f0ee9... Move tests to pytest (#1731)
     instance['label_joins'] = {
         'kube_deployment_labels': {
             'label_to_match': 'deployment',
@@ -257,6 +269,7 @@ def test_join_custom_labels(aggregator, instance, check):
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in JOINED_METRICS.get(metric, []):
+<<<<<<< HEAD
             aggregator.assert_metric_has_tag(metric, tag)
         if metric not in ZERO_METRICS:
             assert_not_all_zeroes(aggregator, metric)
@@ -268,3 +281,10 @@ def test_disabling_hostname_override(instance):
     instance["hostname_override"] = False
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     assert check.label_to_hostname is None
+=======
+            print aggregator.metrics(metric)
+            print tag
+            aggregator.assert_metric_has_tag(metric, tag)
+        if metric not in ZERO_METRICS:
+            assert_not_all_zeroes(aggregator, metric)
+>>>>>>> 054f0ee9... Move tests to pytest (#1731)
