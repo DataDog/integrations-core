@@ -52,7 +52,7 @@ Note that in the command above, you are able to pass your API key to the Datadog
 | TAGS | Sets host tags as a comma delimited string. You can pass both simple tags and key-value tags. For example, `-e TAGS="simple-tag, tag-key:tag-value"`. |
 | EC2_TAGS | Enabling this feature allows the agent to query and capture custom tags set using the EC2 API during startup. To enable, set the value to "yes", for example, `-e EC2_TAGS=yes`. Note that this feature requires an [IAM role][8] associated with the instance. |
 | NON_LOCAL_TRAFFIC | Enabling this feature will allow statsd reporting from any external IP. For example, `-e NON_LOCAL_TRAFFIC=yes`. This can be used to report metrics from other containers or systems. See [network configuration][9] for more details.
-| PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation][10] |
+| PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASSWORD | Sets proxy configuration details. For more information, see the [Agent proxy documentation][7] |
 | SD_BACKEND, SD_CONFIG_BACKEND, SD_BACKEND_HOST, SD_BACKEND_PORT, SD_TEMPLATE_DIR, SD_CONSUL_TOKEN | Enables and configures Autodiscovery. For more information, please see the [Autodiscovery guide][11]. |
 
 **Note**: Add `--restart=unless-stopped` if you want your agent to be resistant to restarts.
@@ -182,10 +182,9 @@ We've also written several other in-depth blog posts to help you get the most ou
 [4]: https://app.datadoghq.com/account/settings#integrations/docker
 [5]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/conf.yaml.example
 [6]: https://app.datadoghq.com/account/settings#agent/docker
-[7]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
+[7]: https://docs.datadoghq.com/agent/proxy/
 [8]: https://github.com/DataDog/dd-agent/wiki/Capturing-EC2-tags-at-startup
-[9]: https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
-[10]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-a-web-proxy-as-proxy
+[9]: https://docs.datadoghq.com/agent/network/
 [11]: https://docs.datadoghq.com/agent/autodiscovery/
 [12]: https://alpinelinux.org/
 [13]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
