@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 0.1.2 / 2018-06-13
+
+* [Fixed] Convert port to a string before calling get_subprocess_output. See [#1549](https://github.com/DataDog/integrations-core/pull/1549). Thanks [jalaziz](https://github.com/jalaziz).
+
 ## 0.1.1 / 2017-11-08
 
 * [BUGFIX] Fix a case where metrics would not be sent for some nodes
