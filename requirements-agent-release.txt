@@ -10,7 +10,7 @@ cisco_aci==1.0.0
 consul==1.5.0
 couch==2.6.0
 couchbase==1.4.0
-datadog_checks_base==1.3.0
+datadog_checks_base==1.3.1
 directory==1.2.0
 disk==1.2.0
 dns_check==1.1.0
