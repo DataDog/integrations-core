@@ -4,6 +4,6 @@ pyasn1==0.4.2
 cffi==1.11.5
 pycparser==2.18
 enum34==1.1.6
-idna==2.6
+idna==2.7
 asn1crypto==0.24.0
 ipaddress==1.0.22
