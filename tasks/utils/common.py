@@ -8,16 +8,19 @@ import json
 from ..constants import ROOT
 
 
+def get_version_file(check_name):
+    if check_name in ('datadog_checks_base', 'datadog_checks_test_helper'):
+        return os.path.join(ROOT, check_name, "datadog_checks", "__about__.py")
+    else:
+        return os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
+
+
 def get_version_string(check_name):
     """
     Get the version string for the given check.
     """
     about = {}
-    if check_name in ('datadog_checks_base', 'datadog_checks_test_helper'):
-        about_path = os.path.join(ROOT, check_name, "datadog_checks", "__about__.py")
-    else:
-        about_path = os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
-    with open(about_path) as f:
+    with open(get_version_file(check_name)) as f:
         exec(f.read(), about)
 
     return about.get('__version__')
@@ -46,7 +49,7 @@ def update_version_module(check_name, old_ver, new_ver):
     Change the Python code in the __about__.py module so that `__version__`
     contains the new value.
     """
-    about_module = os.path.join(ROOT, check_name, 'datadog_checks', check_name, '__about__.py')
+    about_module = get_version_file(check_name)
     with open(about_module, 'r') as f:
         contents = f.read()
 

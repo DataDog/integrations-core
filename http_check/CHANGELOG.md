@@ -1,11 +1,11 @@
 # CHANGELOG - http_check
 
-## 2.1.0 / Unreleased
+## 2.1.0 / 2018-06-06
 
-* [FEATURE] Add `check_hostname` option to allow users to disable matching
-  hostnames verification. See [#485][]
-* [IMPROVEMENT] Emit warning when `disable_ssl_validation` is unset in configuration
-  file. See [#1999][]
+* [Fixed] fixes AttributeError when running on 6.2.1. See [#1617](https://github.com/DataDog/integrations-core/pull/1617).
+* [Fixed] Suppress InsecureRequestWarning for urllib3 for http_check. See [#1574](https://github.com/DataDog/integrations-core/pull/1574).
+* [Added] Allow users to disable matching hostnames verification in ssl cert verification. See [#1519](https://github.com/DataDog/integrations-core/pull/1519).
+* [Changed] Emit a warning if disable_ssl_validation is unset. See [#1517](https://github.com/DataDog/integrations-core/pull/1517).
 
 ## 2.0.1 / 2018-05-11
 

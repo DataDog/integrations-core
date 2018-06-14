@@ -1,57 +1,32 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# Always prefer setuptools over distutils
 from setuptools import setup
-# To use a consistent encoding
-from codecs import open
+from codecs import open  # To use a consistent encoding
 from os import path
 
-import re
+HERE = path.dirname(path.abspath(__file__))
 
-here = path.abspath(path.dirname(__file__))
+# Get version info
+ABOUT = {}
+with open(path.join(HERE, 'datadog_checks', 'etcd', '__about__.py')) as f:
+    exec(f.read(), ABOUT)
 
-# get the long description from the readme file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+# Get the long description from the README file
+with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-runtime_reqs = ['datadog_checks_base']
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    for line in f.readlines():
-        line = line.strip()
-        if not line or line.startswith('--hash') or line[0] == '#':
-            continue
-        req = line.rpartition('#')
-        if not len(req[1]):
-            if '--hash=' in req[2]:
-                tokens = req[2].split()
-                if len(tokens) > 1:
-                    runtime_reqs.append(tokens[0])
-            elif ';' in req[2]:
-                runtime_reqs.append(req[2])
-        else:
-            runtime_reqs.append(req[0])
 
-def read(*parts):
-    with open(path.join(here, *parts), 'r') as fp:
-        return fp.read()
+# Parse requirements
+def get_requirements(fpath):
+    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+        return f.readlines()
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
-# https://packaging.python.org/guides/single-sourcing-package-version/
-version = find_version("datadog_checks", "etcd", "__init__.py")
 
 setup(
     name='datadog-etcd',
-    version=version,
-    description='The Etcd Check',
+    version=ABOUT['__version__'],
+    description='The Etcd check',
     long_description=long_description,
     keywords='datadog agent etcd check',
 
@@ -80,26 +55,14 @@ setup(
     packages=['datadog_checks.etcd'],
 
     # Run-time dependencies
-    install_requires=list(set(runtime_reqs)),
-
-    # Development dependencies, run with:
-    # $ pip install -e .[dev]
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'datadog_agent_tk>=5.15',
-        ],
-    },
+    install_requires=get_requirements('requirements.in')+[
+        'datadog_checks_base',
+    ],
 
     # Testing setup and dependencies
-    tests_require=[
-        'nose',
-        'coverage',
-        'datadog_agent_tk>=5.15',
-    ],
-    test_suite='nose.collector',
+    tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.etcd': ['conf.yaml.example', 'auto_conf.yaml']},
+    package_data={'datadog_checks.etcd': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

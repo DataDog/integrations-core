@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 1.2.1 / 2018-06-07
+
+* [Security] Update psycopg2 for security fixes. See [#1538](https://github.com/DataDog/integrations-core/pull/1538).
+
 ## 1.2.0 / 2018-05-11
 
 * [FEATURE] Added custom tag support to service check.

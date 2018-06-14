@@ -28,7 +28,7 @@ def get_requirements(fpath):
 setup(
     name='datadog-mapreduce',
     version=ABOUT['__version__'],
-    description='The MapReduce Check',
+    description='The MapReduce check',
     long_description=long_description,
     keywords='datadog agent mapreduce check',
 

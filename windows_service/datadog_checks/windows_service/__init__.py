@@ -1,7 +1,10 @@
-from . import windows_service
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .windows_service import WindowsService
 
-WindowsService = windows_service.WindowsService
-
-__version__ = "1.2.0"
-
-__all__ = ['windows_service']
+__all__ = [
+    '__version__',
+    'WindowsService'
+]

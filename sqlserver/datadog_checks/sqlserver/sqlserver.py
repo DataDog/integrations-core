@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from collections import defaultdict
 # 3rd party
 import adodbapi
+from six import iteritems
 try:
     import pyodbc
 except ImportError:
@@ -37,20 +38,20 @@ PERF_COUNTER_LARGE_RAWCOUNT = 65792
 # Queries
 COUNTER_TYPE_QUERY = '''select distinct cntr_type
                         from sys.dm_os_performance_counters
-                        where counter_name = ?;'''
+                        where {metric_type} = ?;'''
 
-BASE_NAME_QUERY = '''select distinct counter_name
+BASE_NAME_QUERY = '''select distinct {metric_type}
                      from sys.dm_os_performance_counters
-                     where (counter_name=? or counter_name=?
-                     or counter_name=?) and cntr_type=%s;''' % PERF_LARGE_RAW_BASE
+                     where ({metric_type}=? or {metric_type}=?
+                     or {metric_type}=?) and cntr_type=%s;''' % PERF_LARGE_RAW_BASE
 
 INSTANCES_QUERY = '''select instance_name
                      from sys.dm_os_performance_counters
-                     where counter_name=? and instance_name!='_Total';'''
+                     where {metric_type}=? and instance_name!='_Total';'''
 
-VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name
+VALUE_AND_BASE_QUERY = '''select {metric_type}, cntr_type, cntr_value, instance_name
                           from sys.dm_os_performance_counters
-                          where counter_name in (%s)
+                          where {metric_type} in (%s)
                           order by cntr_type;'''
 
 DATABASE_EXISTS_QUERY = 'select name from sys.databases;'
@@ -66,6 +67,10 @@ class SQLConnectionError(Exception):
     Exception raised for SQL instance connection issues
     """
     pass
+
+
+def format_query(query, metric_type='counter_name'):
+    return query.format(metric_type=metric_type)
 
 
 class SQLServer(AgentCheck):
@@ -188,11 +193,12 @@ class SQLServer(AgentCheck):
         metrics_to_collect = []
         for name, counter_name, instance_name in self.METRICS:
             try:
-                sql_type, base_name = self.get_sql_type(instance, counter_name)
                 cfg = {}
                 cfg['name'] = name
                 cfg['counter_name'] = counter_name
                 cfg['instance_name'] = instance_name
+                cfg['metric_type'] = 'counter_name'
+                sql_type, base_name = self.get_sql_type(instance, cfg)
 
                 metrics_to_collect.append(self.typed_metric(instance,
                                                             cfg,
@@ -214,6 +220,14 @@ class SQLServer(AgentCheck):
                 self.log.error('%s has an invalid table name: %s', row['name'], db_table)
                 continue
 
+            if 'counter_name' in row:
+                row['metric_type'] = 'counter_name'
+            elif 'object_name' in row:
+                row['metric_type'] = 'object_name'
+            else:
+                self.log.error('Field counter_name or object_name is required for {}'.format(row['name']))
+                continue
+
             if db_table == DEFAULT_PERFORMANCE_TABLE:
                 user_type = row.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
@@ -221,7 +235,7 @@ class SQLServer(AgentCheck):
                 sql_type = None
                 try:
                     if user_type is None:
-                        sql_type, base_name = self.get_sql_type(instance, row['counter_name'])
+                        sql_type, base_name = self.get_sql_type(instance, row)
                 except Exception:
                     self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
                     continue
@@ -246,8 +260,8 @@ class SQLServer(AgentCheck):
 
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
         self.instances_metrics[instance_key] = metrics_to_collect
-        simple_metrics = []
-        fraction_metrics = []
+        simple_metrics = defaultdict(list)
+        fraction_metrics = defaultdict(list)
         wait_stat_metrics = []
         vfs_metrics = []
         clerk_metrics = []
@@ -255,11 +269,11 @@ class SQLServer(AgentCheck):
         for m in metrics_to_collect:
             if type(m) is SqlSimpleMetric:
                 self.log.debug("Adding simple metric %s", m.sql_name)
-                simple_metrics.append(m.sql_name)
+                simple_metrics[m.metric_type].append(m.sql_name)
             elif type(m) is SqlFractionMetric or type(m) is SqlIncrFractionMetric:
                 self.log.debug("Adding fraction metric %s", m.sql_name)
-                fraction_metrics.append(m.sql_name)
-                fraction_metrics.append(m.base_name)
+                fraction_metrics[m.metric_type].append(m.sql_name)
+                fraction_metrics[m.metric_type].append(m.base_name)
             elif type(m) is SqlOsWaitStat:
                 self.log.debug("Adding SqlOsWaitStat metric %s", m.sql_name)
                 wait_stat_metrics.append(m.sql_name)
@@ -408,7 +422,7 @@ class SQLServer(AgentCheck):
         cursor = conn.cursor()
         return cursor
 
-    def get_sql_type(self, instance, counter_name):
+    def get_sql_type(self, instance, cfg):
         '''
         Return the type of the performance counter so that we can report it to
         Datadog correctly
@@ -416,7 +430,10 @@ class SQLServer(AgentCheck):
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         '''
         with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
-            cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
+            metric_type = cfg['metric_type']
+            counter_name = cfg[metric_type]
+
+            cursor.execute(format_query(COUNTER_TYPE_QUERY, metric_type), (counter_name,))
             (sql_type,) = cursor.fetchone()
             if sql_type == PERF_LARGE_RAW_BASE:
                 self.log.warning("Metric %s is of type Base and shouldn't be reported this way",
@@ -432,7 +449,7 @@ class SQLServer(AgentCheck):
                               counter_name.replace("Avg ", "") + " base"
                               )
                 try:
-                    cursor.execute(BASE_NAME_QUERY, candidates)
+                    cursor.execute(format_query(BASE_NAME_QUERY, metric_type), candidates)
                     base_name = cursor.fetchone().counter_name.strip()
                     self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
                 except Exception as e:
@@ -646,7 +663,8 @@ class SqlServerMetric(object):
         self.connector = connector
         self.cfg_instance = cfg_instance
         self.datadog_name = cfg_instance['name']
-        self.sql_name = cfg_instance.get('counter_name', '')
+        self.metric_type = cfg_instance.get('metric_type', 'counter_name')
+        self.sql_name = cfg_instance.get(self.metric_type, '')
         self.base_name = base_name
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
@@ -663,17 +681,22 @@ class SqlServerMetric(object):
 class SqlSimpleMetric(SqlServerMetric):
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = '''
-            select counter_name, instance_name, cntr_value
-            from sys.dm_os_performance_counters where counter_name in (%s)
-            ''' % placeholders
+    def fetch_all_values(cls, cursor, metric_lists, logger):
+        rows = []
 
-        logger.debug("query base: %s", query_base)
-        cursor.execute(query_base, counters_list)
-        rows = cursor.fetchall()
+        for metric_type, counters_list in iteritems(metric_lists):
+            placeholder = '?'
+            placeholders = ', '.join(placeholder for unused in counters_list)
+            query_base = '''
+                select {metric_type}, instance_name, cntr_value
+                from sys.dm_os_performance_counters where {metric_type} in (%s)
+                ''' % placeholders
+            query_base = format_query(query_base, metric_type)
+
+            logger.debug("query base: %s", query_base)
+            cursor.execute(query_base, counters_list)
+            rows.extend(cursor.fetchall())
+
         return rows
 
     def fetch_metric(self, cursor, rows, tags):
@@ -700,24 +723,29 @@ class SqlSimpleMetric(SqlServerMetric):
 class SqlFractionMetric(SqlServerMetric):
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger):
-        placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = VALUE_AND_BASE_QUERY % placeholders
+    def fetch_all_values(cls, cursor, metric_lists, logger):
+        all_results = {}
 
-        logger.debug("query base: %s, %s", query_base, str(counters_list))
-        cursor.execute(query_base, counters_list)
-        rows = cursor.fetchall()
-        results = defaultdict(list)
-        for counter_name, cntr_type, cntr_value, instance_name in rows:
-            rowlist = [cntr_type, cntr_value, instance_name.strip()]
-            logger.debug("Adding new rowlist %s", str(rowlist))
-            results[counter_name.strip()].append(rowlist)
-        return results
+        for metric_type, counters_list in iteritems(metric_lists):
+            placeholder = '?'
+            placeholders = ', '.join(placeholder for unused in counters_list)
+            query_base = format_query(VALUE_AND_BASE_QUERY % placeholders, metric_type)
+
+            logger.debug("query base: %s, %s", query_base, str(counters_list))
+            cursor.execute(query_base, counters_list)
+            rows = cursor.fetchall()
+            results = defaultdict(list)
+            for counter_name, cntr_type, cntr_value, instance_name in rows:
+                rowlist = [cntr_type, cntr_value, instance_name.strip()]
+                logger.debug("Adding new rowlist %s", str(rowlist))
+                results[counter_name.strip()].append(rowlist)
+            all_results.update(results)
+
+        return all_results
 
     def set_instances(self, cursor):
         if self.instance == ALL_INSTANCES:
-            cursor.execute(INSTANCES_QUERY, (self.sql_name,))
+            cursor.execute(format_query(INSTANCES_QUERY, self.metric_type), (self.sql_name,))
             self.instances = [row.instance_name for row in cursor.fetchall()]
         else:
             self.instances = [self.instance]

@@ -1,8 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
+  "manifest_version": "1.0.0",
   "name": "tokumx",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
   "support": "core",
@@ -11,11 +9,12 @@
     "mac_os",
     "windows"
   ],
-  "version": "1.2.0",
   "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
   "public_title": "Datadog-Tokumx Integration",
-  "categories":["data store"],
-  "type":"check",
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/tokumx/",
   "is_public": true,
   "has_logo": true

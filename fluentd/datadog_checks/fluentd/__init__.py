@@ -1,7 +1,10 @@
-from . import fluentd
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .fluentd import Fluentd
 
-Fluentd = fluentd.Fluentd
-
-__version__ = "1.0.0"
-
-__all__ = ['fluentd']
+__all__ = [
+    '__version__',
+    'Fluentd'
+]

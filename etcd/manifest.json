@@ -11,9 +11,13 @@
   ],
   "guid": "a1cfafdb-5d88-4ae1-acdc-6356df755b73",
   "public_title": "Datadog-etcd Integration",
-  "categories":["orchestration", "containers", "configuration & deployment", "orchestration"],
-  "type":"check",
-  "version": "1.4.0",
+  "categories": [
+    "orchestration",
+    "containers",
+    "configuration & deployment",
+    "orchestration"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
   "is_public": true,
   "has_logo": true

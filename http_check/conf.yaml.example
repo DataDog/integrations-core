@@ -7,10 +7,10 @@ instances:
     url: http://some.url.example.com
     timeout: 1
 
-    # The default HTTP method is GET but the (optional) method parameter allows you to change the
-    # HTTP method to POST.
-    # If using the POST method, you can then specify the data to send in the body of the request
-    # with the data parameter.
+    # The default HTTP method is GET but the (optional) method parameter allows you to change the HTTP method used in
+    # the request.
+    # If any one of the POST, PUT, DELETE, or PATCH method is specified, you can choose to send data in the body of the
+    # request with the data parameter.
     # SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.
     #
     # method: get

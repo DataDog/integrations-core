@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.3.0 / 2018-06-07
+
+* [Added] Add support for HTTP authentication. See [#1677](https://github.com/DataDog/integrations-core/pull/1677).
+
 ## 1.2.1 / 2018-02-28
 
 * [BUGFIX] Fix regression where instance tags were required. See [#1132][]

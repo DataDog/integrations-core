@@ -1,7 +1,10 @@
-from . import gitlab_runner
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .gitlab_runner import GitlabRunnerCheck
 
-GitlabRunnerCheck = gitlab_runner.GitlabRunnerCheck
-
-__version__ = "1.1.0"
-
-__all__ = ['gitlab_runner']
+__all__ = [
+    '__version__',
+    'GitlabRunnerCheck'
+]

@@ -1,0 +1,12 @@
+version: '3.5'
+
+services:
+  activemq_xml:
+    image: rmohr/activemq:${ACTIVEMQ_XML_VERSION}
+    ports:
+      - 8161:8161
+      - 61616:61616
+    environment:
+      - ACTIVEMQ_DATA=/var/activemq/data
+    volumes:
+      - ${ACTIVEMQ_DATA_DIR}:/var/activemq/data

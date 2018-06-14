@@ -279,7 +279,7 @@ SYNTHETIC_VARS = {
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
-    MAX_CUSTOM_QUERIES = 20
+    DEFAULT_MAX_CUSTOM_QUERIES = 20
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -290,7 +290,9 @@ class MySql(AgentCheck):
         return {"pymysql": pymysql.__version__}
 
     def check(self, instance):
-        host, port, user, password, mysql_sock, defaults_file, tags, options, queries, ssl, connect_timeout = \
+        host, port, user, password, mysql_sock, \
+            defaults_file, tags, options, queries, ssl, \
+            connect_timeout, max_custom_queries = \
             self._get_config(instance)
 
         self._set_qcache_stats()
@@ -305,7 +307,7 @@ class MySql(AgentCheck):
                 self._collect_metadata(db, host)
 
                 # Metric collection
-                self._collect_metrics(host, db, tags, options, queries)
+                self._collect_metrics(host, db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
 
                 # keeping track of these:
@@ -327,9 +329,10 @@ class MySql(AgentCheck):
         queries = instance.get('queries', [])
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', 10)
+        max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
 
         return (self.host, self.port, user, password, self.mysql_sock,
-                self.defaults_file, tags, options, queries, ssl, connect_timeout)
+                self.defaults_file, tags, options, queries, ssl, connect_timeout, max_custom_queries)
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -420,7 +423,7 @@ class MySql(AgentCheck):
             if db:
                 db.close()
 
-    def _collect_metrics(self, host, db, tags, options, queries):
+    def _collect_metrics(self, host, db, tags, options, queries, max_custom_queries):
 
         # Get aggregate of all VARS we want to collect
         metrics = STATUS_VARS
@@ -610,7 +613,7 @@ class MySql(AgentCheck):
         # Collect custom query metrics
         # Max of 20 queries allowed
         if isinstance(queries, list):
-            for index, check in enumerate(queries[:self.MAX_CUSTOM_QUERIES]):
+            for index, check in enumerate(queries[:max_custom_queries]):
                 total_tags = tags + check.get('tags', [])
                 self._collect_dict(check['type'],
                                    {check['field']: check['metric']},
@@ -618,9 +621,9 @@ class MySql(AgentCheck):
                                    db,
                                    tags=total_tags)
 
-            if len(queries) > self.MAX_CUSTOM_QUERIES:
+            if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest."
-                             % self.MAX_CUSTOM_QUERIES)
+                             % max_custom_queries)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves

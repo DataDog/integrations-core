@@ -1,7 +1,10 @@
-from . import agent_metrics
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .agent_metrics import AgentMetrics
 
-AgentMetrics = agent_metrics.AgentMetrics
-
-__version__ = "1.1.0"
-
-__all__ = ['agent_metrics']
+__all__ = [
+    '__version__',
+    'AgentMetrics'
+]

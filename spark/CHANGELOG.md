@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.4.0 / 2018-06-07
+
+* [Added] Add support for HTTP authentication. See [#1680](https://github.com/DataDog/integrations-core/pull/1680).
+
 ## 1.3.0 / 2018-05-11
 
 * [FEATURE] adds custom tag support to service check.

@@ -14,10 +14,12 @@ AGENT_REQ_FILE = 'requirements-agent-release.txt'
 # Note: these are the names of the folder containing the check
 AGENT_BASED_INTEGRATIONS = [
     'active_directory',
+    'activemq_xml',
     'apache',
     'aspdotnet',
     'btrfs',
     'ceph',
+    'cisco_aci',
     'consul',
     'couch',
     'couchbase',
@@ -28,6 +30,8 @@ AGENT_BASED_INTEGRATIONS = [
     'elastic',
     'envoy',
     'exchange_server',
+    'gitlab',
+    'gitlab_runner',
     'haproxy',
     'hdfs_datanode',
     'hdfs_namenode',
@@ -37,6 +41,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kafka_consumer',
     'kube_proxy',
     'kubelet',
+    'kubernetes_state',
     'kyototycoon',
     'lighttpd',
     'linkerd',
@@ -63,6 +68,7 @@ AGENT_BASED_INTEGRATIONS = [
     'teamcity',
     'varnish',
     'vsphere',
+    'yarn',
 ]
 
 AGENT_V5_ONLY = [
@@ -71,3 +77,10 @@ AGENT_V5_ONLY = [
     'kubernetes',
     'ntp',
 ]
+
+# If a file changes in a PR with any of these file extensiosn, a test will run against the check containing the file
+TESTABLE_FILE_EXTENSIONS = (
+    '.py',
+    '.ini',
+    '.txt',
+)

@@ -1,7 +1,10 @@
-from . import go_expvar
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .go_expvar import GoExpvar
 
-GoExpvar = go_expvar.GoExpvar
-
-__version__ = "1.0.3"
-
-__all__ = ['go_expvar']
+__all__ = [
+    '__version__',
+    'GoExpvar'
+]

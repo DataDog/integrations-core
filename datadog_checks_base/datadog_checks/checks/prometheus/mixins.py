@@ -423,7 +423,11 @@ class PrometheusScraperMixin(object):
                 except KeyError:
                     if not ignore_unmapped:
                         # call magic method (non-generic check)
-                        getattr(self, message.name)(message, **kwargs)
+                        handler = getattr(self, message.name)  # Lookup will throw AttributeError if not found
+                        try:
+                            handler(message, **kwargs)
+                        except Exception as err:
+                            self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
                     else:
                         # build the wildcard list if first pass
                         if self._metrics_wildcards is None:
@@ -474,7 +478,7 @@ class PrometheusScraperMixin(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=True, timeout=10, cert=cert, verify=verify)
+            response = requests.get(endpoint, headers=headers, stream=False, timeout=10, cert=cert, verify=verify)
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise

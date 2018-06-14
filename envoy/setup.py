@@ -9,7 +9,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "envoy", "__about__.py")) as f:
+with open(path.join(HERE, 'datadog_checks', 'envoy', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -25,7 +25,7 @@ def get_requirements(fpath):
 
 setup(
     name='datadog-envoy',
-    version=ABOUT["__version__"],
+    version=ABOUT['__version__'],
     description='The Envoy check',
     long_description=long_description,
     keywords='datadog agent envoy check',

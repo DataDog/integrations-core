@@ -1,19 +1,18 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.18.0",
+  "manifest_version": "1.0.0",
   "name": "win32_event_log",
   "short_description": "Send Windows events to your Datadog event stream.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "version": "1.1.1",
   "guid": "b04d6f04-947c-4068-b73d-f861adc39959",
   "public_title": "Datadog-Win 32 event log Integration",
-  "categories":["os & system"],
-  "type":"check",
+  "categories": [
+    "os & system"
+  ],
+  "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/win32_event_log/",
   "is_public": true,
   "has_logo": true
