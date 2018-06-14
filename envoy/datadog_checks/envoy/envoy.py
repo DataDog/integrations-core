@@ -69,6 +69,7 @@ class Envoy(AgentCheck):
 
             try:
                 metric, tags, method = parse_metric(envoy_metric)
+                tags.extend(custom_tags)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `{}`'.format(envoy_metric))
@@ -84,7 +85,6 @@ class Envoy(AgentCheck):
 
             try:
                 value = int(value)
-                tags.extend(custom_tags)
                 get_method(self, method)(metric, value, tags=tags)
 
             # If the value isn't an integer assume it's pre-computed histogram data.
