@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 1.4.0 / 2018-06-14
+
+* [Changed] Kubelet check: better encapsulate the pod list retrieval. See [#1648](https://github.com/DataDog/integrations-core/pull/1648).
+
 ## 1.3.0 / 2018-06-07
 
 * [Added] Support for gathering metrics from prometheus endpoint for the kubelet itself.. See [#1581](https://github.com/DataDog/integrations-core/pull/1581).
