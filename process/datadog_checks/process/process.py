@@ -153,8 +153,8 @@ class ProcessCheck(AgentCheck):
                 except psutil.NoSuchProcess:
                     self.log.warning('Process disappeared while scanning')
                 except psutil.AccessDenied as e:
-                    ad_error_logger('Access denied to process with PID %s', proc.pid)
-                    ad_error_logger('Error: %s', e)
+                    ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
+                    ad_error_logger('Error: {}'.format(e))
                     if refresh_ad_cache:
                         self.ad_cache.add(proc.pid)
                     if not ignore_ad:
@@ -204,11 +204,12 @@ class ProcessCheck(AgentCheck):
                     try:
                         result[acc] = getattr(res, acc)
                     except AttributeError:
-                        self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
+                        self.log.debug("psutil.{}().{} attribute does"
+                                       "not exist".format(method, acc))
         except (NotImplementedError, AttributeError):
-            self.log.debug("psutil method %s not implemented", method)
+            self.log.debug("psutil method {} not implemented".format(method))
         except psutil.AccessDenied:
-            self.log.debug("psutil was denied access for method %s", method)
+            self.log.debug("psutil was denied access for method {}".format(method))
             if method == 'num_fds' and Platform.is_unix() and try_sudo:
                 try:
                     # It is up the agent's packager to grant
@@ -218,12 +219,12 @@ class ProcessCheck(AgentCheck):
                     result = len(process_ls.splitlines())
 
                 except subprocess.CalledProcessError as e:
-                    self.log.exception("trying to retrieve %s with sudo failed with return code %d",
-                                       method, e.returncode)
-                except Exception:
-                    self.log.exception("trying to retrieve %s with sudo also failed", method)
+                    self.log.exception("trying to retrieve {} with sudo failed with "
+                                       "return code {}".format(method, e.returncode))
+                except:
+                    self.log.exception("trying to retrieve {} with sudo also failed".format(method))
         except psutil.NoSuchProcess:
-            self.warning("Process {0} disappeared while scanning".format(process.pid))
+            self.warning("Process {} disappeared while scanning".format(process.pid))
 
         return result
 
@@ -245,10 +246,10 @@ class ProcessCheck(AgentCheck):
                 new_process = True
                 try:
                     self.process_cache[name][pid] = psutil.Process(pid)
-                    self.log.debug('New process in cache: %s' % pid)
+                    self.log.debug('New process in cache: {}'.format(pid))
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.warning('Process %s disappeared while scanning' % pid)
+                    self.warning('Process {} disappeared while scanning'.format(pid))
                     # reset the PID cache now, something changed
                     self.last_pid_cache_ts[name] = 0
                     continue
@@ -285,8 +286,8 @@ class ProcessCheck(AgentCheck):
                 if cpu_count > 0:
                     st['cpu_norm'].append(cpu_percent/cpu_count)
                 else:
-                    self.log.debug('could not calculate the normalized \
-                                    cpu pct, cpu_count: %s' %(cpu_count))
+                    self.log.debug('could not calculate the normalized '
+                                   'cpu pct, cpu_count: {}'.format(cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
@@ -330,10 +331,10 @@ class ProcessCheck(AgentCheck):
 
         # http://man7.org/linux/man-pages/man5/proc.5.html
         try:
-            data = file_to_string('/%s/%s/stat' % (psutil.PROCFS_PATH, pid))
+            data = file_to_string('/{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
         except Exception:
-            self.log.debug('error getting proc stats: file_to_string failed for /%s/%s/stat' %
-                           (psutil.PROCFS_PATH, pid))
+            self.log.debug('error getting proc stats: file_to_string failed',
+                           'for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
             return None
 
         return map(lambda i: int(i), data.split()[9:13])
@@ -343,7 +344,7 @@ class ProcessCheck(AgentCheck):
         for pid in pids:
             try:
                 children = psutil.Process(pid).children(recursive=True)
-                self.log.debug('%s children were collected for process %s', len(children), pid)
+                self.log.debug('{} children were collected for process {}'.format(len(children), pid))
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
@@ -402,7 +403,7 @@ class ProcessCheck(AgentCheck):
                     pids = self._get_pid_set(int(pid_line))
             except IOError as e:
                 # pid file doesn't exist, assuming the process is not running
-                self.log.debug('Unable to find pid file: %s', e)
+                self.log.debug('Unable to find pid file: {}'.format(e))
                 pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
@@ -416,31 +417,31 @@ class ProcessCheck(AgentCheck):
         proc_state = self.get_process_state(name, pids, try_sudo)
 
         # FIXME 6.x remove the `name` tag
-        tags.extend(['process_name:%s' % name, name])
+        tags.extend(['process_name:{}'.format(name), name])
 
-        self.log.debug('ProcessCheck: process %s analysed', name)
+        self.log.debug('ProcessCheck: process {} analysed'.format(name))
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("No matching process '%s' was found" % name)
+            self.warning("No matching process '{}' was found".format(name))
 
         for attr, mname in ATTR_TO_METRIC.iteritems():
             vals = [x for x in proc_state[attr] if x is not None]
             # skip []
             if vals:
                 if attr == 'run_time':
-                    self.gauge('system.processes.%s.avg' % mname, sum(vals)/len(vals), tags=tags)
-                    self.gauge('system.processes.%s.max' % mname, max(vals), tags=tags)
-                    self.gauge('system.processes.%s.min' % mname, min(vals), tags=tags)
+                    self.gauge('system.processes.{}.avg'.format(mname), sum(vals)/len(vals), tags=tags)
+                    self.gauge('system.processes.{}.max'.format(mname), max(vals), tags=tags)
+                    self.gauge('system.processes.{}.min'.format(mname), min(vals), tags=tags)
 
                 # FIXME 6.x: change this prefix?
                 else:
-                    self.gauge('system.processes.%s' % mname, sum(vals), tags=tags)
+                    self.gauge('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
         for attr, mname in ATTR_TO_METRIC_RATE.iteritems():
             vals = [x for x in proc_state[attr] if x is not None]
             if vals:
-                self.rate('system.processes.%s' % mname, sum(vals), tags=tags)
+                self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
         self._process_service_check(name, len(pids), instance.get('thresholds', None), tags)
 
@@ -458,9 +459,8 @@ class ProcessCheck(AgentCheck):
                    WARNING              out of the warning thresholds
         """
         # FIXME 6.x remove the `process:name` tag
-        service_check_tags = tags + ["process:%s" % name]
+        service_check_tags = tags + ["process:{}".format(name)]
         status = AgentCheck.OK
-        message_str = "PROCS %s: %s processes found for %s"
         status_str = {
             AgentCheck.OK: "OK",
             AgentCheck.WARNING: "WARNING",
@@ -482,7 +482,7 @@ class ProcessCheck(AgentCheck):
             "process.up",
             status,
             tags=service_check_tags,
-            message=message_str % (status_str[status], nb_procs, name)
+            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name)
         )
 
     def _filter_by_user(self, user, pids):
@@ -497,10 +497,10 @@ class ProcessCheck(AgentCheck):
             try:
                 proc = psutil.Process(pid)
                 if proc.username() == user:
-                    self.log.debug("Collecting pid %s belonging to %s", pid, user)
+                    self.log.debug("Collecting pid {} belonging to {}".format(pid, user))
                     filtered_pids.add(pid)
                 else:
-                    self.log.debug("Discarding pid %s not belonging to %s", pid, user)
+                    self.log.debug("Discarding pid {} not belonging to {}".format(pid, user))
             except psutil.NoSuchProcess:
                 pass
 
