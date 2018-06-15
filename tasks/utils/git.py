@@ -16,7 +16,7 @@ def get_current_branch(ctx):
     Get the current branch name.
     """
     cmd = "git rev-parse --abbrev-ref HEAD"
-    return ctx.run(cmd, hide='out').stdout
+    return ctx.run(cmd, hide='out').stdout.strip()
 
 
 def parse_pr_numbers(git_log_lines):
