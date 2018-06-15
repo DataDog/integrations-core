@@ -541,6 +541,7 @@ class MySql(AgentCheck):
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
+                tags = tags.append("channel:{0}".format(replication_channel))
             results.update(self._get_replica_stats(db, is_mariadb, replication_channel))
             nonblocking = _is_affirmative(options.get('replication_non_blocking_status', False))
             results.update(self._get_slave_status(db, above_560, nonblocking))
