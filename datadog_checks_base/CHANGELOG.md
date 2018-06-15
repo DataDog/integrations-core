@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks
 
+## 1.3.2 / 2018-06-15
+
+* [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).
+
 ## 1.3.1 / 2018-06-13
 
 * [Fixed] upgrade requests dependency. See [#1734](https://github.com/DataDog/integrations-core/pull/1734).
