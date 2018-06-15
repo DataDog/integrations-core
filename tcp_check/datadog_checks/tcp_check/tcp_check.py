@@ -53,7 +53,7 @@ class TCPCheck(NetworkCheck):
                 addr = socket.gethostbyname(url)
                 socket_type = socket.AF_INET
             except Exception:
-                msg = "URL: %s is not a correct IPv4, IPv6 or hostname" % url
+                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(url)
                 raise BadConfException(msg)
 
         return addr, port, custom_tags, socket_type, timeout, response_time
