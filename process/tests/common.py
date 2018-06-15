@@ -39,7 +39,7 @@ UNIX_TO_WINDOWS_MAP = {
 def get_config_stubs():
     return [
         {
-            'config': {
+            'instance': {
                 'name': 'test_0',
                 # index in the array for our find_pids mock
                 'search_string': ['test_0'],
@@ -51,7 +51,7 @@ def get_config_stubs():
             'mocked_processes': set()
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_1',
                 # index in the array for our find_pids mock
                 'search_string': ['test_1'],
@@ -63,7 +63,7 @@ def get_config_stubs():
             'mocked_processes': set([1])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_2',
                 # index in the array for our find_pids mock
                 'search_string': ['test_2'],
@@ -75,7 +75,7 @@ def get_config_stubs():
             'mocked_processes': set([22, 35])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_3',
                 # index in the array for our find_pids mock
                 'search_string': ['test_3'],
@@ -87,7 +87,7 @@ def get_config_stubs():
             'mocked_processes': set([1, 5, 44, 901, 34])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_4',
                 # index in the array for our find_pids mock
                 'search_string': ['test_4'],
@@ -99,7 +99,7 @@ def get_config_stubs():
             'mocked_processes': set([3, 7, 2, 9, 34, 72])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_tags',
                 # index in the array for our find_pids mock
                 'search_string': ['test_5'],
@@ -108,7 +108,7 @@ def get_config_stubs():
             'mocked_processes': set([2])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_badthresholds',
                 # index in the array for our find_pids mock
                 'search_string': ['test_6'],
@@ -119,7 +119,7 @@ def get_config_stubs():
             'mocked_processes': set([89])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_7',
                 # index in the array for our find_pids mock
                 'search_string': ['test_7'],
@@ -131,14 +131,14 @@ def get_config_stubs():
             'mocked_processes': set([1])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_8',
                 'pid': 1,
             },
             'mocked_processes': set([1])
         },
         {
-            'config': {
+            'instance': {
                 'name': 'test_9',
                 'pid_file': 'process/test/ci/fixtures/test_pid_file',
             },

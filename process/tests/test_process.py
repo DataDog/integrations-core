@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# import contextlib
+import contextlib
 import os
-from mock import patch
+from mock import patch, MagicMock
 import psutil
 from datadog_checks.process import ProcessCheck
 import common
@@ -163,18 +163,193 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(aggregator):
+def test_check(mock_process, aggregator):
     (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
 
     def mock_get_pagefault_stats(pid):
         return [minflt, cminflt, majflt, cmajflt]
 
-    mocks = {
-        'find_pids': mock_find_pids,
-        'psutil_wrapper': mock_psutil_wrapper,
-        'get_pagefault_stats': mock_get_pagefault_stats,
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    config = common.get_config_stubs()
+    for instance in config:
+        print instance['instance']
+        # process.check(instance['instance'])
+
+
+def mock_get_child_processes(pids):
+    return [2, 3, 4]
+
+
+@patch('psutil.Process', return_value=MockProcess())
+def test_check_collect_children(mock_process, aggregator):
+    instance = {
+        'name': 'foo',
+        'pid': 1,
+        'collect_children': True
     }
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process.check(instance)
+    aggregator.assert_metric('system.processes.number', value=1,
+                             tags=generate_expected_tags(instance))
+
+
+@patch('psutil.Process', return_value=MockProcess())
+def test_check_filter_user(mock_process, aggregator):
+    instance = {
+        'name': 'foo',
+        'pid': 1,
+        'user': 'Bob'
+    }
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    with patch('datadog_checks.process.ProcessCheck._filter_by_user',
+               return_value={1, 2}):
+        process.check(instance)
+    print aggregator._metrics
+    aggregator.assert_metric('system.processes.number', value=2,
+                             tags=generate_expected_tags(instance))
+
+
+def test_check_missing_pid(aggregator):
+    instance = {
+        'name': 'foo',
+        'pid_file': '/foo/bar/baz'
+    }
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process.check(instance)
+    aggregator.assert_service_check('process.up', count=1,
+                                    status=process.CRITICAL)
+
+
+def test_check_real_process(aggregator):
+    "Check that we detect python running (at least this process)"
+    from datadog_checks.utils.platform import Platform
+
+    instance = {
+        'name': 'py',
+        'search_string': ['python'],
+        'exact_match': False,
+        'ignored_denied_access': True,
+        'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+    }
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    expected_tags = generate_expected_tags(instance)
+    process.check(instance)
+    for mname in common.PROCESS_METRIC:
+        # cases where we don't actually expect some metrics here:
+        #  - if io_counters() is not available
+        #  - if memory_info_ex() is not available
+        #  - first run so no `cpu.pct`
+        if (not _PSUTIL_IO_COUNTERS and '.io' in mname)\
+                or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname)\
+                or mname == 'system.processes.cpu.pct':
+            continue
+
+        if Platform.is_windows():
+            metric = common.UNIX_TO_WINDOWS_MAP.get(mname, mname)
+        else:
+            metric = mname
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+
+    aggregator.assert_service_check('process.up', count=1,
+                                    tags=expected_tags + ['process:py'])
+    aggregator.assert_all_metrics_covered()
+
+    process.check(instance)
+    aggregator.assert_metric('system.processes.cpu.pct',
+                             count=1, tags=expected_tags)
+
+
+def test_relocated_procfs(aggregator):
+    from datadog_checks.utils.platform import Platform
+    import tempfile
+    import shutil
+    import uuid
+
+    already_linux = Platform.is_linux()
+    unique_process_name = str(uuid.uuid4())
+    my_procfs = tempfile.mkdtemp()
+
+    def _fake_procfs(arg, root=my_procfs):
+        for key, val in arg.iteritems():
+            path = os.path.join(root, key)
+            if isinstance(val, dict):
+                os.mkdir(path)
+                _fake_procfs(val, path)
+            else:
+                with open(path, "w") as f:
+                    f.write(str(val))
+    _fake_procfs({
+        '1': {
+            'status': (
+                "Name:\t{}\nThreads:\t1\n"
+            ).format(unique_process_name),
+            'stat': (
+                '1 ({}) S 0 1 1 ' + ' 0' * 46
+            ).format(unique_process_name),
+            'cmdline': unique_process_name,
+        },
+        'stat': (
+            "cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\n"
+            "btime 1448632481\n"
+        ),
+    })
 
     config = {
-        'instances': [stub['config'] for stub in common.get_config_stubs()]
+        'init_config': {
+            'procfs_path': my_procfs
+        },
+        'instances': [{
+            'name': 'moved_procfs',
+            'search_string': [unique_process_name],
+            'exact_match': False,
+            'ignored_denied_access': True,
+            'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+        }]
     }
+    version = int(psutil.__version__.replace(".", ""))
+    process = ProcessCheck(common.CHECK_NAME, config['init_config'],
+                           {}, config['instances'])
+
+    try:
+        def import_mock(name, i_globals={}, i_locals={}, fromlist=[],
+                        level=-1, orig_import=__import__):
+            # _psutil_linux and _psutil_posix are the
+            #  C bindings; use a mock for those
+            if name in ('_psutil_linux', '_psutil_posix') or level >= 1 and\
+               ('_psutil_linux' in fromlist or '_psutil_posix' in fromlist):
+                m = MagicMock()
+                # the import system will ask us for our own name
+                m._psutil_linux = m
+                m._psutil_posix = m
+                # there's a version safety check in psutil/__init__.py;
+                # this skips it
+                m.version = version
+                return m
+            return orig_import(name, i_globals, i_locals, fromlist, level)
+        # contextlib.nested is deprecated in favor of with MGR1, MGR2, ... etc
+        # but we have too many mocks to fit on one line and apparently \ line
+        # continuation is not flake8 compliant, even when semantically
+        # required (as here). Patch is unlikely to throw errors that are
+        # suppressed, so the main downside of contextlib is avoided.
+        with contextlib.nested(patch('sys.platform', 'linux'),
+                               patch('socket.AF_PACKET', create=True),
+                               patch('__builtin__.__import__',
+                               side_effect=import_mock)):
+            if not already_linux:
+                # Reloading psutil fails on linux, but we only
+                # need to do so if we didn't start out on a linux platform
+                reload(psutil)
+            assert Platform.is_linux()
+            process.check(config["instances"][0])
+    finally:
+        shutil.rmtree(my_procfs)
+        if not already_linux:
+            # restore the original psutil that doesn't have our mocks
+            reload(psutil)
+        else:
+            psutil.PROCFS_PATH = '/proc'
+
+    expected_tags = generate_expected_tags(config['instances'][0])
+    expected_tags += ['process:moved_procfs']
+    aggregator.assert_service_check('process.up', count=1,
+                                    tags=expected_tags)
