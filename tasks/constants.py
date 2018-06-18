@@ -26,6 +26,7 @@ AGENT_BASED_INTEGRATIONS = [
     'datadog_checks_base',
     'directory',
     'disk',
+    'dns_check',
     'dotnetclr',
     'elastic',
     'envoy',

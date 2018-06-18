@@ -1,6 +1,8 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from __future__ import unicode_literals
 
 # stdlib
 import time
@@ -10,7 +12,7 @@ import dns.resolver
 
 # project
 from utils.platform import Platform
-from checks.network_checks import NetworkCheck, Status
+from datadog_checks.checks import NetworkCheck, Status
 
 # These imports are necessary because otherwise dynamic type
 # resolution will fail on windows without it.
@@ -34,14 +36,14 @@ class DNSCheck(NetworkCheck):
     SERVICE_CHECK_NAME = 'dns.can_resolve'
     DEFAULT_TIMEOUT = 5
 
-    def __init__(self, name, init_config, agentConfig, instances):
+    def __init__(self, name, init_config, agentConfig, instances=None):
         # Now that the DNS check is a Network check, we must provide a `name` for each
         # instance before calling NetworkCheck to make backwards compatible with old yaml.
         for idx, inst in enumerate(instances):
             try:
                 inst['name'] = inst['name']
             except KeyError:
-                inst['name'] = 'dns-check-%s' % idx
+                inst['name'] = "dns-check-{0}".format(idx)
 
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 

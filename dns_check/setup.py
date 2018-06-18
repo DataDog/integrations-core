@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# Always prefer setuptools over distutils
 from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
@@ -63,6 +65,6 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.dns_check': ['conf.yaml.example']},
+    package_data={'datadog_checks.dns_check': ['conf.yaml.example', 'autoconf.yaml']},
     include_package_data=True,
 )
