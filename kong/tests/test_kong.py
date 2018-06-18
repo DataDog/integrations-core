@@ -63,7 +63,7 @@ def wait_for_cluster():
     return False
 
 
-@pytest.fixture(scope="session", autouse=True))
+@pytest.fixture(scope="session", autouse=True)
 def kong_cluster():
     """
     Start a kong cluster
