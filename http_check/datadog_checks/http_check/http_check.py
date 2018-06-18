@@ -379,7 +379,7 @@ class HTTPCheck(NetworkCheck):
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
-            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname)
+            status, days_left, msg = self.check_cert_expiration(instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key)
 
             tags_list = list(tags)
             tags_list.append('url:{}'.format(addr))
@@ -413,7 +413,7 @@ class HTTPCheck(NetworkCheck):
 
         self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
 
-    def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname):
+    def check_cert_expiration(self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None):
         warning_days = int(instance.get('days_warning', 14))
         critical_days = int(instance.get('days_critical', 7))
         url = instance.get('url')
@@ -432,6 +432,10 @@ class HTTPCheck(NetworkCheck):
             context.verify_mode = ssl.CERT_REQUIRED
             context.check_hostname = check_hostname
             context.load_verify_locations(instance_ca_certs)
+
+            if client_cert and client_key:
+                context.load_cert_chain(client_cert, keyfile=client_key)
+
             ssl_sock = context.wrap_socket(sock, server_hostname=server_name)
             cert = ssl_sock.getpeercert()
 
