@@ -265,10 +265,11 @@ class Memcache(AgentCheck):
             raise Exception('Either "url" or "socket" must be configured')
 
         if socket:
-            server = 'unix'
-            port = socket
+            server = socket
+            connection_server = "{}".format(server)
         else:
             port = int(instance.get('port', self.DEFAULT_PORT))
+            connection_server = "{}:{}".format(server, port)
         custom_tags = instance.get('tags') or []
 
         mc = None  # client
@@ -277,7 +278,7 @@ class Memcache(AgentCheck):
 
         try:
             self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
-            mc = bmemcached.Client(["{}:{}".format(server, port)], username, password)
+            mc = bmemcached.Client(connection_server, username, password)
 
             self._get_metrics(mc, tags, service_check_tags)
             if options:
