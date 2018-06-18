@@ -53,7 +53,7 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
   logs_enabled: true
   ```
 
-* Then Add this configuration block to your `apache.yaml` file to start collecting your Elasticsearch Logs:
+* Then Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
 
   ```yaml
     logs:
