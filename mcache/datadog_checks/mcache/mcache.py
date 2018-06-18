@@ -278,7 +278,7 @@ class Memcache(AgentCheck):
         service_check_tags = ["host:%s" % server, "port:%s" % port] + custom_tags
 
         try:
-            self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
+            self.log.debug("Connecting to %s, tags:%s", connection_server, tags)
             mc = bmemcached.Client(connection_server, username, password)
 
             self._get_metrics(mc, tags, service_check_tags)
