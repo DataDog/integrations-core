@@ -265,8 +265,9 @@ class Memcache(AgentCheck):
             raise Exception('Either "url" or "socket" must be configured')
 
         if socket:
-            server = socket
-            connection_server = "{}".format(server)
+            server = 'unix'
+            port = socket
+            connection_server = "{}".format(port)
         else:
             port = int(instance.get('port', self.DEFAULT_PORT))
             connection_server = "{}:{}".format(server, port)
