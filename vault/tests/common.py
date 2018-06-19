@@ -13,10 +13,12 @@ INSTANCES = {
     },
     'bad_url': {
         'api_url': 'http://1.2.3.4:555/v1',
+        'tags': ['instance:foobar'],
         'timeout': 1,
     },
     'no_leader': {
         'api_url': 'http://{}:{}/v1'.format(HOST, PORT),
+        'tags': ['instance:foobar'],
     },
     'invalid': {},
 }
