@@ -33,8 +33,8 @@ To verify the correct permissions run the following command:
 
 ```
 psql -h localhost -U datadog postgres -c \
-"select * from pg_stat_database LIMIT(1);"
-&& echo -e "\e[0;32mPostgres connection - OK\e[0m" || \
+"select * from pg_stat_database LIMIT(1);" \
+&& echo -e "\e[0;32mPostgres connection - OK\e[0m" \
 || echo -e "\e[0;31mCannot connect to Postgres\e[0m"
 ```
 
