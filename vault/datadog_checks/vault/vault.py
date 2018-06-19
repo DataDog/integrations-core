@@ -134,7 +134,7 @@ class Vault(AgentCheck):
 
         return config
 
-    def access_api(self, url, config, tags=None):
+    def access_api(self, url, config, tags):
         try:
             response = requests.get(
                 url,
@@ -150,7 +150,7 @@ class Vault(AgentCheck):
                 self.SERVICE_CHECK_CONNECT,
                 AgentCheck.CRITICAL,
                 message=msg,
-                tags=config['tags'] + (tags or [])
+                tags=tags
             )
             self.log.exception(msg)
             raise ApiUnreachable
@@ -160,7 +160,7 @@ class Vault(AgentCheck):
                 self.SERVICE_CHECK_CONNECT,
                 AgentCheck.CRITICAL,
                 message=msg,
-                tags=config['tags'] + (tags or [])
+                tags=tags
             )
             self.log.exception(msg)
             raise ApiUnreachable
