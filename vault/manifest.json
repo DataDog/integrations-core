@@ -3,7 +3,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "vault",
-  "metric_prefix": "vault",
+  "metric_prefix": "vault.",
   "metric_to_check": "",
   "creates_events": "true",
   "short_description": "Vault is a tool for secrets management, encryption as a service, and privileged access management.",
