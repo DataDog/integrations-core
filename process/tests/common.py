@@ -5,7 +5,6 @@
 CHECK_NAME = 'process'
 
 PROCESS_METRIC = [
-    'system.processes.cpu.pct',
     'system.processes.involuntary_ctx_switches',
     'system.processes.ioread_bytes',
     'system.processes.ioread_count',

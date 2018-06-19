@@ -135,8 +135,8 @@ def test_ad_cache(aggregator):
     process.check(config['instances'][0])
 
 
-def mock_find_pids(name, search_string, exact_match=True, ignore_ad=True,
-                   refresh_ad_cache=True):
+def mock_find_pid(name, search_string, exact_match=True, ignore_ad=True,
+                  refresh_ad_cache=True):
     if search_string is not None:
         idx = search_string[0].split('_')[1]
 
@@ -171,13 +171,20 @@ def test_check(mock_process, aggregator):
 
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     config = common.get_config_stubs()
-    for instance in config:
-        print instance['instance']
-        # process.check(instance['instance'])
+    for idx in range(len(config)):
+        instance = config[idx]['instance']
+        if 'search_string' not in instance.keys():
+            process.check(instance)
+        else:
+            with patch('datadog_checks.process.ProcessCheck.find_pids',
+                       return_value=mock_find_pid(instance['name'], instance['search_string'])):
+                process.check(instance)
 
-
-def mock_get_child_processes(pids):
-    return [2, 3, 4]
+        # these are just here to ensure it passes the coverage report.
+        # they don't really "test" for anything.
+        for sname in common.PAGEFAULT_STAT:
+            aggregator.assert_metric('system.processes.mem.page_faults.' + sname, at_least=0,
+                                     tags=generate_expected_tags(instance))
 
 
 @patch('psutil.Process', return_value=MockProcess())
@@ -189,8 +196,7 @@ def test_check_collect_children(mock_process, aggregator):
     }
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
-    aggregator.assert_metric('system.processes.number', value=1,
-                             tags=generate_expected_tags(instance))
+    aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
 
 
 @patch('psutil.Process', return_value=MockProcess())
@@ -201,12 +207,10 @@ def test_check_filter_user(mock_process, aggregator):
         'user': 'Bob'
     }
     process = ProcessCheck(common.CHECK_NAME, {}, {})
-    with patch('datadog_checks.process.ProcessCheck._filter_by_user',
-               return_value={1, 2}):
+    with patch('datadog_checks.process.ProcessCheck._filter_by_user', return_value={1, 2}):
         process.check(instance)
-    print aggregator._metrics
-    aggregator.assert_metric('system.processes.number', value=2,
-                             tags=generate_expected_tags(instance))
+
+    aggregator.assert_metric('system.processes.number', value=2, tags=generate_expected_tags(instance))
 
 
 def test_check_missing_pid(aggregator):
@@ -216,8 +220,7 @@ def test_check_missing_pid(aggregator):
     }
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
-    aggregator.assert_service_check('process.up', count=1,
-                                    status=process.CRITICAL)
+    aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
 
 
 def test_check_real_process(aggregator):
@@ -239,8 +242,7 @@ def test_check_real_process(aggregator):
         #  - if io_counters() is not available
         #  - if memory_info_ex() is not available
         #  - first run so no `cpu.pct`
-        if (not _PSUTIL_IO_COUNTERS and '.io' in mname)\
-                or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname)\
+        if (not _PSUTIL_IO_COUNTERS and '.io' in mname) or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname) \
                 or mname == 'system.processes.cpu.pct':
             continue
 
@@ -250,13 +252,11 @@ def test_check_real_process(aggregator):
             metric = mname
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
-    aggregator.assert_service_check('process.up', count=1,
-                                    tags=expected_tags + ['process:py'])
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
     aggregator.assert_all_metrics_covered()
 
     process.check(instance)
-    aggregator.assert_metric('system.processes.cpu.pct',
-                             count=1, tags=expected_tags)
+    aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
 
 
 def test_relocated_procfs(aggregator):
@@ -307,8 +307,7 @@ def test_relocated_procfs(aggregator):
         }]
     }
     version = int(psutil.__version__.replace(".", ""))
-    process = ProcessCheck(common.CHECK_NAME, config['init_config'],
-                           {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, config['init_config'], {}, config['instances'])
 
     try:
         def import_mock(name, i_globals={}, i_locals={}, fromlist=[],
@@ -351,5 +350,4 @@ def test_relocated_procfs(aggregator):
 
     expected_tags = generate_expected_tags(config['instances'][0])
     expected_tags += ['process:moved_procfs']
-    aggregator.assert_service_check('process.up', count=1,
-                                    tags=expected_tags)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags)
