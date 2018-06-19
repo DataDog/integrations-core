@@ -126,7 +126,7 @@ SELECT mode,
         'metrics': {
             'seq_scan': ('postgresql.seq_scans', RATE),
             'seq_tup_read': ('postgresql.seq_rows_read', RATE),
-            'idx_scan': ('postgresql.index_scans', RATE),
+            'idx_scan': ('postgresql.index_rel_scans', RATE),
             'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE),
             'n_tup_ins': ('postgresql.rows_inserted', RATE),
             'n_tup_upd': ('postgresql.rows_updated', RATE),
