@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import pytest
 
@@ -20,5 +21,6 @@ def spin_up_vault():
         'docker-compose', '-f', os.path.join(DOCKER_DIR, 'docker-compose.yaml')
     ]
     subprocess.check_call(base_command + ['up', '-d'])
+    time.sleep(5)
     yield
     subprocess.check_call(base_command + ['down'])
