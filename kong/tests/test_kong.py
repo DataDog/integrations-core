@@ -76,6 +76,7 @@ def kong_cluster():
     ]
     subprocess.check_call(args + ["up", "-d"])
     if not wait_for_cluster():
+        subprocess.check_call(args + ["down"])
         raise Exception("Kong cluster boot timed out!")
     yield
     subprocess.check_call(args + ["down"])
