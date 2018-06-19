@@ -6,6 +6,8 @@ init_config:
 
 instances:
   - api_url: http://localhost:8200/v1
+
+  #   The default configuration does not require a client token.
   #   client_token: TOKEN
 
   #   Whether or not this instance should report cluster leader change events.
