@@ -46,6 +46,7 @@ AGENT_BASED_INTEGRATIONS = [
     'kyototycoon',
     'lighttpd',
     'linkerd',
+    'linux_proc_extras',
     'mapreduce',
     'marathon',
     'mcache',
