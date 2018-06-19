@@ -26,7 +26,7 @@ def get_requirements(fpath):
 
 
 setup(
-    name='datadog-http_check',
+    name='datadog-dns_check',
     version=ABOUT['__version__'],
     description='The DNS check',
     long_description=long_description,
