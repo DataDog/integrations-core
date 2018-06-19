@@ -1,0 +1,29 @@
+{
+  "display_name": "Vault",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "vault",
+  "metric_prefix": "vault",
+  "metric_to_check": "",
+  "creates_events": "true",
+  "short_description": "Vault is a tool for secrets management, encryption as a service, and privileged access management.",
+  "guid": "d65af827-c818-44ce-9ec3-cd7ead3ac4ce",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Vault Integration",
+  "categories": [
+    "security",
+    "configuration & deployment",
+    "aws",
+    "google cloud",
+    "azure"
+  ],
+  "type": "check",
+  "doc_link": "https://docs.datadoghq.com/integrations/vault/",
+  "is_public": true,
+  "has_logo": true
+}

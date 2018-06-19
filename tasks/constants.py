@@ -67,6 +67,7 @@ AGENT_BASED_INTEGRATIONS = [
     'system_core',
     'teamcity',
     'varnish',
+    'vault',
     'vsphere',
     'yarn',
 ]
