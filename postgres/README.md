@@ -136,8 +136,11 @@ Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL
 * [PostgreSQL custom metric collection explained][19]
 
 ## Further Reading
-### Blog Post
-To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
+### Blog posts
+* To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.  
+* [Key metrics for PostgreSQL monitoring][21]  
+* [Collecting metrics with PostgreSQL monitoring tools][22]  
+* [How to collect and monitor PostgreSQL data with Datadog][23]  
 
 ### Knowledge Base
 #### Custom metrics
@@ -211,3 +214,6 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 [18]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [19]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
 [20]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/
+[21]: https://www.datadoghq.com/blog/postgresql-monitoring/
+[22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
+[23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/
