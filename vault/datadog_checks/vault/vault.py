@@ -46,9 +46,8 @@ class Vault(AgentCheck):
 
         self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
-    def check_leader_v1(self, config, tags=None):
+    def check_leader_v1(self, config, tags):
         url = config['api_url'] + '/sys/leader'
-        tags = tags or []
         leader_data = self.access_api(url, config, tags).json()
 
         is_leader = _is_affirmative(leader_data.get('is_self'))
@@ -70,9 +69,8 @@ class Vault(AgentCheck):
                 })
             config['leader'] = current_leader
 
-    def check_health_v1(self, config, tags=None):
+    def check_health_v1(self, config, tags):
         url = config['api_url'] + '/sys/health'
-        tags = tags or []
         health_data = self.access_api(url, config, tags).json()
 
         cluster_name = health_data.get('cluster_name')
@@ -123,7 +121,7 @@ class Vault(AgentCheck):
             password = instance.get('password')
             config['auth'] = (username, password) if username and password else None
 
-            config['ssl_verify'] = instance.get('ssl_verify', True)
+            config['ssl_verify'] = _is_affirmative(instance.get('ssl_verify', True))
             config['proxies'] = self.get_instance_proxy(instance, config['api_url'])
             config['timeout'] = int(instance.get('timeout', 20))
             config['tags'] = instance.get('tags', [])

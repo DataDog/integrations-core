@@ -14,28 +14,28 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
         c.check(instance)
 
-        assert len(aggregator.service_checks(Vault.SERVICE_CHECK_CONNECT)) == 0
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
     def test_service_check_connect_ok(self, aggregator):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
         c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_CONNECT)[0].status == Vault.OK
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
     def test_service_check_connect_fail(self, aggregator):
         instance = INSTANCES['bad_url']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
         c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_CONNECT)[0].status == Vault.CRITICAL
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1)
 
     def test_service_check_unsealed_ok(self, aggregator):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
         c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_UNSEALED)[0].status == Vault.OK
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, count=1)
 
     def test_service_check_unsealed_fail(self, aggregator):
         instance = INSTANCES['main']
@@ -65,14 +65,14 @@ class TestVault:
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_UNSEALED)[0].status == Vault.CRITICAL
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
 
     def test_service_check_initialized_ok(self, aggregator):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
         c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_INITIALIZED)[0].status == Vault.OK
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, count=1)
 
     def test_service_check_initialized_fail(self, aggregator):
         instance = INSTANCES['main']
@@ -102,7 +102,7 @@ class TestVault:
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             c.check(instance)
 
-        assert aggregator.service_checks(Vault.SERVICE_CHECK_INITIALIZED)[0].status == Vault.CRITICAL
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
     def test_event_leader_change(self, aggregator):
         instance = INSTANCES['main']
