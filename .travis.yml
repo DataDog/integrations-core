@@ -37,11 +37,13 @@ jobs:
   include:
     - stage: test_changed
       script:
+       - inv dep-check
        - inv manifest --include-extras
        - inv test --changed-only
     - stage: test
       env: CHECK=datadog_checks_base
       script:
+        - inv dep-check
         - inv manifest --include-extras
         - travis_retry inv test --targets=${CHECK}
     - stage: test

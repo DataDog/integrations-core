@@ -4,12 +4,18 @@
 from __future__ import print_function, unicode_literals
 
 import os
+import re
+from collections import defaultdict
 from io import open
 
 from invoke import task
 from invoke.exceptions import Exit
+from six import iteritems
 
 from .constants import ROOT
+
+
+DEP_PATTERN = re.compile(r'^([^=]+)==(\S+)')
 
 
 def ensure_deps_declared(reqs_txt, reqs_in):
@@ -28,12 +34,50 @@ def ensure_deps_declared(reqs_txt, reqs_in):
             f.writelines(declacred_lines)
 
 
+@task
+def dep_check(ctx):
+    packages = defaultdict(lambda: defaultdict(list))
+
+    for check_name in sorted(os.listdir(ROOT)):
+        reqs_file = os.path.join(ROOT, check_name, 'requirements.txt')
+        if os.path.isfile(reqs_file):
+            with open(reqs_file, 'r') as f:
+                for line in f:
+                    match = DEP_PATTERN.match(line)
+                    if match:
+                        package, version = match.groups()
+                        packages[package][version].append(check_name)
+
+    output = ''
+    for package, versions in sorted(iteritems(packages)):
+        if len(versions) > 1:
+            output += 'Multiple versions found for package `{}`:\n'.format(package)
+            for version, checks in sorted(iteritems(versions)):
+                if len(checks) == 1:
+                    output += '    {}: {}\n'.format(version, checks[0])
+                elif len(checks) == 2:
+                    output += '    {}: {} and {}\n'.format(version, checks[0], checks[1])
+                else:
+                    remaining = len(checks) - 2
+                    output += '    {}: {}, {}, and {} other{}\n'.format(
+                        version,
+                        checks[0],
+                        checks[1],
+                        remaining,
+                        's' if remaining > 1 else ''
+                    )
+
+    if output:
+        print(output[:-1])
+        Exit(1)
+
+
 @task(help={
     'package': 'The package to upgrade throughout the integrations',
     'version': 'The version of the package to pin',
     'verbose': 'Whether or not to produce output',
 })
-def upgrade(ctx, package=None, version=None, verbose=False):
+def dep_upgrade(ctx, package=None, version=None, verbose=False):
     """Upgrade a dependency for all integrations that require it.
     ``pip-compile`` must be in PATH.
 
