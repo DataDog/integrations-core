@@ -8,6 +8,7 @@ PORT = '8200'
 INSTANCES = {
     'main': {
         'api_url': 'http://{}:{}/v1'.format(HOST, PORT),
+        'tags': ['instance:foobar'],
         'detect_leader': True,
     },
     'bad_url': {

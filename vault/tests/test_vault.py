@@ -23,6 +23,53 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
+    def test_service_check_connect_ok_all_tags(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+
+        config = c.get_config(instance)
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == config['api_url'] + '/sys/leader':
+                return MockResponse({
+                    'ha_enabled': False,
+                    'is_self': True,
+                    'leader_address': '',
+                    'leader_cluster_address': ''
+                })
+            elif url == config['api_url'] + '/sys/health':
+                return MockResponse({
+                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                    'cluster_name': 'vault-cluster-f5f44063',
+                    'initialized': True,
+                    'replication_dr_mode': 'disabled',
+                    'replication_performance_mode': 'disabled',
+                    'sealed': False,
+                    'server_time_utc': 1529357080,
+                    'standby': False,
+                    'version': '0.10.2'
+                })
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            c.check(instance)
+
+        expected_tags = [
+            'instance:foobar',
+            'is_leader:true',
+            'cluster_name:vault-cluster-f5f44063',
+            'vault_version:0.10.2'
+        ]
+        aggregator.assert_service_check(
+            Vault.SERVICE_CHECK_CONNECT,
+            status=Vault.OK,
+            tags=expected_tags,
+            count=1
+        )
+
     def test_service_check_connect_fail(self, aggregator):
         instance = INSTANCES['bad_url']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
@@ -42,7 +89,6 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
 
         config = c.get_config(instance)
-        config['leader'] = 'foo'
 
         # Keep a reference for use during mock
         requests_get = requests.get
@@ -79,7 +125,6 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
 
         config = c.get_config(instance)
-        config['leader'] = 'foo'
 
         # Keep a reference for use during mock
         requests_get = requests.get
