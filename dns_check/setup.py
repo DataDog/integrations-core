@@ -4,29 +4,29 @@
 
 # Always prefer setuptools over distutils
 from setuptools import setup
-from codecs import open  # To use a consistent encoding
+# To use a consistent encoding
+from codecs import open
 from os import path
 
-HERE = path.dirname(path.abspath(__file__))
-
-# Get version info
-ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'dns_check', '__about__.py')) as f:
-    exec(f.read(), ABOUT)
+HERE = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# Get version info
+ABOUT = {}
+with open(path.join(HERE, "datadog_checks", "dns_check", "__about__.py")) as f:
+    exec(f.read(), ABOUT)
 
-# Parse requirements
+
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
 
 setup(
-    name='datadog-dns_check',
+    name='datadog-http_check',
     version=ABOUT['__version__'],
     description='The DNS check',
     long_description=long_description,
@@ -57,14 +57,12 @@ setup(
     packages=['datadog_checks.dns_check'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
+    install_requires=get_requirements('requirements.in') + [
         'datadog_checks_base',
     ],
-
-    # Testing setup and dependencies
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.dns_check': ['conf.yaml.example', 'autoconf.yaml']},
+    package_data={b'datadog_checks.dns_check': ['conf.yaml.example']},
     include_package_data=True,
 )

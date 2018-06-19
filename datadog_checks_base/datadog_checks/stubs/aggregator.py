@@ -97,7 +97,7 @@ class AggregatorStub(object):
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             assert len(candidates) >= at_least, msg
 
-    def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None):
+    def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
         Assert a service check was processed by this stub
         """
@@ -107,6 +107,12 @@ class AggregatorStub(object):
                 continue
 
             if tags and sorted(tags) != sorted(sc.tags):
+                continue
+
+            if hostname is not None and hostname != sc.hostname:
+                continue
+
+            if message is not None and message != sc.message:
                 continue
 
             candidates.append(sc)

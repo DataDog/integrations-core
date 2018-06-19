@@ -26,11 +26,11 @@ class MockDNSAnswer:
 # otherwise the consecutive calls are too close to one another in the check run with mocks,
 # the time difference is `0` and no response_time metric is sent
 class MockTime(object):
-    global_time = 1.
+    global_time = 1
 
     @classmethod
     def time(cls):
-        cls.global_time += 0.1
+        cls.global_time += 1
         return cls.global_time
 
 

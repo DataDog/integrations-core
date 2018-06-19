@@ -69,6 +69,8 @@ jobs:
     - stage: test
       env: CHECK=disk
     - stage: test
+      env: CHECK=dns_check
+    - stage: test
       env: CHECK=dotnetclr
     - stage: test
       env: CHECK=elastic

@@ -11,7 +11,7 @@ import time
 import dns.resolver
 
 # project
-from utils.platform import Platform
+from datadog_checks.utils.platform import Platform
 from datadog_checks.checks import NetworkCheck, Status
 
 # These imports are necessary because otherwise dynamic type
@@ -36,7 +36,7 @@ class DNSCheck(NetworkCheck):
     SERVICE_CHECK_NAME = 'dns.can_resolve'
     DEFAULT_TIMEOUT = 5
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, agentConfig, instances={}):
         # Now that the DNS check is a Network check, we must provide a `name` for each
         # instance before calling NetworkCheck to make backwards compatible with old yaml.
         for idx, inst in enumerate(instances):
