@@ -38,6 +38,7 @@ class Vault(AgentCheck):
 
         tags = list(config['tags'])
 
+        # We access the version of the Vault API corresponding to each instance's `api_url`.
         try:
             config['api']['check_leader'](config, tags)
             config['api']['check_health'](config, tags)
