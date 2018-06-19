@@ -6,7 +6,6 @@ import requests
 import time
 
 from datadog_checks.kong import Kong
-from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger('test_kong')
@@ -108,7 +107,7 @@ def test_check(aggregator, check):
             tags = expected_tags + ['table:{}'.format(name)]
             aggregator.assert_metric('kong.table.items', tags=tags, count=1)
 
-        aggregator.assert_service_check('kong.can_connect', status=AgentCheck.OK,
+        aggregator.assert_service_check('kong.can_connect', status=Kong.OK,
                                         tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1)
 
         aggregator.all_metrics_asserted()
@@ -117,7 +116,7 @@ def test_check(aggregator, check):
 def test_connection_failure(aggregator, check):
     with pytest.raises(Exception):
         check.check(BAD_CONFIG)
-    aggregator.assert_service_check('kong.can_connect', status=AgentCheck.CRITICAL,
+    aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL,
                                     tags=['kong_host:localhost', 'kong_port:1111'], count=1)
 
     aggregator.all_metrics_asserted()
