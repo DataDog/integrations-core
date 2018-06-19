@@ -151,6 +151,8 @@ jobs:
     - stage: test
       env: CHECK=varnish
     - stage: test
+      env: CHECK=vault
+    - stage: test
       env: CHECK=vsphere
     - stage: test
       env: CHECK=yarn
