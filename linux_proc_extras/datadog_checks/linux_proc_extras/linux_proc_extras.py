@@ -3,10 +3,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
 from collections import defaultdict
+
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 PROCESS_STATES = {
     'D': 'uninterruptible',
@@ -23,6 +23,7 @@ PROCESS_PRIOS = {
     'N': 'low',
     'L': 'locked'
 }
+
 
 class MoreUnixCheck(AgentCheck):
     def check(self, instance):
@@ -45,7 +46,6 @@ class MoreUnixCheck(AgentCheck):
 
         for key, path in self.proc_path_map.iteritems():
             self.proc_path_map[key] = "{procfs}/{path}".format(procfs=proc_location, path=path)
-
 
     def get_inode_info(self):
         with open(self.proc_path_map['inode_info'], 'r') as inode_info:
