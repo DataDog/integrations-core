@@ -1,5 +1,8 @@
 # CHANGELOG - supervisord
 
+## 1.1.2 / 2018-06-20
+
+
 ## 1.1.1 / 2018-01-10
 
 * [FEATURE] add support for tags per instance. See [#411][]. Thanks [@frederikhappel][].
