@@ -45,7 +45,7 @@ Each Datadog Agent release will continue to ship a set of the most up to date st
 | Agent Version | List of Shipped Integration Versions |
 |---------------|--------------------------------------|
 | 6.2.1         | [Link](https://github.com/DataDog/integrations-core/blob/6.2.1/requirements-integration-core.txt) |
-| 6.3.0         | [Link](https://github.com/DataDog/integrations-core/blob/supervisord-1.1.2/requirements-agent-release.txt) |
+| 6.3.0         | [Link](https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt) |
 
 ## Quick Start
 
