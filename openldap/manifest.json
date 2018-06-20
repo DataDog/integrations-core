@@ -1,0 +1,20 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "openldap",
+  "short_description": "The OpenLDAP integration collect metrics from your OpenLDAP server using the cn=monitor branch",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "guid": "000-000",
+  "public_title": "openldap Integration",
+  "categories":[],
+  "type":"check",
+  "doc_link": "",
+  "aliases":[],
+  "is_public": true,
+  "has_logo": true
+}

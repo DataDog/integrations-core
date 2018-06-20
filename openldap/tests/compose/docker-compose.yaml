@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  openldap:
+    image: "osixia/openldap:1.2.1"
+    container_name: ${CONTAINER_NAME}
+    ports:
+      - "3890:389"
+      - "6360:636"
+    environment:
+      - LDAP_TLS_VERIFY_CLIENT=never
+    volumes:
+      - ${HOST_SOCKET_DIR}:/var/run/slapd/
