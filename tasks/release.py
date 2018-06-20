@@ -73,10 +73,16 @@ def print_shippable(ctx, quiet=False):
             try:
                 payload = get_pr(pr_num)
                 changelog_labels = get_changelog_types(payload)
+
+                if not changelog_labels:
+                    msg = Fore.RED + "PR #{} has no changelog label attached, please add one!\n".format(pr_num)
+                    sys.stderr.write(msg)
+                    continue
+
                 if changelog_labels[0] != CHANGELOG_TYPE_NONE:
                     all_no_changelog = False
             except Exception as e:
-                sys.stderr.write("Unable to fetch info for PR #{}\n: {}".format(pr_num, e))
+                sys.stderr.write("Unable to fetch info for PR #{}: {}\n".format(pr_num, e))
                 continue
 
         if pr_numbers and not all_no_changelog:
