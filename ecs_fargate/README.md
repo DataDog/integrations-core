@@ -10,7 +10,7 @@ Get metrics from all your containers running in ECS Fargate:
 ## Setup
 ### Installation
 
-The ECS Fargate check is packaged with the Agent, [run the Agent][1] with your containers to start collecting metrics. Additional details are available in our [AWS Fargate guide][7].
+The ECS Fargate check is packaged with the Agent, [run the Agent][1] with your containers to start collecting metrics.
 
 ### Configuration
 
