@@ -2,6 +2,7 @@
 
 ## 1.2.1 / 2018-06-20
 
+* [Tooling] Bump check to be in sync with new release tooling.
 
 ## 1.2.0 / 2017-10-10
 
