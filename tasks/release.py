@@ -182,7 +182,7 @@ def release_prepare(ctx, target, new_version):
     update_requirements(req_file, target, get_requirement_line(target, new_version))
 
     # commit the changes
-    msg = "Bumped {} version to {}".format(target, new_version)
+    msg = "[ci skip] Bumped {} version to {}".format(target, new_version)
     git_commit(ctx, [target, AGENT_REQ_FILE], msg)
 
     # done
