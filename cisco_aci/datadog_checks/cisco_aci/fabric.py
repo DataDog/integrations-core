@@ -4,6 +4,7 @@
 
 from . import metrics as aci_metrics
 from . import helpers
+from .exceptions import APIConnectionException, APIParsingException
 
 
 class Fabric:

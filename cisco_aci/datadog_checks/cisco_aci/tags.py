@@ -7,6 +7,7 @@ import re
 from datadog_checks.utils.containers import hash_mutable
 
 from . import helpers
+from .exceptions import APIConnectionException, APIParsingException
 
 
 class CiscoTags:

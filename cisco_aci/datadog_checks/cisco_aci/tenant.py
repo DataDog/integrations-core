@@ -7,6 +7,7 @@ import time
 import datetime
 
 from . import helpers
+from .exceptions import APIConnectionException, APIParsingException
 
 
 class Tenant:
