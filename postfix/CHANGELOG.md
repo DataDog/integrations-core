@@ -1,5 +1,8 @@
 # CHANGELOG - postfix
 
+## 1.2.1 / 2018-06-20
+
+
 ## 1.2.0 / 2017-10-10
 
 * [IMPROVEMENT] option to run the check using postqueue -p. See [#665][].
