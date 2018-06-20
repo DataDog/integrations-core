@@ -2,10 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import print_function, unicode_literals
-import os
+
 import json
+import os
+import re
 
 from ..constants import ROOT
+
+VERSION = re.compile(r'__version__ *= *(?:\'|")(.+?)(?:\'|")')
+REVISION_DELIMITER = '-rev.'
 
 
 def get_version_file(check_name):
@@ -15,15 +20,31 @@ def get_version_file(check_name):
         return os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
 
 
-def get_version_string(check_name):
+def read_version_file(check_name):
+    with open(get_version_file(check_name), 'r') as f:
+        return f.read()
+
+
+def get_valid_checks():
+    return {path for path in os.listdir(ROOT) if os.path.isfile(get_version_file(path))}
+
+
+def get_version_string(check_name, release=True):
     """
     Get the version string for the given check.
     """
-    about = {}
-    with open(get_version_file(check_name)) as f:
-        exec(f.read(), about)
+    version = VERSION.search(read_version_file(check_name))
+    if version:
+        version = version.group(1)
+        return parse_release_version(version) if release else version
 
-    return about.get('__version__')
+
+def parse_release_version(version):
+    return version.split(REVISION_DELIMITER)[0]
+
+
+def make_dev_version(version, rev):
+    return '{}{}{}'.format(version, REVISION_DELIMITER, rev)
 
 
 def get_release_tag_string(check_name, version_string):
@@ -49,10 +70,10 @@ def update_version_module(check_name, old_ver, new_ver):
     Change the Python code in the __about__.py module so that `__version__`
     contains the new value.
     """
-    about_module = get_version_file(check_name)
-    with open(about_module, 'r') as f:
+    version_file = get_version_file(check_name)
+    with open(version_file, 'r') as f:
         contents = f.read()
 
     contents = contents.replace(old_ver, new_ver)
-    with open(about_module, 'w') as f:
+    with open(version_file, 'w') as f:
         f.write(contents)

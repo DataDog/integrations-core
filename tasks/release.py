@@ -4,8 +4,9 @@
 from __future__ import print_function, unicode_literals
 import os
 import sys
+from collections import defaultdict
 
-from packaging import version
+from semver import parse_version_info
 from invoke import task
 from invoke.exceptions import Exit
 from colorama import Fore
@@ -15,7 +16,8 @@ from .utils.git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
 from .utils.common import (
-    get_version_string, get_release_tag_string, update_version_module
+    get_valid_checks, get_version_string, get_release_tag_string, update_version_module,
+    make_dev_version, parse_release_version
 )
 from .utils.github import get_changelog_types, get_pr
 from .utils.requirements import get_requirement_line, update_requirements
@@ -119,6 +121,63 @@ def release_show_pending(ctx, target):
         print("")
 
 
+@task
+def release_dev(ctx, branch=None, commit=True, push=False, force=False, dry_run=False):
+    """Updates the dev version of any check that was modified in the most
+    recent commit to the master branch. This command is idempotent given
+    the same state of master and ignores release commits.
+    """
+    branch = branch or 'master'
+    current_rev, previous_rev = (
+        line.strip() for line in ctx.run(
+            'git rev-list --abbrev-commit --max-count=2 {}'.format(branch),
+            hide='out'
+        ).stdout.splitlines() if line
+    )
+    changes = (
+        line.strip() for line in ctx.run(
+            'git diff --name-only {}..{}'.format(previous_rev, current_rev),
+            hide='out'
+        ).stdout.splitlines() if line
+    )
+
+    all_checks = get_valid_checks()
+    to_modify = defaultdict(list)
+
+    # Group everything that was changed for each check.
+    for change in changes:
+        check = change.split('/', 1)[0]
+        if check in all_checks:
+            to_modify[check].append(change)
+
+    # Ignore checks that had their versions bumped.
+    for check in list(to_modify.keys()):
+        for change in to_modify[check]:
+            if change.endswith('__about__.py'):
+                del to_modify[check]
+                break
+
+    # If there's no check to bump indicate no committing is necessary.
+    if not to_modify:
+        Exit(code=2)
+
+    for check in sorted(to_modify):
+        full_version = get_version_string(check, release=False)
+        release_version = parse_release_version(full_version)
+        new_version = make_dev_version(release_version, current_rev)
+
+        if dry_run:
+            print(check)
+        else:
+            update_version_module(check, full_version, new_version)
+
+    if not dry_run and commit:
+        ctx.run('git add --all')
+        ctx.run('git commit -m "Dev version update for revision {}"'.format(current_rev))
+        if push:
+            ctx.run('git push{} -u origin {}'.format(' -f' if force else '', branch))
+
+
 @task(help={
     'target': "The check to release",
     'new_version': "The new version",
@@ -144,9 +203,10 @@ def release_prepare(ctx, target, new_version):
         raise Exit("This task will add a commit, you don't want to add it on master directly")
 
     # sanity check on the version provided
-    cur_version = get_version_string(target)
-    p_version = version.parse(new_version)
-    p_current = version.parse(cur_version)
+    cur_version = get_version_string(target, release=False)
+    release_version = parse_release_version(cur_version)
+    p_version = parse_version_info(new_version)
+    p_current = parse_version_info(release_version)
     if p_version <= p_current:
         raise Exit("Current version is {}, can't bump to {}".format(p_current, p_version))
 
@@ -156,7 +216,7 @@ def release_prepare(ctx, target, new_version):
 
     # update the CHANGELOG
     print("Updating the changelog")
-    do_update_changelog(ctx, target, cur_version, new_version)
+    do_update_changelog(ctx, target, release_version, new_version)
 
     # update the global requirements file
     req_file = os.path.join(ROOT, AGENT_REQ_FILE)
