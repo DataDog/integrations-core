@@ -15,6 +15,18 @@ def get_version_file(check_name):
         return os.path.join(ROOT, check_name, "datadog_checks", check_name, "__about__.py")
 
 
+def get_tox_file(check_name):
+    return os.path.join(ROOT, check_name, 'tox.ini')
+
+
+def get_valid_checks():
+    return {path for path in os.listdir(ROOT) if os.path.isfile(get_version_file(path))}
+
+
+def get_testable_checks():
+    return {path for path in os.listdir(ROOT) if os.path.isfile(get_tox_file(path))}
+
+
 def get_version_string(check_name):
     """
     Get the version string for the given check.

@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 2.6.0 / 2018-06-13
+
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+
 ## 2.5.0 / 2018-05-11
 
 * [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
