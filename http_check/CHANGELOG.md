@@ -1,5 +1,10 @@
 # CHANGELOG - http_check
 
+## 2.2.0 / 2018-06-20
+
+* [Fixed] Add support client auth for http check cert expiration.. See [#1754](https://github.com/DataDog/integrations-core/pull/1754).
+* [Fixed] Check will now send data with PUT, DELETE, and PATCH methods--not just POST. See [#1718](https://github.com/DataDog/integrations-core/pull/1718).
+
 ## 2.1.0 / 2018-06-06
 
 * [Fixed] fixes AttributeError when running on 6.2.1. See [#1617](https://github.com/DataDog/integrations-core/pull/1617).
