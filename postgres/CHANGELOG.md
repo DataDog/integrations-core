@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 2.1.3 / 2018-06-20
+
+* [Fixed] Fixed postgres verification script. See [#1764](https://github.com/DataDog/integrations-core/pull/1764).
+
 ## 2.1.2 / 2018-06-07
 
 * [Fixed] Fix function metrics tagging issue for no-args functions. See [#1452](https://github.com/DataDog/integrations-core/pull/1452). Thanks [zorgz](https://github.com/zorgz).
