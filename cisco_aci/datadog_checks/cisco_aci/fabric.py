@@ -4,7 +4,7 @@
 
 from . import metrics as aci_metrics
 from . import helpers
-from .exceptions import APIConnectionException, APIParsingException
+from . import exceptions
 
 
 class Fabric:
@@ -45,7 +45,7 @@ class Fabric:
             try:
                 stats = self.api.get_pod_stats(pod_id)
                 self.submit_fabric_metric(stats, tags, 'fabricPod')
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
             self.log.info("finished processing pod {}".format(pod_attrs['id']))
 
@@ -68,14 +68,14 @@ class Fabric:
             self.log.info("processing node {} on pod {}".format(node_id, pod_id))
             try:
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
             if node_attrs['role'] != "controller":
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
                     self.process_eth(node_attrs)
-                except APIConnectionException, APIParsingException:
+                except exceptions.APIConnectionException, exceptions.APIParsingException:
                     pass
             self.log.info("finished processing node {}".format(node_id))
 
@@ -85,7 +85,7 @@ class Fabric:
         pod_id = helpers.get_pod_from_dn(node['dn'])
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
-        except APIConnectionException, APIParsingException:
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
             pass
         for e in eth_list:
             eth_attrs = helpers.get_attributes(e)
@@ -94,7 +94,7 @@ class Fabric:
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
         self.log.info("finished processing ethernet ports for {}".format(node['id']))
 

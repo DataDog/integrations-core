@@ -7,7 +7,7 @@ import time
 import datetime
 
 from . import helpers
-from .exceptions import APIConnectionException, APIParsingException
+from . import exceptions
 
 
 class Tenant:
@@ -50,14 +50,14 @@ class Tenant:
                         list_epgs = self.api.get_epgs(t, app_name)
                         self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
                         self.submit_epg_data(t, app_name, list_epgs)
-                    except APIConnectionException, APIParsingException:
+                    except exceptions.APIConnectionException, exceptions.APIParsingException:
                         pass
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
             self.submit_ten_data(t)
             try:
                 self.collect_events(t)
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
 
     def submit_app_data(self, tenant, app):
@@ -86,7 +86,7 @@ class Tenant:
             stats = self.api.get_tenant_stats(tenant)
             tags = self.tagger.get_tags(tenant, 'tenant')
             self.submit_raw_obj(stats, tags, 'tenant')
-        except APIConnectionException, APIParsingException:
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
             pass
 
     def submit_raw_obj(self, raw_stats, tags, obj_type):

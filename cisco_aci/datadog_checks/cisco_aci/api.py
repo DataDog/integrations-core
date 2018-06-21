@@ -5,7 +5,7 @@
 import random
 from requests import Request, Session
 
-from .exceptions import APIConnectionException, APIParsingException
+from . import exceptions
 
 
 class SessionWrapper:
@@ -34,7 +34,7 @@ class SessionWrapper:
             response.raise_for_status()
         except Exception as e:
             self.log.warning("Error making request: {}".format(e))
-            raise APIConnectionException("Error making request: {}".format(e))
+            raise exceptions.APIConnectionException("Error making request: {}".format(e))
         try:
             if raw_response:
                 return response
@@ -42,7 +42,7 @@ class SessionWrapper:
                 return response.json()
         except Exception as e:
             self.log.warning("Exception in json parsing: {}".format(e))
-            raise APIParsingException("Exception in json parsing: {}".format(e))
+            raise exceptions.APIParsingException("Exception in json parsing: {}".format(e))
 
 
 class Api:

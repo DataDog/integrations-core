@@ -7,7 +7,7 @@ import re
 from datadog_checks.utils.containers import hash_mutable
 
 from . import helpers
-from .exceptions import APIConnectionException, APIParsingException
+from . import exceptions
 
 
 class CiscoTags:
@@ -66,7 +66,7 @@ class CiscoTags:
                     if encap:
                         endpoint_meta.append("encap:" + encap)
                     # adding application tags
-        except APIConnectionException, APIParsingException:
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
             # the exception will already be logged, just pass it over here
             pass
         endpoint_meta += application_meta
@@ -102,7 +102,7 @@ class CiscoTags:
                         self.tenant_farbic_mapper[tenant_fabric_key].extend(application_meta)
 
                     self.tenant_farbic_mapper[tenant_fabric_key] = list(set(self.tenant_farbic_mapper[tenant_fabric_key]))
-            except APIConnectionException, APIParsingException:
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
                 # the exception will already be logged, just pass it over here
                 pass
 
