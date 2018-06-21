@@ -251,28 +251,19 @@ class AgentCheck(object):
 
     def _normalize_tags_type(self, tags):
         """
-        Normalize all the tags to strings (type `str`) so that the go bindings can handle them easily
+        Normalize all the tags to bytes (type `bytes`) so that the go bindings can handle them easily
         Doesn't mutate the passed list, returns a new list
         """
         normalized_tags = []
         if tags is not None:
             for tag in tags:
-                # Common case
-                try:
-                    tag = tag.encode('utf-8')
-
-                # Unexpected type like an int
-                except Exception:
-                    try:
-                        tag = str(tag)
-                    except Exception:
-                        self.log.warning("Error converting tag to string, ignoring tag")
-                        continue
-
+                # TODO: On Python 3, move this `if` line to the `except` branch
+                # as the common case will indeed no longer be bytes.
+                if not isinstance(tag, bytes):
                     try:
                         tag = tag.encode('utf-8')
                     except Exception:
-                        self.log.warning("Error encoding unicode tag to utf-8 encoded string, ignoring tag")
+                        self.log.warning('Error encoding tag to utf-8 encoded string, ignoring tag')
                         continue
 
                 normalized_tags.append(tag)
