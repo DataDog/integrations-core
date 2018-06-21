@@ -15,7 +15,7 @@ from six import iteritems
 from .constants import ROOT
 
 
-DEP_PATTERN = re.compile(r'^([^=]+)==(\S+)')
+DEP_PATTERN = re.compile(r'^([^=#]+)(?:==(\S+))?')
 
 
 def ensure_deps_declared(reqs_txt, reqs_in):
@@ -43,7 +43,7 @@ def dep_check(ctx):
         if os.path.isfile(reqs_file):
             with open(reqs_file, 'r') as f:
                 for line in f:
-                    match = DEP_PATTERN.match(line)
+                    match = DEP_PATTERN.match(line.strip())
                     if match:
                         package, version = match.groups()
                         packages[package.lower()][version].append(check_name)
