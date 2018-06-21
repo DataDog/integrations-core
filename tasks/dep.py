@@ -39,14 +39,14 @@ def dep_check(ctx):
     packages = defaultdict(lambda: defaultdict(list))
 
     for check_name in sorted(os.listdir(ROOT)):
-        reqs_file = os.path.join(ROOT, check_name, 'requirements.txt')
+        reqs_file = os.path.join(ROOT, check_name, 'requirements.in')
         if os.path.isfile(reqs_file):
             with open(reqs_file, 'r') as f:
                 for line in f:
                     match = DEP_PATTERN.match(line)
                     if match:
                         package, version = match.groups()
-                        packages[package][version].append(check_name)
+                        packages[package.lower()][version].append(check_name)
 
     output = ''
     for package, versions in sorted(iteritems(packages)):
