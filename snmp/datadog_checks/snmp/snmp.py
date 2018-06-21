@@ -517,11 +517,12 @@ class SnmpCheck(NetworkCheck):
             tags.append("{0}:{1}".format(tag_group, tag_value))
         return tags
 
-    def submit_metric(self, name, snmp_value, forced_type, tags=[]):
+    def submit_metric(self, name, snmp_value, forced_type, tags=None):
         '''
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator
         '''
+        tags = [] if tags is None else tags
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
             self.log.warning("No such Mib available: %s" % name)
