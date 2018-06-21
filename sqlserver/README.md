@@ -68,7 +68,11 @@ Need help? Contact [Datadog Support][6].
 
 ## Further Reading
 
-* [Monitor your Azure SQL Databases with Datadog][7]
+* [Monitor your Azure SQL Databases with Datadog][7]  
+* [Key metrics for SQL Server monitoring][8]  
+* [SQL Server monitoring tools][9]  
+* [Monitor SQL Server performance with Datadog][10]  
+* [Custom SQL Server metrics for detailed monitoring][11]  
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -78,3 +82,7 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog/
+[8]: https://www.datadoghq.com/blog/sql-server-monitoring/
+[9]: https://www.datadoghq.com/blog/sql-server-monitoring-tools/
+[10]: https://www.datadoghq.com/blog/sql-server-performance/
+[11]: https://www.datadoghq.com/blog/sql-server-metrics/

@@ -129,10 +129,12 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 
 ## Further Reading
 ### Datadog Blog
-Learn more about infrastructure monitoring and all our integrations on [our blog][9]
+* [Key metrics for RabbitMQ monitoring][9]  
+* [Collecting metrics with RabbitMQ monitoring tools][10]
+* [Monitoring RabbitMQ performance with Datadog][11]
 
 ### Knowledge Base
-* By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here][10]
+* By default, `queue` metrics are tagged by queue and `node` metrics are tagged by node. If you have a Datadog account you can see the integration installation instructions [here][12]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -143,5 +145,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [8]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family
-[9]: https://www.datadoghq.com/blog/
-[10]: https://app.datadoghq.com/account/settings#integrations/rabbitmq
+[9]: https://www.datadoghq.com/blog/rabbitmq-monitoring/
+[10]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools/
+[11]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/
+[12]: https://app.datadoghq.com/account/settings#integrations/rabbitmq

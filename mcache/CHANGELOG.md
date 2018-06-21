@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.3.1 / 2018-06-20
+
+* [Fixed] Fix connection to unix socket for new binary. See [#1755](https://github.com/DataDog/integrations-core/pull/1755).
+
 ## 1.3.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).

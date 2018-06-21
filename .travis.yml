@@ -93,6 +93,8 @@ jobs:
     - stage: test
       env: CHECK=kafka_consumer
     - stage: test
+      env: CHECK=kong
+    - stage: test
       env: CHECK=kube_proxy
     - stage: test
       env: CHECK=kubelet
@@ -104,6 +106,8 @@ jobs:
       env: CHECK=lighttpd
     - stage: test
       env: CHECK=linkerd
+    - stage: test
+      env: CHECK=linux_proc_extras
     - stage: test
       env: CHECK=mapreduce
     - stage: test
@@ -150,6 +154,8 @@ jobs:
       env: CHECK=teamcity
     - stage: test
       env: CHECK=varnish
+    - stage: test
+      env: CHECK=vault
     - stage: test
       env: CHECK=vsphere
     - stage: test

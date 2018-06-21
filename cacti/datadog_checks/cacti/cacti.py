@@ -167,7 +167,7 @@ class Cacti(AgentCheck):
                     # Save this metric as a gauge
                     val = self._transform_metric(m_name, p[k])
                     self.gauge(m_name, val, hostname=hostname,
-                        device_name=device_name, timestamp=ts, tags=tags)
+                        device_name=device_name, tags=tags)
                     metric_count += 1
                     last_ts = (ts + interval)
 

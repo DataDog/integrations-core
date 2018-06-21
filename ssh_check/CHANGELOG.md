@@ -1,5 +1,9 @@
 # CHANGELOG - ssh_check
 
+## 1.3.0 / 2018-06-20
+
+* [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).
+
 ## 1.2.0 / 2018-03-23
 
 * [FEATURE] Add custom tag support.

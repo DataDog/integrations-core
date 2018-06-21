@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.1.1 / 2018-06-13
+
+* [Fixed] Fix parsing of requirements file so that `dnspython` is listed as a req. See [#1603](https://github.com/DataDog/integrations-core/pull/1603).
+
 ## 1.1.0 / 2017-10-10
 
 * [FEATURE] Adds ability to specify a custom port for your nameserver. See [#756][]

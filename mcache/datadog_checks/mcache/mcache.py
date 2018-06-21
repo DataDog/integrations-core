@@ -267,8 +267,10 @@ class Memcache(AgentCheck):
         if socket:
             server = 'unix'
             port = socket
+            connection_server = "{}".format(port)
         else:
             port = int(instance.get('port', self.DEFAULT_PORT))
+            connection_server = "{}:{}".format(server, port)
         custom_tags = instance.get('tags') or []
 
         mc = None  # client
@@ -276,8 +278,8 @@ class Memcache(AgentCheck):
         service_check_tags = ["host:%s" % server, "port:%s" % port] + custom_tags
 
         try:
-            self.log.debug("Connecting to %s:%s tags:%s", server, port, tags)
-            mc = bmemcached.Client(["{}:{}".format(server, port)], username, password)
+            self.log.debug("Connecting to %s, tags:%s", connection_server, tags)
+            mc = bmemcached.Client(connection_server, username, password)
 
             self._get_metrics(mc, tags, service_check_tags)
             if options:

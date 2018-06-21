@@ -1,5 +1,9 @@
 # CHANGELOG - Kube-dns
 
+## 1.4.0 / 2018-06-13
+
+* [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
+
 ## 1.3.0 / 2018-05-11
 
 * [IMPROVEMENT] Add metrics `kubedns.request_count.count`, `kubedns.error_count.count` and `cachemiss_count.count`, alternative metrics submitted as monotonic\_counts. See [#1341][]

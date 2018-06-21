@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
@@ -55,7 +56,7 @@ setup(
     packages=['datadog_checks.linux_proc_extras'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
+    install_requires=get_requirements('requirements.in') + [
         'datadog_checks_base',
     ],
 

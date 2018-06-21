@@ -9,6 +9,7 @@ from invoke import task
 from invoke.exceptions import Exit
 
 from .constants import AGENT_BASED_INTEGRATIONS, ROOT, TESTABLE_FILE_EXTENSIONS
+from .utils.common import get_testable_checks
 
 
 def testable_files(files):
@@ -101,9 +102,9 @@ def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
         inv test --targets=disk,redisdb
     """
     if targets is None:
-        targets = AGENT_BASED_INTEGRATIONS
+        targets = get_testable_checks()
     elif isinstance(targets, basestring):
-        targets = [t for t in targets.split(',') if t in AGENT_BASED_INTEGRATIONS]
+        targets = [t for t in targets.split(',') if t in get_testable_checks()]
 
     # determine the integrations we need to test based on the changed files
     changed_files = []
