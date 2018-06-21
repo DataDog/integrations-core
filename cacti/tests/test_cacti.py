@@ -98,11 +98,13 @@ MOCK_RRD_META = [
 
 CHECK_NAME = 'cacti'
 
+CUSTOM_TAGS = ['optional:tag1']
+
 CACTI_CONFIG = {
     'mysql_host': 'nohost',
     'mysql_user': 'mocked',
     'rrd_path': '/rrdtool/is/mocked',
-    'tags': ['optional:tag1'],
+    'tags': CUSTOM_TAGS,
 }
 
 
@@ -118,7 +120,7 @@ def check():
     return Cacti(CHECK_NAME, {}, {})
 
 
-def testCheck(aggregator, check):
+def test_check(aggregator, check):
 
     mocks = [
         mock.patch('datadog_checks.cacti.cacti.pymysql'),
@@ -134,19 +136,18 @@ def testCheck(aggregator, check):
     # Run the check twice to set the timestamps and capture metrics on the second run
     check.check(CACTI_CONFIG)
     check.check(CACTI_CONFIG)
-    print aggregator._metrics
 
     for mock_func in mocks:
         mock_func.stop()
 
     # We are mocking the MySQL call so we won't have cacti.rrd.count or cacti.hosts.count metrics,
     # check for metrics that are returned from our mock data.
-    aggregator.assert_metric('cacti.metrics.count', value=10, tags=['optional:tag1'])
-    aggregator.assert_metric('system.mem.buffered.max', value=2, tags=['optional:tag1'])
-    aggregator.assert_metric('system.mem.buffered', value=2, tags=['optional:tag1'])
+    aggregator.assert_metric('cacti.metrics.count', value=10, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('system.mem.buffered.max', value=2, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('system.mem.buffered', value=2, tags=CUSTOM_TAGS)
 
 
-def testCactiMetrics(aggregator, check):
+def test_cacti_metrics(aggregator, check):
 
     mocks = [
         mock.patch('datadog_checks.cacti.cacti.pymysql'),
@@ -164,7 +165,7 @@ def testCactiMetrics(aggregator, check):
         mock_func.stop()
 
     # We are mocking pymysql, this results in returning only the cacti.* metrics.
-    aggregator.assert_metric('cacti.metrics.count', value=0, tags=['optional:tag1'])
-    aggregator.assert_metric('cacti.rrd.count', value=0, tags=['optional:tag1'])
-    aggregator.assert_metric('cacti.hosts.count', value=0, tags=['optional:tag1'])
+    aggregator.assert_metric('cacti.metrics.count', value=0, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.rrd.count', value=0, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.hosts.count', value=0, tags=CUSTOM_TAGS)
     aggregator.assert_all_metrics_covered()
