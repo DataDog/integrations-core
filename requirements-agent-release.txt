@@ -69,7 +69,7 @@ riak==1.3.0
 riakcs==1.1.0
 snmp==1.4.0
 spark==1.4.0
-sqlserver==1.4.0; sys_platform == 'win32'
+sqlserver==1.5.0; sys_platform == 'win32'
 squid==1.0.1
 ssh_check==1.3.0
 supervisord==1.1.2
