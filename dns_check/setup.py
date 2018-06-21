@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Always prefer setuptools over distutils
 from setuptools import setup
-# To use a consistent encoding
 from codecs import open
 from os import path
 
-HERE = path.abspath(path.dirname(__file__))
+HERE = path.dirname(path.abspath(__file__))
 
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:

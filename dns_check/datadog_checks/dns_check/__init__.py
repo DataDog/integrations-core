@@ -5,6 +5,6 @@ from .__about__ import __version__
 from .dns_check import DNSCheck
 
 __all__ = [
-    '__version__',
-    'DNSCheck'
+    "__version__",
+    "DNSCheck"
 ]

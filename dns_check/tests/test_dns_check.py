@@ -2,15 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from .mocks import MockTime, success_query_mock, nxdomain_query_mock
-# stdlib
-import mock
-
-# 3p
 from dns.resolver import Resolver, Timeout
 
-# project
 from datadog_checks.dns_check import DNSCheck
+
+import mock
+from .mocks import MockTime, success_query_mock, nxdomain_query_mock
+
 
 RESULTS_TIMEOUT = 10
 
@@ -91,7 +89,6 @@ def test_success(mocked_query, mocked_time, aggregator):
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
-    aggregator.reset()
 
 
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
@@ -107,7 +104,6 @@ def test_success_nxdomain(mocked_query, mocked_time, aggregator):
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
-    aggregator.reset()
 
 
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
@@ -122,7 +118,6 @@ def test_default_timeout(mocked_query, mocked_time, aggregator):
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
-    aggregator.reset()
 
 
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
@@ -137,7 +132,6 @@ def test_instance_timeout(mocked_query, mocked_time, aggregator):
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
-    aggregator.reset()
 
 
 def test_invalid_config(aggregator):
@@ -151,4 +145,3 @@ def test_invalid_config(aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
-        aggregator.reset()

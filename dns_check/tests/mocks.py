@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# 3p
 from dns.resolver import NXDOMAIN
 
 
