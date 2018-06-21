@@ -159,11 +159,17 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.extra_headers.update(instance.get("extra_headers", {}))
         # For simple values instance settings overrides optional defaults
         scraper.prometheus_metrics_prefix = instance.get("prometheus_metrics_prefix", default_instance.get("prometheus_metrics_prefix", ''))
-        scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("prometheus_url", ""))
+        scraper.label_to_hostname = instance.get("label_to_hostname", default_instance.get("label_to_hostname", ""))
         scraper.health_service_check = instance.get("health_service_check", default_instance.get("health_service_check", True))
         scraper.ssl_cert = instance.get("ssl_cert", default_instance.get("ssl_cert", None))
         scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))
+
+        timeout_default = 10
+        scraper.prometheus_timeout = instance.get("prometheus_timeout", default_instance.get("prometheus_timeout", timeout_default))
+        if scraper.prometheus_timeout <= 0:
+            self.log.debug("Prometheus integration timeout is incorrect, defaulting to {}".format(timeout_default))
+            scraper.prometheus_timeout = timeout_default
 
         self.scrapers_map[endpoint] = scraper
 

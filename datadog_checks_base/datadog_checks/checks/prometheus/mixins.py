@@ -147,6 +147,9 @@ class PrometheusScraperMixin(object):
         # Extra http headers to be sent when polling endpoint
         self.extra_headers = {}
 
+        # Timeout used during the network request
+        self.prometheus_timeout = 10
+
     def parse_metric_family(self, response):
         """
         Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
@@ -353,6 +356,11 @@ class PrometheusScraperMixin(object):
         if instance:
             kwargs['custom_tags'] = instance.get('tags', [])
 
+        # Used in a regular PrometheusCheck, a prometheus_timeout can be passed here as an argument
+        timeout = kwargs.get('prometheus_timeout')
+        if timeout:
+            self.prometheus_timeout = timeout
+
         for metric in self.scrape_metrics(endpoint):
             self.process_metric(metric, **kwargs)
 
@@ -478,7 +486,7 @@ class PrometheusScraperMixin(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=False, timeout=10, cert=cert, verify=verify)
+            response = requests.get(endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify)
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise
