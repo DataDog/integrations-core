@@ -23,7 +23,9 @@ stages:
   - name: test
     if: (branch = master) AND (type != pull_request)
 
-script: travis_retry inv test --targets=${CHECK}
+script:
+  - travis_retry inv test --targets=${CHECK}
+  - inv test --targets=${CHECK} --bench || true
 
 # Conditional jobs are currently buggy and verbose.
 #
@@ -40,12 +42,14 @@ jobs:
        - inv dep-check
        - inv manifest --include-extras
        - inv test --changed-only
+       - inv test --changed-only --bench || true
     - stage: test
       env: CHECK=datadog_checks_base
       script:
         - inv dep-check
         - inv manifest --include-extras
         - travis_retry inv test --targets=${CHECK}
+        - inv test --targets=${CHECK} --bench || true
     - stage: test
       env: CHECK=active_directory
     - stage: test
