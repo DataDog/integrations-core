@@ -165,7 +165,7 @@ class GenericPrometheusCheck(AgentCheck):
         scraper.ssl_private_key = instance.get("ssl_private_key", default_instance.get("ssl_private_key", None))
         scraper.ssl_ca_cert = instance.get("ssl_ca_cert", default_instance.get("ssl_ca_cert", None))
 
-        scraper.prometheus_timeout = scraper._extract_prometheus_timeout(instance, default_instance.get("prometheus_timeout", 10))
+        scraper.set_prometheus_timeout(instance, default_instance.get("prometheus_timeout", 10))
 
         self.scrapers_map[endpoint] = scraper
 

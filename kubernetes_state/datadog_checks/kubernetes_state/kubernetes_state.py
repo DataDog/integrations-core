@@ -179,7 +179,7 @@ class KubernetesState(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
 
-        timeout = self._extract_prometheus_timeout(instance)
+        self.set_prometheus_timeout(instance)
 
         if 'labels_mapper' in instance:
             if isinstance(instance['labels_mapper'], dict):
@@ -202,7 +202,7 @@ class KubernetesState(PrometheusCheck):
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
 
-        self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance, prometheus_timeout=timeout)
+        self.process(endpoint, send_histograms_buckets=send_buckets, instance=instance)
 
         for job_tags, job_count in self.job_succeeded_count.iteritems():
             self.monotonic_count(self.NAMESPACE + '.job.succeeded', job_count, list(job_tags))

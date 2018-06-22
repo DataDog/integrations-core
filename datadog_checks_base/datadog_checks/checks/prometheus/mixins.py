@@ -356,11 +356,6 @@ class PrometheusScraperMixin(object):
         if instance:
             kwargs['custom_tags'] = instance.get('tags', [])
 
-        # Used in a regular PrometheusCheck, a prometheus_timeout can be passed here as an argument
-        timeout = kwargs.get('prometheus_timeout')
-        if timeout:
-            self.prometheus_timeout = timeout
-
         for metric in self.scrape_metrics(endpoint):
             self.process_metric(metric, **kwargs)
 
@@ -631,11 +626,12 @@ class PrometheusScraperMixin(object):
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
 
-    def _extract_prometheus_timeout(self, instance, default_value=10):
+    def set_prometheus_timeout(self, instance, default_value=10):
+        """ extract `prometheus_timeout` directly from the instance configuration """
+        self.prometheus_timeout = default_value
         timeout = instance.get('prometheus_timeout')
         if timeout is not None:
             if timeout <= 0:
                 self.log.debug("Prometheus integration timeout is incorrect, defaulting to {}".format(default_value))
-                return(default_value)
-            return(timeout)
-        return(default_value)
+            else:
+                self.prometheus_timeout = timeout
