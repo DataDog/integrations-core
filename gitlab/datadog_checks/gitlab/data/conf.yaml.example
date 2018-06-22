@@ -148,3 +148,6 @@ instances:
     # If ssl_cert_validation is enabled, you can provide a custom file
     # that lists trusted CA certificates (optional).
     # ssl_ca_certs: /path/to/CA/certificate/file
+
+    # Set a timeout for the prometheus query, defaults to 10
+    # prometheus_timeout: 10
