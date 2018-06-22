@@ -81,3 +81,6 @@ instances:
   #
   # The path to the trusted CA used for generating custom certificates
   # ssl_ca_cert: "/path/to/cacert"
+
+  # Set a timeout for the prometheus query, defaults to 10
+  # prometheus_timeout: 10
