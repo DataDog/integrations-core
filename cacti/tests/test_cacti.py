@@ -121,13 +121,17 @@ def check():
 
 
 def test_check(aggregator, check):
+    mock_conn = mock.MagicMock()
+    mock_cursor = mock.MagicMock()
+
+    mock_cursor.fetchall.return_value = MOCK_RRD_META
+    mock_conn.cursor.return_value = mock_cursor
 
     mocks = [
-        mock.patch('datadog_checks.cacti.cacti.pymysql'),
         mock.patch('datadog_checks.cacti.cacti.rrdtool'),
+        mock.patch('datadog_checks.cacti.cacti.pymysql.connect', return_value=mock_conn),
         mock.patch('datadog_checks.cacti.Cacti._get_rrd_info', return_value=MOCK_INFO),
         mock.patch('datadog_checks.cacti.Cacti._get_rrd_fetch', return_value=MOCK_FETCH),
-        mock.patch('datadog_checks.cacti.Cacti._fetch_rrd_meta', return_value=MOCK_RRD_META),
     ]
 
     for mock_func in mocks:
@@ -145,27 +149,6 @@ def test_check(aggregator, check):
     aggregator.assert_metric('cacti.metrics.count', value=10, tags=CUSTOM_TAGS)
     aggregator.assert_metric('system.mem.buffered.max', value=2, tags=CUSTOM_TAGS)
     aggregator.assert_metric('system.mem.buffered', value=2, tags=CUSTOM_TAGS)
-
-
-def test_cacti_metrics(aggregator, check):
-
-    mocks = [
-        mock.patch('datadog_checks.cacti.cacti.pymysql'),
-        mock.patch('datadog_checks.cacti.cacti.rrdtool'),
-    ]
-
-    for mock_func in mocks:
-        mock_func.start()
-
-    # Run the check twice to set the timestamps and capture metrics on the second run
-    check.check(CACTI_CONFIG)
-    check.check(CACTI_CONFIG)
-
-    for mock_func in mocks:
-        mock_func.stop()
-
-    # We are mocking pymysql, this results in returning only the cacti.* metrics.
-    aggregator.assert_metric('cacti.metrics.count', value=0, tags=CUSTOM_TAGS)
-    aggregator.assert_metric('cacti.rrd.count', value=0, tags=CUSTOM_TAGS)
-    aggregator.assert_metric('cacti.hosts.count', value=0, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.rrd.count', value=5, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.hosts.count', value=1, tags=CUSTOM_TAGS)
     aggregator.assert_all_metrics_covered()
