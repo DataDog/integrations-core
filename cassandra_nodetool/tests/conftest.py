@@ -32,7 +32,6 @@ def wait_on_docker_logs(container_name, max_wait, sentences):
             log.info(" {} is up!".format(container_name))
             return True
         else:
-            print(out)
             log.info(out)
             return False
 
@@ -72,24 +71,24 @@ def cassandra_cluster():
     ]
     subprocess.check_call(docker_compose_args + ["down"])
 
-    subprocess.check_call(docker_compose_args + ["up", "-d", "dd-test-cassandra"])
+    subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME])
 
     # wait for the cluster to be up before yielding
-    if not wait_on_docker_logs("dd-test-cassandra", 20, ['Listening for thrift clients',
-                                                         "Created default superuser role 'cassandra'"]):
+    if not wait_on_docker_logs(common.CASSANDRA_CONTAINER_NAME, 20, ['Listening for thrift clients',
+                                                                     "Created default superuser role 'cassandra'"]):
         raise Exception("Cassandra cluster dd-test-cassandra boot timed out!")
 
-    cassandra_seed = get_container_ip("dd-test-cassandra")
+    cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
     env['CASSANDRA_SEEDS'] = cassandra_seed
-    subprocess.check_call(docker_compose_args + ["up", "-d", "dd-test-cassandra2"])
+    subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME_2])
 
-    if not wait_on_docker_logs("dd-test-cassandra2", 50, ['Listening for thrift clients',
-                               'Not starting RPC server as requested']):
-        raise Exception("Cassandra cluster dd-test-cassandra2 boot timed out!")
+    if not wait_on_docker_logs(common.CASSANDRA_CONTAINER_NAME_2, 50, ['Listening for thrift clients',
+                                                                       'Not starting RPC server as requested']):
+        raise Exception("Cassandra cluster {} boot timed out!".format(common.CASSANDRA_CONTAINER_NAME_2))
 
     subprocess.check_call([
         "docker",
-        "exec", "dd-test-cassandra",
+        "exec", common.CASSANDRA_CONTAINER_NAME,
         "cqlsh",
         "-e", "CREATE KEYSPACE test WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}"
     ])

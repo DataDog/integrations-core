@@ -9,6 +9,7 @@ HERE = path.dirname(path.abspath(__file__))
 CHECK_NAME = 'cassandra_nodetool'
 
 CASSANDRA_CONTAINER_NAME = 'dd-test-cassandra'
+CASSANDRA_CONTAINER_NAME_2 = 'dd-test-cassandra2'
 
 CONFIG_INSTANCE = {
     'nodetool': 'docker exec {} nodetool'.format(CASSANDRA_CONTAINER_NAME),
