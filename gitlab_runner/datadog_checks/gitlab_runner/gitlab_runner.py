@@ -52,8 +52,6 @@ class GitlabRunnerCheck(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find prometheus_endpoint in config file.")
 
-        self.set_prometheus_timeout(instance)
-
         # By default we send the buckets
         send_buckets = _is_affirmative(instance.get('send_histograms_buckets', True))
 
