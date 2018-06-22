@@ -179,14 +179,7 @@ class KubernetesState(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
 
-        timeout_default = 10
-        timeout = instance.get('prometheus_timeout')
-        if timeout is not None:
-            if timeout <= 0:
-                self.log.debug("Prometheus integration timeout is incorrect, defaulting to {}".format(timeout_default))
-                timeout = timeout_default
-        else:
-            timeout = timeout_default
+        timeout = self._extract_prometheus_timeout(instance)
 
         if 'labels_mapper' in instance:
             if isinstance(instance['labels_mapper'], dict):

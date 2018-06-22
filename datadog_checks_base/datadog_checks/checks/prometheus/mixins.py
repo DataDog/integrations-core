@@ -630,3 +630,12 @@ class PrometheusScraperMixin(object):
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
+
+    def _extract_prometheus_timeout(self, instance, default_value=10):
+        timeout = instance.get('prometheus_timeout')
+        if timeout is not None:
+            if timeout <= 0:
+                self.log.debug("Prometheus integration timeout is incorrect, defaulting to {}".format(default_value))
+                return(default_value)
+            return(timeout)
+        return(default_value)
