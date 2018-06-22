@@ -1,5 +1,7 @@
 # Network check
-{{< img src="integrations/network/netdashboard.png" alt="Network Dashboard" responsive="true" popup="true">}}
+
+![Network Dashboard][9]
+
 ## Overview
 
 The network check collects TCP/IP stats from the host operating system.
@@ -63,3 +65,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
 [7]: https://www.datadoghq.com/blog/
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network
+[9]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/network/netdashboard.png

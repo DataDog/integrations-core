@@ -1,5 +1,7 @@
 # PHP-FPM Check
-{{< img src="integrations/phpfpm/phpfpmoverview.png" alt="PHP overview" responsive="true" popup="true">}}
+
+![PHP overview][8]
+
 ## Overview
 
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.
@@ -70,3 +72,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [5]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/phpfpm/phpfpmoverview.png

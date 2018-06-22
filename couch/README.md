@@ -1,5 +1,7 @@
 # CouchDB Integration
-{{< img src="integrations/couchdb/couchdb_graph.png" alt="CouchDb Graph" responsive="true" popup="true">}}
+
+![CouchDB graph][8]
+
 ## Overview
 
 Capture CouchDB data in Datadog to:
@@ -68,3 +70,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/couchdb/couchdb_graph.png

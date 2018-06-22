@@ -1,5 +1,7 @@
 # Wmi_check Integration
-{{< img src="integrations/wmi/wmimetric.png" alt="WMI Metric" responsive="true" popup="true">}}
+
+![WMI metric][12]
+
 ## Overview
 
 Get metrics from your Windows applications/servers with Windows Management Instrumentation (WMI) in real time to
@@ -142,3 +144,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [9]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [10]: http://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/
+[12]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/wmi/wmimetric.png

@@ -1,5 +1,7 @@
 # Btrfs Integration
-{{< img src="integrations/btrfs/btrfs_metric.png" alt="btrfs metric" responsive="true" popup="true">}}
+
+![BTRFS metric][8]
+
 ## Overview
 
 Get metrics from Btrfs service in real time to:
@@ -48,3 +50,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [5]: https://github.com/DataDog/integrations-core/blob/master/btrfs/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/btrfs/btrfs_metric.png

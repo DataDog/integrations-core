@@ -1,5 +1,7 @@
 # Openstack Integration
-{{< img src="integrations/openstack/openstack.png" alt="OpenStack default dashboard" responsive="true" popup="true">}}
+
+![OpenStack default dashboard][10]
+
 ## Overview
 
 Get metrics from OpenStack service in real time to:
@@ -127,3 +129,4 @@ See also our blog posts:
 [7]: https://www.datadoghq.com/blog/openstack-monitoring-nova/
 [8]: https://www.datadoghq.com/blog/install-openstack-in-two-commands/
 [9]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/
+[10]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/openstack/openstack.png

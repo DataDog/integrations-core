@@ -1,5 +1,7 @@
 # Postfix Check
-{{< img src="integrations/postfix/postfixgraph.png" alt="Postfix Graph" responsive="true" popup="true">}}
+
+![Postfix Graph][8]
+
 ## Overview
 
 This check monitors the size of all your Postfix queues.
@@ -105,3 +107,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-postfix-queues/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postfix/postfixgraph.png

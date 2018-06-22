@@ -1,5 +1,7 @@
 # Agent Check: TCP connectivity
-{{< img src="integrations/tcpcheck/netgraphs.png" alt="Network Graphs" responsive="true" popup="true">}}
+
+![Network Graph][9]
+
 ## Overview
 
 Monitor TCP connectivity and response time for any host and port.
@@ -71,3 +73,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://app.datadoghq.com/monitors#/create
 [7]: http://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/
+[9]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png

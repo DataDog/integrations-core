@@ -1,5 +1,6 @@
 # PostgreSQL Integration
-{{< img src="integrations/postgresql/pggraph.png" alt="PostgreSQL Graph" responsive="true" popup="true">}}
+
+![PostgreSQL Graph][24]
 
 ## Overview
 
@@ -217,3 +218,4 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 [21]: https://www.datadoghq.com/blog/postgresql-monitoring/
 [22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
 [23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/
+[24]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postgresql/pggraph.png

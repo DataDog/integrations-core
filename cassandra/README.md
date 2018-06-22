@@ -1,5 +1,7 @@
 # Cassandra Integration
-{{< img src="integrations/cassandra/cassandra.png" alt="Cassandra default dashboard" responsive="true" popup="true">}}
+
+![Cassandra default dashboard][1011]
+
 ## Overview
 
 Get metrics from Cassandra service in real time to:
@@ -88,3 +90,4 @@ Need help? Contact [Datadog Support][107].
 [108]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [109]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [1010]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/
+[1011]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/cassandra/cassandra.png

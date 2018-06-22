@@ -1,5 +1,6 @@
 # Agent Check: Varnish
-{{< img src="integrations/varnish/varnish.png" alt="Varnish default dashboard" responsive="true" popup="true">}}
+
+![Varnish default dashboard][11]
 
 ## Overview
 
@@ -133,3 +134,4 @@ Need help? Contact [Datadog Support][7].
 [8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
 [9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/
+[11]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/varnish/varnish.png

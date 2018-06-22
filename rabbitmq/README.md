@@ -1,5 +1,7 @@
 # RabbitMQ Check
-{{< img src="integrations/rabbitmq/rabbitmqdashboard.png" alt="RabbitMQ Dashboard" responsive="true" popup="true">}}
+
+![RabbitMQ Dashboard][13]
+
 ## Overview
 
 The RabbitMQ check lets you:
@@ -149,3 +151,4 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 [10]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools/
 [11]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/
 [12]: https://app.datadoghq.com/account/settings#integrations/rabbitmq
+[13]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/rabbitmq/rabbitmqdashboard.png

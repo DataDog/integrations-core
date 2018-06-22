@@ -1,5 +1,7 @@
 # Ceph Integration
-{{< img src="integrations/ceph/ceph_graph.png" alt="Ceph Graph" responsive="true" popup="true">}}
+
+![Ceph Graph][7]
+
 ## Overview
 
 Enable the Datadog-Ceph integration to:
@@ -102,3 +104,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
 [5]: http://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-ceph-datadog/
+[7]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/ceph/ceph_graph.png

@@ -1,5 +1,7 @@
 # Agent Check: Zookeeper
-{{< img src="integrations/zookeeper/zookeepergraph.png" alt="Zookeeper Dashboard" responsive="true" popup="true">}}
+
+![Zookeeper Dashboard][20]
+
 ## Overview
 
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
@@ -145,3 +147,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [18]: http://docs.datadoghq.com/help/
 [19]: https://www.datadoghq.com/blog/
+[20]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/zookeeper/zookeepergraph.png

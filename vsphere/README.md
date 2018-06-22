@@ -1,5 +1,7 @@
 # Agent Check: VMWare vSphere
-{{< img src="integrations/vmware/vsphere_graph.png" alt="vsphere graph" responsive="true" popup="true">}}
+
+![Vsphere Graph][8]
+
 ## Overview
 
 This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
@@ -88,3 +90,4 @@ See our [blog post][7] on monitoring vSphere environments with Datadog.
 [5]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [6]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
 [7]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/vmware/vsphere_graph.png

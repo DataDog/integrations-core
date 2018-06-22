@@ -1,5 +1,7 @@
 # Agent Check: system cores
-{{< img src="integrations/systemcore/syscoredash.png" alt="System Core" responsive="true" popup="true">}}
+
+![System Core][8]
+
 ## Overview
 
 This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).
@@ -55,3 +57,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [5]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/systemcore/syscoredash.png

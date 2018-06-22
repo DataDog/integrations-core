@@ -1,5 +1,7 @@
 # Microsoft SQL Server Check
-{{< img src="integrations/sql_server/sql_server_graph.png" alt="sql server graph" responsive="true" popup="true">}}
+
+![SQL server Graph][12]
+
 ## Overview
 
 This check lets you track the performance of your SQL Server instances. It collects metrics for number of user connections, rate of SQL compilations, and more.
@@ -86,3 +88,4 @@ Need help? Contact [Datadog Support][6].
 [9]: https://www.datadoghq.com/blog/sql-server-monitoring-tools/
 [10]: https://www.datadoghq.com/blog/sql-server-performance/
 [11]: https://www.datadoghq.com/blog/sql-server-metrics/
+[12]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/sql_server/sql_server_graph.png

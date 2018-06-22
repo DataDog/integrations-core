@@ -1,5 +1,6 @@
 # IIS Integration
-{{< img src="integrations/iis/iisgraph.png" alt="IIS Graph" responsive="true" popup="true">}}
+
+![IIS Graph][10]
 
 ## Overview
 
@@ -165,3 +166,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [7]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [8]: http://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/
+[10]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/iis/iisgraph.png

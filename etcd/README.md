@@ -1,5 +1,7 @@
 # Etcd Integration
-{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" popup="true">}}
+
+![Etcd graph][8]
+
 ## Overview
 
 Collect etcd metrics to:
@@ -65,3 +67,4 @@ To get a better idea of how (or why) to integrate etcd with Datadog, check out o
 [5]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-etcd-performance/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/etcd/etcd_graph.png

@@ -1,5 +1,6 @@
 # Riak Check
-{{< img src="integrations/riak/riak_graph.png" alt="Riak Graph" responsive="true" popup="true">}}
+
+![Riak Graph][8]
 
 ## Overview
 
@@ -56,3 +57,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [5]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/riak/riak_graph.png

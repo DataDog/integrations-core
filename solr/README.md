@@ -1,5 +1,7 @@
 # Solr Check
-{{< img src="integrations/solr/solrgraph.png" alt="Solr Graph" responsive="true" popup="true">}}
+
+![Solr Graph][8]
+
 ## Overview
 
 The Solr check tracks the state and performance of a Solr cluster. It collects metrics like number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
@@ -272,3 +274,4 @@ You may use the `attribute` filter as follow:
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
 [7]: https://www.datadoghq.com/blog/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/solr/solrgraph.png

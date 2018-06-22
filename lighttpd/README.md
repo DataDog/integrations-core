@@ -1,5 +1,7 @@
 # Lighttpd Check
-{{< img src="integrations/lighttpd/lighttpddashboard.png" alt="Lighttpd Dashboard" responsive="true" popup="true">}}
+
+![Lighttpd Dashboard][8]
+
 ## Overview
 
 The Agent's lighttpd check tracks uptime, bytes served, requests per second, response codes, and more.
@@ -61,3 +63,4 @@ To get a better idea of how (or why) to monitor Lighttpd web server metrics with
 [5]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics/
+[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/lighttpd/lighttpddashboard.png
