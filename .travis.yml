@@ -55,6 +55,8 @@ jobs:
     - stage: test
       env: CHECK=btrfs
     - stage: test
+      env: CHECK=cacti
+    - stage: test
       env: CHECK=ceph
     - stage: test
       env: CHECK=cisco_aci
