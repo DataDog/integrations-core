@@ -6,6 +6,7 @@ from __future__ import print_function, unicode_literals
 import os
 import re
 import subprocess
+import sys
 from collections import defaultdict
 from io import open
 
@@ -23,11 +24,11 @@ init(autoreset=True)
 DEP_PATTERN = re.compile(r'^([^=#]+)(?:==(\S+))?')
 
 
-def ensure_deps_declared(compiled_reqs_file, pinned_reqs_file):
-    if os.path.isfile(compiled_reqs_file) and not os.path.isfile(pinned_reqs_file):
+def ensure_deps_declared(resolved_reqs_file, pinned_reqs_file):
+    if os.path.isfile(resolved_reqs_file) and not os.path.isfile(pinned_reqs_file):
         declacred_lines = []
 
-        with open(compiled_reqs_file, 'r', encoding='utf-8') as f:
+        with open(resolved_reqs_file, 'r', encoding='utf-8') as f:
             for line in f:
                 match = DEP_PATTERN.match(line.strip())
                 if match:
@@ -37,26 +38,26 @@ def ensure_deps_declared(compiled_reqs_file, pinned_reqs_file):
             f.writelines(declacred_lines)
 
 
-def compile_requirements(pinned_file, compiled_file, upgrade=False):
+def resolve_requirements(pinned_file, resolved_file, upgrade=False):
     command = ['pip-compile', '--generate-hashes', '--output-file']
     if upgrade:
         command.insert(1, '--upgrade')
 
     pinned_file = os.path.realpath(pinned_file)
-    compiled_file = os.path.realpath(compiled_file)
+    resolved_file = os.path.realpath(resolved_file)
 
     pin_dir, pinned_file = os.path.split(pinned_file)
     if not pin_dir:
         pin_dir = os.getcwd()
 
-    command.append(os.path.relpath(compiled_file, start=pin_dir).replace('\\', '/'))
+    command.append(os.path.relpath(resolved_file, start=pin_dir).replace('\\', '/'))
     command.append(pinned_file)
 
     with chdir(pin_dir):
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.poll():
-            raise subprocess.CalledProcessError('{}\n{}\n'.format(stdout, stderr))
+            sys.exit('{}\n{}\n'.format(stdout.decode('utf-8'), stderr.decode('utf-8')))
 
 
 def read_packages(reqs_file):
@@ -66,6 +67,43 @@ def read_packages(reqs_file):
                 match = DEP_PATTERN.match(line.strip())
                 if match:
                     yield match.groups()
+
+
+def print_package_changes(pre_packages, post_packages, indent=''):
+    pre_packages_set = set(pre_packages)
+    post_packages_set = set(post_packages)
+
+    added = post_packages_set - pre_packages_set
+    removed = pre_packages_set - post_packages_set
+    changed = {
+        package for package in pre_packages_set & post_packages_set
+        if pre_packages[package] != post_packages[package]
+    }
+
+    if added:
+        print('{}{}{}Added packages:'.format(Fore.CYAN, Style.BRIGHT, indent))
+        for package in sorted(added):
+            print('{}{}    {}=={}'.format(Style.BRIGHT, indent, package, post_packages[package]))
+
+    if removed:
+        print('{}{}{}Removed packages:'.format(Fore.RED, Style.BRIGHT, indent))
+        for package in sorted(removed):
+            print('{}{}    {}=={}'.format(Style.BRIGHT, indent, package, pre_packages[package]))
+
+    if changed:
+        print('{}{}{}Changed packages:'.format(Fore.YELLOW, Style.BRIGHT, indent))
+        for package in sorted(changed):
+            print('{}{}    {}=={} -> {}=={}'.format(
+                Style.BRIGHT,
+                indent,
+                package,
+                pre_packages[package],
+                package,
+                post_packages[package])
+            )
+
+    if not (added or removed or changed):
+        print('{}{}No changes'.format(Style.BRIGHT, indent))
 
 
 def collect_packages(verify=True, checks=None):
@@ -99,10 +137,9 @@ def dep_freeze(ctx, upgrade=False):
     pinned_packages = collect_packages()
 
     pinned_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'requirements.in')
-    compiled_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'requirements.txt')
+    resolved_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'requirements.txt')
 
-    pre_compiled_packages = dict(read_packages(compiled_reqs_file))
-    pre_packages_set = set(pre_compiled_packages)
+    pre_resolved_packages = dict(read_packages(resolved_reqs_file))
 
     pinned_lines = [
         '{}=={}\n'.format(package, versions.keys()[0])
@@ -112,38 +149,10 @@ def dep_freeze(ctx, upgrade=False):
         f.writelines(pinned_lines)
 
     print('{}{}Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
-    compile_requirements(pinned_reqs_file, compiled_reqs_file, upgrade=upgrade)
+    resolve_requirements(pinned_reqs_file, resolved_reqs_file, upgrade=upgrade)
 
-    post_compiled_packages = dict(read_packages(compiled_reqs_file))
-    post_packages_set = set(post_compiled_packages)
-
-    added = post_packages_set - pre_packages_set
-    removed = pre_packages_set - post_packages_set
-    changed = {
-        package for package in pre_packages_set & post_packages_set
-        if pre_compiled_packages[package] != post_compiled_packages[package]
-    }
-
-    if added:
-        print('{}{}Added packages:'.format(Fore.CYAN, Style.BRIGHT))
-        for package in sorted(added):
-            print('{}    {}=={}'.format(Style.BRIGHT, package, post_compiled_packages[package]))
-
-    if removed:
-        print('{}{}Removed packages:'.format(Fore.RED, Style.BRIGHT))
-        for package in sorted(removed):
-            print('{}    {}=={}'.format(Style.BRIGHT, package, pre_compiled_packages[package]))
-
-    if changed:
-        print('{}{}Changed packages:'.format(Fore.YELLOW, Style.BRIGHT))
-        for package in sorted(changed):
-            print('{}    {}=={} -> {}=={}'.format(
-                Style.BRIGHT,
-                package,
-                pre_compiled_packages[package],
-                package,
-                post_compiled_packages[package])
-            )
+    post_resolved_packages = dict(read_packages(resolved_reqs_file))
+    print_package_changes(pre_resolved_packages, post_resolved_packages)
 
 
 @task
@@ -185,15 +194,19 @@ def dep_check(ctx):
 @task(help={
     'package': 'The package to pin throughout the checks',
     'version': 'The version of the package to pin',
-    'upgrade': 'Attempt to upgrade transient dependencies',
+    'resolve': 'Resolve transient dependencies',
+    'upgrade': 'When resolving, attempt to upgrade transient dependencies',
     'quiet': 'Whether or not to hide output',
 })
-def dep_pin(ctx, package, version, upgrade=False, quiet=False):
-    """Pin a dependency for all checks that require it.
-    ``pip-compile`` must be in PATH.
+def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
+    """Pin a dependency for all checks that require it. Setting the version
+    to `none` will remove the package. `pip-compile` must be in PATH if
+    resolving; disable resolving via `--no-resolve`.
 
-    Example invocation:
-        inv pin requests 2.19.1
+    Example invocations:
+        inv pin cryptography 2.2.2
+        inv pin --upgrade requests 2.19.1
+        inv pin scandir none
     """
     if not (package and version):
         raise Exit('`package` and `version` are required arguments.')
@@ -201,9 +214,9 @@ def dep_pin(ctx, package, version, upgrade=False, quiet=False):
     for check_name in sorted(os.listdir(ROOT)):
         check_dir = os.path.join(ROOT, check_name)
         pinned_reqs_file = os.path.join(check_dir, 'requirements.in')
-        compiled_reqs_file = os.path.join(check_dir, 'requirements.txt')
+        resolved_reqs_file = os.path.join(check_dir, 'requirements.txt')
 
-        ensure_deps_declared(compiled_reqs_file, pinned_reqs_file)
+        ensure_deps_declared(resolved_reqs_file, pinned_reqs_file)
 
         if os.path.isfile(pinned_reqs_file):
             with open(pinned_reqs_file, 'r', encoding='utf-8') as f:
@@ -216,21 +229,28 @@ def dep_pin(ctx, package, version, upgrade=False, quiet=False):
                         break
                 except IndexError:
                     continue
-            # Skip integrations that don't require the package.
+            # Skip checks that don't require the package.
             else:
                 continue
 
-            if not quiet:
-                print('{}{}Check `{}`:'.format(Fore.CYAN, Style.BRIGHT, check_name))
-                print('{}      Old: `{}`'.format(Style.BRIGHT, lines[i].strip()))
+            most_changed_file = resolved_reqs_file if resolve else pinned_reqs_file
+            pre_packages = dict(read_packages(most_changed_file))
 
-            lines[i] = '{}=={}\n'.format(package, version)
+            if not quiet:
+                print('{}Check `{}`:'.format(Style.BRIGHT, check_name))
+
+            if version.lower() == 'none':
+                del lines[i]
+            else:
+                lines[i] = '{}=={}\n'.format(package, version)
 
             with open(pinned_reqs_file, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
 
-            if not quiet:
-                print('{}      New: `{}`'.format(Style.BRIGHT, lines[i].strip()))
-                print('{}{}      Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
+            if resolve:
+                if not quiet:
+                    print('{}{}    Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
+                resolve_requirements(pinned_reqs_file, resolved_reqs_file, upgrade=upgrade)
 
-            compile_requirements(pinned_reqs_file, compiled_reqs_file, upgrade=upgrade)
+            post_packages = dict(read_packages(most_changed_file))
+            print_package_changes(pre_packages, post_packages, indent='    ')
