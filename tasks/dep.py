@@ -159,35 +159,38 @@ def dep_freeze(ctx, upgrade=False):
 def dep_check(ctx):
     all_packages = collect_packages(verify=False)
 
-    output = ''
+    output_lines = []
     for package, versions in sorted(iteritems(all_packages)):
         if len(versions) > 1:
-            output += '{}{}Multiple versions found for package `{}`:\n'.format(Fore.RED, Style.BRIGHT, package)
+            output_lines.append(
+                '{}{}Multiple versions found for package `{}`:'.format(Fore.RED, Style.BRIGHT, package)
+            )
             for version, checks in sorted(iteritems(versions)):
                 if len(checks) == 1:
-                    output += '{}    {}: {}\n'.format(Style.BRIGHT, version, checks[0])
+                    output_lines.append('{}    {}: {}'.format(Style.BRIGHT, version, checks[0]))
                 elif len(checks) == 2:
-                    output += '{}    {}: {} and {}\n'.format(Style.BRIGHT, version, checks[0], checks[1])
+                    output_lines.append('{}    {}: {} and {}'.format(Style.BRIGHT, version, checks[0], checks[1]))
                 else:
                     remaining = len(checks) - 2
-                    output += '{}    {}: {}, {}, and {} other{}\n'.format(
+                    output_lines.append('{}    {}: {}, {}, and {} other{}'.format(
                         Style.BRIGHT,
                         version,
                         checks[0],
                         checks[1],
                         remaining,
                         's' if remaining > 1 else ''
-                    )
+                    ))
         else:
             version, checks = versions.items()[0]
             if version is None:
-                output += (
-                    '{}{}Unpinned dependency `{}` in the `{}` check.\n'
+                output_lines.append((
+                    '{}{}Unpinned dependency `{}` in the `{}` check.'
                     ''.format(Fore.RED, Style.BRIGHT, package, checks[0])
-                )
+                ))
 
-    if output:
-        print(output[:-1])
+    if output_lines:
+        for line in output_lines:
+            print(line)
         raise Exit(1)
 
 
@@ -211,6 +214,8 @@ def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
     if not (package and version):
         raise Exit('`package` and `version` are required arguments.')
 
+    package = package.lower()
+
     for check_name in sorted(os.listdir(ROOT)):
         check_dir = os.path.join(ROOT, check_name)
         pinned_reqs_file = os.path.join(check_dir, 'requirements.in')
@@ -225,7 +230,7 @@ def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
             for i, line in enumerate(lines):
                 try:
                     pkg = line.split('=')[0].strip()
-                    if pkg == package:
+                    if pkg.lower() == package:
                         break
                 except IndexError:
                     continue
