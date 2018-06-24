@@ -257,5 +257,6 @@ def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
                     print('{}{}    Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
                 resolve_requirements(pinned_reqs_file, resolved_reqs_file, upgrade=upgrade)
 
-            post_packages = dict(read_packages(most_changed_file))
-            print_package_changes(pre_packages, post_packages, indent='    ')
+            if not quiet:
+                post_packages = dict(read_packages(most_changed_file))
+                print_package_changes(pre_packages, post_packages, indent='    ')
