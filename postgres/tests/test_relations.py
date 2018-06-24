@@ -31,7 +31,8 @@ RELATION_SIZE_METRICS = [
 ]
 
 RELATION_INDEX_METRICS = [
-    'postgresql.index_scans',
+    'postgresql.index_scans',  # deprecated
+    'postgresql.index_rel_scans',
     'postgresql.index_rows_fetched',
     'postgresql.index_blocks_read',
     'postgresql.index_blocks_hit',
@@ -58,7 +59,7 @@ def test_relations_metrics(aggregator, postgres_standalone, pg_instance):
 
     # 'persons' db don't have any indexes
     for name in RELATION_INDEX_METRICS:
-        aggregator.assert_metric(name, count=0, tags=expected_tags)
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
     for name in RELATION_SIZE_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_size_tags)

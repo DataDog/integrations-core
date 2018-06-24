@@ -27,6 +27,7 @@ postgresql.locks,gauge,,lock,,The number of locks active for this database.,0,po
 postgresql.seq_scans,gauge,,,,The number of sequential scans initiated on this table.,0,postgres,seq scans
 postgresql.seq_rows_read,gauge,,row,second,The number of live rows fetched by sequential scans.,0,postgres,seq rows rd
 postgresql.index_scans,gauge,,,,The number of index scans initiated on this table.,0,postgres,idx scans
+postgresql.index_rel_scans,gauge,,,,The number of index scans initiated on this table tagged by relation name.,0,postgres,idx scans
 postgresql.index_rows_fetched,gauge,,row,second,The number of live rows fetched by index scans.,0,postgres,idx rows fetch
 postgresql.rows_hot_updated,gauge,,row,second,"The number of rows HOT updated, meaning no separate index update was needed.",0,postgres,rows hot updated
 postgresql.live_rows,gauge,,row,,The estimated number of live rows.,0,postgres,live rows

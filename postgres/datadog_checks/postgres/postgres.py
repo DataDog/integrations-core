@@ -123,6 +123,11 @@ SELECT mode,
             ('relname', 'table'),
             ('schemaname', 'schema'),
         ],
+        # this field contains old metrics that need to be deprecated. For now
+        # we keep sending them.
+        'deprecated_metrics': {
+            'idx_scan': ('postgresql.index_scans', RATE),
+        },
         'metrics': {
             'seq_scan': ('postgresql.seq_scans', RATE),
             'seq_tup_read': ('postgresql.seq_rows_read', RATE),
@@ -594,6 +599,11 @@ SELECT s.schemaname,
             # metric-map is: (dd_name, "rate"|"gauge")
             # shift the results since the first columns will be the "descriptors"
             values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
+            # keep sending the deprecated metrics if any
+            deprecated_values = zip([scope.get('deprecated_metrics', {}).get(c) for c in cols], row[len(desc):])
+            for metric_map, value in deprecated_values:
+                if metric_map is not None:
+                    values.append((metric_map, value))
 
             # To submit simply call the function for each value v
             # v[0] == (metric_name, submit_function)
