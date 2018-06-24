@@ -45,6 +45,5 @@ setup(
     install_requires=get_requirements("requirements.in") + ["datadog_checks_base"],
     tests_require=get_requirements("requirements-dev.txt"),
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.pgbouncer': ['conf.yaml.example']},
     include_package_data=True,
 )

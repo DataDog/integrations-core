@@ -62,6 +62,5 @@ setup(
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.prometheus': ['conf.yaml.default']},
     include_package_data=True,
 )

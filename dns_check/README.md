@@ -66,7 +66,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/datadog_checks/dns_check/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv

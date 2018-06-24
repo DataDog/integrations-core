@@ -117,7 +117,7 @@ Returns `OK` otherwise.
 [15]: https://app.datadoghq.com/account/settings#agent
 [16]: https://github.com/DataDog/jmxfetch
 [17]: https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent
-[18]: https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example
+[18]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
 [19]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [20]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [21]: https://docs.datadoghq.com/logs

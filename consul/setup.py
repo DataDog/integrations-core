@@ -61,6 +61,5 @@ setup(
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.consul': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

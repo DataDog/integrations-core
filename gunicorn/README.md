@@ -112,7 +112,7 @@ To get a better idea of how (or why) to integrate your Gunicorn apps with Datado
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://pypi.python.org/pypi/setproctitle
-[3]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: http://docs.gunicorn.org/en/stable/settings.html#statsd-host
 [6]: https://docs.datadoghq.com/guides/dogstatsd

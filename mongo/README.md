@@ -137,7 +137,7 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/mongo/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/logs
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

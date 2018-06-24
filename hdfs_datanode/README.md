@@ -67,7 +67,7 @@ Need help? Contact [Datadog Support][106].
 
 
 [101]: https://app.datadoghq.com/account/settings#agent
-[102]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/conf.yaml.example
+[102]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/datadog_checks/hdfs_datanode/data/conf.yaml.example
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [104]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [105]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/metadata.csv
