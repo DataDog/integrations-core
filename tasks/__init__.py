@@ -13,7 +13,7 @@ from colorama import init
 # Ignore "imported but unused" flake8 errors for these imports.
 from .cleanup import cleanup  # noqa: F401
 from .manifest import manifest  # noqa: F401
-from .dep import dep_check, dep_freeze, dep_upgrade  # noqa: F401
+from .dep import dep_check, dep_freeze, dep_pin  # noqa: F401
 from .test import test  # noqa: F401
 from .changelog import update_changelog  # noqa: F401
 from .release import (  # noqa: F401
