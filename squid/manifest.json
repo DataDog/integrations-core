@@ -1,15 +1,18 @@
 {
-  "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "squid",
+  "display_name": "Squid",
   "short_description": "Track metrics from your squid-cache servers with Datadog",
   "guid": "e7d4b233-b32a-46f9-8cb2-c582ee8fd251",
   "support": "core",
+  "maintainer": "help@datadoghq.com",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
+  "metric_prefix": "squid",
+  "metric_to_check": "squid.cpu_time",
   "public_title": "Datadog-Squid Integration",
   "categories": ["web", "caching"],
   "type": "check",
