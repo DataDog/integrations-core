@@ -24,6 +24,8 @@ ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "varnish", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-varnish',
     version=ABOUT["__version__"],
@@ -56,9 +58,7 @@ setup(
     packages=['datadog_checks.varnish'],
 
     # Run-time dependencies
-    install_requires=get_requirements("requirements.in") + [
-        "datadog_checks_base",
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     # Testing setup and dependencies
     tests_require=get_requirements("requirements-dev.txt"),
