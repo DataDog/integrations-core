@@ -124,5 +124,6 @@ AGENT_V5_ONLY = [
 TESTABLE_FILE_EXTENSIONS = (
     '.py',
     '.ini',
+    '.in',
     '.txt',
 )
