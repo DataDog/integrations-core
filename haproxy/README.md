@@ -22,7 +22,7 @@ The HAProxy check is packaged with the Agent. To start gathering your HAProxy me
 ### Configuration
 
 Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your HAProxy [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example) for all available configuration options.
 
 #### Prepare HAProxy
 
@@ -56,7 +56,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
         password: <your_password>
 ```
 
-  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  See the [sample haproxy.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example) for all available configuration options.
 
 *  [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
@@ -81,7 +81,7 @@ Add this configuration block to your `haproxy.d/conf.yaml` file to start gatheri
         sourcecategory: http_web_access
 ```
 
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example) for all available configuration options.
+  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example) for all available configuration options.
 
 * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent)
 
@@ -118,7 +118,7 @@ Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
 [3]: https://www.haproxy.org/download/1.7/doc/management.txt
-[4]: https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/logs
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

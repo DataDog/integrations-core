@@ -139,7 +139,7 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://www.rabbitmq.com/management.html
-[3]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/datadog_checks/rabbitmq/data/conf.yaml.example
 [4]: http://www.rabbitmq.com/management.html
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

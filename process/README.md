@@ -101,7 +101,7 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 
 [1]: http://docs.datadoghq.com/monitoring/#process
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
 [4]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/process.py#L117
 [5]: https://github.com/DataDog/integrations-core/tree/master/docker_daemon
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

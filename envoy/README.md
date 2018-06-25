@@ -123,7 +123,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
 [5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [6]: https://istio.io
 [7]: https://istio.io/docs/reference/config/

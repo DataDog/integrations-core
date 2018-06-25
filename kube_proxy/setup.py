@@ -63,6 +63,5 @@ setup(
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.kube_proxy': ['conf.yaml.default', 'auto_conf.yaml']},
     include_package_data=True,
 )

@@ -125,6 +125,9 @@ def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
     if bench:
         sys.stdout.write('\nRunning available benchmarks...\n')
 
+    # sort targets
+    targets.sort()
+
     for target in targets:
         # check requirements.in and requirements.txt are in sync
         if not bench:
