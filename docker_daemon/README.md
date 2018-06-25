@@ -26,7 +26,7 @@ Whichever you choose, your hosts need to have cgroup memory management enabled f
 4. Add the Agent user to the docker group: `usermod -a -G docker dd-agent`
 5. Create a `docker_daemon.yaml` file by copying [the example file in the agent conf.d directory][5]. If you have a standard install of Docker on your host, there shouldn't be anything you need to change to get the integration to work.
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
-    ![Integration docker docker][28]
+    ![Docker ps command][28]
 
 **Note:** docker_daemon has replaced the older docker integration.
 
