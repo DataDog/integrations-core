@@ -14,7 +14,7 @@ The MongoDB check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `mongodb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your MongoDB [metrics](#metric-collection) and [logs](#log-collection).  See the [sample mongo.yaml][2] for all available configuration options.
+Edit the `mongo.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your MongoDB [metrics](#metric-collection) and [logs](#log-collection).  See the [sample mongo.yaml][2] for all available configuration options.
 
 #### Prepare MongoDB
 
@@ -42,7 +42,7 @@ db.createUser({
 
 #### Metric Collection
 
-* Add this configuration block to your `mongodb.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.d/conf.yaml][2] for all available configuration options:
+* Add this configuration block to your `mongo.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics). See the [sample mongo.d/conf.yaml][2] for all available configuration options:
 
   ```
   init_config:
@@ -54,7 +54,7 @@ db.createUser({
         - tcmalloc
         - top
   ```
-  See the [sample mongodb.yaml][2] for all available configuration options
+  See the [sample mongo.yaml][2] for all available configuration options
 
 * [Restart the Agent][3] to start sending MongoDB metrics to Datadog.
 
@@ -68,7 +68,7 @@ db.createUser({
   logs_enabled: true
   ```
 
-* Add this configuration block to your `mongodb.d/conf.yaml` file to start collecting your MongoDB Logs:
+* Add this configuration block to your `mongo.d/conf.yaml` file to start collecting your MongoDB Logs:
 
   ```
   logs:
@@ -78,7 +78,7 @@ db.createUser({
         source: mongodb
   ```
   Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample mongodb.yaml][2] for all available configuration options
+  See the [sample mongo.yaml][2] for all available configuration options
 
 * [Restart the Agent][3].
 
