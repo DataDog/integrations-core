@@ -683,11 +683,12 @@ class Network(AgentCheck):
 
         self._cx_counters_psutil(tags=custom_tags)
 
-    def _cx_state_psutil(self, tags=[]):
+    def _cx_state_psutil(self, tags=None):
         """
         Collect metrics about connections state using psutil
         """
         metrics = defaultdict(int)
+        tags = [] if tags is None else tags
         for conn in psutil.net_connections():
             protocol = self._parse_protocol_psutil(conn)
             status = self.tcp_states['psutil'].get(conn.status)
@@ -700,10 +701,11 @@ class Network(AgentCheck):
         for metric, value in metrics.iteritems():
             self.gauge(metric, value, tags=tags)
 
-    def _cx_counters_psutil(self, tags=[]):
+    def _cx_counters_psutil(self, tags=None):
         """
         Collect metrics about interfaces counters using psutil
         """
+        tags = [] if tags is None else tags
         for iface, counters in psutil.net_io_counters(pernic=True).iteritems():
             metrics = {
                 'bytes_rcvd': counters.bytes_recv,
