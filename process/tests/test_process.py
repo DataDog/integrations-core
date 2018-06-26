@@ -253,8 +253,8 @@ def test_check_real_process(aggregator):
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
-    aggregator.assert_all_metrics_covered()
 
+    # this requires another run
     process.check(instance)
     aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
 
