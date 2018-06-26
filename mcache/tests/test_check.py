@@ -147,7 +147,6 @@ def memcached_socket():
     """
     env = os.environ
     env['PWD'] = common.HERE
-
     env['SOCKET'] = common.SOCKET
     env['MCACHE_SOCKET_DIR'] = common.UNIXSOCKET_DIR
 
@@ -158,8 +157,6 @@ def memcached_socket():
     docker_compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
 
-    # subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
-    # subprocess.check_call(["ls", "-al", "/tmp/mcache"], env=env)
     try:
         if Platform.is_linux():
             # on linux this needs access to the socket
@@ -175,7 +172,6 @@ def memcached_socket():
     except subprocess.CalledProcessError:
         # it's not always bad if this fails
         pass
-    # time.sleep(20)
 
     attempts = 0
     while True:
@@ -210,7 +206,7 @@ def client():
 
 @pytest.fixture
 def client_socket():
-    return bmemcached.Client('unix://{0}'.format(common.UNIXSOCKET_PATH), common.USERNAME, common.PASSWORD)
+    return bmemcached.Client(common.UNIXSOCKET_PATH, common.USERNAME, common.PASSWORD)
 
 
 @pytest.fixture
