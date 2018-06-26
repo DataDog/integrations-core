@@ -79,9 +79,9 @@ Need help? Contact [Datadog Support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/fluentd/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/logs/faq/how-to-send-logs-to-datadog-via-external-log-shippers/#fluentd
+[4]: https://docs.datadoghq.com/logs/log_collection/fluentd/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [7]: http://docs.datadoghq.com/help/

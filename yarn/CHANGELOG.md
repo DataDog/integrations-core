@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.3.0 / 2018-06-13
+
+* [Added] Add support for HTTP authentication. See [#1684](https://github.com/DataDog/integrations-core/pull/1684).
+
 ## 1.3.0 / 2018-06-08
 
 * [Added] Add support for HTTP authentication. See [#1684](https://github.com/DataDog/integrations-core/pull/1684).

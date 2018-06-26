@@ -27,7 +27,9 @@ def pdh_mocks_fixture():
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(),  pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
+        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
+        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -48,7 +50,9 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhgetformattedcountervalue = mock.patch('win32pdh.GetFormattedCounterValue', mock_GetFormattedCounterValue)
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(),  pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
+        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
+        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start()
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -58,7 +62,8 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhgetformattedcountervalue.stop()
     pdhcollectquerydata.stop()
 
-def initialize_pdh_tests(lang = None):
+
+def initialize_pdh_tests(lang=None):
     """
     initialize_pdh_tests
 
@@ -96,6 +101,7 @@ def initialize_pdh_tests(lang = None):
 
     read_available_counters(counterdata)
 
+
 def read_available_counters(fname):
     counters_by_class.clear()
     instances_by_class.clear()
@@ -111,7 +117,7 @@ def read_available_counters(fname):
                 clss = clss.strip()
                 inst = inst.strip()
                 counter = counter.strip()
-            except:
+            except ValueError:
                 print line
                 raise
 
@@ -143,10 +149,12 @@ def load_registry_values(fname):
         idx += 2
     return idx_array, ctr_index
 
+
 def mock_EnumObjectItems(reserved, machine_name, clss, detail):
     ctrs = list(counters_by_class[clss])
     insts = list(instances_by_class[clss])
     return ctrs, insts
+
 
 def mock_MakeCounterPath(arglist):
     # win32pdh.MakeCounterPath takes as it's first argument a list of parameters
@@ -174,22 +182,28 @@ def mock_MakeCounterPath(arglist):
         p = "%s| |%s" % (clss, cname)
     return p
 
+
 def mock_AddCounter(h, path):
     if path is None or len(path) == 0:
         raise AttributeError("Invalid path")
     return path
 
+
 def mock_GetFormattedCounterValue(h, p):
-    return 1, 1 # for now
+    return 1, 1  # for now
+
 
 def mock_CollectQueryData(h):
     return True
 
+
 def mock_LookupPerfNameByIndex(machine_name, ndx):
     return counters_index[ndx]
 
+
 def mock_QueryValueEx(*args, **kwargs):
     return (index_array, _winreg.REG_SZ)
+
 
 def mock_QueryValueExWithRaise(*args, **kwargs):
     raise WindowsError

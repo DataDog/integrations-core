@@ -55,7 +55,7 @@ Need help? Contact [Datadog Support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv

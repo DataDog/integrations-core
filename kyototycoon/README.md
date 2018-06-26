@@ -60,7 +60,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/datadog_checks/kyototycoon/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/kyototycoon/metadata.csv
 [5]: http://docs.datadoghq.com/help/

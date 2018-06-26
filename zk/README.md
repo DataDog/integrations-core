@@ -139,7 +139,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example
+[14]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
 [15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv

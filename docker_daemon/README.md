@@ -180,7 +180,7 @@ We've also written several other in-depth blog posts to help you get the most ou
 [2]: https://github.com/DataDog/docker-dd-agent#cgroups
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://app.datadoghq.com/account/settings#integrations/docker
-[5]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/conf.yaml.example
+[5]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example
 [6]: https://app.datadoghq.com/account/settings#agent/docker
 [7]: https://github.com/DataDog/dd-agent/wiki/Proxy-Configuration#using-the-agent-as-a-proxy
 [8]: https://github.com/DataDog/dd-agent/wiki/Capturing-EC2-tags-at-startup

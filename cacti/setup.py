@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
@@ -22,6 +23,8 @@ def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
+
+CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
     name='datadog-cacti',
@@ -55,14 +58,11 @@ setup(
     packages=['datadog_checks.cacti'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     # Testing setup and dependencies
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.cacti': ['conf.yaml.example']},
     include_package_data=True,
 )

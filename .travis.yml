@@ -23,7 +23,9 @@ stages:
   - name: test
     if: (branch = master) AND (type != pull_request)
 
-script: travis_retry inv test --targets=${CHECK}
+script:
+  - travis_retry inv test --targets=${CHECK}
+  - inv test --targets=${CHECK} --bench || true
 
 # Conditional jobs are currently buggy and verbose.
 #
@@ -37,13 +39,17 @@ jobs:
   include:
     - stage: test_changed
       script:
+       - inv dep-check
        - inv manifest --include-extras
        - inv test --changed-only
+       - inv test --changed-only --bench || true
     - stage: test
       env: CHECK=datadog_checks_base
       script:
+        - inv dep-check
         - inv manifest --include-extras
         - travis_retry inv test --targets=${CHECK}
+        - inv test --targets=${CHECK} --bench || true
     - stage: test
       env: CHECK=active_directory
     - stage: test
@@ -54,6 +60,8 @@ jobs:
       env: CHECK=aspdotnet
     - stage: test
       env: CHECK=btrfs
+    - stage: test
+      env: CHECK=cacti
     - stage: test
       env: CHECK=ceph
     - stage: test
@@ -68,6 +76,8 @@ jobs:
       env: CHECK=directory
     - stage: test
       env: CHECK=disk
+    - stage: test
+      env: CHECK=dns_check
     - stage: test
       env: CHECK=dotnetclr
     - stage: test
@@ -91,6 +101,8 @@ jobs:
     - stage: test
       env: CHECK=kafka_consumer
     - stage: test
+      env: CHECK=kong
+    - stage: test
       env: CHECK=kube_proxy
     - stage: test
       env: CHECK=kubelet
@@ -102,6 +114,8 @@ jobs:
       env: CHECK=lighttpd
     - stage: test
       env: CHECK=linkerd
+    - stage: test
+      env: CHECK=linux_proc_extras
     - stage: test
       env: CHECK=mapreduce
     - stage: test
@@ -150,6 +164,8 @@ jobs:
       env: CHECK=teamcity
     - stage: test
       env: CHECK=varnish
+    - stage: test
+      env: CHECK=vault
     - stage: test
       env: CHECK=vsphere
     - stage: test

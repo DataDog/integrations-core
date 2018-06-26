@@ -13,7 +13,7 @@ The Linkerd check is included in the [Datadog Agent](https://app.datadoghq.com/a
 ### Configuration
 
 Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
-See [sample linkerd.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example) for all available configuration options.
+See [sample linkerd.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example) for all available configuration options.
 
 ### Validation
 
@@ -37,7 +37,7 @@ curl <linkerd_prometheus_endpoint>
 Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
-Simply follow the examples present in the [default configuration](https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example).
+Simply follow the examples present in the [default configuration](https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example).
 
 ### Service Checks
 

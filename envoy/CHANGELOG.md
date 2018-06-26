@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.2.1 / 2018-06-14
+
+* [Fixed] properly send tags for histograms. See [#1741](https://github.com/DataDog/integrations-core/pull/1741).
+
 ## 1.2.0 / 2018-06-07
 
 * [Added] support histograms, fix count submission. See [#1616](https://github.com/DataDog/integrations-core/pull/1616).

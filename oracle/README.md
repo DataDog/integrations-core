@@ -13,7 +13,7 @@ In order to use the Oracle integration, either install the Oracle Instant Client
 #### Steps for the JDBC Driver
 
 - [Download](http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html) the jar file
-- Add the path to the downloaded file in your $CLASSPATH, or add it to the check configuration file under `jdbc_driver_path`, as in the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example).
+- Add the path to the downloaded file in your $CLASSPATH, or add it to the check configuration file under `jdbc_driver_path`, as in the [sample oracle.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example).
 
 #### Steps for the Instant Client
 
@@ -70,7 +70,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example) for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml](https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example) for all available configuration options.
 
 Configuration Options:
 
@@ -106,7 +106,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [1]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 [2]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [3]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[4]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [7]: http://docs.datadoghq.com/help/

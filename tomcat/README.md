@@ -338,7 +338,7 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 [14]: http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
 [15]: http://docs.datadoghq.com/integrations/java/
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example
+[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
 [18]: http://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [19]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

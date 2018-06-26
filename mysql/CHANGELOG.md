@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 1.3.0 / 2018-06-08
+## 1.3.0 / 2018-06-13
 
 * [Added] Make the max custom queries configurable in the yaml file. See [#1713](https://github.com/DataDog/integrations-core/pull/1713).
 

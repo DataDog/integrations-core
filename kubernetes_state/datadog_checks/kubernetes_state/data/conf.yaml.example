@@ -1,0 +1,30 @@
+init_config:
+
+instances:
+  # To enable Kube State metrics you must specify the url exposing the API
+  #
+  # Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
+  # the CPP extension to process Protocol buffer messages coming from the api. Depending
+  # on the metrics volume, the check may run very slowly.
+  - kube_state_url: http://example.com:8080/metrics
+    # Tags are reported as set by kube-state-metrics. If you want to translate
+    # them to other tags, you can use the labels_mapper dictionary
+    # labels_mapper:
+    #   namespace: kube_namespace
+    # Add the tags to join from the KSM.
+    # Example: Joining for deployment metrics. Based on: kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile"}
+    # Use the following config to add the value of label_addonmanager_kubernetes_io_mode as a tag to your KSM deployment metrics.
+    # label_joins:
+    #  kube_deployment_labels:
+    #    label_to_match: deployment
+    #    labels_to_get:
+    #      - label_addonmanager_kubernetes_io_mode
+    # By default the hostname for metrics containing the node label will be
+    # overriden by the value of the label, this can be deactivated (all metrics
+    # will be attached to the host running KSM)
+    # hostname_override: true
+
+    # You can also specify here custom tags to be added to all metrics reported by this integration
+    #  tags:
+    #    - optional_tag1
+    #    - optional_tag2

@@ -170,7 +170,9 @@ class KubernetesState(PrometheusCheck):
         # We do not support more than one instance of kube-state-metrics
         extra_labels = instances[0].get("label_joins", {})
         self.label_joins.update(extra_labels)
-        self.label_to_hostname = 'node'
+        hostname_override = instances[0].get('hostname_override', True)
+        if hostname_override:
+            self.label_to_hostname = 'node'
 
     def check(self, instance):
         endpoint = instance.get('kube_state_url')

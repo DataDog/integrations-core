@@ -9,6 +9,7 @@ from invoke import task
 from invoke.exceptions import Exit
 
 from .constants import AGENT_BASED_INTEGRATIONS, ROOT, TESTABLE_FILE_EXTENSIONS
+from .utils.common import get_testable_checks
 
 
 def testable_files(files):
@@ -28,7 +29,7 @@ def files_changed(ctx):
     return [f for f in changed_files if f]
 
 
-def run_tox(ctx, target, bench, dry_run):
+def run_tox(ctx, target, bench, every, dry_run):
     """
     Run tox on the folders contained in `targets`
     """
@@ -37,18 +38,23 @@ def run_tox(ctx, target, bench, dry_run):
             sys.stdout.write("\nRunning tox in '{}'...\n".format(target))
             sys.stdout.write("Ok.\n")
         else:
-            env_list = ctx.run('tox --listenvs', hide='out').stdout
-            env_list = [e.strip() for e in env_list.splitlines()]
-
-            if bench:
-                benches = [e for e in env_list if e.startswith('bench')]
-                # Don't print anything if there are no benchmarks
-                if benches:
-                    ctx.run('tox -e {}'.format(','.join(benches)))
-            else:
+            if every:
                 sys.stdout.write('\nRunning tox in `{}`...\n'.format(target))
-                ctx.run('tox -e {}'.format(','.join(e for e in env_list if not e.startswith('bench'))))
+                ctx.run('tox')
                 sys.stdout.write('Ok.\n')
+            else:
+                env_list = ctx.run('tox --listenvs', hide='out').stdout
+                env_list = [e.strip() for e in env_list.splitlines()]
+
+                if bench:
+                    benches = [e for e in env_list if e.startswith('bench')]
+                    # Don't print anything if there are no benchmarks
+                    if benches:
+                        ctx.run('tox -e {}'.format(','.join(benches)))
+                else:
+                    sys.stdout.write('\nRunning tox in `{}`...\n'.format(target))
+                    ctx.run('tox -e {}'.format(','.join(e for e in env_list if not e.startswith('bench'))))
+                    sys.stdout.write('Ok.\n')
 
 
 def check_requirements(ctx, target, dry_run, changed_files):
@@ -91,9 +97,10 @@ def check_requirements(ctx, target, dry_run, changed_files):
     'targets': "Comma separated names of the checks that will be tested",
     'changed-only': "Whether to only test checks that were changed in a PR",
     'bench': "Runs any benchmarks",
+    'every': "Runs every kind of test",
     'dry-run': "Runs the task without actually doing anything",
 })
-def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
+def test(ctx, targets=None, changed_only=False, bench=False, every=False, dry_run=False):
     """
     Run the tests for Agent-based checks
 
@@ -101,9 +108,9 @@ def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
         inv test --targets=disk,redisdb
     """
     if targets is None:
-        targets = AGENT_BASED_INTEGRATIONS
+        targets = get_testable_checks()
     elif isinstance(targets, basestring):
-        targets = [t for t in targets.split(',') if t in AGENT_BASED_INTEGRATIONS]
+        targets = [t for t in targets.split(',') if t in get_testable_checks()]
 
     # determine the integrations we need to test based on the changed files
     changed_files = []
@@ -124,9 +131,12 @@ def test(ctx, targets=None, changed_only=False, bench=False, dry_run=False):
     if bench:
         sys.stdout.write('\nRunning available benchmarks...\n')
 
+    # sort targets
+    targets.sort()
+
     for target in targets:
         # check requirements.in and requirements.txt are in sync
         if not bench:
             check_requirements(ctx, target, dry_run, changed_files)
         # run the tests for each target with tox
-        run_tox(ctx, target, bench, dry_run)
+        run_tox(ctx, target, bench, every, dry_run)

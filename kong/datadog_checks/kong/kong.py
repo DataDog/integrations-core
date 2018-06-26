@@ -10,8 +10,8 @@ import requests
 import simplejson as json
 
 # project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 
 class Kong(AgentCheck):
@@ -47,15 +47,15 @@ class Kong(AgentCheck):
             self.log.debug(u"Kong status `response`: {0}".format(response))
             response.raise_for_status()
         except Exception:
-            self.service_check(service_check_name, AgentCheck.CRITICAL,
+            self.service_check(service_check_name, Kong.CRITICAL,
                                tags=service_check_tags)
             raise
         else:
             if response.status_code == 200:
-                self.service_check(service_check_name, AgentCheck.OK,
+                self.service_check(service_check_name, Kong.OK,
                                    tags=service_check_tags)
             else:
-                self.service_check(service_check_name, AgentCheck.CRITICAL,
+                self.service_check(service_check_name, Kong.CRITICAL,
                                    tags=service_check_tags)
 
         return self._parse_json(response.content, tags)

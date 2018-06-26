@@ -468,11 +468,12 @@ class MapReduceCheck(AgentCheck):
         else:
             self.log.error('Metric type "{}" unknown'.format(metric_type))
 
-    def _rest_request_to_json(self, address, auth, ssl_verify, object_path, service_name, tags=[], *args, **kwargs):
+    def _rest_request_to_json(self, address, auth, ssl_verify, object_path, service_name, tags=None, *args, **kwargs):
         """
         Query the given URL and return the JSON response
         """
         response_json = None
+        tags = [] if tags is None else tags
 
         service_check_tags = ['url:{}'.format(self._get_url_base(address))] + tags
 

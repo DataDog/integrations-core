@@ -62,7 +62,7 @@ Need help? Contact [Datadog Support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
-[3]: https://github.com/DataDog/integrations-core/blob/master/teamcity/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: http://docs.datadoghq.com/help/
