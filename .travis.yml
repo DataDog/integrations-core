@@ -145,6 +145,8 @@ jobs:
     - stage: test
       env: CHECK=powerdns_recursor
     - stage: test
+      env: CHECK=process
+    - stage: test
       env: CHECK=prometheus
     - stage: test
       env: CHECK=redisdb
