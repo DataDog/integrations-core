@@ -94,7 +94,7 @@ For example, the first version of the Docker image that will bundle the Datadog 
 
 #### Custom containers and additional information
 
-For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, please reference [our `docker-dd-agent` project on Github](https://github.com/DataDog/docker-dd-agent).
+For more information about building custom Docker containers with the Datadog Agent, the Alpine Linux based image, versioning, and more, please reference [our `docker-dd-agent` project on Github][1].
 
 ### Validation
 

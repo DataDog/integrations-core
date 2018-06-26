@@ -6,8 +6,7 @@ Integration that allows to:
 
 * Visualize and monitor metrics collected via Gitlab through Prometheus
 
-See https://docs.gitlab.com/ee/administration/monitoring/prometheus/ for
-more information about Gitlab and its integration with Prometheus
+See the [Gitlab documentation][107] for more information about Gitlab and its integration with Prometheus
 
 ## Setup
 ### Installation
@@ -49,3 +48,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [104]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [105]: http://docs.datadoghq.com/help/
 [106]: https://www.datadoghq.com/blog/
+[107]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/
