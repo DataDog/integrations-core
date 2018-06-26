@@ -19,7 +19,7 @@ from .utils.common import (
 )
 from .utils.github import get_changelog_types, get_pr
 from .utils.requirements import get_requirement_line, update_requirements
-from .changelog import do_update_changelog
+from .changelog import do_update_changelog, CHANGELOG_TYPE_NONE
 
 
 @task(help={
@@ -66,8 +66,26 @@ def print_shippable(ctx, quiet=False):
         diff_lines = get_diff(ctx, target, target_tag)
 
         # get the number of PRs that could be potentially released
+        # Only show the ones that have a changelog label that isn't no-changelog
         pr_numbers = parse_pr_numbers(diff_lines)
-        if pr_numbers:
+        all_no_changelog = True
+        for pr_num in pr_numbers:
+            try:
+                payload = get_pr(pr_num)
+                changelog_labels = get_changelog_types(payload)
+
+                if not changelog_labels:
+                    msg = Fore.RED + "PR #{} has no changelog label attached, please add one!\n".format(pr_num)
+                    sys.stderr.write(msg)
+                    continue
+
+                if changelog_labels[0] != CHANGELOG_TYPE_NONE:
+                    all_no_changelog = False
+            except Exception as e:
+                sys.stderr.write("Unable to fetch info for PR #{}: {}\n".format(pr_num, e))
+                continue
+
+        if pr_numbers and not all_no_changelog:
             if quiet:
                 print(target)
             else:
@@ -164,7 +182,7 @@ def release_prepare(ctx, target, new_version):
     update_requirements(req_file, target, get_requirement_line(target, new_version))
 
     # commit the changes
-    msg = "Bumped {} version to {}".format(target, new_version)
+    msg = "[ci skip] Bumped {} version to {}".format(target, new_version)
     git_commit(ctx, [target, AGENT_REQ_FILE], msg)
 
     # done

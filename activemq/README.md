@@ -14,7 +14,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 ### Configuration
 
 1. **Make sure that [JMX Remote is enabled][103] on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
+2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
 
       ```yaml
       instances:
@@ -110,8 +110,8 @@ Need help? Contact [Datadog Support][107].
 [101]: https://app.datadoghq.com/account/settings#agent
 [102]: https://github.com/DataDog/jmxfetch
 [103]: http://activemq.apache.org/jmx.html
-[104]: https://github.com/DataDog/integrations-core/blob/master/activemq/conf.yaml.example
+[104]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
 [105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [107]: http://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
-[109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent 
+[109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

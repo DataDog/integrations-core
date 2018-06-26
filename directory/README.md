@@ -15,7 +15,7 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting Directory performance data.    
+1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting Directory performance data.
   See the [sample directory.d/conf.yaml][2] for all available configuration options.
 
     ```yaml
@@ -57,7 +57,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/directory/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/directory/datadog_checks/directory/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/directory/metadata.csv

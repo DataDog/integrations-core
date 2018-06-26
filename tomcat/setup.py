@@ -58,6 +58,5 @@ setup(
     install_requires=['datadog_checks_base'],
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.tomcat': ['conf.yaml.example', 'metrics.yaml', 'auto_conf.yaml']},
     include_package_data=True,
 )

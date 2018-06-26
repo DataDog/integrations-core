@@ -14,7 +14,7 @@ The Activemq XML check is included in the [Datadog Agent][1] package, so you don
 
 ### Configuration
 
-1. Edit the `activemq_xml.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor.
+1. Edit the `activemq_xml.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set the masters to monitor.
 
     See the [sample activemq_xml.d/conf.yaml][2] for all available configuration options.
 
@@ -43,7 +43,7 @@ Need help? Contact [Datadog Support][5].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/datadog_checks/activemq_xml/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/metadata.csv
 [5]: http://docs.datadoghq.com/help/

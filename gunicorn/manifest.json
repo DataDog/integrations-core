@@ -11,7 +11,8 @@
   "guid": "5347bfe1-2e9b-4c92-9410-48b8659ce10f",
   "public_title": "Datadog-Gunicorn Integration",
   "categories": [
-    "web"
+    "web",
+    "log collection"
   ],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",

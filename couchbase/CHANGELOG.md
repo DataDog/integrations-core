@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.5.0 / 2018-06-20
+
+* [Added] Add Couchbase health and cluster membership service checks and alerts. See [#1593](https://github.com/DataDog/integrations-core/pull/1593).
+
 ## 1.4.0 / 2018-06-07
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).

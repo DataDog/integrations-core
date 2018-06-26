@@ -9,7 +9,7 @@ You can also create your own metrics by having the check run custom queries.
 ## Setup
 ### Installation
 
-The SQL Server check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your SQL Server instances.  
+The SQL Server check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your SQL Server instances.
 
 Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties.
 **Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**
@@ -25,7 +25,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
         GRANT VIEW SERVER STATE to datadog;
     ```
 
-2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory.  
+2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample sqlserver.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -69,12 +69,20 @@ Need help? Contact [Datadog Support][6].
 ## Further Reading
 
 * [Monitor your Azure SQL Databases with Datadog][7]
+* [Key metrics for SQL Server monitoring][8]
+* [SQL Server monitoring tools][9]
+* [Monitor SQL Server performance with Datadog][10]
+* [Custom SQL Server metrics for detailed monitoring][11]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
 [6]: http://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog/
+[8]: https://www.datadoghq.com/blog/sql-server-monitoring/
+[9]: https://www.datadoghq.com/blog/sql-server-monitoring-tools/
+[10]: https://www.datadoghq.com/blog/sql-server-performance/
+[11]: https://www.datadoghq.com/blog/sql-server-metrics/

@@ -14,7 +14,7 @@ The Kubernetes-Sate check is included in the [Datadog Agent][1] package, so you 
 
 ### Configuration
 
-Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.d/conf.yaml][2] for all available configuration options.
+Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set the masters to monitor. See the [sample kubernetes_state.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 
@@ -65,7 +65,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/datadog_checks/kubernetes_state/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/metadata.csv
 [5]: http://docs.datadoghq.com/help/

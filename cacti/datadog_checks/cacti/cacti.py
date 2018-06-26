@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from collections import namedtuple
@@ -16,13 +16,9 @@ except ImportError:
 import pymysql
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
-CFUNC_TO_AGGR = {
-    'AVERAGE': 'avg',
-    'MAXIMUM': 'max',
-    'MINIMUM': 'min'
-}
+CFUNC_TO_AGGR = {'AVERAGE': 'avg', 'MAXIMUM': 'max', 'MINIMUM': 'min'}
 
 CACTI_TO_DD = {
     'hdd_free': 'system.disk.free',
@@ -35,8 +31,9 @@ CACTI_TO_DD = {
     'proc': 'system.proc.running',
     'users': 'system.users.current',
     'mem_swap': 'system.swap.free',
-    'ping': 'system.ping.latency'
+    'ping': 'system.ping.latency',
 }
+
 
 class Cacti(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -87,7 +84,6 @@ class Cacti(AgentCheck):
 
         return patterns
 
-
     def _get_config(self, instance):
         required = ['mysql_host', 'mysql_user', 'rrd_path']
         for param in required:
@@ -103,15 +99,8 @@ class Cacti(AgentCheck):
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 
-        Config = namedtuple('Config', [
-            'host',
-            'user',
-            'password',
-            'db',
-            'rrd_path',
-            'whitelist',
-            'field_names',
-            'tags']
+        Config = namedtuple(
+            'Config', ['host', 'user', 'password', 'db', 'rrd_path', 'whitelist', 'field_names', 'tags']
         )
 
         return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
@@ -134,7 +123,7 @@ class Cacti(AgentCheck):
             return metric_count
 
         # Find the consolidation functions for the RRD metrics
-        c_funcs = set([v for k,v in info.items() if k.endswith('.cf')])
+        c_funcs = set([v for k, v in info.items() if k.endswith('.cf')])
 
         for c in list(c_funcs):
             last_ts_key = '%s.%s' % (rrd_path, c)
@@ -166,10 +155,9 @@ class Cacti(AgentCheck):
 
                     # Save this metric as a gauge
                     val = self._transform_metric(m_name, p[k])
-                    self.gauge(m_name, val, hostname=hostname,
-                        device_name=device_name, timestamp=ts, tags=tags)
+                    self.gauge(m_name, val, hostname=hostname, device_name=device_name, tags=tags)
                     metric_count += 1
-                    last_ts = (ts + interval)
+                    last_ts = ts + interval
 
             # Update the last timestamp based on the last valid metric
             self.last_ts[last_ts_key] = last_ts
@@ -179,8 +167,9 @@ class Cacti(AgentCheck):
         ''' Fetch metadata about each RRD in this Cacti DB, returning a list of
             tuples of (hostname, device_name, rrd_path)
         '''
+
         def _in_whitelist(rrd):
-            path = rrd.replace('<path_rra>/','')
+            path = rrd.replace('<path_rra>/', '')
             for p in whitelist:
                 if fnmatch(path, p):
                     return True
@@ -191,7 +180,8 @@ class Cacti(AgentCheck):
         and_parameters = " OR ".join(["hsc.field_name = '%s'" % field_name for field_name in field_names])
 
         # Check for the existence of the `host_snmp_cache` table
-        rrd_query = """
+        rrd_query = (
+            """
             SELECT
                 h.hostname as hostname,
                 hsc.field_value as device_name,
@@ -203,7 +193,8 @@ class Cacti(AgentCheck):
                     AND dl.snmp_index = hsc.snmp_index
             WHERE dt.data_source_path IS NOT NULL
             AND dt.data_source_path != ''
-            AND (%s OR hsc.field_name is NULL) """ % and_parameters
+            AND ({} OR hsc.field_name is NULL) """.format(and_parameters)
+        )
 
         c.execute(rrd_query)
         res = []
@@ -232,10 +223,10 @@ class Cacti(AgentCheck):
         try:
             m_name = CACTI_TO_DD[m_name]
             if aggr != 'avg':
-                m_name += '.%s' % (aggr)
+                m_name += '.{}'.format(aggr)
             return m_name
         except KeyError:
-            return "cacti.%s.%s" % (m_name.lower(), aggr)
+            return "cacti.{}.{}".format(m_name.lower(), aggr)
 
     def _transform_metric(self, m_name, val):
         ''' Add any special case transformations here '''

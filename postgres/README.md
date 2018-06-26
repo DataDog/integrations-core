@@ -16,7 +16,7 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
-Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options. 
+Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
 
 #### Prepare Postgres
 
@@ -33,8 +33,8 @@ To verify the correct permissions run the following command:
 
 ```
 psql -h localhost -U datadog postgres -c \
-"select * from pg_stat_database LIMIT(1);"
-&& echo -e "\e[0;32mPostgres connection - OK\e[0m" || \
+"select * from pg_stat_database LIMIT(1);" \
+&& echo -e "\e[0;32mPostgres connection - OK\e[0m" \
 || echo -e "\e[0;31mCannot connect to Postgres\e[0m"
 ```
 
@@ -136,8 +136,11 @@ Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL
 * [PostgreSQL custom metric collection explained][19]
 
 ## Further Reading
-### Blog Post
-To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
+### Blog posts
+* To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
+* [Key metrics for PostgreSQL monitoring][21]
+* [Collecting metrics with PostgreSQL monitoring tools][22]
+* [How to collect and monitor PostgreSQL data with Datadog][23]
 
 ### Knowledge Base
 #### Custom metrics
@@ -204,10 +207,13 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example
+[14]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [16]: https://docs.datadoghq.com/logs
 [17]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [18]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [19]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
 [20]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line/
+[21]: https://www.datadoghq.com/blog/postgresql-monitoring/
+[22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
+[23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/

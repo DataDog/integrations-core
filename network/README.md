@@ -11,8 +11,8 @@ The network check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory.  
-  See the [sample network.d/conf.yaml][2] for all available configuration options:  
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
+  See the [sample network.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
       init_config:
@@ -56,7 +56,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/network/conf.yaml.default
+[2]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv

@@ -1,5 +1,5 @@
 prometheus-client==0.1.0
-requests==2.18.4
+requests==2.19.1
 protobuf==3.5.1
 simplejson==3.6.5
 uptime==3.0.1

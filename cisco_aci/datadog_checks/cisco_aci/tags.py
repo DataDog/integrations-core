@@ -7,6 +7,7 @@ import re
 from datadog_checks.utils.containers import hash_mutable
 
 from . import helpers
+from . import exceptions
 
 
 class CiscoTags:
@@ -47,23 +48,27 @@ class CiscoTags:
             if app:
                 app_name = app.group(1)
                 application_meta.append("application:" + app_name)
-        # adding meta tags
-        meta = self.api.get_epg_meta(tenant_name, app_name, epg_name)
         endpoint_meta = []
-        if len(meta) > 0:
-            meta = meta[0]
-            meta_attrs = meta.get('fvCEp', {}).get('attributes')
-            if meta_attrs:
-                ip = meta_attrs.get('ip')
-                if ip:
-                    endpoint_meta.append("ip:" + ip)
-                mac = meta_attrs.get('mac')
-                if mac:
-                    endpoint_meta.append("mac:" + mac)
-                encap = meta_attrs.get('encap')
-                if encap:
-                    endpoint_meta.append("encap:" + encap)
-                # adding application tags
+        # adding meta tags
+        try:
+            meta = self.api.get_epg_meta(tenant_name, app_name, epg_name)
+            if len(meta) > 0:
+                meta = meta[0]
+                meta_attrs = meta.get('fvCEp', {}).get('attributes')
+                if meta_attrs:
+                    ip = meta_attrs.get('ip')
+                    if ip:
+                        endpoint_meta.append("ip:" + ip)
+                    mac = meta_attrs.get('mac')
+                    if mac:
+                        endpoint_meta.append("mac:" + mac)
+                    encap = meta_attrs.get('encap')
+                    if encap:
+                        endpoint_meta.append("encap:" + encap)
+                    # adding application tags
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            # the exception will already be logged, just pass it over here
+            pass
         endpoint_meta += application_meta
 
         context_hash = hash_mutable(endpoint_meta)
@@ -71,31 +76,35 @@ class CiscoTags:
         if self.tenant_tags.get(context_hash):
             eth_meta = self.tenant_tags.get(context_hash)
         else:
-            # adding eth and node tags
-            eth_list = self.api.get_eth_list_for_epg(tenant_name, app_name, epg_name)
-            for eth in eth_list:
-                eth_attrs = eth.get('fvRsCEpToPathEp', {}).get('attributes', {})
-                port = re.search('/pathep-\[(.+?)\]', eth_attrs.get('tDn', ''))
-                if not port:
-                    continue
-                eth_tag = 'port:' + port.group(1)
-                if eth_tag not in eth_meta:
-                    eth_meta.append(eth_tag)
-                node = re.search('/paths-(.+?)/', eth_attrs.get('tDn', ''))
-                if not node:
-                    continue
-                eth_node = 'node_id:' + node.group(1)
-                if eth_node not in eth_meta:
-                    eth_meta.append(eth_node)
-                # populating the map for eth-app mapping
+            try:
+                # adding eth and node tags
+                eth_list = self.api.get_eth_list_for_epg(tenant_name, app_name, epg_name)
+                for eth in eth_list:
+                    eth_attrs = eth.get('fvRsCEpToPathEp', {}).get('attributes', {})
+                    port = re.search('/pathep-\[(.+?)\]', eth_attrs.get('tDn', ''))
+                    if not port:
+                        continue
+                    eth_tag = 'port:' + port.group(1)
+                    if eth_tag not in eth_meta:
+                        eth_meta.append(eth_tag)
+                    node = re.search('/paths-(.+?)/', eth_attrs.get('tDn', ''))
+                    if not node:
+                        continue
+                    eth_node = 'node_id:' + node.group(1)
+                    if eth_node not in eth_meta:
+                        eth_meta.append(eth_node)
+                    # populating the map for eth-app mapping
 
-                tenant_fabric_key = node.group(1) + ":" + port.group(1)
-                if tenant_fabric_key not in self.tenant_farbic_mapper:
-                    self.tenant_farbic_mapper[tenant_fabric_key] = application_meta
-                else:
-                    self.tenant_farbic_mapper[tenant_fabric_key].extend(application_meta)
+                    tenant_fabric_key = node.group(1) + ":" + port.group(1)
+                    if tenant_fabric_key not in self.tenant_farbic_mapper:
+                        self.tenant_farbic_mapper[tenant_fabric_key] = application_meta
+                    else:
+                        self.tenant_farbic_mapper[tenant_fabric_key].extend(application_meta)
 
-                self.tenant_farbic_mapper[tenant_fabric_key] = list(set(self.tenant_farbic_mapper[tenant_fabric_key]))
+                    self.tenant_farbic_mapper[tenant_fabric_key] = list(set(self.tenant_farbic_mapper[tenant_fabric_key]))
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
+                # the exception will already be logged, just pass it over here
+                pass
 
         tags = tags + endpoint_meta + eth_meta
         if len(eth_meta) > 0:

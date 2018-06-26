@@ -42,7 +42,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Configuration
 
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare NGINX
@@ -213,7 +213,7 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [2]: http://nginx.org/en/docs/http/ngx_http_stub_status_module.html
 [3]: http://nginx.org/en/docs/http/ngx_http_status_module.html
 [4]: https://www.nginx.com/blog/nginx-plus-r13-released/
-[5]: https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example
+[5]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

@@ -4,6 +4,7 @@
 
 from . import metrics as aci_metrics
 from . import helpers
+from . import exceptions
 
 
 class Capacity:
@@ -24,10 +25,26 @@ class Capacity:
 
     def collect(self):
         self.log.info("collecting capacity data")
-        self.get_contexts()
-        self.get_apic_capacity_limits()
-        self.get_apic_capacity_metrics()
-        self.get_eqpt_capacity()
+        try:
+            self.get_contexts()
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            # all should fail independently
+            pass
+        try:
+            self.get_apic_capacity_limits()
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            # all should fail independently
+            pass
+        try:
+            self.get_apic_capacity_metrics()
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            # all should fail independently
+            pass
+        try:
+            self.get_eqpt_capacity()
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            # all should fail independently
+            pass
         self.log.info("finished collecting capacity data")
 
     def get_eqpt_capacity(self):

@@ -13,7 +13,7 @@ The SNMP check is included in the [Datadog Agent][1] package, so you don't need 
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
+Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -114,27 +114,27 @@ Example using the `CISCO-TCP-MIB.my`:
 # /opt/datadog-agent/bin/mibdump.py --mib-source /path/to/mib/files/  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
 
  Source MIB repositories: /path/to/mib/files/, http://mibs.snmplabs.com/asn1/@mib@
- Borrow missing/failed MIBs from: http://mibs.snmplabs.com/pysnmp/notexts/@mib@ 
- Existing/compiled MIB locations: pysnmp.smi.mibs, pysnmp_mibs 
- Compiled MIBs destination directory: /opt/datadog-agent/pysnmp/custom_mibpy/ 
- MIBs excluded from code generation: INET-ADDRESS-MIB, PYSNMP-USM-MIB, RFC-1212, RFC-1215, RFC1065-SMI, RFC1155-SMI, RFC1158-MIB, RFC1213-MIB, SNMP-FRAMEWORK-MIB, SNMP-TARGET-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, SNMPv2-TM, TRANSPORT-ADDRESS-MIB 
- MIBs to compile: CISCO-TCP 
- Destination format: pysnmp 
- Parser grammar cache directory: not used 
- Also compile all relevant MIBs: yes 
- Rebuild MIBs regardless of age: no 
- Dry run mode: no Create/update MIBs: yes 
- Byte-compile Python modules: yes (optimization level no) 
- Ignore compilation errors: no 
- Generate OID->MIB index: no 
- Generate texts in MIBs: no 
- Keep original texts layout: no 
- Try various file names while searching for MIB module: yes 
- Created/updated MIBs: CISCO-SMI, CISCO-TCP-MIB (CISCO-TCP) 
- Pre-compiled MIBs borrowed: 
- Up to date MIBs: INET-ADDRESS-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, TCP-MIB 
- Missing source MIBs: 
- Ignored MIBs: 
+ Borrow missing/failed MIBs from: http://mibs.snmplabs.com/pysnmp/notexts/@mib@
+ Existing/compiled MIB locations: pysnmp.smi.mibs, pysnmp_mibs
+ Compiled MIBs destination directory: /opt/datadog-agent/pysnmp/custom_mibpy/
+ MIBs excluded from code generation: INET-ADDRESS-MIB, PYSNMP-USM-MIB, RFC-1212, RFC-1215, RFC1065-SMI, RFC1155-SMI, RFC1158-MIB, RFC1213-MIB, SNMP-FRAMEWORK-MIB, SNMP-TARGET-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, SNMPv2-TM, TRANSPORT-ADDRESS-MIB
+ MIBs to compile: CISCO-TCP
+ Destination format: pysnmp
+ Parser grammar cache directory: not used
+ Also compile all relevant MIBs: yes
+ Rebuild MIBs regardless of age: no
+ Dry run mode: no Create/update MIBs: yes
+ Byte-compile Python modules: yes (optimization level no)
+ Ignore compilation errors: no
+ Generate OID->MIB index: no
+ Generate texts in MIBs: no
+ Keep original texts layout: no
+ Try various file names while searching for MIB module: yes
+ Created/updated MIBs: CISCO-SMI, CISCO-TCP-MIB (CISCO-TCP)
+ Pre-compiled MIBs borrowed:
+ Up to date MIBs: INET-ADDRESS-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, TCP-MIB
+ Missing source MIBs:
+ Ignored MIBs:
  Failed MIBs:
 
 
@@ -180,7 +180,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: http://docs.datadoghq.com/help/
@@ -188,4 +188,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [7]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [8]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
-[10]: https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example#L3
+[10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3

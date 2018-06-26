@@ -16,9 +16,9 @@ The CouchDB check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your CouchDB performance data.  
+1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your CouchDB performance data.
   See the [sample couch.d/conf.yaml][2] for all available configuration options.
-    
+
       ```yaml
       init_config:
 
@@ -62,7 +62,7 @@ Need help? Contact [Datadog Support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/couch/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/couch/datadog_checks/couch/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv

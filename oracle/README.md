@@ -70,7 +70,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][6] for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][6] for all available configuration options.
 
 Configuration Options:
 
@@ -101,7 +101,6 @@ Need help? Contact [Datadog Support][10].
 ## Further Reading
 
 Learn more about infrastructure monitoring and all our integrations on [our blog][11]
-
 
 [1]: http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
 [2]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example

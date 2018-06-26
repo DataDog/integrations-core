@@ -23,6 +23,8 @@ def get_requirements(fpath):
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-kubelet',
     version=ABOUT["__version__"],
@@ -55,14 +57,11 @@ setup(
     packages=['datadog_checks.kubelet'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     # Testing setup and dependencies
     tests_require=get_requirements(path.join('tests', 'requirements.txt')),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.kubelet': ['conf.yaml.default']},
     include_package_data=True,
 )

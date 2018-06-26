@@ -1,0 +1,42 @@
+# NB: This check requires the python environment on which gunicorn runs to
+# have the `setproctitle` module installed (https://pypi.python.org/pypi/setproctitle/)
+
+init_config:
+
+instances:
+  # The name of the gunicorn process. For the following gunicorn server ...
+  #
+  #    gunicorn --name my_web_app my_web_app_config.ini
+  #
+  #  ... we'd use the name `my_web_app`.
+  #
+  # - proc_name: my_web_app
+  #   tags:
+  #     - optional:tag1
+  
+## Log section (Available for Agent >=6.0)
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file / journald / docker)
+    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+    # - type: file
+    #   path: /var/log/gunicorn/access.log
+    #   service: <MY_SERVICE>
+    #   source: gunicorn
+    #   sourcecategory: http_web_access
+
+    # - type: file
+    #   path: /var/log/gunicorn/error.log
+    #   service: <MY_SERVICE>
+    #   source: gunicorn
+    #   sourcecategory: sourcecode
+    #   log_processing_rules:
+    #     - type: multi_line
+    #       name: log_start_with_date
+    #       pattern: \[\d{4}-\d{2}-\d{2}
+

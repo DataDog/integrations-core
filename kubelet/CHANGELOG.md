@@ -1,6 +1,6 @@
 # CHANGELOG - kubelet
 
-## 1.3.1 / 2018-06-08
+## 1.4.0 / 2018-06-14
 
 * [Changed] Kubelet check: better encapsulate the pod list retrieval. See [#1648](https://github.com/DataDog/integrations-core/pull/1648).
 

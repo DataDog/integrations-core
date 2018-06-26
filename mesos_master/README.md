@@ -88,7 +88,7 @@ Need help? Contact [Datadog Support][103].
 * [Installing Datadog on Mesos with DC/OS][104]
 
 
-[101]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/conf.yaml.example
+[101]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
 [102]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
 [103]: http://docs.datadoghq.com/help/
 [104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/

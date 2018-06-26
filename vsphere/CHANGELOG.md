@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 2.2.0 / 2018-06-20
+
+* [Changed] Bump requests to 2.19.1. See [#1743](https://github.com/DataDog/integrations-core/pull/1743).
+
 ## 2.1.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support for service checks.

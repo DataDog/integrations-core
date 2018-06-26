@@ -7,6 +7,7 @@ import time
 import datetime
 
 from . import helpers
+from . import exceptions
 
 
 class Tenant:
@@ -39,16 +40,25 @@ class Tenant:
         self.log.info("collecting from %s tenants" % len(tenants))
         # check if tenant exist before proceeding.
         for t in tenants:
-            list_apps = self.api.get_apps(t)
-            self.log.info("collecting %s apps from %s" % (len(list_apps), t))
-            for app in list_apps:
-                self.submit_app_data(t, app)
-                app_name = app.get('fvAp', {}).get('attributes', {}).get('name')
-                list_epgs = self.api.get_epgs(t, app_name)
-                self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
-                self.submit_epg_data(t, app_name, list_epgs)
+            try:
+                list_apps = self.api.get_apps(t)
+                self.log.info("collecting %s apps from %s" % (len(list_apps), t))
+                for app in list_apps:
+                    self.submit_app_data(t, app)
+                    app_name = app.get('fvAp', {}).get('attributes', {}).get('name')
+                    try:
+                        list_epgs = self.api.get_epgs(t, app_name)
+                        self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
+                        self.submit_epg_data(t, app_name, list_epgs)
+                    except exceptions.APIConnectionException, exceptions.APIParsingException:
+                        pass
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
+                pass
             self.submit_ten_data(t)
-            self.collect_events(t)
+            try:
+                self.collect_events(t)
+            except exceptions.APIConnectionException, exceptions.APIParsingException:
+                pass
 
     def submit_app_data(self, tenant, app):
         a = app.get('fvAp', {})
@@ -72,9 +82,12 @@ class Tenant:
             self.submit_raw_obj(stats, tags, 'endpoint_group')
 
     def submit_ten_data(self, tenant):
-        stats = self.api.get_tenant_stats(tenant)
-        tags = self.tagger.get_tags(tenant, 'tenant')
-        self.submit_raw_obj(stats, tags, 'tenant')
+        try:
+            stats = self.api.get_tenant_stats(tenant)
+            tags = self.tagger.get_tags(tenant, 'tenant')
+            self.submit_raw_obj(stats, tags, 'tenant')
+        except exceptions.APIConnectionException, exceptions.APIParsingException:
+            pass
 
     def submit_raw_obj(self, raw_stats, tags, obj_type):
         for s in raw_stats:

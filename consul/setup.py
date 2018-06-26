@@ -24,6 +24,8 @@ def get_requirements(fpath):
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-consul',
     version=ABOUT['__version__'],
@@ -55,12 +57,9 @@ setup(
     packages=['datadog_checks.consul'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.consul': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

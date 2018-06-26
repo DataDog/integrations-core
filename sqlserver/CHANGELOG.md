@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.5.0 / 2018-06-20
+
+* [Added] support object_name metric identifiers. See [#1679](https://github.com/DataDog/integrations-core/pull/1679).
+
 ## 1.4.0 / 2018-05-11
 
 * [FEATURE] Add custom tag support for service checks.

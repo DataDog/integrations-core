@@ -11,8 +11,8 @@ The Kong check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
-    See the [sample kong.d/conf.yaml][2] for all available configuration options:  
+1. Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+    See the [sample kong.d/conf.yaml][2] for all available configuration options:
     ```yaml
     init_config:
 
@@ -55,7 +55,7 @@ Need help? Contact [Datadog Support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/kong/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kong/metadata.csv
