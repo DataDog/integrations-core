@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import print_function, unicode_literals
 
 import os
@@ -21,21 +21,13 @@ from .utils.common import chdir
 init(autoreset=True)
 
 
-DEP_PATTERN = re.compile(r'^([^=#]+)(?:==(\S+))?')
+DEP_PATTERN = re.compile(r'([^=]+)(?:==(\S+))?')
 
 
 def ensure_deps_declared(resolved_reqs_file, pinned_reqs_file):
     if os.path.isfile(resolved_reqs_file) and not os.path.isfile(pinned_reqs_file):
-        declacred_lines = []
-
-        with open(resolved_reqs_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                match = DEP_PATTERN.match(line.strip())
-                if match:
-                    declacred_lines.append(match.group(0) + '\n')
-
-        with open(pinned_reqs_file, 'w', encoding='utf-8') as f:
-            f.writelines(declacred_lines)
+        resolved_packages = dict(read_packages(resolved_reqs_file))
+        write_packages(resolved_packages, pinned_reqs_file)
 
 
 def resolve_requirements(pinned_file, resolved_file, upgrade=False):
@@ -64,9 +56,20 @@ def read_packages(reqs_file):
     if os.path.isfile(reqs_file):
         with open(reqs_file, 'r', encoding='utf-8') as f:
             for line in f:
-                match = DEP_PATTERN.match(line.strip())
-                if match:
-                    yield match.groups()
+                line = line.strip()
+                if not line.startswith(('#', '--hash')):
+                    match = DEP_PATTERN.match(line)
+                    if match:
+                        package, version = match.groups()
+                        yield package.lower(), version
+
+
+def write_packages(packages, reqs_file):
+    with open(reqs_file, 'w', encoding='utf-8') as f:
+        f.writelines(
+            '{}=={}\n'.format(package, version)
+            for package, version in sorted(iteritems(packages))
+        )
 
 
 def print_package_changes(pre_packages, post_packages, indent=''):
@@ -119,7 +122,7 @@ def collect_packages(verify=True, checks=None):
                     )
                 )
 
-            versions = packages[package.lower()]
+            versions = packages[package]
             versions[version].append(check_name)
 
             if verify and len(versions) > 1:
@@ -136,8 +139,8 @@ def collect_packages(verify=True, checks=None):
 def dep_freeze(ctx, upgrade=False):
     pinned_packages = collect_packages()
 
-    pinned_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'requirements.in')
-    resolved_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'requirements.txt')
+    pinned_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'agent_requirements.in')
+    resolved_reqs_file = os.path.join(ROOT, 'datadog_checks_base', 'agent_requirements.txt')
 
     pre_resolved_packages = dict(read_packages(resolved_reqs_file))
 
@@ -197,11 +200,10 @@ def dep_check(ctx):
 @task(help={
     'package': 'The package to pin throughout the checks',
     'version': 'The version of the package to pin',
-    'resolve': 'Resolve transient dependencies',
     'upgrade': 'When resolving, attempt to upgrade transient dependencies',
     'quiet': 'Whether or not to hide output',
 })
-def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
+def dep_pin(ctx, package, version, upgrade=False, quiet=False):
     """Pin a dependency for all checks that require it. Setting the version
     to `none` will remove the package. `pip-compile` must be in PATH if
     resolving; disable resolving via `--no-resolve`.
@@ -224,39 +226,26 @@ def dep_pin(ctx, package, version, resolve=True, upgrade=False, quiet=False):
         ensure_deps_declared(resolved_reqs_file, pinned_reqs_file)
 
         if os.path.isfile(pinned_reqs_file):
-            with open(pinned_reqs_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-
-            for i, line in enumerate(lines):
-                try:
-                    pkg = line.split('=')[0].strip()
-                    if pkg.lower() == package:
-                        break
-                except IndexError:
-                    continue
-            # Skip checks that don't require the package.
-            else:
+            pinned_packages = dict(read_packages(pinned_reqs_file))
+            if package not in pinned_packages:
                 continue
-
-            most_changed_file = resolved_reqs_file if resolve else pinned_reqs_file
-            pre_packages = dict(read_packages(most_changed_file))
 
             if not quiet:
                 print('{}Check `{}`:'.format(Style.BRIGHT, check_name))
 
             if version.lower() == 'none':
-                del lines[i]
+                del pinned_packages[package]
             else:
-                lines[i] = '{}=={}\n'.format(package, version)
+                pinned_packages[package] = version
 
-            with open(pinned_reqs_file, 'w', encoding='utf-8') as f:
-                f.writelines(lines)
-
-            if resolve:
-                if not quiet:
-                    print('{}{}    Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
-                resolve_requirements(pinned_reqs_file, resolved_reqs_file, upgrade=upgrade)
+            write_packages(pinned_packages, pinned_reqs_file)
 
             if not quiet:
-                post_packages = dict(read_packages(most_changed_file))
+                print('{}{}    Resolving dependencies...'.format(Fore.MAGENTA, Style.BRIGHT))
+
+            pre_packages = dict(read_packages(resolved_reqs_file))
+            resolve_requirements(pinned_reqs_file, resolved_reqs_file, upgrade=upgrade)
+
+            if not quiet:
+                post_packages = dict(read_packages(resolved_reqs_file))
                 print_package_changes(pre_packages, post_packages, indent='    ')
