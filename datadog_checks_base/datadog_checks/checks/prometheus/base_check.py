@@ -92,10 +92,7 @@ class GenericPrometheusCheck(AgentCheck):
             self.get_scraper(instance)
 
     def check(self, instance):
-        endpoint = instance.get('prometheus_url') or instance.get('prometheus_endpoint')
-        if endpoint is None:
-            raise CheckException("No endpoint was defined in the prometheus check configuration")
-
+        endpoint = instance["prometheus_url"]
         scraper = self.get_scraper(instance)
         if not scraper.metrics_mapper:
             raise CheckException("You have to collect at least one metric from the endpoint: " + endpoint)
