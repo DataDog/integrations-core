@@ -221,7 +221,7 @@ class ProcessCheck(AgentCheck):
                 except subprocess.CalledProcessError as e:
                     self.log.exception("trying to retrieve {} with sudo failed with "
                                        "return code {}".format(method, e.returncode))
-                except:
+                except:  # noqa: E722
                     self.log.exception("trying to retrieve {} with sudo also failed".format(method))
         except psutil.NoSuchProcess:
             self.warning("Process {} disappeared while scanning".format(process.pid))
