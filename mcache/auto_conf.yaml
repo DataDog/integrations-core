@@ -6,3 +6,5 @@ init_config:
 instances:
   - url: "%%host%%"
     port: "11211"
+
+  - socket: "11212"
