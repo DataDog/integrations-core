@@ -11,7 +11,7 @@ The Windows Service check is included in the [Datadog Agent][1] package, so you 
 
 ### Configuration
 
-Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample windows_service.d/conf.yaml][2] for all available configuration options:
+Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample windows_service.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

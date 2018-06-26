@@ -14,7 +14,7 @@ The ASP.NET check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. Edit the `aspdotnet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your ASP.NET performance data.  
+1. Edit the `aspdotnet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ASP.NET performance data.
 
     See the [sample aspdotnet.d/conf.yaml][3] for all available configuration options.
 

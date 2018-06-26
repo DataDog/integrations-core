@@ -15,7 +15,7 @@ The directory check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting Directory performance data.    
+1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting Directory performance data.
   See the [sample directory.d/conf.yaml][2] for all available configuration options.
 
     ```yaml

@@ -42,7 +42,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Configuration
 
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare NGINX

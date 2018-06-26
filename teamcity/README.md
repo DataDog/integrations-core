@@ -16,7 +16,7 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow [Teamcity's documentation][2] to enable Guest Login.
 
-Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
+Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:

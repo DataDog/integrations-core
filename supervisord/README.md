@@ -48,7 +48,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

@@ -14,7 +14,7 @@ The Elasticsearch check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample elastic.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -64,11 +64,11 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  
+
 * [Restart the Agent][3] to begin sending Elasticsearch logs to Datadog.
-  
+
 **Learn more about log collection [in the log documentation][4]**
-  
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `elastic` under the Checks section.

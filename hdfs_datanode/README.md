@@ -27,7 +27,7 @@ Restart the DataNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Edit the `hdfs_datanode.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample hdfs_datanode.d/conf.yaml][102] for all available configuration options:
+Edit the `hdfs_datanode.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample hdfs_datanode.d/conf.yaml][102] for all available configuration options:
 
 ```
 init_config:

@@ -13,7 +13,7 @@ The Kubelet check is included in the [Datadog Agent][3] package, so you don't ne
 
 ## Configuration
 
-Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your server and port, set tags to send along with metrics.
+Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set tags to send along with metrics.
 
 ## Validation
 

@@ -15,7 +15,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]

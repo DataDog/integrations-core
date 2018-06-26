@@ -12,7 +12,7 @@ The Agent's Active Directory check is included in the [Datadog Agent][4] package
 
 ### Configuration
 
-1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Active Directory performance data.  
+1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Active Directory performance data.
 
     See the [sample active_directory.d/conf.yaml][1] for all available configuration options.
 

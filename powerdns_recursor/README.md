@@ -38,7 +38,7 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.  
+1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
 	See the [sample powerdns_recursor.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
