@@ -15,12 +15,21 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
 
 
-UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT = [
+METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
     'nginx.upstream.peers.responses.2xx',
     'nginx.upstream.peers.responses.3xx',
     'nginx.upstream.peers.responses.4xx',
-    'nginx.upstream.peers.responses.5xx'
+    'nginx.upstream.peers.responses.5xx',
+    'nginx.upstream.peers.received',
+    'nginx.upstream.peers.sent',
+    'nginx.server_zone.responses.1xx',
+    'nginx.server_zone.responses.2xx',
+    'nginx.server_zone.responses.3xx',
+    'nginx.server_zone.responses.4xx',
+    'nginx.server_zone.responses.5xx',
+    'nginx.server_zone.received',
+    'nginx.server_zone.sent',
 ]
 
 PLUS_API_ENDPOINTS = {
@@ -156,7 +165,7 @@ class Nginx(AgentCheck):
                     if name is None:
                         continue
 
-                if name in UPSTREAM_RESPONSE_CODES_SEND_AS_COUNT:
+                if name in METRICS_SEND_AS_COUNT:
                     func_count = funcs['count']
                     func_count(name + "_count", value, tags)
                 func = funcs[metric_type]
