@@ -221,7 +221,7 @@ class ProcessCheck(AgentCheck):
                 except subprocess.CalledProcessError as e:
                     self.log.exception("trying to retrieve {} with sudo failed with "
                                        "return code {}".format(method, e.returncode))
-                except:  # noqa: E722
+                except Exception:
                     self.log.exception("trying to retrieve {} with sudo also failed".format(method))
         except psutil.NoSuchProcess:
             self.warning("Process {} disappeared while scanning".format(process.pid))
@@ -372,8 +372,7 @@ class ProcessCheck(AgentCheck):
             self.warning('DEPRECATION NOTICE: Specifying `procfs_path` in process.yaml` is deprecated. '
                          'Please specify it in `datadog.conf` instead')
 
-        if (not isinstance(search_string, list) and
-            pid is None and pid_file is None):   # noqa: E129
+        if not isinstance(search_string, list) and pid is None and pid_file is None:
             raise ValueError('"search_string" or "pid" or "pid_file" parameter is required')
 
         # FIXME 6.x remove me
