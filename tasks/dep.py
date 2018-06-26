@@ -205,8 +205,7 @@ def dep_check(ctx):
 })
 def dep_pin(ctx, package, version, upgrade=False, quiet=False):
     """Pin a dependency for all checks that require it. Setting the version
-    to `none` will remove the package. `pip-compile` must be in PATH if
-    resolving; disable resolving via `--no-resolve`.
+    to `none` will remove the package. `pip-compile` must be in PATH.
 
     Example invocations:
         inv pin cryptography 2.2.2
