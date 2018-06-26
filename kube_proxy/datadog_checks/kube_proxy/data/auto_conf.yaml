@@ -1,7 +1,0 @@
-ad_identifiers:
-  - kube-proxy
-
-init_config:
-
-instances:
-  - prometheus_url: "http://%%host%%:10249/metrics"
