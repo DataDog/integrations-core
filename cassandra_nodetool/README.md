@@ -69,7 +69,7 @@ Need help? Contact [Datadog Support][6].
 
 [1]: https://github.com/DataDog/integrations-core/tree/master/cassandra
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/datadog_checks/cassandra_nodetool/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
 [6]: http://docs.datadoghq.com/help/

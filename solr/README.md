@@ -267,7 +267,7 @@ You may use the `attribute` filter as follow:
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: http://docs.datadoghq.com/integrations/java/
-[3]: https://github.com/DataDog/integrations-core/blob/master/solr/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv

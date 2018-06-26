@@ -33,6 +33,8 @@ with open(path.join(HERE, "datadog_checks", "apache", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-apache',
     version=ABOUT["__version__"],
@@ -65,13 +67,10 @@ setup(
     packages=['datadog_checks.apache'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.apache': ['conf.yaml.example', 'auto_conf.yaml']},
     include_package_data=True,
 )

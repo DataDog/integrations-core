@@ -276,7 +276,8 @@ class Riak(AgentCheck):
 
         self.prev_coord_redirs_total = coord_redirs_total
 
-    def safe_submit_metric(self, name, value, tags=[]):
+    def safe_submit_metric(self, name, value, tags=None):
+        tags = [] if tags is None else tags
         try:
             self.gauge(name, float(value), tags=tags)
             return

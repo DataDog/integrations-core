@@ -70,7 +70,7 @@ Reach out to our team and other Datadog users on [Slack][9].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/squid/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
 [5]: https://docs.datadoghq.com/

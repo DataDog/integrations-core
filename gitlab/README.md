@@ -44,7 +44,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [101]: https://app.datadoghq.com/account/settings#agent
-[102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/conf.yaml.example
+[102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [104]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [105]: http://docs.datadoghq.com/help/

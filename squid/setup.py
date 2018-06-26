@@ -23,6 +23,8 @@ ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "squid", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-squid',
     version=ABOUT["__version__"],
@@ -55,13 +57,10 @@ setup(
     packages=['datadog_checks.squid'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.squid': ['conf.yaml.example']},
     include_package_data=True,
 )

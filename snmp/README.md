@@ -180,7 +180,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: http://docs.datadoghq.com/help/
@@ -188,4 +188,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [7]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [8]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
-[10]: https://github.com/DataDog/integrations-core/blob/master/snmp/conf.yaml.example#L3
+[10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3

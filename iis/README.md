@@ -158,7 +158,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
-[3]: https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [4]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

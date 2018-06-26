@@ -2,10 +2,23 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import print_function, unicode_literals
-import os
+
 import json
+import os
+from contextlib import contextmanager
 
 from ..constants import ROOT
+
+
+@contextmanager
+def chdir(d, cwd=None):
+    origin = cwd or os.getcwd()
+    os.chdir(d)
+
+    try:
+        yield
+    finally:
+        os.chdir(origin)
 
 
 def get_version_file(check_name):

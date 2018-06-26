@@ -215,7 +215,7 @@ class HAProxy(AgentCheck):
                       collect_status_metrics=False, collect_status_metrics_by_host=False,
                       tag_service_check_by_host=False, services_incl_filter=None,
                       services_excl_filter=None, collate_status_tags_per_host=False,
-                      count_status_by_service=True, custom_tags=[], tags_regex=None, active_tag=[]):
+                      count_status_by_service=True, custom_tags=None, tags_regex=None, active_tag=None):
         ''' Main data-processing loop. For each piece of useful data, we'll
         either save a metric, save an event or both. '''
 
@@ -234,6 +234,8 @@ class HAProxy(AgentCheck):
 
         # Sanitize CSV, handle line breaks
         data = self._sanitize_lines(data)
+        custom_tags = [] if custom_tags is None else custom_tags
+        active_tag = [] if active_tag is None else active_tag
 
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
@@ -457,8 +459,11 @@ class HAProxy(AgentCheck):
         return formatted_status
 
     def _process_backend_hosts_metric(self, hosts_statuses, services_incl_filter=None,
-                                      services_excl_filter=None, custom_tags=[], active_tag=[]):
+                                      services_excl_filter=None, custom_tags=None, active_tag=None):
         agg_statuses = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        custom_tags = [] if custom_tags is None else custom_tags
+        active_tag = [] if active_tag is None else active_tag
+
         for host_status, count in hosts_statuses.iteritems():
             try:
                 service, hostname, status = host_status
@@ -492,9 +497,10 @@ class HAProxy(AgentCheck):
     def _process_status_metric(self, hosts_statuses, collect_status_metrics_by_host,
                                services_incl_filter=None, services_excl_filter=None,
                                collate_status_tags_per_host=False, count_status_by_service=True,
-                               custom_tags=[], active_tag=[]):
+                               custom_tags=None, active_tag=None):
         agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
-
+        custom_tags = [] if custom_tags is None else custom_tags
+        active_tag = [] if active_tag is None else active_tag
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
         # keys, which depends on the `collate_status_tags_per_host` option
         reported_statuses = Services.ALL_STATUSES
@@ -553,7 +559,7 @@ class HAProxy(AgentCheck):
                 self.gauge("haproxy.count_per_status", count, tags=service_tags + ('status:%s' % status, ))
 
     def _process_metrics(self, data, url, services_incl_filter=None,
-                         services_excl_filter=None, custom_tags=[], active_tag=[]):
+                         services_excl_filter=None, custom_tags=None, active_tag=None):
         """
         Data is a dictionary related to one host
         (one line) extracted from the csv.
@@ -563,6 +569,8 @@ class HAProxy(AgentCheck):
         hostname = data['svname']
         service_name = data['pxname']
         back_or_front = data['back_or_front']
+        custom_tags = [] if custom_tags is None else custom_tags
+        active_tag = [] if active_tag is None else active_tag
         tags = [
             "type:%s" % back_or_front,
             "instance_url:%s" % url,
@@ -591,7 +599,7 @@ class HAProxy(AgentCheck):
                     pass
 
     def _process_event(self, data, url, services_incl_filter=None,
-                       services_excl_filter=None, custom_tags=[]):
+                       services_excl_filter=None, custom_tags=None):
         '''
         Main event processing loop. An event will be created for a service
         status change.
@@ -601,6 +609,7 @@ class HAProxy(AgentCheck):
         service_name = data['pxname']
         key = "%s:%s" % (hostname, service_name)
         status = self.host_status[url][key]
+        custom_tags = [] if custom_tags is None else custom_tags
 
         if self._is_service_excl_filtered(service_name, services_incl_filter,
                                           services_excl_filter):
@@ -629,8 +638,9 @@ class HAProxy(AgentCheck):
             self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front,
-                      custom_tags=[]):
+                      custom_tags=None):
         HAProxy_agent = self.hostname.decode('utf-8')
+        custom_tags = [] if custom_tags is None else custom_tags
         if status == 'down':
             alert_type = "error"
             title = "%s reported %s:%s %s" % (HAProxy_agent, service_name, hostname, status.upper())
@@ -657,10 +667,11 @@ class HAProxy(AgentCheck):
         }
 
     def _process_service_check(self, data, url, tag_by_host=False,
-                               services_incl_filter=None, services_excl_filter=None, custom_tags=[]):
+                               services_incl_filter=None, services_excl_filter=None, custom_tags=None):
         ''' Report a service check, tagged by the service and the backend.
             Statuses are defined in `STATUS_TO_SERVICE_CHECK` mapping.
         '''
+        custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']
         haproxy_hostname = self.hostname.decode('utf-8')

@@ -80,7 +80,7 @@ Need help? Contact [Datadog Support][107].
 
 [101]: https://app.datadoghq.com/account/settings#agent
 [102]: https://docs.datadoghq.com/integrations/java/
-[103]: https://github.com/DataDog/integrations-core/blob/master/cassandra/conf.yaml.example
+[103]: https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/conf.yaml.example
 [104]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [106]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv

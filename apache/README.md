@@ -103,7 +103,7 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/logs
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

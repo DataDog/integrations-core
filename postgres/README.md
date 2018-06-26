@@ -207,7 +207,7 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://github.com/DataDog/integrations-core/blob/master/postgres/conf.yaml.example
+[14]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [16]: https://docs.datadoghq.com/logs
 [17]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
