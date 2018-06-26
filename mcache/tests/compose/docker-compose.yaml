@@ -8,7 +8,7 @@ services:
       PASSWORD: testpass
     ports:
       - "11211:11211"
-    command: memcached -S -vv
+    command: memcached -S
 
   memcached_socket:
     image: datadog/docker-library:memcached_SASL
@@ -17,4 +17,4 @@ services:
       PASSWORD: testpass
     volumes:
     - ${MCACHE_SOCKET_DIR}:/tmp
-    command: memcached -S -s ${SOCKET} -a 755 -vv
+    command: memcached -S -s ${SOCKET} -a 0755 -vv
