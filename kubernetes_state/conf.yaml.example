@@ -19,7 +19,11 @@ instances:
     #    label_to_match: deployment
     #    labels_to_get:
     #      - label_addonmanager_kubernetes_io_mode
-    
+    # By default the hostname for metrics containing the node label will be
+    # overriden by the value of the label, this can be deactivated (all metrics
+    # will be attached to the host running KSM)
+    # hostname_override: true
+
     # You can also specify here custom tags to be added to all metrics reported by this integration
     #  tags:
     #    - optional_tag1
