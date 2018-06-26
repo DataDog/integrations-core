@@ -41,7 +41,7 @@ def get_container_ip(container_id_or_name):
         '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name
     ]
 
-    return subprocess.check_output(args).strip('\r\n')
+    return subprocess.check_output(args).strip()
 
 
 @pytest.fixture(scope="session")
