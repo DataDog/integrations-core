@@ -4,16 +4,13 @@
 
 import subprocess
 import os
+import stat
 import time
 import pytest
-import getpass
-
 import bmemcached
 from bmemcached.exceptions import MemcachedException
 
-
 from datadog_checks.mcache import Memcache
-from datadog_checks.utils.platform import Platform
 
 import common
 
@@ -150,28 +147,14 @@ def memcached_socket():
     env['SOCKET'] = common.SOCKET
     env['MCACHE_SOCKET_DIR'] = common.UNIXSOCKET_DIR
 
-    if Platform.is_linux() and not os.path.exists(common.UNIXSOCKET_DIR):
+    if not os.path.exists(common.UNIXSOCKET_DIR):
         # make the tmp directory on linux
         os.makedirs(common.UNIXSOCKET_DIR)
 
     docker_compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
 
-    try:
-        if Platform.is_linux():
-            # on linux this needs access to the socket
-            # it won't work without access
-            chown_args = []
-            user = getpass.getuser()
-            if user != 'root':
-                chown_args += ['sudo']
-            chown_args += [
-                "chown", user, common.UNIXSOCKET_PATH
-            ]
-            subprocess.check_call(chown_args, env=env)
-    except subprocess.CalledProcessError:
-        # it's not always bad if this fails
-        pass
+    os.chmod(common.UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     attempts = 0
     while True:
@@ -191,12 +174,11 @@ def memcached_socket():
     yield
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
-    if Platform.is_linux():
-        # make the tmp directory on linux
-        try:
-            os.removedirs(common.UNIXSOCKET_DIR)
-        except OSError:
-            pass
+
+    try:
+        os.removedirs(common.UNIXSOCKET_DIR)
+    except OSError:
+        pass
 
 
 @pytest.fixture
@@ -228,7 +210,7 @@ def instance():
 @pytest.fixture
 def instance_socket():
     return {
-        'socket': common.UNIXSOCKET_PATH,
+        'socket': common.SOCKET,
         'tags': ["foo:bar"],
         'username': common.USERNAME,
         'password': common.PASSWORD,
