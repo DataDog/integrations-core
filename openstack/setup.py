@@ -25,6 +25,8 @@ def get_requirements(fpath):
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-openstack',
     version=ABOUT['__version__'],
@@ -58,9 +60,7 @@ setup(
 
     # Run-time dependencies
 
-    install_requires=get_requirements('requirements.in') + [
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
     tests_require=get_requirements('requirements-dev.txt'),
 
     # Extra files to ship with the wheel package

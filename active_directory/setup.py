@@ -24,6 +24,8 @@ def get_requirements(fpath):
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-active_directory',
     version=ABOUT["__version__"],
@@ -56,9 +58,7 @@ setup(
     packages=['datadog_checks.active_directory'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog_checks_base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
     # Testing setup and dependencies
     tests_require=get_requirements('requirements-dev.txt'),
