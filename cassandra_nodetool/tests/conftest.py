@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import subprocess
+import stat
 import os
 import logging
 import pytest
@@ -14,27 +15,20 @@ log = logging.getLogger(__file__)
 
 
 def wait_on_docker_logs(container_name, max_wait, sentences):
-    count = 0
     args = [
         'docker',
         'logs',
         container_name
     ]
-    out = subprocess.check_output(args)
     log.info("Waiting for {} to come up".format(container_name))
-    if sentences is not None:
-        while count < max_wait and not any(s in out for s in sentences):
-            time.sleep(1)
-            out = subprocess.check_output(args)
-            count += 1
-
+    for _ in range(max_wait):
+        out = subprocess.check_output(args)
         if any(s in out for s in sentences):
-            log.info(" {} is up!".format(container_name))
+            log.info('{} is up!'.format(container_name))
             return True
-        else:
-            log.info(out)
-            return False
+        time.sleep(1)
 
+    log.info(out)
     return False
 
 
@@ -47,7 +41,7 @@ def get_container_ip(container_id_or_name):
         '-f', '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', container_id_or_name
     ]
 
-    return subprocess.check_output(args).rstrip('\r\n')
+    return subprocess.check_output(args).strip('\r\n')
 
 
 @pytest.fixture(scope="session")
@@ -59,31 +53,31 @@ def cassandra_cluster():
     env['CONTAINER_PORT'] = common.PORT
 
     # We need to restrict permission on the password file
-    subprocess.check_call([
-        "chmod",
-        "400",
-        os.path.join(common.HERE, 'compose', 'jmxremote.password')
-    ])
+    os.chmod(os.path.join(common.HERE, 'compose', 'jmxremote.password'), stat.S_IRUSR)
 
     docker_compose_args = [
         "docker-compose",
         "-f", os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     ]
-    subprocess.check_call(docker_compose_args + ["down"])
-
     subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME])
 
     # wait for the cluster to be up before yielding
-    if not wait_on_docker_logs(common.CASSANDRA_CONTAINER_NAME, 20, ['Listening for thrift clients',
-                                                                     "Created default superuser role 'cassandra'"]):
+    if not wait_on_docker_logs(
+            common.CASSANDRA_CONTAINER_NAME,
+            20,
+            ['Listening for thrift clients', "Created default superuser role 'cassandra'"]
+    ):
         raise Exception("Cassandra cluster dd-test-cassandra boot timed out!")
 
     cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
     env['CASSANDRA_SEEDS'] = cassandra_seed
     subprocess.check_call(docker_compose_args + ["up", "-d", common.CASSANDRA_CONTAINER_NAME_2])
 
-    if not wait_on_docker_logs(common.CASSANDRA_CONTAINER_NAME_2, 50, ['Listening for thrift clients',
-                                                                       'Not starting RPC server as requested']):
+    if not wait_on_docker_logs(
+            common.CASSANDRA_CONTAINER_NAME_2,
+            50,
+            ['Listening for thrift clients', 'Not starting RPC server as requested']
+    ):
         raise Exception("Cassandra cluster {} boot timed out!".format(common.CASSANDRA_CONTAINER_NAME_2))
 
     subprocess.check_call([
