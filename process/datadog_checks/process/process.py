@@ -283,7 +283,7 @@ class ProcessCheck(AgentCheck):
                 # first time it's sampled on a process,
                 # so save the value only on non-new processes
                 st['cpu'].append(cpu_percent)
-                if cpu_count > 0:
+                if cpu_count > 0 and cpu_percent is None:
                     st['cpu_norm'].append(cpu_percent/cpu_count)
                 else:
                     self.log.debug('could not calculate the normalized '
