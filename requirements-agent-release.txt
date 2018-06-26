@@ -36,8 +36,13 @@ kafka_consumer==1.4.0; sys_platform != 'win32'
 kong==1.2.0
 kube_dns==1.3.0
 kube_proxy==1.1.0
+<<<<<<< HEAD
 kubelet==1.3.1; sys_platform == 'linux2'
 kubernetes_state==2.5.0; sys_platform != 'win32'
+=======
+kubelet==1.4.0; sys_platform == 'linux2'
+kubernetes_state==2.7.0; sys_platform != 'win32'
+>>>>>>> 6d7e62d3... [ci skip] Bumped kubernetes_state version to 2.7.0 (#1803)
 kyototycoon==1.3.0
 lighttpd==1.2.0
 linkerd==1.1.0
