@@ -14,7 +14,7 @@ The Btrfs check is included in the [Datadog Agent][4] package, so you don't need
 
 ### Configuration
 
-1. Configure the Agent according to your needs, edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. 
+1. Configure the Agent according to your needs, edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample btrfs.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]

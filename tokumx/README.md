@@ -50,7 +50,7 @@ For more details about creating and managing users in MongoDB, refer to [the Mon
 
 #### Connect the Agent
 
-1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory.  
+1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample tokumx.d/conf.yaml][3] for all available configuration options:
 
     ```yaml

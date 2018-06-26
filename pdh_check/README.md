@@ -13,7 +13,7 @@ The PDH check is included in the [Datadog Agent][1] package, so you don't need t
 
 ### Configuration
 
-Edit the `pdh_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to collect Windows performance data. See the [sample pdh_check.d/conf.yaml][2] for all available configuration options.
+Edit the `pdh_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect Windows performance data. See the [sample pdh_check.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 

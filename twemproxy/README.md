@@ -11,7 +11,7 @@ The Agent's Twemproxy check is included in the [Datadog Agent][1] package, so yo
 
 ### Configuration
 
-1. Edit the `twemproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample twemproxy.d/conf.yaml][2] for all available configuration options:
+1. Edit the `twemproxy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample twemproxy.d/conf.yaml][2] for all available configuration options:
 
     ```
     init_config:

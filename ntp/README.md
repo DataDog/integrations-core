@@ -21,7 +21,7 @@ The NTP check is included in the [Datadog Agent][1] package, so you don't need t
 
 ### Configuration
 
-The Agent enables the NTP check by default, but if you want to configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample ntp.d/conf.yaml][2] for all available configuration options:
+The Agent enables the NTP check by default, but if you want to configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample ntp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

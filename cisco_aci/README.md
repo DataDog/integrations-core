@@ -15,8 +15,8 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.  
-    See the [sample cisco_aci.d/conf.yaml][2] for all available configuration options:  
+1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+    See the [sample cisco_aci.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
       init_config:

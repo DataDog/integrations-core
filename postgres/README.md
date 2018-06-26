@@ -16,7 +16,7 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
-Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options. 
+Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
 
 #### Prepare Postgres
 
@@ -137,10 +137,10 @@ Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL
 
 ## Further Reading
 ### Blog posts
-* To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.  
-* [Key metrics for PostgreSQL monitoring][21]  
-* [Collecting metrics with PostgreSQL monitoring tools][22]  
-* [How to collect and monitor PostgreSQL data with Datadog][23]  
+* To get a better idea of how (or why) to have 100x faster PostgreSQL performance by changing 1 line with Datadog, check out our [series of blog posts][20] about it.
+* [Key metrics for PostgreSQL monitoring][21]
+* [Collecting metrics with PostgreSQL monitoring tools][22]
+* [How to collect and monitor PostgreSQL data with Datadog][23]
 
 ### Knowledge Base
 #### Custom metrics

@@ -11,7 +11,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package, so yo
 
 ### Configuration
 
-Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options:
+Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

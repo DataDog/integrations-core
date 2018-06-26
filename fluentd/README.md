@@ -14,7 +14,7 @@ The Fluentd check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 #### Prepare Fluentd
@@ -44,7 +44,7 @@ In your fluentd configuration file, add a `monitor_agent` source:
           #  - plg2
     ```
 
-    See the [sample fluentd.d/conf.yaml][2] for all available configuration options.  
+    See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3] to begin sending Fluentd metrics to Datadog.
 

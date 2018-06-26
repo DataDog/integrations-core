@@ -16,7 +16,7 @@ The Gitlab check is included in the [Datadog Agent][101] package, so you don't n
 
 ### Configuration
 
-Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to the Gitlab's Prometheus metrics endpoint.
+Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to the Gitlab's Prometheus metrics endpoint.
 See the [sample gitlab.d/conf.yaml][102] for all available configuration options.
 
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.

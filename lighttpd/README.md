@@ -13,7 +13,7 @@ In addition, install `mod_status` on your Lighttpd servers.
 
 ### Configuration
 
-1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.
+1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
 	See the [sample lighttpd.d/conf.yaml][2] for all available configuration options:
 
     ```yaml

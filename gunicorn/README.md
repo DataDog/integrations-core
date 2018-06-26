@@ -21,13 +21,13 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 
 ### Configuration
 
-Edit the `gunicorn.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your GUNICORN [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `gunicorn.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GUNICORN [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample gunicorn.yaml][3] for all available configuration options.
-  
-#### Metric Collection  
+
+#### Metric Collection
 
 * Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering your [GUNICORN metrics](#metrics):
-  
+
     ```yaml
     init_config:
 
@@ -77,7 +77,7 @@ Since version 19.1, Gunicorn [provides an option][5] to send its metrics to a da
           name: log_start_with_date
           pattern: \[\d{4}-\d{2}-\d{2}
   ```
-  
+
   Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample gunicorn.yaml][3] for all available configuration options.
 

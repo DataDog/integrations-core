@@ -11,7 +11,7 @@ The NFSstat check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][3] for all available configuration options.
+Edit the `nfsstat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your nfsiostat binary script, or use the one included with the binary installer. See the [sample nfsstat.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
 

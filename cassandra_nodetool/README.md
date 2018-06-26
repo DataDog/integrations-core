@@ -12,7 +12,7 @@ The Cassandra Nodetool check is included in the [Datadog Agent][2] package, so y
 
 ### Configuration
 
-Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory.  
+Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory.
 See the [sample cassandra_nodetool.d/conf.yaml][3] for all available configuration options:
 
 ```yaml

@@ -11,7 +11,7 @@ The PgBouncer check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
+Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:

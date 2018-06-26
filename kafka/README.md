@@ -20,7 +20,7 @@ The check collects metrics via JMX, so you'll need a JVM on each kafka node so t
 
 ### Configuration
 
-Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's directory.
+Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's configuration directory.
 
 #### Metric Collection
 
@@ -78,7 +78,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample kafka.d/conf.yaml][18] for all available configuration options.
 
-* [Restart the Agent][19]. 
+* [Restart the Agent][19].
 
 **Learn more about log collection [in the log documentation][21]**
 

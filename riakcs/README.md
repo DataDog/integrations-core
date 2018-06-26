@@ -14,7 +14,7 @@ The RiakCS check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-1. Edit the `riakcs.yamld/conf.` file, in the `conf.d/` folder at the root of your Agent's directory.  
+1. Edit the `riakcs.yamld/conf.` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample riakcs.d/conf.yaml][2] for all available configuration options:
 
     ```yaml

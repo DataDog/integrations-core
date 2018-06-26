@@ -12,7 +12,7 @@ The Redis check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample redis.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
