@@ -148,10 +148,10 @@ def memcached_socket():
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
     env['UNIXSOCKET_PATH'] = UNIXSOCKET_PATH
 
+    os.chmod(UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
-
-    os.chmod(UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     attempts = 0
     while True:

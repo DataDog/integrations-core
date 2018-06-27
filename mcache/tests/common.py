@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
+import tempfile
 
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -17,5 +18,4 @@ USERNAME = 'testuser'
 PASSWORD = 'testpass'
 
 DOCKER_SOCKET_PATH = '/tmp/memcached.sock'
-TMP_DIR = os.path.join(ROOT, "tmp")
-UNIXSOCKET_PATH = os.path.join(os.path.join(TMP_DIR, "mcache"), 'memcached.sock')
+UNIXSOCKET_PATH = os.path.realpath(tempfile.mkdtemp())
