@@ -29,8 +29,9 @@ init_config:
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
     cluster_stats: false # set true ONLY if you're not running the check on each cluster node
-    pshard_stats: true
-    pending_task_stats: true
+    pshard_stats: true # the agent sends primary shard metrics
+    index_stats: true # the agent sends index level metrics
+    pending_task_stats: true # the agent sends cluster-wide pending task metrics
 ```
 
 **Note**:
@@ -74,6 +75,13 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
 [Run the Agent's `status` subcommand][5] and look for `elastic` under the Checks section.
 
 ## Data Collected
+
+By default, not all of the following metrics are sent by the Agent. To send all metrics, configure flags in `elastic.yaml` as shown above.
+
+* `pshard_states` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
+* `index_stats` sends **elasticsearch.index.\*** metrics
+* `pending_task_stats` sends **elasticsearch.pending_\*** metrics
+
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
