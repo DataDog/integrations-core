@@ -13,24 +13,7 @@ import simplejson as json
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.headers import headers
-
-
-METRICS_SEND_AS_COUNT = [
-    'nginx.upstream.peers.responses.1xx',
-    'nginx.upstream.peers.responses.2xx',
-    'nginx.upstream.peers.responses.3xx',
-    'nginx.upstream.peers.responses.4xx',
-    'nginx.upstream.peers.responses.5xx',
-    'nginx.upstream.peers.received',
-    'nginx.upstream.peers.sent',
-    'nginx.server_zone.responses.1xx',
-    'nginx.server_zone.responses.2xx',
-    'nginx.server_zone.responses.3xx',
-    'nginx.server_zone.responses.4xx',
-    'nginx.server_zone.responses.5xx',
-    'nginx.server_zone.received',
-    'nginx.server_zone.sent',
-]
+from datadog_checks.nginx.metrics import VTS_METRIC_MAP, METRICS_SEND_AS_COUNT
 
 PLUS_API_ENDPOINTS = {
     "nginx": [],
@@ -57,37 +40,6 @@ TAGGED_KEYS = {
     'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot'
-}
-
-# Map metrics from vhost_traffic_status to metrics from NGINX Plus
-VTS_METRIC_MAP = {
-    'nginx.loadMsec': 'nginx.load_timestamp',
-    'nginx.nowMsec': 'nginx.timestamp',
-    'nginx.connections.accepted': 'nginx.connections.accepted',
-    'nginx.connections.active': 'nginx.connections.active',
-    'nginx.connections.reading': 'nginx.net.reading',
-    'nginx.connections.writing': 'nginx.net.writing',
-    'nginx.connections.waiting': 'nginx.net.waiting',
-    'nginx.connections.requests': 'nginx.requests.total',
-    'nginx.server_zone.requestCounter': 'nginx.server_zone.requests',
-    'nginx.server_zone.responses.1xx': 'nginx.server_zone.responses.1xx',
-    'nginx.server_zone.responses.2xx': 'nginx.server_zone.responses.2xx',
-    'nginx.server_zone.responses.3xx': 'nginx.server_zone.responses.3xx',
-    'nginx.server_zone.responses.4xx': 'nginx.server_zone.responses.4xx',
-    'nginx.server_zone.responses.5xx': 'nginx.server_zone.responses.5xx',
-    'nginx.server_zone.inBytes': 'nginx.server_zone.received',
-    'nginx.server_zone.outBytes': 'nginx.server_zone.sent',
-    'nginx.upstream.requestCounter': 'nginx.upstream.peers.requests',
-    'nginx.upstream.inBytes': 'nginx.upstream.peers.received',
-    'nginx.upstream.outBytes': 'nginx.upstream.peers.sent',
-    'nginx.upstream.responses.1xx': 'nginx.upstream.peers.responses.1xx',
-    'nginx.upstream.responses.2xx': 'nginx.upstream.peers.responses.2xx',
-    'nginx.upstream.responses.3xx': 'nginx.upstream.peers.responses.3xx',
-    'nginx.upstream.responses.4xx': 'nginx.upstream.peers.responses.4xx',
-    'nginx.upstream.responses.5xx': 'nginx.upstream.peers.responses.5xx',
-    'nginx.upstream.weight': 'nginx.upstream.peers.weight',
-    'nginx.upstream.backup': 'nginx.upstream.peers.backup',
-    'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
 }
 
 
