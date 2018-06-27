@@ -11,7 +11,7 @@
     "mac_os",
     "windows"
   ],
-  "metric_prefix": "squid",
+  "metric_prefix": "squid.",
   "metric_to_check": "squid.cpu_time",
   "public_title": "Datadog-Squid Integration",
   "categories": ["web", "caching"],
