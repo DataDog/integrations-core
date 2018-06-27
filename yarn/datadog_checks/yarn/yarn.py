@@ -94,7 +94,7 @@ from datadog_checks.config import _is_affirmative
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
 DEFAULT_TIMEOUT = 5
-DEFAULT_CUSTER_NAME = 'default_cluster'
+DEFAULT_CLUSTER_NAME = 'default_cluster'
 DEFAULT_COLLECT_APP_METRICS = True
 MAX_DETAILED_QUEUES = 100
 
@@ -250,9 +250,9 @@ class YarnCheck(AgentCheck):
         if cluster_name is None:
             self.warning(
                 "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(self.DEFAULT_CUSTER_NAME)
+                "defaulting to '{}'".format(DEFAULT_CLUSTER_NAME)
             )
-            cluster_name = self.DEFAULT_CUSTER_NAME
+            cluster_name = DEFAULT_CLUSTER_NAME
 
         tags.append('cluster_name:{}'.format(cluster_name))
 
