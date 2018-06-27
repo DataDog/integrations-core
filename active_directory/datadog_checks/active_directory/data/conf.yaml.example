@@ -18,3 +18,18 @@ instances:
   #   
   #   additional_metrics:
   #     - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+
+## Log Section (Available for Agent >=6.0)
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file / windows_event)
+    #   port / path /channel: (mandatory) Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+    
+    # - type: file
+    #   path: /path/to/active_directory/file.log
+    #   source: ruby
+    #   service: <MY_SERVICE>
