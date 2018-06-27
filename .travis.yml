@@ -97,6 +97,8 @@ jobs:
     - stage: test
       env: CHECK=hdfs_namenode
     - stage: test
+      env: CHECK=http_check
+    - stage: test
       env: CHECK=iis
     - stage: test
       env: CHECK=istio
