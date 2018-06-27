@@ -43,14 +43,21 @@ nginx.requests.total,gauge,,request,,The total number of client requests.,0,ngin
 nginx.server_zone.discarded,gauge,,request,,The total number of requests completed without sending a response.,0,nginx,server zone discarded
 nginx.server_zone.processing,gauge,,request,,The number of client requests that are currently being processed.,0,nginx,server zone processing
 nginx.server_zone.received,gauge,,byte,,The total amount of data received from clients.,0,nginx,server zone rcvd
+nginx.server_zone.received_count,count,,byte,,The total amount of data received from clients (shown as count).,0,nginx,server zone rcvd
 nginx.server_zone.requests,gauge,,request,,The total number of client requests received from clients.,0,nginx,server zone req
 nginx.server_zone.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,server zone resp 1xx
+nginx.server_zone.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,server zone resp 1xx
 nginx.server_zone.responses.2xx,gauge,,response,,The number of responses with 2xx status code.,0,nginx,server zone resp 2xx
+nginx.server_zone.responses.2xx_count,count,,response,,The number of responses with 2xx status code (shown as count).,0,nginx,server zone resp 2xx
 nginx.server_zone.responses.3xx,gauge,,response,,The number of responses with 3xx status code.,0,nginx,server zone resp 3xx
+nginx.server_zone.responses.3xx_count,count,,response,,The number of responses with 3xx status code (shown as count).,0,nginx,server zone resp 3xx
 nginx.server_zone.responses.4xx,gauge,,response,,The number of responses with 4xx status code.,0,nginx,server zone resp 4xx
+nginx.server_zone.responses.4xx_count,count,,response,,The number of responses with 4xx status code (shown as count).,0,nginx,server zone resp 4xx
 nginx.server_zone.responses.5xx,gauge,,response,,The number of responses with 5xx status code.,0,nginx,server zone resp 5xx
+nginx.server_zone.responses.5xx_count,count,,response,,The number of responses with 5xx status code (shown as count).,0,nginx,server zone resp 5xx
 nginx.server_zone.responses.total,gauge,,response,,The total number of responses sent to clients.,0,nginx,server zone resp total
 nginx.server_zone.sent,gauge,,byte,,The total amount of data sent to clients.,0,nginx,server zone sent
+nginx.server_zone.sent_count,count,,byte,,The total amount of data sent to clients (shown as count).,0,nginx,server zone sent
 nginx.slab.pages.free,gauge,,page,,The current number of free memory pages,0,nginx,slab pages free
 nginx.slab.pages.used,gauge,,page,,The current number of used memory pages,0,nginx,slab pages used
 nginx.slab.slots.fails,gauge,,request,,The number of unsuccessful attempts to allocate memory of specified size,-1,nginx,slab slots fails
@@ -99,6 +106,7 @@ nginx.upstream.peers.health_checks.last_passed,gauge,,,,Boolean indicating if th
 nginx.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state “unhealthy”).,-1,nginx,upstr peers health chk unhealthy
 nginx.upstream.peers.id,gauge,,,,The ID of the server.,0,nginx,upstr peers id
 nginx.upstream.peers.received,gauge,,byte,,The total amount of data received from this server.,0,nginx,upstr peers rec
+nginx.upstream.peers.received_count,count,,byte,,The total amount of data received from this server (shown as count).,0,nginx,upstr peers rec
 nginx.upstream.peers.requests,gauge,,request,,The total number of client requests forwarded to this server.,0,nginx,upstr peers req
 nginx.upstream.peers.responses.1xx,gauge,,response,,The number of responses with 1xx status code.,0,nginx,upstr peers resp 1xx
 nginx.upstream.peers.responses.1xx_count,count,,response,,The number of responses with 1xx status code (shown as count).,0,nginx,upstr peers resp 1xx count
@@ -113,6 +121,7 @@ nginx.upstream.peers.responses.5xx_count,count,,response,,The number of response
 nginx.upstream.peers.responses.total,gauge,,response,,The total number of responses obtained from this server.,0,nginx,upstr peers resp
 nginx.upstream.peers.selected,gauge,,millisecond,,The time (since Epoch) when the server was last selected to process a request (1.7.5).,0,nginx,upstr peers sel
 nginx.upstream.peers.sent,gauge,,byte,,The total amount of data sent to this server.,0,nginx,upstr peers sent
+nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to this server (shown as count).,0,nginx,upstr peers sent
 nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state “unavail”) due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
 nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version
