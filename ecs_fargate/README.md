@@ -14,7 +14,7 @@ The ECS Fargate check is packaged with the Agent, [run the Agent][1] with your c
 
 ### Configuration
 
-1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your ECS Fargate performance data.
+1. Edit the `ecs_fargate.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ECS Fargate performance data.
     See the [sample ecs_fargate.d/conf.yaml][6] for all available configuration options.
 
 2. [Restart the Agent][5]
@@ -51,4 +51,4 @@ Need help? Contact [Datadog Support][3].
 [3]: http://docs.datadoghq.com/help/
 [4]: https://www.datadoghq.com/blog/monitor-aws-fargate/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.example

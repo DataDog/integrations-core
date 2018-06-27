@@ -120,9 +120,11 @@ AGENT_V5_ONLY = [
     'ntp',
 ]
 
-# If a file changes in a PR with any of these file extensiosn, a test will run against the check containing the file
+# If a file changes in a PR with any of these file extensions,
+# a test will run against the check containing the file
 TESTABLE_FILE_EXTENSIONS = (
     '.py',
     '.ini',
+    '.in',
     '.txt',
 )

@@ -22,6 +22,8 @@ def get_requirements(fpath):
         return f.readlines()
 
 
+CHECKS_BASE_REQ = 'datadog_checks_base'
+
 setup(
     name='datadog-ceph',
     version=ABOUT["__version__"],
@@ -54,15 +56,12 @@ setup(
     packages=['datadog_checks.ceph'],
 
     # Run-time dependencies
-    install_requires=get_requirements("requirements.in") + [
-        "datadog_checks_base"
-    ],
+    install_requires=[CHECKS_BASE_REQ],
 
 
     # Testing setup and dependencies
     tests_require=get_requirements("requirements-dev.txt"),
 
     # Extra files to ship with the wheel package
-    package_data={b'datadog_checks.ceph': ['conf.yaml.example']},
     include_package_data=True,
 )

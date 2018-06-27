@@ -1,4 +1,4 @@
-![EKS Dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/a30e284214e465844d18b7ac06c7c2b1dab8b43a/amazon_eks/images/eks_screenboard.png)
+![EKS Dashboard][1]
 
 ## Overview
 
@@ -12,26 +12,38 @@ Because Datadog already integrates with Kubernetes and AWS, it is ready-made to 
 
 Monitoring EKS requires that you set up the Datadog integrations for:
 
-* [Kubernetes](https://docs.datadoghq.com/integrations/kubernetes/)
-* [AWS](https://docs.datadoghq.com/integrations/amazon_web_services/)
-* [AWS EC2](https://docs.datadoghq.com/integrations/amazon_ec2/)
+* [Kubernetes][2]
+* [AWS][3]
+* [AWS EC2][4]
 
-along with integrations for any other AWS services you're running with EKS (e.g., [ELB](https://docs.datadoghq.com/integrations/amazon_elb/))
+along with integrations for any other AWS services you're running with EKS (e.g., [ELB][5])
 
 ### Log Collection
 
 **Available for Agent >6.0**
 
 The setup is exactly the same as for Kubernetes. 
-To start collecting logs from all your containers, use your Datadog Agent [environment variables](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup).
+To start collecting logs from all your containers, use your Datadog Agent [environment variables][6].
 
-Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes](https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation). 
+Take also advantage of DaemonSets to [automatically deploy the Datadog Agent on all your nodes][7]. 
 
-Follow the [container log collection steps](https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation) to learn more about those environment variables and discover more advanced setup options.
+Follow the [container log collection steps][8] to learn more about those environment variables and discover more advanced setup options.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support](http://docs.datadoghq.com/help/).
+Need help? Contact [Datadog Support][9].
 
 ## Further Reading
 
-* [Monitor Amazon EKS with Datadog](https://www.datadoghq.com/blog/announcing-eks/)
+* [Monitor Amazon EKS with Datadog][10]
+
+
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/a30e284214e465844d18b7ac06c7c2b1dab8b43a/amazon_eks/images/eks_screenboard.png
+[2]: https://docs.datadoghq.com/integrations/kubernetes/
+[3]: https://docs.datadoghq.com/integrations/amazon_web_services/
+[4]: https://docs.datadoghq.com/integrations/amazon_ec2/
+[5]: https://docs.datadoghq.com/integrations/amazon_elb/
+[6]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
+[7]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
+[8]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
+[9]: http://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/announcing-eks/

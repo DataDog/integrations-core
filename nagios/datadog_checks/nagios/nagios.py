@@ -182,7 +182,7 @@ class Nagios(AgentCheck):
 
 class NagiosTailer(object):
 
-    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=[]):
+    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=None):
         '''
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
@@ -202,7 +202,7 @@ class NagiosTailer(object):
         self._gauge = gauge_func
         self._line_parsed = 0
         self._freq = freq
-        self._tags = tags
+        self._tags = [] if tags is None else tags
 
         if file_template is not None:
             self.compile_file_template(file_template)

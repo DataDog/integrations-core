@@ -15,7 +15,7 @@ The Elasticsearch check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample elastic.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -30,8 +30,9 @@ init_config:
 instances:
   - url: http://localhost:9200 # or wherever your cluster API is listening
     cluster_stats: false # set true ONLY if you're not running the check on each cluster node
-    pshard_stats: true
-    pending_task_stats: true
+    pshard_stats: true # the agent sends primary shard metrics
+    index_stats: true # the agent sends index level metrics
+    pending_task_stats: true # the agent sends cluster-wide pending task metrics
 ```
 
 **Note**:
@@ -65,16 +66,23 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  
+
 * [Restart the Agent][3] to begin sending Elasticsearch logs to Datadog.
-  
+
 **Learn more about log collection [in the log documentation][4]**
-  
+
 ### Validation
 
 [Run the Agent's `status` subcommand][5] and look for `elastic` under the Checks section.
 
 ## Data Collected
+
+By default, not all of the following metrics are sent by the Agent. To send all metrics, configure flags in `elastic.yaml` as shown above.
+
+* `pshard_states` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
+* `index_stats` sends **elasticsearch.index.\*** metrics
+* `pending_task_stats` sends **elasticsearch.pending_\*** metrics
+
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
@@ -103,7 +111,7 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/Datadog/integrations-core/blob/master/elastic/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/logs
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

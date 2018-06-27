@@ -11,7 +11,7 @@ The Envoy check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
-1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Envoy performance data.
+1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Envoy performance data.
   See the [sample envoy.d/conf.yaml][4] for all available configuration options.
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
@@ -123,7 +123,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://github.com/DataDog/integrations-core/blob/master/envoy/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
 [5]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [6]: https://istio.io
 [7]: https://istio.io/docs/reference/config/

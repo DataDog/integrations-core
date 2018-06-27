@@ -20,7 +20,7 @@ The check collects metrics via JMX, so you'll need a JVM on each kafka node so t
 
 ### Configuration
 
-Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's directory.
+Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's configuration directory.
 
 #### Metric Collection
 
@@ -78,7 +78,7 @@ Make sure you clone and edit the [integration pipeline][20] if you have a differ
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample kafka.d/conf.yaml][18] for all available configuration options.
 
-* [Restart the Agent][19]. 
+* [Restart the Agent][19].
 
 **Learn more about log collection [in the log documentation][21]**
 
@@ -117,7 +117,7 @@ Returns `OK` otherwise.
 [15]: https://app.datadoghq.com/account/settings#agent
 [16]: https://github.com/DataDog/jmxfetch
 [17]: https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent
-[18]: https://github.com/DataDog/integrations-core/blob/master/kafka/conf.yaml.example
+[18]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
 [19]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [20]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [21]: https://docs.datadoghq.com/logs

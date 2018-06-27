@@ -11,7 +11,7 @@ Collect IIS metrics aggregated across all of your sites, or on a per-site basis.
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-1. [Install the Agent][1] on your IIS servers. 
+1. [Install the Agent][1] on your IIS servers.
 
 2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:
@@ -39,7 +39,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][2] at the root of your Agent's directory,
+Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][2] at the root of your Agent's configuration directory,
 
 #### Prepare IIS
 
@@ -128,7 +128,7 @@ Here's an example of configuration that would check the current machine and a re
 
   Change the `path` and `service` parameter values and configure them for your environment.
   See the [sample iis.d/conf.yaml][2] for all available configuration options.
-  
+
   * [Restart the Agent](https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent).
 
 
@@ -159,7 +159,7 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
-[3]: https://github.com/DataDog/integrations-core/blob/master/iis/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [4]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
