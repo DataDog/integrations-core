@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from setuptools import setup
-from codecs import open  # To use a consistent encoding
+from codecs import open
 from os import path
 
 HERE = path.dirname(path.abspath(__file__))
@@ -17,13 +18,13 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-# Parse requirements
 def get_requirements(fpath):
     with open(path.join(HERE, fpath), encoding='utf-8') as f:
         return f.readlines()
 
 
 CHECKS_BASE_REQ = 'datadog_checks_base'
+
 
 setup(
     name='datadog-cassandra_nodetool',

@@ -1,15 +1,13 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import re
 import shlex
-
-# project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
 from collections import defaultdict
+
+from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.checks import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'
 DEFAULT_HOST = 'localhost'
@@ -28,6 +26,7 @@ TO_BYTES = {
     'GiB': 1e9,
     'TiB': 1e12,
 }
+
 
 class CassandraNodetoolCheck(AgentCheck):
 
