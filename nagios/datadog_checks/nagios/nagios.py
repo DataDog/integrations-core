@@ -73,7 +73,8 @@ class Nagios(AgentCheck):
         re.compile('^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
     ]
 
-    def agent6_gauge_wrapper(self, *args, **kwargs):
+    # Wrapper for gauge functions that do not send timestamps
+    def timestamp_excluded_gauge(self, *args, **kwargs):
         if 'timestamp' in kwargs:
             del kwargs['timestamp']
         self.gauge(*args, **kwargs)
@@ -83,11 +84,11 @@ class Nagios(AgentCheck):
         self.nagios_tails = {}
         check_freq = init_config.get("check_freq", 15)
 
-        # for Agent 6 compatibility
+        # Compatibility wrapper for Agents that do not send timestamps with gauge metrics
         if 'timestamp' in getargspec(self.gauge).args:
             gauge_func = self.gauge
         else:
-            gauge_func = self.agent6_gauge_wrapper
+            gauge_func = self.timestamp_excluded_gauge
 
         if instances is not None:
             for instance in instances:
