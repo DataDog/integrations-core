@@ -10,7 +10,8 @@
   "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
   "public_title": "Datadog-Active Directory Integration",
   "categories": [
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/active_directory/",
   "is_public": true,
