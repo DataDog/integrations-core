@@ -64,10 +64,20 @@ cryptography==2.2.2 \
     --hash=sha256:f57008eaff597c69cf692c3518f6d4800f0309253bb138b526a37fe9ef0c7471 \
     --hash=sha256:f6c821ac253c19f2ad4c8691633ae1d1a17f120d5b01ea1d256d7b602bc59887 \
     # via requests-ntlm
+enum34==1.1.6 \
+    --hash=sha256:2d81cbbe0e73112bdfe6ef8576f2238f2ba27dd0d55752a776c41d38b7da2850 \
+    --hash=sha256:644837f692e5f550741432dd3f223bbb9852018674981b1664e5dc339387588a \
+    --hash=sha256:6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79 \
+    --hash=sha256:8ad8c4783bf61ded74527bffb48ed9b54166685e4230386a9ed9b1279e2df5b1 \
+    # via cryptography
 idna==2.7 \
     --hash=sha256:156a6814fb5ac1fc6850fb002e0852d56c0c8d2531923a51032d1b70760e186e \
     --hash=sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16 \
     # via cryptography, requests
+ipaddress==1.0.22 \
+    --hash=sha256:64b28eec5e78e7510698f6d4da08800a5c575caa4a286c93d651c5d3ff7b6794 \
+    --hash=sha256:b146c751ea45cad6188dd6cf2d9b757f6f4f8d6ffb96a023e6f2e26eea02a72c \
+    # via cryptography
 ntlm-auth==1.2.0 \
     --hash=sha256:7bc02a3fbdfee7275d3dc20fce8028ed8eb6d32364637f28be9e9ae9160c6d5c \
     --hash=sha256:9b13eaf88f16a831637d75236a93d60c0049536715aafbf8190ba58a590b023e \
