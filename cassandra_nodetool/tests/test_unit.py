@@ -11,8 +11,7 @@ from datadog_checks.cassandra_nodetool import CassandraNodetoolCheck
 def mock_output(*args):
     with open(path.join(common.HERE, 'fixtures', 'nodetool_output')) as f:
         contents = f.read()
-        contents = contents.decode('string-escape')
-        return contents.decode("utf-8"), "", 0
+        return contents, "", 0
 
 
 @patch('datadog_checks.cassandra_nodetool.cassandra_nodetool.get_subprocess_output', side_effect=mock_output)
