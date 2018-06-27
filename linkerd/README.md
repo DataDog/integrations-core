@@ -38,7 +38,7 @@ Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you shou
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
 
-Simply follow the examples present in the [default configuration][8].
+Simply follow the examples present in the [default configuration][3].
 
 ### Service Checks
 
@@ -46,18 +46,17 @@ Simply follow the examples present in the [default configuration][8].
 Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, otherwise returns UP.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][9].
+Need help? Contact [Datadog Support][8].
 
 ## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][10]
+Learn more about infrastructure monitoring and all our integrations on [our blog][9]
 
 [1]: https://linkerd.io/
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/linkerd/metadata.csv
 [6]: https://twitter.github.io/finagle/guide/Metrics.html
 [7]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
-[8]: https://github.com/DataDog/integrations-core/blob/master/linkerd/conf.yaml.example
-[9]: http://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/
+[8]: http://docs.datadoghq.com/help/
+[9]: https://www.datadoghq.com/blog/

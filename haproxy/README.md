@@ -116,7 +116,7 @@ Need help? Contact [Datadog Support][14].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
-[6]: https://github.com/DataDog/integrations-core/blob/master/haproxy/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [7]: https://www.haproxy.org/download/1.7/doc/management.txt
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [11]: https://docs.datadoghq.com/logs
