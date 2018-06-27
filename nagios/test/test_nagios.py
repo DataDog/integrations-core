@@ -8,8 +8,15 @@ import time
 
 from datadog_checks.nagios import Nagios
 from .common import (
-    CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC,
-    NAGIOS_TEST_SVC_TEMPLATE
+    CHECK_NAME,
+    CUSTOM_TAGS,
+    NAGIOS_TEST_LOG,
+    NAGIOS_TEST_HOST,
+    NAGIOS_TEST_ALT_HOST_TEMPLATE,
+    NAGIOS_TEST_HOST_TEMPLATE,
+    NAGIOS_TEST_SVC,
+    NAGIOS_TEST_SVC_TEMPLATE,
+    NAGIOS_TEST_ALT_SVC_TEMPLATE,
 )
 
 
@@ -84,111 +91,84 @@ class TestEventLogTailer:
         """
         Make sure the tailer continues to parse nagios as the file grows
         """
-        x = open(NAGIOS_TEST_LOG).read()
-        ITERATIONS = 10
-        f = tempfile.NamedTemporaryFile(mode="a+b")
-        f.write(x)
-        f.flush()
+        test_data = open(NAGIOS_TEST_LOG).read()
+        ITERATIONS = 1
+        log_file = tempfile.NamedTemporaryFile(mode="a+b")
 
         # Get the config
-        config, nagios_cfg = get_config("log_file={}\n".format(f.name), events=True)
+        config, nagios_cfg = get_config("log_file={}\n".format(log_file.name), events=True)
 
         # Set up the check
         nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
 
-        # Run the check once
-        nagios.check(config['instances'][0])
-
         for i in range(ITERATIONS):
-            f.write(x)
-            f.flush()
+            log_file.write(test_data)
+            log_file.flush()
             nagios.check(config['instances'][0])
-        f.close()
+
+        log_file.close()
         assert len(aggregator.events) == ITERATIONS * 503
 
 
 class TestPerfDataTailer:
     POINT_TIME = (int(time.time()) / 15) * 15
 
+    DB_LOG_SERVICEPERFDATA = [
+        "time=0.06",
+        "db0=33;180;190;0;200",
+        "db1=1;150;190;0;200",
+        "db2=0;120;290;1;200",
+        "db3=0;110;195;5;100"
+    ]
+
     DB_LOG_DATA = [
-        (
-            "DATATYPE::SERVICEPERFDATA",
-            "TIMET::%s" % POINT_TIME,
-            "HOSTNAME::myhost0",
-            "SERVICEDESC::Pgsql Backends",
-            "SERVICEPERFDATA::"
-            + " ".join(
-                [
-                    "time=0.06",
-                    "db0=33;180;190;0;200",
-                    "db1=1;150;190;0;200",
-                    "db2=0;120;290;1;200",
-                    "db3=0;110;195;5;100",
-                ]
-            ),
-            "SERVICECHECKCOMMAND::check_nrpe_1arg!check_postgres_backends",
-            "HOSTSTATE::UP",
-            "HOSTSTATETYPE::HARD",
-            "SERVICESTATE::OK",
-            "SERVICESTATETYPE::HARD",
-        )
+        "DATATYPE::SERVICEPERFDATA",
+        "TIMET::{}".format(POINT_TIME),
+        "HOSTNAME::myhost0",
+        "SERVICEDESC::Pgsql Backends",
+        "SERVICEPERFDATA::" + " ".join(DB_LOG_SERVICEPERFDATA),
+        "SERVICECHECKCOMMAND::check_nrpe_1arg!check_postgres_backends",
+        "HOSTSTATE::UP",
+        "HOSTSTATETYPE::HARD",
+        "SERVICESTATE::OK",
+        "SERVICESTATETYPE::HARD",
+    ]
+
+    DISK_LOG_SERVICEPERFDATA = [
+        "/=5477MB;6450;7256;0;8063",
+        "/dev=0MB;2970;3341;0;3713",
+        "/dev/shm=0MB;3080;3465;0;3851",
+        "/var/run=0MB;3080;3465;0;3851",
+        "/var/lock=0MB;3080;3465;0;3851",
+        "/lib/init/rw=0MB;3080;3465;0;3851",
+        "/mnt=290MB;338636;380966;0;423296",
+        "/data=39812MB;40940;46057;0;51175",
     ]
 
     DISK_LOG_DATA = [
-        (
-            "DATATYPE::SERVICEPERFDATA",
-            "TIMET::%s" % POINT_TIME,
-            "HOSTNAME::myhost2",
-            "SERVICEDESC::Disk Space",
-            "SERVICEPERFDATA::"
-            + " ".join(
-                [
-                    "/=5477MB;6450;7256;0;8063",
-                    "/dev=0MB;2970;3341;0;3713",
-                    "/dev/shm=0MB;3080;3465;0;3851",
-                    "/var/run=0MB;3080;3465;0;3851",
-                    "/var/lock=0MB;3080;3465;0;3851",
-                    "/lib/init/rw=0MB;3080;3465;0;3851",
-                    "/mnt=290MB;338636;380966;0;423296",
-                    "/data=39812MB;40940;46057;0;51175",
-                ]
-            ),
-            "SERVICECHECKCOMMAND::check_all_disks!20%!10%",
-            "HOSTSTATE::UP",
-            "HOSTSTATETYPE::HARD",
-            "SERVICESTATE::OK",
-            "SERVICESTATETYPE::HARD",
-        )
+        "DATATYPE::SERVICEPERFDATA",
+        "TIMET::{}".format(POINT_TIME),
+        "HOSTNAME::myhost2",
+        "SERVICEDESC::Disk Space",
+        "SERVICEPERFDATA::" + " ".join(DISK_LOG_SERVICEPERFDATA),
+        "SERVICECHECKCOMMAND::check_all_disks!20%!10%",
+        "HOSTSTATE::UP",
+        "HOSTSTATETYPE::HARD",
+        "SERVICESTATE::OK",
+        "SERVICESTATETYPE::HARD",
     ]
+
+    HOST_LOG_SERVICEPERFDATA = ["rta=0.978000ms;5000.000000;5000.000000;0.000000", "pl=0%;100;100;0"]
 
     HOST_LOG_DATA = [
-        (
-            "DATATYPE::HOSTPERFDATA",
-            "TIMET::%s" % POINT_TIME,
-            "HOSTNAME::myhost1",
-            "HOSTPERFDATA::" + " ".join(["rta=0.978000ms;5000.000000;5000.000000;0.000000", "pl=0%;100;100;0"]),
-            "HOSTCHECKCOMMAND::check-host-alive",
-            "HOSTSTATE::UP",
-            "HOSTSTATETYPE::HARD",
-        )
+        "DATATYPE::HOSTPERFDATA",
+        "TIMET::{}".format(POINT_TIME),
+        "HOSTNAME::myhost1",
+        "HOSTPERFDATA::" + " ".join(HOST_LOG_SERVICEPERFDATA),
+        "HOSTCHECKCOMMAND::check-host-alive",
+        "HOSTSTATE::UP",
+        "HOSTSTATETYPE::HARD",
     ]
-
-    def _write_log(self, log_data):
-        """
-        Write log data to log file
-        """
-        for data in log_data:
-            self.log_file.write(data + "\n")
-        self.log_file.flush()
-
-    def compare_metric(self, actual, expected):
-        """
-        Return true when `actual` metic == `expected` metric
-        """
-        assert actual[0] == expected[0], "Metrics name actual:{} vs expected:{}".format(actual[0], expected[0])
-        assert actual[1] == expected[1], "Timestamp actual:{} vs expected:{}".format(actual[1], expected[1])
-        assert actual[2] == expected[2], "Value actual:{} vs expected:{}".format(actual[2], expected[2])
-        assert actual[3] == expected[3], "Context actual:{} vs expected:{}".format(actual[3], expected[3])
 
     def test_service_perfdata(self, aggregator):
         """
@@ -199,10 +179,7 @@ class TestPerfDataTailer:
         # Get the config
         config, _ = get_config(
             "service_perfdata_file={}\n"
-            "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\t"
-            "SERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\t"
-            "SERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\t"
-            "SERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$".format(self.log_file.name),
+            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
             service_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -214,14 +191,11 @@ class TestPerfDataTailer:
         nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.DB_LOG_DATA])
+        self._write_log('\t'.join(self.DB_LOG_DATA))
         nagios.check(config['instances'][0])
 
         # Test metrics
-        # 'time=0.06 db0=33;180;190;0;200 db1=1;150;190;0;200 db2=0;120;290;1;200 db3=0;110;195;5;100'
-        service_perf_data = self.DB_LOG_DATA[0][4][17:]
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.DB_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             metric_name = "nagios.pgsql_backends." + name
 
@@ -245,10 +219,7 @@ class TestPerfDataTailer:
         # Get the config
         config, _ = get_config(
             "service_perfdata_file={}\n"
-            "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\t"
-            "SERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\t"
-            "SERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\t"
-            "SERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$".format(self.log_file.name),
+            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
             service_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -260,13 +231,11 @@ class TestPerfDataTailer:
         nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.DISK_LOG_DATA])
+        self._write_log('\t'.join(self.DISK_LOG_DATA))
         nagios.check(config['instances'][0])
 
         # Test metrics
-        service_perf_data = self.DISK_LOG_DATA[0][4][17:]
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.DISK_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             values = info.split(";")
             value = int(values[0][:-2])
@@ -290,9 +259,7 @@ class TestPerfDataTailer:
         # Get the config
         config, _ = get_config(
             "host_perfdata_file={}\n"
-            "host_perfdata_file_template=DATATYPE::HOSTPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\t"
-            "HOSTPERFDATA::$HOSTPERFDATA$\tHOSTCHECKCOMMAND::$HOSTCHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\t"
-            "HOSTSTATETYPE::$HOSTSTATETYPE$".format(self.log_file.name),
+            "host_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_HOST_TEMPLATE),
             host_perf=True,
             tags=CUSTOM_TAGS,
         )
@@ -304,13 +271,11 @@ class TestPerfDataTailer:
         nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.HOST_LOG_DATA])
+        self._write_log('\t'.join(self.HOST_LOG_DATA))
         nagios.check(config['instances'][0])
 
         # Test metric
-        service_perf_data = self.HOST_LOG_DATA[0][3][14:]
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.HOST_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             metric_name = "nagios.host." + name
 
@@ -339,7 +304,7 @@ class TestPerfDataTailer:
         # Get the config
         config, _ = get_config(
             "service_perfdata_file={}\n"
-            "service_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_SVC_TEMPLATE),
+            "service_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_SVC_TEMPLATE),
             service_perf=True,
         )
 
@@ -404,7 +369,7 @@ class TestPerfDataTailer:
         # Get the config
         config, _ = get_config(
             "host_perfdata_file={}\n"
-            "host_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_HOST_TEMPLATE),
+            "host_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_HOST_TEMPLATE),
             host_perf=True,
         )
 
@@ -444,6 +409,13 @@ class TestPerfDataTailer:
             aggregator.assert_metric(metric['name'], metric['value'], tags=metric['tags'], hostname=metric['hostname'])
 
         aggregator.assert_all_metrics_covered()
+
+    def _write_log(self, log_data):
+        """
+        Write log data to log file
+        """
+        self.log_file.write(log_data + "\n")
+        self.log_file.flush()
 
 
 def get_config(nagios_conf, events=False, service_perf=False, host_perf=False, tags=None):
