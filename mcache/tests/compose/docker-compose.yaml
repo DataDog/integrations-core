@@ -16,5 +16,5 @@ services:
       USERNAME: testuser
       PASSWORD: testpass
     volumes:
-    - ${MCACHE_SOCKET_DIR}:/tmp
-    command: memcached -S -s ${SOCKET} -a 0755 -vv
+    - ${UNIXSOCKET_PATH}:${DOCKER_SOCKET_PATH}
+    command: memcached -S -s ${DOCKER_SOCKET_PATH} -a 0755 -vv

@@ -10,9 +10,10 @@ import pytest
 import bmemcached
 from bmemcached.exceptions import MemcachedException
 
+from datadog_checks.utils.platform import Platform
 from datadog_checks.mcache import Memcache
 
-import common
+from common import (HERE, PORT, SERVICE_CHECK, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_PATH, UNIXSOCKET_PATH)
 
 GAUGES = [
     "memcache.total_items",
@@ -112,8 +113,8 @@ def memcached():
     Start a standalone Memcached server.
     """
     env = os.environ
-    env['PWD'] = common.HERE
-    docker_compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    env['PWD'] = HERE
+    docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached"], env=env)
     attempts = 0
@@ -121,7 +122,7 @@ def memcached():
         if attempts > 10:
             raise Exception("Memcached boot timed out!")
 
-        mc = bmemcached.Client(["{}:{}".format(common.HOST, common.PORT)], common.USERNAME, common.PASSWORD)
+        mc = bmemcached.Client(["{}:{}".format(HOST, PORT)], USERNAME, PASSWORD)
         try:
             mc.set("foo", "bar")
         except MemcachedException:
@@ -143,25 +144,21 @@ def memcached_socket():
     Start a standalone Memcached server.
     """
     env = os.environ
-    env['PWD'] = common.HERE
-    env['SOCKET'] = common.SOCKET
-    env['MCACHE_SOCKET_DIR'] = common.UNIXSOCKET_DIR
+    env['PWD'] = HERE
+    env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
+    env['UNIXSOCKET_PATH'] = UNIXSOCKET_PATH
 
-    if not os.path.exists(common.UNIXSOCKET_DIR):
-        # make the tmp directory on linux
-        os.makedirs(common.UNIXSOCKET_DIR)
-
-    docker_compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
+    docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
 
-    os.chmod(common.UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    os.chmod(UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     attempts = 0
     while True:
         if attempts > 10:
             raise Exception("Memcached boot timed out!")
 
-        mc = bmemcached.Client(common.UNIXSOCKET_PATH, common.USERNAME, common.PASSWORD)
+        mc = bmemcached.Client(UNIXSOCKET_PATH, USERNAME, PASSWORD)
         try:
             mc.set("foo", "bar")
         except MemcachedException:
@@ -175,20 +172,15 @@ def memcached_socket():
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
 
-    try:
-        os.removedirs(common.UNIXSOCKET_DIR)
-    except OSError:
-        pass
-
 
 @pytest.fixture
 def client():
-    return bmemcached.Client(["{}:{}".format(common.HOST, common.PORT)], common.USERNAME, common.PASSWORD)
+    return bmemcached.Client(["{}:{}".format(HOST, PORT)], USERNAME, PASSWORD)
 
 
 @pytest.fixture
 def client_socket():
-    return bmemcached.Client(common.UNIXSOCKET_PATH, common.USERNAME, common.PASSWORD)
+    return bmemcached.Client(UNIXSOCKET_PATH, USERNAME, PASSWORD)
 
 
 @pytest.fixture
@@ -199,21 +191,21 @@ def check():
 @pytest.fixture
 def instance():
     return {
-        'url': "{}".format(common.HOST),
-        'port': common.PORT,
+        'url': "{}".format(HOST),
+        'port': PORT,
         'tags': ["foo:bar"],
-        'username': common.USERNAME,
-        'password': common.PASSWORD,
+        'username': USERNAME,
+        'password': PASSWORD,
     }
 
 
 @pytest.fixture
 def instance_socket():
     return {
-        'socket': common.SOCKET,
+        'socket': DOCKER_SOCKET_PATH,
         'tags': ["foo:bar"],
-        'username': common.USERNAME,
-        'password': common.PASSWORD,
+        'username': USERNAME,
+        'password': PASSWORD,
     }
 
 
@@ -251,14 +243,14 @@ def test_service_ko(check, aggregator):
     """
     If the service is down, the service check should be sent accordingly
     """
-    tags = ["host:{}".format(common.HOST), "port:{}".format(common.PORT), "foo:bar"]
+    tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
     with pytest.raises(Exception) as e:
-        check.check({'url': "{}".format(common.HOST), 'port': common.PORT, 'tags': ["foo:bar"]})
+        check.check({'url': "{}".format(HOST), 'port': PORT, 'tags': ["foo:bar"]})
         # FIXME: the check should raise a more precise exception and there should be
         # no need to assert the content of the message!
         assert "Unable to retrieve stats from memcache instance" in e.message
-    assert len(aggregator.service_checks(common.SERVICE_CHECK)) == 1
-    sc = aggregator.service_checks(common.SERVICE_CHECK)[0]
+    assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
+    sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.CRITICAL
     assert sc.tags == tags
 
@@ -267,22 +259,23 @@ def test_service_ok(check, instance, aggregator, memcached):
     """
     Service is up
     """
-    tags = ["host:{}".format(common.HOST), "port:{}".format(common.PORT), "foo:bar"]
+    tags = ["host:{}".format(HOST), "port:{}".format(PORT), "foo:bar"]
     check.check(instance)
-    assert len(aggregator.service_checks(common.SERVICE_CHECK)) == 1
-    sc = aggregator.service_checks(common.SERVICE_CHECK)[0]
+    assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
+    sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
     assert sc.tags == tags
 
 
+@pytest.mark.skipif(Platform.is_win32(), reason='Windows sockets are not file handles')
 def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_socket):
     """
     Service is up
     """
-    tags = ["socket:{}".format(common.UNIXSOCKET_PATH), "foo:bar"]
+    tags = ["socket:{}".format(UNIXSOCKET_PATH), "foo:bar"]
     check.check(instance_socket)
-    assert len(aggregator.service_checks(common.SERVICE_CHECK)) == 1
-    sc = aggregator.service_checks(common.SERVICE_CHECK)[0]
+    assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
+    sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
     assert sc.tags == tags
 
@@ -306,7 +299,7 @@ def test_metrics(client, check, instance, aggregator, memcached):
 
     print(aggregator._metrics)
 
-    expected_tags = ["url:{}:{}".format(common.HOST, common.PORT), 'foo:bar']
+    expected_tags = ["url:{}:{}".format(HOST, PORT), 'foo:bar']
     for m in GAUGES + RATES + SLABS_AGGREGATES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
@@ -323,7 +316,7 @@ def test_connections_leaks(check, instance):
     problem anymore.
     """
     # Start state, connections should be 0
-    assert count_connections(common.PORT) == 0
+    assert count_connections(PORT) == 0
     check.check(instance)
     # Verify that the count is still 0
-    assert count_connections(common.PORT) == 0
+    assert count_connections(PORT) == 0
