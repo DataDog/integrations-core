@@ -129,6 +129,8 @@ jobs:
     - stage: test
       env: CHECK=mysql
     - stage: test
+      env: CHECK=nagios
+    - stage: test
       env: CHECK=network
     - stage: test
       env: CHECK=nfsstat
