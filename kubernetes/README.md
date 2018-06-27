@@ -176,9 +176,9 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example#L118
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
-[10]: http://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
+[10]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [11]: https://github.com/DataDog/dd-agent/pull/3051
 [12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era/
 [13]: https://docs.datadoghq.com/agent/faq/how-to-get-more-out-of-your-kubernetes-integration
 [14]: https://docs.datadoghq.com/agent/faq/how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container
-[15]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/kubernetes/k8sdashboard.png
+[15]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/kubernetes/k8sdashboard.png

@@ -193,9 +193,9 @@ We've also written several other in-depth blog posts to help you get the most ou
 [14]: https://docs.docker.com/engine/reference/commandline/cli/#environment-variables
 [15]: https://docs.datadoghq.com/agent/#cli
 [16]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
-[17]: http://docs.datadoghq.com/help/
-[18]: http://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
-[19]: http://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
+[17]: https://docs.datadoghq.com/help/
+[18]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
+[19]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
 [20]: https://www.datadoghq.com/blog/the-docker-monitoring-problem/
 [21]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics/
 [22]: https://www.datadoghq.com/blog/how-to-collect-docker-metrics/

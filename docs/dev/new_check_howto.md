@@ -319,7 +319,7 @@ Our check sends a Service Check though, so we need to add it to the `service_che
 [1]: https://github.com/audreyr/cookiecutter
 [2]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
 [3]: https://docs.pytest.org/en/latest/
-[4]: http://tox.readthedocs.io/en/latest/
+[4]: https://tox.readthedocs.io/en/latest/
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [IntegrationsExtrasRepository]: https://github.com/DataDog/integrations-extras

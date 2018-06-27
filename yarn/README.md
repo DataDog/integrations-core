@@ -66,9 +66,9 @@ Need help? Contact [Datadog Support][6].
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/hadoop-architecture-overview/
 [8]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
-[11]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/yarn/yarndashboard.png
+[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/yarn/yarndashboard.png

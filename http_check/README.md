@@ -119,5 +119,5 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [8]: https://app.datadoghq.com/monitors#/create
-[9]: http://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/

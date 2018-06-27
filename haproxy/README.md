@@ -122,7 +122,7 @@ Need help? Contact [Datadog Support][14].
 [11]: https://docs.datadoghq.com/logs
 [12]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
-[14]: http://docs.datadoghq.com/help/
+[14]: https://docs.datadoghq.com/help/
 [15]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics/
 [16]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics/
 [17]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog/

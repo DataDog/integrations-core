@@ -73,7 +73,7 @@ and [knowledge base][12]. You can also visit our
 [8]: https://docs.datadoghq.com/agent/
 [9]: https://docs.pytest.org/en/latest/
 [10]: https://packaging.python.org/tutorials/distributing-packages/
-[11]: http://docs.datadoghq.com
+[11]: https://docs.datadoghq.com
 [12]: https://help.datadoghq.com/hc/en-us
-[13]: http://docs.datadoghq.com/help/
+[13]: https://docs.datadoghq.com/help/
 [14]: https://github.com/DataDog/integrations-core/blob/master/tasks/constants.py#L15

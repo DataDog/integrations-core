@@ -90,6 +90,6 @@ Need help? Contact [Datadog Support][103].
 
 [101]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
 [102]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
-[103]: http://docs.datadoghq.com/help/
+[103]: https://docs.datadoghq.com/help/
 [104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
 [105]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery

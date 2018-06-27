@@ -211,16 +211,16 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: http://nginx.org/en/docs/http/ngx_http_stub_status_module.html
-[3]: http://nginx.org/en/docs/http/ngx_http_status_module.html
+[2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
+[3]: https://nginx.org/en/docs/http/ngx_http_status_module.html
 [4]: https://www.nginx.com/blog/nginx-plus-r13-released/
 [5]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[10]: http://nginx.org/en/docs/http/ngx_http_status_module.html#data
+[10]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
 [11]: https://www.datadoghq.com/blog/how-to-monitor-nginx/
 [12]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [13]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
-[14]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/nginx/nginx.jpg
+[14]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/nginx/nginx.jpg

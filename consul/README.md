@@ -164,6 +164,6 @@ Need help? Contact [Datadog Support][9].
 [6]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
 [7]: https://www.consul.io/docs/agent/telemetry.html
 [8]: https://www.consul.io/docs/internals/coordinates.html
-[9]: http://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [11]: https://engineering.datadoghq.com/consul-at-datadog/

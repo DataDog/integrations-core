@@ -105,6 +105,6 @@ Need help? Contact [Datadog Support][6].
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-postfix-queues/
-[8]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postfix/postfixgraph.png
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postfix/postfixgraph.png

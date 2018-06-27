@@ -71,6 +71,6 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv
 [6]: https://app.datadoghq.com/monitors#/create
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/
-[9]: http://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png
+[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png

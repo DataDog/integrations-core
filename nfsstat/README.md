@@ -38,11 +38,11 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 * [Built a network monitor on an http check][8]
 
 
-[1]: http://man7.org/linux/man-pages/man8/nfsiostat.8.html
+[1]: https://man7.org/linux/man-pages/man8/nfsiostat.8.html
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/datadog_checks/nfsstat/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network

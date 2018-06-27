@@ -65,6 +65,6 @@ To get a better idea of how (or why) to integrate etcd with Datadog, check out o
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-etcd-performance/
 [8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/etcd/etcd_graph.png

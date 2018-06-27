@@ -132,4 +132,4 @@ Need help? Contact [Datadog Support][4].
 [1]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
 [2]: https://hub.docker.com/r/datadog/agent/tags/
 [3]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
-[4]: http://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/help/
