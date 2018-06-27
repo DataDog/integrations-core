@@ -361,7 +361,7 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
 [15]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
-[16]: https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example
+[16]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [17]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [18]: https://docs.datadoghq.com/logs
 [19]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

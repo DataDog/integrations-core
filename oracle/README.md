@@ -103,11 +103,11 @@ Need help? Contact [Datadog Support][10].
 Learn more about infrastructure monitoring and all our integrations on [our blog][11]
 
 [1]: http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-[2]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 [4]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [5]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[6]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [10]: http://docs.datadoghq.com/help/
