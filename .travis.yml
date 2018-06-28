@@ -165,6 +165,8 @@ jobs:
     - stage: test
       env: CHECK=system_core
     - stage: test
+      env: CHECK=tcp_check
+    - stage: test
       env: CHECK=teamcity
     - stage: test
       env: CHECK=varnish
