@@ -143,6 +143,6 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
 [7]: https://docs.mongodb.org/manual/reference/command/dbStats/
-[8]: http://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/
 [10]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/

@@ -45,5 +45,5 @@ Need help? Contact [Datadog Support][9].
 [6]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
 [7]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
 [8]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
-[9]: http://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/announcing-eks/

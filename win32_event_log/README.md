@@ -58,7 +58,7 @@ Need help? Contact [Datadog Support][5].
 [2]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: http://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help/
 [6]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [7]: https://www.datadoghq.com/blog/monitoring-windows-server-2012/
 [8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/

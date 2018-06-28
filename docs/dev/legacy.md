@@ -292,7 +292,7 @@ In our experience building integrations, we've also faced a number of challenges
 [16]: https://www.ruby-lang.org
 [17]: https://www.ruby-lang.org/en/documentation/installation/
 [18]: https://www.gnu.org/software/wget/
-[19]: http://brew.sh/
+[19]: https://brew.sh/
 [20]: https://chocolatey.org/
 [AGem]: https://rubygems.org/gems/datadog-sdk-testing
 [Python]: https://www.python.org/

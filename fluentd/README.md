@@ -1,5 +1,7 @@
 # Fluentd Integration
-{{< img src="integrations/fluentd/snapshot-fluentd.png" alt="Fluentd Dashboard" responsive="true" popup="true">}}
+
+![Fluentd Dashboard][9]
+
 ## Overview
 
 Get metrics from Fluentd to:
@@ -84,5 +86,6 @@ Need help? Contact [Datadog Support][7].
 [4]: https://docs.datadoghq.com/logs/log_collection/fluentd/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-fluentd-datadog/
+[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/fluentd/snapshot-fluentd.png

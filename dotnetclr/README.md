@@ -31,6 +31,6 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[3]: http://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/help/
 [4]: https://www.datadoghq.com/blog/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

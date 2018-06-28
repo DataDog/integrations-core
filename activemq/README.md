@@ -109,9 +109,9 @@ Need help? Contact [Datadog Support][107].
 
 [101]: https://app.datadoghq.com/account/settings#agent
 [102]: https://github.com/DataDog/jmxfetch
-[103]: http://activemq.apache.org/jmx.html
+[103]: https://activemq.apache.org/jmx.html
 [104]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
 [105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[107]: http://docs.datadoghq.com/help/
+[107]: https://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
 [109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

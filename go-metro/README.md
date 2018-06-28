@@ -98,6 +98,6 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [1]: https://github.com/DataDog/go-metro
 [2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
 [3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
-[4]: http://docs.datadoghq.com/help/
+[4]: https://docs.datadoghq.com/help/
 [5]: https://www.datadoghq.com/blog/
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

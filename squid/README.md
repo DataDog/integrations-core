@@ -77,5 +77,5 @@ Reach out to our team and other Datadog users on [Slack][9].
 [6]: https://datadog.zendesk.com/agent/
 [7]: https://app.datadoghq.com/event/stream
 [8]: mailto:support@datadoghq.com
-[9]: http://chat.datadoghq.com/
+[9]: https://chat.datadoghq.com/
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

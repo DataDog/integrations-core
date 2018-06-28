@@ -71,7 +71,7 @@ Need help? Contact [Datadog Support][106].
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [104]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [105]: https://github.com/DataDog/integrations-core/blob/master/hdfs_datanode/metadata.csv
-[106]: http://docs.datadoghq.com/help/
+[106]: https://docs.datadoghq.com/help/
 [107]: https://www.datadoghq.com/blog/hadoop-architecture-overview/
 [108]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [109]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/

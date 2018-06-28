@@ -1,5 +1,7 @@
 # Go Expvar Integration
-{{< img src="integrations/goexpvar/go_graph.png" alt="Go Graph" responsive="true" popup="true">}}
+
+![Go graph][11]
+
 ## Overview
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
@@ -75,5 +77,6 @@ Need help? Contact [Datadog Support][9].
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
-[9]: http://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/
+[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/goexpvar/go_graph.png
