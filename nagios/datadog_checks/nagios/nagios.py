@@ -74,7 +74,7 @@ class Nagios(AgentCheck):
     ]
 
     # Wrapper for gauge functions that do not send timestamps
-    def timestamp_excluded_gauge(self, *args, **kwargs):
+    def timestamp_ignored_gauge(self, *args, **kwargs):
         if 'timestamp' in kwargs:
             del kwargs['timestamp']
         self.gauge(*args, **kwargs)
@@ -85,10 +85,7 @@ class Nagios(AgentCheck):
         check_freq = init_config.get("check_freq", 15)
 
         # Compatibility wrapper for Agents that do not send timestamps with gauge metrics
-        if 'timestamp' in getargspec(self.gauge).args:
-            gauge_func = self.gauge
-        else:
-            gauge_func = self.timestamp_excluded_gauge
+        gauge_func = self.gauge if 'timestamp' in getargspec(self.gauge).args else self.timestamp_ignored_gauge
 
         if instances is not None:
             for instance in instances:
@@ -196,13 +193,13 @@ class Nagios(AgentCheck):
                 f.close()
 
     def check(self, instance):
-        '''
+        """
         Parse until the end of each tailer associated with this instance.
         We match instance and tailers based on the path to the Nagios configuration file
 
         Special case: Compatibility with the old conf when no conf file is specified
         but the path to the event_log is given
-        '''
+        """
         instance_key = instance.get('nagios_conf', instance.get('nagios_perf_cfg', instance.get('nagios_log', None)))
 
         # Bad configuration: This instance does not contain any necessary configuration
@@ -214,7 +211,7 @@ class Nagios(AgentCheck):
 
 class NagiosTailer(object):
     def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=None):
-        '''
+        """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
         :param logger: Logger object
@@ -223,7 +220,8 @@ class NagiosTailer(object):
         :param gauge_func: function to report a gauge
         :param freq: int, size of bucket to aggregate perfdata metrics
         :param tags: list, list of custom tags
-        '''
+        """
+
         self.log_path = log_path
         self.log = logger
         self.gen = None
@@ -266,7 +264,7 @@ class NagiosTailer(object):
 
 class NagiosEventLogTailer(NagiosTailer):
     def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, passive_checks=False):
-        '''
+        """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
         :param logger: Logger object
@@ -275,14 +273,16 @@ class NagiosEventLogTailer(NagiosTailer):
         :param gauge_func: function to report a gauge
         :param freq: int, size of bucket to aggregate perfdata metrics
         :param passive_checks: bool, enable or not passive checks events
-        '''
+        """
+
         self.passive_checks = passive_checks
         super(NagiosEventLogTailer, self).__init__(
             log_path, file_template, logger, hostname, event_func, gauge_func, freq
         )
 
     def _parse_line(self, line):
-        """Actual nagios parsing
+        """
+        Actual nagios parsing
         Return True if we found an event, False otherwise
         """
         # first isolate the timestamp and the event type
