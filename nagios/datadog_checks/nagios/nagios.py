@@ -73,19 +73,19 @@ class Nagios(AgentCheck):
         re.compile('^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
     ]
 
-    # Wrapper for gauge functions that do not send timestamps
-    def timestamp_ignored_gauge(self, *args, **kwargs):
-        if 'timestamp' in kwargs:
+    def gauge(self, *args, **kwargs):
+        """
+        Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
+        """
+        if 'timestamp' in kwargs and 'timestamp' not in getargspec(super(Nagios, self).gauge).args:
             del kwargs['timestamp']
-        self.gauge(*args, **kwargs)
+
+        super(Nagios, self).gauge(*args, **kwargs)
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.nagios_tails = {}
         check_freq = init_config.get("check_freq", 15)
-
-        # Compatibility wrapper for Agents that do not send timestamps with gauge metrics
-        gauge_func = self.gauge if 'timestamp' in getargspec(self.gauge).args else self.timestamp_ignored_gauge
 
         if instances is not None:
             for instance in instances:
@@ -123,7 +123,7 @@ class Nagios(AgentCheck):
                             logger=self.log,
                             hostname=self.hostname,
                             event_func=self.event,
-                            gauge_func=gauge_func,
+                            gauge_func=self.gauge,
                             freq=check_freq,
                             passive_checks=instance.get('passive_checks_events', False),
                         )
@@ -141,7 +141,7 @@ class Nagios(AgentCheck):
                             logger=self.log,
                             hostname=self.hostname,
                             event_func=self.event,
-                            gauge_func=gauge_func,
+                            gauge_func=self.gauge,
                             freq=check_freq,
                             tags=custom_tag,
                         )
@@ -159,7 +159,7 @@ class Nagios(AgentCheck):
                             logger=self.log,
                             hostname=self.hostname,
                             event_func=self.event,
-                            gauge_func=gauge_func,
+                            gauge_func=self.gauge,
                             freq=check_freq,
                             tags=custom_tag,
                         )
