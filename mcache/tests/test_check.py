@@ -4,7 +4,7 @@
 
 import subprocess
 import os
-# import stat
+import stat
 import time
 import pytest
 import bmemcached
@@ -160,7 +160,7 @@ def memcached_socket():
     print("MEMCACHE_UID", MEMCACHE_UID)
     print("MEMCACHE_GID", MEMCACHE_GID)
 
-    # os.chmod(UNIXSOCKET_DIR, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    os.chmod(UNIXSOCKET_DIR, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)

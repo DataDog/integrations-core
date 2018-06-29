@@ -16,8 +16,8 @@ services:
       USERNAME: testuser
       PASSWORD: testpass
     volumes:
-    - ${UNIXSOCKET_DIR}:${DOCKER_SOCKET_DIR}
-    command: memcached -S -s ${DOCKER_SOCKET_PATH} -vvv
+    - ${UNIXSOCKET_DIR}:${DOCKER_SOCKET_DIR}:rw
+    command: memcached -S -s ${DOCKER_SOCKET_PATH} -a 755 -vvv
 
 #   memcached_socket:
 #    build:
