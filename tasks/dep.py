@@ -200,10 +200,11 @@ def dep_check(ctx):
 @task(help={
     'package': 'The package to pin throughout the checks',
     'version': 'The version of the package to pin',
+    'checks': 'The additional checks to apply the pin',
     'upgrade': 'When resolving, attempt to upgrade transient dependencies',
     'quiet': 'Whether or not to hide output',
 })
-def dep_pin(ctx, package, version, upgrade=False, quiet=False):
+def dep_pin(ctx, package, version, checks=None, upgrade=False, quiet=False):
     """Pin a dependency for all checks that require it. Setting the version
     to `none` will remove the package. `pip-compile` must be in PATH.
 
@@ -216,6 +217,7 @@ def dep_pin(ctx, package, version, upgrade=False, quiet=False):
         raise Exit('`package` and `version` are required arguments.')
 
     package = package.lower()
+    checks = [] if checks is None else checks.split(',')
 
     for check_name in sorted(os.listdir(ROOT)):
         check_dir = os.path.join(ROOT, check_name)
@@ -226,7 +228,7 @@ def dep_pin(ctx, package, version, upgrade=False, quiet=False):
 
         if os.path.isfile(pinned_reqs_file):
             pinned_packages = dict(read_packages(pinned_reqs_file))
-            if package not in pinned_packages:
+            if package not in pinned_packages and check_name not in checks:
                 continue
 
             if not quiet:
