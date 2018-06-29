@@ -5,7 +5,6 @@
 from requests.exceptions import SSLError
 from datadog_checks.yarn import YarnCheck
 
-# Grab the module constant
 from datadog_checks.yarn.yarn import (
     SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
 )

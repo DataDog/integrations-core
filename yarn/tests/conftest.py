@@ -2,13 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-# stdlib
 import os
 import json
 from requests.exceptions import SSLError
 
-# 3rd party
 import pytest
 from mock import patch
 
@@ -49,6 +46,9 @@ def mocked_auth_request():
 
 @pytest.fixture
 def mocked_bad_cert_request():
+    """
+    Mock request.get to an endpoint with a badly configured ssl cert
+    """
     def requests_bad_cert_get(*args, **kwargs):
         # Make sure we're passing in the 'verify' argument
         assert 'verify' in kwargs, 'Missing "verify" argument in requests.get(...) call'
