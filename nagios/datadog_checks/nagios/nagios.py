@@ -77,10 +77,12 @@ class Nagios(AgentCheck):
         """
         Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
         """
-        if 'timestamp' in kwargs and 'timestamp' not in getargspec(super(Nagios, self).gauge).args:
+        orig_gauge = super(Nagios, self).gauge
+        # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg
+        if 'timestamp' in kwargs and 'timestamp' not in getargspec(orig_gauge).args:
             del kwargs['timestamp']
 
-        super(Nagios, self).gauge(*args, **kwargs)
+        orig_gauge(*args, **kwargs)
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -408,14 +410,8 @@ class NagiosPerfDataTailer(NagiosTailer):
                     if attr_val is not None and attr_val != '':
                         tags.append("{0}:{1}".format(key, attr_val))
 
-                self._gauge(
-                    metric,
-                    value,
-                    tags=tags + self._tags,
-                    hostname=host_name,
-                    device_name=device_name,
-                    timestamp=timestamp,
-                )
+                self._gauge(metric, value, tags=tags + self._tags, hostname=host_name, device_name=device_name,
+                            timestamp=timestamp)
 
 
 class NagiosHostPerfDataTailer(NagiosPerfDataTailer):
