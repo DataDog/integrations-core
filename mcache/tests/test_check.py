@@ -280,7 +280,10 @@ def test_service_ok(check, instance, aggregator, memcached):
     assert sc.tags == tags
 
 
-@pytest.mark.skipif(Platform.is_win32(), reason='Windows sockets are not file handles')
+# This test doesn't work with Mac either.
+# See https://docs.docker.com/docker-for-mac/osxfs/#file-types
+# See open PR https://github.com/docker/for-mac/issues/483
+@pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
 def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_socket):
     """
     Service is up
