@@ -13,14 +13,12 @@ The Agent's Squid check is included in the [Datadog Agent][1] package, so you do
 ### Configuration
 
 1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
-	See the [sample squid.d/conf.yaml][2] for all available configuration options:
+    See the [sample squid.d/conf.yaml][2] for all available configuration options:
 
     ```
         init_config:
-
         instances:
             # A list of squid instances identified by their name
-
             - name: my_squid
             #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
             #   port: 3128  # The port where the squid server is listening. Default to 3128
