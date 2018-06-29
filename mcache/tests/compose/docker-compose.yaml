@@ -16,5 +16,19 @@ services:
       USERNAME: testuser
       PASSWORD: testpass
     volumes:
-    - ${UNIXSOCKET_PATH}:${DOCKER_SOCKET_PATH}
-    command: memcached -S -s ${DOCKER_SOCKET_PATH} -a 0755 -vv
+    - ${UNIXSOCKET_DIR}:${DOCKER_SOCKET_DIR}
+    command: memcached -S -s ${DOCKER_SOCKET_PATH} -vvv
+
+#   memcached_socket:
+#    build:
+#      context: .
+#      args:
+#        memcache_uid: ${MEMCACHE_UID}
+#        memcache_gid: ${MEMCACHE_GID}
+#    environment:
+#      USERNAME: testuser
+#      PASSWORD: testpass
+#    restart: always
+#    volumes:
+#    - ${UNIXSOCKET_DIR}:${DOCKER_SOCKET_DIR}
+#    command: memcached -s ${DOCKER_SOCKET_PATH} -vvv

@@ -17,5 +17,7 @@ HOST = get_docker_hostname()
 USERNAME = 'testuser'
 PASSWORD = 'testpass'
 
+DOCKER_SOCKET_DIR = '/tmp'
 DOCKER_SOCKET_PATH = '/tmp/memcached.sock'
-UNIXSOCKET_PATH = os.path.realpath(tempfile.mkdtemp())
+UNIXSOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
+UNIXSOCKET_PATH = os.path.join(UNIXSOCKET_DIR, 'memcached.sock')

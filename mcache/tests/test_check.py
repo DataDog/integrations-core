@@ -4,7 +4,7 @@
 
 import subprocess
 import os
-import stat
+# import stat
 import time
 import pytest
 import bmemcached
@@ -13,7 +13,8 @@ from bmemcached.exceptions import MemcachedException
 from datadog_checks.utils.platform import Platform
 from datadog_checks.mcache import Memcache
 
-from common import (HERE, PORT, SERVICE_CHECK, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_PATH, UNIXSOCKET_PATH)
+from common import (HERE, PORT, SERVICE_CHECK, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH,
+                    UNIXSOCKET_DIR, UNIXSOCKET_PATH)
 
 GAUGES = [
     "memcache.total_items",
@@ -145,10 +146,21 @@ def memcached_socket():
     """
     env = os.environ
     env['PWD'] = HERE
+    env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
-    env['UNIXSOCKET_PATH'] = UNIXSOCKET_PATH
+    env['UNIXSOCKET_DIR'] = UNIXSOCKET_DIR
+    MEMCACHE_UID = subprocess.check_output(['id', '-u']).replace('\n', '')
+    env['MEMCACHE_UID'] = MEMCACHE_UID
+    MEMCACHE_GID = subprocess.check_output(['id', '-g']).replace('\n', '')
+    env['MEMCACHE_GID'] = MEMCACHE_GID
+    print("DOCKER_SOCKET_DIR", DOCKER_SOCKET_DIR)
+    print("DOCKER_SOCKET_PATH", DOCKER_SOCKET_PATH)
+    print("UNIXSOCKET_DIR", UNIXSOCKET_DIR)
+    print("UNIXSOCKET_PATH", UNIXSOCKET_PATH)
+    print("MEMCACHE_UID", MEMCACHE_UID)
+    print("MEMCACHE_GID", MEMCACHE_GID)
 
-    os.chmod(UNIXSOCKET_PATH, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    # os.chmod(UNIXSOCKET_DIR, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
@@ -168,6 +180,7 @@ def memcached_socket():
             mc.delete("foo")
             mc.disconnect_all()
             break
+
     yield
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
@@ -273,7 +286,12 @@ def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_so
     Service is up
     """
     tags = ["socket:{}".format(UNIXSOCKET_PATH), "foo:bar"]
-    check.check(instance_socket)
+    try:
+        check.check(instance_socket)
+    except Exception:
+        docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+        subprocess.check_call(["docker-compose", "-f", docker_compose_file, "logs", "memcached_socket"],
+                              env=os.environ)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
