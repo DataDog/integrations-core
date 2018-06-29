@@ -21,6 +21,8 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
+You'll also need `docker-compose` in order to run the test harness. 
+
 ## Setup
 
 Clone the [integrations extras repository][IntegrationsExtrasRepository] and point your shell at the root:
