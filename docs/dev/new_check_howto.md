@@ -111,11 +111,11 @@ class MyCheck(AgentCheck):
             r = requests.get(url)
             r.raise_for_status()
             if search_string in r.text:
-                self.service_check(self.OK)
+                self.service_check('my_check.all_good', self.OK)
             else:
-                self.service_check(self.WARNING)
+                self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
-            self.service_check(self.CRITICAL, e)
+            self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
 To learn more about the base Python class, see the [Python API documentation][2]. Now let's write some tests and see if that works.
@@ -252,7 +252,7 @@ def test_service_check(aggregator):
 Run only the integration tests for faster iterations:
 
 ```
-tox -e integrations
+tox -e integration
 ```
 
 The check is almost done. Let's add the final touches.
