@@ -83,7 +83,7 @@ yarn.queue.maxApplicationsPerUser      The maximum number of active applications
 from urlparse import urljoin, urlsplit, urlunsplit
 
 # 3rd party
-from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError
+from requests.exceptions import Timeout, HTTPError, InvalidURL, ConnectionError, SSLError
 import requests
 
 # Project
@@ -241,6 +241,7 @@ class YarnCheck(AgentCheck):
         if username is not None and password is not None:
             auth = (username, password)
 
+        # Option to disable verifying ssl certificate
         ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
 
         # Get additional tags from the conf file
@@ -440,7 +441,7 @@ class YarnCheck(AgentCheck):
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
+        except (HTTPError, InvalidURL, ConnectionError, SSLError) as e:
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

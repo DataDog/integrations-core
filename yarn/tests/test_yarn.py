@@ -2,10 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from requests.exceptions import SSLError
 from datadog_checks.yarn import YarnCheck
 
 # Grab the module constant
-from datadog_checks.yarn.yarn import SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
+from datadog_checks.yarn.yarn import (
+    SERVICE_CHECK_NAME, YARN_QUEUE_METRICS, YARN_APP_METRICS
+)
 
 from .common import (
     YARN_CONFIG,
@@ -22,6 +25,8 @@ from .common import (
     YARN_NODE_METRICS_VALUES,
     YARN_ROOT_QUEUE_METRICS_VALUES,
     YARN_QUEUE_METRICS_VALUES,
+    YARN_SSL_VERIFY_TRUE_CONFIG,
+    YARN_SSL_VERIFY_FALSE_CONFIG,
     RM_ADDRESS,
     CUSTOM_TAGS,
 )
@@ -83,6 +88,7 @@ def test_check_excludes_app_metrics(aggregator, mocked_request):
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=3,
     )
 
 
@@ -98,4 +104,33 @@ def test_auth(aggregator, mocked_auth_request):
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=4,
+    )
+
+
+def test_ssl_verification(aggregator, mocked_bad_cert_request):
+    # Instantiate YarnCheck
+    yarn = YarnCheck('yarn', {}, {})
+
+    # Run the check on a config with a badly configured SSL certificate
+    try:
+        yarn.check(YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0])
+    except SSLError:
+        aggregator.assert_service_check(
+            SERVICE_CHECK_NAME,
+            status=YarnCheck.CRITICAL,
+            tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+            count=1
+        )
+        pass
+    else:
+        assert False, "Should have thrown an SSLError due to a badly configured certificate"
+
+    # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
+    yarn.check(YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0])
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.OK,
+        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+        count=4,
     )
