@@ -123,6 +123,11 @@ SELECT mode,
             ('relname', 'table'),
             ('schemaname', 'schema'),
         ],
+         # this field contains old metrics that need to be deprecated. For now
+         # we keep sending them.
+        'deprecated_metrics': {
+            'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE),
+        },
         'metrics': {
             'seq_scan': ('postgresql.seq_scans', RATE),
             'seq_tup_read': ('postgresql.seq_rows_read', RATE),
