@@ -4,7 +4,7 @@
 
 Send events from your Nagios-monitored infrastructure to Datadog for richer alerting and to help correlate Nagios events with metrics from your Datadog-monitored infrastructure.
 
-This check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. The check can also send Nagios Perfdata as metrics to Datadog.
+This check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. This check can also send Nagios performance data as metrics to Datadog.
 
 ## Setup
 ### Installation
@@ -13,7 +13,7 @@ The Nagios check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-Edit the `nagios.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
+Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -27,11 +27,11 @@ instances:
     collect_service_performance_data: True # default is False
 ```
 
-The Agent reads the main nagios configuration file to get the locations of the nagios log files it should watch.
+The Agent reads the main Nagios configuration file to get the locations of the Nagios log files it should watch.
 
-This check also works with Icinga, the popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
+This check also works with Icinga, a popular fork of Nagios. If you use Icinga, just set `nagios_conf` to the location of your Icinga configuration file.
 
-[Restart the Agent][3] to start sending Nagios events and (optionally) perfdata metrics to Datadog.
+[Restart the Agent][3] to start sending Nagios events and (optionally) performance data metrics to Datadog.
 
 ### Validation
 
@@ -40,11 +40,11 @@ This check also works with Icinga, the popular fork of Nagios. If you use Icinga
 ## Data Collected
 ### Metrics
 
-With a default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for perfdata and sumbits it as gauge metrics to Datadog.
+With the default configuration, the Nagios check doesn't collect any metrics. But if you set `collect_host_performance_data` and/or `collect_service_performance_data` to `True`, the check watches for Nagios performance data and submits it as gauge metrics to Datadog.
 
 ### Events
 
-The check watches the Nagios events log for log lines containing these string, emitting an event for each such line:
+The check watches the Nagios events log for log lines containing these strings, emitting an event for each line:
 
 - SERVICE FLAPPING ALERT
 - ACKNOWLEDGE_SVC_PROBLEM
