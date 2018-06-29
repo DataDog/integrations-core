@@ -21,6 +21,8 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
+You'll also need `docker-compose` in order to run the test harness. 
+
 ## Setup
 
 Clone the [integrations extras repository][IntegrationsExtrasRepository] and point your shell at the root:
@@ -111,11 +113,11 @@ class MyCheck(AgentCheck):
             r = requests.get(url)
             r.raise_for_status()
             if search_string in r.text:
-                self.service_check(self.OK)
+                self.service_check('my_check.all_good', self.OK)
             else:
-                self.service_check(self.WARNING)
+                self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
-            self.service_check(self.CRITICAL, e)
+            self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
 To learn more about the base Python class, see the [Python API documentation][2]. Now let's write some tests and see if that works.
@@ -252,7 +254,7 @@ def test_service_check(aggregator):
 Run only the integration tests for faster iterations:
 
 ```
-tox -e integrations
+tox -e integration
 ```
 
 The check is almost done. Let's add the final touches.
