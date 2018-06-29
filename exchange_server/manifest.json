@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "exchange_server",
-  "display_name": "Microsoft Exchange Server",
+  "display_name": "Exchange Server",
   "short_description": "Collect and graph Microsoft exchange server metrics",
   "support": "core",
   "creates_events": false,
