@@ -20,7 +20,7 @@ def test_http_headers(http_check):
     Headers format.
     """
 
-    # Get just the headers from http_check._load_conf(...), which happens to be at index 10
+    # Get just the headers from http_check._load_conf(...), which happens to be at index 11
     headers = http_check._load_conf(CONFIG_HTTP_HEADERS['instances'][0])[11]
 
     expected_headers = agent_headers({}).get('User-Agent')
