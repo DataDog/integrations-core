@@ -41,6 +41,12 @@ instances:
     # username: user
     # password: pass
 
+    # If your service uses NTLM authentication, you can optionally
+    # specify a domain and password that will be used in the check.
+    #
+    # ntlm_domain: domain
+    # password: pass
+
     # If your service uses client side certificates, you can optionally
     # specify a client certificate and key files that will be used in the check.
     # The private key to your local certificate must be unencrypted.
