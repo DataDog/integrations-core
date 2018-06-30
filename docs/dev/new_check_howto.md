@@ -50,10 +50,11 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── CHANGELOG.md
     ├── MANIFEST.in
     ├── README.md
-    ├── conf.yaml.example
     ├── datadog_checks
     │   ├── __init__.py
     │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
     │       ├── __about__.py
     │       ├── __init__.py
     │       └── foo_check.py
