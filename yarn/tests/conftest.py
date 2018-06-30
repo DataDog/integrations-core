@@ -2,13 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import os
 import json
-from mock import patch
+from requests.exceptions import SSLError
 
-# 3rd party
 import pytest
+from mock import patch
 
 from .common import (
     HERE, YARN_CLUSTER_METRICS_URL, YARN_APPS_URL, YARN_NODES_URL, YARN_SCHEDULER_URL, TEST_USERNAME, TEST_PASSWORD
@@ -31,7 +30,36 @@ def mocked_request():
 
 @pytest.fixture
 def mocked_auth_request():
-    with patch("requests.get", new=requests_auth_mock):
+    def requests_auth_get(*args, **kwargs):
+        # Make sure we're passing in authentication
+        assert 'auth' in kwargs, 'Missing "auth" argument in requests.get(...) call'
+
+        # Make sure we've got the correct username and password
+        assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password in requests.get"
+
+        # Return mocked request.get(...)
+        return requests_get_mock(*args, **kwargs)
+
+    with patch("requests.get", new=requests_auth_get):
+        yield
+
+
+@pytest.fixture
+def mocked_bad_cert_request():
+    """
+    Mock request.get to an endpoint with a badly configured ssl cert
+    """
+    def requests_bad_cert_get(*args, **kwargs):
+        # Make sure we're passing in the 'verify' argument
+        assert 'verify' in kwargs, 'Missing "verify" argument in requests.get(...) call'
+
+        if kwargs['verify']:
+            raise SSLError("certificate verification failed for {}".format(args[0]))
+
+        # Return the actual response
+        return requests_get_mock(*args, **kwargs)
+
+    with patch("requests.get", new=requests_bad_cert_get):
         yield
 
 
@@ -70,14 +98,3 @@ def requests_get_mock(*args, **kwargs):
         with open(yarn_scheduler_metrics, "r") as f:
             body = f.read()
             return MockResponse(body, 200)
-
-
-def requests_auth_mock(*args, **kwargs):
-    # Make sure we're passing in authentication
-    assert 'auth' in kwargs, "Error, missing authentication"
-
-    # Make sure we've got the correct username and password
-    assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
-
-    # Return mocked request.get(...)
-    return requests_get_mock(*args, **kwargs)
