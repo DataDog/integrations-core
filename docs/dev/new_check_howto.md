@@ -52,9 +52,9 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── README.md
     ├── datadog_checks
     │   ├── __init__.py
-    │   └── data
-    │       └── conf.yaml.example
     │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
     │       ├── __about__.py
     │       ├── __init__.py
     │       └── foo_check.py
