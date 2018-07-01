@@ -1,25 +1,19 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import tempfile
 import time
+import pytest
 
 from datadog_checks.nagios import Nagios
 from .common import (
-    CHECK_NAME,
-    CUSTOM_TAGS,
-    NAGIOS_TEST_LOG,
-    NAGIOS_TEST_HOST,
-    NAGIOS_TEST_ALT_HOST_TEMPLATE,
-    NAGIOS_TEST_HOST_TEMPLATE,
-    NAGIOS_TEST_SVC,
-    NAGIOS_TEST_SVC_TEMPLATE,
-    NAGIOS_TEST_ALT_SVC_TEMPLATE,
+    CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_ALT_HOST_TEMPLATE,
+    NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC, NAGIOS_TEST_SVC_TEMPLATE, NAGIOS_TEST_ALT_SVC_TEMPLATE,
 )
 
 
+@pytest.mark.integration
 class TestEventLogTailer:
     def test_line_parser(self, aggregator):
         """
@@ -110,6 +104,7 @@ class TestEventLogTailer:
         assert len(aggregator.events) == ITERATIONS * 503
 
 
+@pytest.mark.integration
 class TestPerfDataTailer:
     POINT_TIME = (int(time.time()) / 15) * 15
 
