@@ -21,7 +21,7 @@ The Agent's Squid check is included in the [Datadog Agent][1] package, so you do
     instances:
         # A list of squid instances identified by their name
 
-        * name: my_squid
+        - name: my_squid
         #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
         #   port: 3128  # The port where the squid server is listening. Default to 3128
         #   tags: ['custom:tag']  # A list of tags that you wish to send with your squid metrics
