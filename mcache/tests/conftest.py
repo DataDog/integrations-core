@@ -47,7 +47,7 @@ def memcached():
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def memcached_socket():
     """
     Start a standalone Memcached server.
