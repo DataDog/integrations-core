@@ -19,7 +19,7 @@ PASSWORD = 'testpass'
 
 DOCKER_SOCKET_DIR = '/tmp'
 DOCKER_SOCKET_PATH = '/tmp/memcached.sock'
-HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
+HOST_SOCKET_DIR = os.path.join(ROOT, "mcache", "tmp")
 HOST_SOCKET_PATH = os.path.join(HOST_SOCKET_DIR, 'memcached.sock')
 
 GAUGES = [
