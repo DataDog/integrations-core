@@ -182,7 +182,7 @@ class Nagios(AgentCheck):
 
 class NagiosTailer(object):
 
-    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=None):
+    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=[]):
         '''
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
@@ -202,7 +202,7 @@ class NagiosTailer(object):
         self._gauge = gauge_func
         self._line_parsed = 0
         self._freq = freq
-        self._tags = [] if tags is None else tags
+        self._tags = tags
 
         if file_template is not None:
             self.compile_file_template(file_template)
@@ -302,9 +302,21 @@ class NagiosEventLogTailer(NagiosTailer):
     def create_event(self, timestamp, event_type, hostname, fields):
         """Factory method called by the parsers
         """
+        # The Agent expects a specific set of fields, so we need to place all 
+        # extra fields in the msg_title and let the Datadog backend separate them
+        # Any remaining fields that aren't a part of the datadog-agent payload
+        # specification will be dropped. 
         d = fields._asdict()
+        msg_title = "event_soft_hard:" + d.pop('event_soft_hard', " ")
+        msg_title += " | " + "event_type:" + d.pop('event_type', " ")
+        msg_title += " | " + "check_name:" + d.pop('check_name', " ")
+        msg_title += " | " + "event_state:" + d.pop('event_state', " ")
+        msg_title += " | " + "payload:" + d.pop('payload', " ")
+        msg_title += " | " + "ack_author" + d.pop('ack_author', " ")
+        
         d.update({'timestamp': timestamp,
-                  'event_type': event_type})
+                  'event_type': event_type,
+                  'msg_title': msg_title})
 
         # if host is localhost, turn that into the internal host name
         host = d.get('host', None)
