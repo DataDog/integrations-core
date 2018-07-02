@@ -8,9 +8,9 @@ import pytest
 
 from datadog_checks.utils.platform import Platform
 
-from common import (PORT, SERVICE_CHECK, HOST, HOST_SOCKET_PATH, GAUGES, RATES, ITEMS_RATES, ITEMS_GAUGES, SLABS_RATES,
+from common import (PORT, SERVICE_CHECK, HOST, GAUGES, RATES, ITEMS_RATES, ITEMS_GAUGES, SLABS_RATES,
                     SLABS_GAUGES, SLABS_AGGREGATES)
-
+import conftest
 
 def count_connections(port):
     """
@@ -71,7 +71,7 @@ def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_so
     """
     Service is up
     """
-    tags = ["host:unix", "port:{}".format(HOST_SOCKET_PATH), "foo:bar"]
+    tags = ["host:unix", "port:{}".format(conftest.HOST_SOCKET_PATH), "foo:bar"]
 
     check.check(instance_socket)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
