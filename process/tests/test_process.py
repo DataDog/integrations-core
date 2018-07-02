@@ -257,6 +257,7 @@ def test_check_real_process(aggregator):
     # this requires another run
     process.check(instance)
     aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
+    aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
 def test_relocated_procfs(aggregator):

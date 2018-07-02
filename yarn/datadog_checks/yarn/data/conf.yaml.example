@@ -41,6 +41,10 @@ instances:
     # Allowed yarn keys: applicationType, applicationTags, name, queue, user
     # By default, the application name is collected with the prefix app_name.
 
+    # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+    # need to set to false when using self-signed certs
+    # ssl_verify: true
+
     # Do not emit metrics for certain yarn capacityScheduler queues.
     # The check can send queue metrics on up to 100 queues.
     # If you have less than 100 queues, you don't have to set this parameter.

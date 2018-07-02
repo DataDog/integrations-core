@@ -32,7 +32,8 @@ RELATION_SIZE_METRICS = [
 
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
-    'postgresql.index_rows_fetched',
+    'postgresql.index_rows_fetched',  # deprecated
+    'postgresql.index_rel_rows_fetched',
     'postgresql.index_blocks_read',
     'postgresql.index_blocks_hit',
 ]

@@ -76,9 +76,9 @@ Need help? Contact [Datadog Support][7].
 
 [1]: https://raw.githubusercontent.com/DataDog/documentation/9cca18a10dc34066a8722a23fb2cd7086ac86bd1/src/images/integrations/couchbase/couchbase_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/couchbase/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/couchbase/datadog_checks/couchbase/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/

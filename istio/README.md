@@ -59,9 +59,9 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
-[3]: https://github.com/DataDog/integrations-core/blob/master/istio/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example
 [4]: https://istio.io/docs/tasks/telemetry/querying-metrics.html#about-the-prometheus-add-on
 [5]: https://docs.datadoghq.com/agent/faq/agent-status-and-information/
 [6]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/

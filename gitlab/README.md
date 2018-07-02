@@ -46,6 +46,6 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [104]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
-[105]: http://docs.datadoghq.com/help/
+[105]: https://docs.datadoghq.com/help/
 [106]: https://www.datadoghq.com/blog/
 [107]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/

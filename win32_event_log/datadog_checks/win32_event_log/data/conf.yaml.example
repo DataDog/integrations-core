@@ -100,3 +100,26 @@ instances:
   #     - Error
   #   tags:
   #     - system
+  
+## Log Section (Available for Agent >=6.0)
+#logs:
+
+    # - type : (mandatory) type of log input source (tcp / udp / file / windows_event)
+    #   port / path /channel: (mandatory) Set port if type is tcp or udp. Set path if type is file and channel if windows_event
+    #   service : (mandatory) name of the service owning the log
+    #   source : (mandatory) attribute that defines which integration is sending the logs
+    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
+    #   tags: (optional) add tags to each logs collected
+  
+    # - type: windows_event
+    #   channel_path: <CHANNEL_1>
+    #   source: <CHANNEL_1>
+    #   service: myservice
+    #   sourcecategory: windowsevent
+    
+    # - type: windows_event
+    #   channel_path: <CHANNEL_2>
+    #   source: <CHANNEL_2>
+    #   service: myservice
+    #   sourcecategory: windowsevent
+

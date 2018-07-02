@@ -63,6 +63,30 @@ YARN_AUTH_CONFIG = {
     ]
 }
 
+YARN_SSL_VERIFY_TRUE_CONFIG = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
+            'ssl_verify': True,
+        }
+    ]
+}
+
+YARN_SSL_VERIFY_FALSE_CONFIG = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
+            'ssl_verify': False,
+        }
+    ]
+}
+
 YARN_CLUSTER_METRICS_VALUES = {
     'yarn.metrics.apps_submitted': 0,
     'yarn.metrics.apps_completed': 0,

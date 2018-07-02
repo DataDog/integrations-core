@@ -70,7 +70,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][6] for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][2] for all available configuration options.
 
 Configuration Options:
 
@@ -82,12 +82,12 @@ Configuration Options:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `oracle` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `oracle` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 The Oracle Database check does not include any events at this time.
@@ -96,19 +96,18 @@ The Oracle Database check does not include any events at this time.
 The Oracle Database integration includes the service check `oracle.can_connect` which will verify the database is available and accepting connections.
 
 ## Troubleshooting
-Need help? Contact [Datadog Support][10].
+Need help? Contact [Datadog Support][8].
 
 ## Further Reading
 
-Learn more about infrastructure monitoring and all our integrations on [our blog][11]
+Learn more about infrastructure monitoring and all our integrations on [our blog][9]
 
-[1]: http://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-[2]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
+[1]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+[2]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 [4]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [5]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[6]: https://github.com/DataDog/integrations-core/blob/master/oracle/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[10]: http://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[8]: https://docs.datadoghq.com/help/
+[9]: https://www.datadoghq.com/blog/

@@ -1,5 +1,7 @@
 # Wmi_check Integration
-{{< img src="integrations/wmi/wmimetric.png" alt="WMI Metric" responsive="true" popup="true">}}
+
+![WMI metric][12]
+
 ## Overview
 
 Get metrics from your Windows applications/servers with Windows Management Instrumentation (WMI) in real time to
@@ -135,10 +137,11 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [2]: https://wmie.codeplex.com/
 [3]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
 [4]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
-[5]: http://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
+[5]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [6]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [7]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
-[10]: http://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/
+[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/wmi/wmimetric.png

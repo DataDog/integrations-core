@@ -63,6 +63,8 @@ jobs:
     - stage: test
       env: CHECK=cacti
     - stage: test
+      env: CHECK=cassandra_nodetool
+    - stage: test
       env: CHECK=ceph
     - stage: test
       env: CHECK=cisco_aci
@@ -94,6 +96,8 @@ jobs:
       env: CHECK=hdfs_datanode
     - stage: test
       env: CHECK=hdfs_namenode
+    - stage: test
+      env: CHECK=http_check
     - stage: test
       env: CHECK=iis
     - stage: test
@@ -160,6 +164,8 @@ jobs:
       env: CHECK=squid
     - stage: test
       env: CHECK=system_core
+    - stage: test
+      env: CHECK=tcp_check
     - stage: test
       env: CHECK=teamcity
     - stage: test

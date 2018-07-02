@@ -1,5 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.processes.cpu.pct,gauge,,percent,,The process CPU utilization.,0,system,processes cpu pct
+system.processes.cpu.pct,gauge,,percent,,The CPU utilization of a process.,0,system,processes cpu pct
+system.processes.cpu.normalized_pct,gauge,,percent,,The normalized CPU utilization of a process.,0,system,processes cpu normalized pct
 system.processes.involuntary_ctx_switches,gauge,,event,,The number of involuntary context switches performed by this process.,0,system,processes invol ctx switches
 system.processes.ioread_bytes,gauge,,byte,,The number of bytes read from disk by this process.,0,system,processes io r bytes
 system.processes.ioread_count,gauge,,read,,The number of disk reads by this process.,0,system,processes io r count

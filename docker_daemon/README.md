@@ -1,5 +1,6 @@
 # Docker_daemon Integration
-{{< img src="integrations/docker/docker.png" alt="Docker default dashboard" responsive="true" popup="true">}}
+
+![Docker default dashboard][27]
 
 ## Overview
 
@@ -25,7 +26,7 @@ Whichever you choose, your hosts need to have cgroup memory management enabled f
 4. Add the Agent user to the docker group: `usermod -a -G docker dd-agent`
 5. Create a `docker_daemon.yaml` file by copying [the example file in the agent conf.d directory][5]. If you have a standard install of Docker on your host, there shouldn't be anything you need to change to get the integration to work.
 6. To enable other integrations, use `docker ps` to identify the ports used by the corresponding applications.
-    {{< img src="integrations/docker/integrations-docker-dockerps.png" >}}
+    ![Docker ps command][28]
 
 **Note:** docker_daemon has replaced the older docker integration.
 
@@ -192,9 +193,9 @@ We've also written several other in-depth blog posts to help you get the most ou
 [14]: https://docs.docker.com/engine/reference/commandline/cli/#environment-variables
 [15]: https://docs.datadoghq.com/agent/#cli
 [16]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/metadata.csv
-[17]: http://docs.datadoghq.com/help/
-[18]: http://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
-[19]: http://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
+[17]: https://docs.datadoghq.com/help/
+[18]: https://docs.datadoghq.com/integrations/faq/compose-and-the-datadog-agent
+[19]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
 [20]: https://www.datadoghq.com/blog/the-docker-monitoring-problem/
 [21]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics/
 [22]: https://www.datadoghq.com/blog/how-to-collect-docker-metrics/
@@ -202,3 +203,5 @@ We've also written several other in-depth blog posts to help you get the most ou
 [24]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs/
 [25]: https://www.datadoghq.com/blog/docker-performance-datadog/
 [26]: https://www.datadoghq.com/blog/monitor-docker-datadog/
+[27]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/docker/docker.png
+[28]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/docker/integrations-docker-dockerps.png

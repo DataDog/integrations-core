@@ -33,6 +33,6 @@ Need help? Contact [Datadog Support][2].
 Learn more about infrastructure monitoring and all our integrations on [our blog][3]
 
 
-[1]: http://tox.readthedocs.io/en/latest/install.html
-[2]: http://docs.datadoghq.com/help/
+[1]: https://tox.readthedocs.io/en/latest/install.html
+[2]: https://docs.datadoghq.com/help/
 [3]: https://www.datadoghq.com/blog/

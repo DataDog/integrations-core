@@ -17,13 +17,12 @@ from urlparse import urlparse
 
 # 3rd party
 import requests
-
 from requests.adapters import HTTPAdapter
 from requests.packages import urllib3
 from requests.packages.urllib3.util import ssl_
-
 from requests.packages.urllib3.exceptions import InsecureRequestWarning, SecurityWarning
 from requests.packages.urllib3.packages.ssl_match_hostname import match_hostname
+from requests_ntlm import HttpNtlmAuth
 
 # project
 from datadog_checks.checks import NetworkCheck, Status
@@ -183,6 +182,7 @@ class HTTPCheck(NetworkCheck):
         method = instance.get('method', 'get')
         data = instance.get('data', {})
         tags = instance.get('tags', [])
+        ntlm_domain = instance.get('ntlm_domain')
         username = instance.get('username')
         password = instance.get('password')
         client_cert = instance.get('client_cert')
@@ -213,14 +213,14 @@ class HTTPCheck(NetworkCheck):
             instance.get('skip_proxy', instance.get('no_proxy', False)))
         allow_redirects = _is_affirmative(instance.get('allow_redirects', True))
 
-        return url, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, \
-            include_content, headers, response_time, content_match, reverse_content_match, tags, \
+        return url, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
+            timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
             disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
             skip_proxy, allow_redirects
 
     def _check(self, instance):
-        addr, username, password, client_cert, client_key, method, data, http_response_status_code, timeout, \
-            include_content, headers, response_time, content_match, reverse_content_match, tags, \
+        addr, ntlm_domain, username, password, client_cert, client_key, method, data, http_response_status_code, \
+            timeout, include_content, headers, response_time, content_match, reverse_content_match, tags, \
             disable_ssl_validation, ssl_expire, instance_ca_certs, weakcipher, check_hostname, ignore_ssl_warning, \
             skip_proxy, allow_redirects = self._load_conf(instance)
 
@@ -267,8 +267,11 @@ class HTTPCheck(NetworkCheck):
             self.log.debug("Proxies used for {} - {}".format(addr, instance_proxy))
 
             auth = None
-            if username is not None and password is not None:
-                auth = (username, password)
+            if password is not None:
+                if username is not None:
+                    auth = (username, password)
+                elif ntlm_domain is not None:
+                    auth = HttpNtlmAuth(ntlm_domain, password)
 
             sess = requests.Session()
             sess.trust_env = False
