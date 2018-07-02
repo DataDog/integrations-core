@@ -4,6 +4,7 @@
 
 import subprocess
 import os
+import shutil
 import time
 import pytest
 import bmemcached
@@ -88,7 +89,7 @@ def memcached_socket():
     if Platform.is_linux():
         # make the temp directory on linux
         try:
-            os.removedirs(HOST_SOCKET_DIR)
+            shutil.rmtree(HOST_SOCKET_DIR)
         except OSError:
             pass
 
