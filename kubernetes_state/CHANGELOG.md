@@ -1,7 +1,5 @@
 # CHANGELOG - kubernetes_state
 
-<<<<<<< HEAD
-=======
 ## 2.7.0 / 2018-06-26
 
 * [Added] Add an option to disable hostname override. See [#1800](https://github.com/DataDog/integrations-core/pull/1800).
@@ -11,7 +9,6 @@
 
 * [Added] Package `auto_conf.yaml` for appropriate integrations. See [#1664](https://github.com/DataDog/integrations-core/pull/1664).
 
->>>>>>> 6d7e62d3... [ci skip] Bumped kubernetes_state version to 2.7.0 (#1803)
 ## 2.5.0 / 2018-05-11
 
 * [BUGFIX] [Fix the chosen port](https://github.com/DataDog/datadog-agent/issues/1523) in recent KSM versions exposing multiple ports
