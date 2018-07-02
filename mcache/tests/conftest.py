@@ -4,7 +4,6 @@
 
 import subprocess
 import os
-import tempfile
 import shutil
 import time
 import pytest
@@ -13,8 +12,9 @@ from bmemcached.exceptions import MemcachedException
 
 from datadog_checks.mcache import Memcache
 
-from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH)
-import common
+from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH, HOST_SOCKET_DIR,
+                    HOST_SOCKET_PATH)
+
 
 @pytest.fixture(scope="session")
 def memcached():
@@ -52,16 +52,16 @@ def memcached_socket():
     """
     Start a standalone Memcached server.
     """
-    if not os.path.exists(common.HOST_SOCKET_DIR):
-        common.HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
-        common.HOST_SOCKET_PATH = os.path.join(common.HOST_SOCKET_DIR, 'memcached.sock')
+    if not os.path.exists(HOST_SOCKET_DIR):
+        os.makedirs(HOST_SOCKET_DIR)
+
     env = os.environ
     env['PWD'] = HERE
     env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
-    env['HOST_SOCKET_DIR'] = common.HOST_SOCKET_DIR
+    env['HOST_SOCKET_DIR'] = HOST_SOCKET_DIR
 
-    os.chmod(common.HOST_SOCKET_DIR, 00777)
+    os.chmod(HOST_SOCKET_DIR, 00777)
 
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
@@ -71,7 +71,7 @@ def memcached_socket():
         if attempts > 10:
             raise Exception("Memcached boot timed out!")
 
-        mc = bmemcached.Client(common.HOST_SOCKET_PATH, USERNAME, PASSWORD)
+        mc = bmemcached.Client(HOST_SOCKET_PATH, USERNAME, PASSWORD)
         try:
             mc.set("foo", "bar")
         except MemcachedException:
@@ -86,7 +86,7 @@ def memcached_socket():
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
     # Remove temporary dir
-    shutil.rmtree(common.HOST_SOCKET_DIR)
+    shutil.rmtree(HOST_SOCKET_DIR)
 
 @pytest.fixture
 def client():
@@ -95,7 +95,7 @@ def client():
 
 @pytest.fixture
 def client_socket():
-    return bmemcached.Client(common.HOST_SOCKET_PATH, USERNAME, PASSWORD)
+    return bmemcached.Client(HOST_SOCKET_PATH, USERNAME, PASSWORD)
 
 
 @pytest.fixture
@@ -117,7 +117,7 @@ def instance():
 @pytest.fixture
 def instance_socket():
     return {
-        'socket': common.HOST_SOCKET_PATH,
+        'socket': HOST_SOCKET_PATH,
         'tags': ["foo:bar"],
         'username': USERNAME,
         'password': PASSWORD,
