@@ -631,7 +631,4 @@ class PrometheusScraperMixin(object):
         self.prometheus_timeout = default_value
         timeout = instance.get('prometheus_timeout')
         if timeout is not None:
-            if timeout <= 0:
-                self.log.debug("Prometheus integration timeout is incorrect, defaulting to {}".format(default_value))
-            else:
-                self.prometheus_timeout = timeout
+            self.prometheus_timeout = timeout
