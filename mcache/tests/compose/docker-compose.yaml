@@ -16,5 +16,5 @@ services:
       USERNAME: testuser
       PASSWORD: testpass
     volumes:
-    - ${UNIXSOCKET_DIR}:${DOCKER_SOCKET_DIR}
-    command: memcached -S -s ${DOCKER_SOCKET_PATH} -a 777
+    - ${HOST_SOCKET_DIR}:${DOCKER_SOCKET_DIR}
+    command: memcached -S -s ${HOST_SOCKET_PATH} -a 777
