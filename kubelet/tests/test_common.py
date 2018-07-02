@@ -38,6 +38,16 @@ def test_container_filter(monkeypatch):
     assert short_cid in filter.containers
     is_excluded.assert_not_called()
 
+    # Test cid == None
+    is_excluded.reset_mock()
+    assert filter.is_excluded(None) is True
+    is_excluded.assert_not_called()
+
+    # Test cid == ""
+    is_excluded.reset_mock()
+    assert filter.is_excluded("") is True
+    is_excluded.assert_not_called()
+
     # Test non-existing container
     is_excluded.reset_mock()
     assert filter.is_excluded("invalid") is True
