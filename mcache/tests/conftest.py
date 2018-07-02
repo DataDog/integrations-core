@@ -4,6 +4,7 @@
 
 import subprocess
 import os
+import tempfile
 import shutil
 import time
 import pytest
@@ -13,8 +14,10 @@ from bmemcached.exceptions import MemcachedException
 from datadog_checks.utils.platform import Platform
 from datadog_checks.mcache import Memcache
 
-from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH, HOST_SOCKET_DIR,
-                    HOST_SOCKET_PATH)
+from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH)
+
+HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
+HOST_SOCKET_PATH = os.path.join(HOST_SOCKET_DIR, 'memcached.sock')
 
 
 @pytest.fixture(scope="session")
@@ -53,9 +56,10 @@ def memcached_socket():
     """
     Start a standalone Memcached server.
     """
-    if Platform.is_linux() and not os.path.exists(HOST_SOCKET_DIR):
-        # make the temp directory on linux
-        os.makedirs(HOST_SOCKET_DIR)
+    # if Platform.is_linux() and not os.path.exists(HOST_SOCKET_DIR):
+    #     # make the temp directory on linux
+    #     HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
+    #     HOST_SOCKET_PATH = os.path.join(HOST_SOCKET_DIR, 'memcached.sock')
 
     env = os.environ
     env['PWD'] = HERE
@@ -87,11 +91,7 @@ def memcached_socket():
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
 
     if Platform.is_linux():
-        # make the temp directory on linux
-        try:
-            shutil.rmtree(HOST_SOCKET_DIR)
-        except OSError:
-            pass
+        shutil.rmtree(HOST_SOCKET_DIR, ignore_errors=True)
 
 
 @pytest.fixture
