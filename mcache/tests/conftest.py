@@ -67,6 +67,7 @@ def memcached_socket():
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
     env['HOST_SOCKET_DIR'] = HOST_SOCKET_DIR
 
+    os.chmod(HOST_SOCKET_DIR, 0777)
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
 
@@ -135,4 +136,3 @@ def aggregator():
     from datadog_checks.stubs import aggregator
     aggregator.reset()
     return aggregator
-
