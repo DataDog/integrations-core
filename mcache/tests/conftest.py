@@ -52,14 +52,15 @@ def memcached_socket():
     """
     Start a standalone Memcached server.
     """
+    if Platform.is_linux() and not os.path.exists(HOST_SOCKET_DIR):
+        # make the temp directory on linux
+        os.makedirs(HOST_SOCKET_DIR)
+
     env = os.environ
     env['PWD'] = HERE
     env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
     env['HOST_SOCKET_DIR'] = HOST_SOCKET_DIR
-    if Platform.is_linux() and not os.path.exists(HOST_SOCKET_DIR):
-        # make the temp directory on linux
-        os.makedirs(HOST_SOCKET_DIR)
 
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
@@ -83,7 +84,7 @@ def memcached_socket():
     yield
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
-    
+
     if Platform.is_linux():
         # make the temp directory on linux
         try:
