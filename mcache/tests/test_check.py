@@ -4,7 +4,6 @@
 
 import subprocess
 import os
-import stat
 import time
 import pytest
 import bmemcached
@@ -149,18 +148,8 @@ def memcached_socket():
     env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
     env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
     env['UNIXSOCKET_DIR'] = UNIXSOCKET_DIR
-    MEMCACHE_UID = subprocess.check_output(['id', '-u']).replace('\n', '')
-    env['MEMCACHE_UID'] = MEMCACHE_UID
-    MEMCACHE_GID = subprocess.check_output(['id', '-g']).replace('\n', '')
-    env['MEMCACHE_GID'] = MEMCACHE_GID
-    print("DOCKER_SOCKET_DIR", DOCKER_SOCKET_DIR)
-    print("DOCKER_SOCKET_PATH", DOCKER_SOCKET_PATH)
-    print("UNIXSOCKET_DIR", UNIXSOCKET_DIR)
-    print("UNIXSOCKET_PATH", UNIXSOCKET_PATH)
-    print("MEMCACHE_UID", MEMCACHE_UID)
-    print("MEMCACHE_GID", MEMCACHE_GID)
 
-    os.chmod(UNIXSOCKET_DIR, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    os.chmod(UNIXSOCKET_DIR, 00777)
 
     docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
@@ -215,7 +204,7 @@ def instance():
 @pytest.fixture
 def instance_socket():
     return {
-        'socket': DOCKER_SOCKET_PATH,
+        'socket': UNIXSOCKET_PATH,
         'tags': ["foo:bar"],
         'username': USERNAME,
         'password': PASSWORD,
@@ -288,13 +277,9 @@ def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_so
     """
     Service is up
     """
-    tags = ["socket:{}".format(UNIXSOCKET_PATH), "foo:bar"]
-    try:
-        check.check(instance_socket)
-    except Exception:
-        docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-        subprocess.check_call(["docker-compose", "-f", docker_compose_file, "logs", "memcached_socket"],
-                              env=os.environ)
+    tags = ["host:unix", "port:{}".format(UNIXSOCKET_PATH), "foo:bar"]
+
+    check.check(instance_socket)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
     assert sc.status == check.OK
