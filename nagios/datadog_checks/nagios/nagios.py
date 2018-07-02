@@ -202,7 +202,7 @@ class NagiosTailer(object):
         self._gauge = gauge_func
         self._line_parsed = 0
         self._freq = freq
-        self._tags = tags
+        self._tags = [] if tags is None else tags
 
         if file_template is not None:
             self.compile_file_template(file_template)
