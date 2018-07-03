@@ -46,6 +46,7 @@ METRICS = [
     # pods
     NAMESPACE + '.pod.ready',
     NAMESPACE + '.pod.scheduled',
+    NAMESPACE + '.pod.status_phase',
     # containers
     NAMESPACE + '.container.ready',
     NAMESPACE + '.container.running',
@@ -81,6 +82,12 @@ TAGS = {
         'condition:MemoryPressure', 'condition:DiskPressure',
         'condition:OutOfDisk', 'condition:Ready',
         'status:true', 'status:false', 'status:unknown',
+    ],
+    NAMESPACE + '.pod.status_phase': [
+        'phase:Pending', 'phase:Running',
+        'phase:Failed', 'phase:Succeeded',
+        'phase:Unknown', 'namespace:default',
+        'namespace:kube-system'
     ],
     NAMESPACE + '.container.status_report.count.waiting': [
         'reason:CrashLoopBackoff',
@@ -216,6 +223,18 @@ def test_update_kube_state_metrics(aggregator, instance, check):
                              tags=['condition:Ready', 'status:false', 'optional:tag1'], value=0)
     aggregator.assert_metric(NAMESPACE + '.nodes.by_condition',
                              tags=['condition:Ready', 'status:unknown', 'optional:tag1'], value=0)
+
+    # Make sure we send counts for all phases to avoid no-data graphing issues
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Pending', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Succeeded', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
+                             tags=['namespace:default', 'phase:Unknown', 'optional:tag1'], value=0)
 
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))

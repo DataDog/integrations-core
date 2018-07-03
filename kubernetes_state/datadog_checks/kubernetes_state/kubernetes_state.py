@@ -342,7 +342,8 @@ class KubernetesState(PrometheusCheck):
     # Labels attached: namespace, pod
     # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
     # From the phase the check will update its status
-    # Also submits as a gauge metric with tags so it is visualisable over time
+    # Also submits as an aggregated count with minimal tags so it is
+    # visualisable over time per namespace and phase
     def kube_pod_status_phase(self, message, **kwargs):
         """ Phase a pod is in. """
         metric_name = self.NAMESPACE + '.pod.status_phase'
@@ -350,10 +351,17 @@ class KubernetesState(PrometheusCheck):
         # More details about the phase in the message of the check.
         check_basename = self.NAMESPACE + '.pod.phase'
         for metric in message.metric:
-            tags = [self._label_to_tag("pod", metric.label), self._label_to_tag("namespace", metric.label),
-                    self._label_to_tag("phase", metric.label)] + self.custom_tags
-            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status, tags=tags)
-            self.gauge(metric_name, metric.gauge.value, tags)
+            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
+                                         tags=[self._label_to_tag("pod", metric.label),
+                                               self._label_to_tag("namespace", metric.label)] + self.custom_tags)
+
+            # Counts aggregated cluster-wide to avoid no-data issues on pod churn,
+            # pod granularity available in the service checks
+            tags = [
+                self._label_to_tag("namespace", metric.label),
+                self._label_to_tag("phase", metric.label)
+            ] + self.custom_tags
+            self.count(metric_name, metric.gauge.value, tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
