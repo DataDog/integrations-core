@@ -628,7 +628,4 @@ class PrometheusScraperMixin(object):
 
     def set_prometheus_timeout(self, instance, default_value=10):
         """ extract `prometheus_timeout` directly from the instance configuration """
-        self.prometheus_timeout = default_value
-        timeout = instance.get('prometheus_timeout')
-        if timeout is not None:
-            self.prometheus_timeout = timeout
+        self.prometheus_timeout = instance.get('prometheus_timeout', default_value)
