@@ -1601,3 +1601,30 @@ def test_health_service_check_failing():
         PrometheusCheck.CRITICAL,
         tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
+
+def test_set_prometheus_timeout():
+    """ Tests set_prometheus_timeout function call from a PrometheusCheck"""
+    # no timeout specified, should be default 10
+    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    instance_default = {
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'foobar',
+        'metrics': [
+            'metric3'
+        ]
+    }
+    check.set_prometheus_timeout(instance_default)
+    assert check.prometheus_timeout == 10
+
+    # timeout set to 3
+    check2 = PrometheusCheck('prometheus_check', {}, {}, {})
+    instance_timeout_set = {
+        'prometheus_timeout': 3,
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'foobar',
+        'metrics': [
+            'metric3'
+        ]
+    }
+    check2.set_prometheus_timeout(instance_timeout_set)
+    assert check2.prometheus_timeout == 3
