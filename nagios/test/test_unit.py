@@ -21,18 +21,19 @@ class TestGaugeWrapper:
         Test the 'gauge' wrapper to see if it strips the 'timestamp' arg for gauge functions that do not accept it
         """
 
-        def timestamp_excluded_gauge(self, name, value, **kwargs):
+        def gauge_v6(self, name, value, tags=None, hostname=None, device_name=None):
             """
             A gauge function that does not accept the 'timestamp' argument
             """
             # Make sure we get the original arguments back and timestamp is not being received
             assert name == METRIC_NAME
             assert value == METRIC_VALUE
-            assert 'timestamp' not in kwargs
-            assert kwargs['tags'] == METRIC_TAGS
+            assert tags == METRIC_TAGS
+            assert hostname is None
+            assert device_name is None
 
         # Make sure we're removing timestamps for gauge functions that do not accept 'timestamp'
-        with patch('datadog_checks.checks.AgentCheck.gauge', new=timestamp_excluded_gauge):
+        with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v6):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
 
@@ -41,18 +42,19 @@ class TestGaugeWrapper:
         Test the 'gauge' wrapper to see if it doesn't strip anything for gauge functions that accept timestamps
         """
 
-        def timestamp_included_gauge(self, name, value, tags=None, timestamp=None):
+        def gauge_v5(self, metric, value, tags=None, hostname=None, device_name=None, timestamp=None):
             """
             A gauge function that should accept the 'timestamp' argument
             """
-
             # Make sure we get the original arguments back
-            assert name == METRIC_NAME
+            assert metric == METRIC_NAME
             assert value == METRIC_VALUE
-            assert timestamp == METRIC_TIMESTAMP
             assert tags == METRIC_TAGS
+            assert hostname is None
+            assert device_name is None
+            assert timestamp == METRIC_TIMESTAMP
 
         # Make sure we're removing timestamps for gauge functions that do not accept 'timestamp'
-        with patch('datadog_checks.checks.AgentCheck.gauge', new=timestamp_included_gauge):
+        with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v5):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
