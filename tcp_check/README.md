@@ -1,5 +1,7 @@
 # Agent Check: TCP connectivity
-{{< img src="integrations/tcpcheck/netgraphs.png" alt="Network Graphs" responsive="true" popup="true">}}
+
+![Network Graph][9]
+
 ## Overview
 
 Monitor TCP connectivity and response time for any host and port.
@@ -12,7 +14,7 @@ The TCP check is included in the [Datadog Agent][1] package, so you don't need t
 
 ### Configuration
 
-Edit the `tcp_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample tcp_check.d/conf.yaml][2] for all available configuration options:
+Edit the `tcp_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample tcp_check.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -64,10 +66,11 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/datadog_checks/tcp_check/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv
 [6]: https://app.datadoghq.com/monitors#/create
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/
+[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png

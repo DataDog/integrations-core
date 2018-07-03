@@ -11,7 +11,7 @@ The Windows Service check is included in the [Datadog Agent][1] package, so you 
 
 ### Configuration
 
-Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample windows_service.d/conf.yaml][2] for all available configuration options:
+Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample windows_service.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -70,10 +70,10 @@ Need help? Contact [Datadog Support][5].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/windows_service/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/windows_service/datadog_checks/windows_service/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[5]: http://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitoring-windows-server-2012/
 [7]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
 [8]: https://www.datadoghq.com/blog/windows-server-monitoring/

@@ -1,5 +1,7 @@
 # Agent Check: Supervisor
-{{< img src="integrations/supervisor/supervisorevent.png" alt="Supervisor Event" responsive="true" popup="true">}}
+
+![Supervisor Event][8]
+
 ## Overview
 
 This check monitors the uptime, status, and number of processes running under supervisord.
@@ -48,7 +50,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -126,9 +128,10 @@ Need help? Contact [Datadog Support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/supervisord/datadog_checks/supervisord/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/supervisor/supervisorevent.png

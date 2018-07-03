@@ -57,7 +57,7 @@ from datadog_checks.config import _is_affirmative
 
 class MapReduceCheck(AgentCheck):
     # Default Settings
-    DEFAULT_CUSTER_NAME = 'default_cluster'
+    DEFAULT_CLUSTER_NAME = 'default_cluster'
 
     # Service Check Names
     YARN_SERVICE_CHECK = 'mapreduce.resource_manager.can_connect'
@@ -143,9 +143,9 @@ class MapReduceCheck(AgentCheck):
         if cluster_name is None:
             self.warning(
                 "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(self.DEFAULT_CUSTER_NAME)
+                "defaulting to '{}'".format(self.DEFAULT_CLUSTER_NAME)
             )
-            cluster_name = self.DEFAULT_CUSTER_NAME
+            cluster_name = self.DEFAULT_CLUSTER_NAME
 
         tags.append('cluster_name:{}'.format(cluster_name))
 
@@ -468,11 +468,12 @@ class MapReduceCheck(AgentCheck):
         else:
             self.log.error('Metric type "{}" unknown'.format(metric_type))
 
-    def _rest_request_to_json(self, address, auth, ssl_verify, object_path, service_name, tags=[], *args, **kwargs):
+    def _rest_request_to_json(self, address, auth, ssl_verify, object_path, service_name, tags=None, *args, **kwargs):
         """
         Query the given URL and return the JSON response
         """
         response_json = None
+        tags = [] if tags is None else tags
 
         service_check_tags = ['url:{}'.format(self._get_url_base(address))] + tags
 

@@ -1,5 +1,7 @@
 # Agent Check: Zookeeper
-{{< img src="integrations/zookeeper/zookeepergraph.png" alt="Zookeeper Dashboard" responsive="true" popup="true">}}
+
+![Zookeeper Dashboard][20]
+
 ## Overview
 
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
@@ -11,7 +13,7 @@ The Zookeeper check is included in the [Datadog Agent][13] package, so you don't
 
 ### Configuration
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample zk.d/conf.yaml][14] for all available configuration options.
 
 2. [Restart the Agent][15]
@@ -139,9 +141,10 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
-[14]: https://github.com/DataDog/integrations-core/blob/master/zk/conf.yaml.example
+[14]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
 [15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
-[18]: http://docs.datadoghq.com/help/
+[18]: https://docs.datadoghq.com/help/
 [19]: https://www.datadoghq.com/blog/
+[20]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/zookeeper/zookeepergraph.png

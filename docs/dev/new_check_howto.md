@@ -21,6 +21,8 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
+You'll also need `docker-compose` in order to run the test harness. 
+
 ## Setup
 
 Clone the [integrations extras repository][IntegrationsExtrasRepository] and point your shell at the root:
@@ -48,10 +50,11 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── CHANGELOG.md
     ├── MANIFEST.in
     ├── README.md
-    ├── conf.yaml.example
     ├── datadog_checks
     │   ├── __init__.py
     │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
     │       ├── __about__.py
     │       ├── __init__.py
     │       └── foo_check.py
@@ -111,11 +114,11 @@ class MyCheck(AgentCheck):
             r = requests.get(url)
             r.raise_for_status()
             if search_string in r.text:
-                self.service_check(self.OK)
+                self.service_check('my_check.all_good', self.OK)
             else:
-                self.service_check(self.WARNING)
+                self.service_check('my_check.all_good', self.WARNING)
         except Exception as e:
-            self.service_check(self.CRITICAL, e)
+            self.service_check('my_check.all_good', self.CRITICAL, e)
 ```
 
 To learn more about the base Python class, see the [Python API documentation][2]. Now let's write some tests and see if that works.
@@ -252,7 +255,7 @@ def test_service_check(aggregator):
 Run only the integration tests for faster iterations:
 
 ```
-tox -e integrations
+tox -e integration
 ```
 
 The check is almost done. Let's add the final touches.
@@ -319,7 +322,7 @@ Our check sends a Service Check though, so we need to add it to the `service_che
 [1]: https://github.com/audreyr/cookiecutter
 [2]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
 [3]: https://docs.pytest.org/en/latest/
-[4]: http://tox.readthedocs.io/en/latest/
+[4]: https://tox.readthedocs.io/en/latest/
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [IntegrationsExtrasRepository]: https://github.com/DataDog/integrations-extras

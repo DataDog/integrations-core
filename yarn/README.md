@@ -1,5 +1,7 @@
 # Agent Check: Hadoop YARN
-{{< img src="integrations/yarn/yarndashboard.png" alt="Hadoop Yarn" responsive="true" popup="true">}}
+
+![Hadoop Yarn][11]
+
 ## Overview
 
 This check collects metrics from your YARN ResourceManager, including (but not limited to)::
@@ -16,7 +18,7 @@ The YARN check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory.
+1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
 
     ```yaml
     	init_config:
@@ -60,12 +62,13 @@ Need help? Contact [Datadog Support][6].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/yarn/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/yarn/datadog_checks/yarn/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/hadoop-architecture-overview/
 [8]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
+[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/yarn/yarndashboard.png

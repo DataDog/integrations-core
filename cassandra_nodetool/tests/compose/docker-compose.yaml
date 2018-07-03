@@ -1,0 +1,28 @@
+version: '3.5'
+
+services:
+  dd-test-cassandra:
+    image: cassandra:${CASSANDRA_VERSION}
+    container_name: dd-test-cassandra
+    ports:
+      - ${CONTAINER_PORT}:${CONTAINER_PORT}
+    environment:
+      JMX_PORT: ${CONTAINER_PORT}
+      LOCAL_JMX: "no"
+      JVM_EXTRA_OPTS: >
+        -Dcom.sun.management.jmxremote.port=${CONTAINER_PORT}
+        -Dcom.sun.management.jmxremote.rmi.port=${CONTAINER_PORT}
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=true
+        -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password
+        -Djava.rmi.server.hostname=localhost
+    expose:
+      - ${CONTAINER_PORT}
+    volumes:
+      - ./jmxremote.password:/etc/cassandra/jmxremote.password
+
+  dd-test-cassandra2:
+    image: cassandra:${CASSANDRA_VERSION}
+    container_name: dd-test-cassandra2
+    environment:
+      CASSANDRA_SEEDS: ${CASSANDRA_SEEDS}

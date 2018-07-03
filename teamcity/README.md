@@ -16,7 +16,7 @@ The Teamcity check is included in the [Datadog Agent][1] package, so you don't n
 
 Follow [Teamcity's documentation][2] to enable Guest Login.
 
-Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
+Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample teamcity.d/conf.yaml][3] for all available configuration options:
 
 ```
 init_config:
@@ -62,8 +62,8 @@ Need help? Contact [Datadog Support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
-[3]: https://github.com/DataDog/integrations-core/blob/master/teamcity/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/

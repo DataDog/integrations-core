@@ -1,5 +1,7 @@
 # Ceph Integration
-{{< img src="integrations/ceph/ceph_graph.png" alt="Ceph Graph" responsive="true" popup="true">}}
+
+![Ceph Graph][7]
+
 ## Overview
 
 Enable the Datadog-Ceph integration to:
@@ -14,9 +16,9 @@ Enable the Datadog-Ceph integration to:
 The Ceph check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Ceph servers.
 
 ### Configuration
- 
-Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory.  
-See the [sample ceph.d/conf.yaml][2] for all available configuration options:  
+
+Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory.
+See the [sample ceph.d/conf.yaml][2] for all available configuration options:
 
 ```yaml
 init_config:
@@ -97,8 +99,9 @@ Need help? Contact [Datadog Support][5].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/ceph/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
-[5]: http://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-ceph-datadog/
+[7]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/ceph/ceph_graph.png

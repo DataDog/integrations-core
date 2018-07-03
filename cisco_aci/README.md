@@ -15,8 +15,8 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1]
 
 ### Configuration
 
-1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.  
-    See the [sample cisco_aci.d/conf.yaml][2] for all available configuration options:  
+1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+    See the [sample cisco_aci.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
       init_config:
@@ -62,9 +62,9 @@ Need help? Contact [Datadog Support][6].
 Learn more about infrastructure monitoring and all our integrations on [our blog][7]
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/

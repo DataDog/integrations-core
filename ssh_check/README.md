@@ -11,7 +11,7 @@ The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-1. Edit the `ssh_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory.  
+1. Edit the `ssh_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample ssh_check.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -60,9 +60,9 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/datadog_checks/ssh_check/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/

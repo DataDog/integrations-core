@@ -19,7 +19,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
 
 2. [Restart the Agent][16]
@@ -291,7 +291,7 @@ Make sure you clone and edit the [integration pipeline][19] if you have a differ
 
   Change the `path` and `service` parameter values and configure them for your environment.
     see the [sample tomcat.yaml][17] for all available configuration options.
-    * [Restart the Agent][16]. 
+    * [Restart the Agent][16].
 
 ### Validation
 
@@ -335,11 +335,11 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 
 
 [13]: https://app.datadoghq.com/account/settings#agent
-[14]: http://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[15]: http://docs.datadoghq.com/integrations/java/
+[14]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[15]: https://docs.datadoghq.com/integrations/java/
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/conf.yaml.example
-[18]: http://tomcat.apache.org/tomcat-7.0-doc/logging.html
+[17]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
+[18]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [19]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv

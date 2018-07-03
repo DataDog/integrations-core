@@ -8,28 +8,28 @@ This integration lets you monitor your Squid metrics from the Cache Manager dire
 
 ### Installation
 
-The Agent's Squid check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Squid server.  
+The Agent's Squid check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Squid server.
 
-## Configuration
+### Configuration
 
-1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory.  
-	See the [sample squid.d/conf.yaml][2] for all available configuration options:
+1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
+    See the [sample squid.d/conf.yaml][2] for all available configuration options:
 
-    ```yaml
-	    init_config:
+```
+    init_config:
 
-	    instances:
-	      # A list of squid instances identified by their name
+    instances:
+        # A list of squid instances identified by their name
 
-      	- name: my_squid
-	      #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
-	      #   port: 3128  # The port where the squid server is listening. Default to 3128
-	      #   tags: ['custom:tag']  # A list of tags that you wish to send with your squid metrics
-    ```
+        - name: my_squid
+        #   host: localhost  # The hostname or ip address of the squid server. Default to 'localhost'
+        #   port: 3128  # The port where the squid server is listening. Default to 3128
+        #   tags: ['custom:tag']  # A list of tags that you wish to send with your squid metrics
+```
 
 2. [Restart the Agent][10] to start sending metrics and service checks to Datadog.
 
-## Validation
+### Validation
 
 [Run the Agent's info subcommand][3] and look for `squid` under the Checks section.
 
@@ -70,12 +70,12 @@ Reach out to our team and other Datadog users on [Slack][9].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/squid/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
 [5]: https://docs.datadoghq.com/
 [6]: https://datadog.zendesk.com/agent/
 [7]: https://app.datadoghq.com/event/stream
 [8]: mailto:support@datadoghq.com
-[9]: http://chat.datadoghq.com/
+[9]: https://chat.datadoghq.com/
 [10]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

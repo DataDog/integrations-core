@@ -1,5 +1,6 @@
 # Agent Check: Varnish
-{{< img src="integrations/varnish/varnish.png" alt="Varnish default dashboard" responsive="true" popup="true">}}
+
+![Varnish default dashboard][11]
 
 ## Overview
 
@@ -19,7 +20,7 @@ The Varnish check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample varnish.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -124,12 +125,13 @@ Need help? Contact [Datadog Support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/varnish/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/logs
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
-[7]: http://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
 [9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/
+[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/varnish/varnish.png

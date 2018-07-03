@@ -19,7 +19,7 @@ The MySQL check is included in the [Datadog Agent][13] package, so you don't nee
 
 ### Configuration
 
-Edit `conf.d/mysql.d/conf.yaml` in the root of your Agent's directory in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
+Edit `conf.d/mysql.d/conf.yaml` in the root of your Agent's configuration directory in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -90,7 +90,7 @@ Query OK, 0 rows affected (0.00 sec)
           schema_size_metrics: false
           disable_innodb_metrics: false
   ```
-  
+
 **Note**: Wrap your password in single quotes in case a special character is present.
 
 In order to gather `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, [see the MySQL documentation][15].
@@ -361,7 +361,7 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
 [15]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
-[16]: https://github.com/Datadog/integrations-core/blob/master/mysql/conf.yaml.example
+[16]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [17]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [18]: https://docs.datadoghq.com/logs
 [19]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information

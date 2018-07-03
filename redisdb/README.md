@@ -12,7 +12,7 @@ The Redis check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample redis.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
@@ -224,7 +224,7 @@ Read our [series of blog posts][8] about how to monitor your Redis servers with 
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/redisdb/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv

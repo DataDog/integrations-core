@@ -99,14 +99,14 @@ Need help? Contact [Datadog Support][10].
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out our [series of blog posts][11] about it.
 
 
-[1]: http://docs.datadoghq.com/monitoring/#process
+[1]: https://docs.datadoghq.com/monitoring/#process
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/process/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
 [4]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/process.py#L117
 [5]: https://github.com/DataDog/integrations-core/tree/master/docker_daemon
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [8]: https://docs.datadoghq.com/agent/faq/why-don-t-i-see-the-system-processes-open-file-descriptors-metric
 [9]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
-[10]: http://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/process-check-monitoring/

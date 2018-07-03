@@ -1,5 +1,7 @@
 # PHP-FPM Check
-{{< img src="integrations/phpfpm/phpfpmoverview.png" alt="PHP overview" responsive="true" popup="true">}}
+
+![PHP overview][8]
+
 ## Overview
 
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.
@@ -11,7 +13,7 @@ The PHP-FPM check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory. See the [sample php_fpm.d/conf.yaml][2] for all available configuration options:
+Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample php_fpm.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -64,9 +66,10 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/phpfpm/phpfpmoverview.png

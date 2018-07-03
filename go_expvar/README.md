@@ -1,5 +1,7 @@
 # Go Expvar Integration
-{{< img src="integrations/goexpvar/go_graph.png" alt="Go Graph" responsive="true" popup="true">}}
+
+![Go graph][11]
+
 ## Overview
 
 Track the memory usage of your Go services and collect metrics instrumented from Go's expvar package.
@@ -20,8 +22,8 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's directory. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
-    
+1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
+
     ```yaml
         init_config:
 
@@ -30,7 +32,7 @@ If your service doesn't already listen for HTTP requests (via the http package),
             # optionally change the top-level namespace for metrics, e.g. my_go_app.memstats.alloc
             namespace: my_go_app # defaults to go_expvar, e.g. go_expvar.memstats.alloc
             # optionally define the metrics to collect, e.g. a counter var your service exposes with expvar.NewInt("my_func_counter")
-            
+
             metrics:
               - path: my_func_counter
                 # if you don't want it named my_go_app.my_func_counter
@@ -71,9 +73,10 @@ Need help? Contact [Datadog Support][9].
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://golang.org/pkg/expvar/
 [4]: https://golang.org/pkg/net/http/#ListenAndServe
-[5]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/conf.yaml.example
+[5]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/datadog_checks/go_expvar/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
-[9]: http://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/
+[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/goexpvar/go_graph.png

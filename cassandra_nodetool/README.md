@@ -12,7 +12,7 @@ The Cassandra Nodetool check is included in the [Datadog Agent][2] package, so y
 
 ### Configuration
 
-Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's directory.  
+Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory.
 See the [sample cassandra_nodetool.d/conf.yaml][3] for all available configuration options:
 
 ```yaml
@@ -69,10 +69,10 @@ Need help? Contact [Datadog Support][6].
 
 [1]: https://github.com/DataDog/integrations-core/tree/master/cassandra
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/datadog_checks/cassandra_nodetool/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [8]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [9]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/

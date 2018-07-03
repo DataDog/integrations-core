@@ -21,13 +21,13 @@ The Gunicorn check requires your Gunicorn app's Python environment to have the [
 
 ### Configuration
 
-Edit the `gunicorn.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your GUNICORN [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `gunicorn.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GUNICORN [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample gunicorn.yaml][3] for all available configuration options.
-  
-#### Metric Collection  
+
+#### Metric Collection
 
 * Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering your [GUNICORN metrics](#metrics):
-  
+
     ```yaml
     init_config:
 
@@ -77,7 +77,7 @@ Since version 19.1, Gunicorn [provides an option][5] to send its metrics to a da
           name: log_start_with_date
           pattern: \[\d{4}-\d{2}-\d{2}
   ```
-  
+
   Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample gunicorn.yaml][3] for all available configuration options.
 
@@ -153,12 +153,12 @@ To get a better idea of how (or why) to integrate your Gunicorn apps with Datado
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://pypi.python.org/pypi/setproctitle
-[3]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[5]: http://docs.gunicorn.org/en/stable/settings.html#statsd-host
+[5]: https://docs.gunicorn.org/en/stable/settings.html#statsd-host
 [6]: https://docs.datadoghq.com/guides/dogstatsd
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/metadata.csv
 [9]: https://www.datadoghq.com/blog/monitor-gunicorn-performance/
-[10]: http://docs.gunicorn.org/en/stable/settings.html#accesslog
-[11]: http://docs.gunicorn.org/en/stable/settings.html#errorlog
+[10]: https://docs.gunicorn.org/en/stable/settings.html#accesslog
+[11]: https://docs.gunicorn.org/en/stable/settings.html#errorlog

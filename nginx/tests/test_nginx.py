@@ -196,7 +196,7 @@ def test_plus_api(check, instance, aggregator):
     all = 0
     for m in aggregator.metric_names:
         all += len(aggregator.metrics(m))
-    assert all == 956
+    assert all == 1180
 
 
 def test_nest_payload(check):

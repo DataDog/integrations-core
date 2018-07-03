@@ -49,12 +49,12 @@ If you're using Miniconda, a tool to manage virtual environments is already ther
 
 [1]: https://github.com/DataDog/omnibus-software/blob/master/config/software/python.rb#L21
 [2]: https://pythonclock.org/
-[3]: http://brew.sh/#install
-[4]: http://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
-[5]: http://anaconda.com
+[3]: https://brew.sh/#install
+[4]: https://docs.python-guide.org/en/latest/starting/install/osx/#doing-it-right
+[5]: https://anaconda.com
 [6]: https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh
 [7]: https://conda.io/docs/user-guide/install/macos.html
-[8]: http://pypi.python.org/pypi/virtualenv
+[8]: https://pypi.python.org/pypi/virtualenv
 [9]: https://virtualenvwrapper.readthedocs.io/en/latest/index.html
-[10]: http://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv
+[10]: https://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv
 [11]: https://conda.io/docs/user-guide/tasks/manage-environments.html

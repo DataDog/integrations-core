@@ -1,5 +1,7 @@
 # Spark Check
-{{< img src="integrations/spark/sparkgraph.png" alt="spark graph" responsive="true" popup="true">}}
+
+![Spark Graph][10]
+
 ## Overview
 
 The Spark check collects metrics for:
@@ -20,7 +22,7 @@ The Spark check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory.  
+1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample spark.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -77,7 +79,7 @@ To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][6] t
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/spark/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
@@ -85,3 +87,4 @@ To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][6] t
 [7]: https://docs.datadoghq.com/agent/
 [8]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [9]: https://www.datadoghq.com/blog/monitoring-spark/
+[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/spark/sparkgraph.png

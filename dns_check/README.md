@@ -8,15 +8,15 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 
 ### Installation
 
-The DNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on the server from which you will probe your DNS servers.  
+The DNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on the server from which you will probe your DNS servers.
 
 Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored DNS services.
 
 ### Configuration
 
-1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your Couchbase performance data.  
+1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Couchbase performance data.
     See the [sample dns_check.d/conf.yaml][2] for all available configuration options:
-    
+
     ```yaml
       init_config:
 
@@ -28,7 +28,7 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
         - name: Example (org)
           hostname: example.org
     ```
-    
+
     If you omit the `nameserver` option, the check uses whichever nameserver is configured in local network settings.
 
 2. [Restart the Agent][3] to begin sending DNS service checks and response times to Datadog.
@@ -66,9 +66,9 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/dns_check/datadog_checks/dns_check/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/

@@ -76,7 +76,7 @@ For new integrations, please open a pull request in the [integrations-extras][ex
 
 [troubleshooting]: https://datadog.zendesk.com/hc/en-us/sections/200766955-Troubleshooting
 [kb]: https://datadog.zendesk.com/hc/en-us
-[support]: http://docs.datadoghq.com/help/
+[support]: https://docs.datadoghq.com/help/
 [flare]: https://docs.datadoghq.com/agent/troubleshooting/#send-a-flare
 [extras]: https://github.com/DataDog/integrations-extras
-[slack]: http://datadoghq.slack.com
+[slack]: https://datadoghq.slack.com

@@ -1,5 +1,7 @@
 # Agent Check: Apache Web Server
-{{< img src="integrations/apache/apachegraph.png" alt="apache graph" responsive="true" popup="true">}}
+
+![Apache Graph][12]
+
 ## Overview
 
 The Apache check tracks requests per second, bytes served, number of worker threads, service uptime, and more.
@@ -15,7 +17,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -103,7 +105,7 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/apache/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/logs
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
@@ -113,3 +115,4 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 [9]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/
 [10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
 [11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
+[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/apache/apachegraph.png

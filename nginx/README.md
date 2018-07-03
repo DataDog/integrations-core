@@ -1,5 +1,6 @@
 # NGINX check
-{{< img src="integrations/nginx/nginx.jpg" alt="NGINX default dashboard" responsive="true" popup="true">}}
+
+![NGINX default dashboard][14]
 
 ## Overview
 
@@ -42,7 +43,7 @@ If the command output does not include `http_stub_status_module`, you must insta
 
 ### Configuration
 
-Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `nginx.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NGINX [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample nginx.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare NGINX
@@ -210,15 +211,16 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: http://nginx.org/en/docs/http/ngx_http_stub_status_module.html
-[3]: http://nginx.org/en/docs/http/ngx_http_status_module.html
+[2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
+[3]: https://nginx.org/en/docs/http/ngx_http_status_module.html
 [4]: https://www.nginx.com/blog/nginx-plus-r13-released/
-[5]: https://github.com/DataDog/integrations-core/blob/master/nginx/conf.yaml.example
+[5]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[10]: http://nginx.org/en/docs/http/ngx_http_status_module.html#data
+[10]: https://nginx.org/en/docs/http/ngx_http_status_module.html#data
 [11]: https://www.datadoghq.com/blog/how-to-monitor-nginx/
 [12]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [13]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[14]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/nginx/nginx.jpg

@@ -6,8 +6,7 @@ Integration that allows to:
 
 * Visualize and monitor metrics collected via Gitlab through Prometheus
 
-See https://docs.gitlab.com/ee/administration/monitoring/prometheus/ for
-more information about Gitlab and its integration with Prometheus
+See the [Gitlab documentation][107] for more information about Gitlab and its integration with Prometheus
 
 ## Setup
 ### Installation
@@ -16,7 +15,7 @@ The Gitlab check is included in the [Datadog Agent][101] package, so you don't n
 
 ### Configuration
 
-Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory, to point to the Gitlab's Prometheus metrics endpoint.
+Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to the Gitlab's Prometheus metrics endpoint.
 See the [sample gitlab.d/conf.yaml][102] for all available configuration options.
 
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
@@ -44,8 +43,9 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [101]: https://app.datadoghq.com/account/settings#agent
-[102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/conf.yaml.example
+[102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [104]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
-[105]: http://docs.datadoghq.com/help/
+[105]: https://docs.datadoghq.com/help/
 [106]: https://www.datadoghq.com/blog/
+[107]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/

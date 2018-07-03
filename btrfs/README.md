@@ -1,5 +1,7 @@
 # Btrfs Integration
-{{< img src="integrations/btrfs/btrfs_metric.png" alt="btrfs metric" responsive="true" popup="true">}}
+
+![BTRFS metric][8]
+
 ## Overview
 
 Get metrics from Btrfs service in real time to:
@@ -14,7 +16,7 @@ The Btrfs check is included in the [Datadog Agent][4] package, so you don't need
 
 ### Configuration
 
-1. Configure the Agent according to your needs, edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. 
+1. Configure the Agent according to your needs, edit the `btrfs.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
     See the [sample btrfs.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -42,9 +44,10 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/btrfs/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/btrfs/datadog_checks/btrfs/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/btrfs/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/btrfs/btrfs_metric.png

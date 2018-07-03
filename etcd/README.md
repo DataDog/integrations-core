@@ -1,5 +1,7 @@
 # Etcd Integration
-{{< img src="integrations/etcd/etcd_graph.png" alt="Etcd Graph" responsive="true" popup="true">}}
+
+![Etcd graph][8]
+
 ## Overview
 
 Collect etcd metrics to:
@@ -15,7 +17,7 @@ The etcd check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's directory to start collecting your etcd performance data.  
+1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your etcd performance data.
     See the [sample etcd.d/conf.yaml][2] for all available configuration options.
 
     ```yaml
@@ -59,9 +61,10 @@ To get a better idea of how (or why) to integrate etcd with Datadog, check out o
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/etcd/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/etcd/datadog_checks/etcd/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-etcd-performance/
+[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/etcd/etcd_graph.png

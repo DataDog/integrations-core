@@ -1,0 +1,54 @@
+init_config:
+
+instances:
+  # The YARN check retrieves metrics from YARNS's ResourceManager. This
+  # check must be run from the Master Node and the ResourceManager URI must
+  # be specified below. The ResourceManager URI is composed of the
+  # ResourceManager's hostname and port.
+  #
+  # The ResourceManager hostname can be found in the yarn-site.xml conf file
+  # under the property yarn.resourcemanager.address
+  #
+  # The ResourceManager port can be found in the yarn-site.xml conf file under
+  # the property yarn.resourcemanager.webapp.address
+  #
+  - resourcemanager_uri: http://localhost:8088
+
+    # A Required friendly name for the cluster.
+    # cluster_name: MyYarnCluster
+
+    # Optionally remove yarn.app metrics from metric collection.
+    # Defaults to true
+    # collect_app_metrics: true
+
+    # Optional tags to be applied to every emitted metric.
+    # tags:
+    #   - "key:value"
+    #   - "instance:production"
+
+    # If your service uses basic HTTP authentication, you can optionally
+    # specify a username and password that will be used in the check.
+    # username: user
+    # password: pass
+
+    # Optional tags retrieved from the application data to be applied to the
+    # application metrics.
+    # application_tags:
+    # # tag_prefix: yarn_key
+    #   app_queue: queue
+    # This will add a tag 'app_queue:name_of_the_queue' to the app metrics,
+    # app_queue being the tag_prefix and queue the actual YARN key.
+    # Allowed yarn keys: applicationType, applicationTags, name, queue, user
+    # By default, the application name is collected with the prefix app_name.
+
+    # Whether to enable SSL certificate verification for HTTP requests. Defaults to true, you may
+    # need to set to false when using self-signed certs
+    # ssl_verify: true
+
+    # Do not emit metrics for certain yarn capacityScheduler queues.
+    # The check can send queue metrics on up to 100 queues.
+    # If you have less than 100 queues, you don't have to set this parameter.
+    # If you have more than 100 queues, please exclude queues with this parameter.
+    # queue_blacklist:
+    #   - foo_queue
+    #   - bar_queue

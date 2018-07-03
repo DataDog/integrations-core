@@ -1,5 +1,7 @@
 # Openstack Integration
-{{< img src="integrations/openstack/openstack.png" alt="OpenStack default dashboard" responsive="true" popup="true">}}
+
+![OpenStack default dashboard][10]
+
 ## Overview
 
 Get metrics from OpenStack service in real time to:
@@ -70,7 +72,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
-3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
+3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
 
 4. [Restart the Agent][3]
 
@@ -119,11 +121,12 @@ See also our blog posts:
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/openstack/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/openstack/datadog_checks/openstack/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
-[6]: http://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/openstack-monitoring-nova/
 [8]: https://www.datadoghq.com/blog/install-openstack-in-two-commands/
 [9]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/
+[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/openstack/openstack.png

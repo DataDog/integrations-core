@@ -118,6 +118,9 @@ class ContainerFilter(object):
         :param pod_uid: pod UID for static pod detection
         :return: bool
         """
+        if not cid:
+            return True
+
         if cid in self.cache:
             return self.cache[cid]
 
