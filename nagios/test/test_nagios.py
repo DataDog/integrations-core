@@ -82,9 +82,9 @@ class EventLogTailerTestCase(NagiosTestCase):
                     assert int(event["sticky_ack"]) >= 0
                     assert int(event["notify_ack"]) >= 0
                     assert event["msg_title"] == \
-                        "event_soft_hard| , event_type| , check_name|cassandra JVM Heap , event_state| , payload| yes , ack_author|nagiosadmin" or \
-                        "event_soft_hard| , event_type| , check_name|cassandra JVM Heap , event_state| , payload| will look into it tomorrow , ack_author|nagiosadmin" or \
-                        "event_soft_hard| , event_type| , check_name|cassandra JVM Heap , event_state| , payload| alq , ack_author|nagiosadmin"
+                        "event_soft_hard|,event_type|,check_name|cassandra JVM Heap,event_state|,payload|yes,ack_author|nagiosadmin" or \
+                        "event_soft_hard|,event_type|,check_name|cassandra JVM Heap,event_state|,payload| will look into it tomorrow,ack_author|nagiosadmin" or \
+                        "event_soft_hard|,event_type|,check_name|cassandra JVM Heap,event_state|,payload|alq,ack_author|nagiosadmin"
                 elif t == "ACKNOWLEDGE_HOST_PROBLEM":
                     assert event["ack_author"] is not None
                     assert int(event["sticky_ack"]) >= 0
