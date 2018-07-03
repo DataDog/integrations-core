@@ -33,3 +33,17 @@ def test_timeout_override():
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'prometheus_timeout': 5}
     check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
     assert check.get_scraper(instance).prometheus_timeout == 5
+
+def test_label_to_hostname_override():
+    endpoint = "none"
+    default_instance = {
+        'default_namespace': {
+            'prometheus_url': endpoint,
+            'metrics': [{"test_rate": "test.rate"}],
+            'label_to_hostname': 'node',
+        }
+    }
+
+    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace'}
+    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    assert check.get_scraper(instance).label_to_hostname == 'node'
