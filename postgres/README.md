@@ -164,7 +164,7 @@ custom_metrics:
     metrics:
         SUM(idx_scan) as idx_scan_count: [postgresql.idx_scan_count_by_table, RATE]
         SUM(idx_tup_read) as idx_read_count: [postgresql.idx_read_count_by_table, RATE]
-    query: SELECT relname, schemaname, %s FROM pg_stat_all_indexes GROUP BY relname;
+    query: SELECT relname, schemaname, %s FROM pg_stat_all_indexes GROUP BY relname, schemaname;
     relation: false
 ```
 
