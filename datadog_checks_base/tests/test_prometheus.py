@@ -1628,15 +1628,3 @@ def test_set_prometheus_timeout():
     }
     check2.set_prometheus_timeout(instance_timeout_set)
     assert check2.prometheus_timeout == 3
-
-    check3 = PrometheusCheck('prometheus_check', {}, {}, {})
-    instance_timeout_set_negative = {
-        'prometheus_timeout': -3,
-        'prometheus_url': 'http://localhost:10249/metrics',
-        'namespace': 'foobar',
-        'metrics': [
-            'metric3'
-        ]
-    }
-    check3.set_prometheus_timeout(instance_timeout_set_negative)
-    assert check3.prometheus_timeout == -3
