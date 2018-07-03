@@ -11,7 +11,6 @@ import pytest
 import bmemcached
 from bmemcached.exceptions import MemcachedException
 
-from datadog_checks.utils.platform import Platform
 from datadog_checks.mcache import Memcache
 
 from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH)
@@ -56,11 +55,6 @@ def memcached_socket():
     """
     Start a standalone Memcached server.
     """
-    # if Platform.is_linux() and not os.path.exists(HOST_SOCKET_DIR):
-    #     # make the temp directory on linux
-    #     HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
-    #     HOST_SOCKET_PATH = os.path.join(HOST_SOCKET_DIR, 'memcached.sock')
-
     env = os.environ
     env['PWD'] = HERE
     env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
@@ -91,8 +85,7 @@ def memcached_socket():
 
     subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
 
-    if Platform.is_linux():
-        shutil.rmtree(HOST_SOCKET_DIR, ignore_errors=True)
+    shutil.rmtree(HOST_SOCKET_DIR, ignore_errors=True)
 
 
 @pytest.fixture

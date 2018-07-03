@@ -7,7 +7,6 @@ from datadog_checks.utils.common import get_docker_hostname
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))
 
 PORT = 11211
 SERVICE_CHECK = 'memcache.can_connect'
