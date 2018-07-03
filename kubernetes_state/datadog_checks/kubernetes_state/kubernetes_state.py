@@ -4,7 +4,7 @@
 
 import re
 import time
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 try:
     # Agent5 compatibility layer
@@ -452,6 +452,7 @@ class KubernetesState(PrometheusCheck):
         """ The ready status of a cluster node. v1.0+"""
         base_check_name = self.NAMESPACE + '.node'
         metric_name = self.NAMESPACE + '.nodes.by_condition'
+        by_condition_counter = Counter()
 
         for metric in message.metric:
             self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
@@ -463,7 +464,10 @@ class KubernetesState(PrometheusCheck):
                 self._label_to_tag("condition", metric.label),
                 self._label_to_tag("status", metric.label)
             ] + self.custom_tags
-            self.count(metric_name, metric.gauge.value, tags)
+            by_condition_counter[tuple(sorted(tags))] += metric.gauge.value
+
+        for tags, count in by_condition_counter.iteritems():
+            self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node (legacy)"""
