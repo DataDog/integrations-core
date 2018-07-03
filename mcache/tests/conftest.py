@@ -15,9 +15,6 @@ from datadog_checks.mcache import Memcache
 
 from common import (HERE, PORT, HOST, USERNAME, PASSWORD, DOCKER_SOCKET_DIR, DOCKER_SOCKET_PATH)
 
-HOST_SOCKET_DIR = os.path.realpath(tempfile.mkdtemp())
-HOST_SOCKET_PATH = os.path.join(HOST_SOCKET_DIR, 'memcached.sock')
-
 
 @pytest.fixture(scope="session")
 def memcached():
@@ -55,37 +52,42 @@ def memcached_socket():
     """
     Start a standalone Memcached server.
     """
-    env = os.environ
-    env['PWD'] = HERE
-    env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
-    env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
-    env['HOST_SOCKET_DIR'] = HOST_SOCKET_DIR
+    try:
+        host_socket_dir = os.path.realpath(tempfile.mkdtemp())
+        host_socket_path = os.path.join(host_socket_dir, 'memcached.sock')
+        os.chmod(host_socket_dir, 0777)
 
-    os.chmod(HOST_SOCKET_DIR, 0777)
-    docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
+        env = os.environ
+        env['PWD'] = HERE
+        env['DOCKER_SOCKET_DIR'] = DOCKER_SOCKET_DIR
+        env['DOCKER_SOCKET_PATH'] = DOCKER_SOCKET_PATH
+        env['HOST_SOCKET_DIR'] = host_socket_dir
 
-    attempts = 0
-    while True:
-        if attempts > 10:
-            raise Exception("Memcached boot timed out!")
+        docker_compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+        subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
+        subprocess.check_call(["docker-compose", "-f", docker_compose_file, "up", "-d", "memcached_socket"], env=env)
 
-        mc = bmemcached.Client(HOST_SOCKET_PATH, USERNAME, PASSWORD)
-        try:
-            mc.set("foo", "bar")
-        except MemcachedException:
-            attempts += 1
-            time.sleep(1)
-        else:
-            mc.delete("foo")
-            mc.disconnect_all()
-            break
+        attempts = 0
+        while True:
+            if attempts > 10:
+                raise Exception("Memcached boot timed out!")
 
-    yield
+            mc = bmemcached.Client(host_socket_path, USERNAME, PASSWORD)
+            try:
+                mc.set("foo", "bar")
+            except MemcachedException:
+                attempts += 1
+                time.sleep(1)
+            else:
+                mc.delete("foo")
+                mc.disconnect_all()
+                break
 
-    subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
+        yield host_socket_dir, host_socket_path
 
-    shutil.rmtree(HOST_SOCKET_DIR, ignore_errors=True)
+        subprocess.check_call(["docker-compose", "-f", docker_compose_file, "down"])
+    finally:
+        shutil.rmtree(host_socket_dir, ignore_errors=True)
 
 
 @pytest.fixture
@@ -94,8 +96,8 @@ def client():
 
 
 @pytest.fixture
-def client_socket():
-    return bmemcached.Client(HOST_SOCKET_PATH, USERNAME, PASSWORD)
+def client_socket(memcached_socket):
+    return bmemcached.Client(memcached_socket[1], USERNAME, PASSWORD)
 
 
 @pytest.fixture
@@ -115,9 +117,9 @@ def instance():
 
 
 @pytest.fixture
-def instance_socket():
+def instance_socket(memcached_socket):
     return {
-        'socket': HOST_SOCKET_PATH,
+        'socket': memcached_socket[1],
         'tags': ["foo:bar"],
         'username': USERNAME,
         'password': PASSWORD,

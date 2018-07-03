@@ -10,7 +10,6 @@ from datadog_checks.utils.platform import Platform
 
 from common import (PORT, SERVICE_CHECK, HOST, GAUGES, RATES, ITEMS_RATES, ITEMS_GAUGES, SLABS_RATES, SLABS_GAUGES,
                     SLABS_AGGREGATES)
-import conftest
 
 
 def count_connections(port):
@@ -89,7 +88,7 @@ def test_service_with_socket_ok(check, instance_socket, aggregator, memcached_so
     """
     Service is up
     """
-    tags = ["host:unix", "port:{}".format(conftest.HOST_SOCKET_PATH), "foo:bar"]
+    tags = ["host:unix", "port:{}".format(memcached_socket[1]), "foo:bar"]
     check.check(instance_socket)
     assert len(aggregator.service_checks(SERVICE_CHECK)) == 1
     sc = aggregator.service_checks(SERVICE_CHECK)[0]
@@ -116,7 +115,7 @@ def test_metrics_with_socket(client_socket, check, instance_socket, aggregator, 
     })
     check.check(instance_socket)
 
-    expected_tags = ["url:unix:{}".format(conftest.HOST_SOCKET_PATH), 'foo:bar']
+    expected_tags = ["url:unix:{}".format(memcached_socket[1]), 'foo:bar']
     for m in GAUGES + RATES + SLABS_AGGREGATES:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
