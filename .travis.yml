@@ -180,6 +180,8 @@ jobs:
       env: CHECK=vsphere
     - stage: test
       env: CHECK=yarn
+    - stage: test
+      env: CHECK=zk
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
