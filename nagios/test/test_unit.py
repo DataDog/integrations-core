@@ -32,7 +32,7 @@ class TestGaugeWrapper:
             assert hostname is None
             assert device_name is None
 
-        # Make sure we're removing timestamps for gauge functions that do not accept 'timestamp'
+        # This should call 'gauge_v6' with all the same arguments that we passed in, except for the 'timestamp' argument
         with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v6):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
@@ -54,7 +54,7 @@ class TestGaugeWrapper:
             assert device_name is None
             assert timestamp == METRIC_TIMESTAMP
 
-        # Make sure we're removing timestamps for gauge functions that do not accept 'timestamp'
+        # This should call 'gauge_v5' with all the same arguments that we passed in
         with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v5):
             nagios = Nagios(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
