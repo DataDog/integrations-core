@@ -414,10 +414,3 @@ class PerfDataTailerTestCase(NagiosTestCase):
             self.compare_metric(actual, expected)
 
         self.coverage_report()
-
-
-    def test_msg_title(self):
-        """
-        Test the msg_title in the event includes all relevant information:
-
-        """
