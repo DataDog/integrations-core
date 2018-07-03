@@ -15,11 +15,10 @@ environment:
   PYTHON_ARCH: 64
   PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
   PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
-  TESTABLE_PYTEST_TARGETS: datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check
-  TESTABLE_RAKE_TARGETS: sqlserver windows_service wmi_check
+  TESTABLE_PYTEST_TARGETS: datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service wmi_check
 init:
   # Include Python in PATH and use 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;C:\Ruby22-x64\bin;%PATH%
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 cache:
   - C:\projects\integrations-core\.cache
   - C:\projects\integrations-core\vendor\cache
@@ -29,7 +28,6 @@ services:
   # - mssql2008r2sp2 # FIXME: re-enable when we can launch multiple mssql instances at once
   - mssql2012sp1
   # - mssql2014 # FIXME: re-enable when we can launch multiple mssql instances at once
-
 install:
   - ps: |
       if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
@@ -39,16 +37,13 @@ install:
         $changed_testable_files = (& git diff --name-only master...) | Select-String -Pattern "\.(py|ini|in|txt)$"
         $changed_integrations = $changed_testable_files | % { $_.Line.Split('/')[0] } | select -unique
         $pytest_targets = @($changed_integrations | ? { $env:TESTABLE_PYTEST_TARGETS.Split(' ') -contains $_ })
-        $rake_targets = @($changed_integrations | ? { $env:TESTABLE_RAKE_TARGETS.Split(' ') -contains $_ })
 
         # We need to join all the targets into a single string so the invoke task can run tests on all of the checks
         $env:PYTEST_TARGETS=$pytest_targets -join ','
 
         # Set the env var that determines whether or not to set up the test environment
-        If ($pytest_targets.Count -ne 0 -or $rake_targets.Count -ne 0) {
-          $env:TEST_PYTESTS = If ($pytest_targets.Count -ne 0) { "true" } else { "false" }
-          $env:TEST_RAKE = If ($rake_targets.Count -ne 0) { "true" } else { "false" }
-          $targets=($pytest_targets + $rake_targets | select -unique | Sort-Object) -join ", "
+        If ($pytest_targets.Count -ne 0) {
+          $targets=($pytest_targets | Sort-Object) -join ", "
           Write-Host "Running tests on $targets." -f green
         } else {
           Write-Host "No need to run tests." -f green
@@ -57,12 +52,8 @@ install:
       } else {
         # This is a master build, test on everything
         $env:PYTEST_TARGETS=$env:TESTABLE_PYTEST_TARGETS.Replace(" ", ",")
-        $rake_targets=$env:TESTABLE_RAKE_TARGETS.Split(' ')
-
         Write-Host "This is a master build, running tests on all targets." -f green
       }
-  - cmd: if "%TEST_RAKE%"=="true" bundle install
-  - cmd: if "%TEST_RAKE%"=="true" bundle package
   - cmd: git clone -b %DD_AGENT_BRANCH% https://github.com/DataDog/dd-agent.git c:\projects\dd-agent
   - cmd: if not exist %PIP_CACHE% mkdir %PIP_CACHE%
   - cmd: appveyor-retry powershell If (-Not (Test-Path $env:PYWIN_PATH)) {(new-object net.webclient).DownloadFile("$env:PYWIN32_URL", "$env:PYWIN_PATH")}
@@ -92,31 +83,6 @@ install:
       cd datadog_checks_base
       (& "$env:PYTHON/Scripts/pip.exe" install .)
       cd ..
-  - ps: |
-      If ("sqlserver" -in $rake_targets) {
-        cd sqlserver
-        (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
-        (& "$env:PYTHON/Scripts/pip.exe" install .)
-        $env:TEST_SQLSERVER="true"
-        cd ..
-      }
-  - ps: |
-      If ("windows_service" -in $rake_targets) {
-        cd windows_service
-        (& "$env:PYTHON/Scripts/pip.exe" install .)
-        $env:TEST_WINDOWS_SERVICE="true"
-        cd ..
-      }
-  - ps: |
-      If ("wmi_check" -in $rake_targets) {
-        cd wmi_check
-        (& "$env:PYTHON/Scripts/pip.exe" install .)
-        $env:TEST_WMI_CHECK="true"
-        cd ..
-      }
 build: off
 test_script:
-  - cmd: if "%TEST_SQLSERVER%"=="true" (bundle exec rake ci:run[sqlserver])
-  - cmd: if "%TEST_WINDOWS_SERVICE%"=="true" (bundle exec rake ci:run[windows_service])
-  - cmd: if "%TEST_WMI_CHECK%"=="true" (bundle exec rake ci:run[wmi_check])
-  - cmd: if "%TEST_PYTESTS%"=="true" (inv test --targets="%PYTEST_TARGETS%")
+  - cmd: inv test --targets="%PYTEST_TARGETS%"
