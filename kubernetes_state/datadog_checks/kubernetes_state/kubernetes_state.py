@@ -179,6 +179,8 @@ class KubernetesState(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find kube_state_url in config file.")
 
+        self.set_prometheus_timeout(instance)
+
         if 'labels_mapper' in instance:
             if isinstance(instance['labels_mapper'], dict):
                 self.labels_mapper = instance['labels_mapper']

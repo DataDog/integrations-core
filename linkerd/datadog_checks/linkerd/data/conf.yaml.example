@@ -29,3 +29,6 @@ instances:
     #
     # type_overrides:
     #   "jvm:start_time": "gauge"
+
+    # Set a timeout for the prometheus query, defaults to 10
+    # prometheus_timeout: 10

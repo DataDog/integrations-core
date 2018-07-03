@@ -7,3 +7,6 @@ instances:
   #   configure the behavior of our check.
   #
   # - prometheus_url: http://127.0.0.1:10249/metrics
+
+  # Set a timeout for the prometheus query, defaults to 10
+  # prometheus_timeout: 10

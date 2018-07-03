@@ -14,3 +14,6 @@ instances:
     #
     # tags:
     #   - 'mytag1:myValue1'
+
+    # Set a timeout for the prometheus query, defaults to 10
+    # prometheus_timeout: 10
