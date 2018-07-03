@@ -44,10 +44,10 @@ class GUnicornCheck(AgentCheck):
 
         # Load the gunicorn master procedure.
         proc_name = instance.get(self.PROC_NAME)
-        master_proc = self._get_master_proc_by_name(proc_name, custom_tags)
+        master_procs = self._get_master_proc_by_name(proc_name, custom_tags)
 
         # Fetch the worker procs and count their states.
-        worker_procs = master_proc.children()
+        worker_procs = self._get_workers_from_procs(master_procs)
         working, idle = self._count_workers(worker_procs)
 
         # if no workers are running, alert CRITICAL, otherwise OK
@@ -61,6 +61,13 @@ class GUnicornCheck(AgentCheck):
         self.log.debug("instance %s procs - working:%s idle:%s" % (proc_name, working, idle))
         self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
         self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
+
+    def _get_workers_from_procs(self, master_procs):
+        workers_procs = []
+        # loop through all master procs and get children procs
+        for proc in master_procs:
+            workers_procs += proc.children()
+        return workers_procs
 
     def _count_workers(self, worker_procs):
         working = 0
@@ -110,10 +117,8 @@ class GUnicornCheck(AgentCheck):
             self.service_check(self.SVC_NAME, AgentCheck.CRITICAL, tags=['app:' + name] + tags,
                                message="No gunicorn process with name %s found" % name)
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
-        elif len(master_procs) > 1:
-            raise GUnicornCheckError("Found more than one master process with name: %s" % master_name)
         else:
-            return master_procs[0]
+            return master_procs
 
     @staticmethod
     def _get_master_proc_name(name):
