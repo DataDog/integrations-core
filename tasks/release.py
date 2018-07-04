@@ -68,7 +68,7 @@ def print_shippable(ctx, quiet=False):
         # get the number of PRs that could be potentially released
         # Only show the ones that have a changelog label that isn't no-changelog
         pr_numbers = parse_pr_numbers(diff_lines)
-        all_no_changelog = True
+        shippable_prs = 0
         for pr_num in pr_numbers:
             try:
                 payload = get_pr(pr_num)
@@ -79,17 +79,24 @@ def print_shippable(ctx, quiet=False):
                     sys.stderr.write(msg)
                     continue
 
+                if len(changelog_labels) > 1:
+                    msg = Fore.RED + "Multiple changelog labels found attached to PR #{}, please use only one".format(pr_num)
+                    sys.stderr.write(msg)
+                    continue
+
                 if changelog_labels[0] != CHANGELOG_TYPE_NONE:
-                    all_no_changelog = False
+                    shippable_prs += 1
             except Exception as e:
                 sys.stderr.write("Unable to fetch info for PR #{}: {}\n".format(pr_num, e))
                 continue
 
-        if pr_numbers and not all_no_changelog:
+        if shippable_prs:
             if quiet:
-                print(target)
+                msg = target
             else:
-                print("Check {} has {} merged PRs that could be released".format(target, len(pr_numbers)))
+                msg = "Check {} has {} out of {} merged PRs that could be released".format(target, shippable_prs,
+                                                                                           len(pr_numbers))
+            print(msg)
 
 
 @task(help={
