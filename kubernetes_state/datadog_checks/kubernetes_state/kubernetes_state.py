@@ -4,7 +4,7 @@
 
 import re
 import time
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 try:
     # Agent5 compatibility layer
@@ -350,6 +350,8 @@ class KubernetesState(PrometheusCheck):
         # Will submit a service check which status is given by its phase.
         # More details about the phase in the message of the check.
         check_basename = self.NAMESPACE + '.pod.phase'
+        status_phase_counter = Counter()
+
         for metric in message.metric:
             self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
                                          tags=[self._label_to_tag("pod", metric.label),
@@ -361,7 +363,10 @@ class KubernetesState(PrometheusCheck):
                 self._label_to_tag("namespace", metric.label),
                 self._label_to_tag("phase", metric.label)
             ] + self.custom_tags
-            self.count(metric_name, metric.gauge.value, tags)
+            status_phase_counter[tuple(sorted(tags))] += metric.gauge.value
+
+        for tags, count in status_phase_counter.iteritems():
+            self.gauge(metric_name, count, tags=list(tags))
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
         metric_name = self.NAMESPACE + '.container.status_report.count.waiting'
