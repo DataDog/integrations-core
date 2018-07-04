@@ -32,10 +32,10 @@ setup(
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
     keywords='datadog agent checks',
-    url='https://github.com/DataDog/datadog-agent-tk',
+    url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
-    license='New BSD',
+    license='BSD',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
