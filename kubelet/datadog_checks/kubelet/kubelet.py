@@ -24,7 +24,7 @@ from .prometheus import CadvisorPrometheusScraper
 
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
-POD_LIST_PATH = '/pods/'
+POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 
