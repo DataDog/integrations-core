@@ -21,11 +21,11 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
-You'll also need `docker-compose` in order to run the test harness. 
+You'll also need [cookiecutter][1] to generate a template, and `docker-compose` in order to run the test harness. 
 
 ## Setup
 
-Clone the [integrations extras repository][IntegrationsExtrasRepository] and point your shell at the root:
+Clone the [integrations extras repository][7] and point your shell at the root:
 
 ```
 git clone https://github.com/DataDog/integrations-extras.git && cd integrations-extras
@@ -318,6 +318,16 @@ Our check sends a Service Check though, so we need to add it to the `service_che
 ]
 ```
 
+### Building
+
+`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
+
+Once your `setup.py` is ready, create a wheel:
+
+```
+cd {integration}
+python setup.py bdist_wheel
+```
 
 [1]: https://github.com/audreyr/cookiecutter
 [2]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
@@ -325,4 +335,4 @@ Our check sends a Service Check though, so we need to add it to the `service_che
 [4]: https://tox.readthedocs.io/en/latest/
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
-[IntegrationsExtrasRepository]: https://github.com/DataDog/integrations-extras
+[7]: https://github.com/DataDog/integrations-extras
