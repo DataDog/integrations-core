@@ -66,7 +66,7 @@ class GUnicornCheck(AgentCheck):
         workers_procs = []
         # loop through all master procs and get children procs
         for proc in master_procs:
-            workers_procs += proc.children()
+            workers_procs.extend(proc.children())
         return workers_procs
 
     def _count_workers(self, worker_procs):
@@ -118,6 +118,7 @@ class GUnicornCheck(AgentCheck):
                                message="No gunicorn process with name %s found" % name)
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         else:
+            self.log.debug("There is %s master process with the name %s" % (len(master_procs), name))
             return master_procs
 
     @staticmethod
