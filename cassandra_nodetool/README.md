@@ -37,7 +37,7 @@ instances:
   # username:
   # password:
 
-  # a list of additionnal tags to be sent with the metrics
+  # a list of additional tags to be sent with the metrics
   # tags: []
 ```
 

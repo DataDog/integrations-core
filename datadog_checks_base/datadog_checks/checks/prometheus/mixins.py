@@ -350,7 +350,7 @@ class PrometheusScraperMixin(object):
         `endpoint` is the metrics endpoint to use to poll metrics from Prometheus
 
         Note that if the instance has a 'tags' attribute, it will be pushed
-        automatically as additionnal custom tags and added to the metrics
+        automatically as additional custom tags and added to the metrics
         """
         instance = kwargs.get('instance')
         if instance:
