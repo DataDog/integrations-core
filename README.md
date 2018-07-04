@@ -21,11 +21,11 @@ python project. The new structure should help keep a more sane and modular codeb
 To help with the transition, please take a look at the following map to understand
 where everything falls into place in the new approach.
 
-| FORMER LOCATION | NEW LOCATION |
-| --------------- | ------------ |
-| `{integration}/check.py` | `{integration}/datadog_checks/{integration}/*.py` |
-| `{integration}/test_check.py` | `{integration}/tests/*.py` |
-| n/a | `{integration}/setup.py` |
+| FORMER LOCATION               | NEW LOCATION                                      |
+| ---------------               | ------------                                      |
+| `{integration}/check.py`      | `{integration}/datadog_checks/{integration}/*.py` |
+| `{integration}/test_check.py` | `{integration}/tests/*.py`                        |
+| n/a                           | `{integration}/setup.py`                          |
 
 ## A note about installing
 
@@ -42,10 +42,10 @@ Each Datadog Agent release will continue to ship a set of the most up to date st
 
 **Note** The release process is currently in flux as we move toward the ability to ship wheels independently of Agent releases. Due to this, the Changelog may show a version and release that isn't yet available to download. Please check the below table to see which Integration versions are shipped with your Agent install.
 
-| Agent Version | List of Shipped Integration Versions |
-|---------------|--------------------------------------|
-| 6.2.1         | [Link][15] |
-| 6.3.0         | [Link][16] |
+| Agent Version   | List of Shipped Integration Versions   |
+| --------------- | -------------------------------------- |
+| 6.2.1           | [Link][15]                             |
+| 6.3.0           | [Link][16]                             |
 
 ## Quick Start
 
