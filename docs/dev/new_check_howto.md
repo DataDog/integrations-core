@@ -21,7 +21,7 @@ These requirements are used during the code review process as a checklist. This 
 
 Python 2.7 needs to be available on your system. It is strongly recommended to create and activate a [Python virtual environment][5] in order to isolate the development environment. See the [Python Environment documentation][6] for more information.
 
-You'll also need [cookiecutter][1] to generate a template, and `docker-compose` in order to run the test harness. 
+You'll also need `docker-compose` in order to run the test harness. 
 
 ## Setup
 
@@ -336,3 +336,4 @@ python setup.py bdist_wheel
 [5]: https://virtualenv.pypa.io/en/stable/
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [7]: https://github.com/DataDog/integrations-extras
+[9]: https://packaging.python.org/tutorials/distributing-packages/
