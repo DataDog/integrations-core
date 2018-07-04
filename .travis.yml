@@ -146,7 +146,9 @@ jobs:
       env: CHECK=pdh_check
     - stage: test
       env: CHECK=pgbouncer
-    # - stage: test
+    - stage: test
+      env: CHECK=php_fpm
+      # - stage: test
     #   env: CHECK=postgres
     - stage: test
       env: CHECK=powerdns_recursor

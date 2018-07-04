@@ -1,16 +1,17 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# 3p
 import requests
 
-# project
-from checks import AgentCheck
-from util import headers
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
+from datadog_checks.config import _is_affirmative
 
 DEFAULT_TIMEOUT = 20
+
+
+class BadConfigError(Exception):
+    pass
 
 
 class PHPFPMCheck(AgentCheck):
@@ -55,23 +56,17 @@ class PHPFPMCheck(AgentCheck):
             auth = (user, password)
 
         if status_url is None and ping_url is None:
-            raise Exception("No status_url or ping_url specified for this instance")
+            raise BadConfigError("No status_url or ping_url specified for this instance")
 
         pool = None
-        status_exception = None
         if status_url is not None:
             try:
                 pool = self._process_status(status_url, auth, tags, http_host, timeout, disable_ssl_validation)
             except Exception as e:
-                status_exception = e
-                pass
+                self.log.error("Error running php_fpm check: {}".format(e))
 
         if ping_url is not None:
             self._process_ping(ping_url, ping_reply, auth, tags, pool, http_host, timeout, disable_ssl_validation)
-
-        # pylint doesn't understand that we are raising this only if it's here
-        if status_exception is not None:
-            raise status_exception  # pylint: disable=E0702
 
     def _process_status(self, status_url, auth, tags, http_host, timeout, disable_ssl_validation):
         data = {}
@@ -122,20 +117,17 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(ping_url,
-                                auth=auth,
-                                timeout=timeout,
+            resp = requests.get(ping_url, auth=auth, timeout=timeout,
                                 headers=headers(self.agentConfig, http_host=http_host),
                                 verify=not disable_ssl_validation)
             resp.raise_for_status()
 
             if ping_reply not in resp.text:
-                raise Exception("Received unexpected reply to ping {0}".format(resp.text))
+                raise Exception("Received unexpected reply to ping: {}".format(resp.text))
 
         except Exception as e:
-            self.log.error("Failed to ping FPM pool {0} on URL {1}."
-                           "\nError {2}".format(pool_name, ping_url, e))
-            self.service_check(self.SERVICE_CHECK_NAME,
-                               AgentCheck.CRITICAL, tags=sc_tags, message=str(e))
+            self.log.error("Failed to ping FPM pool {} on URL {}: {}".format(pool_name, ping_url, e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=sc_tags,
+                               message=str(e))
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=sc_tags)
