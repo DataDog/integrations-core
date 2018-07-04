@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "varnish",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
