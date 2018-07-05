@@ -43,7 +43,7 @@ instances:
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 1. the `rabbitmq.aliveness` service check
-1. the `rabbitmq.connections` metric
+2. the `rabbitmq.connections` metric
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
@@ -68,10 +68,10 @@ Configuration Options
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-  ```
-  log.dir = /var/log/rabbit
-  log.file = rabbit.log
-  ```
+    ```
+    log.dir = /var/log/rabbit
+    log.file = rabbit.log
+    ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -81,20 +81,20 @@ Configuration Options
 
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-  ```
-  logs:
+    ```
+    logs:
 
-      - type: file
-        path: /var/log/rabbit/*.log
-        source: rabbitmq
-        service: myservice
-        log_processing_rules:
-          - type: multi_line
-            name: logs_starts_with_equal_sign
-            pattern: "="
-  ```
+        - type: file
+          path: /var/log/rabbit/*.log
+          source: rabbitmq
+          service: myservice
+          log_processing_rules:
+            - type: multi_line
+              name: logs_starts_with_equal_sign
+              pattern: "="
+    ```
 
-  See the [sample rabbitmq.yaml][3] for all available configuration options.
+    See the [sample rabbitmq.yaml][3] for all available configuration options.
 
 4. [Restart the Agent][5].
 
