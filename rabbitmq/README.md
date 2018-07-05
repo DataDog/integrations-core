@@ -1,8 +1,8 @@
 # RabbitMQ Check
 
-## Overview
-
 ![RabbitMQ Dashboard][13]
+
+## Overview
 
 The RabbitMQ check lets you:
 

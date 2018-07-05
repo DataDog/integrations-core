@@ -4,6 +4,7 @@
   "name": "hdfs_datanode",
   "display_name": "HDFS Datanode",
   "creates_events": true,
+  "metric_to_check": "hdfs.datanode.dfs_used",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
   "supported_os": [

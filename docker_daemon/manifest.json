@@ -4,6 +4,7 @@
   "name": "docker_daemon",
   "display_name": "Docker",
   "creates_events": true,
+  "metric_to_check": "docker.cpu.usage",
   "short_description": "Correlate container performance with that of the services running inside them.",
   "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
   "support": "core",

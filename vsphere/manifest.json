@@ -4,6 +4,7 @@
   "name": "vsphere",
   "display_name": "Vsphere",
   "creates_events": true,
+  "metric_to_check": "vsphere.cpu.usage",
   "short_description": "Understand how vSphere resource usage affects your application.",
   "support": "core",
   "supported_os": [

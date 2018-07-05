@@ -4,6 +4,7 @@
   "name": "gunicorn",
   "display_name": "Gunicorn",
   "creates_events": true,
+  "metric_to_check": "gunicorn.request.duration.avg",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",
   "supported_os": [

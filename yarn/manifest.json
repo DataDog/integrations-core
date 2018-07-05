@@ -4,6 +4,7 @@
   "name": "yarn",
   "display_name": "Yarn",
   "creates_events": true,
+  "metric_to_check": "yarn.metrics.total_nodes",
   "short_description": "Collect cluster-wide health metrics and track application progress.",
   "support": "core",
   "supported_os": [

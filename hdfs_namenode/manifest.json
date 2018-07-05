@@ -4,6 +4,7 @@
   "name": "hdfs_namenode",
   "display_name": "HDFS Namenode",
   "creates_events": true,
+  "metric_to_check": "hdfs.namenode.capacity_used",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
   "supported_os": [

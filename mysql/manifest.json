@@ -4,6 +4,7 @@
   "name": "MySQL",
   "display_name": "MySQL",
   "creates_events": true,
+  "metric_to_check": "mysql.replication.slaves_connected",
   "support": "core",
   "supported_os": [
     "linux",

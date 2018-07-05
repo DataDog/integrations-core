@@ -4,6 +4,7 @@
   "name": "supervisord",
   "display_name": "Supervisord",
   "creates_events": true,
+  "metric_to_check": "supervisord.process.count",
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",
   "supported_os": [

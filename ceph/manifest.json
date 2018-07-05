@@ -4,6 +4,7 @@
   "name": "ceph",
   "display_name": "Ceph",
   "creates_events": true,
+  "metric_to_check": "ceph.write_bytes_sec",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",
   "supported_os": [

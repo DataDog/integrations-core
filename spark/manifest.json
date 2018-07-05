@@ -4,6 +4,7 @@
   "name": "spark",
   "display_name": "Spark",
   "creates_events": true,
+  "metric_to_check": "spark.job.count",
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
   "supported_os": [

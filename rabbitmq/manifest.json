@@ -5,6 +5,7 @@
   "name": "rabbitmq",
   "display_name": "RabbitMQ",
   "creates_events": true,
+  "metric_to_check": "rabbitmq.queue.messages",
   "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
   "support": "core",
   "supported_os": [

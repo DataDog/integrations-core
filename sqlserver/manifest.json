@@ -4,6 +4,7 @@
   "name": "sqlserver",
   "display_name": "SQL Server",
   "creates_events": true,
+  "metric_to_check": "sqlserver.stats.connections",
   "short_description": "Collect important SQL Server performance and health metrics.",
   "support": "core",
   "supported_os": [

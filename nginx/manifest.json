@@ -5,6 +5,7 @@
   "name": "nginx",
   "display_name": "NGINX",
   "creates_events": true,
+  "metric_to_check": "nginx.net.connections",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
   "supported_os": [

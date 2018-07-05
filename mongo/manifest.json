@@ -5,6 +5,7 @@
   "name": "mongo",
   "display_name": "Mongo",
   "creates_events": true,
+  "metric_to_check": "mongodb.connections.available",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
   "supported_os": [
