@@ -76,17 +76,18 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            for i in range(3):
+            max_attempts = 3
+            for i in range(max_attempts):
                 resp = requests.get(status_url, auth=auth, timeout=timeout,
                                     headers=headers(self.agentConfig, http_host=http_host),
                                     verify=not disable_ssl_validation, params={'json': True})
 
-                # Exponential backoff in case we get a 503 for at most 3 times.
-                # Delay in seconds is (attempt + random amount of seconds between 0 and 1)
+                # Exponential backoff, wait at most (max_attempts - 1) times in case we get a 503.
+                # Delay in seconds is (2^i + random amount of seconds between 0 and 1)
                 # 503s originated here: https://github.com/php/php-src/blob/d84ef96/sapi/fpm/fpm/fpm_status.c#L96
-                if resp.status_code == 503 and i < 2:
+                if resp.status_code == 503 and i < max_attempts - 1:
                     # retry
-                    time.sleep(i + 1 + random.random())
+                    time.sleep(2**i + random.random())
                     continue
 
                 resp.raise_for_status()
