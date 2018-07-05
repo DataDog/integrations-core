@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kubernetes",
+  "display_name": "Kubernetes",
+  "creates_events": true,
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
   "guid": "eb31452b-d681-4823-87cc-2ef114559edf",
   "support": "core",

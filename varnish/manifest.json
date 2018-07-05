@@ -3,6 +3,8 @@
   "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "varnish",
+  "display_name": "Varnish",
+  "creates_events": true,
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
   "support": "core",
   "supported_os": [

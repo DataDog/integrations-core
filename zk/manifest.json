@@ -3,6 +3,8 @@
   "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "zk",
+  "display_name": "Zookeeper",
+  "creates_events": true,
   "short_description": "Track client connections and latencies, and know when requests are backing up.",
   "support": "core",
   "supported_os": [

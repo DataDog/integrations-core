@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "spark",
+  "display_name": "Spark",
+  "creates_events": true,
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
   "supported_os": [

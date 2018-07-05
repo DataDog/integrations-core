@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "mapreduce",
+  "display_name": "MapReduce",
+  "creates_events": true,
   "short_description": "Monitor the status and duration of map and reduce tasks.",
   "support": "core",
   "supported_os": [

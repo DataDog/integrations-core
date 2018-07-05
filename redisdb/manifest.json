@@ -3,6 +3,8 @@
   "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "redisdb",
+  "display_name": "RedisDB",
+  "creates_events": true,
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
   "support": "core",
   "supported_os": [

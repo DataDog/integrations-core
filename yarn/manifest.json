@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "yarn",
+  "display_name": "Yarn",
+  "creates_events": true,
   "short_description": "Collect cluster-wide health metrics and track application progress.",
   "support": "core",
   "supported_os": [

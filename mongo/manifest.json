@@ -3,6 +3,8 @@
   "creates_events": "true",
   "manifest_version": "1.0.0",
   "name": "mongo",
+  "display_name": "Mongo",
+  "creates_events": true,
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
   "supported_os": [

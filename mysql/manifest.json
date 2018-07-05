@@ -3,6 +3,7 @@
   "creates_events": "false",
   "name": "MySQL",
   "display_name": "MySQL",
+  "creates_events": true,
   "support": "core",
   "supported_os": [
     "linux",

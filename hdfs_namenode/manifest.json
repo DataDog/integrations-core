@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "hdfs_namenode",
+  "display_name": "HDFS Namenode",
+  "creates_events": true,
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
   "supported_os": [

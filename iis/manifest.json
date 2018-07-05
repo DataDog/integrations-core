@@ -3,6 +3,8 @@
   "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "iis",
+  "display_name": "IIS",
+  "creates_events": true,
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",
   "supported_os": [

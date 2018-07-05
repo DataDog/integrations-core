@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "sqlserver",
+  "display_name": "SQL Server",
+  "creates_events": true,
   "short_description": "Collect important SQL Server performance and health metrics.",
   "support": "core",
   "supported_os": [

@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "riak",
+  "display_name": "Riak",
+  "creates_events": true,
   "short_description": "Track node, vnode and ring performance metrics for RiakKV or RiakTS.",
   "support": "core",
   "supported_os": [

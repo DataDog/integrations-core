@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kafka_consumer",
+  "display_name": "Kafka Consumer",
+  "creates_events": true,
   "short_description": "Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.",
   "support": "core",
   "supported_os": [

@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "powerdns_recursor",
+  "display_name": "PowerDNS",
+  "creates_events": true,
   "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
   "support": "core",
   "supported_os": [

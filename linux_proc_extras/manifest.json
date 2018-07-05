@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "linux_proc_extras",
+  "display_name": "Linux proc extras",
+  "creates_events": true,
   "short_description": "linux_proc_extras description.",
   "support": "core",
   "supported_os": [

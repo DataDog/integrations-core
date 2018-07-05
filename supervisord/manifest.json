@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "supervisord",
+  "display_name": "Supervisord",
+  "creates_events": true,
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",
   "supported_os": [
