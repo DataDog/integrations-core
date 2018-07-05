@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "rabbitmq",
+  "display_name": "RabbitMQ",
+  "create_event": true,
   "short_description": "Track queue size, consumer count, unacknowledged messages, and more.",
   "support": "core",
   "supported_os": [
