@@ -37,7 +37,12 @@ CONFIG = {
 
 
 class FakeSess(SessionWrapper):
-    def make_request(self, path, raw_response=False):
+    """ This mock:
+     1. Takes the requested path and replace all special characters to underscore
+     2. Fetch the corresponding hash from FIXTURE_LIST_FILE_MAP
+     3. Returns the corresponding file content
+     """
+    def make_request(self, path):
         mock_path = path.replace('/', '_')
         mock_path = mock_path.replace('?', '_')
         mock_path = mock_path.replace('&', '_')
@@ -92,8 +97,7 @@ def session_mock():
 
 def test_cisco(aggregator, session_mock):
     cisco_aci_check = CiscoACICheck(CHECK_NAME, {}, {})
-    api = Api(ACI_URLS, USERNAME, PASSWORD, log=cisco_aci_check.log)
-    api.sessions = [session_mock]
+    api = Api(ACI_URLS, USERNAME, PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
     api._refresh_sessions = False
     cisco_aci_check._api_cache[hash_mutable(CONFIG)] = api
 
@@ -102,8 +106,7 @@ def test_cisco(aggregator, session_mock):
 
 def test_cisco_metrics(aggregator, session_mock):
     cisco_aci_check = CiscoACICheck(CHECK_NAME, {}, {})
-    api = Api(ACI_URLS, USERNAME, PASSWORD, log=cisco_aci_check.log)
-    api.sessions = [session_mock]
+    api = Api(ACI_URLS, USERNAME, PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
     api._refresh_sessions = False
     cisco_aci_check._api_cache[hash_mutable(CONFIG)] = api
 
