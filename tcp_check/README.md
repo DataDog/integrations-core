@@ -61,9 +61,6 @@ To create alert conditions on this service check in the Datadog app, click **Net
 ## Troubleshooting
 Need help? Contact [Datadog Support][7].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][8]
-
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/datadog_checks/tcp_check/data/conf.yaml.example
@@ -72,5 +69,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [5]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv
 [6]: https://app.datadoghq.com/monitors#/create
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/
 [9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png

@@ -63,14 +63,9 @@ Returns CRITICAL if the NTP offset is greater than the threshold specified in `n
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][7]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/ntp/datadog_checks/ntp/data/conf.yaml.default
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/

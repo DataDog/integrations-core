@@ -136,15 +136,10 @@ The Agent submits this service check if `expected_mode` is configured in `zk.yam
 ## Troubleshooting
 Need help? Contact [Datadog Support][18].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][19]
-
-
 [13]: https://app.datadoghq.com/account/settings#agent
 [14]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
 [15]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [18]: https://docs.datadoghq.com/help/
-[19]: https://www.datadoghq.com/blog/
 [20]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/zookeeper/zookeepergraph.png

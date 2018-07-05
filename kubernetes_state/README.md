@@ -60,13 +60,8 @@ Returns `CRITICAL` if the pod is in phase `Failed`, `WARNING` if it is `Pending`
 ## Troubleshooting
 Need help? Contact [Datadog Support][5].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][6]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/datadog_checks/kubernetes_state/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state/metadata.csv
 [5]: https://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/

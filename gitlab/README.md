@@ -38,14 +38,9 @@ Moreover, it provides a service check to ensure that the local Prometheus endpoi
 ## Troubleshooting
 Need help? Contact [Datadog Support][105].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][106]
-
-
 [101]: https://app.datadoghq.com/account/settings#agent
 [102]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [103]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [104]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [105]: https://docs.datadoghq.com/help/
-[106]: https://www.datadoghq.com/blog/
 [107]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/

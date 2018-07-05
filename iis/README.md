@@ -153,10 +153,6 @@ The Agent submits this service check for each configured site in `iis.yaml`. It 
 ## Troubleshooting
 Need help? Contact [Datadog Support][8].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][9]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
 [3]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
@@ -165,5 +161,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/
 [10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/iis/iisgraph.png
