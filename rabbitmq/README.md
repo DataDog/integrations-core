@@ -1,4 +1,32 @@
-# RabbitMQ Check
+---
+categories:
+- processing
+- log collection
+creates_events: true
+ddtype: check
+display_name: RabbitMQ
+doc_link: https://docs.datadoghq.com/integrations/rabbitmq/
+git_integration_title: rabbitmq
+guid: a790a556-fbaa-4208-9d39-c42c3d57084b
+has_logo: true
+integration_title: RabbitMQ
+is_public: true
+kind: integration
+maintainer: help@datadoghq.com
+manifest_version: 1.0.0
+metric_to_check: rabbitmq.queue.messages
+name: rabbitmq
+public_title: Datadog-RabbitMQ Integration
+short_description: Track queue size, consumer count, unacknowledged messages, and
+  more.
+support: core
+supported_os:
+- linux
+- mac_os
+- windows
+---
+
+
 
 ![RabbitMQ Dashboard][13]
 
@@ -26,18 +54,19 @@ Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][2] to enab
 
 #### Metric Collection
 
-Add this configuration block to your `rabbitmq.d/conf.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
+* Add this configuration block to your `rabbitmq.d/conf.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
 
-    init_config:
+```
+init_config:
 
-    instances:
-      - rabbitmq_api_url: http://localhost:15672/api/
-      #  rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
-      #  rabbitmq_pass: <RABBIT_PASS> # default is guest
-      #  tag_families: true           # default is false
-      #  vhosts:
-      #    - <THE_ONE_VHOST_YOU_CARE_ABOUT>
-
+instances:
+  - rabbitmq_api_url: http://localhost:15672/api/
+  #  rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
+  #  rabbitmq_pass: <RABBIT_PASS> # default is guest
+  #  tag_families: true           # default is false
+  #  vhosts:
+  #    - <THE_ONE_VHOST_YOU_CARE_ABOUT>
+```
 
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
@@ -68,25 +97,31 @@ See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-        log.dir = /var/log/rabbit
-        log.file = rabbit.log
+    ```
+    log.dir = /var/log/rabbit
+    log.file = rabbit.log
+    ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-        logs_enabled: true
+    ```
+    logs_enabled: true
+    ```
 
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-        logs:
+    ```
+    logs:
 
-            - type: file
-            path: /var/log/rabbit/*.log
-            source: rabbitmq
-            service: myservice
-            log_processing_rules:
-                - type: multi_line
-                name: logs_starts_with_equal_sign
-                pattern: "="
+        - type: file
+          path: /var/log/rabbit/*.log
+          source: rabbitmq
+          service: myservice
+          log_processing_rules:
+            - type: multi_line
+              name: logs_starts_with_equal_sign
+              pattern: "="
+    ```
 
     See the [sample rabbitmq.yaml][3] for all available configuration options.
 
@@ -98,8 +133,8 @@ See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options
 
 ## Data Collected
 ### Metrics
+{{< get-metrics-from-git "rabbitmq" >}}
 
-See [metadata.csv][7] for a list of metrics provided by this check.
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` metrics by node name.
 
