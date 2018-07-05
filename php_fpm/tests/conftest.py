@@ -13,7 +13,7 @@ from datadog_checks.utils.common import get_docker_hostname
 
 
 HOST = get_docker_hostname()
-HERE = os.path.join(os.path.dirname(__file__))
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture

@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.php_fpm import BadConfigError
+from datadog_checks.php_fpm.php_fpm import BadConfigError
 
 # sample from /status?json
 # {
