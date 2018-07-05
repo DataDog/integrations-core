@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "consul",
+  "display_name": "Consul",
+  "creates_events": true,
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",
   "supported_os": [

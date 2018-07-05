@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "cisco_aci",
+  "display_name": "Cisco ACI",
+  "creates_events": true,
   "short_description": "Track Cisco ACI performance and usage.",
   "support": "core",
   "supported_os": [
