@@ -1,32 +1,4 @@
----
-categories:
-- processing
-- log collection
-creates_events: true
-ddtype: check
-display_name: RabbitMQ
-doc_link: https://docs.datadoghq.com/integrations/rabbitmq/
-git_integration_title: rabbitmq
-guid: a790a556-fbaa-4208-9d39-c42c3d57084b
-has_logo: true
-integration_title: RabbitMQ
-is_public: true
-kind: integration
-maintainer: help@datadoghq.com
-manifest_version: 1.0.0
-metric_to_check: rabbitmq.queue.messages
-name: rabbitmq
-public_title: Datadog-RabbitMQ Integration
-short_description: Track queue size, consumer count, unacknowledged messages, and
-  more.
-support: core
-supported_os:
-- linux
-- mac_os
-- windows
----
-
-
+# RabbitMQ Check
 
 ![RabbitMQ Dashboard][13]
 
