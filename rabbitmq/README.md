@@ -33,11 +33,11 @@ init_config:
 
 instances:
   - rabbitmq_api_url: http://localhost:15672/api/
-#   rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
-#   rabbitmq_pass: <RABBIT_PASS> # default is guest
-#   tag_families: true           # default is false
-#   vhosts:
-#     - <THE_ONE_VHOST_YOU_CARE_ABOUT>
+  #  rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
+  #  rabbitmq_pass: <RABBIT_PASS> # default is guest
+  #  tag_families: true           # default is false
+  #  vhosts:
+  #    - <THE_ONE_VHOST_YOU_CARE_ABOUT>
 ```
 
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
