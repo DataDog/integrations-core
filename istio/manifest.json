@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.0.0",
   "name": "istio",
-  "display_name": "istio",
+  "display_name": "Istio",
   "support": "core",
   "supported_os": [
     "linux",

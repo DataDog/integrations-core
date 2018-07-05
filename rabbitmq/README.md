@@ -33,23 +33,23 @@ init_config:
 
 instances:
   - rabbitmq_api_url: http://localhost:15672/api/
-#   rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
-#   rabbitmq_pass: <RABBIT_PASS> # default is guest
-#   tag_families: true           # default is false
-#   vhosts:
-#     - <THE_ONE_VHOST_YOU_CARE_ABOUT>
+  #  rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
+  #  rabbitmq_pass: <RABBIT_PASS> # default is guest
+  #  tag_families: true           # default is false
+  #  vhosts:
+  #    - <THE_ONE_VHOST_YOU_CARE_ABOUT>
 ```
 
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 1. the `rabbitmq.aliveness` service check
-1. the `rabbitmq.connections` metric
+2. the `rabbitmq.connections` metric
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
-There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][3] for details on these configuration options (and all others).
+There are options for `queues` and `nodes` that work similarly. The Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][3] for details on these configuration options (and all others).
 
-Configuration Options
+Configuration Options:
 
 * `rabbitmq_api_url` - **required** - Points to the api url of the [RabbitMQ Managment Plugin][4]
 * `rabbitmq_user` - **optional** - Defaults to 'guest'
@@ -59,8 +59,9 @@ Configuration Options
 * `queues` or `queues_regexes` - **optional** - Use the `queues` or `queues_regexes` parameters to specify the queues you'd like to collect metrics on (up to 200 queues). If you have less than 200 queues, you don't have to set this parameter, the metrics will be collected on all the queues by. default. If you have set up vhosts, set the queue names as `vhost_name/queue_name`. If you have `tag_families` enabled, the first captured group in the regex will be used as the queue_family tag.  See the link to the example YAML below for more.
 * `vhosts` - **optional** - By default a list of all vhosts is fetched and each one will be checked using the aliveness API. If you prefer only certain vhosts to be monitored, list the vhosts you care about.
 
- See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options.
-* [Restart the Agent][5] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
+See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options.
+
+[Restart the Agent][5] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
 #### Log Collection
 
@@ -68,10 +69,10 @@ Configuration Options
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following in your rabbitmq configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-  ```
-  log.dir = /var/log/rabbit
-  log.file = rabbit.log
-  ```
+    ```
+    log.dir = /var/log/rabbit
+    log.file = rabbit.log
+    ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -81,20 +82,20 @@ Configuration Options
 
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-  ```
-  logs:
+    ```
+    logs:
 
-      - type: file
-        path: /var/log/rabbit/*.log
-        source: rabbitmq
-        service: myservice
-        log_processing_rules:
-          - type: multi_line
-            name: logs_starts_with_equal_sign
-            pattern: "="
-  ```
+        - type: file
+          path: /var/log/rabbit/*.log
+          source: rabbitmq
+          service: myservice
+          log_processing_rules:
+            - type: multi_line
+              name: logs_starts_with_equal_sign
+              pattern: "="
+    ```
 
-  See the [sample rabbitmq.yaml][3] for all available configuration options.
+    See the [sample rabbitmq.yaml][3] for all available configuration options.
 
 4. [Restart the Agent][5].
 
@@ -104,8 +105,8 @@ Configuration Options
 
 ## Data Collected
 ### Metrics
+{{< get-metrics-from-git "rabbitmq" >}}
 
-See [metadata.csv][7] for a list of metrics provided by this check.
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` metrics by node name.
 

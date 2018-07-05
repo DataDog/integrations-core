@@ -2,6 +2,9 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "mesos_master",
+  "display_name": "Mesos Master",
+  "creates_events": true,
+  "metric_to_check": "mesos.framework.cpu",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",
   "supported_os": [

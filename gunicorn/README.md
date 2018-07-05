@@ -38,7 +38,7 @@ See the [sample gunicorn.yaml][3] for all available configuration options.
         - proc_name: <YOUR_APP_NAME>
     ```
 
-2. [Restart the Agent][4] to begin sending Gunicorn metrics to Datadog.
+* [Restart the Agent][4] to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
