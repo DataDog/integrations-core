@@ -33,11 +33,11 @@ init_config:
 
 instances:
   - rabbitmq_api_url: http://localhost:15672/api/
-#   rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
-#   rabbitmq_pass: <RABBIT_PASS> # default is guest
-#   tag_families: true           # default is false
-#   vhosts:
-#     - <THE_ONE_VHOST_YOU_CARE_ABOUT>
+  #  rabbitmq_user: <RABBIT_USER> # if your rabbitmq API requires auth; default is guest
+  #  rabbitmq_pass: <RABBIT_PASS> # default is guest
+  #  tag_families: true           # default is false
+  #  vhosts:
+  #    - <THE_ONE_VHOST_YOU_CARE_ABOUT>
 ```
 
 If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
@@ -47,7 +47,7 @@ If you don't set `vhosts`, the Agent sends the following for EVERY vhost:
 
 If you do set `vhosts`, the Agent sends this check and metric only for the vhosts you list.
 
-There are options for `queues` and `nodes` that work similarly—the Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][3] for details on these configuration options (and all others).
+There are options for `queues` and `nodes` that work similarly. The Agent checks all queues and nodes by default, but you can provide lists or regexes to limit this. See the [example check configuration][3] for details on these configuration options (and all others).
 
 Configuration Options
 
