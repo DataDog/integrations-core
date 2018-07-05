@@ -38,16 +38,10 @@ The Btrfs check does not include any service checks at this time.
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].
 
-## Further Reading
-
-Learn more about infrastructure monitoring and all our integrations on [our blog][7]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/btrfs/datadog_checks/btrfs/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/btrfs/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/
 [8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/btrfs/btrfs_metric.png

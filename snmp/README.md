@@ -141,7 +141,7 @@ Example using the `CISCO-TCP-MIB.my`:
 # ls /opt/datadog-agent/pysnmp/custom_mibpy/
 CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
- ```
+```
 
 The Agent with the path looks for the converted MIB Python files by specifying the destination path with mibs_folder: in the [SNMP yaml configuration][10].
 
@@ -171,10 +171,6 @@ Returns CRITICAL if the Agent cannot collect SNMP metrics, otherwise OK.
 Need help? Contact [Datadog Support][5].
 
 ## Further Reading
-### Datadog Blog
-Learn more about infrastructure monitoring and all our integrations on [our blog][6]
-
-### Knowledge Base
 
 * [For SNMP, does Datadog have a list of commonly used/compatible OIDs?  ][7]
 
@@ -184,7 +180,6 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/
 [7]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [8]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
