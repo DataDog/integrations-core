@@ -1,4 +1,5 @@
 {
+  "creates_events": "false",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "nginx",

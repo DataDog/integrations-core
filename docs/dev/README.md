@@ -5,75 +5,27 @@ kind: documentation
 
 ## Why create an Integration?
 
-While we do have guides to submit [custom metrics][1] via our [API][2] and [code instrumentation][3], it's possible you might want to see a certain source become an integration available in the [official core repository][4] and bundled into the Agent package.
+[Custom Checks][11] are great for occasional reporting, or in cases where the data source is either unique or very limited. For more general use-cases — such as application frameworks, open source projects, or commonly-used software — it makes sense to write an Integration.
 
-Overall, the largest deciding factor in what integrations we build is what our clients request. There are two ways to propose an integration:
+Metrics reported from accepted Integrations are not counted as custom metrics, and therefore don’t impact your custom metric allocation. (Integrations that emit potentially unlimited metrics may still be considered custom.) Ensuring native support for Datadog reduces friction to adoption, and incentivizes people to use your product, service, or project. Also, being featured within the Datadog ecosystem is a great avenue for added visibility.
 
-* [Reach out to support@datadoghq.com][5] and tell us what metrics you would like to see from a given source.
-* Implement the integration yourself and submit the code to the [official extras repository][6].
+### What’s the process?
+The initial goal is to generate some code that collects the desired metrics in a reliable way, and to ensure that the general Integration framework is in place. Start by writing the basic functionality as a custom Check, then fill in the framework details from the [Create an Integration documentation][10].
 
-## Development basics
+Next, open a pull request against the [integrations-extras repository][6]. This signals to Datadog that you’re ready to start reviewing code together. Don’t worry if you have questions about tests, Datadog internals, or other topics — the Integrations team is ready to help, and the pull request is a good place to go over those concerns. Be sure to take advantage of the [Community Office Hours][12] as well!
 
-The remainder of this document introduces you to the base knowledge and setup required to start working on your own Integration. If you're comfortable with this content already, move on to the [technical specifics of Integration development][10] directly - otherwise, read on.
+Once the Integration has been validated (functionality, framework compliance, and general code quality) it will be merged into Extras. Once there, it becomes part of the Datadog ecosystem. Congratulations!
 
-### Prerequisites
+### What are your responsibilities?
 
-* Python 2.7, see [this page][7] for more details.
+Going forward, you — as the author of the code — are now the active maintainer of the Integration. You’re responsible for maintaining the code and ensuring the Integration’s functionality. There is no specific time commitment, but we do ask that you only agree to become a maintainer if you feel that you can take care of the code for the foreseeable future. Datadog extends support on a best-effort basis for Extras, so you won’t be on your own!
 
-### Quickstart
+## Let's get started!
 
-The project comes with a requirements file usable by `pip` to install all the dependencies needed to work with any Check. From the root of the repo, run:
-
-```
-pip install -r requirements-dev.txt
-```
-
-You must install the dependencies of a specific Check in order to work with it. The easiest way to iterate during development is by installing the wheel itself in editable mode. Consider the `disk` Check as an example:
-
-```
-cd disk && pip install -e .
-```
-
-Verify that everything is working as expected:
-
-```
-python -c"from datadog_checks.disk import Disk"
-```
-
-If the command exits without errors, you're good to go!
-
-### Testing
-
-Use `tox` to run the test suite for a given Check:
-
-```
-cd {integration} && tox
-```
-
-If you updated the test requirements for a check, run `tox --recreate` for your changes to become effective.
-
-### Building
-
-`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official python documentation][9]
-
-Once your `setup.py` is ready, create a wheel:
-
-```
-  cd {integration}
-  python setup.py bdist_wheel
-```
-
-## Writing your own
-
-Now that you're comfortable with the basics, move on to the [technical specifics of Integration development][10].
+All of the details—including prerequisites, code examples, and more—are in the [Create a new Integration][10] documentation.
 
 [1]: https://docs.datadoghq.com/developers/metrics/
-[2]: https://docs.datadoghq.com/api/
-[3]: https://docs.datadoghq.com/developers/libraries/
-[4]: https://github.com/DataDog/integrations-core
-[5]: https://docs.datadoghq.com/help/
 [6]: https://github.com/DataDog/integrations-extras
-[7]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
-[8]: https://docs.pytest.org/en/latest/
-[9]: https://packaging.python.org/tutorials/distributing-packages/
 [10]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/new_check_howto.md 
+[11]: https://docs.datadoghq.com/developers/agent_checks/
+[12]: https://docs.datadoghq.com/developers/office_hours/

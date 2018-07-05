@@ -16,7 +16,7 @@ except ImportError:
 
 
 METRIC_TYPES = ['counter', 'gauge']
-WHITELISTED_WAITING_REASONS = ['ErrImagePull']
+WHITELISTED_WAITING_REASONS = ['ErrImagePull', 'ImagePullBackoff', 'CrashLoopBackoff']
 WHITELISTED_TERMINATED_REASONS = ['OOMKilled', 'ContainerCannotRun', 'Error']
 
 

@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "iis",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",

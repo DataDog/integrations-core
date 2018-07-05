@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "true",
   "manifest_version": "1.0.0",
   "name": "elastic",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",

@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "tomcat",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",

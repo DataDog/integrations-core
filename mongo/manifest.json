@@ -1,5 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "true",
   "manifest_version": "1.0.0",
   "name": "mongo",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
