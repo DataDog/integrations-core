@@ -2,6 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import sys
+import time
+import subprocess
+import requests
+import pytest
 from datadog_checks.utils.common import get_docker_hostname
 
 CHECK_NAME = 'zk'
@@ -9,26 +14,6 @@ HOST = get_docker_hostname()
 PORT = 12181
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
-INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-    'expected_mode': "standalone",
-    'tags': ["mytag"]
-}
-
-WRONG_EXPECTED_MODE = {
-    'host': HOST,
-    'port': PORT,
-    'expected_mode': "follower",
-    'tags': []
-}
-
-CONNECTION_FAILURE_CONFIG = {
-    'host': HOST,
-    'port': 2182,
-    'expected_mode': "down",
-    'tags': []
-}
 
 STAT_METRICS = [
     'zookeeper.latency.min',
@@ -73,3 +58,58 @@ STATUS_TYPES = [
     'inactive',
     'unknown',
 ]
+
+
+@pytest.fixture
+def get_instance():
+    return {
+        'host': HOST,
+        'port': PORT,
+        'expected_mode': "standalone",
+        'tags': ["mytag"]
+    }
+
+
+@pytest.fixture
+def get_invalid_mode_instance():
+    return {
+        'host': HOST,
+        'port': PORT,
+        'expected_mode': "follower",
+        'tags': []
+    }
+
+
+@pytest.fixture
+def get_conn_failure_config():
+    return {
+        'host': HOST,
+        'port': 2182,
+        'expected_mode': "down",
+        'tags': []
+    }
+
+
+@pytest.fixture
+def aggregator():
+    from datadog_checks.stubs import aggregator
+    aggregator.reset()
+    return aggregator
+
+
+@pytest.fixture(scope="session")
+def spin_up_zk():
+    env = os.environ
+    args = [
+        'docker-compose', '-f', os.path.join(HERE, 'compose', 'zk.yaml')
+    ]
+    subprocess.check_call(args + ["up", "-d"], env=env)
+    sys.stderr.write("Waiting for ZK to boot")
+    for _ in xrange(2):
+        try:
+            res = requests.get(URL)
+            res.raise_for_status()
+        except Exception:
+            time.sleep(1)
+    yield
+    subprocess.check_call(args + ["down"], env=env)
