@@ -28,8 +28,8 @@ Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your A
 init_config:
 
 instances:
-  - istio_mesh_endpoint: http://localhost:42422/metrics
-    mixer_endpoint: http://localhost:9093/metrics
+  - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+    mixer_endpoint: http://istio-telemetry.istio-system:9093/metrics
     send_histograms_buckets: true
 ```
 
