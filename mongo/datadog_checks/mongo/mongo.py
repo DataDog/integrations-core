@@ -7,10 +7,10 @@ import urllib
 import pymongo
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 from urlparse import urlsplit
-from config import _is_affirmative
-from distutils.version import LooseVersion # pylint: disable=E0611,E0401
+from datadog_checks.config import _is_affirmative
+from distutils.version import LooseVersion
 
 DEFAULT_TIMEOUT = 30
 GAUGE = AgentCheck.gauge
@@ -465,7 +465,8 @@ class MongoDb(AgentCheck):
         last_short_status = self.get_state_name(last_state)
         hostname = self.hostname_for_event(clean_server_name, agentConfig)
         msg_title = "%s is %s for %s" % (hostname, short_status, replset_name)
-        msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before." % (hostname, clean_server_name, status, short_status, replset_name, last_short_status)
+        msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
+        msg = msg % (hostname, clean_server_name, status, short_status, replset_name, last_short_status)
 
         self.event({
             'timestamp': int(time.time()),
@@ -638,7 +639,8 @@ class MongoDb(AgentCheck):
                         "name:{0}".format(stats.get('name', 'unknown')),
                         "collection:{0}".format(coll_name),
                     ]
-                    self.gauge('mongodb.collection.indexes.accesses.ops', int(stats.get('accesses', {}).get('ops', 0)), idx_tags)
+                    val = int(stats.get('accesses', {}).get('ops', 0))
+                    self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
             except Exception as e:
                 self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
 
@@ -678,7 +680,9 @@ class MongoDb(AgentCheck):
                 del ssl_params[key]
 
         server = instance['server']
-        username, password, db_name, nodelist, clean_server_name, auth_source = self._parse_uri(server, sanitize_username=bool(ssl_params))
+        username, password, db_name, nodelist, clean_server_name, auth_source = \
+            self._parse_uri(server, sanitize_username=bool(ssl_params))
+
         additional_metrics = instance.get('additional_metrics', [])
 
         # Get the list of metrics to collect
@@ -745,8 +749,14 @@ class MongoDb(AgentCheck):
 
         if do_auth:
             if auth_source:
-                self.log.info("authSource was specified in the the server URL: using '%s' as the authentication database", auth_source)
-                self._authenticate(cli[auth_source], username, password, use_x509, clean_server_name, service_check_tags)
+                msg = "authSource was specified in the the server URL: using '%s' as the authentication database"
+                self.log.info(msg, auth_source)
+                self._authenticate(cli[auth_source],
+                                   username,
+                                   password,
+                                   use_x509,
+                                   clean_server_name,
+                                   service_check_tags)
             else:
                 self._authenticate(db, username, password, use_x509, clean_server_name, service_check_tags)
 
@@ -800,9 +810,19 @@ class MongoDb(AgentCheck):
 
                     if do_auth:
                         if auth_source:
-                            self._authenticate(cli_rs[auth_source], username, password, use_x509, server, service_check_tags)
+                            self._authenticate(cli_rs[auth_source],
+                                               username,
+                                               password,
+                                               use_x509,
+                                               server,
+                                               service_check_tags)
                         else:
-                            self._authenticate(cli_rs[db_name], username, password, use_x509, server, service_check_tags)
+                            self._authenticate(cli_rs[db_name],
+                                               username,
+                                               password,
+                                               use_x509,
+                                               server,
+                                               service_check_tags)
 
                     # Replication set information
                     replset_name = replSet['set']
@@ -848,7 +868,8 @@ class MongoDb(AgentCheck):
                     )
 
             except Exception as e:
-                if "OperationFailure" in repr(e) and ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
+                if "OperationFailure" in repr(e) and \
+                  ("not running with --replSet" in str(e) or "replSetGetStatus" in str(e)):
                     pass
                 else:
                     raise e
@@ -930,7 +951,8 @@ class MongoDb(AgentCheck):
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 self._collect_indexes_stats(instance, db, tags)
             else:
-                self.log.error("'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s", mongo_version)
+                msg = "'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s"
+                self.log.error(msg, mongo_version)
 
         # Report the usage metrics for dbs/collections
         if 'top' in additional_metrics:
@@ -972,8 +994,7 @@ class MongoDb(AgentCheck):
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s' % str(e))
 
-
-        if 'local' in dbnames: # it might not be if we are connectiing through mongos
+        if 'local' in dbnames:  # it might not be if we are connectiing through mongos
             # Fetch information analogous to Mongo's db.getReplicationInfo()
             localdb = cli['local']
 
