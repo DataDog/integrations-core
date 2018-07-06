@@ -331,10 +331,10 @@ class NagiosEventLogTailer(NagiosTailer):
     def create_event(self, timestamp, event_type, hostname, fields):
         """Factory method called by the parsers
         """
-        # The Agent expects a specific set of fields, so we need to place all 
+        # The Agent expects a specific set of fields, so we need to place all
         # extra fields in the msg_title and let the Datadog backend separate them
         # Any remaining fields that aren't a part of the datadog-agent payload
-        # specification will be dropped. 
+        # specification will be dropped.
         d = fields._asdict()
         msg_title = (
             'event_soft_hard|{},'
@@ -344,12 +344,12 @@ class NagiosEventLogTailer(NagiosTailer):
             'payload|{},'
             'ack_author|{}'
             .format(
-                d.pop('event_soft_hard', ''),
-                d.pop('event_type', ''),
-                d.pop('check_name', ''),
-                d.pop('event_state', ''),
-                d.pop('payload', ''),
-                d.pop('ack_author', ''),
+                d.get('event_soft_hard', ''),
+                d.get('event_type', ''),
+                d.get('check_name', ''),
+                d.get('event_state', ''),
+                d.get('payload', ''),
+                d.get('ack_author', ''),
             )
         )
 
