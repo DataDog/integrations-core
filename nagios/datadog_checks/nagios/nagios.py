@@ -313,7 +313,7 @@ class NagiosEventLogTailer(NagiosTailer):
             'check_name|{},'
             'event_state|{},'
             'payload|{},'
-            'ack_author|{},'
+            'ack_author|{}'
             .format(
                 d.pop('event_soft_hard', ''),
                 d.pop('event_type', ''),
