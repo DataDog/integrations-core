@@ -523,7 +523,7 @@ class SQLServer(AgentCheck):
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 
-                    if row.type in self.proc_type_mapping:
+                    if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags)
                     else:
                         self.log.warning('%s is not a recognised type from procedure %s, metric %s'
