@@ -243,19 +243,18 @@ class Oracle(AgentCheck):
         if tags is None:
             tags = []
 
-        query = "SELECT PID, {} FROM GV$PROCESS".format(','.join(self.PROCESS_METRICS.keys()))
+        query = "SELECT PROGRAM, {} FROM GV$PROCESS".format(','.join(self.PROCESS_METRICS.keys()))
         with closing(con.cursor()) as cur:
             cur.execute(query)
             for row in cur.fetchall():
 
-                # Oracle process identifier
-                pid = row[0]
-                pid_tag = ['pid:{}'.format(pid)]
+                # Oracle program name
+                program_tag = ['program:{}'.format(row[0])]
 
                 # Get the metrics
                 for i, metric_name in enumerate(self.PROCESS_METRICS.values(), 1):
                     metric_value = row[i]
-                    self.gauge(metric_name, metric_value, tags=tags + pid_tag)
+                    self.gauge(metric_name, metric_value, tags=tags + program_tag)
 
     def _get_tablespace_metrics(self, con, tags):
         if tags is None:

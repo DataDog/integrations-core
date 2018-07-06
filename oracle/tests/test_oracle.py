@@ -245,17 +245,25 @@ class TestMetrics:
             aggregator.assert_metric(metric, count=1, value=0, tags=["custom_tag"])
 
     def test__get_process_metrics(self, aggregator, check):
-        query = "SELECT PID, {} FROM GV$PROCESS".format(','.join(check.PROCESS_METRICS.keys()))
+        query = "SELECT PROGRAM, {} FROM GV$PROCESS".format(','.join(check.PROCESS_METRICS.keys()))
         con = mock.MagicMock()
         cur = mock.MagicMock()
         con.cursor.return_value = cur
-        cur.fetchall.return_value = [[pid] + ([0] * len(check.PROCESS_METRICS)) for pid in range(10)]
+        programs = [
+            "PSEUDO",
+            "oracle@localhost.localdomain (PMON)",
+            "oracle@localhost.localdomain (PSP0)",
+            "oracle@localhost.localdomain (VKTM)",
+        ]
+        cur.fetchall.return_value = [[program] + ([0] * len(check.PROCESS_METRICS)) for program in programs]
 
         check._get_process_metrics(con, ['custom_tag'])
 
         cur.execute.assert_called_with(query)
         for i, metric_name in enumerate(check.PROCESS_METRICS.values()):
-            aggregator.assert_metric(metric_name, count=1, value=0, tags=['custom_tag', 'pid:{}'.format(i)])
+            expected_program = programs[i]
+            aggregator.assert_metric(metric_name, count=1, value=0,
+                                     tags=['custom_tag', 'program:{}'.format(expected_program)])
 
     def test__get_tablespace_metrics(self, aggregator, check):
         query = "SELECT TABLESPACE_NAME, sum(BYTES), sum(MAXBYTES) FROM sys.dba_data_files GROUP BY TABLESPACE_NAME"
