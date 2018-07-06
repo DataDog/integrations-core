@@ -248,9 +248,9 @@ class Oracle(AgentCheck):
             cur.execute(query)
             for row in cur.fetchall():
 
-                # Oracle process identifier for the process
+                # Oracle process identifier
                 pid = row[0]
-                pid_tag = "pid:{}".format(pid)
+                pid_tag = ['pid:{}'.format(pid)]
 
                 # Get the metrics
                 for i, metric_name in enumerate(self.PROCESS_METRICS.values(), 1):
