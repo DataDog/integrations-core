@@ -6,6 +6,7 @@ import os
 import subprocess
 import time
 import sys
+import json
 
 import requests
 from datadog_checks.php_fpm import PHPFPMCheck
@@ -66,3 +67,26 @@ def php_fpm_instance():
     yield
 
     subprocess.check_call(args + ["down"], env=env)
+
+
+@pytest.fixture
+def payload():
+    """
+    example payload from /status?json
+    """
+    return json.loads("""{
+        "pool":"www",
+        "process manager":"dynamic",
+        "start time":1530722898,
+        "start since":12,
+        "accepted conn":2,
+        "listen queue":0,
+        "max listen queue":0,
+        "listen queue len":128,
+        "idle processes":1,
+        "active processes":1,
+        "total processes":2,
+        "max active processes":1,
+        "max children reached":0,
+        "slow requests":0
+    }""")

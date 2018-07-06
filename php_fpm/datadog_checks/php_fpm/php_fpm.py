@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import random
+import time
+
 import requests
 
 from datadog_checks.checks import AgentCheck
@@ -73,17 +76,27 @@ class PHPFPMCheck(AgentCheck):
         try:
             # TODO: adding the 'full' parameter gets you per-process detailed
             # informations, which could be nice to parse and output as metrics
-            resp = requests.get(status_url,
-                                auth=auth,
-                                timeout=timeout,
-                                headers=headers(self.agentConfig, http_host=http_host),
-                                verify=not disable_ssl_validation,
-                                params={'json': True})
-            resp.raise_for_status()
+            max_attempts = 3
+            for i in range(max_attempts):
+                resp = requests.get(status_url, auth=auth, timeout=timeout,
+                                    headers=headers(self.agentConfig, http_host=http_host),
+                                    verify=not disable_ssl_validation, params={'json': True})
 
-            data = resp.json()
+                # Exponential backoff, wait at most (max_attempts - 1) times in case we get a 503.
+                # Delay in seconds is (2^i + random amount of seconds between 0 and 1)
+                # 503s originated here: https://github.com/php/php-src/blob/d84ef96/sapi/fpm/fpm/fpm_status.c#L96
+                if resp.status_code == 503 and i < max_attempts - 1:
+                    # retry
+                    time.sleep(2**i + random.random())
+                    continue
+
+                resp.raise_for_status()
+                data = resp.json()
+
+                # successfully got a response, exit the backoff system
+                break
         except Exception as e:
-            self.log.error("Failed to get metrics from {0}.\nError {1}".format(status_url, e))
+            self.log.error("Failed to get metrics from {}: {}".format(status_url, e))
             raise
 
         pool_name = data.get('pool', 'default')
