@@ -844,7 +844,7 @@ class DockerDaemon(AgentCheck):
                     container_name = DockerUtil.container_name_extractor(cont)[0]
                     container_tags.update(self._get_tags(cont, PERFORMANCE))
                     container_tags.add('container_name:%s' % container_name)
-                    # Add additionnal docker event attributes as tag
+                    # Add additional docker event attributes as tag
                     for attr in self.event_attributes_as_tags:
                         if attr in event['Actor']['Attributes'] and attr not in EXCLUDED_ATTRIBUTES:
                             container_tags.add('%s:%s' % (attr, event['Actor']['Attributes'][attr]))

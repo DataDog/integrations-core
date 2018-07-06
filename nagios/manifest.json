@@ -2,6 +2,8 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "nagios",
+  "display_name": "Nagios",
+  "creates_events": true,
   "short_description": "Send Nagios service flaps, host alerts, and more to your Datadog event stream.",
   "support": "core",
   "supported_os": [

@@ -2,6 +2,9 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "mcache",
+  "display_name": "Memcached",
+  "creates_events": true,
+  "metric_to_check": "memcache.bytes",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",
   "supported_os": [

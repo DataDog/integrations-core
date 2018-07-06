@@ -72,14 +72,9 @@ Returns CRITICAL if the Agent is unable to connect to the recursor's statistics 
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][7]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/datadog_checks/powerdns_recursor/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/

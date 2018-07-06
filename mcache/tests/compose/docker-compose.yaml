@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  memcached:
+    image: datadog/docker-library:memcached_SASL
+    environment:
+      USERNAME: testuser
+      PASSWORD: testpass
+    ports:
+      - "11211:11211"
+    command: memcached -S
+
+  memcached_socket:
+    image: datadog/docker-library:memcached_SASL
+    environment:
+      USERNAME: testuser
+      PASSWORD: testpass
+    volumes:
+    - ${HOST_SOCKET_DIR}:${DOCKER_SOCKET_DIR}
+    command: memcached -S -s ${DOCKER_SOCKET_PATH} -a 777

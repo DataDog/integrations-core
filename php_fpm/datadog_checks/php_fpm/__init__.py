@@ -6,5 +6,5 @@ from .php_fpm import PHPFPMCheck
 
 __all__ = [
     '__version__',
-    'PHPFPMCheck'
+    'PHPFPMCheck',
 ]

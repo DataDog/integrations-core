@@ -1,66 +1,41 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import tempfile
 import time
-import os
+import pytest
 
-# 3p
-from nose.plugins.attrib import attr
-
-# project
-from tests.checks.common import AgentCheckTest, Fixtures
-
-FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'ci')
-
-class NagiosTestCase(AgentCheckTest):
-    CHECK_NAME = 'nagios'
-    NAGIOS_TEST_LOG = Fixtures.file('nagios.log', sdk_dir=FIXTURE_DIR)
-    NAGIOS_TEST_HOST = Fixtures.file('host-perfdata', sdk_dir=FIXTURE_DIR)
-    NAGIOS_TEST_SVC = Fixtures.file('service-perfdata', sdk_dir=FIXTURE_DIR)
-    NAGIOS_TEST_HOST_TEMPLATE = "[HOSTPERFDATA]\t$TIMET$\t$HOSTNAME$\t$HOSTEXECUTIONTIME$\t$HOSTOUTPUT$\t$HOSTPERFDATA$"
-    NAGIOS_TEST_SVC_TEMPLATE = "[SERVICEPERFDATA]\t$TIMET$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$"
-
-    def get_config(self, nagios_conf, events=False, service_perf=False, host_perf=False):
-        """
-        Helper to generate a valid Nagios configuration
-        """
-        self.nagios_cfg = tempfile.NamedTemporaryFile(mode="a+b")
-        self.nagios_cfg.write(nagios_conf)
-        self.nagios_cfg.flush()
-
-        return {
-            'instances': [{
-                'nagios_conf': self.nagios_cfg.name,
-                'collect_events': events,
-                'collect_service_performance_data': service_perf,
-                'collect_host_performance_data': host_perf,
-            }]
-        }
+from datadog_checks.nagios import Nagios
+from .common import (
+    CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG, NAGIOS_TEST_HOST, NAGIOS_TEST_ALT_HOST_TEMPLATE,
+    NAGIOS_TEST_HOST_TEMPLATE, NAGIOS_TEST_SVC, NAGIOS_TEST_SVC_TEMPLATE, NAGIOS_TEST_ALT_SVC_TEMPLATE,
+)
 
 
-@attr('unix')
-class EventLogTailerTestCase(NagiosTestCase):
-    def test_line_parser(self):
+@pytest.mark.integration
+class TestEventLogTailer:
+    def test_line_parser(self, aggregator):
         """
         Parse lines
         """
-        config = self.get_config(
-            '\n'.join(["log_file={0}".format(self.NAGIOS_TEST_LOG)]),
-            events=True
-        )
 
-        self.run_check(config)
+        # Get the config
+        config, nagios_cfg = get_config("log_file={}\n".format(NAGIOS_TEST_LOG), events=True)
 
-        nagios_tailer = self.check.nagios_tails[self.nagios_cfg.name][0]
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
+
+        nagios_tailer = nagios.nagios_tails[nagios_cfg.name][0]
         counters = {}
 
-        for line in open(self.NAGIOS_TEST_LOG).readlines():
+        for line in open(NAGIOS_TEST_LOG).readlines():
             parsed = nagios_tailer._parse_line(line)
             if parsed:
-                event = self.check.get_events()[-1]
+                event = aggregator.events[-1]
                 t = event["event_type"]
                 assert t in line
                 assert int(event["timestamp"]) > 0, line
@@ -72,7 +47,13 @@ class EventLogTailerTestCase(NagiosTestCase):
                     assert event["event_state"] in ("CRITICAL", "WARNING", "UNKNOWN", "OK"), line
                     assert event["check_name"] is not None
                 elif t == "SERVICE NOTIFICATION":
-                    assert event["event_state"] in ("ACKNOWLEDGEMENT", "OK", "CRITICAL", "WARNING", "ACKNOWLEDGEMENT (CRITICAL)"), line
+                    assert event["event_state"] in (
+                        "ACKNOWLEDGEMENT",
+                        "OK",
+                        "CRITICAL",
+                        "WARNING",
+                        "ACKNOWLEDGEMENT (CRITICAL)",
+                    ), line
                 elif t == "SERVICE FLAPPING ALERT":
                     assert event["flap_start_stop"] in ("STARTED", "STOPPED"), line
                     assert event["check_name"] is not None
@@ -93,210 +74,207 @@ class EventLogTailerTestCase(NagiosTestCase):
                     assert event["host"] is not None
                     assert event["downtime_start_stop"] in ("STARTED", "STOPPED")
 
-        self.assertEquals(counters["SERVICE ALERT"], 301)
-        self.assertEquals(counters["SERVICE NOTIFICATION"], 120)
-        self.assertEquals(counters["HOST ALERT"], 3)
-        self.assertEquals(counters["SERVICE FLAPPING ALERT"], 7)
-        self.assertEquals(counters["CURRENT HOST STATE"], 8)
-        self.assertEquals(counters["CURRENT SERVICE STATE"], 52)
-        self.assertEquals(counters["SERVICE DOWNTIME ALERT"], 3)
-        self.assertEquals(counters["HOST DOWNTIME ALERT"], 5)
-        self.assertEquals(counters["ACKNOWLEDGE_SVC_PROBLEM"], 4)
+        assert counters["SERVICE ALERT"] == 301
+        assert counters["SERVICE NOTIFICATION"] == 120
+        assert counters["HOST ALERT"] == 3
+        assert counters["SERVICE FLAPPING ALERT"] == 7
+        assert counters["CURRENT HOST STATE"] == 8
+        assert counters["CURRENT SERVICE STATE"] == 52
+        assert counters["SERVICE DOWNTIME ALERT"] == 3
+        assert counters["HOST DOWNTIME ALERT"] == 5
+        assert counters["ACKNOWLEDGE_SVC_PROBLEM"] == 4
         assert "ACKNOWLEDGE_HOST_PROBLEM" not in counters
 
-    def test_continuous_bulk_parsing(self):
+    def test_continuous_bulk_parsing(self, aggregator):
         """
         Make sure the tailer continues to parse nagios as the file grows
         """
-        x = open(self.NAGIOS_TEST_LOG).read()
-        events = []
-        ITERATIONS = 10
-        f = tempfile.NamedTemporaryFile(mode="a+b")
-        f.write(x)
-        f.flush()
+        test_data = open(NAGIOS_TEST_LOG).read()
+        ITERATIONS = 1
+        log_file = tempfile.NamedTemporaryFile(mode="a+b")
 
-        config = self.get_config('\n'.join(["log_file={0}".format(f.name)]), events=True)
-        self.run_check(config)
+        # Get the config
+        config, nagios_cfg = get_config("log_file={}\n".format(log_file.name), events=True)
+
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
 
         for i in range(ITERATIONS):
-            f.write(x)
-            f.flush()
-            self.run_check(config)
-            events.extend(self.events)
-        f.close()
-        self.assertEquals(len(events), ITERATIONS * 503)
+            log_file.write(test_data)
+            log_file.flush()
+            nagios.check(config['instances'][0])
+
+        log_file.close()
+        assert len(aggregator.events) == ITERATIONS * 503
 
 
-@attr('unix')
-class PerfDataTailerTestCase(NagiosTestCase):
+@pytest.mark.integration
+class TestPerfDataTailer:
     POINT_TIME = (int(time.time()) / 15) * 15
 
-    DB_LOG_DATA = [(
+    DB_LOG_SERVICEPERFDATA = [
+        "time=0.06",
+        "db0=33;180;190;0;200",
+        "db1=1;150;190;0;200",
+        "db2=0;120;290;1;200",
+        "db3=0;110;195;5;100"
+    ]
+
+    DB_LOG_DATA = [
         "DATATYPE::SERVICEPERFDATA",
-        "TIMET::%s" % POINT_TIME,
+        "TIMET::{}".format(POINT_TIME),
         "HOSTNAME::myhost0",
         "SERVICEDESC::Pgsql Backends",
-        "SERVICEPERFDATA::" + " ".join([
-            "time=0.06",
-            "db0=33;180;190;0;200",
-            "db1=1;150;190;0;200",
-            "db2=0;120;290;1;200",
-            "db3=0;110;195;5;100"
-        ]),
+        "SERVICEPERFDATA::" + " ".join(DB_LOG_SERVICEPERFDATA),
         "SERVICECHECKCOMMAND::check_nrpe_1arg!check_postgres_backends",
         "HOSTSTATE::UP",
         "HOSTSTATETYPE::HARD",
         "SERVICESTATE::OK",
         "SERVICESTATETYPE::HARD",
-    )]
+    ]
 
-    DISK_LOG_DATA = [(
+    DISK_LOG_SERVICEPERFDATA = [
+        "/=5477MB;6450;7256;0;8063",
+        "/dev=0MB;2970;3341;0;3713",
+        "/dev/shm=0MB;3080;3465;0;3851",
+        "/var/run=0MB;3080;3465;0;3851",
+        "/var/lock=0MB;3080;3465;0;3851",
+        "/lib/init/rw=0MB;3080;3465;0;3851",
+        "/mnt=290MB;338636;380966;0;423296",
+        "/data=39812MB;40940;46057;0;51175",
+    ]
+
+    DISK_LOG_DATA = [
         "DATATYPE::SERVICEPERFDATA",
-        "TIMET::%s" % POINT_TIME,
+        "TIMET::{}".format(POINT_TIME),
         "HOSTNAME::myhost2",
         "SERVICEDESC::Disk Space",
-        "SERVICEPERFDATA::" + " ".join([
-            "/=5477MB;6450;7256;0;8063",
-            "/dev=0MB;2970;3341;0;3713",
-            "/dev/shm=0MB;3080;3465;0;3851",
-            "/var/run=0MB;3080;3465;0;3851",
-            "/var/lock=0MB;3080;3465;0;3851",
-            "/lib/init/rw=0MB;3080;3465;0;3851",
-            "/mnt=290MB;338636;380966;0;423296",
-            "/data=39812MB;40940;46057;0;51175",
-        ]),
+        "SERVICEPERFDATA::" + " ".join(DISK_LOG_SERVICEPERFDATA),
         "SERVICECHECKCOMMAND::check_all_disks!20%!10%",
         "HOSTSTATE::UP",
         "HOSTSTATETYPE::HARD",
         "SERVICESTATE::OK",
         "SERVICESTATETYPE::HARD",
-    )]
+    ]
 
-    HOST_LOG_DATA = [(
+    HOST_LOG_SERVICEPERFDATA = ["rta=0.978000ms;5000.000000;5000.000000;0.000000", "pl=0%;100;100;0"]
+
+    HOST_LOG_DATA = [
         "DATATYPE::HOSTPERFDATA",
-        "TIMET::%s" % POINT_TIME,
+        "TIMET::{}".format(POINT_TIME),
         "HOSTNAME::myhost1",
-        "HOSTPERFDATA::" + " ".join([
-            "rta=0.978000ms;5000.000000;5000.000000;0.000000",
-            "pl=0%;100;100;0",
-        ]),
+        "HOSTPERFDATA::" + " ".join(HOST_LOG_SERVICEPERFDATA),
         "HOSTCHECKCOMMAND::check-host-alive",
         "HOSTSTATE::UP",
         "HOSTSTATETYPE::HARD",
-    )]
+    ]
 
-    def _write_log(self, log_data):
-        """
-        Write log data to log file
-        """
-        for data in log_data:
-            self.log_file.write(data + "\n")
-        self.log_file.flush()
-
-    def compare_metric(self, actual, expected):
-        """
-        Return true when `actual` metic == `expected` metric
-        """
-        self.assertEquals(actual[0], expected[0], "Metrics name actual:{0} vs expected:{1}"
-                          .format(actual[0], expected[0]))
-        self.assertEquals(actual[1], expected[1], "Timestamp actual:{0} vs expected:{1}"
-                          .format(actual[1], expected[1]))
-        self.assertEquals(actual[2], expected[2], "Value actual:{0} vs expected:{1}"
-                          .format(actual[2], expected[2]))
-        self.assertEqual(actual[3], expected[3], "Context actual:{0} vs expected:{1}"
-                         .format(actual[3], expected[3]))
-
-    def test_service_perfdata(self):
+    def test_service_perfdata(self, aggregator):
         """
         Collect Nagios Service PerfData metrics
         """
         self.log_file = tempfile.NamedTemporaryFile()
-        config = self.get_config(
-            '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$"]),
-            service_perf=True)
 
-        config["instances"][0]["tags"] = ['optional:tag1']
-        self.run_check(config)
+        # Get the config
+        config, _ = get_config(
+            "service_perfdata_file={}\n"
+            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
+            service_perf=True,
+            tags=CUSTOM_TAGS,
+        )
+
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.DB_LOG_DATA])
-        self.run_check(config)
+        self._write_log('\t'.join(self.DB_LOG_DATA))
+        nagios.check(config['instances'][0])
 
         # Test metrics
-        service_perf_data = self.DB_LOG_DATA[0][4][17:]  # 'time=0.06 db0=33;180;190;0;200 db1=1;150;190;0;200 db2=0;120;290;1;200 db3=0;110;195;5;100'
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.DB_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             metric_name = "nagios.pgsql_backends." + name
 
             values = info.split(";")
             value = float(values[0])
-            expected_tags = ['optional:tag1']
+            expected_tags = list(CUSTOM_TAGS)
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
                 expected_tags.append('min:' + values[3])
                 expected_tags.append('max:' + values[4])
+            aggregator.assert_metric(metric_name, value=value, tags=expected_tags, count=1)
 
-            self.assertMetric(metric_name, value=value, tags=expected_tags, count=1)
+        aggregator.assert_all_metrics_covered()
 
-        self.coverage_report()
-
-    def test_service_perfdata_special_cases(self):
+    def test_service_perfdata_special_cases(self, aggregator):
         """
         Handle special cases in PerfData metrics
         """
         self.log_file = tempfile.NamedTemporaryFile()
-        config = self.get_config(
-            '\n'.join(["service_perfdata_file=%s" % self.log_file.name, "service_perfdata_file_template=DATATYPE::SERVICEPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tSERVICEDESC::$SERVICEDESC$\tSERVICEPERFDATA::$SERVICEPERFDATA$\tSERVICECHECKCOMMAND::$SERVICECHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$\tSERVICESTATE::$SERVICESTATE$\tSERVICESTATETYPE::$SERVICESTATETYPE$",]),
-            service_perf=True)
+        # Get the config
+        config, _ = get_config(
+            "service_perfdata_file={}\n"
+            "service_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_SVC_TEMPLATE),
+            service_perf=True,
+            tags=CUSTOM_TAGS,
+        )
 
-        config["instances"][0]["tags"] = ['optional:tag1']
-        self.run_check(config)
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.DISK_LOG_DATA])
-        self.run_check(config)
+        self._write_log('\t'.join(self.DISK_LOG_DATA))
+        nagios.check(config['instances'][0])
 
         # Test metrics
-        service_perf_data = self.DISK_LOG_DATA[0][4][17:]
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.DISK_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             values = info.split(";")
             value = int(values[0][:-2])
-            expected_tags = ['unit:' + values[0][-2:], "optional:tag1"]
+            expected_tags = ['unit:{}'.format(values[0][-2:]), 'device:{}'.format(name)] + CUSTOM_TAGS
             if len(values) == 5:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
                 expected_tags.append('min:' + values[3])
                 expected_tags.append('max:' + values[4])
 
-            self.assertMetric("nagios.disk_space", value=value, tags=expected_tags,
-                              device_name=name, count=1)
+            aggregator.assert_metric("nagios.disk_space", value=value, tags=expected_tags, count=1)
 
-        self.coverage_report()
+        aggregator.assert_all_metrics_covered()
 
-    def test_host_perfdata(self):
+    def test_host_perfdata(self, aggregator):
         """
         Collect Nagios Host PerfData metrics
         """
         self.log_file = tempfile.NamedTemporaryFile()
-        config = self.get_config(
-            '\n'.join(["host_perfdata_file=%s" % self.log_file.name, "host_perfdata_file_template=DATATYPE::HOSTPERFDATA\tTIMET::$TIMET$\tHOSTNAME::$HOSTNAME$\tHOSTPERFDATA::$HOSTPERFDATA$\tHOSTCHECKCOMMAND::$HOSTCHECKCOMMAND$\tHOSTSTATE::$HOSTSTATE$\tHOSTSTATETYPE::$HOSTSTATETYPE$"]),
-            host_perf=True)
 
-        config["instances"][0]["tags"] = ['optional:tag1']
-        self.run_check(config)
+        # Get the config
+        config, _ = get_config(
+            "host_perfdata_file={}\n"
+            "host_perfdata_file_template={}".format(self.log_file.name, NAGIOS_TEST_HOST_TEMPLATE),
+            host_perf=True,
+            tags=CUSTOM_TAGS,
+        )
+
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
 
         # Write content to log file and run check
-        self._write_log(['\t'.join(data) for data in self.HOST_LOG_DATA])
-        self.run_check(config)
+        self._write_log('\t'.join(self.HOST_LOG_DATA))
+        nagios.check(config['instances'][0])
 
         # Test metric
-        service_perf_data = self.HOST_LOG_DATA[0][3][14:]
-
-        for metric_data in service_perf_data.split(" "):
+        for metric_data in self.HOST_LOG_SERVICEPERFDATA:
             name, info = metric_data.split("=")
             metric_name = "nagios.host." + name
 
@@ -305,112 +283,160 @@ class PerfDataTailerTestCase(NagiosTestCase):
             index = values[0].find("ms") if values[0].find("ms") != -1 else values[0].find("%")
             index = len(values[0]) - index
             value = float(values[0][:-index])
-            expected_tags = ['unit:' + values[0][-index:], "optional:tag1"]
+            expected_tags = ['unit:' + values[0][-index:]] + CUSTOM_TAGS
             if len(values) == 4:
                 expected_tags.append('warn:' + values[1])
                 expected_tags.append('crit:' + values[2])
                 expected_tags.append('min:' + values[3])
 
-            self.assertMetric(metric_name, value=value, tags=expected_tags, count=1)
+            aggregator.assert_metric(metric_name, value=value, tags=expected_tags, count=1)
 
-        self.coverage_report()
+        aggregator.assert_all_metrics_covered()
 
-    def test_alt_service_perfdata(self):
+    def test_alt_service_perfdata(self, aggregator):
         """
         Collect Nagios Service PerfData metrics - alternative template
         """
         self.log_file = tempfile.NamedTemporaryFile()
         perfdata_file = tempfile.NamedTemporaryFile()
-        config = self.get_config('\n'.join(
-            ["service_perfdata_file=%s" % perfdata_file.name, "service_perfdata_file_template=%s" % self.NAGIOS_TEST_SVC_TEMPLATE]),
-            service_perf=True
-        )
-        self.run_check(config)
 
-        with open(self.NAGIOS_TEST_SVC, "r") as f:
+        # Get the config
+        config, _ = get_config(
+            "service_perfdata_file={}\n"
+            "service_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_SVC_TEMPLATE),
+            service_perf=True,
+        )
+
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
+
+        with open(NAGIOS_TEST_SVC, "r") as f:
             nagios_perf = f.read()
 
         perfdata_file.write(nagios_perf)
         perfdata_file.flush()
 
-        self.run_check(config)
+        nagios.check(config['instances'][0])
 
         # Test metrics
-        expected_output = [
-            (
-                'nagios.current_users.users', 1339511440, 1.0,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'tags': ['warn:20', 'crit:50', 'min:0']
-                }
-            ), (
-                'nagios.ping.pl', 1339511500, 0.0,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'tags': ['unit:%', 'warn:20', 'crit:60', 'min:0']
-                }
-            ), (
-                'nagios.ping.rta', 1339511500, 0.065,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'tags': ['unit:ms', 'warn:100.000000', 'crit:500.000000', 'min:0.000000']
-                }
-            ), ('nagios.root_partition', 1339511560, 2470.0,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'device_name': '/',
-                    'tags': ['unit:MB', 'warn:5852', 'crit:6583', 'min:0', 'max:7315']
-                }
-                )
+        expected_metrics = [
+            {
+                'name': 'nagios.current_users.users',
+                'timestamp': 1339511440,
+                'value': 1.0,
+                'hostname': 'localhost',
+                'tags': ['warn:20', 'crit:50', 'min:0'],
+            },
+            {
+                'name': 'nagios.ping.pl',
+                'timestamp': 1339511500,
+                'value': 0.0,
+                'hostname': 'localhost',
+                'tags': ['unit:%', 'warn:20', 'crit:60', 'min:0'],
+            },
+            {
+                'name': 'nagios.ping.rta',
+                'timestamp': 1339511500,
+                'value': 0.065,
+                'hostname': 'localhost',
+                'tags': ['unit:ms', 'warn:100.000000', 'crit:500.000000', 'min:0.000000'],
+            },
+            {
+                'name': 'nagios.root_partition',
+                'timestamp': 1339511560,
+                'value': 2470.0,
+                'hostname': 'localhost',
+                'tags': ['unit:MB', 'warn:5852', 'crit:6583', 'min:0', 'max:7315', 'device:/'],
+            },
         ]
 
-        for actual, expected in zip(sorted(self.metrics), sorted(expected_output)):
-            self.compare_metric(actual, expected)
+        for metric in expected_metrics:
+            aggregator.assert_metric(metric['name'], metric['value'], tags=metric['tags'], hostname=metric['hostname'])
 
-        self.coverage_report()
+        aggregator.assert_all_metrics_covered()
 
-    def test_alt_host_perfdata(self):
+    def test_alt_host_perfdata(self, aggregator):
         """
         Collect Nagios Host PerfData metrics - alternative template
         """
         self.log_file = tempfile.NamedTemporaryFile()
         perfdata_file = tempfile.NamedTemporaryFile()
-        config = self.get_config(
-            '\n'.join(["host_perfdata_file=%s" % perfdata_file.name, "host_perfdata_file_template=%s" % self.NAGIOS_TEST_HOST_TEMPLATE]),
-            host_perf=True)
-        self.run_check(config)
 
-        with open(self.NAGIOS_TEST_HOST, "r") as f:
+        # Get the config
+        config, _ = get_config(
+            "host_perfdata_file={}\n"
+            "host_perfdata_file_template={}".format(perfdata_file.name, NAGIOS_TEST_ALT_HOST_TEMPLATE),
+            host_perf=True,
+        )
+
+        # Set up the check
+        nagios = Nagios(CHECK_NAME, {}, {}, config['instances'])
+
+        # Run the check once
+        nagios.check(config['instances'][0])
+
+        with open(NAGIOS_TEST_HOST, "r") as f:
             nagios_perf = f.read()
 
         perfdata_file.write(nagios_perf)
         perfdata_file.flush()
 
-        self.run_check(config)
+        nagios.check(config['instances'][0])
 
         # Test metrics
-        expected_output = [
-            (
-                'nagios.host.pl', 1339511440, 0.0,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'tags': ['unit:%', 'warn:80', 'crit:100', 'min:0']
-                }
-            ), (
-                'nagios.host.rta', 1339511440, 0.048,
-                {
-                    'type': 'gauge',
-                    'hostname': 'localhost',
-                    'tags': ['unit:ms', 'warn:3000.000000', 'crit:5000.000000', 'min:0.000000']
-                }
-            )]
+        expected_metrics = [
+            {
+                'name': 'nagios.host.pl',
+                'timestamp': 1339511440,
+                'value': 0.0,
+                'hostname': 'localhost',
+                'tags': ['unit:%', 'warn:80', 'crit:100', 'min:0'],
+            },
+            {
+                'name': 'nagios.host.rta',
+                'timestamp': 1339511440,
+                'value': 0.048,
+                'hostname': 'localhost',
+                'tags': ['unit:ms', 'warn:3000.000000', 'crit:5000.000000', 'min:0.000000'],
+            },
+        ]
 
-        for actual, expected in zip(sorted(self.metrics), sorted(expected_output)):
-            self.compare_metric(actual, expected)
+        for metric in expected_metrics:
+            aggregator.assert_metric(metric['name'], metric['value'], tags=metric['tags'], hostname=metric['hostname'])
 
-        self.coverage_report()
+        aggregator.assert_all_metrics_covered()
+
+    def _write_log(self, log_data):
+        """
+        Write log data to log file
+        """
+        self.log_file.write(log_data + "\n")
+        self.log_file.flush()
+
+
+def get_config(nagios_conf, events=False, service_perf=False, host_perf=False, tags=None):
+    """
+    Helper to generate a valid Nagios configuration
+    """
+    tags = [] if tags is None else tags
+
+    NAGIOS_CFG = tempfile.NamedTemporaryFile(mode="a+b")
+    NAGIOS_CFG.write(nagios_conf)
+    NAGIOS_CFG.flush()
+
+    CONFIG = {
+        'instances': [
+            {
+                'nagios_conf': NAGIOS_CFG.name,
+                'collect_events': events,
+                'collect_service_performance_data': service_perf,
+                'collect_host_performance_data': host_perf,
+                'tags': list(tags),
+            }
+        ]
+    }
+
+    return CONFIG, NAGIOS_CFG

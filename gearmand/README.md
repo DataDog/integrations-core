@@ -49,14 +49,9 @@ Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][7]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/gearmand/datadog_checks/gearmand/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/gearmand/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/

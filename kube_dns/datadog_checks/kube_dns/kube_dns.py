@@ -32,6 +32,8 @@ class KubeDNSCheck(PrometheusCheck):
         if endpoint is None:
             raise CheckException("Unable to find prometheus_endpoint in config file.")
 
+        self.set_prometheus_timeout(instance)
+
         send_buckets = instance.get('send_histograms_buckets', True)
         # By default we send the buckets.
         if send_buckets is not None and str(send_buckets).lower() == 'false':

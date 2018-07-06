@@ -107,10 +107,6 @@ To disable this check, set `check_certificate_expiration` to false.
 ## Troubleshooting
 Need help? Contact [Datadog Support][9].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][10]
-
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/getting_started/tagging/
@@ -120,4 +116,3 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [8]: https://app.datadoghq.com/monitors#/create
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/

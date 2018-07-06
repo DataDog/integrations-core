@@ -428,6 +428,8 @@ kube_pod_container_status_waiting_reason{container="hello",namespace="default",p
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ContainerCreating"} 0
+kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="CrashLoopBackoff"} 1
+kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ImagePullBackoff"} 1
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kubedns",namespace="kube-system",pod="kube-dns-1326421443-hj4hx",reason="ErrImagePull"} 0

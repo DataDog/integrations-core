@@ -58,14 +58,14 @@ zk_max_file_descriptor_count    4096
 """
 # stdlib
 from collections import defaultdict
-from distutils.version import LooseVersion # pylint: disable=E0611,E0401
+from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 from StringIO import StringIO
 import re
 import socket
 import struct
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class ZKConnectionFailure(Exception):

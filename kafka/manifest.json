@@ -1,7 +1,11 @@
 {
   "maintainer": "help@datadoghq.com",
+  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "kafka",
+  "display_name": "Kafka",
+  "creates_events": true,
+  "metric_to_check": "kafka.net.bytes_out",
   "short_description": "Collect metrics for producers and consumers, replication, max lag, and more.",
   "support": "core",
   "supported_os": [

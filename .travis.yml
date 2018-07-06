@@ -129,6 +129,8 @@ jobs:
     - stage: test
       env: CHECK=mysql
     - stage: test
+      env: CHECK=nagios
+    - stage: test
       env: CHECK=network
     - stage: test
       env: CHECK=nfsstat
@@ -144,7 +146,9 @@ jobs:
       env: CHECK=pdh_check
     - stage: test
       env: CHECK=pgbouncer
-    # - stage: test
+    - stage: test
+      env: CHECK=php_fpm
+      # - stage: test
     #   env: CHECK=postgres
     - stage: test
       env: CHECK=powerdns_recursor
@@ -176,6 +180,8 @@ jobs:
       env: CHECK=vsphere
     - stage: test
       env: CHECK=yarn
+    - stage: test
+      env: CHECK=zk
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh

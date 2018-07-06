@@ -3,6 +3,7 @@
   "manifest_version": "1.0.0",
   "display_name": "Couchbase",
   "name": "couchbase",
+  "metric_to_check": "couchbase.ram.used",
   "short_description": "Track and graph your Couchbase activity and performance metrics.",
   "support": "core",
   "supported_os": [
@@ -15,7 +16,6 @@
   "categories":["data store"],
   "type":"check",
   "metric_prefix": "couchbase.",
-  "metric_to_check": "couchbase.ram.used_by_data",
   "creates_events": true,
   "doc_link": "https://docs.datadoghq.com/integrations/couchbase/",
   "is_public": true,

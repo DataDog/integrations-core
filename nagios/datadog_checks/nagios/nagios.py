@@ -1,50 +1,59 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 from collections import namedtuple
 import re
+from inspect import getargspec
 
 # project
-from checks import AgentCheck
-from utils.tailfile import TailFile
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.tailfile import TailFile
 
 # fields order for each event type, as named tuples
 EVENT_FIELDS = {
-    'CURRENT HOST STATE':       namedtuple('E_CurrentHostState', 'host, event_state, event_soft_hard, return_code, payload'),
-    'CURRENT SERVICE STATE':    namedtuple('E_CurrentServiceState', 'host, check_name, event_state, event_soft_hard, return_code, payload'),
-    'SERVICE ALERT':            namedtuple('E_ServiceAlert', 'host, check_name, event_state, event_soft_hard, return_code, payload'),
-    'PASSIVE SERVICE CHECK':    namedtuple('E_PassiveServiceCheck', 'host, check_name, return_code, payload'),
-    'HOST ALERT':               namedtuple('E_HostAlert', 'host, event_state, event_soft_hard, return_code, payload'),
-
-    # [1305744274] SERVICE NOTIFICATION: ops;ip-10-114-237-165;Metric ETL;ACKNOWLEDGEMENT (CRITICAL);notify-service-by-email;HTTP CRITICAL: HTTP/1.1 503 Service Unavailable - 394 bytes in 0.010 second response time;datadog;alq
-    'SERVICE NOTIFICATION':     namedtuple('E_ServiceNotification', 'contact, host, check_name, event_state, notification_type, payload'),
-
-    # [1296509331] SERVICE FLAPPING ALERT: ip-10-114-97-27;cassandra JVM Heap;STARTED; Service appears to have started flapping (23.4% change >= 20.0% threshold)
-    # [1296662511] SERVICE FLAPPING ALERT: ip-10-114-97-27;cassandra JVM Heap;STOPPED; Service appears to have stopped flapping (3.8% change < 5.0% threshold)
-    'SERVICE FLAPPING ALERT':   namedtuple('E_FlappingAlert', 'host, check_name, flap_start_stop, payload'),
-
+    'CURRENT HOST STATE': namedtuple('E_CurrentHostState', 'host, event_state, event_soft_hard, return_code, payload'),
+    'CURRENT SERVICE STATE': namedtuple(
+        'E_CurrentServiceState', 'host, check_name, event_state, event_soft_hard, return_code, payload'
+    ),
+    'SERVICE ALERT': namedtuple(
+        'E_ServiceAlert', 'host, check_name, event_state, event_soft_hard, return_code, payload'
+    ),
+    'PASSIVE SERVICE CHECK': namedtuple('E_PassiveServiceCheck', 'host, check_name, return_code, payload'),
+    'HOST ALERT': namedtuple('E_HostAlert', 'host, event_state, event_soft_hard, return_code, payload'),
+    # [1305744274] SERVICE NOTIFICATION: ops;ip-10-114-237-165;Metric ETL;ACKNOWLEDGEMENT (CRITICAL);
+    #   notify-service-by-email;HTTP CRITICAL: HTTP/1.1 503 Service Unavailable - 394 bytes
+    #   in 0.010 second response time;datadog;alq
+    'SERVICE NOTIFICATION': namedtuple(
+        'E_ServiceNotification', 'contact, host, check_name, event_state, notification_type, payload'
+    ),
+    # [1296509331] SERVICE FLAPPING ALERT: ip-10-114-97-27;cassandra JVM Heap;
+    #   STARTED; Service appears to have started flapping (23.4% change >= 20.0% threshold)
+    # [1296662511] SERVICE FLAPPING ALERT: ip-10-114-97-27;cassandra JVM Heap;
+    #   STOPPED; Service appears to have stopped flapping (3.8% change < 5.0% threshold)
+    'SERVICE FLAPPING ALERT': namedtuple('E_FlappingAlert', 'host, check_name, flap_start_stop, payload'),
     # Reference for external commands: http://old.nagios.org/developerinfo/externalcommands/commandlist.php
     # Command Format:
     # ACKNOWLEDGE_SVC_PROBLEM;<host_name>;<service_description>;<sticky>;<notify>;<persistent>;<author>;<comment>
     # [1305832665] EXTERNAL COMMAND: ACKNOWLEDGE_SVC_PROBLEM;ip-10-202-161-236;Resources ETL;2;1;0;datadog;alq checking
-    'ACKNOWLEDGE_SVC_PROBLEM': namedtuple('E_ServiceAck', 'host, check_name, sticky_ack, notify_ack, persistent_ack, ack_author, payload'),
-
+    'ACKNOWLEDGE_SVC_PROBLEM': namedtuple(
+        'E_ServiceAck', 'host, check_name, sticky_ack, notify_ack, persistent_ack, ack_author, payload'
+    ),
     # Command Format:
     # ACKNOWLEDGE_HOST_PROBLEM;<host_name>;<sticky>;<notify>;<persistent>;<author>;<comment>
-    'ACKNOWLEDGE_HOST_PROBLEM': namedtuple('E_HostAck', 'host, sticky_ack, notify_ack, persistent_ack, ack_author, payload'),
-
+    'ACKNOWLEDGE_HOST_PROBLEM': namedtuple(
+        'E_HostAck', 'host, sticky_ack, notify_ack, persistent_ack, ack_author, payload'
+    ),
     # Comment Format:
     # PROCESS_SERVICE_CHECK_RESULT;<host_name>;<service_description>;<result_code>;<comment>
     # We ignore it because Nagios will log a "PASSIVE SERVICE CHECK" after
     # receiving this, and we don't want duplicate events to be counted.
     'PROCESS_SERVICE_CHECK_RESULT': False,
-
     # Host Downtime
     # [1297894825] HOST DOWNTIME ALERT: ip-10-114-89-59;STARTED; Host has entered a period of scheduled downtime
-    # [1297894825] SERVICE DOWNTIME ALERT: ip-10-114-237-165;intake;STARTED; Service has entered a period of scheduled downtime
-
+    # [1297894825] SERVICE DOWNTIME ALERT: ip-10-114-237-165;intake;
+    #   STARTED; Service has entered a period of scheduled downtime
     'HOST DOWNTIME ALERT': namedtuple('E_HostDowntime', 'host, downtime_start_stop, payload'),
     'SERVICE DOWNTIME ALERT': namedtuple('E_ServiceDowntime', 'host, check_name, downtime_start_stop, payload'),
 }
@@ -64,10 +73,22 @@ class Nagios(AgentCheck):
         re.compile('^(?P<key>service_perfdata_file)\s*=\s*(?P<value>.+)$'),
     ]
 
+    def gauge(self, *args, **kwargs):
+        """
+        Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
+        """
+        orig_gauge = super(Nagios, self).gauge
+        # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg
+        if 'timestamp' in kwargs and 'timestamp' not in getargspec(orig_gauge).args:
+            del kwargs['timestamp']
+
+        orig_gauge(*args, **kwargs)
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.nagios_tails = {}
         check_freq = init_config.get("check_freq", 15)
+
         if instances is not None:
             for instance in instances:
                 tailers = []
@@ -95,44 +116,56 @@ class Nagios(AgentCheck):
                     self.log.warning("Missing path to nagios_conf")
                     continue
 
-                if 'log_file' in nagios_conf and \
-                   instance.get('collect_events', True):
+                if 'log_file' in nagios_conf and instance.get('collect_events', True):
                     self.log.debug("Starting to tail the event log")
-                    tailers.append(NagiosEventLogTailer(
-                        log_path=nagios_conf['log_file'],
-                        file_template=None,
-                        logger=self.log,
-                        hostname=self.hostname,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        passive_checks=instance.get('passive_checks_events', False)))
-                if 'host_perfdata_file' in nagios_conf and \
-                   'host_perfdata_file_template' in nagios_conf and \
-                   instance.get('collect_host_performance_data', False):
+                    tailers.append(
+                        NagiosEventLogTailer(
+                            log_path=nagios_conf['log_file'],
+                            file_template=None,
+                            logger=self.log,
+                            hostname=self.hostname,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            passive_checks=instance.get('passive_checks_events', False),
+                        )
+                    )
+                if (
+                    'host_perfdata_file' in nagios_conf
+                    and 'host_perfdata_file_template' in nagios_conf
+                    and instance.get('collect_host_performance_data', False)
+                ):
                     self.log.debug("Starting to tail the host_perfdata file")
-                    tailers.append(NagiosHostPerfDataTailer(
-                        log_path=nagios_conf['host_perfdata_file'],
-                        file_template=nagios_conf['host_perfdata_file_template'],
-                        logger=self.log,
-                        hostname=self.hostname,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        tags=custom_tag))
-                if 'service_perfdata_file' in nagios_conf and \
-                   'service_perfdata_file_template' in nagios_conf and \
-                   instance.get('collect_service_performance_data', False):
+                    tailers.append(
+                        NagiosHostPerfDataTailer(
+                            log_path=nagios_conf['host_perfdata_file'],
+                            file_template=nagios_conf['host_perfdata_file_template'],
+                            logger=self.log,
+                            hostname=self.hostname,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            tags=custom_tag,
+                        )
+                    )
+                if (
+                    'service_perfdata_file' in nagios_conf
+                    and 'service_perfdata_file_template' in nagios_conf
+                    and instance.get('collect_service_performance_data', False)
+                ):
                     self.log.debug("Starting to tail the service_perfdata file")
-                    tailers.append(NagiosServicePerfDataTailer(
-                        log_path=nagios_conf['service_perfdata_file'],
-                        file_template=nagios_conf['service_perfdata_file_template'],
-                        logger=self.log,
-                        hostname=self.hostname,
-                        event_func=self.event,
-                        gauge_func=self.gauge,
-                        freq=check_freq,
-                        tags=custom_tag))
+                    tailers.append(
+                        NagiosServicePerfDataTailer(
+                            log_path=nagios_conf['service_perfdata_file'],
+                            file_template=nagios_conf['service_perfdata_file_template'],
+                            logger=self.log,
+                            hostname=self.hostname,
+                            event_func=self.event,
+                            gauge_func=self.gauge,
+                            freq=check_freq,
+                            tags=custom_tag,
+                        )
+                    )
 
                 self.nagios_tails[instance_key] = tailers
 
@@ -162,17 +195,15 @@ class Nagios(AgentCheck):
                 f.close()
 
     def check(self, instance):
-        '''
+        """
         Parse until the end of each tailer associated with this instance.
         We match instance and tailers based on the path to the Nagios configuration file
 
         Special case: Compatibility with the old conf when no conf file is specified
         but the path to the event_log is given
-        '''
-        instance_key = instance.get('nagios_conf',
-                                    instance.get('nagios_perf_cfg',
-                                                 instance.get('nagios_log',
-                                                              None)))
+        """
+        instance_key = instance.get('nagios_conf', instance.get('nagios_perf_cfg', instance.get('nagios_log', None)))
+
         # Bad configuration: This instance does not contain any necessary configuration
         if not instance_key or instance_key not in self.nagios_tails:
             raise Exception('No Nagios configuration file specified')
@@ -181,9 +212,8 @@ class Nagios(AgentCheck):
 
 
 class NagiosTailer(object):
-
     def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, tags=None):
-        '''
+        """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
         :param logger: Logger object
@@ -192,7 +222,8 @@ class NagiosTailer(object):
         :param gauge_func: function to report a gauge
         :param freq: int, size of bucket to aggregate perfdata metrics
         :param tags: list, list of custom tags
-        '''
+        """
+
         self.log_path = log_path
         self.log = logger
         self.gen = None
@@ -217,8 +248,7 @@ class NagiosTailer(object):
         try:
             self.log.debug("Start nagios check for file %s" % (self.log_path))
             self.gen.next()
-            self.log.debug("Done nagios check for file %s (parsed %s line(s))" %
-                           (self.log_path, self._line_parsed))
+            self.log.debug("Done nagios check for file %s (parsed %s line(s))" % (self.log_path, self._line_parsed))
         except StopIteration as e:
             self.log.exception(e)
             self.log.warning("Can't tail %s file" % (self.log_path))
@@ -235,10 +265,8 @@ class NagiosTailer(object):
 
 
 class NagiosEventLogTailer(NagiosTailer):
-
-    def __init__(self, log_path, file_template, logger, hostname, event_func,
-                 gauge_func, freq, passive_checks=False):
-        '''
+    def __init__(self, log_path, file_template, logger, hostname, event_func, gauge_func, freq, passive_checks=False):
+        """
         :param log_path: string, path to the file to parse
         :param file_template: string, format of the perfdata file
         :param logger: Logger object
@@ -247,15 +275,16 @@ class NagiosEventLogTailer(NagiosTailer):
         :param gauge_func: function to report a gauge
         :param freq: int, size of bucket to aggregate perfdata metrics
         :param passive_checks: bool, enable or not passive checks events
-        '''
+        """
+
         self.passive_checks = passive_checks
         super(NagiosEventLogTailer, self).__init__(
-            log_path, file_template,
-            logger, hostname, event_func, gauge_func, freq
+            log_path, file_template, logger, hostname, event_func, gauge_func, freq
         )
 
     def _parse_line(self, line):
-        """Actual nagios parsing
+        """
+        Actual nagios parsing
         Return True if we found an event, False otherwise
         """
         # first isolate the timestamp and the event type
@@ -287,7 +316,7 @@ class NagiosEventLogTailer(NagiosTailer):
             # and parse the rest of the line
             parts = map(lambda p: p.strip(), remainder.split(';'))
             # Chop parts we don't recognize
-            parts = parts[:len(fields._fields)]
+            parts = parts[: len(fields._fields)]
 
             event = self.create_event(tstamp, event_type, self.hostname, fields._make(parts))
 
@@ -338,15 +367,19 @@ class NagiosEventLogTailer(NagiosTailer):
 class NagiosPerfDataTailer(NagiosTailer):
     perfdata_field = ''  # Should be overriden by subclasses
     metric_prefix = 'nagios'
-    pair_pattern = re.compile(r"".join([
-        r"'?(?P<label>[^=']+)'?=",
-        r"(?P<value>[-0-9.]+)",
-        r"(?P<unit>s|us|ms|%|B|KB|MB|GB|TB|c)?",
-        r"(;(?P<warn>@?[-0-9.~]*:?[-0-9.~]*))?",
-        r"(;(?P<crit>@?[-0-9.~]*:?[-0-9.~]*))?",
-        r"(;(?P<min>[-0-9.]*))?",
-        r"(;(?P<max>[-0-9.]*))?",
-    ]))
+    pair_pattern = re.compile(
+        r"".join(
+            [
+                r"'?(?P<label>[^=']+)'?=",
+                r"(?P<value>[-0-9.]+)",
+                r"(?P<unit>s|us|ms|%|B|KB|MB|GB|TB|c)?",
+                r"(;(?P<warn>@?[-0-9.~]*:?[-0-9.~]*))?",
+                r"(;(?P<crit>@?[-0-9.~]*:?[-0-9.~]*))?",
+                r"(;(?P<min>[-0-9.]*))?",
+                r"(;(?P<max>[-0-9.]*))?",
+            ]
+        )
+    )
 
     @staticmethod
     def underscorize(s):
@@ -400,7 +433,8 @@ class NagiosPerfDataTailer(NagiosTailer):
                     if attr_val is not None and attr_val != '':
                         tags.append("{0}:{1}".format(key, attr_val))
 
-                self._gauge(metric, value, tags + self._tags, host_name, device_name, timestamp)
+                self._gauge(metric, value, tags=tags + self._tags, hostname=host_name, device_name=device_name,
+                            timestamp=timestamp)
 
 
 class NagiosHostPerfDataTailer(NagiosPerfDataTailer):
