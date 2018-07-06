@@ -6,8 +6,8 @@ import logging
 
 from datadog_checks.cisco_aci.helpers import (get_pod_from_dn, get_bd_from_dn, get_app_from_dn, get_cep_from_dn,
                                               get_epg_from_dn, get_ip_from_dn, get_node_from_dn, parse_capacity_tags,
-                                              get_event_tags_from_dn, get_event_tags_from_dn, get_hostname_from_dn,
-                                              get_attributes, check_metric_can_be_zero)
+                                              get_event_tags_from_dn, get_hostname_from_dn, get_attributes,
+                                              check_metric_can_be_zero)
 
 
 log = logging.getLogger('test_cisco_aci')
@@ -160,4 +160,3 @@ def test_check_metric_can_be_zero():
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0"}) is False
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0.0"}) is False
     # assert check_metric_can_be_zero("metric_name", 0, {"cnt": "aaa"}) is True
-

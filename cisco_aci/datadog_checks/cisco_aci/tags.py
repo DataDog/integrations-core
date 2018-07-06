@@ -9,66 +9,113 @@ from datadog_checks.utils.containers import hash_mutable
 from . import helpers
 from . import exceptions
 
+# TODO create constrant for json attr that are used often
+TN_REGEX = re.compile('/tn-([a-zA-Z-_0-9]+)/')  # TODO '/tn--([^/]+)/'  ?
+APP_REGEX = re.compile('/ap-([a-zA-Z-_0-9]+)/')  # TODO '/ap-([^/]+)/'  ?
+
 
 class CiscoTags:
-    def __init__(self, check):
-        self.check = check
+    def __init__(self, log=None):
         self.tenant_farbic_mapper = {}
         self.tenant_tags = {}
         self._api = None
+        if log:
+            self.log = log
+        else:
+            import logging
+            self.log = logging.getLogger('cisco_api')
 
-    def app_tags(self, app):
+    def _app_tags(self, app):
         tags = []
+        if not app or type(app) is not dict:
+            return tags
         attrs = app.get('attributes', {})
+        if type(attrs) is not dict:
+            return tags
         app_name = attrs.get('name')
         dn = attrs.get('dn')
         if app_name:
             tags.append("application:" + app_name)
         if dn:
-            tenant = re.search('/tn-([a-zA-Z-_0-9]+)/', dn)
+            tenant = re.search(TN_REGEX, dn)
             if tenant:
                 tags.append("tenant:" + tenant.group(1))
         return tags
 
-    def tenant_mapper(self, edpt):
-        tags = []
+    def _edpt_tags_map(self, edpt):
+        tags_map = {}
+        if not edpt or type(edpt) is not dict:
+            return tags_map
         attrs = edpt.get('attributes', {})
-        epg_name = attrs.get('name')
+        if type(attrs) is not dict:
+            return tags_map
+        epg_name_tmp = attrs.get('name')
         dn = attrs.get('dn')
-        application_meta = [
-            "endpoint_group:" + epg_name
-        ]
+        if epg_name_tmp:
+            epg_name = epg_name_tmp
+            tags_map["endpoint_group"] = "" + epg_name  # type enforcement
         if dn:
-            tenant = re.search('/tn-([a-zA-Z-_0-9]+)/', dn)
+            tenant = re.search(TN_REGEX, dn)
             if tenant:
                 tenant_name = tenant.group(1)
-                application_meta.append("tenant:" + tenant_name)
-        if dn:
-            app = re.search('/ap-([a-zA-Z-_0-9]+)/', dn)
+                tags_map["tenant"] = tenant_name
+
+            app = re.search(APP_REGEX, dn)
             if app:
                 app_name = app.group(1)
-                application_meta.append("application:" + app_name)
-        endpoint_meta = []
-        # adding meta tags
+                tags_map["application"] = app_name
+        return tags_map
+
+    def _epg_meta_tags_map(self, epg_meta):
+        tags_map = {}
+        if not epg_meta or type(epg_meta) is not dict:
+            return tags_map
+        attrs = epg_meta.get('attributes', {})
+        if type(attrs) is not dict:
+            return tags_map
+        ip = attrs.get('ip')
+        if ip:
+            tags_map["ip"] = ip
+        mac = attrs.get('mac')
+        if mac:
+            tags_map["mac"] = mac
+        encap = attrs.get('encap')
+        if encap:
+            tags_map["encap"] = encap
+        return tags_map
+
+    def _get_epg_meta_tags_map(self, tenant_name, app_name, epg_name):
+        tags_map = {}
         try:
-            meta = self.api.get_epg_meta(tenant_name, app_name, epg_name)
-            if len(meta) > 0:
-                meta = meta[0]
-                meta_attrs = meta.get('fvCEp', {}).get('attributes')
-                if meta_attrs:
-                    ip = meta_attrs.get('ip')
-                    if ip:
-                        endpoint_meta.append("ip:" + ip)
-                    mac = meta_attrs.get('mac')
-                    if mac:
-                        endpoint_meta.append("mac:" + mac)
-                    encap = meta_attrs.get('encap')
-                    if encap:
-                        endpoint_meta.append("encap:" + encap)
-                    # adding application tags
+            epg_metas = self.api.get_epg_meta(tenant_name, app_name, epg_name)
+            if len(epg_metas) > 0 and epg_metas[0] and type(epg_metas[0]) is dict:
+                epg = epg_metas[0].get('fvCEp', {})
+                return self._epg_meta_tags_map(epg)
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             # the exception will already be logged, just pass it over here
             pass
+        return tags_map
+
+    def _tenant_mapper(self, edpt):
+        tags = []
+        if not edpt or type(edpt) is not dict:
+            return tags
+
+        application_meta = []
+        application_meta_map = self._edpt_tags_map(edpt)
+        for k, v in application_meta_map.iteritems():
+            application_meta.append(k + ":" + v)
+        tenant_name = application_meta_map.get("tenant")
+        app_name = application_meta_map.get("application")
+        epg_name = application_meta_map.get("endpoint_group")
+
+        # adding meta tags
+        endpoint_meta = []
+        endpoint_meta_map = self._get_epg_meta_tags_map(tenant_name, app_name, epg_name)
+        for k, v in endpoint_meta_map.iteritems():
+            endpoint_meta.append(k + ":" + v)
+
+        # adding application tags
         endpoint_meta += application_meta
 
         context_hash = hash_mutable(endpoint_meta)
@@ -111,18 +158,28 @@ class CiscoTags:
             self.log.debug('adding eth level tags: %s' % eth_meta)
         return tags
 
-    def get_tags(self, obj, obj_type):
-        tags = []
-        if obj_type == 'endpoint_group':
-            tags = self.tenant_mapper(obj)
-        if obj_type == 'tenant':
-            tags = ["tenant:" + obj]
-        if obj_type == 'application':
-            tags = self.app_tags(obj)
-        return tags
+    # def get_tags(self, obj, obj_type):
+    #     # TODO I am really not a big fan of this method because it's combining 3 behaviors that are not related
+    #     tags = []
+    #     if obj_type == 'endpoint_group':
+    #         tags = self._tenant_mapper(obj)
+    #     if obj_type == 'tenant':
+    #         tags = ["tenant:" + obj]
+    #     if obj_type == 'application':
+    #         tags = self._app_tags(obj)
+    #     return tags
+
+    def get_endpoint_group_tags(self, obj):
+        return self._tenant_mapper(obj)
+
+    def get_application_tags(self, obj):
+        return self._app_tags(obj)
 
     def get_fabric_tags(self, obj, obj_type):
+        # TODO: shouldn't we check if all valid exists
         tags = []
+        if not obj or type(obj) is not dict:
+            return tags
         obj = helpers.get_attributes(obj)
         if obj_type == 'fabricNode':
             if obj.get('role') != "controller":
@@ -147,10 +204,6 @@ class CiscoTags:
             if key in self.tenant_farbic_mapper.keys():
                 tags = tags + self.tenant_farbic_mapper[key]
         return tags
-
-    @property
-    def log(self):
-        return self.check.log
 
     @property
     def api(self):
