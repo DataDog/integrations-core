@@ -48,9 +48,6 @@ Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, other
 ## Troubleshooting
 Need help? Contact [Datadog Support][8].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][9]
-
 [1]: https://linkerd.io/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example
@@ -59,4 +56,3 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://twitter.github.io/finagle/guide/Metrics.html
 [7]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
 [8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/

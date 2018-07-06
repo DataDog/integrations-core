@@ -129,10 +129,6 @@ The WMI check does not include any service checks at this time.
 ## Troubleshooting
 Need help? Contact [Datadog Support][10].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][11]
-
-
 [1]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx)
 [2]: https://wmie.codeplex.com/
 [3]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
@@ -143,5 +139,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/
 [12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/wmi/wmimetric.png

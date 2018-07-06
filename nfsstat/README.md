@@ -31,10 +31,7 @@ The Nfsstat check does not include any service checks at this time.
 Need help? Contact [Datadog Support][6].
 
 ## Further Reading
-### Datadog Blog
-Learn more about infrastructure monitoring and all our integrations on [our blog][7]
 
-### Knowledge Base
 * [Built a network monitor on an http check][8]
 
 
@@ -44,5 +41,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network

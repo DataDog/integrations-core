@@ -98,10 +98,6 @@ The Oracle Database integration includes the service check `oracle.can_connect` 
 ## Troubleshooting
 Need help? Contact [Datadog Support][8].
 
-## Further Reading
-
-Learn more about infrastructure monitoring and all our integrations on [our blog][9]
-
 [1]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
 [2]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
@@ -110,4 +106,3 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/

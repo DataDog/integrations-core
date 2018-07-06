@@ -116,9 +116,6 @@ Returns CRITICAL if the Agent cannot connect to Envoy to collect metrics, otherw
 
 Need help? Contact [Datadog Support][11].
 
-## Further Reading
-Learn more about infrastructure monitoring and all our integrations on [our blog][12]
-
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -131,5 +128,4 @@ Learn more about infrastructure monitoring and all our integrations on [our blog
 [9]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/
 [13]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
