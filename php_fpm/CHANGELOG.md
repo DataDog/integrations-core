@@ -1,5 +1,10 @@
 # CHANGELOG - php_fpm
 
+## 1.2.0 / 2018-07-06
+
+* [Added] Add exponential backoff when status returns 503. See [#1851](https://github.com/DataDog/integrations-core/pull/1851).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.1.0 / 2018-01-10
 
 * [IMPROVEMENT] Adds a timeout parameter. See #206, thanks @toksvaeth.
