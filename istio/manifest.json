@@ -9,7 +9,7 @@
     "windows"
   ],
   "metric_prefix": "istio.",
-  "metric_to_check": "istio.process.cpu_seconds_total",
+  "metric_to_check": "istio.mixer.process.cpu_seconds_total",
   "maintainer": "help@datadoghq.com",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "description": "The istio integration collects data from the istio service mesh and mixer.",
