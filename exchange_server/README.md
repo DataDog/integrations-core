@@ -34,9 +34,9 @@ instances:
   #       rate, histogram or counter
   #   
   #   additional_metrics:
-  #     - - 'MSExchange Content Filter Agent'
-  #       - none,
-  #       - 'Messages that Bypassed Scanning'
+  #     - - MSExchange Content Filter Agent
+  #       - none
+  #       - Messages that Bypassed Scanning
   #       - exchange.content_filter.bypassed_messages
   #       - gauge
 ```
