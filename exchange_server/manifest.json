@@ -7,7 +7,7 @@
   "support": "core",
   "creates_events": false,
   "metric_to_check": "exchange.processor.cpu_user",
-  "metric_prefix": "exchange",
+  "metric_prefix": "exchange.",
   "supported_os": [
     "windows"
   ],
