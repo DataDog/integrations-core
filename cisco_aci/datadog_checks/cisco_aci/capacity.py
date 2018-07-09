@@ -17,6 +17,8 @@ class Capacity:
         self.instance = instance
         self.user_tags = instance.get('tags', [])
         self.check_tags = check_tags
+        if not self.check_tags:
+            self.check_tags = []
 
         # grab some functions from the check
         self.gauge = gauge
@@ -53,12 +55,12 @@ class Capacity:
                 dn = d.get('attributes', {}).get('dn', '')
                 children = d.get('children', [])
                 tags = helpers.parse_capacity_tags(dn)
+                tags += self.user_tags + self.check_tags  # TODO This is a bug fix. it used to keep appending same tags in the loop
                 hostname = helpers.get_hostname_from_dn(dn)
                 for child in children:
                     attr = child.get(c, {}).get('attributes', {})
                     for cisco_metric, dd_metric in metric_dict.iteritems():
                         value = attr.get(cisco_metric, 0)
-                        tags += self.user_tags + self.check_tags
                         self.gauge(dd_metric, value, tags=tags, hostname=hostname)
 
     def _get_contexts(self):

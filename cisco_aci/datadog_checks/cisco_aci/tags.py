@@ -158,17 +158,6 @@ class CiscoTags:
             self.log.debug('adding eth level tags: %s' % eth_meta)
         return tags
 
-    # def get_tags(self, obj, obj_type):
-    #     # TODO I am really not a big fan of this method because it's combining 3 behaviors that are not related
-    #     tags = []
-    #     if obj_type == 'endpoint_group':
-    #         tags = self._tenant_mapper(obj)
-    #     if obj_type == 'tenant':
-    #         tags = ["tenant:" + obj]
-    #     if obj_type == 'application':
-    #         tags = self._app_tags(obj)
-    #     return tags
-
     def get_endpoint_group_tags(self, obj):
         return self._tenant_mapper(obj)
 
