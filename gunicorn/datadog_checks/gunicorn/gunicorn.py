@@ -118,7 +118,7 @@ class GUnicornCheck(AgentCheck):
                                message="No gunicorn process with name %s found" % name)
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         else:
-            self.log.debug("There is %s master process with the name %s" % (len(master_procs), name))
+            self.log.debug("There exist %s master process(es) with the name %s" % (len(master_procs), name))
             return master_procs
 
     @staticmethod
