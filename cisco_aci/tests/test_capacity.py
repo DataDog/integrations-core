@@ -12,8 +12,6 @@ from datadog_checks.cisco_aci.api import SessionWrapper, Api
 from datadog_checks.cisco_aci.capacity import Capacity
 from datadog_checks.cisco_aci import CiscoACICheck
 
-from datadog_checks.utils.containers import hash_mutable
-
 from .common import FIXTURE_LIST_FILE_MAP
 
 log = logging.getLogger('test_cisco_aci')
@@ -65,7 +63,8 @@ class ApiMock:
             {  # Complete sample
                 'attributes': {"dn": "/pod-3/node-4/"},
                 "children": []
-            }, {  # Complete sample
+            },
+            {  # Complete sample
                 'attributes': {
                     "dn": "/pod-1/node-2/"
                 }, "children": [
@@ -242,28 +241,26 @@ def test_get_eqpt_capacity(aggregator):
     capacity._get_eqpt_capacity()
     tags = ['fabric_pod_id:1', 'node_id:2', 'check_tag:1', 'ctag:2', 'user_tag:1', 'utag:2']
     hn = 'pod-1-node-2'
-    aggregator.assert_metric('cisco_aci.capacity.leaf.policy_cam.utilized', value=8.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.vlan.limit', value=5.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv6_endpoint.limit', value=2.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.policy_cam.limit', value=7.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv4_endpoint.limit', value=1.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv6_endpoint.utilized', value=4.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.vlan.utilized', value=6.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.multicast.limit',  value=9.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.multicast.utilized', value=10.0, tags=tags, hostname=hn, count=1)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv4_endpoint.utilized', value=3.0, tags=tags, hostname=hn, count=1)
-
-    # TODO seem we are sending metric even when the response is not valid - I guess we should not
-    aggregator.assert_metric('cisco_aci.capacity.leaf.policy_cam.utilized', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.vlan.limit', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv6_endpoint.limit', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.policy_cam.limit', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv4_endpoint.limit', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv6_endpoint.utilized', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.vlan.utilized', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.multicast.limit', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.multicast.utilized', value=0.0, tags=tags, hostname=hn, count=5)
-    aggregator.assert_metric('cisco_aci.capacity.leaf.ipv4_endpoint.utilized', value=0.0, tags=tags, hostname=hn, count=5)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.policy_cam.utilized', value=8.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.vlan.limit', value=5.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.ipv6_endpoint.limit', value=2.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.policy_cam.limit', value=7.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.ipv4_endpoint.limit', value=1.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.ipv6_endpoint.utilized', value=4.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.vlan.utilized', value=6.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.multicast.limit',  value=9.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.multicast.utilized', value=10.0, tags=tags, hostname=hn, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.capacity.leaf.ipv4_endpoint.utilized', value=3.0, tags=tags, hostname=hn, count=1)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()

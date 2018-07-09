@@ -59,7 +59,7 @@ def test_app_tags():
     assert tags._app_tags({"attributes": {"dn": "1234"}}) == []
     assert tags._app_tags({"attributes": {"dn": "/tn-qwertyQWERTY1234567890-_/"}}) == [
         "tenant:qwertyQWERTY1234567890-_"]
-    assert tags._app_tags({"attributes": {"dn": "/tn-aa!a/"}}) == []
+    assert tags._app_tags({"attributes": {"dn": "/tn-aa!a/"}}) == ["tenant:aa!a"]
     assert tags._app_tags({"attributes": {"dn": "a/tn-aaa/a"}}) == ["tenant:aaa"]
     assert tags._app_tags({"attributes": {"dn": "a/tn-tn-/a"}}) == ["tenant:tn-"]
     assert tags._app_tags({"attributes": {"dn": "a/tn-aaa/tn-bbb/a"}}) == ["tenant:aaa"]
@@ -114,8 +114,8 @@ def test_edpt_tags_map():
     assert tags._edpt_tags_map({"attributes": {"dn": "/tn-qwertyQWERTY1234567890-_/"}}) == {
         "tenant": "qwertyQWERTY1234567890-_"}
     # TODO is this valid?
-    assert tags._edpt_tags_map({"attributes": {"dn": "/tn-aa!a/"}}) == {}
-    assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aaa/"}}) == {"application": "aaa"}
+    assert tags._edpt_tags_map({"attributes": {"dn": "/tn-aa!a/"}}) == {"tenant": "aa!a"}
+    assert tags._edpt_tags_map({"attributes": {"dn": "/tn-aaa/"}}) == {"tenant": "aaa"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/tn-aaa/a"}}) == {"tenant": "aaa"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/tn-tn-/a"}}) == {"tenant": "tn-"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/tn-aaa/tn-bbb/a"}}) == {"tenant": "aaa"}
@@ -123,7 +123,7 @@ def test_edpt_tags_map():
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-qwertyQWERTY1234567890-_/a"}}) == {
         "application": "qwertyQWERTY1234567890-_"}
     # TODO is this valid?
-    assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aa!a/"}}) == {}
+    assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aa!a/"}}) == {"application": "aa!a"}
     assert tags._edpt_tags_map({"attributes": {"dn": "/ap-aaa/"}}) == {"application": "aaa"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-aaa/a"}}) == {"application": "aaa"}
     assert tags._edpt_tags_map({"attributes": {"dn": "a/ap-ap-/a"}}) == {"application": "ap-"}

@@ -133,15 +133,15 @@ def test_get_attributes():
     assert get_attributes({}) == {}
     assert get_attributes({"attr": "val"}) == {"attr": "val"}
 
-    # assert get_attributes({"attributes": ""}) == {}
-    # assert get_attributes({"attributes": "attr"}) == {}
-    # assert get_attributes({"attributes": {}}) == {}
-    # assert get_attributes({"attributes": {"attr": "val"}}) == {"attr": "val"}
+    assert get_attributes({"attributes": ""}) == {"attributes": ""}
+    assert get_attributes({"attributes": "attr"}) == {"attributes": "attr"}
+    assert get_attributes({"attributes": {}}) == {}
+    assert get_attributes({"attributes": {"attr": "val"}}) == {"attr": "val"}
 
-    # assert get_attributes({"obj1": {"b": ""}}) == {}
-    # assert get_attributes({"obj1": {"attributes": ""}}) == {}
-    # assert get_attributes({"obj1": {"attributes": "attr"}}) == {}
-    # assert get_attributes({"obj1": {"attributes": {}}}) == {}
+    assert get_attributes({"obj1": {"b": ""}}) == {"obj1": {"b": ""}}
+    assert get_attributes({"obj1": {"attributes": ""}}) == {"obj1": {"attributes": ""}}
+    assert get_attributes({"obj1": {"attributes": "attr"}}) == {"obj1": {"attributes": "attr"}}
+    assert get_attributes({"obj1": {"attributes": {}}}) == {}
     assert get_attributes({"obj1": {"attributes": {"attr": "val"}}}) == {"attr": "val"}
 
 
@@ -154,9 +154,9 @@ def test_check_metric_can_be_zero():
     assert check_metric_can_be_zero("metric_name", 0.0, {}) is False
     assert check_metric_can_be_zero("metric_name", "0", {}) is False
     assert check_metric_can_be_zero("metric_name", "0.0", {}) is False
-    # assert check_metric_can_be_zero("metric_name", "aaa", {}) is True
+    assert check_metric_can_be_zero("metric_name", "aaa", {}) is False
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": 0}) is False
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": 0.0}) is False
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0"}) is False
     assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0.0"}) is False
-    # assert check_metric_can_be_zero("metric_name", 0, {"cnt": "aaa"}) is True
+    assert check_metric_can_be_zero("metric_name", 0, {"cnt": "aaa"}) is False

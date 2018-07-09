@@ -52,15 +52,29 @@ class Capacity:
         for c, metric_dict in aci_metrics.EQPT_CAPACITY_METRICS.iteritems():
             data = self.api.get_eqpt_capacity(c)
             for d in data:
-                dn = d.get('attributes', {}).get('dn', '')
-                children = d.get('children', [])
+                attrs = d.get('attributes')
+                if not attrs or type(attrs) is not dict:
+                    continue
+                dn = attrs.get('dn')
+                if not dn:
+                    continue
+                children = d.get('children')
+                if not children or type(children) is not list:
+                    continue
                 tags = helpers.parse_capacity_tags(dn)
-                tags += self.user_tags + self.check_tags  # TODO This is a bug fix. it used to keep appending same tags in the loop
+                tags += self.user_tags + self.check_tags
                 hostname = helpers.get_hostname_from_dn(dn)
                 for child in children:
-                    attr = child.get(c, {}).get('attributes', {})
+                    curr_child = child.get(c)
+                    if not curr_child or type(curr_child) is not dict:
+                        continue
+                    child_attrs = curr_child.get('attributes')
+                    if not child_attrs or type(child_attrs) is not dict:
+                        continue
                     for cisco_metric, dd_metric in metric_dict.iteritems():
-                        value = attr.get(cisco_metric, 0)
+                        value = child_attrs.get(cisco_metric)
+                        if not value:
+                            continue
                         self.gauge(dd_metric, value, tags=tags, hostname=hostname)
 
     def _get_contexts(self):

@@ -175,11 +175,18 @@ def get_attributes(obj):
         # if the object is not a dict
         # it is probably already scoped to attributes
         return obj
-    attrs = key_obj.get('attributes')
-    if not attrs:
-        # if the attributes doesn't exist,
-        # it is probably already scoped to attributes
-        return obj
+    if key is not "attributes":
+        attrs = key_obj.get('attributes')
+        if type(attrs) is not dict:
+            # if the attributes doesn't exist,
+            # it is probably already scoped to attributes
+            return obj
+    else:
+        # if the attributes exist, we return the value, except if it's not a dict type
+        attrs = key_obj
+        if type(attrs) is not dict:
+            return obj
+
     return attrs
 
 
@@ -192,9 +199,12 @@ def check_metric_can_be_zero(metric_name, metric_value, json_attributes):
         return True
     if not metric_value:
         return False
-    if metric_value == 0 or metric_value == "0" or metric_value == "0.000000" or float(metric_value) == 0.0:
-        if not json_attributes.get('cnt'):
-            return False
-        if json_attributes.get('cnt') == "0" or json_attributes.get('cnt') == 0:
-            return False
+    try:
+        if metric_value == 0 or metric_value == "0" or metric_value == "0.000000" or float(metric_value) == 0.0:
+            if not json_attributes.get('cnt'):
+                return False
+            if json_attributes.get('cnt') == "0" or json_attributes.get('cnt') == 0:
+                return False
+    except ValueError:
+        return False
     return True

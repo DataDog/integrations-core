@@ -9,10 +9,8 @@ from datadog_checks.utils.containers import hash_mutable
 from . import helpers
 from . import exceptions
 
-# TODO create constrant for json attr that are used often
-TN_REGEX = re.compile('/tn-([a-zA-Z-_0-9]+)/')  # TODO '/tn--([^/]+)/'  ?
-APP_REGEX = re.compile('/ap-([a-zA-Z-_0-9]+)/')  # TODO '/ap-([^/]+)/'  ?
-
+TN_REGEX = re.compile('/tn-([^/]+)/')
+APP_REGEX = re.compile('/ap-([^/]+)/')
 
 class CiscoTags:
     def __init__(self, log=None):
