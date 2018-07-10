@@ -52,23 +52,15 @@ class Capacity:
         for c, metric_dict in aci_metrics.EQPT_CAPACITY_METRICS.iteritems():
             data = self.api.get_eqpt_capacity(c)
             for d in data:
-                attrs = d.get('attributes')
-                if not attrs or type(attrs) is not dict:
-                    continue
-                dn = attrs.get('dn')
+                dn = d.get('attributes', {}).get('dn')
                 if not dn:
-                    continue
-                children = d.get('children')
-                if not children or type(children) is not list:
                     continue
                 tags = helpers.parse_capacity_tags(dn)
                 tags += self.user_tags + self.check_tags
                 hostname = helpers.get_hostname_from_dn(dn)
+                children = d.get('children', [])
                 for child in children:
-                    curr_child = child.get(c)
-                    if not curr_child or type(curr_child) is not dict:
-                        continue
-                    child_attrs = curr_child.get('attributes')
+                    child_attrs = child.get(c, {}).get('attributes')
                     if not child_attrs or type(child_attrs) is not dict:
                         continue
                     for cisco_metric, dd_metric in metric_dict.iteritems():
@@ -90,10 +82,12 @@ class Capacity:
             data = self.api.get_capacity_contexts(c)
             for d in data:
                 attr = d.get('ctxClassCnt', {}).get('attributes', {})
+                value = attr.get('count')
+                if not value:
+                    continue
                 dn = attr.get('dn', '')
                 tags = helpers.parse_capacity_tags(dn)
                 hostname = helpers.get_hostname_from_dn(dn)
-                value = attr.get('count', 0)
                 tags += self.check_tags + self.user_tags
                 self.gauge(utilized_metric_name, value, tags=tags, hostname=hostname)
                 self.gauge(limit_metric_name, limit_value, tags=tags, hostname=hostname)
@@ -119,6 +113,7 @@ class Capacity:
                 self.gauge(dd_metric, value, tags=tags)
             else:
                 for d in data:
-                    attr = d.get('moCount', {}).get('attributes', {})
-                    value = attr.get('count', 0)
+                    value = d.get('moCount', {}).get('attributes', {}).get('count')
+                    if not value:
+                        continue
                     self.gauge(dd_metric, value, tags=tags)

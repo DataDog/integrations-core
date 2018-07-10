@@ -12,6 +12,7 @@ from . import exceptions
 TN_REGEX = re.compile('/tn-([^/]+)/')
 APP_REGEX = re.compile('/ap-([^/]+)/')
 
+
 class CiscoTags:
     def __init__(self, log=None):
         self.tenant_farbic_mapper = {}
@@ -146,7 +147,8 @@ class CiscoTags:
                     else:
                         self.tenant_farbic_mapper[tenant_fabric_key].extend(application_meta)
 
-                    self.tenant_farbic_mapper[tenant_fabric_key] = list(set(self.tenant_farbic_mapper[tenant_fabric_key]))
+                    self.tenant_farbic_mapper[tenant_fabric_key] = list(set(
+                        self.tenant_farbic_mapper[tenant_fabric_key]))
             except exceptions.APIConnectionException, exceptions.APIParsingException:
                 # the exception will already be logged, just pass it over here
                 pass
@@ -163,30 +165,37 @@ class CiscoTags:
         return self._app_tags(obj)
 
     def get_fabric_tags(self, obj, obj_type):
-        # TODO: shouldn't we check if all valid exists
         tags = []
         if not obj or type(obj) is not dict:
             return tags
         obj = helpers.get_attributes(obj)
         if obj_type == 'fabricNode':
-            if obj.get('role') != "controller":
+            if obj.get('role') and obj.get('role') != "controller":
                 tags.append("switch_role:" + obj.get('role'))
-            tags.append("apic_role:" + obj.get('role'))
-            tags.append("node_id:" + obj.get('id'))
-            tags.append("fabric_state:" + obj.get('fabricSt'))
-            tags.append("fabric_pod_id:" + helpers.get_pod_from_dn(obj.get('dn')))
+            if obj.get('role'):
+                tags.append("apic_role:" + obj.get('role'))
+            if obj.get('id'):
+                tags.append("node_id:" + obj.get('id'))
+            if obj.get('fabricSt'):
+                tags.append("fabric_state:" + obj.get('fabricSt'))
+            if helpers.get_pod_from_dn(obj.get('dn')):
+                tags.append("fabric_pod_id:" + helpers.get_pod_from_dn(obj.get('dn')))
         if obj_type == 'fabricPod':
-            tags.append("fabric_pod_id:" + obj['id'])
+            if obj.get('id'):
+                tags.append("fabric_pod_id:" + obj.get('id'))
         if obj_type == 'l1PhysIf':
-            tags.append("port:" + obj.get('id'))
+            if obj.get('id'):
+                tags.append("port:" + obj.get('id'))
             if obj.get('medium'):
                 tags.append("medium:" + obj.get('medium'))
             if obj.get('snmpTrapSt'):
                 tags.append("snmpTrapSt:" + obj.get('snmpTrapSt'))
             node_id = helpers.get_node_from_dn(obj.get('dn'))
             pod_id = helpers.get_pod_from_dn(obj.get('dn'))
-            tags.append("node_id:" + node_id)
-            tags.append("fabric_pod_id:" + pod_id)
+            if node_id:
+                tags.append("node_id:" + node_id)
+            if pod_id:
+                tags.append("fabric_pod_id:" + pod_id)
             key = node_id + ":" + obj.get('id')
             if key in self.tenant_farbic_mapper.keys():
                 tags = tags + self.tenant_farbic_mapper[key]

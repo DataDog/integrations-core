@@ -105,12 +105,6 @@ def test_cisco(aggregator, session_mock):
 
 
 def test_cisco_metrics(aggregator, session_mock):
-
-    # TODO instead test tenant, fabric and capacity individually
-    # capacity uses get_eqpt_capacity, get_capacity_contexts, get_apic_capacity_limits and get_apic_capacity_metrics
-    # fabric uses get_fabric_pods, get_fabric_nodes, get_pod_stats, get_node_stats, get_eth_list, get_eth_stats, get_controller_proc_metrics and get_spine_proc_metrics
-    # tenant uses get_apps, get_epgs, get_app_stats, get_epg_stats, get_tenant_stats, get_tenant_events
-
     cisco_aci_check = CiscoACICheck(CHECK_NAME, {}, {})
     api = Api(ACI_URLS, USERNAME, PASSWORD, log=cisco_aci_check.log, sessions=[session_mock])
     api._refresh_sessions = False

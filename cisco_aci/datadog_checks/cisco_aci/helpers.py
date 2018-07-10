@@ -201,7 +201,7 @@ def check_metric_can_be_zero(metric_name, metric_value, json_attributes):
         return False
     try:
         if metric_value == 0 or metric_value == "0" or metric_value == "0.000000" or float(metric_value) == 0.0:
-            if not json_attributes.get('cnt'):
+            if not json_attributes or not json_attributes.get('cnt'):
                 return False
             if json_attributes.get('cnt') == "0" or json_attributes.get('cnt') == 0:
                 return False

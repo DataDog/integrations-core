@@ -146,17 +146,31 @@ def test_get_attributes():
 
 
 def test_check_metric_can_be_zero():
-    assert check_metric_can_be_zero("metric_name_last", 1, {}) is True
-    assert check_metric_can_be_zero("metric_name_Last", 1, {}) is True
+    assert check_metric_can_be_zero("metric_name_last", None, None) is True
+    assert check_metric_can_be_zero("metric_name_Last", None, None) is True
+    assert check_metric_can_be_zero("metric_name_last", 1, None) is True
+    assert check_metric_can_be_zero("metric_name_Last", 1, None) is True
+    assert check_metric_can_be_zero("metric_name_last", 0, None) is True
+    assert check_metric_can_be_zero("metric_name_Last", 0, None) is True
     assert check_metric_can_be_zero("metric_name", None, {}) is False
+    assert check_metric_can_be_zero("metric_name", 1, None) is True
     assert check_metric_can_be_zero("metric_name", 1, {}) is True
+    assert check_metric_can_be_zero("metric_name", 1.0, {}) is True
+    assert check_metric_can_be_zero("metric_name", "1", None) is True
+    assert check_metric_can_be_zero("metric_name", "1", {}) is True
+    assert check_metric_can_be_zero("metric_name", "1.0", {}) is True
+    assert check_metric_can_be_zero("metric_name", 0, None) is False
     assert check_metric_can_be_zero("metric_name", 0, {}) is False
     assert check_metric_can_be_zero("metric_name", 0.0, {}) is False
     assert check_metric_can_be_zero("metric_name", "0", {}) is False
     assert check_metric_can_be_zero("metric_name", "0.0", {}) is False
     assert check_metric_can_be_zero("metric_name", "aaa", {}) is False
-    assert check_metric_can_be_zero("metric_name", 0, {"cnt": 0}) is False
-    assert check_metric_can_be_zero("metric_name", 0, {"cnt": 0.0}) is False
-    assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0"}) is False
-    assert check_metric_can_be_zero("metric_name", 0, {"cnt": "0.0"}) is False
-    assert check_metric_can_be_zero("metric_name", 0, {"cnt": "aaa"}) is False
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": 0}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": 0.0}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": "0"}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": "0.0"}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": "aaa"}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": 1}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": 1.0}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": "1"}) is True
+    assert check_metric_can_be_zero("metric_name", 1, {"cnt": "1.0"}) is True
