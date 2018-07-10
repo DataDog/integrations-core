@@ -83,6 +83,7 @@ setup(
     },
 
     entry_points={
+        'pytest11': ['datadog_checks = datadog_checks.dev.fixtures.plugin'],
         'console_scripts': [
             'ddev = datadog_checks.dev.tooling.cli:ddev',
         ],
