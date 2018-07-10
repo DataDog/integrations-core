@@ -26,7 +26,7 @@ from ..release import (
 )
 from ..utils import get_version_string
 from ...utils import (
-    chdir, env_vars, read_file_lines, remove_path, run_command, write_file, write_file_lines
+    chdir, env_vars, remove_path, run_command, stream_file_lines, write_file, write_file_lines
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
@@ -231,17 +231,21 @@ def make(ctx, check, version):
     echo_waiting('Updating the changelog...')
     ctx.invoke(changelog, check=check, version=version, old_version=cur_version, dry_run=False)
 
+    if check == 'datadog_checks_dev':
+        commit_targets = [check]
     # update the global requirements file
-    req_file = os.path.join(get_root(), AGENT_REQ_FILE)
-    echo_waiting('Updating the requirements file {}...'.format(req_file))
-    update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
+    else:
+        commit_targets = [check, AGENT_REQ_FILE]
+        req_file = os.path.join(get_root(), AGENT_REQ_FILE)
+        echo_waiting('Updating the requirements file {}...'.format(req_file))
+        update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
 
     # commit the changes
     msg = '[ci skip] Bumped {} version to {}'.format(check, version)
-    git_commit([check, AGENT_REQ_FILE], msg)
+    git_commit(commit_targets, msg)
 
     # done
-    echo_success("All done, remember to push to origin and open a PR to merge these changes on master")
+    echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
 
 
 @release.command(
@@ -328,7 +332,7 @@ def changelog(ctx, check, version, old_version, dry_run):
 
     # read the old contents
     changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
-    old = read_file_lines(changelog_path)
+    old = list(stream_file_lines(changelog_path))
 
     # write the new changelog in memory
     changelog_buffer = StringIO()
@@ -404,9 +408,11 @@ def freeze(ctx, no_deps):
     have in HEAD. Also by default will create the Agent's static dependency file.
     """
     echo_info('Freezing check releases')
+    checks = set(AGENT_BASED_INTEGRATIONS)
+    checks.remove('datadog_checks_dev')
 
     entries = []
-    for check in AGENT_BASED_INTEGRATIONS:
+    for check in checks:
         if check in AGENT_V5_ONLY:
             echo_info('Check `{}` is only shipped with Agent 5, skipping')
             continue

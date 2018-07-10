@@ -34,6 +34,7 @@ AGENT_BASED_INTEGRATIONS = [
     'couch',
     'couchbase',
     'datadog_checks_base',
+    'datadog_checks_dev',
     # 'datadog_checks_tests_helper',
     'directory',
     'disk',
