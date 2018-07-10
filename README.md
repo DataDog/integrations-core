@@ -12,7 +12,7 @@ with all the checks from this repository, so to get started using them, you can
 simply [install the Agent][8] for your operating
 system.
 
-General documentation about the project can be [found here](docs/index.md)
+General documentation about the project can be [found here](docs/README.md)
 
 ## Integrations as Python wheels
 
