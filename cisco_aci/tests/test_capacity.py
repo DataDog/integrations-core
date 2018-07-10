@@ -14,11 +14,15 @@ from datadog_checks.cisco_aci import CiscoACICheck
 
 from datadog_checks.utils.containers import hash_mutable
 
+from common import FIXTURE_LIST_FILE_MAP
+
+
 log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+CAPACITY_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'capacity')
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -343,27 +347,27 @@ class FakeSess(SessionWrapper):
      3. Returns the corresponding file content
      """
     def make_request(self, path):
-        FIXTURE_LIST_FILE_MAP = {
-            # Api.get_eqpt_capacity
-            '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsage5min': "cb5f39f666fdef06a4438813d0814611",
-            '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityVlanUsage5min': "642f9c4d4bffe9e9bad4ad01a34c924e",
-            '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityPolUsage5min': "a32256a38e5ae47ec67a4fe42a487df7",
-            '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityMcastUsage5min': "1e4f33f96dd87955dc6e04b62fdb10f1",
-            '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsageCap5min': "0d6ca781810665156211b355129ba2f1",
-            # Api.get_capacity_contexts
-            '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l2BD': "16c2a93c855b8b0039fa41f7d1fd87c7",
-            '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l3Dom': "caf41b4bc51dc6f145c5379828a9762e",
-            '_api_node_class_ctxClassCnt_json_rsp_subtree_class_fvEpP': "3a3b3fccaf27c95600f33e9c238916d6",
-            # Api.get_apic_capacity_limits
-            '_api_mo_uni_fabric_compcat_default_fvsw_default_capabilities_json_query_target_children_target_subtree_class_fvcapRule': "d9a173b8bee4de1024bdf1671cb09aa2",
-            # Api.get_apic_capacity_metrics
-            '_api_class_fvBD_json_rsp_subtree_include_count': "2b77c071f172dc404574adca6de263d1",
-            '_api_class_fvTenant_json_rsp_subtree_include_count': "3d8273b2eccc0e7b8ddf73c0bcc0dbc9",
-            '_api_class_fvCEp_json_rsp_subtree_include_count': "955e116c3ee8a1101c00ce000baf05f0",
-            '_api_class_fvAEPg_json_rsp_subtree_include_count': "1ee00ee7448fe5900c1a18d70741a6ab",
-            '_api_class_fabricNode_json_query_target_filter_eq_fabricNode_role__leaf__': "c0526b62f52c9e8956990035baa96382",
-            '_api_class_fvCtx_json_rsp_subtree_include_count': "d8ea046fd4b1831561393f0b0e7055ab",
-        }
+        # FIXTURE_LIST_FILE_MAP = {
+        #     # Api.get_eqpt_capacity
+        #     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsage5min': "cb5f39f666fdef06a4438813d0814611",
+        #     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityVlanUsage5min': "642f9c4d4bffe9e9bad4ad01a34c924e",
+        #     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityPolUsage5min': "a32256a38e5ae47ec67a4fe42a487df7",
+        #     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityMcastUsage5min': "1e4f33f96dd87955dc6e04b62fdb10f1",
+        #     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsageCap5min': "0d6ca781810665156211b355129ba2f1",
+        #     # Api.get_capacity_contexts
+        #     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l2BD': "16c2a93c855b8b0039fa41f7d1fd87c7",
+        #     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l3Dom': "caf41b4bc51dc6f145c5379828a9762e",
+        #     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_fvEpP': "3a3b3fccaf27c95600f33e9c238916d6",
+        #     # Api.get_apic_capacity_limits
+        #     '_api_mo_uni_fabric_compcat_default_fvsw_default_capabilities_json_query_target_children_target_subtree_class_fvcapRule': "d9a173b8bee4de1024bdf1671cb09aa2",
+        #     # Api.get_apic_capacity_metrics
+        #     '_api_class_fvBD_json_rsp_subtree_include_count': "2b77c071f172dc404574adca6de263d1",
+        #     '_api_class_fvTenant_json_rsp_subtree_include_count': "3d8273b2eccc0e7b8ddf73c0bcc0dbc9",
+        #     '_api_class_fvCEp_json_rsp_subtree_include_count': "955e116c3ee8a1101c00ce000baf05f0",
+        #     '_api_class_fvAEPg_json_rsp_subtree_include_count': "1ee00ee7448fe5900c1a18d70741a6ab",
+        #     '_api_class_fabricNode_json_query_target_filter_eq_fabricNode_role__leaf__': "c0526b62f52c9e8956990035baa96382",
+        #     '_api_class_fvCtx_json_rsp_subtree_include_count': "d8ea046fd4b1831561393f0b0e7055ab",
+        # }
         mock_path = path.replace('/', '_')
         mock_path = mock_path.replace('?', '_')
         mock_path = mock_path.replace('&', '_')
@@ -379,15 +383,16 @@ class FakeSess(SessionWrapper):
         mock_path = mock_path.replace('|', '_')
         try:
             mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
-        except KeyError:
+
+            mock_path = os.path.join(CAPACITY_FIXTURES_DIR, mock_path)
+            mock_path += '.txt'
+
+            log.info(os.listdir(CAPACITY_FIXTURES_DIR))
+
+            with open(mock_path, 'r') as f:
+                return json.loads(f.read())
+        except Exception:
             return {"imdata": []}
-        mock_path = os.path.join(FIXTURES_DIR, mock_path)
-        mock_path += '.txt'
-
-        log.info(os.listdir(FIXTURES_DIR))
-
-        with open(mock_path, 'r') as f:
-            return json.loads(f.read())
 
 
 def mock_send(prepped_request, **kwargs):

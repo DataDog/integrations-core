@@ -14,11 +14,15 @@ from datadog_checks.cisco_aci import CiscoACICheck
 
 from datadog_checks.utils.containers import hash_mutable
 
+from common import FIXTURE_LIST_FILE_MAP
+
+
 log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+TENANT_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'tenant')
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -113,34 +117,34 @@ class FakeSess(SessionWrapper):
      2. Fetch the corresponding hash from FIXTURE_LIST_FILE_MAP
      3. Returns the corresponding file content
      """
-    #tenant uses get_apps, get_epgs, get_app_stats, get_epg_stats, get_tenant_stats, get_tenant_events
+    # tenant uses get_apps, get_epgs, get_app_stats, get_epg_stats, get_tenant_stats, get_tenant_events
     def make_request(self, path):
-        FIXTURE_LIST_FILE_MAP = {
-            # Api.get_apps
-            '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp': "4efe80304d50330f5ed0f79252ef0a84",
-            # Api.get_epgs
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_query_target_subtree_target_subtree_class_fvAEPg': "d98210e57060ed7285a4fa7434c53ff1",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_query_target_subtree_target_subtree_class_fvAEPg': "4b07d389b109401afcc2c42bdca0f2b2",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_query_target_subtree_target_subtree_class_fvAEPg': "43410607b378cfa340146247a8b422b9",
-            # Api.get_app_stats
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_rsp_subtree_include_stats_no_scoped': "363e27e35a42bb987c121709284b529f",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_rsp_subtree_include_stats_no_scoped': "1c7d7ebf0b75333689662feb19f63ede",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_rsp_subtree_include_stats_no_scoped': "10b987e92abaab8d843e6bee5ab6aef0",
-            # Api.get_epg_stats
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_rsp_subtree_include_stats_no_scoped': "f44f8e9a9afe5d47c8b27d06b6458200",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti2_json_rsp_subtree_include_stats_no_scoped': "d4efb7c9b80929991dd91850d9ddceef",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_MiscAppVMs_json_rsp_subtree_include_stats_no_scoped': "288a353bc9fed8f571d78076cb1585ae",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_epg_Test_EPG_json_rsp_subtree_include_stats_no_scoped': "3f8f3374048d7b5b3a38566765f35cc2",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Inv_json_rsp_subtree_include_stats_no_scoped': "eb4804e1e68e00353c89b13b56b9d7b9",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ord_json_rsp_subtree_include_stats_no_scoped': "af6ca37b21581b58b9901e23dd02cae9",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ecomm_json_rsp_subtree_include_stats_no_scoped': "f929ec691d62a0d70a12e51fc18b4321",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jetty_Controller_json_rsp_subtree_include_stats_no_scoped': "7034a3d481f3cd6b47f86783c7ec4c63",
-            '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_rsp_subtree_include_stats_no_scoped': "b05ed9fa4f7f2f6e52e78976da725716",
-            # Api.get_tenant_stats
-            '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped': "c8e9a0dbceac67fb1149684f7fc7772c",
-            # Api.get_tenant_events
-            '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15': "d0260e4832537b43b1acb38bcfa58063",
-        }
+        # FIXTURE_LIST_FILE_MAP = {
+        #     # Api.get_apps
+        #     '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp': "4efe80304d50330f5ed0f79252ef0a84", #
+        #     # Api.get_epgs
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_query_target_subtree_target_subtree_class_fvAEPg': "d98210e57060ed7285a4fa7434c53ff1",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_query_target_subtree_target_subtree_class_fvAEPg': "4b07d389b109401afcc2c42bdca0f2b2",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_query_target_subtree_target_subtree_class_fvAEPg': "43410607b378cfa340146247a8b422b9",#
+        #     # Api.get_app_stats
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_rsp_subtree_include_stats_no_scoped': "363e27e35a42bb987c121709284b529f",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_rsp_subtree_include_stats_no_scoped': "1c7d7ebf0b75333689662feb19f63ede",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_rsp_subtree_include_stats_no_scoped': "10b987e92abaab8d843e6bee5ab6aef0",#
+        #     # Api.get_epg_stats
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_rsp_subtree_include_stats_no_scoped': "f44f8e9a9afe5d47c8b27d06b6458200",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti2_json_rsp_subtree_include_stats_no_scoped': "d4efb7c9b80929991dd91850d9ddceef",
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_MiscAppVMs_json_rsp_subtree_include_stats_no_scoped': "288a353bc9fed8f571d78076cb1585ae",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_epg_Test_EPG_json_rsp_subtree_include_stats_no_scoped': "3f8f3374048d7b5b3a38566765f35cc2",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Inv_json_rsp_subtree_include_stats_no_scoped': "eb4804e1e68e00353c89b13b56b9d7b9",
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ord_json_rsp_subtree_include_stats_no_scoped': "af6ca37b21581b58b9901e23dd02cae9",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ecomm_json_rsp_subtree_include_stats_no_scoped': "f929ec691d62a0d70a12e51fc18b4321",
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jetty_Controller_json_rsp_subtree_include_stats_no_scoped': "7034a3d481f3cd6b47f86783c7ec4c63",#
+        #     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_rsp_subtree_include_stats_no_scoped': "b05ed9fa4f7f2f6e52e78976da725716",#
+        #     # Api.get_tenant_stats
+        #     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped': "c8e9a0dbceac67fb1149684f7fc7772c",#
+        #     # Api.get_tenant_events
+        #     '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15': "d0260e4832537b43b1acb38bcfa58063",#
+        # }
         mock_path = path.replace('/', '_')
         mock_path = mock_path.replace('?', '_')
         mock_path = mock_path.replace('&', '_')
@@ -156,15 +160,16 @@ class FakeSess(SessionWrapper):
         mock_path = mock_path.replace('|', '_')
         try:
             mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
-        except KeyError:
+
+            mock_path = os.path.join(TENANT_FIXTURES_DIR, mock_path)
+            mock_path += '.txt'
+
+            log.info(os.listdir(TENANT_FIXTURES_DIR))
+
+            with open(mock_path, 'r') as f:
+                return json.loads(f.read())
+        except Exception:
             return {"imdata": []}
-        mock_path = os.path.join(FIXTURES_DIR, mock_path)
-        mock_path += '.txt'
-
-        log.info(os.listdir(FIXTURES_DIR))
-
-        with open(mock_path, 'r') as f:
-            return json.loads(f.read())
 
 
 def mock_send(prepped_request, **kwargs):

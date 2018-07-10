@@ -20,8 +20,13 @@ log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
-FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 
+FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+CAPACITY_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'capacity')
+FABRIC_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'fabric')
+TAGS_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'tags')
+TENANT_FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'tenant')
+ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TAGS_FIXTURES_DIR, TENANT_FIXTURES_DIR]
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
 ACI_URL = 'https://datadoghq.com'
@@ -57,13 +62,17 @@ class FakeSess(SessionWrapper):
         mock_path = mock_path.replace(']', '_')
         mock_path = mock_path.replace('|', '_')
         mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
-        mock_path = os.path.join(FIXTURES_DIR, mock_path)
-        mock_path += '.txt'
 
-        log.info(os.listdir(FIXTURES_DIR))
+        for p in ALL_FICTURE_DIR:
+            path = os.path.join(p, mock_path)
+            path += '.txt'
 
-        with open(mock_path, 'r') as f:
-            return json.loads(f.read())
+            log.info(os.listdir(p))
+            try:
+                with open(path, 'r') as f:
+                    return json.loads(f.read())
+            except Exception:
+                continue
 
 
 @pytest.fixture
