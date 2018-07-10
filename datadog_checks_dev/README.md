@@ -16,8 +16,8 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
 **Table of Contents**
 
 - [Management](#management)
-  * [Installation](#installation-1)
-  * [Usage](#usage-1)
+  * [Installation](#installation)
+  * [Usage](#usage)
     + [Clean](#clean)
     + [Config](#config)
       - [Find](#find)
@@ -44,8 +44,14 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Upload](#upload)
     + [Test](#test)
 - [Development](#development)
-  * [Installation](#installation)
-  * [Usage](#usage)
+  * [Installation](#installation-1)
+  * [Usage](#usage-1)
+    + [Fixtures](#fixtures)
+      - [Aggregator](#aggregator)
+      - [Mocker](#mocker)
+    + [Utilities](#utilities)
+      - [Subprocess commands](#subprocess-commands)
+      - [Temporary directories](#temporary-directories)
 
 ## Management
 
@@ -502,35 +508,33 @@ only dependency in a check's `requirements-dev.txt`.
 ### Usage
 
 Aside from being a source for test dependencies, this also provides many useful
-utilities and fixtures (soon!) to avoid re-inventing the wheel. They can all be
-found [here][2].
+utilities and global `pytest` fixtures to avoid re-inventing the wheel.
 
-Some examples:
+#### Fixtures
+
+##### Aggregator
+
+The `aggregator` fixture returns a [mocked Agent aggregator][2] with state cleared.
 
 ```python
->>> import os
->>> from datadog_checks.dev import run_command, temp_chdir
->>>
->>> # Command can be a list or string
->>> result = run_command('python -c "import sys;print(sys.version)"', capture='out')
->>> result.stdout
-'3.6.1 | packaged by conda-forge | (default, May 23 2017, 14:21:39) [MSC v.1900 64 bit (AMD64)]\r\n'
->>>
->>> os.getcwd()
-'C:\\Users\\Ofek\\Desktop'
->>> with temp_chdir() as d:
-...     d
-...     os.getcwd()
-...
-'C:\\Users\\Ofek\\AppData\\Local\\Temp\\tmp5ef7c2ub'
-'C:\\Users\\Ofek\\AppData\\Local\\Temp\\tmp5ef7c2ub'
->>> os.getcwd()
-'C:\\Users\\Ofek\\Desktop'
+from datadog_checks.vault import Vault
+
+def test_service_check_connect_fail(aggregator):
+    instance = {'api_url': 'http://1.2.3.4:567', 'timeout': 1}
+    c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+    c.check(instance)
+
+    aggregator.assert_service_check(
+        Vault.SERVICE_CHECK_CONNECT,
+        status=Vault.CRITICAL,
+        count=1
+    )
 ```
 
-In addition to being able to import `mock` itself, you also get a convenient `mocker`
-fixture provided by [pytest-mock](https://github.com/pytest-dev/pytest-mock). It's a
-thin-wrapper around `mock`'s patching API with the benefit of not having to worry
+##### Mocker
+
+The `mocker` fixture, provided by [pytest-mock](https://github.com/pytest-dev/pytest-mock),
+is a thin-wrapper around `mock`'s patching API with the benefit of not having to worry
 about undoing patches at the end of a test or nesting `with` statements.
 
 Example from the docs:
@@ -550,5 +554,41 @@ def test_unix_fs(mocker):
     os.remove.assert_called_once_with('file')
 ```
 
+#### Utilities
+
+Utilities live under the `datadog_checks.dev` namespace and can be found [here][3].
+
+Some examples:
+
+##### Subprocess commands
+
+```python
+>>> from datadog_checks.dev import run_command
+>>>
+>>> # Command can be a list or string
+>>> result = run_command('python -c "import sys;print(sys.version)"', capture='out')
+>>> result.stdout
+'3.6.1 | packaged by conda-forge | (default, May 23 2017, 14:21:39) [MSC v.1900 64 bit (AMD64)]\r\n'
+>>>
+```
+
+##### Temporary directories
+
+```python
+>>> import os
+>>> from datadog_checks.dev import temp_chdir
+>>>
+>>> origin = os.getcwd()
+>>>
+>>> with temp_chdir() as d:
+...     assert d == os.getcwd()
+...     # Symlinks are properly resolved to prevent permission errors on macOS
+...     assert d == os.path.realpath(d)
+...
+>>> assert origin == os.getcwd()
+>>>
+```
+
 [1]: https://github.com/DataDog/datadog-agent
-[2]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev
+[2]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/stubs/aggregator.py
+[3]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev
