@@ -33,11 +33,11 @@ def get_tox_file(check_name):
 
 
 def get_valid_checks():
-    return {path for path in os.listdir(ROOT) if os.path.isfile(get_version_file(path))}
+    return [path for path in os.listdir(ROOT) if os.path.isfile(get_version_file(path))]
 
 
 def get_testable_checks():
-    return {path for path in os.listdir(ROOT) if os.path.isfile(get_tox_file(path))}
+    return [path for path in os.listdir(ROOT) if os.path.isfile(get_tox_file(path))]
 
 
 def get_version_string(check_name):
