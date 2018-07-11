@@ -11,10 +11,10 @@ from requests import Session
 from datadog_checks.cisco_aci.api import SessionWrapper, Api
 from datadog_checks.cisco_aci.tenant import Tenant
 from datadog_checks.cisco_aci import CiscoACICheck
-
 from datadog_checks.utils.containers import hash_mutable
+
 import conftest
-from common import FIXTURE_LIST_FILE_MAP
+from .common import FIXTURE_LIST_FILE_MAP
 
 
 log = logging.getLogger('test_cisco_aci')
@@ -413,7 +413,6 @@ def test_tenant_end_to_end(aggregator, session_mock):
                                                            'application:DtDg-test-AP'] + tags, hostname='')
 
     metric_name = 'cisco_aci.capacity.apic.fabric_node.utilized'
-    # TODO are tags valid here? valie is 2.0 in test_cisco
     aggregator.assert_metric(metric_name, value=0.0, tags=['project:cisco_aci', 'cisco'], hostname='')
 
     metric_name = 'cisco_aci.tenant.ingress_pkts.multicast.cum'

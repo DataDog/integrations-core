@@ -528,10 +528,6 @@ FIXTURE_LIST = [
     '_api_node_mo_topology_pod_1_node_3_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
     # ee5cd35d0ce16d8d0b7c8057d9d53f37 - Api.get_controller_proc_metrics
 
-    # {
-    #     "totalCount":"0",
-    #     "imdata":[]
-    # }
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jetty_Controller_json_query_target_subtree_target_subtree_class_fvCEp',
     # 28431f4c95e37bbfce84c0d5b82c08e6 - Api.get_epg_meta
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_MiscAppVMs_json_query_target_subtree_target_subtree_class_fvCEp',
@@ -560,10 +556,6 @@ FIXTURE_LIST = [
     '_api_mo_topology_pod_1_node_101_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
     # dace1ecad6f3d9a50eb8d4a15631ba88 - Api.get_eth_list
 
-    # {
-    #     "totalCount":"0",
-    #     "imdata":[]
-    # }
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
     # e2b226f554c9f77aafd9b66b4cf59383 - Api.get_eth_list_for_epg
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ecomm_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
@@ -602,10 +594,6 @@ FIXTURE_LIST = [
     '_api_node_mo_topology_pod_1_node_101_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
     # 1df5692a384c4dd76bb6aaeec9e5f922 - Api.get_spine_proc_metrics
 
-    # {
-    #     "totalCount":"0",
-    #     "imdata":[]
-    # }
     '_api_mo_topology_pod_1_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # 0d11d458b6d31906696642f74bf016cc - Api.get_pod_stats
 
@@ -623,10 +611,6 @@ FIXTURE_LIST = [
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricPod',
     # 643d217904f09445fbc9f7b43cd131f0 - Api.get_fabric_pods
 
-    # {
-    #     "totalCount":"0",
-    #     "imdata":[]
-    # }
     '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15',
     # d0260e4832537b43b1acb38bcfa58063 - Api.get_tenant_events
 

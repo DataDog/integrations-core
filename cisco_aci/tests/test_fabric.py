@@ -10,10 +10,10 @@ from requests import Session
 
 from datadog_checks.cisco_aci.api import SessionWrapper, Api
 from datadog_checks.cisco_aci import CiscoACICheck
-
 from datadog_checks.utils.containers import hash_mutable
+
 import conftest
-from common import FIXTURE_LIST_FILE_MAP
+from .common import FIXTURE_LIST_FILE_MAP
 
 log = logging.getLogger('test_cisco_aci')
 
@@ -1365,7 +1365,7 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=808249335135.0, tags=tags201 + ['port:eth1/2'], hostname=hn201)
 
     metric_name = 'cisco_aci.capacity.apic.fabric_node.utilized'
-    aggregator.assert_metric(metric_name, value=0.0, tags=['cisco', 'project:cisco_aci'], hostname='')  # TODO value is not the same -> used to be 2.0
+    aggregator.assert_metric(metric_name, value=0.0, tags=['cisco', 'project:cisco_aci'], hostname='')
 
     metric_name = 'cisco_aci.fabric.port.fault_counter.crit'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)

@@ -1,6 +1,7 @@
 # C Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License see LICENSE
+
 import os
 import pytest
 from requests import Response
@@ -10,9 +11,8 @@ CHECK_NAME = 'cisco_aci'
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
 FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')
-TAGS_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tags')
 TENANT_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tenant')
-ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TAGS_FIXTURES_DIR, TENANT_FIXTURES_DIR]
+ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
