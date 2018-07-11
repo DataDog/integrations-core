@@ -39,15 +39,17 @@ class Fabric:
             pod = p.get('fabricPod', {})
             pod_attrs = pod.get('attributes', {})
             pod_id = pod_attrs.get('id')
+            if not pod_id:
+                continue
             pods_dict[pod_id] = pod_attrs
-            self.log.info("processing pod {}".format(pod_attrs['id']))
+            self.log.info("processing pod {}".format(pod_id))
             tags = self.tagger.get_fabric_tags(p, 'fabricPod')
             try:
                 stats = self.api.get_pod_stats(pod_id)
                 self.submit_fabric_metric(stats, tags, 'fabricPod')
             except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
-            self.log.info("finished processing pod {}".format(pod_attrs['id']))
+            self.log.info("finished processing pod {}".format(pod_id))
 
         return pods_dict
 
@@ -64,13 +66,14 @@ class Fabric:
             node_id = node_attrs.get('id', {})
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
-
+            if not node_id or not pod_id:
+                continue
             self.log.info("processing node {} on pod {}".format(node_id, pod_id))
             try:
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
-            if node_attrs['role'] != "controller":
+            if node_attrs.get('role') != "controller":
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
@@ -80,7 +83,7 @@ class Fabric:
             self.log.info("finished processing node {}".format(node_id))
 
     def process_eth(self, node):
-        self.log.info("processing ethernet ports for {}".format(node['id']))
+        self.log.info("processing ethernet ports for {}".format(node.get('id')))
         hostname = helpers.get_fabric_hostname(node)
         pod_id = helpers.get_pod_from_dn(node['dn'])
         try:
