@@ -125,7 +125,7 @@ class SQLServer(AgentCheck):
         self.adoprovider = self.default_adoprovider
 
         self.connector = init_config.get('connector', 'adodbapi')
-        if not self.connector.lower() in self.valid_connectors:
+        if self.connector.lower() not in self.valid_connectors:
             self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
             self.connector = 'adodbapi'
 
@@ -335,7 +335,7 @@ class SQLServer(AgentCheck):
     def _get_connector(self, instance):
         connector = instance.get('connector', self.connector)
         if connector != self.connector:
-            if not connector.lower() in self.valid_connectors:
+            if connector.lower() not in self.valid_connectors:
                 self.log.warning("Invalid database connector %s using default %s" ,
                      connector, self.connector)
                 connector = self.connector
@@ -346,7 +346,7 @@ class SQLServer(AgentCheck):
     def _get_adoprovider(self, instance):
         provider = instance.get('adoprovider', self.default_adoprovider)
         if provider != self.adoprovider:
-            if not provider.upper() in self.valid_adoproviders:
+            if provider.upper() not in self.valid_adoproviders:
                 self.log.warning("Invalid ADO provider %s using default %s", 
                     provider, self.adoprovider)
                 provider = self.adoprovider
