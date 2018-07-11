@@ -185,12 +185,16 @@ class PrometheusScraperMixin(object):
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
-            messages = defaultdict(list)  # map with the name of the element (before the labels)
-            # and the list of occurrences with labels and values
-
-            obj_map = {}  # map of the types of each metrics
-            obj_help = {}  # help for the metrics
+            # Iterate over text_fd_to_metric_families, that will yield one group per
+            # metric name (including buckets/sums sub-metrics). This assumes the input
+            # payload conforms to the prometheus spec and all samples for a given metric
+            # are contiguous
             for metric in text_fd_to_metric_families(response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)):
+                messages = defaultdict(list)  # map with the name of the element (before the labels)
+                # and the list of occurrences with labels and values
+
+                obj_map = {}  # map of the types of each metrics
+                obj_help = {}  # help for the metrics
                 metric.name = self.remove_metric_prefix(metric.name)
                 metric_name = "%s_bucket" % metric.name if metric.type == "histogram" else metric.name
                 metric_type = self.type_overrides.get(metric_name, metric.type)
@@ -207,9 +211,9 @@ class PrometheusScraperMixin(object):
                 obj_map[metric.name] = metric_type
                 obj_help[metric.name] = metric.documentation
 
-            for _m in obj_map:
-                if _m in messages or (obj_map[_m] == 'histogram' and ('{}_bucket'.format(_m) in messages)):
-                    yield self._extract_metric_from_map(_m, messages, obj_map, obj_help)
+                for _m in obj_map:
+                    if _m in messages or (obj_map[_m] == 'histogram' and ('{}_bucket'.format(_m) in messages)):
+                        yield self._extract_metric_from_map(_m, messages, obj_map, obj_help)
         else:
             raise UnknownFormatError('Unsupported content-type provided: {}'.format(
                 response.headers['Content-Type']))
