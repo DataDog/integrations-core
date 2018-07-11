@@ -168,7 +168,7 @@ def changes(ctx, check):
 @click.argument('check')
 @click.argument('version', required=False)
 @click.option('--push/--no-push', default=True)
-@click.option('--dry_run', '-n', is_flag=True)
+@click.option('--dry-run', '-n', is_flag=True)
 def tag(check, version, push, dry_run):
     """Tag the HEAD of the git repo with the current release number for a
     specific check. The tag is pushed to origin by default.
@@ -255,7 +255,7 @@ def make(ctx, check, version):
 @click.argument('check')
 @click.argument('version')
 @click.argument('old_version', required=False)
-@click.option('--dry_run', '-n', is_flag=True)
+@click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
 def changelog(ctx, check, version, old_version, dry_run):
     """Perform the operations needed to update the changelog.
@@ -361,7 +361,7 @@ def changelog(ctx, check, version, old_version, dry_run):
     short_help='Build and upload a check to PyPI'
 )
 @click.argument('check')
-@click.option('--dry_run', '-n', is_flag=True)
+@click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
 def upload(ctx, check, dry_run):
     """Release a specific check to PyPI as it is on the repo HEAD."""

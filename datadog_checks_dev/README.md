@@ -25,6 +25,7 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
+    + [Create](#create)
     + [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
@@ -216,6 +217,19 @@ Options:
   -h, --help  Show this message and exit.
 ```
 
+#### Create
+
+```console
+$ ddev create -h
+Usage: ddev create [OPTIONS] CHECK_NAME
+
+  Create a new check.
+
+Options:
+  -n, --dry-run
+  -h, --help     Show this message and exit.
+```
+
 #### Dep
 
 ```console
@@ -359,7 +373,7 @@ Usage: ddev release changelog [OPTIONS] CHECK VERSION [OLD_VERSION]
   This method is supposed to be used by other tasks and not directly.
 
 Options:
-  -n, --dry_run
+  -n, --dry-run
   -h, --help     Show this message and exit.
 ```
 
@@ -457,7 +471,7 @@ Usage: ddev release tag [OPTIONS] CHECK [VERSION]
 
 Options:
   --push / --no-push
-  -n, --dry_run
+  -n, --dry-run
   -h, --help          Show this message and exit.
 ```
 
@@ -470,7 +484,7 @@ Usage: ddev release upload [OPTIONS] CHECK
   Release a specific check to PyPI as it is on the repo HEAD.
 
 Options:
-  -n, --dry_run
+  -n, --dry-run
   -h, --help     Show this message and exit.
 ```
 

@@ -117,6 +117,10 @@ def dir_exists(d):
     return os.path.isdir(d)
 
 
+def path_exists(p):
+    return os.path.exists(p)
+
+
 def ensure_dir_exists(d):
     if not dir_exists(d):
         os.makedirs(d)

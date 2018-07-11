@@ -6,7 +6,7 @@ import os
 from glob import iglob
 from os.path import join
 
-from .utils import is_project
+from .utils import is_package
 from ..utils import dir_exists, remove_path
 
 DELETE_IN_ROOT = {
@@ -91,7 +91,7 @@ def generate_walker(d, detect_project=True, removed_root_dirs=None):
     r, dirs, f = next(walker)
 
     removed_root_dirs = removed_root_dirs or set()
-    if detect_project and is_project(d):
+    if detect_project and is_package(d):
         removed_root_dirs.add('venv')
 
     for root_dir in removed_root_dirs:

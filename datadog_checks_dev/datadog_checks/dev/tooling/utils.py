@@ -12,8 +12,12 @@ from ..utils import file_exists, read_file
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 
 
-def is_project(d):
+def is_package(d):
     return file_exists(os.path.join(d, 'setup.py'))
+
+
+def normalize_package_name(package_name):
+    return re.sub(r'[-_. ]+', '_', package_name).lower()
 
 
 def string_to_toml_type(s):
