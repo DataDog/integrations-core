@@ -12,9 +12,6 @@ from datadog_checks.cisco_aci.tags import CiscoTags
 log = logging.getLogger('test_cisco_aci')
 
 
-CHECK_NAME = 'cisco_aci'
-
-
 def test_app_tags():
     tags = CiscoTags()
     assert tags._app_tags(None) == []

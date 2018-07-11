@@ -12,8 +12,6 @@ from datadog_checks.cisco_aci.helpers import (get_pod_from_dn, get_bd_from_dn, g
 
 log = logging.getLogger('test_cisco_aci')
 
-CHECK_NAME = 'cisco_aci'
-
 
 def test_get_pod_from_dn():
     assert get_pod_from_dn(None) is None
