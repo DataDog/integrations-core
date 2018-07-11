@@ -92,25 +92,6 @@ def test_no_tenant(aggregator):
     assert len(aggregator._metrics.items()) == 0
 
 
-# def test_one_tenant(aggregator):
-#     config = {
-#         'tenant': [
-#             'DataDog',
-#         ]}
-#     api = ApiMock()
-#     check = CiscoACICheck(CHECK_NAME, {}, {})
-#     api._refresh_sessions = False
-#     check._api_cache[hash_mutable(hash_mutable(config))] = api
-#     check.tagger.api = api
-#     tenant = Tenant(check, api, config, None)
-#     tenant.collect()
-#
-#     for m in aggregator._metrics.items():
-#         print(m)
-#
-#     assert len(aggregator._metrics.items()) == 1
-
-
 class FakeSess(SessionWrapper):
     """ This mock:
      1. Takes the requested path and replace all special characters to underscore

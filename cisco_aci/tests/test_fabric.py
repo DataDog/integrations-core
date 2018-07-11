@@ -3416,8 +3416,5 @@ def test_fabric_end_to_end(aggregator, session_mock):
     aggregator.assert_metric(metric_name, value=1196.0, tags=tags201 + ['port:eth1/1'], hostname=hn201)
     aggregator.assert_metric(metric_name, value=620.0, tags=tags201 + ['port:eth1/2'], hostname=hn201)
 
-    for m in aggregator.not_asserted():
-        print(m)
-
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
