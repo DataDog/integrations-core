@@ -6,42 +6,6 @@ import hashlib
 
 # list of fixture names
 FIXTURE_LIST = [
-    # {
-    #     "totalCount":"3",
-    #     "imdata":[{
-    #         "fvAEPg":{
-    #             "attributes":{
-    #                 "annotation":"",
-    #                 "childAction":"",
-    #                 "configIssues":"",
-    #                 "configSt":"applied",
-    #                 "descr":"",
-    #                 "dn":"uni/tn-DataDog/ap-DtDg-AP2-Jeti/epg-DtDg-Jeti2",
-    #                 "exceptionTag":"",
-    #                 "extMngdBy":"",
-    #                 "floodOnEncap":"disabled",
-    #                 "fwdCtrl":"",
-    #                 "isAttrBasedEPg":"no",
-    #                 "isSharedSrvMsiteEPg":"no",
-    #                 "lcOwn":"local",
-    #                 "matchT":"AtleastOne",
-    #                 "modTs":"2018-04-19T16:02:40.783-07:00",
-    #                 "monPolDn":"uni/tn-common/monepg-default",
-    #                 "name":"DtDg-Jeti2",
-    #                 "nameAlias":"",
-    #                 "pcEnfPref":"unenforced",
-    #                 "pcTag":"16387",
-    #                 "prefGrMemb":"exclude",
-    #                 "prio":"unspecified",
-    #                 "scope":"2359303",
-    #                 "status":"",
-    #                 "triggerSt":"triggerable",
-    #                 "txId":"5188146770752724440",
-    #                 "uid":"15374"
-    #             }
-    #         }
-    #     }]
-    # }
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_query_target_subtree_target_subtree_class_fvAEPg',
     # d98210e57060ed7285a4fa7434c53ff1 - Api.get_epgs
     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_query_target_subtree_target_subtree_class_fvAEPg',
@@ -49,63 +13,6 @@ FIXTURE_LIST = [
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_query_target_subtree_target_subtree_class_fvAEPg',
     # 43410607b378cfa340146247a8b422b9 - Api.get_epgs
 
-    # {
-    #     "totalCount":"294",
-    #     "imdata":[{
-    #         "fvFltCounter5min":{
-    #             "attributes":{
-    #                 "childAction":"deleteNonPresent",
-    #                 "cnt":"28",
-    #                 "critcountAvg":"0",
-    #                 "critcountLast":"0",
-    #                 "critcountMax":"0",
-    #                 "critcountMin":"0",
-    #                 "critcountSpct":"0",
-    #                 "critcountThr":"",
-    #                 "critcountTr":"0",
-    #                 "critcountTrBase":"0",
-    #                 "critcountTtl":"0",
-    #                 "dn":"topology/pod-1/node-102/sys/phys-[eth1/25]/CDfvFltCounter5min",
-    #                 "lastCollOffset":"280",
-    #                 "majcountAvg":"0",
-    #                 "majcountLast":"0",
-    #                 "majcountMax":"0",
-    #                 "majcountMin":"0",
-    #                 "majcountSpct":"0",
-    #                 "majcountThr":"",
-    #                 "majcountTr":"0",
-    #                 "majcountTrBase":"0",
-    #                 "majcountTtl":"0",
-    #                 "mincountAvg":"0",
-    #                 "mincountLast":"0",
-    #                 "mincountMax":"0",
-    #                 "mincountMin":"0",
-    #                 "mincountSpct":"0",
-    #                 "mincountThr":"",
-    #                 "mincountTr":"0",
-    #                 "mincountTrBase":"0",
-    #                 "mincountTtl":"0",
-    #                 "modTs":"never",
-    #                 "repIntvEnd":"2018-05-30T12:49:37.015-07:00",
-    #                 "repIntvStart":"2018-05-30T12:44:56.968-07:00",
-    #                 "status":"",
-    #                 "warncountAvg":"0",
-    #                 "warncountLast":"0",
-    #                 "warncountMax":"0",
-    #                 "warncountMin":"0",
-    #                 "warncountSpct":"0",
-    #                 "warncountThr":"",
-    #                 "warncountTr":"0",
-    #                 "warncountTrBase":"0",
-    #                 "warncountTtl":"0"
-    #             }
-    #         }},{
-    #         "fvFltCounterHist5min":{
-    #             "attributes":{ ...
-    #             }
-    #         }}
-    #     ]
-    # }
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_25__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 29fd45826b0bb763e5c8b4e92fe53216 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_201_sys_phys__eth1_11__json_rsp_subtree_include_stats_no_scoped_page_size_50',
@@ -563,38 +470,6 @@ FIXTURE_LIST = [
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_51__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 39eadf19ae6f6506492894d5b7eb451d - Api.get_eth_stats
 
-    # {
-    #     "totalCount":"294",
-    #     "imdata":[
-    #         {
-    #             "fabricNodeHealth5min":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "cnt":"27",
-    #                     "dn":"topology/pod-1/node-201/sys/CDfabricNodeHealth5min",
-    #                     "healthAvg":"99",
-    #                     "healthLast":"99",
-    #                     "healthMax":"99",
-    #                     "healthMin":"99",
-    #                     "healthSpct":"0",
-    #                     "healthThr":"",
-    #                     "healthTr":"0",
-    #                     "healthTrBase":"99",
-    #                     "healthTtl":"2673",
-    #                     "lastCollOffset":"270",
-    #                     "modTs":"never",
-    #                     "repIntvEnd":"2018-05-30T12:49:33.653-07:00",
-    #                     "repIntvStart":"2018-05-30T12:45:03.590-07:00",
-    #                     "status":""
-    #                 }
-    #             }
-    #         },{
-    #             "fabricNodeHealthHist5min":{
-    #                 "attributes":{...}
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_topology_pod_1_node_201_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # bd2db6fd496f3b1ee12ac533e3224c21 - Api.get_node_stats
     '_api_mo_topology_pod_1_node_102_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
@@ -604,51 +479,6 @@ FIXTURE_LIST = [
     '_api_mo_topology_pod_1_node_101_sys_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # d121d04c8171c3095561ca593dc2de5d - Api.get_node_stats
 
-    # {
-    #     "totalCount":"1124",
-    #     "imdata":[{
-    #         "l2IngrPktsAgHist1h":{
-    #             "attributes":{
-    #                 "childAction":"deleteNonPresent",
-    #                 "cnt":"4",
-    #                 "dn":"uni/tn-DataDog/ap-DtDg-AP2-Jeti/epg-DtDg-Jeti1/HDl2IngrPktsAg1h-138",
-    #                 "dropCum":"0",
-    #                 "dropPer":"0",
-    #                 "dropRate":"0.000000",
-    #                 "dropSpct":"0",
-    #                 "dropThr":"",
-    #                 "dropTr":"0",
-    #                 "floodCum":"0",
-    #                 "floodPer":"0",
-    #                 "floodRate":"0.000000",
-    #                 "floodSpct":"0",
-    #                 "floodThr":"",
-    #                 "floodTr":"0",
-    #                 "index":"138",
-    #                 "lastCollOffset":"3610",
-    #                 "modTs":"never",
-    #                 "multicastCum":"0",
-    #                 "multicastPer":"0",
-    #                 "multicastRate":"0.000000",
-    #                 "multicastSpct":"0",
-    #                 "multicastThr":"",
-    #                 "multicastTr":"0",
-    #                 "repIntvEnd":"2018-05-24T18:00:08.240-07:00",
-    #                 "repIntvStart":"2018-05-24T16:59:58.209-07:00",
-    #                 "status":"",
-    #                 "unicastCum":"0",
-    #                 "unicastPer":"0",
-    #                 "unicastRate":"0.000000",
-    #                 "unicastSpct":"0",
-    #                 "unicastThr":"",
-    #                 "unicastTr":"0"
-    #             }
-    #         }},{
-    #         "l2IngrPktsAgHist15min":{
-    #             "attributes":{ ... }
-    #         }
-    #     }]
-    # }
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti1_json_rsp_subtree_include_stats_no_scoped',
     # f44f8e9a9afe5d47c8b27d06b6458200 - Api.get_epg_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_epg_DtDg_Jeti2_json_rsp_subtree_include_stats_no_scoped',
@@ -668,21 +498,6 @@ FIXTURE_LIST = [
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_rsp_subtree_include_stats_no_scoped',
     # b05ed9fa4f7f2f6e52e78976da725716 - Api.get_epg_stats
 
-    # {
-    #     "totalCount":"1",
-    #     "imdata":[
-    #         {
-    #             "moCount":{
-    #                 "attributes":{
-    #                     "childAction":"",
-    #                     "count":"154",
-    #                     "dn":"",
-    #                     "status":""
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_class_fvBD_json_rsp_subtree_include_count',
     # 2b77c071f172dc404574adca6de263d1 - Api.get_apic_capacity_metrics
     '_api_class_fvTenant_json_rsp_subtree_include_count',
@@ -696,47 +511,9 @@ FIXTURE_LIST = [
     '_api_class_fvCtx_json_rsp_subtree_include_count',
     # d8ea046fd4b1831561393f0b0e7055ab - Api.get_apic_capacity_metrics
 
-    # {
-    #     "totalCount":"14",
-    #     "imdata":[
-    #         {
-    #             "fvcapRule":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "constraint":"200",
-    #                     "descr":"Max number of fabric nodes",
-    #                     "dn":"uni/fabric/compcat-default/fvsw-default/capabilities/fvcaprule-fabricNode-scope-policy-domain-type-limit",
-    #                     "faultState":"nominal",
-    #                     "lcOwn":"local",
-    #                     "modTs":"2016-07-20T11:29:13.890-07:00",
-    #                     "scope":"policy-domain",
-    #                     "status":"",
-    #                     "subj":"fabricNode",
-    #                     "type":"limit"
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_uni_fabric_compcat_default_fvsw_default_capabilities_json_query_target_children_target_subtree_class_fvcapRule',
     # d9a173b8bee4de1024bdf1671cb09aa2 - Api.get_apic_capacity_limits
 
-    # {
-    #     "totalCount":"4",
-    #     "imdata":[
-    #         {
-    #             "ctxClassCnt":{
-    #                 "attributes":{
-    #                     "childAction":"",
-    #                     "count":"44",
-    #                     "dn":"topology/pod-1/node-101/ccnt-l2BD",
-    #                     "name":"l2BD",
-    #                     "status":""
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l2BD',
     # 16c2a93c855b8b0039fa41f7d1fd87c7 - Api.get_capacity_contexts
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_l3Dom',
@@ -744,35 +521,6 @@ FIXTURE_LIST = [
     '_api_node_class_ctxClassCnt_json_rsp_subtree_class_fvEpP',
     # 3a3b3fccaf27c95600f33e9c238916d6 - Api.get_capacity_contexts
 
-    # {
-    #     "totalCount":"24",
-    #     "imdata":[
-    #         {
-    #             "procMemHist5min":{
-    #                 "attributes":{
-    #                     "childAction":"",
-    #                     "cnt":"31",
-    #                     "currentAvg":"43010405",
-    #                     "currentMax":"43221148",
-    #                     "currentMin":"42978588",
-    #                     "currentSpct":"0",
-    #                     "currentThr":"",
-    #                     "currentTr":"12540",
-    #                     "dn":"topology/pod-1/node-1/sys/proc/HDprocMem5min-7",
-    #                     "index":"7",
-    #                     "lastCollOffset":"310",
-    #                     "repIntvEnd":"2018-05-30T12:09:03.223-07:00",
-    #                     "repIntvStart":"2018-05-30T12:03:52.947-07:00",
-    #                     "status":""
-    #                 }
-    #             }
-    #         },{
-    #             "procCPUHist5min":{
-    #                 "attributes":{ ... }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_node_mo_topology_pod_1_node_1_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
     # da3cc25775b42c6e85bf8e389cde346c - Api.get_controller_proc_metrics
     '_api_node_mo_topology_pod_1_node_2_sys_proc_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procMemHist5min_procCPUHist5min',
@@ -803,57 +551,6 @@ FIXTURE_LIST = [
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Ord_json_query_target_subtree_target_subtree_class_fvCEp',
     # b9ec4494d631d05122fd7fb4baf0877d - Api.get_epg_meta
 
-    # {
-    #     "totalCount":"54",
-    #     "imdata":[
-    #         {
-    #             "l1PhysIf":{
-    #                 "attributes":{
-    #                     "adminSt":"up",
-    #                     "autoNeg":"on",
-    #                     "brkoutMap":"none",
-    #                     "bw":"0",
-    #                     "childAction":"",
-    #                     "delay":"1",
-    #                     "descr":"",
-    #                     "dn":"topology/pod-1/node-102/sys/phys-[eth1/33]",
-    #                     "dot1qEtherType":"0x8100",
-    #                     "ethpmCfgFailedBmp":"",
-    #                     "ethpmCfgFailedTs":"00:00:00:00.000",
-    #                     "ethpmCfgState":"0",
-    #                     "fcotChannelNumber":"Channel32",
-    #                     "fecMode":"inherit",
-    #                     "id":"eth1/33",
-    #                     "inhBw":"unspecified",
-    #                     "isReflectiveRelayCfgSupported":"Supported",
-    #                     "layer":"Layer2",
-    #                     "lcOwn":"local",
-    #                     "linkDebounce":"100",
-    #                     "linkLog":"default",
-    #                     "mdix":"auto",
-    #                     "medium":"broadcast",
-    #                     "modTs":"2018-03-16T18:40:37.333-07:00",
-    #                     "mode":"trunk",
-    #                     "monPolDn":"uni/infra/moninfra-default",
-    #                     "mtu":"9000",
-    #                     "name":"",
-    #                     "pathSDescr":"",
-    #                     "portT":"leaf",
-    #                     "prioFlowCtrl":"auto",
-    #                     "reflectiveRelayEn":"off",
-    #                     "routerMac":"not-applicable",
-    #                     "snmpTrapSt":"enable",
-    #                     "spanMode":"not-a-span-dest",
-    #                     "speed":"inherit",
-    #                     "status":"",
-    #                     "switchingSt":"disabled",
-    #                     "trunkLog":"default",
-    #                     "usage":"discovery"
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_topology_pod_1_node_102_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
     # 79af98fe9c1069b329af3b4828712ddd - Api.get_eth_list
     '_api_mo_topology_pod_1_node_202_sys_json_query_target_subtree_target_subtree_class_l1PhysIf',
@@ -886,52 +583,6 @@ FIXTURE_LIST = [
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_epg_DtDg_Pay_json_query_target_subtree_target_subtree_class_fvRsCEpToPathEp',
     # e001f001b7ac8da3335f8ef8bad17129 - Api.get_eth_list_for_epg
 
-    # {
-    #     "totalCount":"1231",
-    #     "imdata":[
-    #         {
-    #             "l2IngrPktsAgHist1h":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "cnt":"4",
-    #                     "dn":"uni/tn-DataDog/ap-DtDg-AP1-EcommerceApp/HDl2IngrPktsAg1h-138",
-    #                     "dropCum":"0",
-    #                     "dropPer":"0",
-    #                     "dropRate":"0.000000",
-    #                     "dropSpct":"0",
-    #                     "dropThr":"",
-    #                     "dropTr":"0",
-    #                     "floodCum":"0",
-    #                     "floodPer":"0",
-    #                     "floodRate":"0.000000",
-    #                     "floodSpct":"0",
-    #                     "floodThr":"",
-    #                     "floodTr":"0",
-    #                     "index":"138",
-    #                     "lastCollOffset":"3610",
-    #                     "modTs":"never",
-    #                     "multicastCum":"0",
-    #                     "multicastPer":"0",
-    #                     "multicastRate":"0.000000",
-    #                     "multicastSpct":"0",
-    #                     "multicastThr":"",
-    #                     "multicastTr":"0",
-    #                     "repIntvEnd":"2018-05-24T18:00:08.240-07:00",
-    #                     "repIntvStart":"2018-05-24T16:59:58.209-07:00",
-    #                     "status":"",
-    #                     "unicastCum":"0",
-    #                     "unicastPer":"0",
-    #                     "unicastRate":"0.000000",
-    #                     "unicastSpct":"0",
-    #                     "unicastThr":"",
-    #                     "unicastTr":"0"
-    #                 }
-    #             }
-    #         },{
-    #             "l2EgrBytesAgHist1h":{"attributes":{ ... }}
-    #         }
-    #     ]
-    # }
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP1_EcommerceApp_json_rsp_subtree_include_stats_no_scoped',
     # 363e27e35a42bb987c121709284b529f - Api.get_app_stats
     '_api_mo_uni_tn_DataDog_ap_DtDg_test_AP_json_rsp_subtree_include_stats_no_scoped',
@@ -939,80 +590,9 @@ FIXTURE_LIST = [
     '_api_mo_uni_tn_DataDog_ap_DtDg_AP2_Jeti_json_rsp_subtree_include_stats_no_scoped',
     # 10b987e92abaab8d843e6bee5ab6aef0 - Api.get_app_stats
 
-    # {
-    #     "totalCount":"7",
-    #     "imdata":[{
-    #         "fabricNode":{
-    #             "attributes":{
-    #                 "adSt":"on",
-    #                 "annotation":"",
-    #                 "childAction":"",
-    #                 "delayedHeartbeat":"no",
-    #                 "dn":"topology/pod-1/node-101",
-    #                 "extMngdBy":"",
-    #                 "fabricSt":"active",
-    #                 "id":"101",
-    #                 "lastStateModTs":"2018-05-29T16:53:17.789-07:00",
-    #                 "lcOwn":"local",
-    #                 "modTs":"2018-05-29T16:53:58.209-07:00",
-    #                 "model":"N9K-C93180YC-FX",
-    #                 "monPolDn":"uni/fabric/monfab-default",
-    #                 "name":"leaf101",
-    #                 "nameAlias":"",
-    #                 "nodeType":"unspecified",
-    #                 "role":"leaf",
-    #                 "serial":"FDO20440TS1",
-    #                 "status":"",
-    #                 "uid":"0",
-    #                 "vendor":"Cisco Systems, Inc",
-    #                 "version":""
-    #             }
-    #         }
-    #     }]
-    # }
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricNode',
     # 2e82232a722241e59f27ac3742934e7e - Api.get_fabric_nodes
 
-    # {
-    #     "totalCount":"24",
-    #     "imdata":[
-    #         {
-    #             "procSysMemHist5min":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "cnt":"30",
-    #                     "dn":"topology/pod-1/node-102/sys/procsys/HDprocSysMem5min-8",
-    #                     "freeAvg":"13946014",
-    #                     "freeMax":"13979788",
-    #                     "freeMin":"13936032",
-    #                     "freeSpct":"0",
-    #                     "freeThr":"",
-    #                     "freeTr":"-41541",
-    #                     "index":"8",
-    #                     "lastCollOffset":"300",
-    #                     "modTs":"never",
-    #                     "repIntvEnd":"2018-05-30T12:04:48.260-07:00",
-    #                     "repIntvStart":"2018-05-30T11:59:48.258-07:00",
-    #                     "status":"",
-    #                     "totalAvg":"24438012",
-    #                     "totalMax":"24438012",
-    #                     "totalMin":"24438012",
-    #                     "totalSpct":"0",
-    #                     "totalThr":"",
-    #                     "totalTr":"0",
-    #                     "usedAvg":"10491997",
-    #                     "usedMax":"10501980",
-    #                     "usedMin":"10458224",
-    #                     "usedSpct":"0",
-    #                     "usedThr":"",
-    #                     "usedTr":"41541"
-    #                 }
-    #             }
-    #         },{
-    #             "procSysCPUHist5min":{"attributes":{ ... }}
-    #         }
-    #     ]
-    # }
     '_api_node_mo_topology_pod_1_node_102_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
     # 39d31c3f91411cd6018abd79e222d0cf - Api.get_spine_proc_metrics
     '_api_node_mo_topology_pod_1_node_202_sys_procsys_json_rsp_subtree_include_stats_no_scoped_rsp_subtree_class_procSysMemHist5min_procSysCPUHist5min',
@@ -1029,162 +609,6 @@ FIXTURE_LIST = [
     '_api_mo_topology_pod_1_json_rsp_subtree_include_stats_no_scoped_page_size_20',
     # 0d11d458b6d31906696642f74bf016cc - Api.get_pod_stats
 
-    # {
-    #     "totalCount":"4",
-    #     "imdata":[
-    #         {
-    #             "eqptcapacityEntity":{
-    #                 "attributes":{
-    #                     "childAction":"",
-    #                     "dn":"topology/pod-1/node-101/sys/eqptcapacity",
-    #                     "lcOwn":"local",
-    #                     "modTs":"2018-03-16T18:37:35.960-07:00",
-    #                     "monPolDn":"uni/fabric/monfab-default",
-    #                     "name":"",
-    #                     "nameAlias":"",
-    #                     "status":""
-    #                 },
-    #                 "children":[
-    #                     {
-    #                         "eqptcapacityL3TotalUsage5min":{
-    #                             "attributes":{
-    #                                 "childAction":"",
-    #                                 "cnt":"28",
-    #                                 "lastCollOffset":"279",
-    #                                 "modTs":"never",
-    #                                 "repIntvEnd":"2018-05-30T12:49:34.011-07:00",
-    #                                 "repIntvStart":"2018-05-30T12:44:54.012-07:00",
-    #                                 "rn":"CDeqptcapacityL3TotalUsage5min",
-    #                                 "status":"",
-    #                                 "v4TotalEpAvg":"0",
-    #                                 "v4TotalEpBase":"0",
-    #                                 "v4TotalEpCum":"63",
-    #                                 "v4TotalEpLast":"0",
-    #                                 "v4TotalEpMax":"0",
-    #                                 "v4TotalEpMin":"0",
-    #                                 "v4TotalEpPer":"0",
-    #                                 "v4TotalEpRate":"0.000000",
-    #                                 "v4TotalEpSpct":"0",
-    #                                 "v4TotalEpThr":"",
-    #                                 "v4TotalEpTr":"0",
-    #                                 "v4TotalEpTrBase":"0",
-    #                                 "v6TotalEpAvg":"0",
-    #                                 "v6TotalEpBase":"0",
-    #                                 "v6TotalEpCum":"0",
-    #                                 "v6TotalEpLast":"0",
-    #                                 "v6TotalEpMax":"0",
-    #                                 "v6TotalEpMin":"0",
-    #                                 "v6TotalEpPer":"0",
-    #                                 "v6TotalEpRate":"0.000000",
-    #                                 "v6TotalEpSpct":"0",
-    #                                 "v6TotalEpThr":"",
-    #                                 "v6TotalEpTr":"0",
-    #                                 "v6TotalEpTrBase":"0"
-    #                             }
-    #                         }
-    #                     },{
-    #                         "eqptcapacityL2UsageHist5min":{
-    #                             "attributes":{
-    #                                 "childAction":"",
-    #                                 "cnt":"60",
-    #                                 "index":"0",
-    #                                 "lastCollOffset":"300",
-    #                                 "localEpAvg":"0",
-    #                                 "localEpCapAvg":"0",
-    #                                 "localEpCapCum":"0",
-    #                                 "localEpCapMax":"0",
-    #                                 "localEpCapMin":"0",
-    #                                 "localEpCapPer":"0",
-    #                                 "localEpCapRate":"0.000000",
-    #                                 "localEpCapSpct":"0",
-    #                                 "localEpCapThr":"",
-    #                                 "localEpCapTr":"0",
-    #                                 "localEpCum":"0",
-    #                                 "localEpMax":"0",
-    #                                 "localEpMin":"0",
-    #                                 "localEpPer":"0",
-    #                                 "localEpRate":"0.000000",
-    #                                 "localEpSpct":"0",
-    #                                 "localEpThr":"",
-    #                                 "localEpTr":"0",
-    #                                 "modTs":"never",
-    #                                 "normalizedAvg":"0",
-    #                                 "normalizedMax":"0",
-    #                                 "normalizedMin":"0",
-    #                                 "normalizedSpct":"0",
-    #                                 "normalizedThr":"",
-    #                                 "normalizedTr":"0",
-    #                                 "repIntvEnd":"2018-05-30T12:45:02.228-07:00",
-    #                                 "repIntvStart":"2018-05-30T12:40:02.182-07:00",
-    #                                 "rn":"HDeqptcapacityL2Usage5min-0",
-    #                                 "status":""
-    #                             }
-    #                         }
-    #                     },{
-    #                         "eqptcapacityL2Entry5min":{
-    #                             "attributes":{
-    #                                 "childAction":"",
-    #                                 "cnt":"56",
-    #                                 "lastCollOffset":"280",
-    #                                 "modTs":"never",
-    #                                 "normalizedAvg":"0",
-    #                                 "normalizedLast":"0",
-    #                                 "normalizedMax":"0",
-    #                                 "normalizedMin":"0",
-    #                                 "normalizedSpct":"0",
-    #                                 "normalizedThr":"",
-    #                                 "normalizedTr":"0",
-    #                                 "normalizedTrBase":"0",
-    #                                 "normalizedTtl":"0",
-    #                                 "repIntvEnd":"2018-05-30T12:49:42.256-07:00",
-    #                                 "repIntvStart":"2018-05-30T12:45:02.226-07:00",
-    #                                 "rn":"CDeqptcapacityL2Entry5min",
-    #                                 "status":""
-    #                             }
-    #                         }
-    #                     },{
-    #                         "eqptcapacityVlanUsage5min":{
-    #                             "attributes":{
-    #                                 "childAction":"",
-    #                                 "cnt":"28",
-    #                                 "lastCollOffset":"280",
-    #                                 "modTs":"never",
-    #                                 "repIntvEnd":"2018-05-30T12:49:45.316-07:00",
-    #                                 "repIntvStart":"2018-05-30T12:45:05.287-07:00",
-    #                                 "rn":"CDeqptcapacityVlanUsage5min",
-    #                                 "status":"",
-    #                                 "totalAvg":"0",
-    #                                 "totalBase":"0",
-    #                                 "totalCapAvg":"0",
-    #                                 "totalCapBase":"0",
-    #                                 "totalCapCum":"0",
-    #                                 "totalCapLast":"0",
-    #                                 "totalCapMax":"0",
-    #                                 "totalCapMin":"0",
-    #                                 "totalCapPer":"0",
-    #                                 "totalCapRate":"0.000000",
-    #                                 "totalCapSpct":"0",
-    #                                 "totalCapThr":"",
-    #                                 "totalCapTr":"0",
-    #                                 "totalCapTrBase":"0",
-    #                                 "totalCum":"0",
-    #                                 "totalLast":"0",
-    #                                 "totalMax":"0",
-    #                                 "totalMin":"0",
-    #                                 "totalPer":"0",
-    #                                 "totalRate":"0.000000",
-    #                                 "totalSpct":"0",
-    #                                 "totalThr":"",
-    #                                 "totalTr":"0",
-    #                                 "totalTrBase":"0"
-    #                             }
-    #                         }
-    #                     }
-    #                 ]
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsage5min',
     # cb5f39f666fdef06a4438813d0814611 - Api.get_eqpt_capacity
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityVlanUsage5min',
@@ -1196,24 +620,6 @@ FIXTURE_LIST = [
     '_api_class_eqptcapacityEntity_json_query_target_self_rsp_subtree_include_stats_rsp_subtree_class_eqptcapacityL3TotalUsageCap5min',
     # 0d6ca781810665156211b355129ba2f1 - Api.get_eqpt_capacity
 
-    # {
-    #     "totalCount":"1",
-    #     "imdata":[
-    #         {
-    #             "fabricPod":{
-    #                 "attributes":{
-    #                     "childAction":"",
-    #                     "dn":"topology/pod-1",
-    #                     "id":"1",
-    #                     "lcOwn":"local",
-    #                     "modTs":"2016-07-20T11:27:59.187-07:00",
-    #                     "monPolDn":"uni/fabric/monfab-default",
-    #                     "status":""
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_topology_json_query_target_subtree_target_subtree_class_fabricPod',
     # 643d217904f09445fbc9f7b43cd131f0 - Api.get_fabric_pods
 
@@ -1224,103 +630,12 @@ FIXTURE_LIST = [
     '_api_node_mo_uni_tn_DataDog_json_rsp_subtree_include_event_logs_no_scoped_subtree_order_by_eventRecord_created_desc_page_0_page_size_15',
     # d0260e4832537b43b1acb38bcfa58063 - Api.get_tenant_events
 
-    # {
-    #     "totalCount":"3",
-    #     "imdata":[
-    #         {
-    #             "fvAp":{
-    #                 "attributes":{
-    #                     "annotation":"",
-    #                     "childAction":"",
-    #                     "descr":"",
-    #                     "dn":"uni/tn-DataDog/ap-DtDg-AP1-EcommerceApp",
-    #                     "extMngdBy":"",
-    #                     "lcOwn":"local",
-    #                     "modTs":"2018-04-19T16:02:38.832-07:00",
-    #                     "monPolDn":"uni/tn-common/monepg-default",
-    #                     "name":"DtDg-AP1-EcommerceApp",
-    #                     "nameAlias":"",
-    #                     "ownerKey":"",
-    #                     "ownerTag":"",
-    #                     "prio":"unspecified",
-    #                     "status":"",
-    #                     "uid":"15374"
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_uni_tn_DataDog_json_query_target_subtree_target_subtree_class_fvAp',
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
 
-    # {
-    #     "totalCount":"1686",
-    #     "imdata":[
-    #         {
-    #             "fvOverallHealthHist1h":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "cnt":"4",
-    #                     "dn":"uni/tn-DataDog/HDfvOverallHealth1h-139",
-    #                     "healthAvg":"99",
-    #                     "healthMax":"99",
-    #                     "healthMin":"99",
-    #                     "healthSpct":"0",
-    #                     "healthThr":"",
-    #                     "healthTr":"0",
-    #                     "index":"139",
-    #                     "lastCollOffset":"3601",
-    #                     "modTs":"never",
-    #                     "repIntvEnd":"2018-05-24T17:03:38.000-07:00",
-    #                     "repIntvStart":"2018-05-24T16:03:37.000-07:00",
-    #                     "status":""
-    #                 }
-    #             }
-    #         },{
-    #             "l2IngrPktsAgHist1h":{
-    #                 "attributes":{
-    #                     "childAction":"deleteNonPresent",
-    #                     "cnt":"4",
-    #                     "dn":"uni/tn-DataDog/HDl2IngrPktsAg1h-137",
-    #                     "dropCum":"0",
-    #                     "dropPer":"0",
-    #                     "dropRate":"0.000000",
-    #                     "dropSpct":"0",
-    #                     "dropThr":"",
-    #                     "dropTr":"0",
-    #                     "floodCum":"0",
-    #                     "floodPer":"0",
-    #                     "floodRate":"0.000000",
-    #                     "floodSpct":"0",
-    #                     "floodThr":"",
-    #                     "floodTr":"0",
-    #                     "index":"137",
-    #                     "lastCollOffset":"3600",
-    #                     "modTs":"never",
-    #                     "multicastCum":"0",
-    #                     "multicastPer":"0",
-    #                     "multicastRate":"0.000000",
-    #                     "multicastSpct":"0",
-    #                     "multicastThr":"",
-    #                     "multicastTr":"0",
-    #                     "repIntvEnd":"2018-05-24T18:59:58.241-07:00",
-    #                     "repIntvStart":"2018-05-24T17:59:58.209-07:00",
-    #                     "status":"",
-    #                     "unicastCum":"0",
-    #                     "unicastPer":"0",
-    #                     "unicastRate":"0.000000",
-    #                     "unicastSpct":"0",
-    #                     "unicastThr":"",
-    #                     "unicastTr":"0"
-    #                 }
-    #             }
-    #         }
-    #     ]
-    # }
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
     # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
 ]
-
 
 # The map will contain the md5 hash to the fixture
 # name. The file on disk should be named with the
