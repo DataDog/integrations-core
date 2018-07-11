@@ -14,32 +14,32 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 ### Configuration
 
 1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Exchange Server performance data.  
-```yaml
-init_config:
+  ```yaml
+  init_config:
 
-instances:
-  # "." means the current host
-  - host: .
-  #
-  #   The additional metrics is a list of additional counters to collect.  The
-  #   list is formatted as follows:
-  #   ['<counterset name>', <counter instance name>, '<counter name>', <metric name>, <metric type>]
-  #
-  #   <counterset name>  is the name of the PDH Counter Set (the name of the counter)
-  #   <counter instance name> is the specific counter instance to collect, for example
-  #           "Default Web Site".  Specify 'none' For all instances of the counter.
-  #   <counter name> is the individual counter to report
-  #   <metric name> is the name you want to show up in Datadog
-  #   <metric type> is from the standard choices for all agent checks, such as gauge,
-  #       rate, histogram or counter
-  #   
-  #   additional_metrics:
-  #     - - MSExchange Content Filter Agent
-  #       - none
-  #       - Messages that Bypassed Scanning
-  #       - exchange.content_filter.bypassed_messages
-  #       - gauge
-```
+  instances:
+    # "." means the current host
+    - host: .
+    #
+    #   The additional metrics is a list of additional counters to collect.  The
+    #   list is formatted as follows:
+    #   ['<counterset name>', <counter instance name>, '<counter name>', <metric name>, <metric type>]
+    #
+    #   <counterset name>  is the name of the PDH Counter Set (the name of the counter)
+    #   <counter instance name> is the specific counter instance to collect, for example
+    #           "Default Web Site".  Specify 'none' For all instances of the counter.
+    #   <counter name> is the individual counter to report
+    #   <metric name> is the name you want to show up in Datadog
+    #   <metric type> is from the standard choices for all agent checks, such as gauge,
+    #       rate, histogram or counter
+    #   
+    #   additional_metrics:
+    #     - - MSExchange Content Filter Agent
+    #       - none
+    #       - Messages that Bypassed Scanning
+    #       - exchange.content_filter.bypassed_messages
+    #       - gauge
+  ```
 
 2. [Restart the Agent][5]
 
