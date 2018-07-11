@@ -10,7 +10,6 @@ __path__ = __import__('pkgutil').extend_path(__path__, __name__)
 """
 
 TEMPLATE_ABOUT = """\
-
 __version__ = '0.0.1'
 """
 

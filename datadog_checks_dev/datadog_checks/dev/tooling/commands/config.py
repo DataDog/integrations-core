@@ -82,10 +82,10 @@ def set_value(ctx, key, value):
     you will be prompted, with the input hidden if it is sensitive.
 
     \b
-    $ ddev config set github.user ofek
+    $ ddev config set github.user foo
     New setting:
     [github]
-    user = "ofek"
+    user = "foo"
     """
     scrubbing = False
     if value is None:

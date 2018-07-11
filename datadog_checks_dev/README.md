@@ -138,11 +138,11 @@ Commands:
 This config file looks like this:
 
 ```toml
-core = "C:\\Users\\Ofek\\Desktop\\code\\integrations-core"
-extras = "C:\\Users\\Ofek\\Desktop\\code\\integrations-extras"
+core = "~/dd/integrations-core"
+extras = "~/dd/integrations-extras"
 
 [github]
-user = "ofek"
+user = "user"
 token = "..."
 
 [pypi]
@@ -183,10 +183,10 @@ Usage: ddev config set [OPTIONS] KEY [VALUE]
   Assigns values to config file entries. If the value is omitted, you will
   be prompted, with the input hidden if it is sensitive.
 
-  $ ddev config set github.user ofek
+  $ ddev config set github.user foo
   New setting:
   [github]
-  user = "ofek"
+  user = "foo"
 
 Options:
   -h, --help  Show this message and exit.
