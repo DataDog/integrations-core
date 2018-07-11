@@ -130,7 +130,7 @@ class SQLServer(AgentCheck):
             self.connector = 'adodbapi'
 
         self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
-        if not self.adoprovider.upper() in self.valid_adoproviders:
+        if self.adoprovider.upper() not in self.valid_adoproviders:
             self.log.error("Invalid ADODB provider string %s, defaulting to %s" % (self.adoprovider, self.default_adoprovider))
             self.adoprovider = self.default_adoprovider
 
