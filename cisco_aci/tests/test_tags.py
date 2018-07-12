@@ -151,38 +151,14 @@ def test_epg_meta_tags_map():
     # ip
     assert tags._epg_meta_tags_map({"attributes": {"ip": ""}}) == {}
     assert tags._epg_meta_tags_map({"attributes": {"ip": "aaa"}}) == {"ip": "aaa"}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"ip": 1234}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"ip": []}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"ip": ["aaa"]}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"ip": {}}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"ip": {"aaa": "aaa"}}}) == {}
 
     # mac
     assert tags._epg_meta_tags_map({"attributes": {"mac": ""}}) == {}
     assert tags._epg_meta_tags_map({"attributes": {"mac": "aaa"}}) == {"mac": "aaa"}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"mac": 1234}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"mac": []}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"mac": ["aaa"]}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"mac": {}}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"mac": {"aaa": "aaa"}}}) == {}
 
     # encap
     assert tags._epg_meta_tags_map({"attributes": {"encap": ""}}) == {}
     assert tags._epg_meta_tags_map({"attributes": {"encap": "aaa"}}) == {"encap": "aaa"}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"encap": 1234}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"encap": []}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"encap": ["aaa"]}}) == {}
-    # assert tags._epg_meta_tags_map({"attributes": {"encap": {}}}) == {}
-    # with pytest.raises(TypeError):
-    #     tags._epg_meta_tags_map({"attributes": {"encap": {"aaa": "aaa"}}}) == {}
 
     # other
     assert tags._epg_meta_tags_map({"attributes": {"other": ""}}) == {}
