@@ -9,7 +9,7 @@ import socket
 from StringIO import StringIO
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"

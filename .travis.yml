@@ -169,6 +169,8 @@ jobs:
     - stage: test
       env: CHECK=ssh_check
     - stage: test
+      env: CHECK=statsd
+    - stage: test
       env: CHECK=squid
     - stage: test
       env: CHECK=system_core
