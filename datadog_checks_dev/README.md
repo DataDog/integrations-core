@@ -25,7 +25,6 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
-    + [Create](#create)
     + [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
@@ -215,19 +214,6 @@ Usage: ddev config update [OPTIONS]
 
 Options:
   -h, --help  Show this message and exit.
-```
-
-#### Create
-
-```console
-$ ddev create -h
-Usage: ddev create [OPTIONS] CHECK_NAME
-
-  Create a new check.
-
-Options:
-  -n, --dry-run
-  -h, --help     Show this message and exit.
 ```
 
 #### Dep
