@@ -1669,3 +1669,22 @@ def test_set_prometheus_timeout():
     }
     check2.set_prometheus_timeout(instance_timeout_set)
     assert check2.prometheus_timeout == 3
+
+def test_text_filter_input():
+    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check._text_filter_blacklist = ["string1", "string2"]
+
+    lines_in = [
+        "line with string3",
+        "line with string1",
+        "line with string2",
+        "line with string1 and string2",
+        "line with string"
+    ]
+    expected_out = [
+        "line with string3",
+        "line with string"
+    ]
+
+    filtered = [x for x in check._text_filter_input(lines_in)]
+    assert filtered == expected_out
