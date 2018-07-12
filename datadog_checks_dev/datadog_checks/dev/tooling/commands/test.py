@@ -81,7 +81,7 @@ def test(checks, bench, every):
         # get the integrations associated with changed files
         changed_checks = {line.split('/')[0] for line in files_requiring_tests}
 
-        checks = sorted(set(checks) & changed_checks)
+        checks = sorted(changed_checks & get_testable_checks())
     else:
         checks = sorted(set(checks) & get_testable_checks())
 
