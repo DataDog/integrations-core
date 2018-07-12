@@ -43,7 +43,7 @@ install:
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
   - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv)
-  - ps: choco install docker-compose
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" uninstall -y docker-py)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .\datadog_checks_dev[cli])
   - ddev config set core .
   - cd datadog_checks_base
