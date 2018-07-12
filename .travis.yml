@@ -24,8 +24,8 @@ stages:
     if: (branch = master) AND (type != pull_request)
 
 script:
-  - travis_retry inv test --targets=${CHECK}
-  - inv test --targets=${CHECK} --bench || true
+  - travis_retry ddev test ${CHECK}
+  - ddev test ${CHECK} --bench || true
 
 # Conditional jobs are currently buggy and verbose.
 #
@@ -39,17 +39,17 @@ jobs:
   include:
     - stage: test_changed
       script:
-       - inv dep-check
-       - inv manifest --include-extras
-       - inv test --changed-only
-       - inv test --changed-only --bench || true
+       - ddev dep verify
+       - ddev manifest verify --include-extras
+       - ddev test
+       - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base
       script:
-        - inv dep-check
-        - inv manifest --include-extras
-        - travis_retry inv test --targets=${CHECK}
-        - inv test --targets=${CHECK} --bench || true
+        - ddev dep verify
+        - ddev manifest verify --include-extras
+        - travis_retry ddev test ${CHECK}
+        - ddev test ${CHECK} --bench || true
     - stage: test
       env: CHECK=active_directory
     - stage: test
@@ -187,7 +187,8 @@ before_install:
   - .travis/prepare.sh
 install:
   - pip install -U pip setuptools
-  - pip install -r requirements-dev.txt
+  - pip install ./datadog_checks_dev[cli]
+  - ddev config set core .
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:
