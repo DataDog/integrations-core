@@ -1,5 +1,5 @@
 version: '{branch}.{build}'
-shallow_clone: true
+clone_depth: 3
 environment:
   TRAVIS_BUILD_DIR: c:\projects\integrations-core
   INTEGRATIONS_DIR: c:\projects\integrations-core\embedded
@@ -15,7 +15,9 @@ environment:
   PYTHON_ARCH: 64
   PYWIN32_URL: https://downloads.sourceforge.net/project/pywin32/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe
   PYWIN32_INSTALL_DIR: pywin32-219-py2.7-win-amd64.egg
+  TESTABLE_PYTEST_TARGETS: datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service wmi_check
 init:
+  # Include Python in PATH and use 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 cache:
   - C:\projects\integrations-core\.cache
@@ -27,43 +29,60 @@ services:
   - mssql2012sp1
   # - mssql2014 # FIXME: re-enable when we can launch multiple mssql instances at once
 install:
-  # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
-  - set PATH=C:\Ruby22-x64\bin;%PATH%
-  - bundle install
-  - bundle package
-  - git clone -b %DD_AGENT_BRANCH% https://github.com/DataDog/dd-agent.git c:\projects\dd-agent
-  - if not exist %PIP_CACHE% mkdir %PIP_CACHE%
+  - ps: |
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        # This is a pull request build, test only on changed integrations
+
+        # Get the list of targets
+        $changed_testable_files = (& git diff --name-only master...) | Select-String -Pattern "\.(py|ini|in|txt)$"
+        $changed_integrations = $changed_testable_files | % { $_.Line.Split('/')[0] } | select -unique
+        $pytest_targets = @($changed_integrations | ? { $env:TESTABLE_PYTEST_TARGETS.Split(' ') -contains $_ })
+
+        # We need to join all the targets into a single string so the invoke task can run tests on all of the checks
+        $env:PYTEST_TARGETS=$pytest_targets -join ','
+
+        # Set the env var that determines whether or not to set up the test environment
+        If ($pytest_targets.Count -ne 0) {
+          $targets=($pytest_targets | Sort-Object) -join ", "
+          Write-Host "Running tests on $targets." -f green
+        } else {
+          Write-Host "No need to run tests." -f green
+          Exit-AppveyorBuild
+        }
+      } else {
+        # This is a master build, test on everything
+        $env:PYTEST_TARGETS=$env:TESTABLE_PYTEST_TARGETS.Replace(" ", ",")
+        Write-Host "This is a master build, running tests on all targets." -f green
+      }
+  - cmd: git clone -b %DD_AGENT_BRANCH% https://github.com/DataDog/dd-agent.git c:\projects\dd-agent
+  - cmd: if not exist %PIP_CACHE% mkdir %PIP_CACHE%
   - cmd: appveyor-retry powershell If (-Not (Test-Path $env:PYWIN_PATH)) {(new-object net.webclient).DownloadFile("$env:PYWIN32_URL", "$env:PYWIN_PATH")}
   - "%PYTHON%/Scripts/easy_install.exe %PYWIN_PATH%"
-  - ps: mkdir -p $(python -m site --user-site)
-  - ps: echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
-  - ps: (& "$env:PYTHON/python.exe" -m pip install --upgrade pip)
-  - ps: '& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt'
-  # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
-  - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
-  - ps: rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install tox)
-  - ps: choco install docker-compose
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install invoke)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install pip-tools)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install packaging)
-  - cd datadog_checks_base
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd sqlserver
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd windows_service
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
-  - cd wmi_check
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
+  - ps: |
+      mkdir -p $(python -m site --user-site)
+
+      echo "C:\projects\dd-agent" | out-file "$(python -m site --user-site)/datadog-agent.pth" -encoding ASCII
+  - ps: |
+
+      # Upgrade pip and install Agent requirements
+
+      (& "$env:PYTHON/python.exe" -m pip install --upgrade pip) 
+      (& "$env:PYTHON/Scripts/pip.exe" install -r c:\projects\dd-agent\requirements.txt)
+
+      # Remove the adodbapi module shipped with pywin32: it conflicts with the pip-installed adodbapi
+      rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.py
+      rm $env:PYTHON/lib/site-packages/$env:PYWIN32_INSTALL_DIR/adodbapi/__init__.pyc
+
+      # Install test dependencies
+      (& "$env:PYTHON/Scripts/pip.exe" install -U virtualenv setuptools)
+      choco install docker-compose
+      (& "$env:PYTHON/Scripts/pip.exe" install invoke pip-tools packaging tox twine cookiecutter colorama requests)
+  - ps: |
+
+      # Get the base requirements
+      cd datadog_checks_base
+      (& "$env:PYTHON/Scripts/pip.exe" install .)
+      cd ..
 build: off
 test_script:
-  - bundle exec rake ci:run[sqlserver]
-  - bundle exec rake ci:run[windows_service]
-  - bundle exec rake ci:run[wmi_check]
-  - inv test --targets="datadog_checks_base,datadog_checks_tests_helper,aspdotnet,active_directory,dotnetclr,exchange_server,iis,pdh_check"
+  - cmd: inv test --targets="%PYTEST_TARGETS%"
