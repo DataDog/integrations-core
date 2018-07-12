@@ -89,6 +89,8 @@ jobs:
     - stage: test
       env: CHECK=envoy PYTHON3=true
     - stage: test
+      env: CHECK=etcd PYTHON3=true
+    - stage: test
       env: CHECK=exchange_server
     - stage: test
       env: CHECK=gitlab
