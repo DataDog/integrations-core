@@ -150,7 +150,7 @@ class PrometheusScraperMixin(object):
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
-        self.text_filter_blacklist = []
+        self._text_filter_blacklist = []
 
     def parse_metric_family(self, response):
         """
@@ -191,8 +191,8 @@ class PrometheusScraperMixin(object):
 
         elif 'text/plain' in response.headers['Content-Type']:
             input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)
-            if self.text_filter_blacklist:
-                input_gen = self.text_filter_input(input_gen)
+            if self._text_filter_blacklist:
+                input_gen = self._text_filter_input(input_gen)
 
             messages = defaultdict(list)  # map with the name of the element (before the labels)
             # and the list of occurrences with labels and values
@@ -223,7 +223,7 @@ class PrometheusScraperMixin(object):
             raise UnknownFormatError('Unsupported content-type provided: {}'.format(
                 response.headers['Content-Type']))
 
-    def text_filter_input(self, input_gen):
+    def _text_filter_input(self, input_gen):
         """
         Filters out the text input line by line to avoid parsing and processing
         metrics we know we don't want to process. This only works on `text/plain`
@@ -232,12 +232,11 @@ class PrometheusScraperMixin(object):
         :output: generator of filtered lines
         """
         for line in input_gen:
-            filtered = False
-            for item in self.text_filter_blacklist:
+            for item in self._text_filter_blacklist:
                 if item in line:
-                    filtered = True
                     break
-            if not filtered:
+            else:
+                # No blacklist matches, passing the line through
                 yield line
 
     def remove_metric_prefix(self, metric):

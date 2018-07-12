@@ -561,7 +561,7 @@ def test_filter_sample_on_gauge(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    check.text_filter_blacklist = ["deployment=\"kube-dns\""]
+    check._text_filter_blacklist = ["deployment=\"kube-dns\""]
     metrics = [k for k in check.parse_metric_family(response)]
 
     assert 1 == len(metrics)

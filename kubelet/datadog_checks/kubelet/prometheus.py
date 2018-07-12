@@ -53,7 +53,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         ]
 
         # Filter out system slices to reduce CPU and memory usage of the check
-        self.text_filter_blacklist = ["container_name=\"\""]
+        self._text_filter_blacklist = ["container_name=\"\""]
 
         # these are filled by container_<metric-name>_usage_<metric-unit>
         # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
