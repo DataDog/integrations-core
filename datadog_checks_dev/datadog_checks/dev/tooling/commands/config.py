@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import click
 import toml
 
@@ -94,6 +96,9 @@ def set_value(ctx, key, value):
             'Value for `{}`'.format(key),
             hide_input=scrubbing
         )
+
+    if key in ('core', 'extras'):
+        value = os.path.abspath(value)
 
     user_config = new_config = ctx.obj
     user_config.pop('repo_choice', None)
