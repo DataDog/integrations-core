@@ -528,6 +528,47 @@ def test_submit_rate(mocked_prometheus_check):
     check._submit('custom.rate', _rate)
     check.rate.assert_called_with('prometheus.custom.rate', 42, [], hostname=None)
 
+
+def test_filter_sample_on_gauge(p_check):
+    """
+    Add a filter blacklist on the check matching one line and make sure
+    only the two other lines are parsed and sent downstream.
+    """
+    text_data = (
+        '# HELP kube_deployment_status_replicas The number of replicas per deployment.\n'
+        '# TYPE kube_deployment_status_replicas gauge\n'
+        'kube_deployment_status_replicas{deployment="event-exporter-v0.1.7"} 1\n'
+        'kube_deployment_status_replicas{deployment="heapster-v1.4.3"} 1\n'
+        'kube_deployment_status_replicas{deployment="kube-dns"} 2\n')
+
+    expected_metric = metrics_pb2.MetricFamily()
+    expected_metric.help = "The number of replicas per deployment."
+    expected_metric.name = "kube_deployment_status_replicas"
+    expected_metric.type = 1
+
+    gauge1 = expected_metric.metric.add()
+    gauge1.gauge.value = 1
+    label1 = gauge1.label.add()
+    label1.name = "deployment"
+    label1.value = "event-exporter-v0.1.7"
+
+    gauge2 = expected_metric.metric.add()
+    gauge2.gauge.value = 1
+    label2 = gauge2.label.add()
+    label2.name = "deployment"
+    label2.value = "heapster-v1.4.3"
+
+    # Iter on the generator to get all metrics
+    response = MockResponse(text_data, 'text/plain; version=0.0.4')
+    check = p_check
+    check.text_filter_blacklist = ["deployment=\"kube-dns\""]
+    metrics = [k for k in check.parse_metric_family(response)]
+
+    assert 1 == len(metrics)
+    current_metric = metrics[0]
+    assert expected_metric == current_metric
+
+
 def test_parse_one_gauge(p_check):
     """
     name: "etcd_server_has_leader"
