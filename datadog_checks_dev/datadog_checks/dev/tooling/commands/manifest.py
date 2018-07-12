@@ -7,17 +7,18 @@ import uuid
 from collections import OrderedDict
 
 import click
-from six import text_type
+from six import string_types
 
 from .utils import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 from ..constants import get_root
+from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
 
 def parse_version_parts(version):
     return (
         [int(v) for v in version.split('.') if v.isdigit()]
-        if isinstance(version, text_type) else []
+        if isinstance(version, string_types) else []
     )
 
 
@@ -51,7 +52,7 @@ def verify(fix, include_extras):
 
             try:
                 decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-            except json.JSONDecodeError:
+            except JSONDecodeError:
                 failed += 1
                 display_queue.append((echo_failure, '  invalid json: {}'.format(manifest_file)))
 
@@ -75,7 +76,7 @@ def verify(fix, include_extras):
                     failed -= 1
                 else:
                     display_queue.append((echo_failure, output))
-            elif not guid or not isinstance(guid, text_type):
+            elif not guid or not isinstance(guid, string_types):
                 failed += 1
                 output = '  required non-null string: guid'
                 if fix:
@@ -221,7 +222,7 @@ def verify(fix, include_extras):
             # name
             correct_name = check_name
             name = decoded.get('name')
-            if not isinstance(name, text_type) or name.lower() != correct_name.lower():
+            if not isinstance(name, string_types) or name.lower() != correct_name.lower():
                 failed += 1
                 output = '  incorrect `name`: {}'.format(name)
 
@@ -237,7 +238,7 @@ def verify(fix, include_extras):
 
             # short_description
             short_description = decoded.get('short_description')
-            if not short_description or not isinstance(short_description, text_type):
+            if not short_description or not isinstance(short_description, string_types):
                 failed += 1
                 display_queue.append((echo_failure, '  required non-null string: short_description'))
 
@@ -275,7 +276,7 @@ def verify(fix, include_extras):
 
                 # public_title
                 public_title = decoded.get('public_title')
-                if not public_title or not isinstance(public_title, text_type):
+                if not public_title or not isinstance(public_title, string_types):
                     failed += 1
                     display_queue.append((echo_failure, '  required non-null string: public_title'))
                 else:
@@ -302,7 +303,7 @@ def verify(fix, include_extras):
                 # type
                 correct_integration_type = 'check'
                 integration_type = decoded.get('type')
-                if not integration_type or not isinstance(integration_type, text_type):
+                if not integration_type or not isinstance(integration_type, string_types):
                     failed += 1
                     output = '  required non-null string: type'
 
@@ -378,7 +379,7 @@ def verify(fix, include_extras):
 
                 # doc_link
                 doc_link = decoded.get('doc_link')
-                if not doc_link or not isinstance(doc_link, text_type):
+                if not doc_link or not isinstance(doc_link, string_types):
                     failed += 1
                     display_queue.append((echo_failure, '  required non-null string: doc_link'))
                 elif not doc_link.startswith('https://docs.datadoghq.com/integrations/'):
@@ -416,7 +417,7 @@ def set_value(key, value):
         if file_exists(manifest_file):
             try:
                 decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-            except json.JSONDecodeError:
+            except JSONDecodeError:
                 echo_failure('Invalid json: {}'.format(manifest_file))
                 continue
 

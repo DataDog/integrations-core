@@ -11,9 +11,10 @@ from io import open
 from subprocess import Popen
 from tempfile import TemporaryFile, mkdtemp
 
-from six import PY3, text_type
+from six import PY3, string_types, text_type
 from six.moves.urllib.request import urlopen
 
+from .compat import FileNotFoundError, PermissionError
 from .errors import SubprocessError
 
 __platform = platform.system()
@@ -64,7 +65,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
     if shell == 'detect':
         shell = NEED_SHELL
 
-    if isinstance(command, str) and not ON_WINDOWS:
+    if isinstance(command, string_types) and not ON_WINDOWS:
         command = shlex.split(command)
 
     if capture:

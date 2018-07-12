@@ -8,8 +8,9 @@ from copy import deepcopy
 import toml
 from appdirs import user_data_dir
 from atomicwrites import atomic_write
-from six import text_type
+from six import string_types
 
+from ..compat import FileNotFoundError
 from ..utils import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', '')
@@ -93,7 +94,7 @@ def scrub_secrets(config):
             if path in branch:
                 if not paths:
                     old_value = branch[path]
-                    if isinstance(old_value, text_type):
+                    if isinstance(old_value, string_types):
                         branch[path] = '*' * len(old_value)
                 else:
                     branch = branch[path]

@@ -9,6 +9,7 @@ from .commands import ALL_COMMANDS
 from .commands.utils import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
 from .constants import set_root
+from ..compat import PermissionError
 from ..utils import dir_exists
 
 
