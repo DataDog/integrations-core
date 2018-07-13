@@ -7,6 +7,8 @@ Get metrics from agent_metrics service in real time to:
 * Visualize and monitor agent_metrics states
 * Be notified about agent_metrics failovers and events.
 
+**NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
+
 ## Setup
 ### Installation
 
