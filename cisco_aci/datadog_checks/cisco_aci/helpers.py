@@ -72,7 +72,7 @@ def get_epg_from_dn(dn):
 def get_ip_from_dn(dn):
     """
     This parses the ip from the dn designator. They look like this:
-    uni/tn-AppDynamics/ap-AppD-AP1-EcommerceApp/epg-AppD-Inv/cep-00:50:56:9D:91:B5/ip-[10.10.10.17]
+    uni/tn-DataDog/ap-DtDg-AP1-EcommerceApp/epg-DtDg-Ecomm/cep-00:50:56:9D:91:B5/ip-[10.10.10.17]
     """
     return _get_value_from_dn(IP_REGEX, dn)
 

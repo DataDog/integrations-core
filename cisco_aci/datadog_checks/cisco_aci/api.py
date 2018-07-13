@@ -50,13 +50,13 @@ class Api:
         self.timeout = timeout
         self.verify = verify
         self.sessions = sessions
+        if sessions is None:
+            self.sessions = []
         if log:
             self.log = log
         else:
             import logging
             self.log = logging.getLogger('cisco_api')
-        if sessions is None:
-            self.sessions = []
         # This is used in testing
         self._refresh_sessions = True
 

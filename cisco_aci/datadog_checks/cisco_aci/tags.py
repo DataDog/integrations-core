@@ -48,10 +48,9 @@ class CiscoTags:
         attrs = edpt.get('attributes', {})
         if type(attrs) is not dict:
             return tags_map
-        epg_name_tmp = attrs.get('name')
+        epg_name = attrs.get('name')
         dn = attrs.get('dn')
-        if epg_name_tmp:
-            epg_name = epg_name_tmp
+        if epg_name:
             tags_map["endpoint_group"] = "" + epg_name  # type enforcement
         if dn:
             tenant = re.search(TN_REGEX, dn)
