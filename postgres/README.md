@@ -168,12 +168,14 @@ custom_metrics:
     relation: false
 ```
 
-The example above will run two queries in PostgreSQL:
+The example above runs two queries in PostgreSQL:
 
 * `SELECT relname, SUM(idx_scan) as idx_scan_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_scan_count_by_table`.
 * `SELECT relname, SUM(idx_tup_read) as idx_read_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_read_count_by_table`.
 
-Both metrics will use the tags `table` and `schema` with values from the results in the `relname` and `schemaname` columns respectively. e.g. `table: <relname>`
+Both metrics use the tags `table` and `schema` with values from the results in the `relname` and `schemaname` columns respectively. e.g. `table: <relname>`
+
+N.B.: **If you're using Agent version 5**, `SUM()` needs to be mapped as `int` using `::bigint`. If not the metrics won't be collected. `SUM()` retrieves a numeric type which is mapped as Decimal type by Python so it has to be mapped as an `int` to be collected.
 
 ##### Example 2
 
