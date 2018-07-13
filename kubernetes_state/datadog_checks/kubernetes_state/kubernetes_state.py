@@ -403,6 +403,8 @@ class KubernetesState(PrometheusCheck):
                     tags.append(self._format_tag("kube_container_name", label.value))
                 elif label.name == "namespace":
                     tags.append(self._format_tag(label.name, label.value))
+                elif label.name == "pod":
+                    tags.append(self._format_tag(label.name, label.value))
             if not skip_metric:
                 self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
 
@@ -420,6 +422,8 @@ class KubernetesState(PrometheusCheck):
                 elif label.name == "container":
                     tags.append(self._format_tag("kube_container_name", label.value))
                 elif label.name == "namespace":
+                    tags.append(self._format_tag(label.name, label.value))
+                elif label.name == "pod":
                     tags.append(self._format_tag(label.name, label.value))
             if not skip_metric:
                 self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
