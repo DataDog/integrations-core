@@ -2,8 +2,12 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "exchange_server",
+  "display_name": "Exchange Server",
   "short_description": "Collect and graph Microsoft exchange server metrics",
   "support": "core",
+  "creates_events": false,
+  "metric_to_check": "exchange.processor.cpu_user",
+  "metric_prefix": "exchange.",
   "supported_os": [
     "windows"
   ],
