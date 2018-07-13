@@ -16,6 +16,7 @@ SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"
 ENDER = re.compile("^(END|health: up|health: down)\n$", re.MULTILINE)
 BAD_ENDER = re.compile("^ERROR\n$", re.MULTILINE)
 
+
 class StatsCheck(AgentCheck):
     def check(self, instance):
         host = instance.get("host", "localhost")

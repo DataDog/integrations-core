@@ -6,9 +6,11 @@ import os
 import sys
 import time
 import pytest
+import requests
 import subprocess
 from datadog_checks.utils.common import get_docker_hostname
-from datadog_checks.statsd import StatsCheck
+from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
+
 
 CHECK_NAME = 'statsd'
 HOST = get_docker_hostname()
@@ -29,11 +31,6 @@ METRICS = [
     'statsd.timers.count'
 ]
 
-SERVICE_CHECKS = [
-    'statsd.is_up',
-    'statsd.can_connect'
-]
-
 
 @pytest.fixture
 def get_instance():
@@ -41,13 +38,6 @@ def get_instance():
         'host': HOST,
         'port': PORT,
     }
-
-
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
 
 
 @pytest.fixture(scope="session")
@@ -62,6 +52,7 @@ def spin_up_statsd():
         try:
             res = requests.get(URL)
             res.raise_for_status()
+            break
         except Exception:
             time.sleep(1)
     yield
@@ -71,7 +62,11 @@ def spin_up_statsd():
 def test_simple_run(aggregator, spin_up_statsd, get_instance):
     stats_check = StatsCheck(CHECK_NAME, {}, {})
     stats_check.check(get_instance)
+    expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
+    print aggregator._metrics
     for mname in METRICS:
-        aggregator.assert_metric(mname)
-    for sc in SERVICE_CHECKS:
-        aggregator.assert_service_check(sc)
+        aggregator.assert_metric(mname, count=1, tags=expected_tags)
+
+    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=stats_check.OK, count=1, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=stats_check.OK, count=1, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
