@@ -25,7 +25,7 @@ istio.mixer.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation d
 istio.mixer.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.mixer.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.mixer.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
-istio.mixer.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated, even if freed.,0,istio,
+istio.mixer.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,istio,
 istio.mixer.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
 istio.mixer.go.memstats.frees_total,gauge,,,,Total number of frees.,0,istio,
 istio.mixer.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
