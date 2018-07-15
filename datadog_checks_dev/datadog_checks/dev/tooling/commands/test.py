@@ -8,7 +8,8 @@ import click
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 from ..constants import TESTABLE_FILE_EXTENSIONS, get_root
 from ..utils import get_testable_checks
-from ...utils import chdir, dir_exists, file_exists, read_file, run_command
+from ...subprocess import run_command
+from ...utils import chdir, dir_exists, file_exists, read_file
 
 
 def testable_files(files):
@@ -91,11 +92,11 @@ def test(checks, bench, every):
 
     for check in checks:
         # check requirements.in and requirements.txt are in sync
-        if not bench:
+        if not bench and check != 'datadog_checks_dev':
             echo_waiting('Verifying requirements are in sync for `{}`...'.format(check))
             check_requirements(check)
+            click.echo()
 
-        click.echo()
         with chdir(os.path.join(root, check)):
             if every:
                 wait_text = 'Running tests for `{}`'.format(check)
