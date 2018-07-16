@@ -6,13 +6,8 @@ import re
 import time
 from collections import defaultdict, Counter
 
-try:
-    # Agent5 compatibility layer
-    from datadog_checks.errors import CheckException
-    from datadog_checks.checks.prometheus import PrometheusCheck
-except ImportError:
-    from checks import CheckException
-    from checks.prometheus_check import PrometheusCheck
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.prometheus import PrometheusCheck
 
 
 METRIC_TYPES = ['counter', 'gauge']
