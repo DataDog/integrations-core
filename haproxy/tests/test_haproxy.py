@@ -143,7 +143,7 @@ def test_unixsocket_config(aggregator, haproxy_container):
     config['url'] = unixsocket_url
     haproxy_check.check(config)
 
-    shared_tag = ["instance_url:{0}".format(common.UNIXSOCKET_URL)]
+    shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag)
