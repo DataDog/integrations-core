@@ -29,12 +29,9 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
-
-def get_unixsocket_config(url):
-    return{
-        'url': url,
-        'collect_aggregates_only': False,
-    }
+CONFIG_UNIXSOCKET = {
+    'collect_aggregates_only': False,
+}
 
 
 CHECK_CONFIG = {
