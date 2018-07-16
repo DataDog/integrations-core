@@ -62,6 +62,7 @@ def wait_for_haproxy():
 @pytest.fixture(scope="session")
 def haproxy_container():
     try:
+        env = os.environ
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
         os.chmod(host_socket_dir, 0777)
@@ -76,7 +77,6 @@ def haproxy_container():
             chown_args += ["chown", user, host_socket_path]
             subprocess.check_call(chown_args, env=env)
 
-        env = os.environ
         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
         env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
         env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
