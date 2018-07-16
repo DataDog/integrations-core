@@ -138,10 +138,8 @@ def test_open_config(aggregator, haproxy_container):
 @pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
 def test_unixsocket_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
-    config = copy.deepcopy(common.CONFIG_UNIXSOCKET)
     unixsocket_url = 'unix://{0}'.format(haproxy_container)
-    config['url'] = unixsocket_url
-    haproxy_check.check(config)
+    haproxy_check.check(common.get_unixsocket_config(unixsocket_url))
 
     shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 
