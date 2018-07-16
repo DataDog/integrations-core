@@ -8,8 +8,8 @@ import urlparse
 # 3rd party
 import requests
 
-from checks import CheckException
-from checks.prometheus_check import PrometheusCheck
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.prometheus import PrometheusCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.headers import headers
 
