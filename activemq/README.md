@@ -4,6 +4,8 @@
 
 The ActiveMQ check lets you collect metrics for brokers and queues, producers and consumers, and more.
 
+**Note**: If you are running a ActiveMQ version older than 5.8.0, refer to [Agent 5.10.x released sample files][109].
+
 ## Setup
 ### Installation
 
@@ -114,4 +116,5 @@ Need help? Contact [Datadog Support][107].
 [105]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [107]: https://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
+[109]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
