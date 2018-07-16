@@ -8,7 +8,6 @@ import mock
 import tempfile
 import shutil
 import getpass
-from datadog_checks.utils.platform import Platform
 
 import common
 
