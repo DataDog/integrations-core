@@ -10,6 +10,7 @@ from datadog_checks.utils.platform import Platform
 
 pytestmark = pytest.mark.integration
 
+
 @pytest.fixture
 def instance():
     return {

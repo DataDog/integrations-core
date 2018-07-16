@@ -10,7 +10,6 @@ from datadog_checks.openldap import OpenLDAP
 from datadog_checks.dev import docker_run
 from .common import HERE
 
-CONTAINER_NAME = "openldap"
 
 @pytest.fixture
 def check():
@@ -25,7 +24,7 @@ def openldap_server():
 
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-        env_vars={"CONTAINER_NAME": CONTAINER_NAME, "HOST_SOCKET_DIR": host_socket_dir},
+        env_vars={"HOST_SOCKET_DIR": host_socket_dir},
         log_patterns="slapd starting",
     ):
         os.chmod(host_socket_path, 0777)
