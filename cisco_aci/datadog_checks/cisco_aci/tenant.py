@@ -42,49 +42,53 @@ class Tenant:
         for t in tenants:
             try:
                 list_apps = self.api.get_apps(t)
+                if list_apps is None:
+                    break
                 self.log.info("collecting %s apps from %s" % (len(list_apps), t))
                 for app in list_apps:
-                    self.submit_app_data(t, app)
+                    self._submit_app_data(t, app)
                     app_name = app.get('fvAp', {}).get('attributes', {}).get('name')
+                    if not app_name:
+                        break
                     try:
                         list_epgs = self.api.get_epgs(t, app_name)
                         self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
-                        self.submit_epg_data(t, app_name, list_epgs)
+                        self._submit_epg_data(t, app_name, list_epgs)
                     except exceptions.APIConnectionException, exceptions.APIParsingException:
                         pass
             except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
-            self.submit_ten_data(t)
+            self._submit_ten_data(t)
             try:
                 self.collect_events(t)
             except exceptions.APIConnectionException, exceptions.APIParsingException:
                 pass
 
-    def submit_app_data(self, tenant, app):
+    def _submit_app_data(self, tenant, app):
         a = app.get('fvAp', {})
-        attrs = a.get('attributes', {})
-        app_name = attrs.get('name')
+        app_name = a.get('attributes', {}).get('name')
         if not app_name:
             return
         stats = self.api.get_app_stats(tenant, app_name)
-        tags = self.tagger.get_tags(a, 'application')
+        tags = self.tagger.get_application_tags(a)
         self.submit_raw_obj(stats, tags, 'application')
 
-    def submit_epg_data(self, tenant, app, epgs):
+    def _submit_epg_data(self, tenant, app, epgs):
         for epg_data in epgs:
             epg = epg_data.get('fvAEPg', {})
-            attrs = epg.get('attributes', {})
-            epg_name = attrs.get('name')
+            epg_name = epg.get('attributes', {}).get('name')
             if not epg_name:
                 continue
             stats = self.api.get_epg_stats(tenant, app, epg_name)
-            tags = self.tagger.get_tags(epg, 'endpoint_group')
+            tags = self.tagger.get_endpoint_group_tags(epg)
             self.submit_raw_obj(stats, tags, 'endpoint_group')
 
-    def submit_ten_data(self, tenant):
+    def _submit_ten_data(self, tenant):
+        if not tenant:
+            return
         try:
             stats = self.api.get_tenant_stats(tenant)
-            tags = self.tagger.get_tags(tenant, 'tenant')
+            tags = ["tenant:" + tenant]
             self.submit_raw_obj(stats, tags, 'tenant')
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             pass
@@ -96,7 +100,7 @@ class Tenant:
             if '15min' not in name:
                 continue
 
-            attrs = s[name]['attributes']
+            attrs = s.get(name, {}).get("attributes", {})
             if 'index' in attrs:
                 continue
 
