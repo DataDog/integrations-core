@@ -5,9 +5,8 @@ import requests
 import time
 import logging
 import mock
-import getpass
-
-from datadog_checks.utils.platform import Platform
+import tempfile
+import shutil
 
 import common
 
@@ -60,44 +59,27 @@ def wait_for_haproxy():
 
 @pytest.fixture(scope="session")
 def spin_up_haproxy():
-    env = os.environ
-    env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
-    env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
-    env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
-    env['HAPROXY_SOCKET_DIR'] = common.UNIXSOCKET_DIR
-    if Platform.is_linux() and not os.path.exists(common.UNIXSOCKET_DIR):
-        # make the temp directory on linux
-        os.makedirs(common.UNIXSOCKET_DIR)
-    args = [
-        "docker-compose",
-        "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
-    ]
-    subprocess.check_call(args + ["down"], env=env)
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    wait_for_haproxy()
-    # subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
-    # subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
     try:
-        if Platform.is_linux():
-            # on linux this needs access to the socket
-            # it won't work without access
-            chown_args = []
-            user = getpass.getuser()
-            if user != 'root':
-                chown_args += ['sudo']
-            chown_args += [
-                "chown", user, common.UNIXSOCKET_PATH
-            ]
-            subprocess.check_call(chown_args, env=env)
-    except subprocess.CalledProcessError:
-        # it's not always bad if this fails
-        pass
-    time.sleep(20)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
-    if Platform.is_linux():
-        # make the temp directory on linux
-        try:
-            os.removedirs(common.UNIXSOCKET_DIR)
-        except OSError:
-            pass
+        host_socket_dir = os.path.realpath(tempfile.mkdtemp())
+        host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
+        os.chmod(host_socket_dir, 0777)
+
+        env = os.environ
+        env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
+        env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
+        env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
+        env['HAPROXY_SOCKET_DIR'] = host_socket_dir
+
+        args = [
+            "docker-compose",
+            "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
+        ]
+        subprocess.check_call(args + ["down"], env=env)
+        subprocess.check_call(args + ["up", "-d"], env=env)
+        wait_for_haproxy()
+
+        time.sleep(20)
+        yield host_socket_path
+        subprocess.check_call(args + ["down"], env=env)
+    finally:
+        shutil.rmtree(host_socket_dir, ignore_errors=True)

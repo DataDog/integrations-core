@@ -29,12 +29,7 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 
-LOCAL_TMP_DIR = os.path.join(ROOT, "tmp")
-UNIXSOCKET_DIR = os.path.join(LOCAL_TMP_DIR, "haproxy")
-UNIXSOCKET_PATH = os.path.join(UNIXSOCKET_DIR, 'datadog-haproxy-stats.sock')
-UNIXSOCKET_URL = 'unix://{0}'.format(UNIXSOCKET_PATH)
 CONFIG_UNIXSOCKET = {
-    'url': UNIXSOCKET_URL,
     'collect_aggregates_only': False,
 }
 
