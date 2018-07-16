@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from io import open
 from subprocess import Popen
 from tempfile import TemporaryFile, mkdtemp
+from time import sleep
 
 from six import PY3, string_types, text_type
 from six.moves.urllib.request import urlopen
@@ -179,6 +180,42 @@ def basepath(path):
 
 def get_next(obj):
     return next(iter(obj))
+
+
+def wait_for_docker_logs(container_name, max_wait, sentences):
+    args = [
+        'docker',
+        'logs',
+        container_name
+    ]
+    if isinstance(sentences, str):
+        sentences = [sentences]
+
+    for _ in range(max_wait):
+        result = run_command(args, capture=True)
+        if any(s in result.stdout for s in sentences) or any(s in result.stderr for s in sentences):
+            return True, result.stdout, result.stderr
+        sleep(1)
+
+    return False, result.stdout, result.stderr
+
+
+@contextmanager
+def docker_compose(compose_file, service_name=None):
+    args = [
+        "docker-compose",
+        "-f", compose_file,
+    ]
+
+    up_args = args + ["up", "-d"]
+    if service_name:
+        up_args.append(service_name)
+    run_command(up_args)
+
+    try:
+        yield
+    finally:
+        run_command(args + ["down"])
 
 
 @contextmanager
