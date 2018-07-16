@@ -78,7 +78,7 @@ def haproxy_container():
         subprocess.check_call(args + ["down"], env=env)
         subprocess.check_call(args + ["up", "-d"], env=env)
         wait_for_haproxy()
-        os.chown(host_socket_path, os.getuid(), os.getgid())
+        # os.chown(host_socket_path, os.getuid(), os.getgid())
         os.chmod(host_socket_path, 0777)
         # try:
         #     if Platform.is_linux():
