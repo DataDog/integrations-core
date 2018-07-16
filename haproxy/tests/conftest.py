@@ -58,7 +58,7 @@ def wait_for_haproxy():
 
 
 @pytest.fixture(scope="session")
-def spin_up_haproxy():
+def haproxy_container():
     try:
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
