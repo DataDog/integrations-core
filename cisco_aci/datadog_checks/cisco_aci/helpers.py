@@ -40,7 +40,7 @@ def get_pod_from_dn(dn):
 def get_bd_from_dn(dn):
     """
     This parses the bd from the dn designator. They look like this:
-    uni/tn-Corvil/BD-Corvil-BD1
+    uni/tn-DataDog/BD-DataDog-BD1
     """
     return _get_value_from_dn(BD_REGEX, dn)
 
@@ -56,7 +56,7 @@ def get_app_from_dn(dn):
 def get_cep_from_dn(dn):
     """
     This parses the cep from the dn designator. They look like this:
-    uni/tn-Lumos/ap-ipam-QA_36/epg-LoadBalancer/cep-00:50:56:9E:FB:48
+    uni/tn-DataDog/ap-DtDg-AP1-EcommerceApp/epg-DtDg-Ecomm/cep-00:50:56:9E:FB:48
     """
     return _get_value_from_dn(CEP_REGEX, dn)
 
