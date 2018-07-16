@@ -7,6 +7,8 @@ import logging
 import mock
 import tempfile
 import shutil
+import getpass
+from datadog_checks.utils.platform import Platform
 
 import common
 
@@ -63,16 +65,16 @@ def haproxy_container():
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
         os.chmod(host_socket_dir, 0777)
-        os.chown(host_socket_dir, os.getuid(), os.getgid())
-        # if Platform.is_linux():
-        #     # on linux this needs access to the socket
-        #     # it won't work without access
-        #     chown_args = []
-        #     user = getpass.getuser()
-        #     if user != 'root':
-        #         chown_args += ['sudo']
-        #     chown_args += ["chown", user, host_socket_path]
-        #     subprocess.check_call(chown_args, env=env)
+        # os.chown(host_socket_dir, os.getuid(), os.getgid())
+        if Platform.is_linux():
+            # on linux this needs access to the socket
+            # it won't work without access
+            chown_args = []
+            user = getpass.getuser()
+            if user != 'root':
+                chown_args += ['sudo']
+            chown_args += ["chown", user, host_socket_path]
+            subprocess.check_call(chown_args, env=env)
 
         env = os.environ
         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
