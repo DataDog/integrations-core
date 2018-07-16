@@ -59,50 +59,26 @@ def wait_for_haproxy():
     raise Exception("Cannot start up apache")
 
 
-# @pytest.fixture(scope="session")
-# def haproxy_container():
-#     try:
-#         env = os.environ
-#         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
-#         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
-#         os.chmod(host_socket_dir, 0777)
-#         # os.chown(host_socket_dir, os.getuid(), os.getgid())
-#         if Platform.is_linux():
-#             # on linux this needs access to the socket
-#             # it won't work without access
-#             chown_args = []
-#             user = getpass.getuser()
-#             if user != 'root':
-#                 chown_args += ['sudo']
-#             chown_args += ["chown", user, host_socket_path]
-#             subprocess.check_call(chown_args, env=env)
-#
-#         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
-#         env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
-#         env['HAPROXY_CONFIG_OPEN'] = os.path.join(common.HERE, 'compose', 'haproxy-open.cfg')
-#         env['HAPROXY_SOCKET_DIR'] = host_socket_dir
-#
-#         args = [
-#             "docker-compose",
-#             "-f", os.path.join(common.HERE, 'compose', 'haproxy.yaml')
-#         ]
-#         subprocess.check_call(args + ["down"], env=env)
-#         subprocess.check_call(args + ["up", "-d"], env=env)
-#         wait_for_haproxy()
-#
-#         time.sleep(20)
-#         yield host_socket_path
-#         subprocess.check_call(args + ["down"], env=env)
-#     finally:
-#         shutil.rmtree(host_socket_dir, ignore_errors=True)
-
-
 @pytest.fixture(scope="session")
 def haproxy_container():
     try:
         env = os.environ
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
+        os.chmod(host_socket_dir, 0777)
+        # try:
+        #     if Platform.is_linux():
+        #         # on linux this needs access to the socket
+        #         # it won't work without access
+        #         chown_args = []
+        #         user = getpass.getuser()
+        #         if user != 'root':
+        #             chown_args += ['sudo']
+        #         chown_args += ["chown", user, host_socket_path]
+        #         subprocess.check_call(chown_args, env=env)
+        # except subprocess.CalledProcessError:
+        #     # it's not always bad if this fails
+        #     pass
 
         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
         env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
@@ -116,21 +92,7 @@ def haproxy_container():
         subprocess.check_call(args + ["down"], env=env)
         subprocess.check_call(args + ["up", "-d"], env=env)
         wait_for_haproxy()
-        # subprocess.check_call(["ls", "-al", "/tmp/"], env=env)
-        # subprocess.check_call(["ls", "-al", "/tmp/haproxy"], env=env)
-        try:
-            if Platform.is_linux():
-                # on linux this needs access to the socket
-                # it won't work without access
-                chown_args = []
-                user = getpass.getuser()
-                if user != 'root':
-                    chown_args += ['sudo']
-                chown_args += ["chown", user, host_socket_path]
-                subprocess.check_call(chown_args, env=env)
-        except subprocess.CalledProcessError:
-            # it's not always bad if this fails
-            pass
+
         time.sleep(20)
         yield host_socket_path
         subprocess.check_call(args + ["down"], env=env)
