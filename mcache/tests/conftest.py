@@ -55,7 +55,8 @@ def memcached_socket():
     try:
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'memcached.sock')
-        os.chmod(host_socket_dir, 0777)
+        os.chown(host_socket_dir, 0777)
+        os.chown(host_socket_dir, os.getuid(), os.getgid())
 
         env = os.environ
         env['PWD'] = HERE
