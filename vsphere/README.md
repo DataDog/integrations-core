@@ -29,7 +29,7 @@ instances:
 
 [Restart the Agent][3] to start sending vSphere metrics and events to Datadog.
 
-**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the Vsphere check enabled can be set up -no matter what OS it's running on- to point to a Vsphere appliance server. You will have to update your `<VECENTER_HOSTNAME>` accordingly.
+**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. You will have to update your `<VCENTER_HOSTNAME>` accordingly.
 
 #### Configuration Options
 
