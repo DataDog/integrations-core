@@ -61,7 +61,7 @@ install:
   - cd ..
 build: off
 test_script:
+  - ddev test datadog_checks_base datadog_checks_dev datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check
   - bundle exec rake ci:run[sqlserver]
   - bundle exec rake ci:run[windows_service]
   - bundle exec rake ci:run[wmi_check]
-  - ddev test datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check
