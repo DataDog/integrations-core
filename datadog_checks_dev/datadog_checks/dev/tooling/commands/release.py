@@ -25,8 +25,10 @@ from ..release import (
     update_version_module
 )
 from ..utils import get_version_string
+from ...structures import EnvVars
+from ...subprocess import run_command
 from ...utils import (
-    chdir, env_vars, remove_path, run_command, stream_file_lines, write_file, write_file_lines
+    chdir, remove_path, stream_file_lines, write_file, write_file_lines
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
@@ -381,7 +383,7 @@ def upload(ctx, check, dry_run):
     check_dir = os.path.join(get_root(), check)
     remove_path(os.path.join(check_dir, 'dist'))
 
-    with chdir(check_dir), env_vars(auth_env_vars):
+    with chdir(check_dir), EnvVars(auth_env_vars):
         result = run_command('python setup.py bdist_wheel --universal', capture='out')
         if result.code != 0:
             abort(result.stdout, result.code)

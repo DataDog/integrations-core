@@ -5,7 +5,8 @@ import re
 import os
 
 from .constants import get_root
-from ..utils import chdir, run_command
+from ..subprocess import run_command
+from ..utils import chdir
 
 # match something like `(#1234)` and return `1234` in a group
 PR_REG = re.compile(r'\(#(\d+)\)')

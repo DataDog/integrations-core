@@ -8,8 +8,9 @@ from collections import defaultdict
 from six import iteritems
 
 from .constants import get_root
+from ..subprocess import run_command
 from ..utils import (
-    chdir, file_exists, resolve_path, run_command, stream_file_lines, write_file_lines
+    chdir, file_exists, resolve_path, stream_file_lines, write_file_lines
 )
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==(\S+))?')
