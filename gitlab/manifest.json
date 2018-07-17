@@ -12,8 +12,9 @@
   ],
   "public_title": "Datadog-Gitlab Integration",
   "categories": [
-    "web",
-    "network"
+    "collaboration",
+    "source control",
+    "issue tracking"
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
   "is_public": true,
