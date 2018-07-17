@@ -100,11 +100,11 @@ def copy_path(path, d):
 
 def remove_path(path):
     try:
-        shutil.rmtree(path)
+        shutil.rmtree(path, ignore_errors=True)
     except (FileNotFoundError, OSError):
         try:
             os.remove(path)
-        except (FileNotFoundError, PermissionError):
+        except (FileNotFoundError, OSError, PermissionError):
             pass
 
 
