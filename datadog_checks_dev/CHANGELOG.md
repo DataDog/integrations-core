@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.2.1 / 2018-07-17
+
+* [Fixed] make remove_path util more resilient to errors. See [#1900](https://github.com/DataDog/integrations-core/pull/1900).
+
 ## 0.2.0 / 2018-07-17
 
 * [Added] improve docker tooling. See [#1891](https://github.com/DataDog/integrations-core/pull/1891).
