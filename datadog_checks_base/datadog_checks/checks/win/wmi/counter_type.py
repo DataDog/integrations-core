@@ -157,7 +157,8 @@ def calculate_perf_average_timer(previous, current, property_name):
     the result can be displayed in seconds.
 
     Generic type	Average
-    Formula	((N1 - N0) / F) / (D1 - D0), where the numerator (N) represents the number of ticks counted during the last sample interval, F represents the frequency of the ticks, and the denominator (D) represents the number of operations completed during the last sample interval.
+    Formula	((N1 - N0) / F) / (D1 - D0), where the numerator (N) represents the number of ticks counted during the last sample interval,
+            F represents the frequency of the ticks, and the denominator (D) represents the number of operations completed during the last sample interval.
     Average	((Nx - N0) / F) / (Dx - D0)
     Example	PhysicalDisk\ Avg. Disk sec/Transfer
     """
