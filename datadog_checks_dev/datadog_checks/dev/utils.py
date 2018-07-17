@@ -125,6 +125,18 @@ def get_next(obj):
 
 
 @contextmanager
+def temp_dir():
+    # TODO: On Python 3.5+ just use `with TemporaryDirectory() as d:`.
+    d = mkdtemp()
+
+    try:
+        d = resolve_path(d)
+        yield d
+    finally:
+        remove_path(d)
+
+
+@contextmanager
 def chdir(d, cwd=None):
     origin = cwd or os.getcwd()
     os.chdir(d)
@@ -137,16 +149,9 @@ def chdir(d, cwd=None):
 
 @contextmanager
 def temp_chdir(cwd=None):
-    origin = cwd or os.getcwd()
-
-    # TODO: On Python 3.5+ wrap everything with `with TemporaryDirectory() as d:`.
-    d = mkdtemp()
-    os.chdir(d)
-
-    try:
-        yield resolve_path(d)
-    finally:
-        os.chdir(origin)
+    with temp_dir() as d:
+        with chdir(d, cwd=cwd):
+            yield d
 
 
 @contextmanager

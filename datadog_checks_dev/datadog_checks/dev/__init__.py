@@ -5,4 +5,4 @@ from .docker import docker_run, get_docker_hostname
 from .errors import RetryError
 from .structures import EnvVars, LazyFunction
 from .subprocess import run_command
-from .utils import chdir, temp_chdir
+from .utils import chdir, temp_chdir, temp_dir

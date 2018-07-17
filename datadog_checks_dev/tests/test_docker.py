@@ -13,7 +13,7 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 class TestComposeFileActive:
     def test_down(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
-        run_command(['docker-compose', '-f', compose_file, 'down'])
+        run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
 
         assert compose_file_active(compose_file) is False
 
@@ -24,11 +24,11 @@ class TestComposeFileActive:
             run_command(['docker-compose', '-f', compose_file, 'up', '-d'], check=True)
             assert compose_file_active(compose_file) is True
         finally:
-            run_command(['docker-compose', '-f', compose_file, 'down'])
+            run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)
 
 
 class TestDockerRun:
-    def test_run_compose_file(self):
+    def test_compose_file(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
 
         try:
@@ -36,4 +36,4 @@ class TestDockerRun:
                 assert compose_file_active(compose_file) is True
             assert compose_file_active(compose_file) is False
         finally:
-            run_command(['docker-compose', '-f', compose_file, 'down'])
+            run_command(['docker-compose', '-f', compose_file, 'down'], capture=True)

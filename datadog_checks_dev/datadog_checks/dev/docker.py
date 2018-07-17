@@ -2,17 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import re
-import time
 from contextlib import contextmanager
 
 from six import string_types
-from six.moves.urllib.error import URLError
 from six.moves.urllib.parse import urlparse
-from six.moves.urllib.request import urlopen
 
 from ._env import tear_down_env
-from .errors import RetryError
+from .conditions import CheckDockerLogs, CheckEndpoints
 from .structures import EnvVars, LazyFunction
 from .subprocess import run_command
 from .utils import mock_context_manager
@@ -49,6 +45,7 @@ def compose_file_active(compose_file):
 @contextmanager
 def docker_run(
     compose_file=None,
+    service_name=None,
     up=None,
     down=None,
     endpoints=None,
@@ -57,14 +54,43 @@ def docker_run(
     env_vars=None,
     wrapper=None
 ):
-    if compose_file is not None and up is not None:
+    """This utility provides a convenient way to safely spin up and tear down Docker environments.
+
+    :param compose_file: A path to a Docker compose file. A custom tear
+                         down is not required when using this.
+    :type compose_file: ``str``
+    :param service_name: Optional name for when ``compose_file`` is provided.
+    :type service_name: ``str``
+    :param up: A custom spin up callable.
+    :type up: ``callable``
+    :param down: A custom tear down callable. This is required when using a custom spin up.
+    :type down: ``callable``
+    :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
+                      ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
+    :type endpoints: ``list`` of ``str``, or a single ``str``
+    :param log_patterns: Patterns to find in Docker logs before yielding. This is only available
+                         when ``compose_file`` is provided. Shorthand for adding
+                         ``conditions.CheckDockerLogs(compose_file, log_patterns)`` to the ``conditions`` argument.
+    :type log_patterns: ``list`` of (``str`` or ``re.Pattern``)
+    :param conditions: A list of callable objects that will be executed before yielding to check for errors.
+    :type conditions: ``callable``
+    :param env_vars: A dictionary to update ``os.environ`` with during execution.
+    :type env_vars: ``dict``
+    :param wrapper: A context manager to use during execution.
+    """
+    if compose_file and up:
         raise TypeError('You must select either a compose file or a custom spin up callable, not both.')
 
     if compose_file is not None:
         if not isinstance(compose_file, string_types):
             raise TypeError('The path to the compose file must be a string.')
-        spin_up = ComposeFileUp(compose_file)
-        tear_down = ComposeFileDown(compose_file)
+        spin_up = ComposeFileUp(compose_file, service_name=service_name)
+        if down is not None:
+            if not callable(down):
+                raise TypeError('The custom tear down must be callable.')
+            tear_down = down
+        else:
+            tear_down = ComposeFileDown(compose_file)
     elif up is not None:
         if not callable(up):
             raise TypeError('The custom spin up must be callable.')
@@ -85,7 +111,7 @@ def docker_run(
                 'The `log_patterns` convenience is unavailable when using '
                 'a custom spin up. Please use a custom condition instead.'
             )
-        conditions.append(CheckComposeFileLogs(compose_file, log_patterns))
+        conditions.append(CheckDockerLogs(compose_file, log_patterns))
 
     if endpoints is not None:
         conditions.append(CheckEndpoints(endpoints))
@@ -124,127 +150,3 @@ class ComposeFileDown(LazyFunction):
 
     def __call__(self):
         return run_command(self.command, check=self.check)
-
-
-class CheckEndpoints(LazyFunction):
-    def __init__(self, endpoints, timeout=1, attempts=60, wait=1):
-        self.endpoints = endpoints
-        self.timeout = timeout
-        self.attempts = attempts
-        self.wait = wait
-
-    def __call__(self):
-        last_endpoint = ''
-        last_error = ''
-
-        for _ in range(self.attempts):
-            for endpoint in self.endpoints:
-                last_endpoint = endpoint
-                try:
-                    request = urlopen(endpoint, timeout=self.timeout)
-                except URLError as e:
-                    last_error = str(e)
-                    break
-                else:
-                    status_code = request.getcode()
-                    if 400 <= status_code < 600:
-                        last_error = 'status {}'.format(status_code)
-                        break
-            else:
-                break
-
-            time.sleep(self.wait)
-        else:
-            raise RetryError(
-                'Endpoint: {}\n'
-                'Error: {}'.format(
-                    last_endpoint,
-                    last_error
-                )
-            )
-
-
-class CheckComposeFileLogs(LazyFunction):
-    def __init__(self, compose_file, patterns, matches=1, attempts=60, wait=1):
-        self.compose_file = compose_file
-        self.attempts = attempts
-        self.wait = wait
-        self.command = ['docker-compose', '-f', self.compose_file, 'logs']
-
-        if matches == 'all':
-            self.matches = len(patterns)
-        else:
-            self.matches = matches
-
-        self.patterns = [
-            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern
-            for pattern in patterns
-        ]
-
-    def __call__(self):
-        log_output = ''
-
-        for _ in range(self.attempts):
-            result = run_command(self.command, capture=True, check=True)
-            log_output = result.stdout
-            matches = 0
-
-            for pattern in self.patterns:
-                if pattern.search(log_output):
-                    matches += 1
-
-            if matches >= self.matches:
-                break
-
-            time.sleep(self.wait)
-        else:
-            raise RetryError(
-                'Command: {}\n'
-                'Captured Output: {}'.format(
-                    self.command,
-                    log_output
-                )
-            )
-
-
-class CheckContainerLogs(LazyFunction):
-    def __init__(self, container_name, patterns, matches=1, attempts=60, wait=1):
-        self.container_name = container_name
-        self.attempts = attempts
-        self.wait = wait
-        self.command = ['docker', 'logs', container_name]
-
-        if matches == 'all':
-            self.matches = len(patterns)
-        else:
-            self.matches = matches
-
-        self.patterns = [
-            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern
-            for pattern in patterns
-        ]
-
-    def __call__(self):
-        log_output = ''
-
-        for _ in range(self.attempts):
-            result = run_command(self.command, capture=True, check=True)
-            log_output = result.stdout
-            matches = 0
-
-            for pattern in self.patterns:
-                if pattern.search(log_output):
-                    matches += 1
-
-            if matches >= self.matches:
-                break
-
-            time.sleep(self.wait)
-        else:
-            raise RetryError(
-                'Command: {}\n'
-                'Captured Output: {}'.format(
-                    self.command,
-                    log_output
-                )
-            )
