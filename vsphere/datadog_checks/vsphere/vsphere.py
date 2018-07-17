@@ -313,7 +313,7 @@ class VSphereCheck(AgentCheck):
                 continue
 
             for mor in list(mor_by_mor_name.values()):
-                if 'hostname' in mor:  # some mor's have a None hostname
+                if mor.get('hostname'):  # some mor's have a None hostname
                     external_host_tags.append((mor['hostname'], {SOURCE_TYPE: mor['tags']}))
 
         return external_host_tags
