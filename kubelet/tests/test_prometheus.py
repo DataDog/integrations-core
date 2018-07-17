@@ -79,7 +79,7 @@ def test_is_container_metric():
         ),
     ]
     for metric in false_metrics:
-        assert CadvisorPrometheusScraper._is_container_metric(metric) is False
+        assert CadvisorPrometheusScraper._is_container_metric(metric.label) is False
 
     true_metric = MockMetric(
         'foo',
@@ -92,7 +92,7 @@ def test_is_container_metric():
             Label(name='id', value='deadbeef'),
         ]
     )
-    assert CadvisorPrometheusScraper._is_container_metric(true_metric) is True
+    assert CadvisorPrometheusScraper._is_container_metric(true_metric.label) is True
 
 
 def test_is_pod_metric():
@@ -111,10 +111,10 @@ def test_is_pod_metric():
     ]
 
     for metric in false_metrics:
-        assert CadvisorPrometheusScraper._is_pod_metric(metric) is False
+        assert CadvisorPrometheusScraper._is_pod_metric(metric.label) is False
 
     for metric in true_metrics:
-        assert CadvisorPrometheusScraper._is_pod_metric(metric) is True
+        assert CadvisorPrometheusScraper._is_pod_metric(metric.label) is True
 
 
 def test_get_container_label():
