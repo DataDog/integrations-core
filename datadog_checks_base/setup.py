@@ -49,7 +49,7 @@ setup(
     ],
 
     packages=['datadog_checks'],
+    include_package_data=True,
 
     install_requires=[],
-    include_package_data=True,
 )
