@@ -1,3 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 openshift.clusterquota.cpu.used,gauge,,cpu,,Observed cpu usage by cluster resource quota for all namespaces,0,openshift
 openshift.clusterquota.cpu.limit,gauge,,cpu,,Hard limit for cpu by cluster resource quota for all namespaces,0,openshift
 openshift.clusterquota.cpu.remaining,gauge,,cpu,,Remaining available cpu by cluster resource quota for all namespaces,1,openshift
