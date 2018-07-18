@@ -70,8 +70,8 @@ class MongoDb(AgentCheck):
         "connections.available": GAUGE,
         "connections.current": GAUGE,
         "connections.totalCreated": GAUGE,
-        "cursors.timedOut": GAUGE,
-        "cursors.totalOpen": GAUGE,
+        "cursors.timedOut": GAUGE,                   # < 2.6
+        "cursors.totalOpen": GAUGE,                  # < 2.6
         "extra_info.heap_usage_bytes": RATE,
         "extra_info.page_faults": RATE,
         "fsyncLocked": GAUGE,
