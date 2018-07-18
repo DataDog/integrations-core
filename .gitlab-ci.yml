@@ -4,6 +4,10 @@ stages:
 
 variables:
   CURRENT_CI_IMAGE: 1
+  SRC_PATH: /go/src/github.com/DataDog/integrations-core
+
+before_script:
+  - cd $SRC_PATH
 
 ci-image:
   stage: ci-image
