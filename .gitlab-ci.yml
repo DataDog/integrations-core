@@ -28,4 +28,8 @@ wheels:
   tags: [ "runner:main", "size:large" ]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:$CURRENT_CI_IMAGE
   script:
-    - echo $(git describe --abbrev=0 --tags)
+    - $CURRENT_REF=$(git rev-parse HEAD)
+    - echo $CURRENT_REF
+    - git fetch --unshallow
+    - git checkout $CURRENT_REF
+    - git describe --abbrev=0 --tags
