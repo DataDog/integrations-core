@@ -17,13 +17,6 @@ log = logging.getLogger('conftest')
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def check():
     check = MongoDb('mongo', {}, {})
     return check
@@ -92,11 +85,6 @@ def spin_up_mongo():
     ]
 
     try:
-        cleanup_mongo(args, env)
-    except Exception:
-        pass
-
-    try:
         subprocess.check_call(args + ["up", "-d"], env=env)
         setup_sharding(env=env)
     except Exception:
@@ -126,10 +114,7 @@ def setup_sharding(env=None):
 
 def cleanup_mongo(args, env):
     subprocess.check_call(args + ["down"], env=env)
-    try:
-        subprocess.check_call(['docker', 'system', 'prune', '-af'])
-    except Exception:
-        pass
+    # it creates a lot of volumes, this is necessary
     try:
         subprocess.check_call(['docker', 'volume', 'prune', '-f'])
     except Exception:

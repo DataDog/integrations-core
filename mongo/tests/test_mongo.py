@@ -58,13 +58,11 @@ def test_mongo(spin_up_mongo, aggregator, set_up_mongo, check):
     assert isinstance(metrics, ListType)
     assert len(metrics) > 0
 
-    tested_metrics = set()
     for m in metrics:
         metric = m[0]
         metric_name = metric.name
         if metric_name in METRIC_VAL_CHECKS:
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-            tested_metrics.add(metric_name)
 
 
 def test_mongo2(spin_up_mongo, aggregator, set_up_mongo, check):
@@ -90,13 +88,11 @@ def test_mongo2(spin_up_mongo, aggregator, set_up_mongo, check):
     assert metrics
     assert len(metrics) > 0
 
-    tested_metrics = set()
     for m in metrics:
         metric = m[0]
         metric_name = metric.name
         if metric_name in METRIC_VAL_CHECKS:
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
-            tested_metrics.add(metric_name)
 
 
 def test_mongo_old_config(spin_up_mongo, aggregator, set_up_mongo, check):
