@@ -104,7 +104,7 @@ class WeakCiphersHTTPSConnectionPool(urllib3.connectionpool.HTTPSConnectionPool)
 
 class WeakCiphersPoolManager(urllib3.poolmanager.PoolManager):
 
-    def _new_pool(self, scheme, host, port):
+    def _new_pool(self, scheme, host, port, request_context=None):
         if scheme == 'https':
             return WeakCiphersHTTPSConnectionPool(host, port, **(self.connection_pool_kw))
         return super(WeakCiphersPoolManager, self)._new_pool(scheme, host, port)
