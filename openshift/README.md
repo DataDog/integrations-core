@@ -6,7 +6,7 @@ Red Hat OpenShift is an open source container application platform based on the 
 
 Datadog's [Kubernetes integration][1] supports OpenShift versions 3.3 and up. No additionnal setup is required for OpenShift-specific tags to be collected.
 
-[Cluster resource quota][2] metrics will be collected by the leader agent, see [how to configure event collection and leader election][3].
+[Cluster resource quota][2] metrics are collected by the leader agent, you must [configure the Agent event collection and leader election][3] in order to send them to your Datadog application.
 
 ## Data Collected
 ### Metrics
