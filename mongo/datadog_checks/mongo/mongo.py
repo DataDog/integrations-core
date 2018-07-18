@@ -98,10 +98,10 @@ class MongoDb(AgentCheck):
         "mem.mappedWithJournal": GAUGE,
         "mem.resident": GAUGE,
         "mem.virtual": GAUGE,
-        "metrics.cursor.open.noTimeout": GAUGE,
-        "metrics.cursor.open.pinned": GAUGE,
-        "metrics.cursor.open.total": GAUGE,
-        "metrics.cursor.timedOut": RATE,
+        "metrics.cursor.open.noTimeout": GAUGE,    # >= 2.6
+        "metrics.cursor.open.pinned": GAUGE,       # >= 2.6
+        "metrics.cursor.open.total": GAUGE,        # >= 2.6
+        "metrics.cursor.timedOut": RATE,           # >= 2.6
         "metrics.document.deleted": RATE,
         "metrics.document.inserted": RATE,
         "metrics.document.returned": RATE,
