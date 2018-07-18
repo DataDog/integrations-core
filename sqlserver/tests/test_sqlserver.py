@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 import copy
@@ -108,11 +108,12 @@ class TestSqlserver(AgentCheckTest):
         # Make sure the ALL custom metric is tagged by db
         self.assertMetricTagPrefix('sqlserver.db.commit_table_entries', tag_prefix='db')
 
+        instance_tags = config['instances'][0].get('tags', [])
+        expected_tags = instance_tags + ['host:{}'.format(config['instances'][0]['host']), 'db:master']
         for metric in EXPECTED_METRICS:
             self.assertMetric(metric, count=1)
 
-        self.assertServiceCheckOK('sqlserver.can_connect',
-                                tags=['host:{}'.format(config['instances'][0]['host']), 'db:master'] + config['instances'][0].get('tags', []))
+        self.assertServiceCheckOK('sqlserver.can_connect', tags=expected_tags)
 
         self.coverage_report()
 

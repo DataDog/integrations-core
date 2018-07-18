@@ -169,6 +169,8 @@ jobs:
     - stage: test
       env: CHECK=spark
     - stage: test
+      env: CHECK=sqlserver
+    - stage: test
       env: CHECK=ssh_check
     - stage: test
       env: CHECK=statsd
