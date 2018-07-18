@@ -32,6 +32,7 @@ wheels:
   script:
     - CURRENT_REF=$(git rev-parse HEAD)
     - echo $CURRENT_REF
+    - git remote remove origin
     - git remote add origin https://github.com/DataDog/integrations-core.git
     - git fetch --tags origin
     - git --no-pager log -n 20
