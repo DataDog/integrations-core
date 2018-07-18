@@ -33,7 +33,7 @@ def instance_ssl(instance):
 
 
 def test_check(aggregator, check, openldap_server, instance):
-    tags = ["url:ldap://localhost:3890", "test:integration"]
+    tags = ["url:{}".format(instance["url"]), "test:integration"]
     check.check(instance)
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
     aggregator.assert_metric("openldap.bind_time", tags=tags)

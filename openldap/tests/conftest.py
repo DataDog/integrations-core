@@ -21,6 +21,7 @@ def check():
 def openldap_server():
     with temp_dir() as d:
         host_socket_path = os.path.join(d, "ldapi")
+        os.chmod(d, 0777)
         create_file(host_socket_path)
         os.chmod(host_socket_path, 0777)
 
