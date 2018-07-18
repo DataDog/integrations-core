@@ -129,6 +129,8 @@ jobs:
     - stage: test
       env: CHECK=mcache
     - stage: test
+      env: CHECK=mongo
+    - stage: test
       env: CHECK=mysql
     - stage: test
       env: CHECK=nagios

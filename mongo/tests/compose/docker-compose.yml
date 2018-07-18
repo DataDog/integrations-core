@@ -1,0 +1,72 @@
+version: '2'
+services:
+
+  ## Config Servers
+  config01:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  config02:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  config03:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+
+  ## Shards
+  shard01a:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --noprealloc --smallfiles --oplogSize 16
+    ports:
+      - "27018:27018"
+    volumes:
+      - ./scripts:/scripts
+  shard01b:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  shard02a:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27019 --bind_ip=0.0.0.0 --shardsvr --replSet shard02 --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  shard02b:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27019 --bind_ip=0.0.0.0 --shardsvr --replSet shard02 --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  shard03a:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27020 --bind_ip=0.0.0.0 --shardsvr --replSet shard03 --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+  shard03b:
+    image: mongo:$MONGO_VERSION
+    command: mongod --port 27020 --bind_ip=0.0.0.0 --shardsvr --replSet shard03 --noprealloc --smallfiles --oplogSize 16
+    volumes:
+      - ./scripts:/scripts
+
+  ## Router
+  router:
+    image: mongo:$MONGO_VERSION
+    command: mongos --port 27017 --bind_ip=0.0.0.0 --configdb configserver/config01:27017,config02:27017,config03:27017
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - config01
+      - config02
+      - config03
+      - shard01a
+      - shard01b
+      - shard02a
+      - shard02b
+      - shard03a
+      - shard03b
