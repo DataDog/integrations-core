@@ -2,8 +2,8 @@
  "signatures": [
   {
    "keyid": "6e7ac369f3fd6b74d89f3ea5b4af1c9c73518187",
-   "other_headers": "04000108001d1621046e7ac369f3fd6b74d89f3ea5b4af1c9c7351818705025b4e5066",
-   "signature": "67248f9e76dbb2cdd8b08bad9a113ea0f5ab33c98558f948d05cf40374b70fce0161f76ea915b40018f225b36e7c4df101ccd758ac1f8c1866467680b2fb6fbc0968a0dbc0e709288ad8145bb11e65fe55b33b20989d70a91aa40c1160fb50e0db4f5b27fb7ad52ad872d8f995ed0a9d86e94eeb763c7345728c0578eba9648d6255d3d91a0f5829bf87d307121ad999339ba3c70817607c01eab0f1a101322a505cbac597ce93dde468708b18bc4c1a1507ba3b8315bd07a1ef80044a35a7b94f437ea0dd4f683194dbfbf14f9157220cf9d15d2a48222ee7170a403614b8a27e11f5cec2688e44b0bbda931b5130602be82952561a7870895d9f8dbb21a972d267d362e9572de81244cb18c86c22cd146f404aa8800d45197e62207d615caae1bcc544e2811d2239dac46a395fd2f0aacd63d89d159fb6c1a78bad2d64f7702389df8bf41d360191acfa1ce8ab31fa32efab6300dcb9a348aca90228552cff1d0b75b324c9c1674a450d9c34bbf8ed6110f569f49eb94331a0b0abc03aaa44b02ee9c011813f6be8ce0ffef088cd45299166a6874e5b9710f23f2f69e6e9d4f13c5115d05ea88d0df22d6a20ca32299299d094e91d4dd313d904d34598427e94c9410504ddcd859cd53581d4932c1c7a07b08b6123650cbc5f63bf99983ffa5975343b7174bff11b6a6ee76f8cb0286521d4158d6c13f103d31438841557b4"
+   "other_headers": "04000108001d1621046e7ac369f3fd6b74d89f3ea5b4af1c9c7351818705025b4f7d61",
+   "signature": "67d3a52b41078ae44243c915ee7680a57d49c724e34323e64f3c29ad33bd48c2e6426ee403bed163c819c9cd15c6dededf39676658391a3c9e5832b82adff219f17417729cf55d2e48cd96a3f120ccf3611d4a5925e3b89183b8465430aa6315347c0cd5ceef1430b77a48116627e8e052c8215816f919c1c62a9ba056f1bc24c3a1c0b7950f567e744c50a7ae9dcb1205e36ab6ccb5b0583d1b9a23927b0220613670da6eb67bdf0aff486febd8463f6df9fbe955d7cedb238e53c57bb56518528009077d899539d5c78b0e5d15b69665a79bf54a8743657c64db228ad29ba2c35211ce2761999467d1a86af3cc6601d99783231088a8d13e818ed88b57b92d76c059949e215364db78e48ea62e2625973d2a0d029014e44d3fa6e6e726baa670d3260b156eb2051601d2184871ebe21e9d125e92e70ca722046c2076b628a7878980fd6ef8cab66e01cd91f57388396409fc213e30f3d6663342bdbc851070c79e1362ca8901ac7d4a077cdfa9829f5818a0bce76152092b7b5514cb6047ddcd90e5776114a70f2570862b1a7359f5b879ad99c3cdcbd2626c953d017d193b786d6eadd3f1bd4467881bf72038369c29ed2cbefba008eef8f9da5d163bb07d5d8de6f6a4060bd910cb785995221f3cb926f5c741ea518b03f859eb2874bae680e4611b8490d509ee1d54a3b64bad54011b488c2fbebe37381c02c5f6dfe804"
   }
  ],
  "signed": {
@@ -13,7 +13,9 @@
   "environment": {
    "workdir": "/home/trishank/GitHub.com/DataDog/integrations-core"
   },
-  "materials": {
+  "materials": {},
+  "name": "tag",
+  "products": {
    ".github/CODEOWNERS": {
     "sha256": "0687e843c2b3615ab30f4eda38f6a0479e4a70fe6b77717fb759aba983ff6a0f"
    },
@@ -24,13 +26,16 @@
     "sha256": "f92da68e49df4e740b0725861d5169dd9db985450fbaa7805ed0a6af49b631fb"
    },
    ".github/stale.yml": {
-    "sha256": "ead954a852a05fce80a3a6610b57c667f487c01189d8e5f17298a6332629d2a6"
+    "sha256": "dd9dfb02a6a5e5452645de946b7ba5ef74cb1ab300eb2a8ac3bd00756e6b6304"
    },
    ".gitignore": {
     "sha256": "bbdc534da308e87e141d915afcd99e37e4dc5fe821957b60e5df26b637fa4fc9"
    },
-   ".in-toto-run.sh.swp": {
-    "sha256": "5a034bcb6533f9ad3fa9d7481e885a5d1acd5508be0de4d9f67b9fbae7da3b9c"
+   ".gitlab-ci.yml": {
+    "sha256": "8f1cfdb61515391dbf11b344325e3727ffcab20a7a84e40159d55b7c23d7b574"
+   },
+   ".in-toto-run.sh": {
+    "sha256": "83d413a7d0ff3551355000513a6633739fba63fd22d50488c671fffd72eb8438"
    },
    ".mention-bot": {
     "sha256": "9ef1e283ae71985b48d7e4f4483facb310eb1482ad843f2f0c06648ccdf21de1"
@@ -48,7 +53,7 @@
     "sha256": "aae89e65a55fad6583b0127beb1d9f8eb4ce79b7ce4e725bdf838a44917110a5"
    },
    ".travis.yml": {
-    "sha256": "ab3a398328ab1e6b7b02dda16c888632941edf6bc9cdd61f02d32c461c4bf2e2"
+    "sha256": "0c49e7e588d04479c77aedc7f5414d0823f91e76c8f9efecc5563add93ab42e5"
    },
    ".travis/prepare.sh": {
     "sha256": "7bbc15771312c3a8a9fe07e8cb898b7a965dd0d1c81be59af56e2f833c93c3ba"
@@ -61,6 +66,9 @@
    },
    "CONTRIBUTING.md": {
     "sha256": "445404640813ca33809612b41789f0d42ae0f929fd7c639dc23cd0dff601b463"
+   },
+   "Dockerfile": {
+    "sha256": "2e8258ab5e6351003d0b72515ce31c5cb76f751ba04cd7793d1defe24ce4a996"
    },
    "Gemfile": {
     "sha256": "1075b8017051d652048bee3f9d33628ca407da040c8fce738a792b06702119ef"
@@ -135,7 +143,7 @@
     "sha256": "b63e7c72470ab4ea861a025e2c4d545604386676709dbb6996238bd5e6deab9c"
    },
    "activemq/README.md": {
-    "sha256": "b34d4b76ddd2c993620bed52bc8072de649eb5d3cacdef0d00965deecac208bf"
+    "sha256": "3164c5eef2ece1b32951264b7ff400adbb9df6d1fc3c133661823f0785ca8161"
    },
    "activemq/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -384,7 +392,7 @@
     "sha256": "f12165635b95ae33ba300804728720cbd98c7288822975a4d2263558b9ba794a"
    },
    "appveyor.yml": {
-    "sha256": "9a2b31cfb83012aa1385e17243e62805c0530ee47d5f7145b854de8721552fb6"
+    "sha256": "35fb5638d3185d7ceab3f22b1f3cbb752429d0e7c3e39c7badd9455ebce06a37"
    },
    "aspdotnet/CHANGELOG.md": {
     "sha256": "9949fe2ec85b688e98a0551e9a28ca87f67ac115dc998306141742c10ce41a77"
@@ -783,13 +791,13 @@
     "sha256": "570ff9fe979233a2bb773083bf81c601e1bdd6d797cc3f98bb533475fb051c06"
    },
    "cisco_aci/datadog_checks/cisco_aci/api.py": {
-    "sha256": "cbc5370b944ade5cf8df0b6da9482c92969336ba78365738e430787da7db4e8b"
+    "sha256": "86214a4cde00e5db3bd239e1346e685948d0839061887a25b28375b9ad12c708"
    },
    "cisco_aci/datadog_checks/cisco_aci/capacity.py": {
-    "sha256": "55a08011036e06ae202ec290924df786e9c6158e292c25e590fd62bcabac1dbc"
+    "sha256": "514f12ce8ba890e7f260ea8d28206cdfccd30e3a136cd24cce1c016f2be19067"
    },
    "cisco_aci/datadog_checks/cisco_aci/cisco.py": {
-    "sha256": "fe8c0ccfe4c1307228c45561831cce8833a5a3936ebb21d3ce82cc94af72b1a7"
+    "sha256": "34c7bbc5eb6f967dcdc6f1013bb6894d30fc8b72123c516abd4a7b7b79fff9b7"
    },
    "cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example": {
     "sha256": "1566347f8227708ba88636b69151d1481c132ef7ff965a7af08dd4b674363e14"
@@ -798,19 +806,19 @@
     "sha256": "dadcb8d480590f5d2eac831f285183b3f7bced5c24d7a1a6a289e19c3e947cbb"
    },
    "cisco_aci/datadog_checks/cisco_aci/fabric.py": {
-    "sha256": "72d9168a33eea3aca3a5b72fe0968d512b09347527b3d31ab36ac46f230753d9"
+    "sha256": "a180c4f3e311175cfdb53836ce27d112ca6219e406e08a7104fa5230a8521c00"
    },
    "cisco_aci/datadog_checks/cisco_aci/helpers.py": {
-    "sha256": "f993730f3e492c57d2806005ab1f43473e6713c34c62bfc42e373ca7ef7db447"
+    "sha256": "298332627fd2f707e303c6c150ef0e21ab77096ebe74b90c1995a4110d3a9ed8"
    },
    "cisco_aci/datadog_checks/cisco_aci/metrics.py": {
     "sha256": "bf3d02da67c1cf48cbf82821d3b0d1a25b37e9bf6ec457791d0bc27cf4c8a261"
    },
    "cisco_aci/datadog_checks/cisco_aci/tags.py": {
-    "sha256": "dfadeeda167ab5ecf52c8a87b7a6147779c00337394476bb04ba757785bb0dcf"
+    "sha256": "c087fc28c4df1596b1237c3dec27c54a46e9ad6df0ec00fdc12b73dd79618184"
    },
    "cisco_aci/datadog_checks/cisco_aci/tenant.py": {
-    "sha256": "522b4b337adde5ffa4f95925e924b7ac6505884af90c165fb908e1fdb04a7a3f"
+    "sha256": "f1802b18ee84a996745afb6f54e811c4a9304c64e8a67ee0e2ab232cb9921b5f"
    },
    "cisco_aci/logos/avatars-bot.png": {
     "sha256": "63ad56d8c46507e81b4a34015b327ae3a6a7ee1ea2403bef610b6bd226fbfb60"
@@ -822,7 +830,7 @@
     "sha256": "ec7e7e799ae3a662ccd90d554aa4e6b0ddea4038cb9d81011f8f41fc468f09b1"
    },
    "cisco_aci/manifest.json": {
-    "sha256": "3fcad7ada2e8bb9a82c5f5fddf3c3f2c630b8d7ccd181ad79475b68f3749965e"
+    "sha256": "4c3c0122ac5af0f66e96e10ba628e699c861a471e9ef71ff0e51591c20814f6d"
    },
    "cisco_aci/metadata.csv": {
     "sha256": "4dcc02179d70c00618d4cf8af3a5cf2b35f7d91cf38d53a41ceadcbafd04397f"
@@ -846,897 +854,792 @@
     "sha256": "d47ea55275165e830ebddb1ad78d1d9cefbc3ac44cc2ec2df2f66587dfb0b4a9"
    },
    "cisco_aci/tests/common.py": {
-    "sha256": "e128b901494f6fe761bf97fa90f847a3607f29dac31991b267cdcb4557a24c2e"
+    "sha256": "625cca8a20fceafabc203cfbf5d8a53ce768a23247cc9d856363a42d238c432c"
    },
-   "cisco_aci/tests/fixtures/01dbe25246a232e83b480b325d039964.txt": {
-    "sha256": "a8bd5d6b917606597c70c666a3974e0e7158e94c600f8139d7549782b503d560"
+   "cisco_aci/tests/conftest.py": {
+    "sha256": "92b27afbbbeb550e2d2ee48ce4e43db2d95fd53de29608d140b7badcc109654b"
    },
-   "cisco_aci/tests/fixtures/0265f64e971b212efa4211dffb9ca963.txt": {
-    "sha256": "17b961e39342525ac678242cb0d9ebc1bb865cd8d4b46f8592ec7fe22c610db6"
-   },
-   "cisco_aci/tests/fixtures/0420ca4146dc833562e815353871c910.txt": {
-    "sha256": "7c3afc30294156f6892d976f40e5a0e0e8560a43efc00da82b3c84bc4ee455ab"
-   },
-   "cisco_aci/tests/fixtures/059ee9bd3834a66b3c3f5861608fe368.txt": {
-    "sha256": "292827ced097b038561760922339eec6db8d35fd5704350fdb886f8e645e5349"
-   },
-   "cisco_aci/tests/fixtures/05d1db1e4a5e62b4056b0aa5958611da.txt": {
-    "sha256": "3490197832f605799d404547f50be2d6840245b1db9f7f80717f7fed24c12a8d"
-   },
-   "cisco_aci/tests/fixtures/05df362203f2d079d6c975bd34e0ced0.txt": {
-    "sha256": "22bedabd18fa2028679e20bac8aae9b4368e5e082eac4a14e2d69bde760ce20d"
-   },
-   "cisco_aci/tests/fixtures/05eea58694d8f2a731b9e4a1dc762eb8.txt": {
-    "sha256": "86068a6ef9882f2cce2092dd5ff79c507ce57de5efd2ebf35ce605282af56e9b"
-   },
-   "cisco_aci/tests/fixtures/062669633a82d933bda471003dd9e186.txt": {
-    "sha256": "2d1cc685da978ae123dba2edc2ae45ac7427e849f1a66284f8459c161b281b73"
-   },
-   "cisco_aci/tests/fixtures/0694b681e750f83314f4492ac6ebfa39.txt": {
-    "sha256": "f5e1fb2213849e1f59ecc03782fe027bc7fc095fe61b226918aaa827310ea74f"
-   },
-   "cisco_aci/tests/fixtures/0826c49f46687d4931b61b718f928ef0.txt": {
-    "sha256": "37ace6d86a294400d19474a1535d37aae374aa000372f4f22e0cc72a9c20dda4"
-   },
-   "cisco_aci/tests/fixtures/08ce11dd471b76a5d9716815baec1ae2.txt": {
-    "sha256": "91ec4d1636370af5e52306bd2c6a3ebfb4978d66c6ee03c12d85b2e9f5cbfd22"
-   },
-   "cisco_aci/tests/fixtures/09307f3bd50af43e2a42115352a9667f.txt": {
-    "sha256": "8bbca727cf07fb82a6354f674c264ef2396eb5c8d164bde15d534403902a5379"
-   },
-   "cisco_aci/tests/fixtures/0ac69558dcde5281f3875cc714251816.txt": {
-    "sha256": "a05a5ecde4ead12edad142f0fbff289f623a096e9cd7e32ea16407ccd4392fca"
-   },
-   "cisco_aci/tests/fixtures/0c9c8a1bc19a01cd2989dc3c969a07b0.txt": {
-    "sha256": "2fbc3fea9b84206e873b6239fa9208aaf0a915203b5e5e9e86b6ee9bd789375a"
-   },
-   "cisco_aci/tests/fixtures/0d11d458b6d31906696642f74bf016cc.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/0d65a35670e5e6911748ffad58aefe97.txt": {
-    "sha256": "cc7b95964b60de51fc7e7416f329d7b7081f254e01c39052c9b04b166a7ac055"
-   },
-   "cisco_aci/tests/fixtures/0d6ca781810665156211b355129ba2f1.txt": {
+   "cisco_aci/tests/fixtures/capacity/0d6ca781810665156211b355129ba2f1.txt": {
     "sha256": "343b74ff93adb5f31e7f37410fca7ebfa5e94382a86cb1be3872e2d9ed978b15"
    },
-   "cisco_aci/tests/fixtures/0d7f07939572bc73ae4282605ca20ebd.txt": {
-    "sha256": "a6d222589bc7ef88f67253a03f4730ba397327623eecc8e256033ee1dea5e51e"
-   },
-   "cisco_aci/tests/fixtures/0f4f1dfb81ec9f835b63955609f35653.txt": {
-    "sha256": "407d19d7915cbe51981bd46e3be29b68a8d989db3986ff22200cac9a675573e2"
-   },
-   "cisco_aci/tests/fixtures/0fe0cd1d847716f3586e58ba3d46a87c.txt": {
-    "sha256": "07b3eb850ff018eab459675b99ae3672a7d3af03a06950502456985258abeea1"
-   },
-   "cisco_aci/tests/fixtures/10b987e92abaab8d843e6bee5ab6aef0.txt": {
-    "sha256": "11dfef67fc571c3ec35f8eeaba792cda984f2786e6c2ea9399b6a6fcded88d1c"
-   },
-   "cisco_aci/tests/fixtures/12531f666a06ff80395f2d12a5379379.txt": {
-    "sha256": "df008edb31ed560930b80c4d443b44253434c4876bf3b0490cecbc57f87d9708"
-   },
-   "cisco_aci/tests/fixtures/12d5f5e65fbebc8b8d061d7bf06582be.txt": {
-    "sha256": "71d02e0387f19b8d7d869b0fdff411e7663bccfa75b4a3f27eeeb027d0c02da1"
-   },
-   "cisco_aci/tests/fixtures/131494bb85b639cfb048bc27621d1eda.txt": {
-    "sha256": "49dafbbd90a0451308577726f965fad6df655892d0eb7547e49863e2b01a721c"
-   },
-   "cisco_aci/tests/fixtures/1592af41e69b692cb9ea41c2082c6324.txt": {
-    "sha256": "787a7893c3026ac3f336d391e36d1e56f67f9c7e040d1eeddb6f26ec1112b966"
-   },
-   "cisco_aci/tests/fixtures/16c2a93c855b8b0039fa41f7d1fd87c7.txt": {
+   "cisco_aci/tests/fixtures/capacity/16c2a93c855b8b0039fa41f7d1fd87c7.txt": {
     "sha256": "5c3a02a64b964d1f3d1995e198f4292b6b769c4a329ae0d89f4f37e929a5ca95"
    },
-   "cisco_aci/tests/fixtures/182c808e8ae2493e815889cb488088e9.txt": {
-    "sha256": "3d1c9135414b23a500e203dc60d729d9802727af16c5c84d4e135a3555c3757c"
-   },
-   "cisco_aci/tests/fixtures/1862d3b380a8f2220ac096d7aef9310a.txt": {
-    "sha256": "411fd3f771afd746612fe370413981a67ca200b2f625fccee8f2c88144fe27ae"
-   },
-   "cisco_aci/tests/fixtures/191f10ceb875b1b8f592deff3e71326b.txt": {
-    "sha256": "1a2944b33e28c4504642322f66d722e7b730c8fd82cacbef7d415ca06c052fe0"
-   },
-   "cisco_aci/tests/fixtures/192e2d8a58b2117282557295dc503b0a.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/1a2b5d3742c9866abf4c3b6d248ab331.txt": {
-    "sha256": "a61774f900d7d41c02bec000a44739b798fa13eac7e4655579b34fbf9fd3fdfa"
-   },
-   "cisco_aci/tests/fixtures/1aaf6555b1102852ff7de4b370cc0d0f.txt": {
-    "sha256": "1b518e87d41087bf3ce7b63d03b5b124233d7f6a9ca7e412310a4999cec7e435"
-   },
-   "cisco_aci/tests/fixtures/1c7d7ebf0b75333689662feb19f63ede.txt": {
-    "sha256": "72cacbc48b113fef5710bff805d23eb7040943e177e8ec07d1a8ac0e66d7cbbf"
-   },
-   "cisco_aci/tests/fixtures/1df5692a384c4dd76bb6aaeec9e5f922.txt": {
-    "sha256": "530349e9e8074953b82140f12d052e97deec05b7f66a01eb72f49bb8fc8d316b"
-   },
-   "cisco_aci/tests/fixtures/1e4f33f96dd87955dc6e04b62fdb10f1.txt": {
+   "cisco_aci/tests/fixtures/capacity/1e4f33f96dd87955dc6e04b62fdb10f1.txt": {
     "sha256": "98757eee658a317d243c05cfbb90308d5c7ab74dc1b26a7b786af0f3c400897e"
    },
-   "cisco_aci/tests/fixtures/1e60b21b3e8faf751aadfd9da2c75ff1.txt": {
-    "sha256": "20ec79118c511520ec75cd6e83791e033e56bfc3b73d7e106db20fc12939c770"
-   },
-   "cisco_aci/tests/fixtures/1ee00ee7448fe5900c1a18d70741a6ab.txt": {
+   "cisco_aci/tests/fixtures/capacity/1ee00ee7448fe5900c1a18d70741a6ab.txt": {
     "sha256": "255f0b1f3bb9dba090057327e8e7eeb43bdecd713e0409f5f4388f50e7388eb4"
    },
-   "cisco_aci/tests/fixtures/20666ac76c056ba221c188dd849ea5ab.txt": {
-    "sha256": "e577e44ef16f2f77d0d9c96af1b092b584845613c40cce5513d522b35898773f"
-   },
-   "cisco_aci/tests/fixtures/236cd3ffe852d58ad38dfbe0e8526386.txt": {
-    "sha256": "6d298f35b4dde3e892ea4024b96d303165d2dbd3de8426cecceb4fc7b18171c8"
-   },
-   "cisco_aci/tests/fixtures/24292dd7f226aaa790ba72888c2f4100.txt": {
-    "sha256": "b8185e7e59f4f39eb854dfd691e67d9ea4193ed1261e34781e1e07086c411183"
-   },
-   "cisco_aci/tests/fixtures/24c2652ea402d34c526a5725b879837a.txt": {
-    "sha256": "31cd6174224dadb5cf7c482466118bd5bc26cf5d61ecf56430f51c7e649216bf"
-   },
-   "cisco_aci/tests/fixtures/25fb8de7707d45adb5547c93647b096a.txt": {
-    "sha256": "e0501210786481d896fbb49613672b68c6c652dd0d2150eaeb3bf69de6ada0ea"
-   },
-   "cisco_aci/tests/fixtures/26bfabd76a3c7b74961718e820150181.txt": {
-    "sha256": "579fad1e2e6cbad5d208177ca6e08ae262a5899f8b41c229b9324c56b4d33800"
-   },
-   "cisco_aci/tests/fixtures/26f89388cc0e2de103e26d6d4ea3d678.txt": {
-    "sha256": "1596191ecb18aacf1e7b391da54dabf6c3b07de7d64b52e2c99271ed9995500d"
-   },
-   "cisco_aci/tests/fixtures/28431f4c95e37bbfce84c0d5b82c08e6.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/288a353bc9fed8f571d78076cb1585ae.txt": {
-    "sha256": "5c8fffdccdc5e1f12d4c51b830e9473583e5332469fbb5522ad9397d8642026c"
-   },
-   "cisco_aci/tests/fixtures/28becf8a90f91ffea40df5c48656743b.txt": {
-    "sha256": "a17a7d703c8f904f773b2fccaa843068f68900ba5a7f059ab6678238641ec4e6"
-   },
-   "cisco_aci/tests/fixtures/29323d3635c14c2110036b6f46ff4e3c.txt": {
-    "sha256": "ef5161070b41876d1799d2eb43b15a749f40b4e2b6c419ecfa57b0f410e4ba38"
-   },
-   "cisco_aci/tests/fixtures/29e52d4c70bccac74f1a4e4f7b29c32e.txt": {
-    "sha256": "e5717d72f60d8e56245e0ca223097f9c2c2255a74b651fe455e9dde70059d8f8"
-   },
-   "cisco_aci/tests/fixtures/29fd45826b0bb763e5c8b4e92fe53216.txt": {
-    "sha256": "bf16f2fe7133a75a73fd5a57d16939357572f3e2d43f41aa5a40714462d4ccfc"
-   },
-   "cisco_aci/tests/fixtures/2a60e74b54870113b67e6ed7f8994d53.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/2b77c071f172dc404574adca6de263d1.txt": {
+   "cisco_aci/tests/fixtures/capacity/2b77c071f172dc404574adca6de263d1.txt": {
     "sha256": "f472c62fbbca55734423d7900d8d92f10b0d20bb2f13b93be740e069eaf5b76c"
    },
-   "cisco_aci/tests/fixtures/2d08f2b65ec42f632aa197568616c9df.txt": {
-    "sha256": "3d7d9ec41e92f7629c6589cd102206f5a94878428f1c5b57502af2565298104e"
-   },
-   "cisco_aci/tests/fixtures/2e82232a722241e59f27ac3742934e7e.txt": {
-    "sha256": "ad8f340d36e2986c37e02741ed00e1606e9bacc99605aaf40b787ff889d845fd"
-   },
-   "cisco_aci/tests/fixtures/310012038948e6cd47afbb3cad45054d.txt": {
-    "sha256": "e797fde15783dc074f7a7568e9ac0067c4b98436d680bfb40c3a8a2637edd8a5"
-   },
-   "cisco_aci/tests/fixtures/3173be2eaf1384d966894ffae62c74f0.txt": {
-    "sha256": "ce5d86270199746d1ff508d76c2f4e560361140175a2cdc9eee0b86521d95c1a"
-   },
-   "cisco_aci/tests/fixtures/325ebbb6ef97627d5b9b6cda91f8e1db.txt": {
-    "sha256": "443d76e54e1a5c6e0c49130ff022295f0a83b06b93130c22850a99a524ce341c"
-   },
-   "cisco_aci/tests/fixtures/363740b68eff24d19f99f62266029e66.txt": {
-    "sha256": "2d17496b819c2d946a8f8a29eba01b99910257cf6ff1bfd321aca0667476aa53"
-   },
-   "cisco_aci/tests/fixtures/363e27e35a42bb987c121709284b529f.txt": {
-    "sha256": "2bb5d0f9dbf7a6c5427eb9a48a896b1330d1a9b7162fa30884cef5fa34a54efd"
-   },
-   "cisco_aci/tests/fixtures/368ad1f728c59d61403654959f02e7e5.txt": {
-    "sha256": "c14417cd9513bf2e28452c7674eecc1a9461543796df713e5c4142f2d63ccaf9"
-   },
-   "cisco_aci/tests/fixtures/37976cf8da42381453005e341ed57edc.txt": {
-    "sha256": "cef20aff1003471eb12469cab8f2459a05d4d7f4093b68c4edc51e8965517af4"
-   },
-   "cisco_aci/tests/fixtures/37ed36e29dc28fecf6ebc21cd2714477.txt": {
-    "sha256": "bbd4e70cb8891131d9b169f3b54536280769aff942cb7d43122e4ddaeda9f2e2"
-   },
-   "cisco_aci/tests/fixtures/38eea560b59819b60a356010e9b3c191.txt": {
-    "sha256": "b144a4116c436902c4ec727a22a66673bc566802c8171823ee4718046545abd5"
-   },
-   "cisco_aci/tests/fixtures/391b0334845ed94bd2f7f0f52c792dcf.txt": {
-    "sha256": "ab519cde536a11b8eb2c26c90386770028e86015dfb4512572b4bb190b778695"
-   },
-   "cisco_aci/tests/fixtures/39d31c3f91411cd6018abd79e222d0cf.txt": {
-    "sha256": "16312c1e17d225c838edc46b29fc16fb19db4b208910c7f58843dda6774ebc15"
-   },
-   "cisco_aci/tests/fixtures/39eadf19ae6f6506492894d5b7eb451d.txt": {
-    "sha256": "19d7b5fd68976516dbf8134ed12338e0d79d6fd4feb11271cf11f36262eab98a"
-   },
-   "cisco_aci/tests/fixtures/3a3b3fccaf27c95600f33e9c238916d6.txt": {
+   "cisco_aci/tests/fixtures/capacity/3a3b3fccaf27c95600f33e9c238916d6.txt": {
     "sha256": "53bbb2ab8bfbf62fcfc99d271ddd47cddadca7bc3e3f5aa2f3ab97d70b956204"
    },
-   "cisco_aci/tests/fixtures/3b1021776ba1702e051084739dfd0dcd.txt": {
-    "sha256": "4f8eb8e69703f0254664bf4754d6e1502d04500dbdafaab687ceb50b12ece56f"
-   },
-   "cisco_aci/tests/fixtures/3b7673a08dfcb78977b89f664eadefe2.txt": {
-    "sha256": "214f8042e398af93a154db53ea7853b625fb08cac6be8584bdd760ae7cac7d3a"
-   },
-   "cisco_aci/tests/fixtures/3c0a81313d92e361c55ae1d5bc82b024.txt": {
-    "sha256": "9e0fd283ff4ee6c0a7194fef7200ff0d760b4214ff61b771dab44623fd950964"
-   },
-   "cisco_aci/tests/fixtures/3cbee8654509c3cd43e50967079d636d.txt": {
-    "sha256": "ebd0e8f39c55102801a68c954ca9a449c1e26f582e81a9e559ad3ca1813f3808"
-   },
-   "cisco_aci/tests/fixtures/3d8273b2eccc0e7b8ddf73c0bcc0dbc9.txt": {
+   "cisco_aci/tests/fixtures/capacity/3d8273b2eccc0e7b8ddf73c0bcc0dbc9.txt": {
     "sha256": "de9c19b110ad345a94fbaaa43f27b6b47fe3cc06ad47111da54ac91e947c9bb3"
    },
-   "cisco_aci/tests/fixtures/3f8f3374048d7b5b3a38566765f35cc2.txt": {
-    "sha256": "c391090fc0e6da82bc572c2749c931e8ab20fed7dfda018bfbd43532bdf01617"
-   },
-   "cisco_aci/tests/fixtures/3fea0478e9d12ef2bef175f14163d15f.txt": {
-    "sha256": "429dd74d1c0cb45a0060ce6e8ee965fdce05cbc91d5414af9b3139a5c27ab74f"
-   },
-   "cisco_aci/tests/fixtures/3fef285c055ac257296e7b7e9d0d99ae.txt": {
-    "sha256": "7628733b9d46b5c3fa07bacf9997e99a5d3fc907d6d517733a573e5b3d6eb277"
-   },
-   "cisco_aci/tests/fixtures/417c59253e3515daaa1c5c77274958ff.txt": {
-    "sha256": "99c4645a780ec19b12a1d642e0c8e9fe66275044ee6e00737994f572aa803cba"
-   },
-   "cisco_aci/tests/fixtures/41c11ba1a96d0c0d0f4b3089f26cf948.txt": {
-    "sha256": "548efb2394f77be370d0da8f2b5293d1630ad2ad234f1ca9757764decf13c174"
-   },
-   "cisco_aci/tests/fixtures/42ba9bb51601fc0dcd87779a4229c533.txt": {
-    "sha256": "c147d7060b6f1dd09fe4666a2ad6b58beb3bde6123bd5953159b9ac7b4d87be9"
-   },
-   "cisco_aci/tests/fixtures/43410607b378cfa340146247a8b422b9.txt": {
-    "sha256": "5e7d0601a0d4ea942733256ea2a01fd715abf735e8adcc6bf2e07c6db339eaa7"
-   },
-   "cisco_aci/tests/fixtures/4507ab28dfda9c6ad0c6adc79465856d.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/468af47d68f6c454058003b213546a3d.txt": {
-    "sha256": "1faae914ff7499ccb5881389eb065393a12ed0b22789499a6c09522aeb22090a"
-   },
-   "cisco_aci/tests/fixtures/472bfc1a0ff05706b83ef45497d62ff3.txt": {
-    "sha256": "9943ecadcad3c2169080636398d33459388983b7df14f8d6cd279565b31c0f5a"
-   },
-   "cisco_aci/tests/fixtures/47378882fc41888f6f23bddf78bf907f.txt": {
-    "sha256": "9b6db1666d6dafd15a5d1e6e21dabe14e8a3075e0daafb8b83e8329f4ed9a07a"
-   },
-   "cisco_aci/tests/fixtures/47ad133793f96281cee2db5286d6d27e.txt": {
-    "sha256": "d24e751451114f20802d47b9aab7dee6d1ca98dd3a5a3128ee99c8eabd2e2f84"
-   },
-   "cisco_aci/tests/fixtures/489238c6f8d6bde0ba86c5388669b2f5.txt": {
-    "sha256": "64ddfeff59f959d03372035002d05f4978dcebc0c6079266af82144a5d9b6f81"
-   },
-   "cisco_aci/tests/fixtures/4a9de3748cf06fd105e574d497e55cb3.txt": {
-    "sha256": "3bd2b7b57434ba0040a3934b75c507571e640dcef61b37e940801029c78a76c0"
-   },
-   "cisco_aci/tests/fixtures/4b07d389b109401afcc2c42bdca0f2b2.txt": {
-    "sha256": "dad808acdb91f4a6e7ca487a797de804cbe53b3898e09026b97ea205513f6592"
-   },
-   "cisco_aci/tests/fixtures/4bb497ebffc529c7b2dc82013341bbae.txt": {
-    "sha256": "a1c0c9ffc72ece6f94847ceaff98770c70e0180c3ed01851eafc5c55d730e745"
-   },
-   "cisco_aci/tests/fixtures/4e6bd13fe648763684a1e52c2b5b6fb9.txt": {
-    "sha256": "76de0004167349eef4d6df963c01f0b96d397f95fc992a5fa9bb2b9bd880fedd"
-   },
-   "cisco_aci/tests/fixtures/4efe80304d50330f5ed0f79252ef0a84.txt": {
-    "sha256": "dc03db30bf47fa5db613e0640f899bda02791bb10108941a34063b6e002f6ab4"
-   },
-   "cisco_aci/tests/fixtures/5030ace26a4225d8a53073b122114bb5.txt": {
-    "sha256": "63c54593be20b5c1d1f296e4d0ea11c797b6f0ffa0fe8c8664cfbcafac8646c6"
-   },
-   "cisco_aci/tests/fixtures/50d46a8273bad8ccb3ffa0733c3511c9.txt": {
-    "sha256": "d2c121b454facf9238d160142bc4772cddef5428f5ebff86cee23ff71626436b"
-   },
-   "cisco_aci/tests/fixtures/512160d3762b1fc5ea0e7d7d652e4c91.txt": {
-    "sha256": "24004386d3e585875b68b31020d29c02de28a9cc0be8c09127bf92d0bd9fbc4d"
-   },
-   "cisco_aci/tests/fixtures/51d1697864fc60fbf06e0838a29d3311.txt": {
-    "sha256": "ddf47564e0264dd0733650926e25efef91743e630ad3b2d8b6be14c723ec1f78"
-   },
-   "cisco_aci/tests/fixtures/54631f3678634a95055946441706e235.txt": {
-    "sha256": "f420667e0607de492b6233fc54f3fa53d1c08719c765a1f64015309beba76907"
-   },
-   "cisco_aci/tests/fixtures/55444ab1c3112431390bb132ef8ea799.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/55df6c4d6ccb8dca85f2de66381f7caf.txt": {
-    "sha256": "ac646de6be963fd2f217b673ac9fe6070771d9ca56693baacf21d1b6283567dc"
-   },
-   "cisco_aci/tests/fixtures/56456cb4cd430d58542eb6f91df0e34f.txt": {
-    "sha256": "b0b3a7a7237b92e651fa8ca630dad05a2d750713550630508f9a5e149f7e7ed1"
-   },
-   "cisco_aci/tests/fixtures/589f829bb465d344c485960ea9910519.txt": {
-    "sha256": "ea3eacb325e3e584389bc0ee4cde6e7412b0c65c3f39a04d012d03936ac4d27c"
-   },
-   "cisco_aci/tests/fixtures/58dca04cc9e1e3d492ac260aac0d1506.txt": {
-    "sha256": "81c59986bcf8f1fd109ddb3b2c5f8fddb2c2940dc7bb0b391d14added76c6b03"
-   },
-   "cisco_aci/tests/fixtures/595020242506421d68ada87ac012256e.txt": {
-    "sha256": "8f51a7ea5d38b4c04c8e4a6ea92b64723f8c56e31e7de49eccdeacb2b2e6e931"
-   },
-   "cisco_aci/tests/fixtures/5a04c996228a0802911e1b5e2dc381d8.txt": {
-    "sha256": "d3ee6052178765815966deceff2af03c03e245f8b81a8a5514424f0d40a01f0c"
-   },
-   "cisco_aci/tests/fixtures/5abeef5dc54c73540c39d62a6e2a77bd.txt": {
-    "sha256": "50b41d5eb031d17c5b81a7951a19ab77dbe6b10ddd4d79827684b70105234bc8"
-   },
-   "cisco_aci/tests/fixtures/5b8ffb24387021e123e166ee7a388bde.txt": {
-    "sha256": "1968a8a70171d43a8ba225455ed06f1462a548c828bb8a1cd1b2c0557d1a2c1e"
-   },
-   "cisco_aci/tests/fixtures/5bcf96443c5b5ca0726de909932e6cd0.txt": {
-    "sha256": "f8f11bc8e6b49a9b710f9b89031efb3adc72616e20d059db96c9be2081f02542"
-   },
-   "cisco_aci/tests/fixtures/5cda376bef1d4d0274b7d2c8007db70e.txt": {
-    "sha256": "fa892356a78eac7d79ea88a52055be4069650708ef5b59b51d793844bc767da8"
-   },
-   "cisco_aci/tests/fixtures/5d7a62e392e669583e450d28bebf32e3.txt": {
-    "sha256": "126e16affec1fdf1cfa005c0b87f0b6461cf161ea8a044e63bdba85b8d5b6b95"
-   },
-   "cisco_aci/tests/fixtures/5f9c17b4985418dceb0375f3c8678663.txt": {
-    "sha256": "689f2ff905f3529862435a4922894606324804dfb23795641200524401d69b2e"
-   },
-   "cisco_aci/tests/fixtures/603cc1278c410b07905c2c35b49afbe6.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/61123225373140dd4bd581621e9b854d.txt": {
-    "sha256": "18ad4e2ffb67f00b69bc5d5092e5b44fe8036d050372643441fd2b1a97faf417"
-   },
-   "cisco_aci/tests/fixtures/642f9c4d4bffe9e9bad4ad01a34c924e.txt": {
+   "cisco_aci/tests/fixtures/capacity/642f9c4d4bffe9e9bad4ad01a34c924e.txt": {
     "sha256": "d75c85cad17a18909be20bd0d3d4d04cc9ed81770ded5e765d7d88bffd75a467"
    },
-   "cisco_aci/tests/fixtures/643d217904f09445fbc9f7b43cd131f0.txt": {
-    "sha256": "dc86b43c2e65a4fe2fc20735c116e15240d73cc2934588b726eaf7746d067370"
-   },
-   "cisco_aci/tests/fixtures/64c95055e2de554c02ef651cdd480e02.txt": {
-    "sha256": "8cf77ded60b4b6ae07bb35eb311e8a0e86e3f1d6b86b5cd19fc76a47bef12402"
-   },
-   "cisco_aci/tests/fixtures/66a518765a86e7f2ae488abc45d95d70.txt": {
-    "sha256": "b95847de3d63bc9753515ce3a41d9749dfc1857a67ae9b7a93c68df8ae275d1b"
-   },
-   "cisco_aci/tests/fixtures/6a927bbf1765276b4bdfb1d9de31990f.txt": {
-    "sha256": "59b4052de2ec2c8a5a3ebf125881e25dbe9df10f5a896d998f36e44e8f24a038"
-   },
-   "cisco_aci/tests/fixtures/6b723f4c78e4e9153d56b0d8410da810.txt": {
-    "sha256": "dcf2bffffa030d9f69cf3c5eee31a3fb8d4e30701c97f0bfc17a083cf8c7a280"
-   },
-   "cisco_aci/tests/fixtures/6bd529f60a581c84be13249fe668c467.txt": {
-    "sha256": "bd21440fbc34b1f7c9139994c4dafd371ece02f79250d9f500d5e87017ebe19c"
-   },
-   "cisco_aci/tests/fixtures/6c18595e43b00d3e591faaefb05e518d.txt": {
-    "sha256": "4dcb09575caf41684af13a1c872399f0cd831225215621684f764ccec87f44a2"
-   },
-   "cisco_aci/tests/fixtures/6ea50eec45df7090c11060ae0642fdf1.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/6fef8e622903fe12fdd1c8849c095509.txt": {
-    "sha256": "9efba0aa9beb4c4e4b66dd032e1ab1da680baa6ab96ddc6e6f9519f95ba5201d"
-   },
-   "cisco_aci/tests/fixtures/7034a3d481f3cd6b47f86783c7ec4c63.txt": {
-    "sha256": "4e5f962beb7e22bf2648c47e63c4d2fa04c464ddd72b76fcf163377e6084fd97"
-   },
-   "cisco_aci/tests/fixtures/73477fd8a36f24ffc7b0a5ff58a0151c.txt": {
-    "sha256": "133d117bef356881f95136e1f2f94aa41f430d6c4a2d47eeb41649389bc9116b"
-   },
-   "cisco_aci/tests/fixtures/737c7e36163881e5e54450fd49b43fd0.txt": {
-    "sha256": "4ee5e53b49131856ab2c3841bd33596ffc197cc247d5f47beca57292a88f7db8"
-   },
-   "cisco_aci/tests/fixtures/74736ad3c53d4da2da6225f020d0ea07.txt": {
-    "sha256": "43272067938ced129b0eccfa9058325a01b645fa312cb77a319e1098ad076e66"
-   },
-   "cisco_aci/tests/fixtures/761de56d98771ada5db2c5d402347831.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/7660dffc9226f865526ffe82fe4694fa.txt": {
-    "sha256": "e6beb91450f010315ec212d24db8f8162cf84604805d4afc99f4f431be8cb63c"
-   },
-   "cisco_aci/tests/fixtures/768c379447d3fb82d769e31807216858.txt": {
-    "sha256": "1914682861a3af710168b03788c83de3cfbdf6a1fe99e00f93bd12a478f3e594"
-   },
-   "cisco_aci/tests/fixtures/7704343d94932b9020928c6b75edde7a.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/774df6b01df155b4a7e9ead5b3bb6f95.txt": {
-    "sha256": "5fb3ac6a4af75e7625b029af14c0d9ce0d374b6279bf4efb561d6a2de8a95ddd"
-   },
-   "cisco_aci/tests/fixtures/784ecd089e2b648809a8e00fd5a11e82.txt": {
-    "sha256": "ae4caedae97bfd952f87ae7c9182fdbfa4b840e60da252994e27a09134e8982e"
-   },
-   "cisco_aci/tests/fixtures/79af98fe9c1069b329af3b4828712ddd.txt": {
-    "sha256": "8928c0be8eb2863f8529d441870ec06054b781bef4561c6738903e73e84171d8"
-   },
-   "cisco_aci/tests/fixtures/79c41743346ba48ef5c40b7942dc59f2.txt": {
-    "sha256": "bcf0543361fffe30c3439c3a337e3911ad703bb2ecb25e956b6a5212543708cc"
-   },
-   "cisco_aci/tests/fixtures/7a5859de7a50c006b2c293a537891ab9.txt": {
-    "sha256": "bae619c2ad87d6fbd2ba928659116138d5664ccb1ac904221b9286f180959bfb"
-   },
-   "cisco_aci/tests/fixtures/7b06db4060591652e39b305410a03a2a.txt": {
-    "sha256": "959095796247e3dec816cef0659329f94066657fbfb316114044add78f1e336d"
-   },
-   "cisco_aci/tests/fixtures/7bb3c44837f66c6a254def67002c459c.txt": {
-    "sha256": "825dbdcd9693fc2f28f2746831375e64e7ab89e973d3b66c49ad23758bdcf29d"
-   },
-   "cisco_aci/tests/fixtures/7cff0d95697cf21e69d7137c29e65df9.txt": {
-    "sha256": "df75e7eb8f36e1054d66c47532a18d449e09f6a3288429de6df2b0cf7ca6f98e"
-   },
-   "cisco_aci/tests/fixtures/7dbe5688443c0124438db66cc4ae8413.txt": {
-    "sha256": "0d583e28e588c70c5fce1760df92b3ca33fd1fcbf9eb7a1200f3fae339c89378"
-   },
-   "cisco_aci/tests/fixtures/7e603ac928ec642f45601a94420fb4db.txt": {
-    "sha256": "207e4c4c0e88dd04ab631ddb70343a3386e07d79a5d7331faa6e3de32151aef9"
-   },
-   "cisco_aci/tests/fixtures/7f313c9de9389bb7b50d1536bac11ec9.txt": {
-    "sha256": "b7b90eee14ddf8eec7ef66063517dc77f9be4623a3960eb24bc82ba51a7f5e81"
-   },
-   "cisco_aci/tests/fixtures/7f75758e50ae1da1b1a5088b3d70600f.txt": {
-    "sha256": "67570a5372f303a32cde47215045bdeea0d7a3f3240d638104cc0833aa2207ee"
-   },
-   "cisco_aci/tests/fixtures/7ffce65d2a991de9faa9d3976bf07e1c.txt": {
-    "sha256": "8c95a26ccb589e34f2729420ac9ce21b3cba7910ddabf4b0cc1112833e56a41d"
-   },
-   "cisco_aci/tests/fixtures/808bdd8ce9c8a62e3a1c9432b9cd2a2d.txt": {
-    "sha256": "407785b25a734ce06cf34889c8bcb78368f47531dd163e67e622e0a27a2ef7bb"
-   },
-   "cisco_aci/tests/fixtures/8178783b3e17693049f299f040015fef.txt": {
-    "sha256": "910f656d46074613241761dd6fc515c1252adfd994b6ea5a48070a067ca295ce"
-   },
-   "cisco_aci/tests/fixtures/82edf3105e5c60a2c778cb35aedb645d.txt": {
-    "sha256": "f8cc38dcacaa17f293a67697498aa0dfdeca33afb79f54709dda738e84d5f033"
-   },
-   "cisco_aci/tests/fixtures/836acd4e8abef3aa3677369d6c45f103.txt": {
-    "sha256": "1f42fc4f2d70c686dcded568314ba5bfb72aedcdbe321a6254c3e078233bddc3"
-   },
-   "cisco_aci/tests/fixtures/843f58e15736191a5e58e1afc2eb5e84.txt": {
-    "sha256": "5d0d48a825e7a9a9ac94771c1e2b61d1fd06eca9c12ddaf5ee2db62ce952ffe0"
-   },
-   "cisco_aci/tests/fixtures/84c022cd474b28fb0c93ca6497fbc465.txt": {
-    "sha256": "162eb71b855b4c6827d3c41ab221962652d9dabbd94fff35992431d495bdfcde"
-   },
-   "cisco_aci/tests/fixtures/84fa5ef1c7cb288cc7d8b3d216a2a359.txt": {
-    "sha256": "67ec3e756d6524e0e933343727c139676bbd5cf841af7b130f51be5a33dc64f2"
-   },
-   "cisco_aci/tests/fixtures/876dd4352811765c90169517e290e8c6.txt": {
-    "sha256": "081c54f36e68b0ee7074ebad5d4460007ea828991548a3e9eaa6cb35fc38ec0e"
-   },
-   "cisco_aci/tests/fixtures/87f77f6251a2517a4f65e94b7f79aaee.txt": {
-    "sha256": "17c2bec743fa0f734d0cc3ad8d473ba10584a9ab0ee331ff7c886e7cde51a430"
-   },
-   "cisco_aci/tests/fixtures/897a879430edceab050ff62f99f990b6.txt": {
-    "sha256": "f1f41f865b8f4ac08a699fd858044ea2dfbdbf02c829cc6f277105b701ac11e7"
-   },
-   "cisco_aci/tests/fixtures/8a0f90b2c6bd500af62722a13d207a20.txt": {
-    "sha256": "29cca87300b5ee3db1a3d95316bcc4466e3825ce30fe68010f563700976ed33f"
-   },
-   "cisco_aci/tests/fixtures/8a68d7acd6469f199b61d9a59a600925.txt": {
-    "sha256": "f230562975cd3afd387975bbc72ee25958a9e8ec0fc807b74492d9ce9c5d7c06"
-   },
-   "cisco_aci/tests/fixtures/8c68bd2767e66b897a40100c52187e03.txt": {
-    "sha256": "af4039a3f264326cc67bc23e2e8db18dde5728420ebc5db9a5059622f0e15cf9"
-   },
-   "cisco_aci/tests/fixtures/8dc1ee02fce40ba8ae240d5e161a88f6.txt": {
-    "sha256": "3723f28fe76266d511ba4ec4df242a06d746bf70050681b0431af57a2a7e771b"
-   },
-   "cisco_aci/tests/fixtures/8ddb6e0c7dfc7ac3b743fabe158f76a2.txt": {
-    "sha256": "de0f9f9cf2fc9762be2293f3f548882f0b0ff0dfef3b2002e3bbd31dd29eed9a"
-   },
-   "cisco_aci/tests/fixtures/8e8698fa185e69226b356a4cf2e77a7d.txt": {
-    "sha256": "b5c12ffab9ca0fb50c3964a089fadca0c00868232b2f25f4821c0ed37a4f4272"
-   },
-   "cisco_aci/tests/fixtures/8ec2fb1e670274ffc7c80a4e8c0b579a.txt": {
-    "sha256": "f7045de9915e5e0c5530facd8f11aa8fe014e1993beea493e5bf2a8c3e5479aa"
-   },
-   "cisco_aci/tests/fixtures/8ee3aa172b88abaeb72a8d92cfd8e1f8.txt": {
-    "sha256": "0b4e6fa696196fbc63ac44988d54d6b8ecfc50722114b34c36dc24ee9c7f6260"
-   },
-   "cisco_aci/tests/fixtures/9006e6d35c66d13426fa04ce73e1ec8b.txt": {
-    "sha256": "323931fe333add539cd00905314ba3e951cc950c5d4d94520d322c76552f9910"
-   },
-   "cisco_aci/tests/fixtures/91823785f83a4dc1926f704cf120359b.txt": {
-    "sha256": "628398dc6ea758bda7c4c143c3f724c77b26b87797edf50435612aaae98edfba"
-   },
-   "cisco_aci/tests/fixtures/91c6c30710d8766a1b18c7970bfe07c3.txt": {
-    "sha256": "48342485d36936904e28bf4317b3ce253aafc1bbf2b7a90451be6d0bc461b2b8"
-   },
-   "cisco_aci/tests/fixtures/923a62a1814d5c8d9d53e04b88a8638a.txt": {
-    "sha256": "7d131840967f0c2c47cebc9c5bb6bde3052160cc1fb63c6bde767703f6636a5b"
-   },
-   "cisco_aci/tests/fixtures/927fcd1e001316ede0756ff8269d36d8.txt": {
-    "sha256": "38cf3b379466145e752b8063804babd3d4a41a6fddc4ad9f9359e9e2c25550de"
-   },
-   "cisco_aci/tests/fixtures/92df89955d9aa53c852817af77427e35.txt": {
-    "sha256": "8290e54fb0cda2686ae50dd8f2c7b2ef2af79666abcb4cee26cc5ad20cd0da1e"
-   },
-   "cisco_aci/tests/fixtures/955e116c3ee8a1101c00ce000baf05f0.txt": {
+   "cisco_aci/tests/fixtures/capacity/955e116c3ee8a1101c00ce000baf05f0.txt": {
     "sha256": "3e1da9d43538784d9feb52fca0b3b3c979ecdec67936eeef02f51ed8b666dbfb"
    },
-   "cisco_aci/tests/fixtures/9647dd5867a5e8000c13a813ea3765a5.txt": {
-    "sha256": "1e93a634f9643f77fe27100f6b182b811ce0401bd4e9f180466e865d0fa0637b"
-   },
-   "cisco_aci/tests/fixtures/9663cbb28348a8cbaf0cd22fd1f37664.txt": {
-    "sha256": "c9d017050617902f10e762efd2b797ab1b9345f078765b7234268bf965a92a54"
-   },
-   "cisco_aci/tests/fixtures/966e2012b2a26cae367719cf4c289418.txt": {
-    "sha256": "c4a22ac12521e0123f989b9e6b25bf8b344f37b43b900fcd4adc50511e4df185"
-   },
-   "cisco_aci/tests/fixtures/971cd5b5cb96fee7663b2c32575d643e.txt": {
-    "sha256": "b700c5d954329f78f4498efc74b0cd93a5c27096cfa5e19ad1552c74b010673a"
-   },
-   "cisco_aci/tests/fixtures/97c9b38cfda14c9218b0d97ac45e2635.txt": {
-    "sha256": "53fc49c1cbae3778b955b94f4083e556f829a7e78e33358d6d82715d42f35305"
-   },
-   "cisco_aci/tests/fixtures/97dbf9f15408eecaa3fd4d45ba7dbaab.txt": {
-    "sha256": "860f2bee8c68428ac37a58661a8242e5d091a608a7f94d7dff7ac09c11d24e27"
-   },
-   "cisco_aci/tests/fixtures/981c85ee885251c23fe84ac8c280813f.txt": {
-    "sha256": "864a05fe4fc31c0cae7c0a5249001b5ecd6d8d4e1e2f35bd463906cfbcbda304"
-   },
-   "cisco_aci/tests/fixtures/98feaf7bf21c889758b0e63c440fe5aa.txt": {
-    "sha256": "ea685bc2de60d6a0c7684b15763c836e303479960618f62df9b53888e166336f"
-   },
-   "cisco_aci/tests/fixtures/9c3b5f41a01c23450b07c06d52243ec1.txt": {
-    "sha256": "f201386ac5e8fefdaa93b19659f842e9059a5a344c6b3d267400715f5e009a65"
-   },
-   "cisco_aci/tests/fixtures/9c623607d19cd8ba1df07157580bbe7d.txt": {
-    "sha256": "a20bb01bbfb2e03fda0a2c0c9da198780c4b74a0b5c9caf1724f870177eff399"
-   },
-   "cisco_aci/tests/fixtures/9d63c3041a48dec9289e0e4555c49a87.txt": {
-    "sha256": "7440a2cdd6fb54d0634b914437a7d94b9cfaf7c5633684d717faf92b121b7afc"
-   },
-   "cisco_aci/tests/fixtures/9f09a35dce91e6170f7b31e02884a578.txt": {
-    "sha256": "f4386440c7adf0f03f6e4156a77fa2ee6202c7c5adb52043193544689ffc7dd0"
-   },
-   "cisco_aci/tests/fixtures/a07b97ec1600dcf7290e14c1c4bef9b0.txt": {
-    "sha256": "4f99d81812e086ff31fe2e3b698258b0c1b13bc2477afa39541351793bfea119"
-   },
-   "cisco_aci/tests/fixtures/a32256a38e5ae47ec67a4fe42a487df7.txt": {
+   "cisco_aci/tests/fixtures/capacity/a32256a38e5ae47ec67a4fe42a487df7.txt": {
     "sha256": "40e0bc23f04f45cb858864d5f87dea6777562e942871557ce513a94bdd30372c"
    },
-   "cisco_aci/tests/fixtures/a464d8d39e53fb950f807296b415ef05.txt": {
-    "sha256": "3b91a15d877f2dce7f8bec9654f7fa14fafaceef23e221a656c28be14ee47095"
-   },
-   "cisco_aci/tests/fixtures/a53d71ffbd0982d015e8395e2f5e4e48.txt": {
-    "sha256": "be3127d633501078e9357f966a4c8e2618aebccbdd10552c9c643ad380c985e7"
-   },
-   "cisco_aci/tests/fixtures/a6f4860ce476b17a4d18014384e8df79.txt": {
-    "sha256": "4c8ebe1153712493082a05ee6b977d8b2d6dc9989956778cb971ad784a261b95"
-   },
-   "cisco_aci/tests/fixtures/a7f558099bdebc44a11f691c18a7b64c.txt": {
-    "sha256": "5da3fb534fa44bfffaf1a33be793517f007456992c66e319dc6cee8a200982c8"
-   },
-   "cisco_aci/tests/fixtures/a877f9e9879ecdaa74fc10fc98415c52.txt": {
-    "sha256": "d0997cbcbfc64f7980dcfb51df3e9f9d44d0aa2a7eb8805bad851131a75553b3"
-   },
-   "cisco_aci/tests/fixtures/a963fd19c5b939826f17e98795384741.txt": {
-    "sha256": "3c9c353a68180b374b58ae4998ec50e092061f17f0193111a5cba2776fac6464"
-   },
-   "cisco_aci/tests/fixtures/aba44ad31223120a0872b33766d856ce.txt": {
-    "sha256": "15e12b02cbb2fde650720b06c006237c6c2f6f0504e9574e2d64c7335dbc32be"
-   },
-   "cisco_aci/tests/fixtures/abc6410c7411348968803d071541ee3a.txt": {
-    "sha256": "94052c93f3628137108810ba679c92ba36083dbef7325ce08b814b2279490c67"
-   },
-   "cisco_aci/tests/fixtures/af35b36a7ed1c5d3e9e64370e779b819.txt": {
-    "sha256": "1f5d3e2c25e6d71d106a06748c268fafe2814f69947d1f0154dfdd831728b7ce"
-   },
-   "cisco_aci/tests/fixtures/af6ca37b21581b58b9901e23dd02cae9.txt": {
-    "sha256": "9e8a356b456aae3b7b4675fbedb1fdff7957b7acd8d16b2929c1ea5802886d05"
-   },
-   "cisco_aci/tests/fixtures/b05ed9fa4f7f2f6e52e78976da725716.txt": {
-    "sha256": "9ff5fdc106a35a651a9ddb2aa7673d5a4e6130b8f06381b563c6c3e71f38bc36"
-   },
-   "cisco_aci/tests/fixtures/b0c46630b68d344089f7209c814e216e.txt": {
-    "sha256": "81bb98529ce8b439c4efe352e600c2d0edcf68e08c81be8d8dccda26c86dc95c"
-   },
-   "cisco_aci/tests/fixtures/b30e959f0d5f3cae611efc62b4430292.txt": {
-    "sha256": "1fd1db81eb3479bcf19059f1a85b726588b891d0ac17d19f311eed67baee3a44"
-   },
-   "cisco_aci/tests/fixtures/b4e10262ba44c169d8ccf61afa3d383f.txt": {
-    "sha256": "7dca9c259d8b78c229996ae7bb5ad995941bc7f1d015a5f2252fbd00888bc908"
-   },
-   "cisco_aci/tests/fixtures/b646eabab7c416db0d772469d9950511.txt": {
-    "sha256": "1169a0013183afaf74176ee9293a771683f34cc27e4e801fb16410d61d60cebe"
-   },
-   "cisco_aci/tests/fixtures/b7ca7e3bf57d9bd268742155051c4b81.txt": {
-    "sha256": "47fac636bc6b7a62378ac7c7ac12160ea219dece1b734f3262eebfd5f95df62b"
-   },
-   "cisco_aci/tests/fixtures/b85c3cc6bc8a0c9e6bb6c1d94e7882a1.txt": {
-    "sha256": "1c15e6cc450bc7435357636502cb9d08786dcebf5d0acb5a9e79919a2b5be89b"
-   },
-   "cisco_aci/tests/fixtures/b890ec9099cd6dc146f1859adb8d0586.txt": {
-    "sha256": "4433723ef4fa6e87e39dc28edfac65225893420b9c3d1d2e78c1d02926a47f5d"
-   },
-   "cisco_aci/tests/fixtures/b8be72b08d60e236c85e568af0b0dfd2.txt": {
-    "sha256": "66776e9637588b3c9ede0cffb735106b10c6677e67f325321142b443d79daa96"
-   },
-   "cisco_aci/tests/fixtures/b9d166b082550a60bbf80eb3e32eb31f.txt": {
-    "sha256": "807afb3ab8187c5abb8e5abb78d3d6cca3ed1a41c584d42a73610b6bb3b3babe"
-   },
-   "cisco_aci/tests/fixtures/b9ec4494d631d05122fd7fb4baf0877d.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/bac89bea75dbf42e5108b31ee5f2e4c6.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/bd2db6fd496f3b1ee12ac533e3224c21.txt": {
-    "sha256": "3179bf148dd62f9ee17b57b562e810eb4cef1a32a7370dea4c76c73eb06b2ae0"
-   },
-   "cisco_aci/tests/fixtures/bdfb722fc02748dce7176d0ce8ea07de.txt": {
-    "sha256": "c8626f42f780b2c9954e0df7f8c5084f8da89b0468145964f0127961882cf794"
-   },
-   "cisco_aci/tests/fixtures/bf67a8207fd44dc95be472148a1eb188.txt": {
-    "sha256": "669e54b407ab11e967b9b29956f93b5567e2181db6aa79d2167e9beaf3f6f082"
-   },
-   "cisco_aci/tests/fixtures/c0526b62f52c9e8956990035baa96382.txt": {
+   "cisco_aci/tests/fixtures/capacity/c0526b62f52c9e8956990035baa96382.txt": {
     "sha256": "459200696eff85d54800caa262d411c706a2dd04c2454854c17b8795cc7b239c"
    },
-   "cisco_aci/tests/fixtures/c1c5a4fec41324e0699f6351e849f8d1.txt": {
-    "sha256": "d07c25dedf9d54f4f61f9636a5f26148c5c40a331a481ccac1a3bd8c821fd062"
-   },
-   "cisco_aci/tests/fixtures/c223c78977aa96d4049f4a8263e315d6.txt": {
-    "sha256": "ca0ad72cd8f101a0642babbc30ffe95840289de16192b6057f6662f3a2075ce5"
-   },
-   "cisco_aci/tests/fixtures/c25e699c9f757dc6b7fdd574ce49ba47.txt": {
-    "sha256": "9b32545ac3b6997700e88a8030dfb3d7dd8bc5ea80c0a3be2c26216609cdc969"
-   },
-   "cisco_aci/tests/fixtures/c38b59ed1668a70ac7769f1d05b27a60.txt": {
-    "sha256": "08b32a394640aa3dd6f9ed860b8d373260b897738f1d6cac816efe72c795709a"
-   },
-   "cisco_aci/tests/fixtures/c3f7c0e63cf5f80a48ab795595be3ab6.txt": {
-    "sha256": "d980f588f9c36acd06d8a3826878b20c34e31658b18a4412eede91671562511d"
-   },
-   "cisco_aci/tests/fixtures/c5a11daf28c01cba3689a316fffc7d62.txt": {
-    "sha256": "6771691345dfd7ffaa898393b6b8c8437ec72c217df6881c4f22a562324b2247"
-   },
-   "cisco_aci/tests/fixtures/c6b444a3748e83d5d5173802e2cc8766.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/c6e8ea2770d307b7ca729a3ae5f5f632.txt": {
-    "sha256": "d2285d2ef833527c6405de2bc2b8580ada100970c9163ac4640252c88eaf714d"
-   },
-   "cisco_aci/tests/fixtures/c6fd7a7101806f9cb68b3baa9bd0f82b.txt": {
-    "sha256": "40772ad71c1a9d2180b06b17d97df2b988d5e80ae26fbd6a8126de0cabd507da"
-   },
-   "cisco_aci/tests/fixtures/c73e82f5cdc241fc509a0bbf6d4a7d51.txt": {
-    "sha256": "0b746df05e78d63faca91e47ec8bb693324564fc59478cbb3181e1baf67517cb"
-   },
-   "cisco_aci/tests/fixtures/c74287938370abba1fbb7deb6f1afcdc.txt": {
-    "sha256": "48a45394c4ed9c84b58c22c0594dbeb2d182ca9f68dd3b6eeaa80461b1105206"
-   },
-   "cisco_aci/tests/fixtures/c8e9a0dbceac67fb1149684f7fc7772c.txt": {
-    "sha256": "d4b3b459f5e8e63cee6f8336b40b6f75507507afd08bd99e317f18fcd7d88b83"
-   },
-   "cisco_aci/tests/fixtures/caf41b4bc51dc6f145c5379828a9762e.txt": {
+   "cisco_aci/tests/fixtures/capacity/caf41b4bc51dc6f145c5379828a9762e.txt": {
     "sha256": "0e022eb408a6d05738a8b5205820efa7d11d702611b5dabeff9c250b7ee4226d"
    },
-   "cisco_aci/tests/fixtures/cb1574172f451af88fc657b5b8326744.txt": {
-    "sha256": "b5ee914e28d456831ceba0606427ab199fda9039ac57490d68f5e12a71521c10"
-   },
-   "cisco_aci/tests/fixtures/cb5f39f666fdef06a4438813d0814611.txt": {
+   "cisco_aci/tests/fixtures/capacity/cb5f39f666fdef06a4438813d0814611.txt": {
     "sha256": "5fb3e4282c47c8d9584fc9550221cc69b346adab3871f5d84882eafeb6f14e9e"
    },
-   "cisco_aci/tests/fixtures/cb6b65dc75a49a5c7d504cded066672c.txt": {
-    "sha256": "6cc870fa3c3b98faaa177ce92ec26c3b38f7f41ebec7af292b9335c3d01636cc"
-   },
-   "cisco_aci/tests/fixtures/cc2f4768ee3a0e093c39baab2b83c2fb.txt": {
-    "sha256": "b3c419a4d350bf5973fc21d48dfe505c4a7dd121f22c3bc61bbf9f08c9bb02c6"
-   },
-   "cisco_aci/tests/fixtures/cc3ee98ed21b0e4cf6d3057123981358.txt": {
-    "sha256": "a9d48cc58f92116a1911338a836f07de3234123b3e473dd0923e96d463245cbf"
-   },
-   "cisco_aci/tests/fixtures/cd43fd4acdc63b1e3b80ca448f37d16d.txt": {
-    "sha256": "f628735daefe148c0546b53ddb2a63edb3e81563e6d1564f0c136d87e9bbce6a"
-   },
-   "cisco_aci/tests/fixtures/cd70f0e8083993b02aa97bfc482be3b3.txt": {
-    "sha256": "40fc9a82acde0aa89c0f25d4ecd1ef4548687afd10844f0a1792118378863157"
-   },
-   "cisco_aci/tests/fixtures/cdcd9cfeee1cdb83883311d87c344b37.txt": {
-    "sha256": "36110a071b71fd91797fc6eeb70a73ba8ba23f06f833bceb688a0b9941caf9ea"
-   },
-   "cisco_aci/tests/fixtures/cde31232e5ba774088e9615ce786f15a.txt": {
-    "sha256": "9883ab8b1172535c02be93b0434f3b2bf579889b8df2073edf2d67f871b4e3ca"
-   },
-   "cisco_aci/tests/fixtures/cf592a4e1c6399ebf0925f01a7b62651.txt": {
-    "sha256": "f6231de20ec35c1cf3fb83aa7575f8d8509ccd2327325dcdedb2e8413214a14c"
-   },
-   "cisco_aci/tests/fixtures/d0260e4832537b43b1acb38bcfa58063.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/d1211059472f6ff3efb9087a3bf21008.txt": {
-    "sha256": "2b9fcfd93cee9e0bef79074a5796e486ccb9ffcefc5e5bf7be8df568448bf57a"
-   },
-   "cisco_aci/tests/fixtures/d121d04c8171c3095561ca593dc2de5d.txt": {
-    "sha256": "9b758f0ce71ab24064abe0bbd3c2a08a89af927bbf79c1e29ad763bab0b80b7b"
-   },
-   "cisco_aci/tests/fixtures/d1bfe6c0c336fa036de9d03b95eb7ea0.txt": {
-    "sha256": "e21c6565ec95064a4ac033a8a428162ad650bf06ade2d133e3e66b11c1bc1156"
-   },
-   "cisco_aci/tests/fixtures/d24061eff4081cff59ca1a0ed7c5211f.txt": {
-    "sha256": "5cd801a319f9468f3ae4c7b0e9723fff945cf9f92bcb8f719dba6400bfde78c4"
-   },
-   "cisco_aci/tests/fixtures/d34ca8b96c40563f86078331b5f4934c.txt": {
-    "sha256": "c3b5139b9b8134666461f5ce55fff372976e5dd00a35d86ee56c347562bf4b48"
-   },
-   "cisco_aci/tests/fixtures/d4a55e02d7d0c4fcd81652d877df0644.txt": {
-    "sha256": "fef46392925df3e3ca7ce6e66e60123e5a2dca719da8f07e63bf8e6a173aeea1"
-   },
-   "cisco_aci/tests/fixtures/d4efb7c9b80929991dd91850d9ddceef.txt": {
-    "sha256": "47f85e71fbbcbeb30b06bf0922d83ea08b07e836c30078da2ac90ed397f6acd3"
-   },
-   "cisco_aci/tests/fixtures/d5a35efb3ba5f75ecebe87583ae42b02.txt": {
-    "sha256": "ff5dfca1dca5403164054d38f1402abb4125bfc2d3a9d0ce18d89329a33e68a3"
-   },
-   "cisco_aci/tests/fixtures/d78862295dbba62424e4a45115e75601.txt": {
-    "sha256": "539cbd6d5e7a00c804df8bf41cea1f58e47d1ae6cd2552ea6eb39d276376e3a8"
-   },
-   "cisco_aci/tests/fixtures/d81771f6f4e30ed0e19fe858f1cfd66f.txt": {
-    "sha256": "575522089e59586184305a837f83868baedd7e68382dbc29f9d03e19aef499f6"
-   },
-   "cisco_aci/tests/fixtures/d8ea046fd4b1831561393f0b0e7055ab.txt": {
+   "cisco_aci/tests/fixtures/capacity/d8ea046fd4b1831561393f0b0e7055ab.txt": {
     "sha256": "6e3390bc5278ed63486a467aee754f51254107741b30037e55c74d1688511547"
    },
-   "cisco_aci/tests/fixtures/d96de58612eb1a5189c57fddf11c3cbe.txt": {
-    "sha256": "30b89b16f7bb45ed01da7c9ee7386a71a8fcd6de398836cd5aff293ec9becd0a"
-   },
-   "cisco_aci/tests/fixtures/d98210e57060ed7285a4fa7434c53ff1.txt": {
-    "sha256": "98848825e84e18a26628c9cdfee1d80143260d397b35626e5db05e3e4a17aa45"
-   },
-   "cisco_aci/tests/fixtures/d9a173b8bee4de1024bdf1671cb09aa2.txt": {
+   "cisco_aci/tests/fixtures/capacity/d9a173b8bee4de1024bdf1671cb09aa2.txt": {
     "sha256": "708b83587710d6b4a536d70592ce876a8d216ff2901ca951a7b81d025c92799e"
    },
-   "cisco_aci/tests/fixtures/d9f5892ce5f43fd4d40f87e8afbfc4e4.txt": {
+   "cisco_aci/tests/fixtures/fabric/01dbe25246a232e83b480b325d039964.txt": {
+    "sha256": "a8bd5d6b917606597c70c666a3974e0e7158e94c600f8139d7549782b503d560"
+   },
+   "cisco_aci/tests/fixtures/fabric/0265f64e971b212efa4211dffb9ca963.txt": {
+    "sha256": "17b961e39342525ac678242cb0d9ebc1bb865cd8d4b46f8592ec7fe22c610db6"
+   },
+   "cisco_aci/tests/fixtures/fabric/0420ca4146dc833562e815353871c910.txt": {
+    "sha256": "7c3afc30294156f6892d976f40e5a0e0e8560a43efc00da82b3c84bc4ee455ab"
+   },
+   "cisco_aci/tests/fixtures/fabric/059ee9bd3834a66b3c3f5861608fe368.txt": {
+    "sha256": "292827ced097b038561760922339eec6db8d35fd5704350fdb886f8e645e5349"
+   },
+   "cisco_aci/tests/fixtures/fabric/05d1db1e4a5e62b4056b0aa5958611da.txt": {
+    "sha256": "3490197832f605799d404547f50be2d6840245b1db9f7f80717f7fed24c12a8d"
+   },
+   "cisco_aci/tests/fixtures/fabric/05df362203f2d079d6c975bd34e0ced0.txt": {
+    "sha256": "22bedabd18fa2028679e20bac8aae9b4368e5e082eac4a14e2d69bde760ce20d"
+   },
+   "cisco_aci/tests/fixtures/fabric/05eea58694d8f2a731b9e4a1dc762eb8.txt": {
+    "sha256": "86068a6ef9882f2cce2092dd5ff79c507ce57de5efd2ebf35ce605282af56e9b"
+   },
+   "cisco_aci/tests/fixtures/fabric/062669633a82d933bda471003dd9e186.txt": {
+    "sha256": "2d1cc685da978ae123dba2edc2ae45ac7427e849f1a66284f8459c161b281b73"
+   },
+   "cisco_aci/tests/fixtures/fabric/0694b681e750f83314f4492ac6ebfa39.txt": {
+    "sha256": "f5e1fb2213849e1f59ecc03782fe027bc7fc095fe61b226918aaa827310ea74f"
+   },
+   "cisco_aci/tests/fixtures/fabric/0826c49f46687d4931b61b718f928ef0.txt": {
+    "sha256": "37ace6d86a294400d19474a1535d37aae374aa000372f4f22e0cc72a9c20dda4"
+   },
+   "cisco_aci/tests/fixtures/fabric/08ce11dd471b76a5d9716815baec1ae2.txt": {
+    "sha256": "91ec4d1636370af5e52306bd2c6a3ebfb4978d66c6ee03c12d85b2e9f5cbfd22"
+   },
+   "cisco_aci/tests/fixtures/fabric/09307f3bd50af43e2a42115352a9667f.txt": {
+    "sha256": "8bbca727cf07fb82a6354f674c264ef2396eb5c8d164bde15d534403902a5379"
+   },
+   "cisco_aci/tests/fixtures/fabric/0ac69558dcde5281f3875cc714251816.txt": {
+    "sha256": "a05a5ecde4ead12edad142f0fbff289f623a096e9cd7e32ea16407ccd4392fca"
+   },
+   "cisco_aci/tests/fixtures/fabric/0c9c8a1bc19a01cd2989dc3c969a07b0.txt": {
+    "sha256": "2fbc3fea9b84206e873b6239fa9208aaf0a915203b5e5e9e86b6ee9bd789375a"
+   },
+   "cisco_aci/tests/fixtures/fabric/0d11d458b6d31906696642f74bf016cc.txt": {
+    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
+   },
+   "cisco_aci/tests/fixtures/fabric/0d65a35670e5e6911748ffad58aefe97.txt": {
+    "sha256": "cc7b95964b60de51fc7e7416f329d7b7081f254e01c39052c9b04b166a7ac055"
+   },
+   "cisco_aci/tests/fixtures/fabric/0d7f07939572bc73ae4282605ca20ebd.txt": {
+    "sha256": "a6d222589bc7ef88f67253a03f4730ba397327623eecc8e256033ee1dea5e51e"
+   },
+   "cisco_aci/tests/fixtures/fabric/0f4f1dfb81ec9f835b63955609f35653.txt": {
+    "sha256": "407d19d7915cbe51981bd46e3be29b68a8d989db3986ff22200cac9a675573e2"
+   },
+   "cisco_aci/tests/fixtures/fabric/0fe0cd1d847716f3586e58ba3d46a87c.txt": {
+    "sha256": "07b3eb850ff018eab459675b99ae3672a7d3af03a06950502456985258abeea1"
+   },
+   "cisco_aci/tests/fixtures/fabric/12531f666a06ff80395f2d12a5379379.txt": {
+    "sha256": "df008edb31ed560930b80c4d443b44253434c4876bf3b0490cecbc57f87d9708"
+   },
+   "cisco_aci/tests/fixtures/fabric/12d5f5e65fbebc8b8d061d7bf06582be.txt": {
+    "sha256": "71d02e0387f19b8d7d869b0fdff411e7663bccfa75b4a3f27eeeb027d0c02da1"
+   },
+   "cisco_aci/tests/fixtures/fabric/131494bb85b639cfb048bc27621d1eda.txt": {
+    "sha256": "49dafbbd90a0451308577726f965fad6df655892d0eb7547e49863e2b01a721c"
+   },
+   "cisco_aci/tests/fixtures/fabric/1592af41e69b692cb9ea41c2082c6324.txt": {
+    "sha256": "787a7893c3026ac3f336d391e36d1e56f67f9c7e040d1eeddb6f26ec1112b966"
+   },
+   "cisco_aci/tests/fixtures/fabric/182c808e8ae2493e815889cb488088e9.txt": {
+    "sha256": "3d1c9135414b23a500e203dc60d729d9802727af16c5c84d4e135a3555c3757c"
+   },
+   "cisco_aci/tests/fixtures/fabric/1862d3b380a8f2220ac096d7aef9310a.txt": {
+    "sha256": "411fd3f771afd746612fe370413981a67ca200b2f625fccee8f2c88144fe27ae"
+   },
+   "cisco_aci/tests/fixtures/fabric/191f10ceb875b1b8f592deff3e71326b.txt": {
+    "sha256": "1a2944b33e28c4504642322f66d722e7b730c8fd82cacbef7d415ca06c052fe0"
+   },
+   "cisco_aci/tests/fixtures/fabric/1a2b5d3742c9866abf4c3b6d248ab331.txt": {
+    "sha256": "a61774f900d7d41c02bec000a44739b798fa13eac7e4655579b34fbf9fd3fdfa"
+   },
+   "cisco_aci/tests/fixtures/fabric/1aaf6555b1102852ff7de4b370cc0d0f.txt": {
+    "sha256": "1b518e87d41087bf3ce7b63d03b5b124233d7f6a9ca7e412310a4999cec7e435"
+   },
+   "cisco_aci/tests/fixtures/fabric/1df5692a384c4dd76bb6aaeec9e5f922.txt": {
+    "sha256": "530349e9e8074953b82140f12d052e97deec05b7f66a01eb72f49bb8fc8d316b"
+   },
+   "cisco_aci/tests/fixtures/fabric/1e60b21b3e8faf751aadfd9da2c75ff1.txt": {
+    "sha256": "20ec79118c511520ec75cd6e83791e033e56bfc3b73d7e106db20fc12939c770"
+   },
+   "cisco_aci/tests/fixtures/fabric/20666ac76c056ba221c188dd849ea5ab.txt": {
+    "sha256": "e577e44ef16f2f77d0d9c96af1b092b584845613c40cce5513d522b35898773f"
+   },
+   "cisco_aci/tests/fixtures/fabric/236cd3ffe852d58ad38dfbe0e8526386.txt": {
+    "sha256": "6d298f35b4dde3e892ea4024b96d303165d2dbd3de8426cecceb4fc7b18171c8"
+   },
+   "cisco_aci/tests/fixtures/fabric/24292dd7f226aaa790ba72888c2f4100.txt": {
+    "sha256": "b8185e7e59f4f39eb854dfd691e67d9ea4193ed1261e34781e1e07086c411183"
+   },
+   "cisco_aci/tests/fixtures/fabric/24c2652ea402d34c526a5725b879837a.txt": {
+    "sha256": "31cd6174224dadb5cf7c482466118bd5bc26cf5d61ecf56430f51c7e649216bf"
+   },
+   "cisco_aci/tests/fixtures/fabric/25fb8de7707d45adb5547c93647b096a.txt": {
+    "sha256": "e0501210786481d896fbb49613672b68c6c652dd0d2150eaeb3bf69de6ada0ea"
+   },
+   "cisco_aci/tests/fixtures/fabric/26bfabd76a3c7b74961718e820150181.txt": {
+    "sha256": "579fad1e2e6cbad5d208177ca6e08ae262a5899f8b41c229b9324c56b4d33800"
+   },
+   "cisco_aci/tests/fixtures/fabric/26f89388cc0e2de103e26d6d4ea3d678.txt": {
+    "sha256": "1596191ecb18aacf1e7b391da54dabf6c3b07de7d64b52e2c99271ed9995500d"
+   },
+   "cisco_aci/tests/fixtures/fabric/28becf8a90f91ffea40df5c48656743b.txt": {
+    "sha256": "a17a7d703c8f904f773b2fccaa843068f68900ba5a7f059ab6678238641ec4e6"
+   },
+   "cisco_aci/tests/fixtures/fabric/29323d3635c14c2110036b6f46ff4e3c.txt": {
+    "sha256": "ef5161070b41876d1799d2eb43b15a749f40b4e2b6c419ecfa57b0f410e4ba38"
+   },
+   "cisco_aci/tests/fixtures/fabric/29e52d4c70bccac74f1a4e4f7b29c32e.txt": {
+    "sha256": "e5717d72f60d8e56245e0ca223097f9c2c2255a74b651fe455e9dde70059d8f8"
+   },
+   "cisco_aci/tests/fixtures/fabric/29fd45826b0bb763e5c8b4e92fe53216.txt": {
+    "sha256": "bf16f2fe7133a75a73fd5a57d16939357572f3e2d43f41aa5a40714462d4ccfc"
+   },
+   "cisco_aci/tests/fixtures/fabric/2d08f2b65ec42f632aa197568616c9df.txt": {
+    "sha256": "3d7d9ec41e92f7629c6589cd102206f5a94878428f1c5b57502af2565298104e"
+   },
+   "cisco_aci/tests/fixtures/fabric/2e82232a722241e59f27ac3742934e7e.txt": {
+    "sha256": "ad8f340d36e2986c37e02741ed00e1606e9bacc99605aaf40b787ff889d845fd"
+   },
+   "cisco_aci/tests/fixtures/fabric/310012038948e6cd47afbb3cad45054d.txt": {
+    "sha256": "e797fde15783dc074f7a7568e9ac0067c4b98436d680bfb40c3a8a2637edd8a5"
+   },
+   "cisco_aci/tests/fixtures/fabric/3173be2eaf1384d966894ffae62c74f0.txt": {
+    "sha256": "ce5d86270199746d1ff508d76c2f4e560361140175a2cdc9eee0b86521d95c1a"
+   },
+   "cisco_aci/tests/fixtures/fabric/325ebbb6ef97627d5b9b6cda91f8e1db.txt": {
+    "sha256": "443d76e54e1a5c6e0c49130ff022295f0a83b06b93130c22850a99a524ce341c"
+   },
+   "cisco_aci/tests/fixtures/fabric/363740b68eff24d19f99f62266029e66.txt": {
+    "sha256": "2d17496b819c2d946a8f8a29eba01b99910257cf6ff1bfd321aca0667476aa53"
+   },
+   "cisco_aci/tests/fixtures/fabric/368ad1f728c59d61403654959f02e7e5.txt": {
+    "sha256": "c14417cd9513bf2e28452c7674eecc1a9461543796df713e5c4142f2d63ccaf9"
+   },
+   "cisco_aci/tests/fixtures/fabric/37976cf8da42381453005e341ed57edc.txt": {
+    "sha256": "cef20aff1003471eb12469cab8f2459a05d4d7f4093b68c4edc51e8965517af4"
+   },
+   "cisco_aci/tests/fixtures/fabric/37ed36e29dc28fecf6ebc21cd2714477.txt": {
+    "sha256": "bbd4e70cb8891131d9b169f3b54536280769aff942cb7d43122e4ddaeda9f2e2"
+   },
+   "cisco_aci/tests/fixtures/fabric/38eea560b59819b60a356010e9b3c191.txt": {
+    "sha256": "b144a4116c436902c4ec727a22a66673bc566802c8171823ee4718046545abd5"
+   },
+   "cisco_aci/tests/fixtures/fabric/391b0334845ed94bd2f7f0f52c792dcf.txt": {
+    "sha256": "ab519cde536a11b8eb2c26c90386770028e86015dfb4512572b4bb190b778695"
+   },
+   "cisco_aci/tests/fixtures/fabric/39d31c3f91411cd6018abd79e222d0cf.txt": {
+    "sha256": "16312c1e17d225c838edc46b29fc16fb19db4b208910c7f58843dda6774ebc15"
+   },
+   "cisco_aci/tests/fixtures/fabric/39eadf19ae6f6506492894d5b7eb451d.txt": {
+    "sha256": "19d7b5fd68976516dbf8134ed12338e0d79d6fd4feb11271cf11f36262eab98a"
+   },
+   "cisco_aci/tests/fixtures/fabric/3b1021776ba1702e051084739dfd0dcd.txt": {
+    "sha256": "4f8eb8e69703f0254664bf4754d6e1502d04500dbdafaab687ceb50b12ece56f"
+   },
+   "cisco_aci/tests/fixtures/fabric/3b7673a08dfcb78977b89f664eadefe2.txt": {
+    "sha256": "214f8042e398af93a154db53ea7853b625fb08cac6be8584bdd760ae7cac7d3a"
+   },
+   "cisco_aci/tests/fixtures/fabric/3c0a81313d92e361c55ae1d5bc82b024.txt": {
+    "sha256": "9e0fd283ff4ee6c0a7194fef7200ff0d760b4214ff61b771dab44623fd950964"
+   },
+   "cisco_aci/tests/fixtures/fabric/3cbee8654509c3cd43e50967079d636d.txt": {
+    "sha256": "ebd0e8f39c55102801a68c954ca9a449c1e26f582e81a9e559ad3ca1813f3808"
+   },
+   "cisco_aci/tests/fixtures/fabric/3fea0478e9d12ef2bef175f14163d15f.txt": {
+    "sha256": "429dd74d1c0cb45a0060ce6e8ee965fdce05cbc91d5414af9b3139a5c27ab74f"
+   },
+   "cisco_aci/tests/fixtures/fabric/3fef285c055ac257296e7b7e9d0d99ae.txt": {
+    "sha256": "7628733b9d46b5c3fa07bacf9997e99a5d3fc907d6d517733a573e5b3d6eb277"
+   },
+   "cisco_aci/tests/fixtures/fabric/417c59253e3515daaa1c5c77274958ff.txt": {
+    "sha256": "99c4645a780ec19b12a1d642e0c8e9fe66275044ee6e00737994f572aa803cba"
+   },
+   "cisco_aci/tests/fixtures/fabric/41c11ba1a96d0c0d0f4b3089f26cf948.txt": {
+    "sha256": "548efb2394f77be370d0da8f2b5293d1630ad2ad234f1ca9757764decf13c174"
+   },
+   "cisco_aci/tests/fixtures/fabric/42ba9bb51601fc0dcd87779a4229c533.txt": {
+    "sha256": "c147d7060b6f1dd09fe4666a2ad6b58beb3bde6123bd5953159b9ac7b4d87be9"
+   },
+   "cisco_aci/tests/fixtures/fabric/468af47d68f6c454058003b213546a3d.txt": {
+    "sha256": "1faae914ff7499ccb5881389eb065393a12ed0b22789499a6c09522aeb22090a"
+   },
+   "cisco_aci/tests/fixtures/fabric/472bfc1a0ff05706b83ef45497d62ff3.txt": {
+    "sha256": "9943ecadcad3c2169080636398d33459388983b7df14f8d6cd279565b31c0f5a"
+   },
+   "cisco_aci/tests/fixtures/fabric/47378882fc41888f6f23bddf78bf907f.txt": {
+    "sha256": "9b6db1666d6dafd15a5d1e6e21dabe14e8a3075e0daafb8b83e8329f4ed9a07a"
+   },
+   "cisco_aci/tests/fixtures/fabric/47ad133793f96281cee2db5286d6d27e.txt": {
+    "sha256": "d24e751451114f20802d47b9aab7dee6d1ca98dd3a5a3128ee99c8eabd2e2f84"
+   },
+   "cisco_aci/tests/fixtures/fabric/489238c6f8d6bde0ba86c5388669b2f5.txt": {
+    "sha256": "64ddfeff59f959d03372035002d05f4978dcebc0c6079266af82144a5d9b6f81"
+   },
+   "cisco_aci/tests/fixtures/fabric/4a9de3748cf06fd105e574d497e55cb3.txt": {
+    "sha256": "3bd2b7b57434ba0040a3934b75c507571e640dcef61b37e940801029c78a76c0"
+   },
+   "cisco_aci/tests/fixtures/fabric/4bb497ebffc529c7b2dc82013341bbae.txt": {
+    "sha256": "a1c0c9ffc72ece6f94847ceaff98770c70e0180c3ed01851eafc5c55d730e745"
+   },
+   "cisco_aci/tests/fixtures/fabric/4e6bd13fe648763684a1e52c2b5b6fb9.txt": {
+    "sha256": "76de0004167349eef4d6df963c01f0b96d397f95fc992a5fa9bb2b9bd880fedd"
+   },
+   "cisco_aci/tests/fixtures/fabric/5030ace26a4225d8a53073b122114bb5.txt": {
+    "sha256": "63c54593be20b5c1d1f296e4d0ea11c797b6f0ffa0fe8c8664cfbcafac8646c6"
+   },
+   "cisco_aci/tests/fixtures/fabric/50d46a8273bad8ccb3ffa0733c3511c9.txt": {
+    "sha256": "d2c121b454facf9238d160142bc4772cddef5428f5ebff86cee23ff71626436b"
+   },
+   "cisco_aci/tests/fixtures/fabric/512160d3762b1fc5ea0e7d7d652e4c91.txt": {
+    "sha256": "24004386d3e585875b68b31020d29c02de28a9cc0be8c09127bf92d0bd9fbc4d"
+   },
+   "cisco_aci/tests/fixtures/fabric/51d1697864fc60fbf06e0838a29d3311.txt": {
+    "sha256": "ddf47564e0264dd0733650926e25efef91743e630ad3b2d8b6be14c723ec1f78"
+   },
+   "cisco_aci/tests/fixtures/fabric/54631f3678634a95055946441706e235.txt": {
+    "sha256": "f420667e0607de492b6233fc54f3fa53d1c08719c765a1f64015309beba76907"
+   },
+   "cisco_aci/tests/fixtures/fabric/55df6c4d6ccb8dca85f2de66381f7caf.txt": {
+    "sha256": "ac646de6be963fd2f217b673ac9fe6070771d9ca56693baacf21d1b6283567dc"
+   },
+   "cisco_aci/tests/fixtures/fabric/56456cb4cd430d58542eb6f91df0e34f.txt": {
+    "sha256": "b0b3a7a7237b92e651fa8ca630dad05a2d750713550630508f9a5e149f7e7ed1"
+   },
+   "cisco_aci/tests/fixtures/fabric/589f829bb465d344c485960ea9910519.txt": {
+    "sha256": "ea3eacb325e3e584389bc0ee4cde6e7412b0c65c3f39a04d012d03936ac4d27c"
+   },
+   "cisco_aci/tests/fixtures/fabric/58dca04cc9e1e3d492ac260aac0d1506.txt": {
+    "sha256": "81c59986bcf8f1fd109ddb3b2c5f8fddb2c2940dc7bb0b391d14added76c6b03"
+   },
+   "cisco_aci/tests/fixtures/fabric/595020242506421d68ada87ac012256e.txt": {
+    "sha256": "8f51a7ea5d38b4c04c8e4a6ea92b64723f8c56e31e7de49eccdeacb2b2e6e931"
+   },
+   "cisco_aci/tests/fixtures/fabric/5a04c996228a0802911e1b5e2dc381d8.txt": {
+    "sha256": "d3ee6052178765815966deceff2af03c03e245f8b81a8a5514424f0d40a01f0c"
+   },
+   "cisco_aci/tests/fixtures/fabric/5abeef5dc54c73540c39d62a6e2a77bd.txt": {
+    "sha256": "50b41d5eb031d17c5b81a7951a19ab77dbe6b10ddd4d79827684b70105234bc8"
+   },
+   "cisco_aci/tests/fixtures/fabric/5b8ffb24387021e123e166ee7a388bde.txt": {
+    "sha256": "1968a8a70171d43a8ba225455ed06f1462a548c828bb8a1cd1b2c0557d1a2c1e"
+   },
+   "cisco_aci/tests/fixtures/fabric/5bcf96443c5b5ca0726de909932e6cd0.txt": {
+    "sha256": "f8f11bc8e6b49a9b710f9b89031efb3adc72616e20d059db96c9be2081f02542"
+   },
+   "cisco_aci/tests/fixtures/fabric/5cda376bef1d4d0274b7d2c8007db70e.txt": {
+    "sha256": "fa892356a78eac7d79ea88a52055be4069650708ef5b59b51d793844bc767da8"
+   },
+   "cisco_aci/tests/fixtures/fabric/5d7a62e392e669583e450d28bebf32e3.txt": {
+    "sha256": "126e16affec1fdf1cfa005c0b87f0b6461cf161ea8a044e63bdba85b8d5b6b95"
+   },
+   "cisco_aci/tests/fixtures/fabric/5f9c17b4985418dceb0375f3c8678663.txt": {
+    "sha256": "689f2ff905f3529862435a4922894606324804dfb23795641200524401d69b2e"
+   },
+   "cisco_aci/tests/fixtures/fabric/61123225373140dd4bd581621e9b854d.txt": {
+    "sha256": "18ad4e2ffb67f00b69bc5d5092e5b44fe8036d050372643441fd2b1a97faf417"
+   },
+   "cisco_aci/tests/fixtures/fabric/643d217904f09445fbc9f7b43cd131f0.txt": {
+    "sha256": "dc86b43c2e65a4fe2fc20735c116e15240d73cc2934588b726eaf7746d067370"
+   },
+   "cisco_aci/tests/fixtures/fabric/64c95055e2de554c02ef651cdd480e02.txt": {
+    "sha256": "8cf77ded60b4b6ae07bb35eb311e8a0e86e3f1d6b86b5cd19fc76a47bef12402"
+   },
+   "cisco_aci/tests/fixtures/fabric/66a518765a86e7f2ae488abc45d95d70.txt": {
+    "sha256": "b95847de3d63bc9753515ce3a41d9749dfc1857a67ae9b7a93c68df8ae275d1b"
+   },
+   "cisco_aci/tests/fixtures/fabric/6a927bbf1765276b4bdfb1d9de31990f.txt": {
+    "sha256": "59b4052de2ec2c8a5a3ebf125881e25dbe9df10f5a896d998f36e44e8f24a038"
+   },
+   "cisco_aci/tests/fixtures/fabric/6b723f4c78e4e9153d56b0d8410da810.txt": {
+    "sha256": "dcf2bffffa030d9f69cf3c5eee31a3fb8d4e30701c97f0bfc17a083cf8c7a280"
+   },
+   "cisco_aci/tests/fixtures/fabric/6bd529f60a581c84be13249fe668c467.txt": {
+    "sha256": "bd21440fbc34b1f7c9139994c4dafd371ece02f79250d9f500d5e87017ebe19c"
+   },
+   "cisco_aci/tests/fixtures/fabric/6c18595e43b00d3e591faaefb05e518d.txt": {
+    "sha256": "4dcb09575caf41684af13a1c872399f0cd831225215621684f764ccec87f44a2"
+   },
+   "cisco_aci/tests/fixtures/fabric/6fef8e622903fe12fdd1c8849c095509.txt": {
+    "sha256": "9efba0aa9beb4c4e4b66dd032e1ab1da680baa6ab96ddc6e6f9519f95ba5201d"
+   },
+   "cisco_aci/tests/fixtures/fabric/73477fd8a36f24ffc7b0a5ff58a0151c.txt": {
+    "sha256": "133d117bef356881f95136e1f2f94aa41f430d6c4a2d47eeb41649389bc9116b"
+   },
+   "cisco_aci/tests/fixtures/fabric/737c7e36163881e5e54450fd49b43fd0.txt": {
+    "sha256": "4ee5e53b49131856ab2c3841bd33596ffc197cc247d5f47beca57292a88f7db8"
+   },
+   "cisco_aci/tests/fixtures/fabric/74736ad3c53d4da2da6225f020d0ea07.txt": {
+    "sha256": "43272067938ced129b0eccfa9058325a01b645fa312cb77a319e1098ad076e66"
+   },
+   "cisco_aci/tests/fixtures/fabric/7660dffc9226f865526ffe82fe4694fa.txt": {
+    "sha256": "e6beb91450f010315ec212d24db8f8162cf84604805d4afc99f4f431be8cb63c"
+   },
+   "cisco_aci/tests/fixtures/fabric/768c379447d3fb82d769e31807216858.txt": {
+    "sha256": "1914682861a3af710168b03788c83de3cfbdf6a1fe99e00f93bd12a478f3e594"
+   },
+   "cisco_aci/tests/fixtures/fabric/774df6b01df155b4a7e9ead5b3bb6f95.txt": {
+    "sha256": "5fb3ac6a4af75e7625b029af14c0d9ce0d374b6279bf4efb561d6a2de8a95ddd"
+   },
+   "cisco_aci/tests/fixtures/fabric/784ecd089e2b648809a8e00fd5a11e82.txt": {
+    "sha256": "ae4caedae97bfd952f87ae7c9182fdbfa4b840e60da252994e27a09134e8982e"
+   },
+   "cisco_aci/tests/fixtures/fabric/79af98fe9c1069b329af3b4828712ddd.txt": {
+    "sha256": "8928c0be8eb2863f8529d441870ec06054b781bef4561c6738903e73e84171d8"
+   },
+   "cisco_aci/tests/fixtures/fabric/79c41743346ba48ef5c40b7942dc59f2.txt": {
+    "sha256": "bcf0543361fffe30c3439c3a337e3911ad703bb2ecb25e956b6a5212543708cc"
+   },
+   "cisco_aci/tests/fixtures/fabric/7a5859de7a50c006b2c293a537891ab9.txt": {
+    "sha256": "bae619c2ad87d6fbd2ba928659116138d5664ccb1ac904221b9286f180959bfb"
+   },
+   "cisco_aci/tests/fixtures/fabric/7b06db4060591652e39b305410a03a2a.txt": {
+    "sha256": "959095796247e3dec816cef0659329f94066657fbfb316114044add78f1e336d"
+   },
+   "cisco_aci/tests/fixtures/fabric/7bb3c44837f66c6a254def67002c459c.txt": {
+    "sha256": "825dbdcd9693fc2f28f2746831375e64e7ab89e973d3b66c49ad23758bdcf29d"
+   },
+   "cisco_aci/tests/fixtures/fabric/7cff0d95697cf21e69d7137c29e65df9.txt": {
+    "sha256": "df75e7eb8f36e1054d66c47532a18d449e09f6a3288429de6df2b0cf7ca6f98e"
+   },
+   "cisco_aci/tests/fixtures/fabric/7dbe5688443c0124438db66cc4ae8413.txt": {
+    "sha256": "0d583e28e588c70c5fce1760df92b3ca33fd1fcbf9eb7a1200f3fae339c89378"
+   },
+   "cisco_aci/tests/fixtures/fabric/7e603ac928ec642f45601a94420fb4db.txt": {
+    "sha256": "207e4c4c0e88dd04ab631ddb70343a3386e07d79a5d7331faa6e3de32151aef9"
+   },
+   "cisco_aci/tests/fixtures/fabric/7f313c9de9389bb7b50d1536bac11ec9.txt": {
+    "sha256": "b7b90eee14ddf8eec7ef66063517dc77f9be4623a3960eb24bc82ba51a7f5e81"
+   },
+   "cisco_aci/tests/fixtures/fabric/7f75758e50ae1da1b1a5088b3d70600f.txt": {
+    "sha256": "67570a5372f303a32cde47215045bdeea0d7a3f3240d638104cc0833aa2207ee"
+   },
+   "cisco_aci/tests/fixtures/fabric/7ffce65d2a991de9faa9d3976bf07e1c.txt": {
+    "sha256": "8c95a26ccb589e34f2729420ac9ce21b3cba7910ddabf4b0cc1112833e56a41d"
+   },
+   "cisco_aci/tests/fixtures/fabric/808bdd8ce9c8a62e3a1c9432b9cd2a2d.txt": {
+    "sha256": "407785b25a734ce06cf34889c8bcb78368f47531dd163e67e622e0a27a2ef7bb"
+   },
+   "cisco_aci/tests/fixtures/fabric/8178783b3e17693049f299f040015fef.txt": {
+    "sha256": "910f656d46074613241761dd6fc515c1252adfd994b6ea5a48070a067ca295ce"
+   },
+   "cisco_aci/tests/fixtures/fabric/82edf3105e5c60a2c778cb35aedb645d.txt": {
+    "sha256": "f8cc38dcacaa17f293a67697498aa0dfdeca33afb79f54709dda738e84d5f033"
+   },
+   "cisco_aci/tests/fixtures/fabric/836acd4e8abef3aa3677369d6c45f103.txt": {
+    "sha256": "1f42fc4f2d70c686dcded568314ba5bfb72aedcdbe321a6254c3e078233bddc3"
+   },
+   "cisco_aci/tests/fixtures/fabric/843f58e15736191a5e58e1afc2eb5e84.txt": {
+    "sha256": "5d0d48a825e7a9a9ac94771c1e2b61d1fd06eca9c12ddaf5ee2db62ce952ffe0"
+   },
+   "cisco_aci/tests/fixtures/fabric/84c022cd474b28fb0c93ca6497fbc465.txt": {
+    "sha256": "162eb71b855b4c6827d3c41ab221962652d9dabbd94fff35992431d495bdfcde"
+   },
+   "cisco_aci/tests/fixtures/fabric/84fa5ef1c7cb288cc7d8b3d216a2a359.txt": {
+    "sha256": "67ec3e756d6524e0e933343727c139676bbd5cf841af7b130f51be5a33dc64f2"
+   },
+   "cisco_aci/tests/fixtures/fabric/876dd4352811765c90169517e290e8c6.txt": {
+    "sha256": "081c54f36e68b0ee7074ebad5d4460007ea828991548a3e9eaa6cb35fc38ec0e"
+   },
+   "cisco_aci/tests/fixtures/fabric/87f77f6251a2517a4f65e94b7f79aaee.txt": {
+    "sha256": "17c2bec743fa0f734d0cc3ad8d473ba10584a9ab0ee331ff7c886e7cde51a430"
+   },
+   "cisco_aci/tests/fixtures/fabric/897a879430edceab050ff62f99f990b6.txt": {
+    "sha256": "f1f41f865b8f4ac08a699fd858044ea2dfbdbf02c829cc6f277105b701ac11e7"
+   },
+   "cisco_aci/tests/fixtures/fabric/8a0f90b2c6bd500af62722a13d207a20.txt": {
+    "sha256": "29cca87300b5ee3db1a3d95316bcc4466e3825ce30fe68010f563700976ed33f"
+   },
+   "cisco_aci/tests/fixtures/fabric/8a68d7acd6469f199b61d9a59a600925.txt": {
+    "sha256": "f230562975cd3afd387975bbc72ee25958a9e8ec0fc807b74492d9ce9c5d7c06"
+   },
+   "cisco_aci/tests/fixtures/fabric/8c68bd2767e66b897a40100c52187e03.txt": {
+    "sha256": "af4039a3f264326cc67bc23e2e8db18dde5728420ebc5db9a5059622f0e15cf9"
+   },
+   "cisco_aci/tests/fixtures/fabric/8dc1ee02fce40ba8ae240d5e161a88f6.txt": {
+    "sha256": "3723f28fe76266d511ba4ec4df242a06d746bf70050681b0431af57a2a7e771b"
+   },
+   "cisco_aci/tests/fixtures/fabric/8ddb6e0c7dfc7ac3b743fabe158f76a2.txt": {
+    "sha256": "de0f9f9cf2fc9762be2293f3f548882f0b0ff0dfef3b2002e3bbd31dd29eed9a"
+   },
+   "cisco_aci/tests/fixtures/fabric/8e8698fa185e69226b356a4cf2e77a7d.txt": {
+    "sha256": "b5c12ffab9ca0fb50c3964a089fadca0c00868232b2f25f4821c0ed37a4f4272"
+   },
+   "cisco_aci/tests/fixtures/fabric/8ec2fb1e670274ffc7c80a4e8c0b579a.txt": {
+    "sha256": "f7045de9915e5e0c5530facd8f11aa8fe014e1993beea493e5bf2a8c3e5479aa"
+   },
+   "cisco_aci/tests/fixtures/fabric/8ee3aa172b88abaeb72a8d92cfd8e1f8.txt": {
+    "sha256": "0b4e6fa696196fbc63ac44988d54d6b8ecfc50722114b34c36dc24ee9c7f6260"
+   },
+   "cisco_aci/tests/fixtures/fabric/9006e6d35c66d13426fa04ce73e1ec8b.txt": {
+    "sha256": "323931fe333add539cd00905314ba3e951cc950c5d4d94520d322c76552f9910"
+   },
+   "cisco_aci/tests/fixtures/fabric/91823785f83a4dc1926f704cf120359b.txt": {
+    "sha256": "628398dc6ea758bda7c4c143c3f724c77b26b87797edf50435612aaae98edfba"
+   },
+   "cisco_aci/tests/fixtures/fabric/91c6c30710d8766a1b18c7970bfe07c3.txt": {
+    "sha256": "48342485d36936904e28bf4317b3ce253aafc1bbf2b7a90451be6d0bc461b2b8"
+   },
+   "cisco_aci/tests/fixtures/fabric/923a62a1814d5c8d9d53e04b88a8638a.txt": {
+    "sha256": "7d131840967f0c2c47cebc9c5bb6bde3052160cc1fb63c6bde767703f6636a5b"
+   },
+   "cisco_aci/tests/fixtures/fabric/927fcd1e001316ede0756ff8269d36d8.txt": {
+    "sha256": "38cf3b379466145e752b8063804babd3d4a41a6fddc4ad9f9359e9e2c25550de"
+   },
+   "cisco_aci/tests/fixtures/fabric/92df89955d9aa53c852817af77427e35.txt": {
+    "sha256": "8290e54fb0cda2686ae50dd8f2c7b2ef2af79666abcb4cee26cc5ad20cd0da1e"
+   },
+   "cisco_aci/tests/fixtures/fabric/9647dd5867a5e8000c13a813ea3765a5.txt": {
+    "sha256": "1e93a634f9643f77fe27100f6b182b811ce0401bd4e9f180466e865d0fa0637b"
+   },
+   "cisco_aci/tests/fixtures/fabric/9663cbb28348a8cbaf0cd22fd1f37664.txt": {
+    "sha256": "c9d017050617902f10e762efd2b797ab1b9345f078765b7234268bf965a92a54"
+   },
+   "cisco_aci/tests/fixtures/fabric/966e2012b2a26cae367719cf4c289418.txt": {
+    "sha256": "c4a22ac12521e0123f989b9e6b25bf8b344f37b43b900fcd4adc50511e4df185"
+   },
+   "cisco_aci/tests/fixtures/fabric/971cd5b5cb96fee7663b2c32575d643e.txt": {
+    "sha256": "b700c5d954329f78f4498efc74b0cd93a5c27096cfa5e19ad1552c74b010673a"
+   },
+   "cisco_aci/tests/fixtures/fabric/97c9b38cfda14c9218b0d97ac45e2635.txt": {
+    "sha256": "53fc49c1cbae3778b955b94f4083e556f829a7e78e33358d6d82715d42f35305"
+   },
+   "cisco_aci/tests/fixtures/fabric/97dbf9f15408eecaa3fd4d45ba7dbaab.txt": {
+    "sha256": "860f2bee8c68428ac37a58661a8242e5d091a608a7f94d7dff7ac09c11d24e27"
+   },
+   "cisco_aci/tests/fixtures/fabric/981c85ee885251c23fe84ac8c280813f.txt": {
+    "sha256": "864a05fe4fc31c0cae7c0a5249001b5ecd6d8d4e1e2f35bd463906cfbcbda304"
+   },
+   "cisco_aci/tests/fixtures/fabric/98feaf7bf21c889758b0e63c440fe5aa.txt": {
+    "sha256": "ea685bc2de60d6a0c7684b15763c836e303479960618f62df9b53888e166336f"
+   },
+   "cisco_aci/tests/fixtures/fabric/9c3b5f41a01c23450b07c06d52243ec1.txt": {
+    "sha256": "f201386ac5e8fefdaa93b19659f842e9059a5a344c6b3d267400715f5e009a65"
+   },
+   "cisco_aci/tests/fixtures/fabric/9c623607d19cd8ba1df07157580bbe7d.txt": {
+    "sha256": "a20bb01bbfb2e03fda0a2c0c9da198780c4b74a0b5c9caf1724f870177eff399"
+   },
+   "cisco_aci/tests/fixtures/fabric/9d63c3041a48dec9289e0e4555c49a87.txt": {
+    "sha256": "7440a2cdd6fb54d0634b914437a7d94b9cfaf7c5633684d717faf92b121b7afc"
+   },
+   "cisco_aci/tests/fixtures/fabric/9f09a35dce91e6170f7b31e02884a578.txt": {
+    "sha256": "f4386440c7adf0f03f6e4156a77fa2ee6202c7c5adb52043193544689ffc7dd0"
+   },
+   "cisco_aci/tests/fixtures/fabric/a07b97ec1600dcf7290e14c1c4bef9b0.txt": {
+    "sha256": "4f99d81812e086ff31fe2e3b698258b0c1b13bc2477afa39541351793bfea119"
+   },
+   "cisco_aci/tests/fixtures/fabric/a464d8d39e53fb950f807296b415ef05.txt": {
+    "sha256": "3b91a15d877f2dce7f8bec9654f7fa14fafaceef23e221a656c28be14ee47095"
+   },
+   "cisco_aci/tests/fixtures/fabric/a53d71ffbd0982d015e8395e2f5e4e48.txt": {
+    "sha256": "be3127d633501078e9357f966a4c8e2618aebccbdd10552c9c643ad380c985e7"
+   },
+   "cisco_aci/tests/fixtures/fabric/a6f4860ce476b17a4d18014384e8df79.txt": {
+    "sha256": "4c8ebe1153712493082a05ee6b977d8b2d6dc9989956778cb971ad784a261b95"
+   },
+   "cisco_aci/tests/fixtures/fabric/a7f558099bdebc44a11f691c18a7b64c.txt": {
+    "sha256": "5da3fb534fa44bfffaf1a33be793517f007456992c66e319dc6cee8a200982c8"
+   },
+   "cisco_aci/tests/fixtures/fabric/a877f9e9879ecdaa74fc10fc98415c52.txt": {
+    "sha256": "d0997cbcbfc64f7980dcfb51df3e9f9d44d0aa2a7eb8805bad851131a75553b3"
+   },
+   "cisco_aci/tests/fixtures/fabric/a963fd19c5b939826f17e98795384741.txt": {
+    "sha256": "3c9c353a68180b374b58ae4998ec50e092061f17f0193111a5cba2776fac6464"
+   },
+   "cisco_aci/tests/fixtures/fabric/aba44ad31223120a0872b33766d856ce.txt": {
+    "sha256": "15e12b02cbb2fde650720b06c006237c6c2f6f0504e9574e2d64c7335dbc32be"
+   },
+   "cisco_aci/tests/fixtures/fabric/abc6410c7411348968803d071541ee3a.txt": {
+    "sha256": "94052c93f3628137108810ba679c92ba36083dbef7325ce08b814b2279490c67"
+   },
+   "cisco_aci/tests/fixtures/fabric/af35b36a7ed1c5d3e9e64370e779b819.txt": {
+    "sha256": "1f5d3e2c25e6d71d106a06748c268fafe2814f69947d1f0154dfdd831728b7ce"
+   },
+   "cisco_aci/tests/fixtures/fabric/b0c46630b68d344089f7209c814e216e.txt": {
+    "sha256": "81bb98529ce8b439c4efe352e600c2d0edcf68e08c81be8d8dccda26c86dc95c"
+   },
+   "cisco_aci/tests/fixtures/fabric/b30e959f0d5f3cae611efc62b4430292.txt": {
+    "sha256": "1fd1db81eb3479bcf19059f1a85b726588b891d0ac17d19f311eed67baee3a44"
+   },
+   "cisco_aci/tests/fixtures/fabric/b4e10262ba44c169d8ccf61afa3d383f.txt": {
+    "sha256": "7dca9c259d8b78c229996ae7bb5ad995941bc7f1d015a5f2252fbd00888bc908"
+   },
+   "cisco_aci/tests/fixtures/fabric/b646eabab7c416db0d772469d9950511.txt": {
+    "sha256": "1169a0013183afaf74176ee9293a771683f34cc27e4e801fb16410d61d60cebe"
+   },
+   "cisco_aci/tests/fixtures/fabric/b7ca7e3bf57d9bd268742155051c4b81.txt": {
+    "sha256": "47fac636bc6b7a62378ac7c7ac12160ea219dece1b734f3262eebfd5f95df62b"
+   },
+   "cisco_aci/tests/fixtures/fabric/b85c3cc6bc8a0c9e6bb6c1d94e7882a1.txt": {
+    "sha256": "1c15e6cc450bc7435357636502cb9d08786dcebf5d0acb5a9e79919a2b5be89b"
+   },
+   "cisco_aci/tests/fixtures/fabric/b890ec9099cd6dc146f1859adb8d0586.txt": {
+    "sha256": "4433723ef4fa6e87e39dc28edfac65225893420b9c3d1d2e78c1d02926a47f5d"
+   },
+   "cisco_aci/tests/fixtures/fabric/b8be72b08d60e236c85e568af0b0dfd2.txt": {
+    "sha256": "66776e9637588b3c9ede0cffb735106b10c6677e67f325321142b443d79daa96"
+   },
+   "cisco_aci/tests/fixtures/fabric/b9d166b082550a60bbf80eb3e32eb31f.txt": {
+    "sha256": "807afb3ab8187c5abb8e5abb78d3d6cca3ed1a41c584d42a73610b6bb3b3babe"
+   },
+   "cisco_aci/tests/fixtures/fabric/bd2db6fd496f3b1ee12ac533e3224c21.txt": {
+    "sha256": "3179bf148dd62f9ee17b57b562e810eb4cef1a32a7370dea4c76c73eb06b2ae0"
+   },
+   "cisco_aci/tests/fixtures/fabric/bdfb722fc02748dce7176d0ce8ea07de.txt": {
+    "sha256": "c8626f42f780b2c9954e0df7f8c5084f8da89b0468145964f0127961882cf794"
+   },
+   "cisco_aci/tests/fixtures/fabric/bf67a8207fd44dc95be472148a1eb188.txt": {
+    "sha256": "669e54b407ab11e967b9b29956f93b5567e2181db6aa79d2167e9beaf3f6f082"
+   },
+   "cisco_aci/tests/fixtures/fabric/c1c5a4fec41324e0699f6351e849f8d1.txt": {
+    "sha256": "d07c25dedf9d54f4f61f9636a5f26148c5c40a331a481ccac1a3bd8c821fd062"
+   },
+   "cisco_aci/tests/fixtures/fabric/c223c78977aa96d4049f4a8263e315d6.txt": {
+    "sha256": "ca0ad72cd8f101a0642babbc30ffe95840289de16192b6057f6662f3a2075ce5"
+   },
+   "cisco_aci/tests/fixtures/fabric/c25e699c9f757dc6b7fdd574ce49ba47.txt": {
+    "sha256": "9b32545ac3b6997700e88a8030dfb3d7dd8bc5ea80c0a3be2c26216609cdc969"
+   },
+   "cisco_aci/tests/fixtures/fabric/c38b59ed1668a70ac7769f1d05b27a60.txt": {
+    "sha256": "08b32a394640aa3dd6f9ed860b8d373260b897738f1d6cac816efe72c795709a"
+   },
+   "cisco_aci/tests/fixtures/fabric/c3f7c0e63cf5f80a48ab795595be3ab6.txt": {
+    "sha256": "d980f588f9c36acd06d8a3826878b20c34e31658b18a4412eede91671562511d"
+   },
+   "cisco_aci/tests/fixtures/fabric/c5a11daf28c01cba3689a316fffc7d62.txt": {
+    "sha256": "6771691345dfd7ffaa898393b6b8c8437ec72c217df6881c4f22a562324b2247"
+   },
+   "cisco_aci/tests/fixtures/fabric/c6e8ea2770d307b7ca729a3ae5f5f632.txt": {
+    "sha256": "d2285d2ef833527c6405de2bc2b8580ada100970c9163ac4640252c88eaf714d"
+   },
+   "cisco_aci/tests/fixtures/fabric/c6fd7a7101806f9cb68b3baa9bd0f82b.txt": {
+    "sha256": "40772ad71c1a9d2180b06b17d97df2b988d5e80ae26fbd6a8126de0cabd507da"
+   },
+   "cisco_aci/tests/fixtures/fabric/c73e82f5cdc241fc509a0bbf6d4a7d51.txt": {
+    "sha256": "0b746df05e78d63faca91e47ec8bb693324564fc59478cbb3181e1baf67517cb"
+   },
+   "cisco_aci/tests/fixtures/fabric/c74287938370abba1fbb7deb6f1afcdc.txt": {
+    "sha256": "48a45394c4ed9c84b58c22c0594dbeb2d182ca9f68dd3b6eeaa80461b1105206"
+   },
+   "cisco_aci/tests/fixtures/fabric/cb1574172f451af88fc657b5b8326744.txt": {
+    "sha256": "b5ee914e28d456831ceba0606427ab199fda9039ac57490d68f5e12a71521c10"
+   },
+   "cisco_aci/tests/fixtures/fabric/cb6b65dc75a49a5c7d504cded066672c.txt": {
+    "sha256": "6cc870fa3c3b98faaa177ce92ec26c3b38f7f41ebec7af292b9335c3d01636cc"
+   },
+   "cisco_aci/tests/fixtures/fabric/cc2f4768ee3a0e093c39baab2b83c2fb.txt": {
+    "sha256": "b3c419a4d350bf5973fc21d48dfe505c4a7dd121f22c3bc61bbf9f08c9bb02c6"
+   },
+   "cisco_aci/tests/fixtures/fabric/cc3ee98ed21b0e4cf6d3057123981358.txt": {
+    "sha256": "a9d48cc58f92116a1911338a836f07de3234123b3e473dd0923e96d463245cbf"
+   },
+   "cisco_aci/tests/fixtures/fabric/cd43fd4acdc63b1e3b80ca448f37d16d.txt": {
+    "sha256": "f628735daefe148c0546b53ddb2a63edb3e81563e6d1564f0c136d87e9bbce6a"
+   },
+   "cisco_aci/tests/fixtures/fabric/cd70f0e8083993b02aa97bfc482be3b3.txt": {
+    "sha256": "40fc9a82acde0aa89c0f25d4ecd1ef4548687afd10844f0a1792118378863157"
+   },
+   "cisco_aci/tests/fixtures/fabric/cdcd9cfeee1cdb83883311d87c344b37.txt": {
+    "sha256": "36110a071b71fd91797fc6eeb70a73ba8ba23f06f833bceb688a0b9941caf9ea"
+   },
+   "cisco_aci/tests/fixtures/fabric/cde31232e5ba774088e9615ce786f15a.txt": {
+    "sha256": "9883ab8b1172535c02be93b0434f3b2bf579889b8df2073edf2d67f871b4e3ca"
+   },
+   "cisco_aci/tests/fixtures/fabric/cf592a4e1c6399ebf0925f01a7b62651.txt": {
+    "sha256": "f6231de20ec35c1cf3fb83aa7575f8d8509ccd2327325dcdedb2e8413214a14c"
+   },
+   "cisco_aci/tests/fixtures/fabric/d1211059472f6ff3efb9087a3bf21008.txt": {
+    "sha256": "2b9fcfd93cee9e0bef79074a5796e486ccb9ffcefc5e5bf7be8df568448bf57a"
+   },
+   "cisco_aci/tests/fixtures/fabric/d121d04c8171c3095561ca593dc2de5d.txt": {
+    "sha256": "9b758f0ce71ab24064abe0bbd3c2a08a89af927bbf79c1e29ad763bab0b80b7b"
+   },
+   "cisco_aci/tests/fixtures/fabric/d1bfe6c0c336fa036de9d03b95eb7ea0.txt": {
+    "sha256": "e21c6565ec95064a4ac033a8a428162ad650bf06ade2d133e3e66b11c1bc1156"
+   },
+   "cisco_aci/tests/fixtures/fabric/d24061eff4081cff59ca1a0ed7c5211f.txt": {
+    "sha256": "5cd801a319f9468f3ae4c7b0e9723fff945cf9f92bcb8f719dba6400bfde78c4"
+   },
+   "cisco_aci/tests/fixtures/fabric/d34ca8b96c40563f86078331b5f4934c.txt": {
+    "sha256": "c3b5139b9b8134666461f5ce55fff372976e5dd00a35d86ee56c347562bf4b48"
+   },
+   "cisco_aci/tests/fixtures/fabric/d4a55e02d7d0c4fcd81652d877df0644.txt": {
+    "sha256": "fef46392925df3e3ca7ce6e66e60123e5a2dca719da8f07e63bf8e6a173aeea1"
+   },
+   "cisco_aci/tests/fixtures/fabric/d5a35efb3ba5f75ecebe87583ae42b02.txt": {
+    "sha256": "ff5dfca1dca5403164054d38f1402abb4125bfc2d3a9d0ce18d89329a33e68a3"
+   },
+   "cisco_aci/tests/fixtures/fabric/d78862295dbba62424e4a45115e75601.txt": {
+    "sha256": "539cbd6d5e7a00c804df8bf41cea1f58e47d1ae6cd2552ea6eb39d276376e3a8"
+   },
+   "cisco_aci/tests/fixtures/fabric/d81771f6f4e30ed0e19fe858f1cfd66f.txt": {
+    "sha256": "575522089e59586184305a837f83868baedd7e68382dbc29f9d03e19aef499f6"
+   },
+   "cisco_aci/tests/fixtures/fabric/d96de58612eb1a5189c57fddf11c3cbe.txt": {
+    "sha256": "30b89b16f7bb45ed01da7c9ee7386a71a8fcd6de398836cd5aff293ec9becd0a"
+   },
+   "cisco_aci/tests/fixtures/fabric/d9f5892ce5f43fd4d40f87e8afbfc4e4.txt": {
     "sha256": "8d06d87a0375070d8b91ef65a360ecad1967b297f755539124962db280827984"
    },
-   "cisco_aci/tests/fixtures/da3cc25775b42c6e85bf8e389cde346c.txt": {
+   "cisco_aci/tests/fixtures/fabric/da3cc25775b42c6e85bf8e389cde346c.txt": {
     "sha256": "bd11596e8bc15c9504206ed8c078c938d431221bbb18dd011d772695bde4ed47"
    },
-   "cisco_aci/tests/fixtures/dace1ecad6f3d9a50eb8d4a15631ba88.txt": {
+   "cisco_aci/tests/fixtures/fabric/dace1ecad6f3d9a50eb8d4a15631ba88.txt": {
     "sha256": "e76010127e3c59aaa6124cdc267821b208088bd89dcfa5c5755b079ad1eeba99"
    },
-   "cisco_aci/tests/fixtures/db0a80e48f616964614a911f537e20b3.txt": {
+   "cisco_aci/tests/fixtures/fabric/db0a80e48f616964614a911f537e20b3.txt": {
     "sha256": "36000b668ba2377ea5d5649e52541b5b6c9ed68812b07a95d694cb846ce11576"
    },
-   "cisco_aci/tests/fixtures/db346582f606b821ac63d7c1de29de16.txt": {
+   "cisco_aci/tests/fixtures/fabric/db346582f606b821ac63d7c1de29de16.txt": {
     "sha256": "a7bc593bb49c40de8a8df7424a08be45cfbbb528a750d9e9efa6ac22f0d873c8"
    },
-   "cisco_aci/tests/fixtures/ded65ac48170a7a3d8914950607e4e18.txt": {
+   "cisco_aci/tests/fixtures/fabric/ded65ac48170a7a3d8914950607e4e18.txt": {
     "sha256": "2b3abc0f2482ce7f0fb8f371836bda5b474ab151fde102ffa8668057e17b869f"
    },
-   "cisco_aci/tests/fixtures/df7bc44413d19409a2dcca4b60b57eed.txt": {
+   "cisco_aci/tests/fixtures/fabric/df7bc44413d19409a2dcca4b60b57eed.txt": {
     "sha256": "8edf483b6e5c1776c86882054b1f610f70e738f7e24a33fd2a2c610508066fcf"
    },
-   "cisco_aci/tests/fixtures/dfe2c1c8228116f9ab57f679177882a7.txt": {
+   "cisco_aci/tests/fixtures/fabric/dfe2c1c8228116f9ab57f679177882a7.txt": {
     "sha256": "c2c2018871b65d1703874de3e811249f9037cf5e1c6a6edf5b6253db3cdcbed1"
    },
-   "cisco_aci/tests/fixtures/e001f001b7ac8da3335f8ef8bad17129.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/e0c56f55dc3f88a472d08a66fca8a60c.txt": {
+   "cisco_aci/tests/fixtures/fabric/e0c56f55dc3f88a472d08a66fca8a60c.txt": {
     "sha256": "8c87e469601db4f60f3afec18e1994f4a3e72132b681a337aa2f996036029240"
    },
-   "cisco_aci/tests/fixtures/e12936b89bb76191abac20937042babc.txt": {
+   "cisco_aci/tests/fixtures/fabric/e12936b89bb76191abac20937042babc.txt": {
     "sha256": "5a4e8ee3bc10165df4887ba627f3f39b4757627cac37c03087b46874b1f7e86e"
    },
-   "cisco_aci/tests/fixtures/e1d65d50c73beddb317b0ca66f97ce4b.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/e22fde3e3e5bf37e4ad41c0227f7acd3.txt": {
+   "cisco_aci/tests/fixtures/fabric/e22fde3e3e5bf37e4ad41c0227f7acd3.txt": {
     "sha256": "ee28541d10d5f5b08946cf15c7292080561bf383e94ac4eae59c2413e9c6a210"
    },
-   "cisco_aci/tests/fixtures/e2b226f554c9f77aafd9b66b4cf59383.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/e2b6ef195ca3ceb6a7985868b44b2cef.txt": {
+   "cisco_aci/tests/fixtures/fabric/e2b6ef195ca3ceb6a7985868b44b2cef.txt": {
     "sha256": "d96eb1833ca13d509dc0cf115e8bb5a557ca2d0ee49f9a3a81045f8026c07698"
    },
-   "cisco_aci/tests/fixtures/e34c735548d6b28c0252cf2f0d4c620e.txt": {
+   "cisco_aci/tests/fixtures/fabric/e34c735548d6b28c0252cf2f0d4c620e.txt": {
     "sha256": "ce1aa3bb3959002fea9ec16a1a8b8eed0c1cebbe658b857c848f5e8fdfc9effe"
    },
-   "cisco_aci/tests/fixtures/e35556d42f69f3c3d421893e9e0c4977.txt": {
+   "cisco_aci/tests/fixtures/fabric/e35556d42f69f3c3d421893e9e0c4977.txt": {
     "sha256": "18e2f885b71602d26046d8024f8f9a1d537e8aae9c68733a824062c4436b73e7"
    },
-   "cisco_aci/tests/fixtures/e3ab944329625480809e8350724d6f7a.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/e46224a7b610c68baa0798548c3a3f5c.txt": {
+   "cisco_aci/tests/fixtures/fabric/e46224a7b610c68baa0798548c3a3f5c.txt": {
     "sha256": "67269ee7be4ca84b0ef0a51051d74ec649c7d89bf06551e5d8419db3a880d3e8"
    },
-   "cisco_aci/tests/fixtures/e49d0a6a4fdc04e0f72f244f7ffc2042.txt": {
+   "cisco_aci/tests/fixtures/fabric/e49d0a6a4fdc04e0f72f244f7ffc2042.txt": {
     "sha256": "7cee1877373a45436fe6d41cee0cf08f5d531e56c10839fd95c8521f8d489b5d"
    },
-   "cisco_aci/tests/fixtures/e5192f427b93b4c3948b53eb060db652.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/e6d339c0b302f35694131b26366b563d.txt": {
+   "cisco_aci/tests/fixtures/fabric/e6d339c0b302f35694131b26366b563d.txt": {
     "sha256": "fcfaf9218cfa6d231910866f01732210cc294c88a6c6cc06b8ccd4827a775091"
    },
-   "cisco_aci/tests/fixtures/e6d9d1020ebec6ede2399f9b379db3d9.txt": {
+   "cisco_aci/tests/fixtures/fabric/e6d9d1020ebec6ede2399f9b379db3d9.txt": {
     "sha256": "104d496019b6f250cbfee9db855f845e26c710b285a8ffa8994077261a1e07d5"
    },
-   "cisco_aci/tests/fixtures/ea1adfb208ff0d3fbf46872302471c52.txt": {
+   "cisco_aci/tests/fixtures/fabric/ea1adfb208ff0d3fbf46872302471c52.txt": {
     "sha256": "e40ec9f82308c01f9f95ddfadbfb656bb6c9077447f690ab8b1cee5142003626"
    },
-   "cisco_aci/tests/fixtures/ea3bdd6b0a08e2e5227bfc5e9bed1077.txt": {
+   "cisco_aci/tests/fixtures/fabric/ea3bdd6b0a08e2e5227bfc5e9bed1077.txt": {
     "sha256": "cf77a21764bc5b3f517b2f7ced9a2bd9eb33b3a54b86fa8ae895c07f8dc3baa5"
    },
-   "cisco_aci/tests/fixtures/eab07e7947c2a3a822aab248c6315f92.txt": {
+   "cisco_aci/tests/fixtures/fabric/eab07e7947c2a3a822aab248c6315f92.txt": {
     "sha256": "b7cc8ec69f69b1fed8916978bb7c7dd605d6944373e625ebe7cc546bbc73cfc3"
    },
-   "cisco_aci/tests/fixtures/eb0a60abd06c6c6888a3a0694d896d5e.txt": {
+   "cisco_aci/tests/fixtures/fabric/eb0a60abd06c6c6888a3a0694d896d5e.txt": {
     "sha256": "e3d49074568f9892740841f3f9b13a15ce75761c10198fe9239fabadcf981414"
    },
-   "cisco_aci/tests/fixtures/eb4804e1e68e00353c89b13b56b9d7b9.txt": {
-    "sha256": "32cbe7f63458c72f53e2dc994bbde2955777e9db7008a7a2214dbf53ba2c18d3"
-   },
-   "cisco_aci/tests/fixtures/ec245c6b5e68d4066b18b62d075de4d4.txt": {
+   "cisco_aci/tests/fixtures/fabric/ec245c6b5e68d4066b18b62d075de4d4.txt": {
     "sha256": "dc20b81121135a135c8048e347a7cecec0209c0e83533d6199c91240433e57e5"
    },
-   "cisco_aci/tests/fixtures/ed8eef187c28d9fcbd18ccecc91c91a3.txt": {
+   "cisco_aci/tests/fixtures/fabric/ed8eef187c28d9fcbd18ccecc91c91a3.txt": {
     "sha256": "29c938ab620ddaa67fc40789a185d145e434a44569def7e939e82307ded97c21"
    },
-   "cisco_aci/tests/fixtures/ee314e906f1b6a03c74f674941b6cec3.txt": {
+   "cisco_aci/tests/fixtures/fabric/ee314e906f1b6a03c74f674941b6cec3.txt": {
     "sha256": "6b5149d4de5f3900575f531d88d92b89f68a2f887c9605c77471b048d97b1b3f"
    },
-   "cisco_aci/tests/fixtures/ee5cd35d0ce16d8d0b7c8057d9d53f37.txt": {
+   "cisco_aci/tests/fixtures/fabric/ee5cd35d0ce16d8d0b7c8057d9d53f37.txt": {
     "sha256": "4ee551d3c6f4853382b621a9c5aa0e9069cf953d01421435fa1d7898fc199f59"
    },
-   "cisco_aci/tests/fixtures/f0ffa4dde0fe109c09872e7d49aeaae4.txt": {
+   "cisco_aci/tests/fixtures/fabric/f0ffa4dde0fe109c09872e7d49aeaae4.txt": {
     "sha256": "e3ad4942cfacbd2a50772fcc148c5f8162d8a0e59a8992dce7559a179fbb2e62"
    },
-   "cisco_aci/tests/fixtures/f1f6b387eccc300e566d32c3ef9ddec4.txt": {
+   "cisco_aci/tests/fixtures/fabric/f1f6b387eccc300e566d32c3ef9ddec4.txt": {
     "sha256": "ef9858208a52757b335d7fabc5b5022d661ab61f725ef10a855d5ff66c82ce14"
    },
-   "cisco_aci/tests/fixtures/f23ec48bbe02711ef10ccc8a2addecdc.txt": {
+   "cisco_aci/tests/fixtures/fabric/f23ec48bbe02711ef10ccc8a2addecdc.txt": {
     "sha256": "b5ef74d671277f111265035fcb2573b9102d16a0975464854eb2ce90ed48a12b"
    },
-   "cisco_aci/tests/fixtures/f270e3e2b3ef7e0d23289842e7c5d845.txt": {
+   "cisco_aci/tests/fixtures/fabric/f270e3e2b3ef7e0d23289842e7c5d845.txt": {
     "sha256": "96c00843bb78e9dcf7f592564488b1e89a485d383095a21593eae2bb7c0edd7f"
    },
-   "cisco_aci/tests/fixtures/f27cb9cabd2f1b5198c03ebbd8c08551.txt": {
+   "cisco_aci/tests/fixtures/fabric/f27cb9cabd2f1b5198c03ebbd8c08551.txt": {
     "sha256": "c802c5517b171b42cc285c249f10d67c764d85e0ec04a17827bbc2ca48f63741"
    },
-   "cisco_aci/tests/fixtures/f4481ba97383eecd355d3a0f330ec602.txt": {
+   "cisco_aci/tests/fixtures/fabric/f4481ba97383eecd355d3a0f330ec602.txt": {
     "sha256": "4a885e11d9b8fa5418f03cffa014c7a5e3660eeb854fb4c9f08734fa7fdf3d2c"
    },
-   "cisco_aci/tests/fixtures/f44f8e9a9afe5d47c8b27d06b6458200.txt": {
-    "sha256": "5ac0b72a8bd7c74b2cf0dda848d8943cd817c34278208bb47be11cca2d3f5a66"
-   },
-   "cisco_aci/tests/fixtures/f5c67861c26f888b77a114eb384fd7ed.txt": {
+   "cisco_aci/tests/fixtures/fabric/f5c67861c26f888b77a114eb384fd7ed.txt": {
     "sha256": "48d85caac0f2180189177688416bed82f8571bf8ee2427231a4e5493ed6781a6"
    },
-   "cisco_aci/tests/fixtures/f6c27908c7e6dcd33e25d632dca2b731.txt": {
+   "cisco_aci/tests/fixtures/fabric/f6c27908c7e6dcd33e25d632dca2b731.txt": {
     "sha256": "0bf35e4b6ce38d2ec5f0e1b57b13871c768bac055e127e188d60f5a9feb2cb83"
    },
-   "cisco_aci/tests/fixtures/f71145d337d6c9a9b241c1c976ced0d1.txt": {
+   "cisco_aci/tests/fixtures/fabric/f71145d337d6c9a9b241c1c976ced0d1.txt": {
     "sha256": "3ae41db41dafd3e7c607cbdac935cdace7acb6d2b7300fceb22bad4b98d178c4"
    },
-   "cisco_aci/tests/fixtures/f72ea212e66461d60982a0fac7c99ab0.txt": {
+   "cisco_aci/tests/fixtures/fabric/f72ea212e66461d60982a0fac7c99ab0.txt": {
     "sha256": "f65fc086c6abeba33273d4c36dd435c68d9f154848c018a7ae9dbcb2c35b4a1b"
    },
-   "cisco_aci/tests/fixtures/f81112b93297d7112561cde49cd0c927.txt": {
-    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
-   },
-   "cisco_aci/tests/fixtures/f8396435d19e4f76835532db423436f3.txt": {
+   "cisco_aci/tests/fixtures/fabric/f8396435d19e4f76835532db423436f3.txt": {
     "sha256": "b106480974710b76cc774b5a44054d52961a97092961e591be2179a7d980a5ea"
    },
-   "cisco_aci/tests/fixtures/f89a2797577aa3b1e142529ca6c5046e.txt": {
+   "cisco_aci/tests/fixtures/fabric/f89a2797577aa3b1e142529ca6c5046e.txt": {
     "sha256": "459d6e688487f823f1b51851ce6a469ff2f638d950336b8f9c52be386fb93391"
    },
-   "cisco_aci/tests/fixtures/f8af6ebf8a9008d3000693a7889edc55.txt": {
+   "cisco_aci/tests/fixtures/fabric/f8af6ebf8a9008d3000693a7889edc55.txt": {
     "sha256": "6b0d7201897e274b4489fce6e34a104f2fd06c0d0c665996b4754efc9f174a66"
    },
-   "cisco_aci/tests/fixtures/f8c5a7073ed0c40fe75c00bc5330863a.txt": {
+   "cisco_aci/tests/fixtures/fabric/f8c5a7073ed0c40fe75c00bc5330863a.txt": {
     "sha256": "e02cf36de4c26290942e23a3d980160f8de050e85c0915685f40c92bb4092aa4"
    },
-   "cisco_aci/tests/fixtures/f929ec691d62a0d70a12e51fc18b4321.txt": {
-    "sha256": "a2acf99f62de8e14ee966100204f1268a06cc614854e7d4bc0b9653e737f6333"
-   },
-   "cisco_aci/tests/fixtures/fc340063f900f0d3e3b4f5517514d684.txt": {
+   "cisco_aci/tests/fixtures/fabric/fc340063f900f0d3e3b4f5517514d684.txt": {
     "sha256": "93f1bca236cef979e7f020cbb7dc300771b1d5cdddb32737ad4e4f79d52563dc"
    },
-   "cisco_aci/tests/fixtures/fcda3e0d023bd6f48ace2d1007323cbd.txt": {
+   "cisco_aci/tests/fixtures/fabric/fcda3e0d023bd6f48ace2d1007323cbd.txt": {
     "sha256": "ab04ce96c88be1f16a85d5f3376edfd9faea9e62f38095609e72affc541dd3b4"
    },
-   "cisco_aci/tests/fixtures/fd44e33bc853f309b9103d5d4ede35bb.txt": {
+   "cisco_aci/tests/fixtures/fabric/fd44e33bc853f309b9103d5d4ede35bb.txt": {
     "sha256": "4796177f545dd2872738e1f3e3c248907c9ea065d8120f39c1d100cb5f637d46"
    },
-   "cisco_aci/tests/fixtures/fef4649d4fae961a0a5761ee30ab73f6.txt": {
+   "cisco_aci/tests/fixtures/fabric/fef4649d4fae961a0a5761ee30ab73f6.txt": {
     "sha256": "69193bdf123d9b89573f4c6e4a9f7b7364522999169c8da0c726ecbca3660510"
    },
    "cisco_aci/tests/fixtures/login.txt": {
@@ -1745,8 +1648,77 @@
    "cisco_aci/tests/fixtures/login_cookie.txt": {
     "sha256": "946040acf82ba0547e32b167f0efc206eae99234a350ebc94d9829b88cc8a787"
    },
+   "cisco_aci/tests/fixtures/tenant/10b987e92abaab8d843e6bee5ab6aef0.txt": {
+    "sha256": "11dfef67fc571c3ec35f8eeaba792cda984f2786e6c2ea9399b6a6fcded88d1c"
+   },
+   "cisco_aci/tests/fixtures/tenant/1c7d7ebf0b75333689662feb19f63ede.txt": {
+    "sha256": "72cacbc48b113fef5710bff805d23eb7040943e177e8ec07d1a8ac0e66d7cbbf"
+   },
+   "cisco_aci/tests/fixtures/tenant/288a353bc9fed8f571d78076cb1585ae.txt": {
+    "sha256": "5c8fffdccdc5e1f12d4c51b830e9473583e5332469fbb5522ad9397d8642026c"
+   },
+   "cisco_aci/tests/fixtures/tenant/363e27e35a42bb987c121709284b529f.txt": {
+    "sha256": "2bb5d0f9dbf7a6c5427eb9a48a896b1330d1a9b7162fa30884cef5fa34a54efd"
+   },
+   "cisco_aci/tests/fixtures/tenant/3f8f3374048d7b5b3a38566765f35cc2.txt": {
+    "sha256": "c391090fc0e6da82bc572c2749c931e8ab20fed7dfda018bfbd43532bdf01617"
+   },
+   "cisco_aci/tests/fixtures/tenant/43410607b378cfa340146247a8b422b9.txt": {
+    "sha256": "5e7d0601a0d4ea942733256ea2a01fd715abf735e8adcc6bf2e07c6db339eaa7"
+   },
+   "cisco_aci/tests/fixtures/tenant/4b07d389b109401afcc2c42bdca0f2b2.txt": {
+    "sha256": "dad808acdb91f4a6e7ca487a797de804cbe53b3898e09026b97ea205513f6592"
+   },
+   "cisco_aci/tests/fixtures/tenant/4efe80304d50330f5ed0f79252ef0a84.txt": {
+    "sha256": "dc03db30bf47fa5db613e0640f899bda02791bb10108941a34063b6e002f6ab4"
+   },
+   "cisco_aci/tests/fixtures/tenant/7034a3d481f3cd6b47f86783c7ec4c63.txt": {
+    "sha256": "4e5f962beb7e22bf2648c47e63c4d2fa04c464ddd72b76fcf163377e6084fd97"
+   },
+   "cisco_aci/tests/fixtures/tenant/af6ca37b21581b58b9901e23dd02cae9.txt": {
+    "sha256": "9e8a356b456aae3b7b4675fbedb1fdff7957b7acd8d16b2929c1ea5802886d05"
+   },
+   "cisco_aci/tests/fixtures/tenant/b05ed9fa4f7f2f6e52e78976da725716.txt": {
+    "sha256": "9ff5fdc106a35a651a9ddb2aa7673d5a4e6130b8f06381b563c6c3e71f38bc36"
+   },
+   "cisco_aci/tests/fixtures/tenant/c8e9a0dbceac67fb1149684f7fc7772c.txt": {
+    "sha256": "d4b3b459f5e8e63cee6f8336b40b6f75507507afd08bd99e317f18fcd7d88b83"
+   },
+   "cisco_aci/tests/fixtures/tenant/d0260e4832537b43b1acb38bcfa58063.txt": {
+    "sha256": "e3b14061e28653ad612105fa8f210b62ccb601dfa653a67d3d11bd2b3b79bb07"
+   },
+   "cisco_aci/tests/fixtures/tenant/d4efb7c9b80929991dd91850d9ddceef.txt": {
+    "sha256": "47f85e71fbbcbeb30b06bf0922d83ea08b07e836c30078da2ac90ed397f6acd3"
+   },
+   "cisco_aci/tests/fixtures/tenant/d98210e57060ed7285a4fa7434c53ff1.txt": {
+    "sha256": "98848825e84e18a26628c9cdfee1d80143260d397b35626e5db05e3e4a17aa45"
+   },
+   "cisco_aci/tests/fixtures/tenant/eb4804e1e68e00353c89b13b56b9d7b9.txt": {
+    "sha256": "32cbe7f63458c72f53e2dc994bbde2955777e9db7008a7a2214dbf53ba2c18d3"
+   },
+   "cisco_aci/tests/fixtures/tenant/f44f8e9a9afe5d47c8b27d06b6458200.txt": {
+    "sha256": "5ac0b72a8bd7c74b2cf0dda848d8943cd817c34278208bb47be11cca2d3f5a66"
+   },
+   "cisco_aci/tests/fixtures/tenant/f929ec691d62a0d70a12e51fc18b4321.txt": {
+    "sha256": "a2acf99f62de8e14ee966100204f1268a06cc614854e7d4bc0b9653e737f6333"
+   },
+   "cisco_aci/tests/test_capacity.py": {
+    "sha256": "0c26ee9e944ae45f1aba025a4065f8fc5d59b0fc89b7f959ae27b65bbee5b895"
+   },
    "cisco_aci/tests/test_cisco.py": {
-    "sha256": "bc76588244160f652e3a69e06aee53654516bbd5ec18eb39873a364d9df5be93"
+    "sha256": "9ea577fbb29847e1763838b2a63cbd01cf6e42279ba62e17b930b8909c20cf40"
+   },
+   "cisco_aci/tests/test_fabric.py": {
+    "sha256": "cdb9fdaa5633cbbef49fafd9c3b837f6e41438899ceff28cd7b5b8ba13ed71e7"
+   },
+   "cisco_aci/tests/test_helpers.py": {
+    "sha256": "343031d6a2a43df1dedf76e5c4c5bbb88e54fdd59c8270bc2ab05c17932a42db"
+   },
+   "cisco_aci/tests/test_tags.py": {
+    "sha256": "babd85fad04670069824b1f5a2fbdb79416b735ce1c8e07b771a9299203e3a45"
+   },
+   "cisco_aci/tests/test_tenant.py": {
+    "sha256": "fbc67a659dbf048e33d372933180f95a13031afe8ceaab8cfb14fd667218e42c"
    },
    "cisco_aci/tox.ini": {
     "sha256": "dc94eb8e9e6fd68a4862b7291f702b111e7b185d08345a7ff8fb27d7fa6d5fbd"
@@ -2037,7 +2009,7 @@
     "sha256": "f917af1935bce2ad26ea544c5345a5ae710987177e7dc0701bbb6d4b20c40ea2"
    },
    "datadog_checks_base/datadog_checks/checks/base.py": {
-    "sha256": "256951b8828a5f3576eb5b7d64d6b76f0059d6715f01609b8744a638ec26a729"
+    "sha256": "9a0294ac653b22a6c68878158301e85e72d82dbe0d9133fa3741b7b92b19830a"
    },
    "datadog_checks_base/datadog_checks/checks/libs/__init__.py": {
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -2067,7 +2039,7 @@
     "sha256": "0e1a00cf8394f99365deed3f3631cbfe8b4ef95e8e381669b3cc7c86827191c7"
    },
    "datadog_checks_base/datadog_checks/checks/prometheus/mixins.py": {
-    "sha256": "f5182122fa89014be08840d83ed4872870a299387c442d4a2539d18d1bff6692"
+    "sha256": "3930b4cb111fd8f49645297b7833987a4127973852478f748d75f889b8493603"
    },
    "datadog_checks_base/datadog_checks/checks/prometheus/prometheus_base.py": {
     "sha256": "6a31c360547d7cb31e98cdfb645e7feeab9d6ddd1b1be196dd7c8dbcd65b1751"
@@ -2085,10 +2057,10 @@
     "sha256": "4567cbc5bd9f5cd13ab523a6f2b3283dc6350c499d07d36998f2edffb2869479"
    },
    "datadog_checks_base/datadog_checks/checks/win/wmi/__init__.py": {
-    "sha256": "e2a172de3338f034215f1bc18f99376185c662fbcafab5d8ff54b577f029dc7e"
+    "sha256": "b4211530dcd5aa5b239bc80c03672f42b9aa9f31a9621df8ebfab3a3824dbc2f"
    },
    "datadog_checks_base/datadog_checks/checks/win/wmi/counter_type.py": {
-    "sha256": "6c1aebcdf627e410c970c9b84f77bf04f0c6084111c5d90ae9bd688e7e356c6c"
+    "sha256": "f7e99e7260f9e5328533c7db6ba5a79426192a387c3873fe3fde0227102de106"
    },
    "datadog_checks_base/datadog_checks/checks/win/wmi/sampler.py": {
     "sha256": "fa484ea41b68d5bd7e06d36b453ce69895458197a6222e881f1647da9e35b33f"
@@ -2184,10 +2156,13 @@
     "sha256": "20f720b35f881a598b4cee09ec84b0c4cec652e88ba39ba676a3c06d379f8777"
    },
    "datadog_checks_base/tests/test_prometheus.py": {
-    "sha256": "a56281c53f58078875d6ca0bd8a721f1060f06c3d5c5bbc8ee452b98a0d420f3"
+    "sha256": "50790e287de142ff961064badf10f28bcdc57c9e48ffeea737739b43b8b644eb"
    },
    "datadog_checks_base/tests/test_prometheus_base_check.py": {
     "sha256": "a5e0a2034931cb3718b2dc3918d6de1e9441487ace9d149c208da54e428e251d"
+   },
+   "datadog_checks_base/tests/test_proxy.py": {
+    "sha256": "071322c6cfba0e504798f83db7fd072c7c5c65083a89609c2d6ca0f637e595aa"
    },
    "datadog_checks_base/tests/test_utils.py": {
     "sha256": "e49f5727d037083c923bc6bd738ae7743e755f01d6f38ba698332bfae13e3e3c"
@@ -2200,6 +2175,141 @@
    },
    "datadog_checks_base/tox.ini": {
     "sha256": "7eb8efb960984d0199989dc3d46460a8fcb97b70a60e25cd95bbdcf8ed2b8dfc"
+   },
+   "datadog_checks_dev/CHANGELOG.md": {
+    "sha256": "b4b654d2169ac9177ff8983b42d9b18ed75913b86098c850360448b7db5b4c57"
+   },
+   "datadog_checks_dev/MANIFEST.in": {
+    "sha256": "d1ff44380274e236f32d5ef48a658986ab2f2dbe0fdb6371fc4627ab7f2197eb"
+   },
+   "datadog_checks_dev/README.md": {
+    "sha256": "7e992555b8b2e7b9f388edd3266bebf56fa31f161daa0b030ac7b58c1787bba4"
+   },
+   "datadog_checks_dev/datadog_checks/__init__.py": {
+    "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
+   },
+   "datadog_checks_dev/datadog_checks/dev/__about__.py": {
+    "sha256": "984b6ea9f1c5b4ec331cfb9c1a54dcf6ff602b6e6ba582cd0de36b2d75f49ed7"
+   },
+   "datadog_checks_dev/datadog_checks/dev/__init__.py": {
+    "sha256": "c4eb27d4a0552506e3afd5faafc518a42ebb84011f95ff777f8bbe449ba5f313"
+   },
+   "datadog_checks_dev/datadog_checks/dev/_env.py": {
+    "sha256": "e43ad7d915d663fd9d8398ff6730e9a56856ee536ece1686f93fd8e6a7802af2"
+   },
+   "datadog_checks_dev/datadog_checks/dev/compat.py": {
+    "sha256": "aa4bfc8964d326d8841dd7cbac743f2256324730afd894080fc6198eef7aa838"
+   },
+   "datadog_checks_dev/datadog_checks/dev/conditions.py": {
+    "sha256": "ebc9a0cdb54064d1b635ed3e1293198b2ec0aa3edf4d2a85e00b558e27a052d7"
+   },
+   "datadog_checks_dev/datadog_checks/dev/docker.py": {
+    "sha256": "5de45c6ec69ff5ef54a0e13034b200a53bcc65d00a048add394711d6f8e3cb5f"
+   },
+   "datadog_checks_dev/datadog_checks/dev/errors.py": {
+    "sha256": "986250938bc050017552a3bd44c9c6302989048adf0b65acab617da10b749302"
+   },
+   "datadog_checks_dev/datadog_checks/dev/fixtures/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "datadog_checks_dev/datadog_checks/dev/fixtures/plugin.py": {
+    "sha256": "5082cfbf218deae2d67b2e0d9992c5ebf381eba4356d09cf4934ad9e1ef6a579"
+   },
+   "datadog_checks_dev/datadog_checks/dev/structures.py": {
+    "sha256": "468a7ffa7136a8dfaf58d04839784abd7a318ebec7f12f63eafc3eb2ff17bcf5"
+   },
+   "datadog_checks_dev/datadog_checks/dev/subprocess.py": {
+    "sha256": "f112ac9370fce3a6f1c9c1bb9ed25fbc4743082e1c51543f14abef4ec0a832e5"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/__main__.py": {
+    "sha256": "c135a8036dbbaecb106f8b523d838e68696f13fd9fc08b61499e1bae080af889"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/clean.py": {
+    "sha256": "93d13f45700ca84a170b599824e3c0df1bf17986798ca810519dec670b2ecacc"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/cli.py": {
+    "sha256": "67c5990dd945cbd9c3f3d0e5fdeaa110a52557fc743f4979076f33be3c6f59fb"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/__init__.py": {
+    "sha256": "aa320de8348048f3ffbaaf9f8aa512e18e43dbfe3f90a2af599aa53f1554dcb4"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/clean.py": {
+    "sha256": "2092ed83fd7f467959d3ce8ca4feb42ceb9ca0d98f69d945f607e6579c40e1d4"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/config.py": {
+    "sha256": "33e7dd40840e4ad1543db6bb96500441e164a2a036f7948b7533fc672c5a3ee6"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/dep.py": {
+    "sha256": "0799c13a6dd78ade5a49174f95d5a702f9edd64eb7bdd6c0d93bb6170c03cda8"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/manifest.py": {
+    "sha256": "eecdabaaabdd1be71c844361eec8ce76c6d95a3c503c1272036ec41b1a8fd5fe"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/release.py": {
+    "sha256": "db36d07b05579faee97bc1ea8403a736b4eb62b15f8f2c451e7515626e39a759"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/test.py": {
+    "sha256": "2b98e50b1489bb2e0c586ae72fd83ca1e932785dfb7c62e5a310871a738ac8d3"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/commands/utils.py": {
+    "sha256": "18b9c2d190ecc2fe0ff335d8cfd7505b7c53edf6ddc76fe34d6c1ccaa4c65989"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/config.py": {
+    "sha256": "a41753b7f3059f6c7fcbe1694dfd249319e4614e6879227021aeb6a1b1607d67"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/constants.py": {
+    "sha256": "9a8b9fb9b012055da07a96b321ea1db6ebdc8cb1401e2241c30eed806baee4cb"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/dep.py": {
+    "sha256": "70d46617518fa3d36764b612f50a57da8b07d4e0354a1077b8ef0f9f444f974c"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/git.py": {
+    "sha256": "97fa5ae957b6541e8c2db8615aeb7f1d84bf37fe25b792408b9bf10a991c97e6"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/github.py": {
+    "sha256": "8b43ee5d535f719977d8046c1a7c8fa0c12fbdd7e3c95c32f74331e972bf6f96"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/release.py": {
+    "sha256": "906865f539c72d9820d619a68768fb32c79e72fcbb671ad9397b573967c3cf92"
+   },
+   "datadog_checks_dev/datadog_checks/dev/tooling/utils.py": {
+    "sha256": "d4547b7638c7691c86f7308ee1a0de2a699f86bf1e7e32dfc6ea8b83c6ed7a65"
+   },
+   "datadog_checks_dev/datadog_checks/dev/utils.py": {
+    "sha256": "57a96814d0f874dee016d983a9dfc46bc3f0090f7ffecd0825ce7659fb2b0814"
+   },
+   "datadog_checks_dev/requirements-dev.txt": {
+    "sha256": "626941a33449db4bd9f7fe59c550de4b7ab7df3d4e748da3b8a0799d039d2f1c"
+   },
+   "datadog_checks_dev/setup.py": {
+    "sha256": "dc1d908bb2756ded289c3834ac5b2597541a0e2e769f85bdecb77621984c9c0a"
+   },
+   "datadog_checks_dev/tests/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "datadog_checks_dev/tests/docker/test_default.yaml": {
+    "sha256": "38fc47026e47e60fbaf3e9c037d1f801a9dc08f44dfe4b61b7c8ee5e6d008f46"
+   },
+   "datadog_checks_dev/tests/test_conditions.py": {
+    "sha256": "b3d03c2d487d2ad6f2783b4b7a42414252d480d86aa86683d5b7217809a05f8c"
+   },
+   "datadog_checks_dev/tests/test_docker.py": {
+    "sha256": "3a4394cc7c665a6ed4a44dc4cc0ae0b9a2deffc5178395ceb4ce6d57085d16eb"
+   },
+   "datadog_checks_dev/tests/test_structures.py": {
+    "sha256": "933d20097badfe17923666ed9e1b4774d4a14864f3ddaca20f36bd343e278f14"
+   },
+   "datadog_checks_dev/tests/test_subprocess.py": {
+    "sha256": "0fafee6aeb5eda396d94da08b9b0b10bd79064f6ba6e17caeb5f92ed4a37a323"
+   },
+   "datadog_checks_dev/tests/tooling/__init__.py": {
+    "sha256": "53975c32879c16739edd4d2509d91fc7e385a02ff69f9d23878e86dae96bca9c"
+   },
+   "datadog_checks_dev/tox.ini": {
+    "sha256": "0e4758c17ed5fea215c4a800c1d2f8b06c59fbd3ff53b3ecbc60026988fc5f95"
    },
    "datadog_checks_tests_helper/CHANGELOG.md": {
     "sha256": "8e75a6f6a41fe56574bdce205924a98bba09ef9c2c2c0329f23bed2959f0fcb3"
@@ -2889,7 +2999,7 @@
     "sha256": "5e84f93dbfdcf16f146977374b0ec0da77ddd1809bf13fe3ba50c016bb632be1"
    },
    "exchange_server/README.md": {
-    "sha256": "b1d078190c42be96dd8d97511f6004899866d6884adfb4860e4caf9b65940ee7"
+    "sha256": "5735b9bbdd977ae88f8afc6ea590ceb0914266a237d170ef2c1606036529c862"
    },
    "exchange_server/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -2906,11 +3016,56 @@
    "exchange_server/datadog_checks/exchange_server/exchange_server.py": {
     "sha256": "fad9320751318df0ac3c69fa70e201188b8cb616d83ee201616b118eb698dc29"
    },
+   "exchange_server/images/exchange_server_120x60.png": {
+    "sha256": "dc67bf9bbf997c7094dab63e24098c4cd8db51f888fab1567624c6e7bd6e001e"
+   },
+   "exchange_server/images/exchange_server_120x60@2x.png": {
+    "sha256": "c196c026a0eef9d125c364f752d3ec2b1bc6250e0ebd867cef42592d0d689430"
+   },
+   "exchange_server/images/exchange_server_128x128.png": {
+    "sha256": "b43313bc89bb66a7607474a5bfa1a40e5499f009437e4f1e04a9e5aa96ed8b69"
+   },
+   "exchange_server/images/exchange_server_128x128@2x.png": {
+    "sha256": "1639056e0bfab352e98cfeee26d1d380655f52b6060699f57d33ac029c9c63c2"
+   },
+   "exchange_server/images/exchange_server_200x128.png": {
+    "sha256": "5dacd6629e4b9242ae08ca09ace55afeff23108fd1b4150a5446bbef43ffd4b4"
+   },
+   "exchange_server/images/exchange_server_200x128@2x.png": {
+    "sha256": "6bc00bb3ff6f6c1e4660d6090a142f176af450227bb10d98c97ff739b0e47201"
+   },
+   "exchange_server/images/exchange_server_reversed_120x60.png": {
+    "sha256": "30dc2cd460f430cc2fefeab6abe00a2560011fbef922d151b7cf270dca171ad3"
+   },
+   "exchange_server/images/exchange_server_reversed_120x60@2x.png": {
+    "sha256": "deeaf1418d28eea78e80812bd6cd5a63bbf12f8312e7596b673174869ce7233f"
+   },
+   "exchange_server/images/exchange_server_reversed_128x128.png": {
+    "sha256": "2e89981190f061f324d8770b938d99f0a8fc2a0bc5b207c2c2b92db133f44314"
+   },
+   "exchange_server/images/exchange_server_reversed_128x128@2x.png": {
+    "sha256": "4b5b9a44fc52e4ab595c8fb813f545927999f64bee2878cfcb57d289aabdac2b"
+   },
+   "exchange_server/images/exchange_server_reversed_200x128.png": {
+    "sha256": "6049929b79ac9f8b1fbb45e1256a6ed53f2520bf6fd5029e470d350fce95b34b"
+   },
+   "exchange_server/images/exchange_server_reversed_200x128@2x.png": {
+    "sha256": "230d9b3cd6d9f4fbe2b2567f62f1c9c6a33aab32acb666d154b9e179a3e4bced"
+   },
+   "exchange_server/logos/avatars-bot.png": {
+    "sha256": "b43313bc89bb66a7607474a5bfa1a40e5499f009437e4f1e04a9e5aa96ed8b69"
+   },
+   "exchange_server/logos/saas_logos-bot.png": {
+    "sha256": "5dacd6629e4b9242ae08ca09ace55afeff23108fd1b4150a5446bbef43ffd4b4"
+   },
+   "exchange_server/logos/saas_logos-small.png": {
+    "sha256": "dc67bf9bbf997c7094dab63e24098c4cd8db51f888fab1567624c6e7bd6e001e"
+   },
    "exchange_server/manifest.in": {
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
    },
    "exchange_server/manifest.json": {
-    "sha256": "9cb8662006796da863b60641e8fc813e657574ce2514b01e5933a418c30bf6b0"
+    "sha256": "9fef04906ead29ab872596898a211f1ec45d4fcd11dca6e09c0933cd67e83e74"
    },
    "exchange_server/metadata.csv": {
     "sha256": "b813d65e84fedbb99e23f3d679b81b6449eead1d1978a737b6e542df23429053"
@@ -2943,7 +3098,7 @@
     "sha256": "f0e94d25c8b8e53b75e69f3557e277ff47fe46f22559aa5baa9854037f11187e"
    },
    "fluentd/README.md": {
-    "sha256": "7f713b42272f5d095402412fda8c2bf68e56776ab7f4bff6bf081bf6a0c6b4db"
+    "sha256": "356f3142f256fb29e0f4b8be6927bce2359410b1992a57f180b7c99bd47bba84"
    },
    "fluentd/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -2967,7 +3122,7 @@
     "sha256": "4c511f53ee15f9dd3c49fe01e924e5358817f2c232a3c90a50e76653f1d005c5"
    },
    "fluentd/manifest.json": {
-    "sha256": "e716b2991abe16d2fe4512f925308bf91c28e418642d5a6380d395a21d26e997"
+    "sha256": "214b178fd595802688977e1401627969bb2015647c32b7bcb4fdcbf8a82758b0"
    },
    "fluentd/metadata.csv": {
     "sha256": "e1a575c23ac32fdff42747defe7cba950578eeed64d7d5db44a7d4a16286923b"
@@ -3087,10 +3242,10 @@
     "sha256": "83dc6e574a1996dcd91517c9978a4afa35b5e842529f1e7a7ff4facd5f9d7a53"
    },
    "gitlab/datadog_checks/gitlab/gitlab.py": {
-    "sha256": "d12b38543aeb1e03838072a3bc0e4f26906c85c671b4d8d72f455e47a219639b"
+    "sha256": "b70c987336d3e92e8fcc2272ae90abaf4f54f6324316bc9f8ab774d24615736a"
    },
    "gitlab/manifest.json": {
-    "sha256": "be2b33ce7923183badb01ab12ee186b5e058c28a06cdce3a9461c60424259239"
+    "sha256": "6e58099a09e63e5f49926db67ab0fe900158a9f7feed44f9a0a4b68d0f4a1bbf"
    },
    "gitlab/metadata.csv": {
     "sha256": "edee6e7fd7cdc71fabc7dd612c8538c32f5a76e9b81277dee9b2783fdacc6d21"
@@ -3150,10 +3305,10 @@
     "sha256": "384fac2aa25de2745f18ad62cb2b068ccd84a4e25c13f152815f49f0d2e9712b"
    },
    "gitlab_runner/datadog_checks/gitlab_runner/gitlab_runner.py": {
-    "sha256": "ad682854cb30d9d8dc0fe0aae99aa5a0100aab84c1a7bca8970c81c3df560a39"
+    "sha256": "481fa7b0e26c553e3bd3c22fa6264d9e65013a87d7499c4b60cd38fa0db56407"
    },
    "gitlab_runner/manifest.json": {
-    "sha256": "e500469f2071dd8e7e538e7dcf7c3f06f76d74c5e5491efa49756d111e31cd04"
+    "sha256": "b8459bdbcbcd5a5f91d483339ff9c74bf5b975a0650b66d3c76a443486f53a61"
    },
    "gitlab_runner/metadata.csv": {
     "sha256": "6c8439d2e07fb673c3dce6205e39824ab738f6fbc5746fa2ec63d8a5a0294b95"
@@ -3408,7 +3563,7 @@
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
    },
    "haproxy/tests/common.py": {
-    "sha256": "9879f6031159bb084af7a82a7b10294bc6a427fc7fb2831702289f60f6b33c76"
+    "sha256": "a1a968626fc0e6e7a368ee25496951bb8184eee5949bb50be78dfe21e40b6fd4"
    },
    "haproxy/tests/compose/haproxy-open.cfg": {
     "sha256": "6c11fd4bd388765e964f687936dbc1a1d14f5d377c2bf429ba2339a54eddd5ac"
@@ -3420,7 +3575,7 @@
     "sha256": "9d3123d19ff24551350c334c96345049d133c85c2538b328df373077a281a272"
    },
    "haproxy/tests/conftest.py": {
-    "sha256": "f2948c3281c995afb075d984da59b82752f0ea62b80c9f2c2c47afe00fa2aa47"
+    "sha256": "1bff79d8e1925cb0fab67d184f9a4153ec7239000090326fbc567fe1acf49e18"
    },
    "haproxy/tests/fixtures/mock_data": {
     "sha256": "7f4536c9d663d41bdcb1c6696049262d7a48fca75b0430e1bd4f0e6a6e3753b3"
@@ -3432,7 +3587,7 @@
     "sha256": "dde645de73ec1416a5c9dcd25b14b110942d03d2d4373503be7cc56590bffacf"
    },
    "haproxy/tests/test_haproxy.py": {
-    "sha256": "3a6ce61af1cfa44483f67bdfc05d065b977c1d07ed8d2c0ec9c813259cf56cba"
+    "sha256": "818e9471a199a62de7ec31fd181d76c40f2af7c8c615ef84cc48a7d011ddc36e"
    },
    "haproxy/tests/test_unit.py": {
     "sha256": "d93be3f558be8d2dd143e8a9e9e4a8a075a0f73640809eb1a958f5423aa56f9e"
@@ -3713,9 +3868,6 @@
    "iis/tox.ini": {
     "sha256": "97dcb551d598b83e00adf7a56874e1c29285ca483f9990aa0c586826595fb9ae"
    },
-   "in-toto-run.sh": {
-    "sha256": "a5c565f260b20c773499f616360a85c63e084ec751833b80e91cebceb8f9f208"
-   },
    "istio/CHANGELOG.md": {
     "sha256": "6f2db282e0adbcbc36156fec0e34de76225e6145c785b0bac5921e334fc11320"
    },
@@ -3753,7 +3905,7 @@
     "sha256": "9bc6ff3109e2bf7cd8a216c33b5aac893c7a91cacf81db69d04cd05c23db3711"
    },
    "istio/metadata.csv": {
-    "sha256": "7712fc80ed21ebc7a61e94f1c7a0c6cb7556aa91154a9c7fa11730af013e0822"
+    "sha256": "c8350437d99ea4f3dcbab8441067a2ab0a311578c974334c00db983cff07fb44"
    },
    "istio/requirements.in": {
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -4020,7 +4172,7 @@
     "sha256": "837a5b762024760f65f83c82f0c0efdae06e06aeac921a241fd51e8ba5bb6651"
    },
    "kube_dns/datadog_checks/kube_dns/kube_dns.py": {
-    "sha256": "0006136b3825d4b2b0c0c6f2b7b09423b142a8e73ac684f144674e9bb1e34fef"
+    "sha256": "10d102ab9df15b74ff49f6be9a9d259d10ac70fe06e23545498ed12b0dc6a72b"
    },
    "kube_dns/manifest.json": {
     "sha256": "1b8c89dd1f7ed823beecc3e1684582c4e499afbad64f428e59fe11e59ee7fa4f"
@@ -4143,7 +4295,7 @@
     "sha256": "2f611685b67fc3f420d08542eb504def90d720a8e017e3b58c654ffbb271f0e2"
    },
    "kubelet/datadog_checks/kubelet/prometheus.py": {
-    "sha256": "fe58f14f167420d7ec8b8a7c8d3d7f2170a3ec8cedf66f9d9f14ccda8beb72ab"
+    "sha256": "c2f2c9ee5cfda6f47a86394fa8ffc66628b3e40767ec8f0d1927f1ecfe328ddb"
    },
    "kubelet/manifest.json": {
     "sha256": "f430607e86db38baf92e982f2fed304477fbf0e6192eee2936c2851edbcaa142"
@@ -4317,7 +4469,7 @@
     "sha256": "817326bb0521206f6102041d3afea9d7e9d6f5e0e2894df43af622b633ed9359"
    },
    "kubernetes_state/datadog_checks/kubernetes_state/kubernetes_state.py": {
-    "sha256": "254b8eccbd57abb1638d854d8a13a793e481045f3169023013b44eeeae95f7ab"
+    "sha256": "494d164dc36d103f19cf4688810bb552db63671cde42c779501fbdb96a1ecbd4"
    },
    "kubernetes_state/logos/avatars-bot.png": {
     "sha256": "d024d8acda957180dad110d57fc40350da3cfd6dc1ffaa12aa07285a09067718"
@@ -7710,7 +7862,7 @@
     "sha256": "97cecfc829dfc9505956028f01290fddf1a1374ba3304d49c1db8eb6b1cb409e"
    },
    "vim.session": {
-    "sha256": "03458dcda07fcfb58253fa520bdb7bb168adbecf070118bb00e942f0a8ee9710"
+    "sha256": "ecf4215ef6db6eb448b14623b66b2c386c4779f40815555d9876e36942a80400"
    },
    "vsphere/CHANGELOG.md": {
     "sha256": "fb10f6b1d0b5a1ceb1868c77cf279a97a0c373db6f0880c782a4ae6bfa26afc3"
@@ -7719,7 +7871,7 @@
     "sha256": "1e2a8e50946faff36317de4a5add4103a99c87a88605361c162d7a63e4ca5646"
    },
    "vsphere/README.md": {
-    "sha256": "89e68b65e02b2abedf2a51608560e9037e0006b363c9053bc4b3a1e54c96d57c"
+    "sha256": "cae15bcd139d56536772184e939555a60f2c5beb47f2af1f4b88076facdcb0f8"
    },
    "vsphere/datadog_checks/__init__.py": {
     "sha256": "91853a02043d56997d90d6ad77acf0006fd1b6360ab0b4d50967bf88590296e8"
@@ -7740,7 +7892,7 @@
     "sha256": "eee926756bf0ad76b1534e772568d2e382de1653fb24c15bb1171f851f57a87d"
    },
    "vsphere/datadog_checks/vsphere/vsphere.py": {
-    "sha256": "fb43f8bbab8a33fcc78dc998275195f7aa0025b0edf1d91c148d88e8e90a5f96"
+    "sha256": "98121360aaa93db301f5d1da1669d08f083332207cf090b25d292933f9f194df"
    },
    "vsphere/logos/avatars-bot.png": {
     "sha256": "88ab34e58030c6d84c6906431fa48956c87d8fb380ab4a3b5169e59b9077bda6"
@@ -8138,8 +8290,6 @@
    "zk/tox.ini": {
     "sha256": "a8088190744bb1241e1d4ce20debd9c46ec37c3553ee944de258e12fd9aec1d9"
    }
-  },
-  "name": "tag",
-  "products": {}
+  }
  }
 }
