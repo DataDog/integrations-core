@@ -19,7 +19,9 @@ ci-image:
 
 wheels:
   stage: wheels
+  only:
+    - master
   tags: [ "runner:main", "size:large" ]
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:latest
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:$CURRENT_CI_IMAGE
   script:
     - echo $(git describe --abbrev=0 --tags)
