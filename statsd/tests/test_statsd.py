@@ -42,21 +42,7 @@ def get_instance():
 
 @pytest.fixture(scope="session")
 def spin_up_statsd():
-    env = os.environ
-    args = [
-        'docker-compose', '-f', os.path.join(HERE, 'compose', 'statsd.yaml')
-    ]
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    sys.stderr.write("Waiting for Statsd instance to boot")
-    for _ in xrange(2):
-        try:
-            res = requests.get(URL)
-            res.raise_for_status()
-            break
-        except Exception:
-            time.sleep(1)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
+    docker_run(compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'))
 
 
 def test_simple_run(aggregator, spin_up_statsd, get_instance):
