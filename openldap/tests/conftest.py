@@ -21,9 +21,9 @@ def check():
 def openldap_server():
     with temp_dir() as d:
         host_socket_path = os.path.join(d, "ldapi")
-        os.chmod(d, 0777)
+        os.chmod(d, 0o777)
         create_file(host_socket_path)
-        os.chmod(host_socket_path, 0777)
+        os.chmod(host_socket_path, 0o777)
 
         with docker_run(
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
