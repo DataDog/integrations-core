@@ -200,7 +200,9 @@ def freeze(lazy):
 
     root = get_root()
     pinned_reqs_file = os.path.join(root, 'datadog_checks_base', 'agent_requirements.in')
-    resolved_reqs_file = os.path.join(root, 'datadog_checks_base', 'agent_requirements.txt')
+    resolved_reqs_file = os.path.join(
+        root, 'datadog_checks_base', 'datadog_checks', 'data', 'agent_requirements.txt'
+    )
 
     echo_info('Pinned file: {}'.format(pinned_reqs_file))
     echo_info('Resolved file: {}'.format(resolved_reqs_file))
