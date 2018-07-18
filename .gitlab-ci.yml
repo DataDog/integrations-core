@@ -30,6 +30,6 @@ wheels:
   script:
     - CURRENT_REF=$(git rev-parse HEAD)
     - echo $CURRENT_REF
-    - git fetch --unshallow
+    - git fetch --tags
     - git checkout $CURRENT_REF
     - git describe --abbrev=0 --tags
