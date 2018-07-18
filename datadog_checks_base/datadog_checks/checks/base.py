@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 import logging
+import os
 import re
 import json
 import copy
@@ -89,6 +90,11 @@ class AgentCheck(object):
                 False,
                 "DEPRECATION NOTICE: `in_developer_mode` is deprecated, please stop using it.",
             ],
+            'no_proxy': [
+                False,
+                "DEPRECATION NOTICE: The `no_proxy` config option has been renamed "
+                "to `skip_proxy` and will be removed in a future release.",
+            ],
         }
 
     @property
@@ -96,10 +102,19 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def get_instance_proxy(self, instance, uri):
-        proxies = self.proxies.copy()
+    def get_instance_proxy(self, instance, uri, proxies=None):
+        proxies = proxies if proxies is not None else self.proxies.copy()
+        proxies['no'] = os.getenv('no_proxy', os.getenv('NO_PROXY', None))
 
-        skip = is_affirmative(instance.get('no_proxy', not self._use_agent_proxy))
+        deprecated_skip = instance.get('no_proxy', None)
+        skip = (
+            is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or
+            is_affirmative(deprecated_skip)
+        )
+
+        if deprecated_skip is not None:
+            self._log_deprecation('no_proxy')
+
         return config_proxy_skip(proxies, uri, skip)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):

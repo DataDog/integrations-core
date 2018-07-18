@@ -14,7 +14,7 @@
   ],
   "guid": "8a20f56b-2e25-4a0b-a252-f5187dddeeef",
   "public_title": "Datadog-CiscoACI Integration",
-  "categories":["networking"],
+  "categories":["network"],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/cisco_aci/",
   "is_public": true,

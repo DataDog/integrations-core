@@ -16,6 +16,7 @@
     "log collection"
   ],
   "type": "check",
+  "aliases":["/logs/log_collection/fluentd"],
   "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
   "is_public": true,
   "has_logo": true

@@ -1,10 +1,10 @@
-try:
-    # Agent5 compatibility layer
-    from datadog_checks.errors import CheckException
-    from datadog_checks.checks.prometheus import PrometheusCheck
-except ImportError:
-    from checks import CheckException
-    from checks.prometheus_check import PrometheusCheck
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.prometheus import PrometheusCheck
+
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'kubedns'
 

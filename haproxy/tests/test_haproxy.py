@@ -74,7 +74,7 @@ def _test_service_checks(aggregator, services=None):
 
 
 @pytest.mark.integration
-def test_check(aggregator, spin_up_haproxy):
+def test_check(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     haproxy_check.check(common.CHECK_CONFIG)
 
@@ -93,7 +93,7 @@ def test_check(aggregator, spin_up_haproxy):
 
 
 @pytest.mark.integration
-def test_check_service_filter(aggregator, spin_up_haproxy):
+def test_check_service_filter(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     config = copy.deepcopy(common.CHECK_CONFIG)
     config['services_include'] = ['datadog']
@@ -109,7 +109,7 @@ def test_check_service_filter(aggregator, spin_up_haproxy):
 
 
 @pytest.mark.integration
-def test_wrong_config(aggregator, spin_up_haproxy):
+def test_wrong_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     config = copy.deepcopy(common.CHECK_CONFIG)
     config['username'] = 'fake_username'
@@ -121,7 +121,7 @@ def test_wrong_config(aggregator, spin_up_haproxy):
 
 
 @pytest.mark.integration
-def test_open_config(aggregator, spin_up_haproxy):
+def test_open_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
     haproxy_check.check(common.CHECK_CONFIG_OPEN)
 
@@ -135,14 +135,15 @@ def test_open_config(aggregator, spin_up_haproxy):
 
 
 @pytest.mark.integration
-def test_unixsocket_config(aggregator, spin_up_haproxy):
-    if not Platform.is_linux():
-        return
-
+@pytest.mark.skipif(not Platform.is_linux(), reason='Windows sockets are not file handles')
+def test_unixsocket_config(aggregator, haproxy_container):
     haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
-    haproxy_check.check(common.CONFIG_UNIXSOCKET)
+    config = copy.deepcopy(common.CONFIG_UNIXSOCKET)
+    unixsocket_url = 'unix://{0}'.format(haproxy_container)
+    config['url'] = unixsocket_url
+    haproxy_check.check(config)
 
-    shared_tag = ["instance_url:{0}".format(common.UNIXSOCKET_URL)]
+    shared_tag = ["instance_url:{0}".format(unixsocket_url)]
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag)
