@@ -1,0 +1,23 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "openshift",
+  "display_name": "OpenShift",
+  "short_description": "The Kubernetes platform for big ideas",
+  "creates_events": false,
+  "guid": "ea7f642f-263f-4ed1-8da0-9bb96c7df1f0",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "version": "1.0.0",
+  "public_title": "Datadog-OpenShift Integration",
+  "categories": [
+    "containers",
+    "orchestration"
+  ],
+  "doc_link": "https://docs.datadoghq.com/integrations/openshift/",
+  "type": "check",
+  "is_public": true,
+  "has_logo": true
+}
