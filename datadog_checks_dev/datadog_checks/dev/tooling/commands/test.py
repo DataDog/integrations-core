@@ -9,7 +9,7 @@ from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waitin
 from ..constants import TESTABLE_FILE_EXTENSIONS, get_root
 from ..utils import get_testable_checks
 from ...subprocess import run_command
-from ...utils import chdir, dir_exists, file_exists, read_file
+from ...utils import chdir
 
 
 def testable_files(files):
