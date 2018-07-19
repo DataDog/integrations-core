@@ -1,10 +1,14 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 """ Collect status information for Windows services
 """
 # project
-from checks import AgentCheck
-from checks.winwmi_check import WinWMICheck
-from utils.containers import hash_mutable
-from utils.timeout import TimeoutException
+from datadog_checks.checks import AgentCheck
+from datadog_checks.win.wmi.winwmi_check import WinWMICheck
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.timeout import TimeoutException
 
 
 class WindowsService(WinWMICheck):
@@ -89,11 +93,9 @@ class WindowsService(WinWMICheck):
                     pass
 
             status = self.STATE_TO_VALUE.get(wmi_obj["state"], AgentCheck.UNKNOWN)
-            self.service_check("windows_service.state", status,
-                        tags=tags + ['service:{0}'.format(sc_name)])
+            self.service_check("windows_service.state", status, tags=tags + ['service:{0}'.format(sc_name)])
             self.log.debug("service state for %s %s" % (sc_name, str(status)))
 
         for lsvc, svc in specific_services.items():
-            self.service_check("windows_service.state", AgentCheck.CRITICAL,
-                        tags=tags + ['service:{0}'.format(svc)])
+            self.service_check("windows_service.state", AgentCheck.CRITICAL, tags=tags + ['service:{0}'.format(svc)])
             self.log.debug("service state for %s %s" % (svc, str(AgentCheck.CRITICAL)))
