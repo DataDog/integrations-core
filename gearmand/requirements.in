@@ -1,1 +1,1 @@
-gearman==2.0.2
+gearman==2.0.2; sys_platform != 'win32'
