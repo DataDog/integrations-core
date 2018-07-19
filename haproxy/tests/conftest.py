@@ -65,7 +65,7 @@ def haproxy_container():
         host_socket_dir = os.path.realpath(tempfile.mkdtemp())
         host_socket_path = os.path.join(host_socket_dir, 'datadog-haproxy-stats.sock')
         os.chmod(host_socket_dir, 0o777)
-        # os.chown(host_socket_dir, os.getuid(), os.getgid())
+        os.chown(host_socket_dir, os.getuid(), os.getgid())
 
         env['HAPROXY_CONFIG_DIR'] = os.path.join(common.HERE, 'compose')
         env['HAPROXY_CONFIG'] = os.path.join(common.HERE, 'compose', 'haproxy.cfg')
