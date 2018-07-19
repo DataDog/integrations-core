@@ -12,7 +12,6 @@
   "guid": "68100352-b993-43e6-9dc8-5ecd498e160b",
   "public_title": "Datadog-FluentD Integration",
   "categories": [
-    "logging",
     "log collection"
   ],
   "type": "check",
