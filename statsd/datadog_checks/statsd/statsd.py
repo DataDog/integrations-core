@@ -1,7 +1,6 @@
-# (C) Datadog, Inc. 2015-2017
-# (C) Cory Watson <cory@stripe.com> 2015
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
 import re
@@ -9,13 +8,14 @@ import socket
 from StringIO import StringIO
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"
 
 ENDER = re.compile("^(END|health: up|health: down)\n$", re.MULTILINE)
 BAD_ENDER = re.compile("^ERROR\n$", re.MULTILINE)
+
 
 class StatsCheck(AgentCheck):
     def check(self, instance):
