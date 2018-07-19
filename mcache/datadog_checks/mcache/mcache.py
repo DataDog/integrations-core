@@ -4,10 +4,15 @@
 import bmemcached
 import pkg_resources
 
+from datadog_checks.errors import CheckException
 from datadog_checks.checks import AgentCheck
 
 
-class BadResponseError(Exception):
+class BadResponseError(CheckException):
+    pass
+
+
+class InvalidConfigError(CheckException):
     pass
 
 
@@ -262,7 +267,7 @@ class Memcache(AgentCheck):
         password = instance.get('password')
 
         if not server and not socket:
-            raise Exception('Either "url" or "socket" must be configured')
+            raise InvalidConfigError('Either "url" or "socket" must be configured')
 
         if socket:
             server = 'unix'
@@ -292,7 +297,7 @@ class Memcache(AgentCheck):
                 self.SERVICE_CHECK, AgentCheck.CRITICAL,
                 tags=service_check_tags,
                 message="Unable to fetch stats from server")
-            raise Exception(
+            raise CheckException(
                 "Unable to retrieve stats from memcache instance: {}:{}."
                 "Please check your configuration. ({})".format(server, port, e))
 
