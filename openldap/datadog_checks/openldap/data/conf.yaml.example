@@ -24,7 +24,3 @@ instances:
     #
     # tags:  # Optional: additional list of tags to attach to the metrics sent by the integration to better identify the instance
     #   - key:value
-
-
-
-
