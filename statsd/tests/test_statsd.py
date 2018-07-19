@@ -3,11 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import sys
-import time
+
 import pytest
-import requests
-import subprocess
+
 from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
 
