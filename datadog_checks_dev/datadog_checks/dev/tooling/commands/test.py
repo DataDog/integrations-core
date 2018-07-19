@@ -31,32 +31,6 @@ def files_changed():
     return [f for f in changed_files if f]
 
 
-def check_requirements(check):
-    """
-    Assert the output of pip-compile is the same as the contents of
-    `requirements.txt` for the given check
-    """
-    check_dir = os.path.join(get_root(), check)
-    if not dir_exists(check_dir):
-        abort('Unable to find folder `{}`'.format(check_dir))
-
-    # Check the files are there
-    req_in = os.path.join(check_dir, 'requirements.in')
-    req_txt = os.path.join(check_dir, 'requirements.txt')
-    if not (file_exists(req_in) and file_exists(req_txt)):
-        abort('Target folder `{}` must contain `requirements.in` and `requirements.txt`.'.format(check_dir))
-
-    # Get the output of pip-compile
-    with chdir(check_dir):
-        out_lines = run_command('pip-compile -n --generate-hashes', capture=True).stdout.splitlines()
-
-    # Read the contents of `requirements.txt`
-    if read_file(req_txt).splitlines() != out_lines:
-        abort('`requirements.in` and `requirements.txt` are out of sync, please run pip-compile and try again.')
-
-    echo_success('Requirements are in sync!')
-
-
 @click.command(
     context_settings=CONTEXT_SETTINGS,
     short_help='Run tests'
@@ -91,12 +65,6 @@ def test(checks, bench, every):
         return
 
     for check in checks:
-        # check requirements.in and requirements.txt are in sync
-        if not bench and check != 'datadog_checks_dev':
-            echo_waiting('Verifying requirements are in sync for `{}`...'.format(check))
-            check_requirements(check)
-            click.echo()
-
         with chdir(os.path.join(root, check)):
             if every:
                 wait_text = 'Running tests for `{}`'.format(check)
