@@ -722,7 +722,7 @@ class ESCheck(AgentCheck):
             raise
 
         self.log.debug("request to url {0} returned: {1}".format(url, resp))
-        
+
         return resp.json()
 
     def _process_pending_tasks_data(self, data, config):
