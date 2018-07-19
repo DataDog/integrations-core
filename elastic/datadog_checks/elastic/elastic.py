@@ -804,23 +804,22 @@ class ESCheck(AgentCheck):
             self._metric_not_found(metric, path)
 
     def _process_health_data(self, data, config):
-        status = data.get('status')
+        cluster_status = data.get('status')
         if not self.cluster_status.get(config.url):
-            self.cluster_status[config.url] = status
-            if status and status in ["yellow", "red"]:
-                event = self._create_event(status, tags=config.tags)
+            self.cluster_status[config.url] = cluster_status
+            if cluster_status in ["yellow", "red"]:
+                event = self._create_event(cluster_status, tags=config.tags)
                 self.event(event)
 
-        if status != self.cluster_status.get(config.url):
-            self.cluster_status[config.url] = status
-            event = self._create_event(status, tags=config.tags)
+        if cluster_status != self.cluster_status.get(config.url):
+            self.cluster_status[config.url] = cluster_status
+            event = self._create_event(cluster_status, tags=config.tags)
             self.event(event)
 
         for metric, desc in self.CLUSTER_HEALTH_METRICS.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 
         # Process the service check
-        cluster_status = status
         if cluster_status == 'green':
             status = AgentCheck.OK
             data['tag'] = "OK"
