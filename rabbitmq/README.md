@@ -105,7 +105,8 @@ See the [sample rabbitmq.d/conf.yaml][3] for all available configuration options
 
 ## Data Collected
 ### Metrics
-{{< get-metrics-from-git "rabbitmq" >}}
+
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 
 The Agent tags `rabbitmq.queue.*` metrics by queue name, and `rabbitmq.node.*` metrics by node name.
