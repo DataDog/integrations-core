@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.2.2 / 2018-07-19
+
+* [Fixed] Relax condition error handling to allow more time. See [#1914](https://github.com/DataDog/integrations-core/pull/1914).
+* [Fixed] Do not skip release builds. See [#1913](https://github.com/DataDog/integrations-core/pull/1913).
+* [Fixed] Fix packaging of agent requirements. See [#1911](https://github.com/DataDog/integrations-core/pull/1911).
+
 ## 0.2.1 / 2018-07-17
 
 * [Fixed] make remove_path util more resilient to errors. See [#1900](https://github.com/DataDog/integrations-core/pull/1900).
