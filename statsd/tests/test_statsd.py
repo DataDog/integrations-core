@@ -8,7 +8,7 @@ import time
 import pytest
 import requests
 import subprocess
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.statsd.statsd import StatsCheck, SERVICE_CHECK_NAME_HEALTH, SERVICE_CHECK_NAME
 
 
@@ -40,16 +40,19 @@ def get_instance():
     }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session', autouse=True)
 def spin_up_statsd():
-    docker_run(compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'))
+    with docker_run(
+        compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'),
+        endpoints=URL
+    ):
+        yield
 
 
-def test_simple_run(aggregator, spin_up_statsd, get_instance):
+def test_simple_run(aggregator, get_instance):
     stats_check = StatsCheck(CHECK_NAME, {}, {})
     stats_check.check(get_instance)
     expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
-    print aggregator._metrics
     for mname in METRICS:
         aggregator.assert_metric(mname, count=1, tags=expected_tags)
 
