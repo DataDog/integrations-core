@@ -244,7 +244,7 @@ def make(ctx, check, version):
 
     # commit the changes.
     # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
-    msg = 'Bumped {} version to {}'.format(check, version)
+    msg = '[Release] Bumped {} version to {}'.format(check, version)
     git_commit(commit_targets, msg)
 
     # done
