@@ -242,7 +242,8 @@ def make(ctx, check, version):
         echo_waiting('Updating the requirements file {}...'.format(req_file))
         update_agent_requirements(req_file, check, get_agent_requirement_line(check, version))
 
-    # commit the changes, do not use [ci skip] so releases get built
+    # commit the changes.
+    # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
     msg = 'Bumped {} version to {}'.format(check, version)
     git_commit(commit_targets, msg)
 
