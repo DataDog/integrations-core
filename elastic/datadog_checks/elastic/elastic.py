@@ -472,7 +472,7 @@ class ESCheck(AgentCheck):
         # is retreived here, and added to the tag list.
         stats_url = self._join_url(config.url, stats_url, admin_forwarder)
         stats_data = self._get_data(stats_url, config)
-        if stats_data['cluster_name']:
+        if stats_data.get('cluster_name'):
             # retreive the cluster name from the data, and append it to the
             # master tag list.
             cluster_name_tag = "cluster_name:{}".format(stats_data['cluster_name'])
@@ -557,13 +557,13 @@ class ESCheck(AgentCheck):
         for idx in index_resp:
             tags = config.tags + ['index_name:' + idx['index']]
             index_data = {
-                'docs_count':         idx.get('docs.count', None),
-                'docs_deleted':       idx.get('docs.deleted', None),
-                'primary_shards':     idx.get('pri', None),
-                'replica_shards':     idx.get('rep', None),
-                'primary_store_size': idx.get('pri.store.size', None),
-                'store_size':         idx.get('store.size', None),
-                'health':             idx.get('health', None),
+                'docs_count':         idx.get('docs.count'),
+                'docs_deleted':       idx.get('docs.deleted'),
+                'primary_shards':     idx.get('pri'),
+                'replica_shards':     idx.get('rep'),
+                'primary_store_size': idx.get('pri.store.size'),
+                'store_size':         idx.get('store.size'),
+                'health':             idx.get('health'),
             }
 
             # Convert the health status value
@@ -721,6 +721,8 @@ class ESCheck(AgentCheck):
                 )
             raise
 
+        self.log.debug("request to url {0} returned: {1}".format(url, resp))
+
         return resp.json()
 
     def _process_pending_tasks_data(self, data, config):
@@ -746,7 +748,7 @@ class ESCheck(AgentCheck):
 
     def _process_stats_data(self, data, stats_metrics, config):
         cluster_stats = config.cluster_stats
-        for node_data in data['nodes'].itervalues():
+        for node_data in data.get('nodes', {}).itervalues():
             metric_hostname = None
             metrics_tags = list(config.tags)
 
@@ -787,7 +789,7 @@ class ESCheck(AgentCheck):
         # Traverse the nested dictionaries
         for key in path.split('.'):
             if value is not None:
-                value = value.get(key, None)
+                value = value.get(key)
             else:
                 break
 
@@ -802,22 +804,22 @@ class ESCheck(AgentCheck):
             self._metric_not_found(metric, path)
 
     def _process_health_data(self, data, config):
-        if self.cluster_status.get(config.url) is None:
-            self.cluster_status[config.url] = data['status']
-            if data['status'] in ["yellow", "red"]:
-                event = self._create_event(data['status'], tags=config.tags)
+        cluster_status = data.get('status')
+        if not self.cluster_status.get(config.url):
+            self.cluster_status[config.url] = cluster_status
+            if cluster_status in ["yellow", "red"]:
+                event = self._create_event(cluster_status, tags=config.tags)
                 self.event(event)
 
-        if data['status'] != self.cluster_status.get(config.url):
-            self.cluster_status[config.url] = data['status']
-            event = self._create_event(data['status'], tags=config.tags)
+        if cluster_status != self.cluster_status.get(config.url):
+            self.cluster_status[config.url] = cluster_status
+            event = self._create_event(cluster_status, tags=config.tags)
             self.event(event)
 
         for metric, desc in self.CLUSTER_HEALTH_METRICS.iteritems():
             self._process_metric(data, metric, *desc, tags=config.tags)
 
         # Process the service check
-        cluster_status = data['status']
         if cluster_status == 'green':
             status = AgentCheck.OK
             data['tag'] = "OK"
@@ -834,7 +836,13 @@ class ESCheck(AgentCheck):
               "| relocating_shards={relocating_shards} "\
               "| unassigned_shards={unassigned_shards} "\
               "| timed_out={timed_out}" \
-              .format(**data)
+              .format(tag=data.get('tag'),
+                      cluster_name=data.get('cluster_name'),
+                      active_shards=data.get('active_shards'),
+                      initializing_shards=data.get('initializing_shards'),
+                      relocating_shards=data.get('relocating_shards'),
+                      unassigned_shards=data.get('unassigned_shards'),
+                      timed_out=data.get('timed_out'))
 
         self.service_check(
             self.SERVICE_CHECK_CLUSTER_STATUS,
@@ -850,18 +858,18 @@ class ESCheck(AgentCheck):
         hostname = self.hostname.decode('utf-8')
         if status == "red":
             alert_type = "error"
-            msg_title = "%s is %s" % (hostname, status)
+            msg_title = "{0} is {1}".format(hostname, status)
 
         elif status == "yellow":
             alert_type = "warning"
-            msg_title = "%s is %s" % (hostname, status)
+            msg_title = "{0} is {1}".format(hostname, status)
 
         else:
             # then it should be green
             alert_type = "success"
-            msg_title = "%s recovered as %s" % (hostname, status)
+            msg_title = "{0} recovered as {1}".format(hostname, status)
 
-        msg = "ElasticSearch: %s just reported as %s" % (hostname, status)
+        msg = "ElasticSearch: {0} just reported as {1}".format(hostname, status)
 
         return {
             'timestamp': int(time.time()),
