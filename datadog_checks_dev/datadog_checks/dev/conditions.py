@@ -5,7 +5,6 @@ import re
 import time
 
 from six import string_types
-from six.moves.urllib.error import URLError
 from six.moves.urllib.request import urlopen
 
 from .errors import RetryError
@@ -30,7 +29,7 @@ class CheckEndpoints(LazyFunction):
                 last_endpoint = endpoint
                 try:
                     request = urlopen(endpoint, timeout=self.timeout)
-                except URLError as e:
+                except Exception as e:
                     last_error = str(e)
                     break
                 else:
@@ -78,9 +77,12 @@ class CheckCommandOutput(LazyFunction):
 
     def __call__(self):
         log_output = ''
+        exit_code = 0
 
         for _ in range(self.attempts):
-            result = run_command(self.command, capture=True, check=True)
+            result = run_command(self.command, capture=True)
+            exit_code = result.code
+
             if self.stdout and self.stderr:
                 log_output = result.stdout + result.stderr
             elif self.stdout:
@@ -100,8 +102,10 @@ class CheckCommandOutput(LazyFunction):
         else:
             raise RetryError(
                 'Command: {}\n'
+                'Exit code: {}\n'
                 'Captured Output: {}'.format(
                     self.command,
+                    exit_code,
                     log_output
                 )
             )
