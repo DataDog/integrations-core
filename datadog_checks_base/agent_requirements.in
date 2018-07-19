@@ -7,7 +7,7 @@ cryptography==2.2.2
 cx_oracle==6.0.1
 dnspython==1.12.0
 enum34==1.1.6
-gearman==2.0.2; sys_platform != 'win32'
+gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
 ipaddress==1.0.22
 jaydebeapi==1.1.1
@@ -42,7 +42,7 @@ scandir==1.5
 serpent==1.23; sys_platform == 'win32'
 simplejson==3.6.5
 six==1.11.0
-supervisor==3.3.3
+supervisor==3.3.3; python_version < '3.0'
 testfixtures==4.14.3; sys_platform == 'win32'
 uptime==3.0.1
 uuid==1.30
