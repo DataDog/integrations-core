@@ -1,0 +1,20 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "openldap",
+  "short_description": "The OpenLDAP integration collect metrics from your OpenLDAP server using the cn=monitor backend",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "guid": "ec61c06d-a870-4183-8a27-c66db1fc47cc",
+  "public_title": "Datadog-OpenLDAP Integration",
+  "categories":["data store"],
+  "type":"check",
+  "doc_link": "https://docs.datadoghq.com/integrations/openldap/",
+  "aliases":[],
+  "is_public": true,
+  "has_logo": true
+}
