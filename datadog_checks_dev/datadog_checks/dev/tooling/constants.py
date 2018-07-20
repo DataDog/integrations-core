@@ -77,6 +77,7 @@ AGENT_BASED_INTEGRATIONS = [
     'network',
     'nfsstat',
     'nginx',
+    'openldap',
     'openstack',
     'oracle',
     'pdh_check',
