@@ -58,7 +58,7 @@ def read_packages(reqs_file):
 def write_packages(packages, reqs_file):
     write_file_lines(
         reqs_file,
-        ('{}\n'.format(format_package(package) for package in sorted(packages)))
+        ('{}\n'.format(format_package(package)) for package in sorted(packages))
     )
 
 
