@@ -3,23 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-from collections import defaultdict
-
-from six import iteritems
+from collections import defaultdict, namedtuple
 
 from .constants import get_root
 from ..subprocess import run_command
 from ..utils import (
-    chdir, file_exists, resolve_path, stream_file_lines, write_file_lines
+    chdir, resolve_path, stream_file_lines, write_file_lines
 )
 
-DEP_PATTERN = re.compile(r'([^=]+)(?:==(\S+))?')
-
-
-def ensure_deps_declared(resolved_reqs_file, pinned_reqs_file):
-    if file_exists(resolved_reqs_file) and not file_exists(pinned_reqs_file):
-        resolved_packages = dict(read_packages(resolved_reqs_file))
-        write_packages(resolved_packages, pinned_reqs_file)
+DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
+Package = namedtuple('Package', ('name', 'version', 'marker'))
 
 
 def resolve_requirements(pinned_file, resolved_file, lazy=True):
@@ -47,38 +40,68 @@ def read_packages(reqs_file):
         if not line.startswith(('#', '--hash')):
             match = DEP_PATTERN.match(line)
             if match:
-                package, version = match.groups()
-                yield package.lower(), version.lower()
+                package, version, marker = match.groups()
+
+                if version:
+                    version = version.lower()
+                else:
+                    version = None
+
+                if marker:
+                    marker = marker.lower().replace('"', "'")
+                else:
+                    marker = None
+
+                yield Package(package.lower(), version, marker)
 
 
 def write_packages(packages, reqs_file):
     write_file_lines(
         reqs_file,
-        (
-            '{}=={}\n'.format(package, version)
-            for package, version in sorted(iteritems(packages))
-        )
+        ('{}\n'.format(format_package(package) for package in sorted(packages)))
+    )
+
+
+def format_package(package):
+    return '{}{}{}'.format(
+        package.name,
+        '=={}'.format(package.version) if package.version else '',
+        '; {}'.format(package.marker) if package.marker else ''
     )
 
 
 def collect_packages(verify=False, checks=None):
     root = get_root()
     checks = checks if checks else os.listdir(root)
-    packages = defaultdict(lambda: defaultdict(list))
+    packages = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     errors = []
 
     for check_name in sorted(checks):
-        for package, version in read_packages(os.path.join(root, check_name, 'requirements.in')):
-            if verify and version is None:
-                errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package, check_name))
+        for package in read_packages(os.path.join(root, check_name, 'requirements.in')):
+            package_data = packages[package.name]
 
-            versions = packages[package]
-            versions[version].append(check_name)
+            # Versions
+            if verify and package.version is None:
+                errors.append('Unpinned dependency `{}` in the `{}` check.'.format(package.name, check_name))
+
+            versions = package_data['versions']
+            versions[package.version].append(check_name)
 
             if verify and len(versions) > 1:
                 errors.append(
                     'Multiple dependency versions for `{}` in the {} and {} checks.'.format(
-                        package, versions.popitem()[1], versions.popitem()[1]
+                        package.name, versions.popitem()[1], versions.popitem()[1]
+                    )
+                )
+
+            # Marker section
+            markers = package_data['markers']
+            markers[package.marker].append(check_name)
+
+            if verify and len(markers) > 1:
+                errors.append(
+                    'Multiple environment marker definitions for `{}` in the {} and {} checks.'.format(
+                        package.name, versions.popitem()[1], versions.popitem()[1]
                     )
                 )
 
