@@ -143,6 +143,8 @@ jobs:
     - stage: test
       env: CHECK=ntp
     - stage: test
+      env: CHECK=openldap
+    - stage: test
       env: CHECK=openstack
     - stage: test
       env: CHECK=oracle
