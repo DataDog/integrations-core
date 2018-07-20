@@ -409,10 +409,12 @@ class KubernetesState(PrometheusCheck):
                 self.count(metric_name, metric.gauge.value, tags + self.custom_tags)
 
     def kube_pod_container_status_waiting_reason(self, message, **kwargs):
-        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.waiting', WHITELISTED_WAITING_REASONS)
+        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.waiting',
+                                                             WHITELISTED_WAITING_REASONS)
 
     def kube_pod_container_status_terminated_reason(self, message, **kwargs):
-        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.terminated', WHITELISTED_TERMINATED_REASONS)
+        self._submit_metric_kube_pod_container_status_reason(message, '.container.status_report.count.terminated',
+                                                             WHITELISTED_TERMINATED_REASONS)
 
     def kube_cronjob_next_schedule_time(self, message, **kwargs):
         """ Time until the next schedule """
