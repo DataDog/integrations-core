@@ -241,7 +241,6 @@ Usage: ddev dep freeze [OPTIONS]
   Combine all dependencies for the Agent's static environment.
 
 Options:
-  -l, --lazy  Do not attempt to upgrade transient dependencies
   -h, --help  Show this message and exit.
 ```
 
@@ -251,16 +250,19 @@ Options:
 $ ddev dep pin -h
 Usage: ddev dep pin [OPTIONS] PACKAGE VERSION [CHECKS]...
 
-  Pin a dependency for all checks that require it. This will also resolve
+  Pin a dependency for all checks that require it. This can also resolve
   transient dependencies.
 
   Setting the version to `none` will remove the package. You can specify an
   unlimited number of additional checks to apply the pin for via arguments.
 
 Options:
-  -l, --lazy   Do not attempt to upgrade transient dependencies
+  -m, --marker TEXT  Environment marker to use
+  -r, --resolve      Resolve transient dependencies
+  -l, --lazy         Do not attempt to upgrade transient dependencies when
+                     resolving
   -q, --quiet
-  -h, --help   Show this message and exit.
+  -h, --help         Show this message and exit.
 ```
 
 ##### Resolve
