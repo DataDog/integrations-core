@@ -4,7 +4,7 @@
 
 """ Collect status information for Windows services
 """
-# project
+
 from datadog_checks.checks.win.wmi.winwmi_check import WinWMICheck
 from datadog_checks.utils.containers import hash_mutable
 from datadog_checks.utils.timeout import TimeoutException

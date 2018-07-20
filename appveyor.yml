@@ -53,9 +53,6 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
-  - cd windows_service
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
-  - cd ..
   - cd wmi_check
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
