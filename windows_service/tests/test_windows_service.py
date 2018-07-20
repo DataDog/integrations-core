@@ -4,12 +4,12 @@
 
 import pytest
 
-from datadog_checks.win.wmi.winwmi_check import WinWMICheck
+from datadog_checks.checks import WindowsService
 
 
 @pytest.fixture
 def check():
-    return WinWMICheck("windows_service", {}, {})
+    return WindowsService("windows_service", {}, {})
 
 
 INSTANCE = {
@@ -33,42 +33,38 @@ ALL_INSTANCE = {
     'services': ['ALL'],
 }
 
-SERVICE_CHECK_NAME = 'windows_service.state'
 
+def test_basic_check(self, aggregator, check):
+    check.check(INSTANCE)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:EventLog', 'optional:tag1'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:Dnscache', 'optional:tag1'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.CRITICAL,
+                                    tags=['service:NonExistingService', 'optional:tag1'], count=1)
+    aggregator.assert_all_metrics_covered()
 
-class TestWindowsServiceCheck():
+def test_invalid_host(self, aggregator, check):
+    check.check(INVALID_HOST_INSTANCE)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.CRITICAL,
+                                    tags=['host:nonexistinghost', 'service:EventLog'], count=1)
+    aggregator.assert_all_metrics_covered()
 
-    def test_basic_check(self, aggregator, check):
-        check.check(INSTANCE)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:EventLog', 'optional:tag1'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:Dnscache', 'optional:tag1'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.CRITICAL,
-                                        tags=['service:NonExistingService', 'optional:tag1'], count=1)
-        aggregator.assert_all_metrics_covered()
+def test_wildcard(self, aggregator, check):
+    check.check(WILDCARD_INSTANCE)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:EventLog'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:EventSystem'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:Dnscache'], count=1)
+    aggregator.assert_all_metrics_covered()
 
-    def test_invalid_host(self, aggregator, check):
-        check.check(INVALID_HOST_INSTANCE)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.CRITICAL,
-                                        tags=['host:nonexistinghost', 'service:EventLog'], count=1)
-        aggregator.assert_all_metrics_covered()
-
-    def test_wildcard(self, aggregator, check):
-        check.check(WILDCARD_INSTANCE)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:EventLog'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:EventSystem'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:Dnscache'], count=1)
-        aggregator.assert_all_metrics_covered()
-
-    def test_all(self, aggregator, check):
-        check.check(ALL_INSTANCE)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:EventLog'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:Dnscache'], count=1)
-        aggregator.assert_service_check(SERVICE_CHECK_NAME, status=WinWMICheck.OK,
-                                        tags=['service:EventSystem'], count=1)
+def test_all(self, aggregator, check):
+    check.check(ALL_INSTANCE)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:EventLog'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:Dnscache'], count=1)
+    aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
+                                    tags=['service:EventSystem'], count=1)
