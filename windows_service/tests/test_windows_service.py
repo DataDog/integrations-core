@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.checks import WindowsService
+from datadog_checks.windows_service import WindowsService
 
 
 @pytest.fixture
