@@ -223,7 +223,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if not uid:
                 metric.Clear()  # Ignore this metric message
                 continue
-            # Sum the counter value accross all cores
+            # Sum the counter value accross all contexts
             if uid not in seen:
                 seen[uid] = metric
             else:
