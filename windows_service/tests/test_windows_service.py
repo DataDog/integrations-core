@@ -34,7 +34,7 @@ ALL_INSTANCE = {
 }
 
 
-def test_basic_check(self, aggregator, check):
+def test_basic_check(aggregator, check):
     check.check(INSTANCE)
     aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
                                     tags=['service:EventLog', 'optional:tag1'], count=1)
@@ -44,13 +44,15 @@ def test_basic_check(self, aggregator, check):
                                     tags=['service:NonExistingService', 'optional:tag1'], count=1)
     aggregator.assert_all_metrics_covered()
 
-def test_invalid_host(self, aggregator, check):
+
+def test_invalid_host(aggregator, check):
     check.check(INVALID_HOST_INSTANCE)
     aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.CRITICAL,
                                     tags=['host:nonexistinghost', 'service:EventLog'], count=1)
     aggregator.assert_all_metrics_covered()
 
-def test_wildcard(self, aggregator, check):
+
+def test_wildcard(aggregator, check):
     check.check(WILDCARD_INSTANCE)
     aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
                                     tags=['service:EventLog'], count=1)
@@ -60,7 +62,8 @@ def test_wildcard(self, aggregator, check):
                                     tags=['service:Dnscache'], count=1)
     aggregator.assert_all_metrics_covered()
 
-def test_all(self, aggregator, check):
+
+def test_all(aggregator, check):
     check.check(ALL_INSTANCE)
     aggregator.assert_service_check(WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK,
                                     tags=['service:EventLog'], count=1)
