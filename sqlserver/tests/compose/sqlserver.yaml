@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  sqlserver:
+    image: "microsoft/mssql-server-linux:2017-latest"
+    ports:
+      - "1443:1443"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "dd-ci"

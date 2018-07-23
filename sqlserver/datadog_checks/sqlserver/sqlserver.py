@@ -10,6 +10,7 @@ http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-value
 import traceback
 from contextlib import contextmanager
 from collections import defaultdict
+
 # 3rd party
 import adodbapi
 try:
@@ -17,10 +18,9 @@ try:
 except ImportError:
     pyodbc = None
 
-from config import _is_affirmative
-
 # project
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -138,7 +138,7 @@ class SQLServer(AgentCheck):
                             self._make_metric_list_to_collect(instance, self.custom_metrics)
                 else:
                     # How much do we care that the DB doesn't exist?
-                    ignore = _is_affirmative(instance.get("ignore_missing_database", False))
+                    ignore = is_affirmative(instance.get("ignore_missing_database", False))
                     if ignore is not None and ignore:
                         # not much : we expect it. leave checks disabled
                         self.do_check[instance_key] = False
@@ -812,7 +812,9 @@ class SqlOsWaitStat(SqlServerMetric):
 
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = 'select * from sys.dm_os_wait_stats where wait_type in ({})'.format(placeholders)
+        query_base = '''
+            select * from sys.dm_os_wait_stats where wait_type in ({})
+            '''.format(placeholders)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -892,7 +894,9 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
 
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
-        query_base = 'select * from sys.dm_os_memory_clerks where type in ({})'.format(placeholders)
+        query_base = '''
+            select * from sys.dm_os_memory_clerks where type in ({})
+            '''.format(placeholders)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]

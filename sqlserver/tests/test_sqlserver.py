@@ -2,120 +2,34 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
-import copy
-from nose.plugins.attrib import attr
-
-# project
-from tests.checks.common import AgentCheckTest
-
-
+# import copy
+import conftest
+from datadog_checks.sqlserver.sqlserver import SQLServer
 """
 Runs against AppVeyor's SQLServer setups with their default configurations
 """
 
-CONFIG = {
-    'init_config': {
-        'custom_metrics': [
-            {
-                'name': 'sqlserver.clr.execution',
-                'type': 'gauge',
-                'counter_name': 'CLR Execution',
-            },
-            {
-                'name': 'sqlserver.exec.in_progress',
-                'type': 'gauge',
-                'counter_name': 'OLEDB calls',
-                'instance_name': 'Cumulative execution time (ms) per second',
-            },
-            {
-                'name': 'sqlserver.db.commit_table_entries',
-                'type': 'gauge',
-                'counter_name': 'Log Flushes/sec',
-                'instance_name': 'ALL',
-                'tag_by': 'db',
-            },
-        ],
-    }
-}
 
-SQL2008_INSTANCE = {
-    'host': '(local)\SQL2008R2SP2',
-    'username': 'sa',
-    'password': 'Password12!',
-}
+def test_check_2012(aggregator, spin_up_sqlserver, get_config, get_sql2012_instance):
+    get_config['instances'] = get_sql2012_instance
+    sqlserver_check = SQLServer(conftest.CHECK_NAME, get_config, {}, [get_sql2012_instance])
+    sqlserver_check.check(get_sql2012_instance)
 
-SQL2012_INSTANCE = {
-    'host': '(local)\SQL2012SP1',
-    'username': 'sa',
-    'password': 'Password12!',
-}
+    # Check custom metrics
+    aggregator.assert_metric('sqlserver.clr.execution', count=1)
+    aggregator.assert_metric('sqlserver.exec.in_progress', count=1)
 
-SQL2014_INSTANCE = {
-    'host': '(local)\SQL2014',
-    'username': 'sa',
-    'password': 'Password12!',
-}
-
-LINUX_INSTANCE = {
-    'host': 'localhost',
-    'username': 'sa',
-    'password': 'dd-ci',
-}
-
-EXPECTED_METRICS = [
-    'sqlserver.buffer.cache_hit_ratio',
-    'sqlserver.buffer.page_life_expectancy',
-    'sqlserver.stats.batch_requests',
-    'sqlserver.stats.sql_compilations',
-    'sqlserver.stats.sql_recompilations',
-    'sqlserver.stats.connections',
-    'sqlserver.stats.lock_waits',
-    'sqlserver.access.page_splits',
-    'sqlserver.stats.procs_blocked',
-    'sqlserver.buffer.checkpoint_pages',
-]
+    # Make sure ALL custom metric is tagged by database
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+    custom_tags = get_sql2012_instance.get('tags', [])
+    expected_tags = custom_tags + ['host:{}'.format(get_sql2012_instance.get('host')), 'db:master']
+    for mname in conftest.EXPECTED_METRICS:
+        aggregator.assert_metric(mname, count=1)
+    aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.OK, tags=expected_tags)
+    aggregator.assert_all_metrics_covered
 
 
-@attr('unix')
-@attr('fixme')
-@attr(requires='sqlserver')
-class TestSqlserverLinux(AgentCheckTest):
-    """Basic Test for sqlserver integration."""
-    CHECK_NAME = 'sqlserver'
-
-    def test_check(self):
-        config = copy.deepcopy(CONFIG)
-        config['instances'] = [LINUX_INSTANCE]
-
-        self.run_check_twice(config, force_reload=True)
-
-        # FIXME: assert something, someday
-
-
-@attr('windows')
-@attr(requires='sqlserver')
-class TestSqlserver(AgentCheckTest):
-    """Basic Test for sqlserver integration."""
-    CHECK_NAME = 'sqlserver'
-
-    def _test_check(self, config):
-        self.run_check_twice(config, force_reload=True)
-
-        # Check our custom metrics
-        self.assertMetric('sqlserver.clr.execution')
-        self.assertMetric('sqlserver.exec.in_progress')
-        # Make sure the ALL custom metric is tagged by db
-        self.assertMetricTagPrefix('sqlserver.db.commit_table_entries', tag_prefix='db')
-
-        instance_tags = config['instances'][0].get('tags', [])
-        expected_tags = instance_tags + ['host:{}'.format(config['instances'][0]['host']), 'db:master']
-        for metric in EXPECTED_METRICS:
-            self.assertMetric(metric, count=1)
-
-        self.assertServiceCheckOK('sqlserver.can_connect', tags=expected_tags)
-
-        self.coverage_report()
+'''
 
     @attr('fixme')
     def test_check_2008(self):
@@ -149,3 +63,19 @@ class TestSqlserver(AgentCheckTest):
 
         self.assertServiceCheckCritical('sqlserver.can_connect',
                                         tags=['host:(local)\SQL2012SP1', 'db:master', 'optional:tag1'])
+
+@attr('unix')
+@attr('fixme')
+@attr(requires='sqlserver')
+class TestSqlserverLinux(AgentCheckTest):
+    """Basic Test for sqlserver integration."""
+
+    def test_check(self):
+        config = copy.deepcopy(CONFIG)
+        config['instances'] = [LINUX_INSTANCE]
+
+        self.run_check_twice(config, force_reload=True)
+
+        # FIXME: assert something, someday
+
+'''
