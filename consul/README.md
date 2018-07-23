@@ -1,5 +1,7 @@
 # Consul Integration
 
+![Consul Dash][12]
+
 ## Overview
 
 The Datadog Agent collects many metrics from Consul nodes, including those for:
@@ -167,3 +169,4 @@ Need help? Contact [Datadog Support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [11]: https://engineering.datadoghq.com/consul-at-datadog/
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png

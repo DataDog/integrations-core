@@ -1,6 +1,6 @@
 # Agent Check: Apache Web Server
 
-![Apache Graph][12]
+![Apache Dashboard][12]
 
 ## Overview
 
@@ -115,4 +115,4 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 [9]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance/
 [10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
 [11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
-[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/apache/apachegraph.png
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png

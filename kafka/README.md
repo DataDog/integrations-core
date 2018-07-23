@@ -1,5 +1,7 @@
 # Agent Check: Kafka
 
+![Kafka Dashboard][30]
+
 ## Overview
 
 Connect Kafka to Datadog in order to:
@@ -129,3 +131,4 @@ Returns `OK` otherwise.
 [27]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics/
 [28]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/
 [29]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog/
+[30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png

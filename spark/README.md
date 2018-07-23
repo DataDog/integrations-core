@@ -87,4 +87,4 @@ To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][6] t
 [7]: https://docs.datadoghq.com/agent/
 [8]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [9]: https://www.datadoghq.com/blog/monitoring-spark/
-[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/spark/sparkgraph.png
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png

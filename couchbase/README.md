@@ -1,5 +1,7 @@
 # Couchbase Integration
 
+![Couchbase Bytes Read][1]
+
 ## Overview
 
 Identify busy buckets, track cache miss ratios, and more. This Agent check collects metrics like:
@@ -11,8 +13,6 @@ Identify busy buckets, track cache miss ratios, and more. This Agent check colle
 * Disk write queue size
 
 And many more.
-
-![Couchbase Bytes Read][1]
 
 ## Setup
 
@@ -74,7 +74,7 @@ Need help? Contact [Datadog Support][7].
 * [Monitor key Couchbase metrics][9].
 
 
-[1]: https://raw.githubusercontent.com/DataDog/documentation/9cca18a10dc34066a8722a23fb2cd7086ac86bd1/src/images/integrations/couchbase/couchbase_graph.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couchbase/images/couchbase_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/couchbase/datadog_checks/couchbase/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent

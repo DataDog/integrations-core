@@ -1,5 +1,7 @@
 # RiakCS Check
 
+![RiakCS Dashboard][8]
+
 ## Overview
 
 Capture RiakCS metrics in Datadog to:
@@ -63,3 +65,4 @@ To get a better idea of how (or why) to monitor Riak CS performance and availabi
 [5]: https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability/
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riakcs/images/riakcs_dashboard.png

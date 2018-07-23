@@ -1,4 +1,5 @@
 # Haproxy Integration
+
 ![HAProxy Out of the box Dashboard][1]
 
 ## Overview

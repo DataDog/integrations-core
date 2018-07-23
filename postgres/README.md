@@ -220,4 +220,4 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 [21]: https://www.datadoghq.com/blog/postgresql-monitoring/
 [22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
 [23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/
-[24]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postgresql/pggraph.png
+[24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png

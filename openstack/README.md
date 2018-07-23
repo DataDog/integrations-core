@@ -129,4 +129,4 @@ See also our blog posts:
 [7]: https://www.datadoghq.com/blog/openstack-monitoring-nova/
 [8]: https://www.datadoghq.com/blog/install-openstack-in-two-commands/
 [9]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/
-[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/openstack/openstack.png
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png

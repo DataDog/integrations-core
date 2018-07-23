@@ -205,5 +205,5 @@ We've also written several other in-depth blog posts to help you get the most ou
 [24]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs/
 [25]: https://www.datadoghq.com/blog/docker-performance-datadog/
 [26]: https://www.datadoghq.com/blog/monitor-docker-datadog/
-[27]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/docker/docker.png
-[28]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/docker/integrations-docker-dockerps.png
+[27]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
+[28]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/integrations-docker-dockerps.png

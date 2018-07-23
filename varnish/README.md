@@ -134,4 +134,4 @@ Need help? Contact [Datadog Support][7].
 [8]: https://www.datadoghq.com/blog/top-varnish-performance-metrics/
 [9]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/varnish/varnish.png
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png

@@ -1,5 +1,7 @@
 # Gunicorn Integration
 
+![Gunicorn Dashboard][12]
+
 ## Overview
 
 The Datadog Agent collects one main metric about Gunicorn: the number of worker processes running. It also sends one service check: whether or not Gunicorn is running.
@@ -162,3 +164,4 @@ To get a better idea of how (or why) to integrate your Gunicorn apps with Datado
 [9]: https://www.datadoghq.com/blog/monitor-gunicorn-performance/
 [10]: https://docs.gunicorn.org/en/stable/settings.html#accesslog
 [11]: https://docs.gunicorn.org/en/stable/settings.html#errorlog
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png

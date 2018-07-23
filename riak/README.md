@@ -52,4 +52,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/riak/riak_graph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png

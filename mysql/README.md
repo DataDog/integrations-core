@@ -1,5 +1,7 @@
 # MySQL check
 
+![MySQL Dashboard][30]
+
 ## Overview
 
 The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
@@ -375,3 +377,4 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [27]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration
 [28]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
 [29]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/
+[30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png

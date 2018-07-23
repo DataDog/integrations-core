@@ -1,5 +1,7 @@
 # MongoDB check
 
+![MongoDB Dashboard][11]
+
 ## Overview
 
 Connect MongoDB to Datadog in order to:
@@ -146,3 +148,4 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/
 [10]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png

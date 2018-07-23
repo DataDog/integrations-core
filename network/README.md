@@ -61,4 +61,4 @@ The Network check does not include any service checks at this time.
 [5]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [6]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/network/netdashboard.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png

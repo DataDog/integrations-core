@@ -79,4 +79,4 @@ Need help? Contact [Datadog Support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/goexpvar/go_graph.png
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png

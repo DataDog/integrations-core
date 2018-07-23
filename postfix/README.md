@@ -107,4 +107,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-postfix-queues/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postfix/postfixgraph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png

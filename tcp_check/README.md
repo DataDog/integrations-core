@@ -69,4 +69,4 @@ Need help? Contact [Datadog Support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/metadata.csv
 [6]: https://app.datadoghq.com/monitors#/create
 [7]: https://docs.datadoghq.com/help/
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/tcpcheck/netgraphs.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tcp_check/images/netgraphs.png

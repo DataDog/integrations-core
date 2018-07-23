@@ -269,4 +269,4 @@ You may use the `attribute` filter as follow:
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/solr/solrgraph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png

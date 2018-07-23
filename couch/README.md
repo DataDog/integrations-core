@@ -1,6 +1,6 @@
 # CouchDB Integration
 
-![CouchDB graph][8]
+![CouchDB dashboard][8]
 
 ## Overview
 
@@ -70,4 +70,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/couchdb/couchdb_graph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couch/images/couchdb_dashboard.png

@@ -142,7 +142,7 @@ Need help? Contact [Datadog Support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-fluentd-datadog/
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/fluentd/snapshot-fluentd.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
 [10]: http://www.rubydoc.info/gems/fluent-plugin-datadog/
 [11]: https://docs.datadoghq.com/logs/#edit-reserved-attributes
 [13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
