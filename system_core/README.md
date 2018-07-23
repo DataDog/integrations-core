@@ -52,4 +52,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/systemcore/syscoredash.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/system_core/images/syscoredash.png

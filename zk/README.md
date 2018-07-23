@@ -142,4 +142,4 @@ Need help? Contact [Datadog Support][18].
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [18]: https://docs.datadoghq.com/help/
-[20]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/zookeeper/zookeepergraph.png
+[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png

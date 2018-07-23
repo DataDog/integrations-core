@@ -1,5 +1,7 @@
 # Agent Check: Cassandra Nodetool
 
+![Cassandra default dashboard][10]
+
 ## Overview
 
 This check collects metrics for your Cassandra cluster that are not available through [jmx integration][1].
@@ -76,3 +78,4 @@ Need help? Contact [Datadog Support][6].
 [7]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [8]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [9]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png

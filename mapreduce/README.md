@@ -1,5 +1,7 @@
 # Mapreduce Integration
 
+![MapReduce Dashboard][10]
+
 ## Overview
 
 Get metrics from mapreduce service in real time to:
@@ -58,3 +60,4 @@ Need help? Contact [Datadog Support][5].
 [7]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [8]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mapreduce/images/mapreduce_dashboard.png

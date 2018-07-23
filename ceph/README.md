@@ -1,6 +1,6 @@
 # Ceph Integration
 
-![Ceph Graph][7]
+![Ceph dashboard][7]
 
 ## Overview
 
@@ -104,4 +104,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
 [5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-ceph-datadog/
-[7]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/ceph/ceph_graph.png
+[7]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png

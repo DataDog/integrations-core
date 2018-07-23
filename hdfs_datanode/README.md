@@ -1,5 +1,7 @@
 # HDFS DataNode Integration
 
+![HDFS Dashboard][1011]
+
 ## Overview
 
 Track disk utilization and failed volumes on each of your HDFS DataNodes. This Agent check collects metrics for these, as well as block- and cache-related metrics.
@@ -76,3 +78,4 @@ Need help? Contact [Datadog Support][106].
 [108]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [109]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [1010]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
+[1011]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png

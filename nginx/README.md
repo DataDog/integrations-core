@@ -223,4 +223,4 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [11]: https://www.datadoghq.com/blog/how-to-monitor-nginx/
 [12]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
 [13]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
-[14]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/nginx/nginx.jpg
+[14]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png

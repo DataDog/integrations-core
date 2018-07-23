@@ -1,5 +1,7 @@
 # Agent Check: Tomcat
 
+![Tomcat Dashboard][23]
+
 ## Overview
 
 This check collects Tomcat metrics like:
@@ -344,3 +346,4 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 [20]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/
+[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png

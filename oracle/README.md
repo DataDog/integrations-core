@@ -1,5 +1,7 @@
 # Oracle Integration
 
+![Oracle Dashboard][9]
+
 ## Overview
 
 Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
@@ -106,3 +108,4 @@ Need help? Contact [Datadog Support][8].
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png

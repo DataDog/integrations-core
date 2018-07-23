@@ -181,4 +181,4 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era/
 [13]: https://docs.datadoghq.com/agent/faq/how-to-get-more-out-of-your-kubernetes-integration
 [14]: https://docs.datadoghq.com/agent/faq/how-to-report-host-disk-metrics-when-dd-agent-runs-in-a-docker-container
-[15]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/kubernetes/k8sdashboard.png
+[15]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png

@@ -1,5 +1,7 @@
 # Agent Check: Kafka Consumer
 
+![Kafka Dashboard][109]
+
 ## Overview
 
 This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
@@ -54,3 +56,4 @@ The Kafka-consumer check does not include any service checks at this time.
 [106]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/
 [107]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog/
 [108]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[109]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png

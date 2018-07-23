@@ -90,4 +90,4 @@ Need help? Contact [Datadog Support][107].
 [108]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [109]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [1010]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/
-[1011]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/cassandra/cassandra.png
+[1011]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png

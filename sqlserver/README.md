@@ -88,4 +88,4 @@ Need help? Contact [Datadog Support][6].
 [9]: https://www.datadoghq.com/blog/sql-server-monitoring-tools/
 [10]: https://www.datadoghq.com/blog/sql-server-performance/
 [11]: https://www.datadoghq.com/blog/sql-server-metrics/
-[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/sql_server/sql_server_graph.png
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png

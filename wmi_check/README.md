@@ -139,4 +139,4 @@ Need help? Contact [Datadog Support][10].
 [8]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [10]: https://docs.datadoghq.com/help/
-[12]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/wmi/wmimetric.png
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png

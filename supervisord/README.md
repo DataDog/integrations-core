@@ -134,4 +134,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/supervisor/supervisorevent.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png

@@ -71,4 +71,4 @@ Need help? Contact [Datadog Support][6].
 [8]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/yarn/yarndashboard.png
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
