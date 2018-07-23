@@ -9,7 +9,7 @@ from datadog_checks.windows_service import WindowsService
 
 @pytest.fixture
 def check():
-    return WindowsService("windows_service", {}, {})
+    return WindowsService("windows_service", {}, {}, None)
 
 
 INSTANCE = {
@@ -48,9 +48,6 @@ class mock_sampler():
 
     def __getitem__(self, i):
         return self._wmi_objects[i]
-
-    def __iter__(self):
-        return self._wmi_objects
 
     def sample(self):
         self._wmi_objects = [
