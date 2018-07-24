@@ -80,6 +80,18 @@ def create_file(fname):
         os.utime(fname, None)
 
 
+def ensure_bytes(s):
+    if not isinstance(s, bytes):
+        s = s.encode('utf-8')
+    return s
+
+
+def ensure_unicode(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
+    return s
+
+
 def download_file(url, fname):
     req = urlopen(url)
     with open(fname, 'wb') as f:

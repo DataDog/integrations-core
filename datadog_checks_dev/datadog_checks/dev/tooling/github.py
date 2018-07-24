@@ -45,6 +45,17 @@ def get_pr(pr_num, config=None):
     return response.json()
 
 
+def get_pr_from_hash(commit_hash, repo, config=None):
+    response = requests.get(
+        'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(
+            commit_hash, repo
+        ),
+        auth=get_auth_info(config)
+    )
+    response.raise_for_status()
+    return response.json()
+
+
 def from_contributor(pr_payload):
     """
     If the PR comes from a fork, we can safely assumed it's from an

@@ -7,6 +7,7 @@ import click
 
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 from ..constants import TESTABLE_FILE_EXTENSIONS, get_root
+from ..git import files_changed
 from ..utils import get_testable_checks
 from ...subprocess import run_command
 from ...utils import chdir
@@ -17,18 +18,6 @@ def testable_files(files):
     Given a list of files, return the files that have an extension listed in FILE_EXTENSIONS_TO_TEST
     """
     return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS)]
-
-
-def files_changed():
-    """
-    Return the list of file changed in the current branch compared to `master`
-    """
-    with chdir(get_root()):
-        result = run_command('git diff --name-only master...', capture='out')
-    changed_files = result.stdout.splitlines()
-
-    # Remove empty lines
-    return [f for f in changed_files if f]
 
 
 @click.command(
