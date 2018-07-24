@@ -1,7 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urlparse import urlparse
+from six import string_types
+from six.moves.urllib.parse import urlparse
 
 
 def config_proxy_skip(proxies, uri, skip_proxy=False):
@@ -17,13 +18,11 @@ def config_proxy_skip(proxies, uri, skip_proxy=False):
 
     # disable proxy if necessary
     if skip_proxy:
-        if 'http' in proxies:
-            proxies.pop('http')
-        if 'https' in proxies:
-            proxies.pop('https')
+        proxies['http'] = ''
+        proxies['https'] = ''
     elif proxies.get('no'):
         urls = []
-        if isinstance(proxies['no'], basestring):
+        if isinstance(proxies['no'], string_types):
             urls = proxies['no'].replace(';', ',').split(",")
         elif isinstance(proxies['no'], list):
             urls = proxies['no']
