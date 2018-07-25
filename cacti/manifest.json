@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "cacti",
+  "display_name": "Cacti",
   "short_description": "Forward your Cacti RRDs to Datadog for richer alerting and beautiful graphing.",
   "support": "core",
   "supported_os": [
@@ -15,5 +16,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/cacti/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

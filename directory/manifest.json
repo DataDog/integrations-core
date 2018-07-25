@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "directory",
+  "display_name": "Directory",
   "short_description": "The Directory integration helps monitoring and reporting metrics on files for a provided directory.",
   "support": "core",
   "supported_os": [
@@ -17,5 +18,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/directory/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

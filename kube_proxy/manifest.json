@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kube_proxy",
+  "display_name": "Kube Proxy",
   "short_description": "kube_proxy description.",
   "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
   "support": "core",
@@ -15,5 +16,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/kube_proxy/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

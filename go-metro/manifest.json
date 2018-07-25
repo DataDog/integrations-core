@@ -1,9 +1,8 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.1",
-  "max_agent_version": "6.0.0",
-  "min_agent_version": "5.6.3",
   "name": "go-metro",
+  "display_name": "Go-Metro",
   "short_description": "Passively calculate TCP RTT between hosts",
   "support": "core",
   "supported_os": [
@@ -16,5 +15,5 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/go-metro/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

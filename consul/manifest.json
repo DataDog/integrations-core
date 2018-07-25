@@ -18,6 +18,5 @@
   "categories":["containers", "orchestration", "configuration & deployment", "notification", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/consul/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

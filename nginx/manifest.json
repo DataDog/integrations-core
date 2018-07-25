@@ -1,10 +1,9 @@
 {
-  "creates_events": "false",
+  "creates_events": false,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "nginx",
-  "display_name": "NGINX",
-  "creates_events": true,
+  "display_name": "Nginx",
   "metric_to_check": "nginx.net.connections",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",
@@ -21,6 +20,5 @@
   ],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/nginx/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

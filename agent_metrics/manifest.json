@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "agent_metrics",
+  "display_name": "Agent Metrics",
   "short_description": "agent_metrics description.",
   "type": "check",
   "guid": "032333e3-5272-4044-90d5-a05997667513",
@@ -17,5 +18,5 @@
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/agent_metrics/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

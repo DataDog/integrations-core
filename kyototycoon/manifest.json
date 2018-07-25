@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kyototycoon",
+  "display_name": "Kyoto Tycoon",
   "short_description": "Track get, set, and delete operations; monitor replication lag.",
   "support": "core",
   "supported_os": [
@@ -15,5 +16,5 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/kyototycoon/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

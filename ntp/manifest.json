@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ntp",
+  "display_name": "NTP",
   "short_description": "Get alerts when your hosts drift out of sync with your chosen NTP server.",
   "support": "core",
   "supported_os": [
@@ -15,5 +16,5 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/ntp/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

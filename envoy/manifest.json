@@ -18,6 +18,5 @@
   "categories": ["cloud", "web"],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/envoy/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

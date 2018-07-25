@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "activemq_xml",
+  "display_name": "ActiveMQ XML",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [
@@ -18,5 +19,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/activemq_xml/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

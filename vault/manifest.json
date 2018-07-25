@@ -23,6 +23,5 @@
   ],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/vault/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

@@ -18,6 +18,5 @@
   "categories":["web", "caching", "log collection"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/varnish/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

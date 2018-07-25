@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.0.0",
   "name": "couch",
-  "display_name": "couch",
+  "display_name": "Couch",
   "support": "core",
   "supported_os": [
     "linux",
@@ -18,5 +18,5 @@
   "doc_link": "https://docs.datadoghq.com/integrations/couch/",
   "aliases":["/integrations/couchdb"],
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

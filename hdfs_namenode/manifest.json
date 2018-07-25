@@ -16,6 +16,5 @@
   "categories":["processing", "os & system"],
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/hdfs_namenode/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

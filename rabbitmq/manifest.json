@@ -1,6 +1,5 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
   "manifest_version": "1.0.0",
   "name": "rabbitmq",
   "display_name": "RabbitMQ",
@@ -21,6 +20,5 @@
   ],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/rabbitmq/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

@@ -18,6 +18,5 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/powerdns_recursor/",
   "is_public": true,
-  "has_logo": true,
   "aliases":["/integrations/powerdns"]
 }

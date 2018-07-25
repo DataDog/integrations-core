@@ -14,6 +14,38 @@ from ..constants import get_root
 from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
+ATTRIBUTES = {
+    "mandatory": [
+        'categories',
+        'creates_events',
+        'display_name',
+        'guid',
+        'is_public',
+        'maintainer',
+        'manifest_version',
+        # 'metric_to_check',
+        # 'metric_prefix',
+        'name',
+        'public_title',
+        'short_description',
+        'support',
+        'supported_os',
+        'type'
+    ],
+    "optional": [
+        'aliases',
+        'description',
+        'doc_link',
+        'is_beta',
+        'package_deps',
+        'use_omnibus_reqs',
+        # Move these two below to mandatory when all integration are fixed
+        'metric_to_check',
+        'metric_prefix',
+        'version'
+    ]
+}
+
 
 def parse_version_parts(version):
     return (
@@ -59,6 +91,19 @@ def verify(fix, include_extras):
                 for display, message in display_queue:
                     display(message)
                 continue
+
+            # attributes are valid
+            all_mandatory_attrs = list(ATTRIBUTES["mandatory"])
+            all_attributes = list(ATTRIBUTES["mandatory"] + ATTRIBUTES["optional"])
+            for attr in decoded.keys():
+                if attr in all_mandatory_attrs:
+                    all_mandatory_attrs.remove(attr)
+                if attr not in all_attributes:
+                    display_queue.append((echo_failure, '  Attribute {} is not valid, it should be one of: {}'.format(
+                        attr, all_attributes)))
+            if len(all_mandatory_attrs) > 0:
+                for attr in all_mandatory_attrs:
+                    display_queue.append((echo_failure, '  Attribute {} is mandatory'.format(attr)))
 
             # guid
             guid = decoded.get('guid')

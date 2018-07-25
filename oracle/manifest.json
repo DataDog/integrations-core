@@ -20,6 +20,5 @@
   ],
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/oracle/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

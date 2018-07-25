@@ -17,7 +17,6 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/windows_service/",
   "is_public": true,
-  "has_logo": true,
   "aliases": [
     "/integrations/winservices"
   ]

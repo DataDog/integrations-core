@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "http_check",
+  "display_name": "HTTP Check",
   "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
   "support": "core",
   "supported_os": [
@@ -15,6 +16,6 @@
   "type":"check",
   "doc_link": "https://docs.datadoghq.com/integrations/http_check/",
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases":["/integrations/httpcheck"]
 }

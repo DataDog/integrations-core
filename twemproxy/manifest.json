@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "twemproxy",
+  "display_name": "Twemproxy",
   "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
   "support": "core",
   "supported_os": [
@@ -17,5 +18,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/twemproxy/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

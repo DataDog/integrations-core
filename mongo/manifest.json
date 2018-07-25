@@ -22,7 +22,6 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/mongo/",
   "is_public": true,
-  "has_logo": true,
   "aliases": [
     "/integrations/mongodb"
   ]

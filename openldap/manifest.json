@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "openldap",
+  "display_name": "OpenLDAP",
   "short_description": "The OpenLDAP integration collect metrics from your OpenLDAP server using the cn=monitor backend",
   "support": "core",
   "supported_os": [
@@ -16,5 +17,5 @@
   "doc_link": "https://docs.datadoghq.com/integrations/openldap/",
   "aliases":[],
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

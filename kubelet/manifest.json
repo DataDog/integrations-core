@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.2.0",
   "name": "kubelet",
+  "display_name": "Kubelet",
   "short_description": "Collects container stats from kubelet.",
   "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
   "support": "core",
@@ -13,5 +14,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/kubelet/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

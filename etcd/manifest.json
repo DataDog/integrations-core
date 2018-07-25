@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "etcd",
+  "display_name": "etcd",
   "short_description": "Track writes, updates, deletes, inter-node latencies, and more etcd metrics.",
   "support": "core",
   "supported_os": [
@@ -20,5 +21,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/etcd/",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }
