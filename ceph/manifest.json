@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "ceph",
   "display_name": "Ceph",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "ceph.write_bytes_sec",
   "short_description": "Collect per-pool performance metrics and monitor overall cluster status.",
   "support": "core",

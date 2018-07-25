@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "iis",
   "display_name": "IIS",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "iis.uptime",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",

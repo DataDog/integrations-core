@@ -5,7 +5,7 @@
   "display_name": "Exchange Server",
   "short_description": "Collect and graph Microsoft exchange server metrics",
   "support": "core",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "exchange.processor.cpu_user",
   "metric_prefix": "exchange.",
   "supported_os": [

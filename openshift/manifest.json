@@ -4,7 +4,7 @@
   "name": "openshift",
   "display_name": "OpenShift",
   "short_description": "The Kubernetes platform for big ideas",
-  "creates_events": true,
+  "creates_events": false,
   "guid": "ea7f642f-263f-4ed1-8da0-9bb96c7df1f0",
   "metric_prefix": "openshift.",
   "support": "core",

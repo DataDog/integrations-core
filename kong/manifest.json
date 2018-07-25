@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "kong",
   "display_name": "Kong",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "kong.table.count",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",

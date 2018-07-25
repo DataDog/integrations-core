@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": true,
+  "creates_events": false,
   "manifest_version": "1.0.0",
   "name": "zk",
   "display_name": "Zookeeper",

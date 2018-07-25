@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "riak",
   "display_name": "Riak",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "riak.node_gets",
   "short_description": "Track node, vnode and ring performance metrics for RiakKV or RiakTS.",
   "support": "core",

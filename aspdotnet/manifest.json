@@ -14,5 +14,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/aspdotnet/",
   "is_public": true,
-  "creates_events": true
+  "creates_events": false
 }

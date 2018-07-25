@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "kubernetes_state",
   "display_name": "Kubernetes State",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "kubernetes_state.container.running",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
   "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",

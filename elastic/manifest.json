@@ -1,10 +1,9 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
+  "creates_events": true,
   "manifest_version": "1.0.0",
   "name": "elastic",
   "display_name": "Elasticsearch",
-  "creates_events": true,
   "metric_to_check": "elasticsearch.fs.total.disk_reads",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",
   "support": "core",

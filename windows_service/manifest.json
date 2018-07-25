@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "windows_service",
   "display_name": "Windows Service",
-  "creates_events": true,
+  "creates_events": false,
   "short_description": "Monitor the state of your Windows services.",
   "support": "core",
   "supported_os": [

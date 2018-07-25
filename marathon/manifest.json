@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "marathon",
   "display_name": "Marathon",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "marathon.cpus",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",
   "support": "core",

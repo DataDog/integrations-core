@@ -20,5 +20,5 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/ecs_fargate/",
   "is_public": true,
-  "creates_events": true
+  "creates_events": false
 }

@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "cassandra",
   "display_name": "Cassandra",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "cassandra.max_row_size",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",
   "support": "core",

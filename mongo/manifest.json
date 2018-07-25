@@ -1,10 +1,9 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
+  "creates_events": true,
   "manifest_version": "1.0.0",
   "name": "mongo",
   "display_name": "Mongo",
-  "creates_events": true,
   "metric_to_check": "mongodb.connections.available",
   "short_description": "Track read/write performance, most-used replicas, collection metrics, and more.",
   "support": "core",
