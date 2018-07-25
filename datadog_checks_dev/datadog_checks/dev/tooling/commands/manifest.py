@@ -405,23 +405,6 @@ def verify(fix, include_extras):
                     else:
                         display_queue.append((echo_failure, output))
 
-                # has_logo
-                default_has_logo = True
-                has_logo = decoded.get('has_logo')
-                if not isinstance(has_logo, bool):
-                    failed += 1
-                    output = '  required boolean: has_logo'
-
-                    if fix:
-                        decoded['has_logo'] = default_has_logo
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `has_logo`: {}'.format(default_has_logo)))
-
-                        failed -= 1
-                    else:
-                        display_queue.append((echo_failure, output))
-
                 # doc_link
                 doc_link = decoded.get('doc_link')
                 if not doc_link or not isinstance(doc_link, string_types):
