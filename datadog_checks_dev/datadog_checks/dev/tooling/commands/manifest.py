@@ -19,6 +19,7 @@ ATTRIBUTES = {
         'categories',
         'creates_events',
         'display_name',
+        'doc_link',
         'guid',
         'is_public',
         'maintainer',
@@ -35,7 +36,6 @@ ATTRIBUTES = {
     "optional": [
         'aliases',
         'description',
-        'doc_link',
         'is_beta',
         'package_deps',
         'use_omnibus_reqs',
