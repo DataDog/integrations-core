@@ -19,5 +19,5 @@
   "aliases":["/logs/log_collection/fluentd"],
   "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
   "is_public": true,
-  "creates_events": false
+  "creates_events": true
 }

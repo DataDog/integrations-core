@@ -19,6 +19,6 @@
   ],
   "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
   "is_public": true,
-  "creates_events": false,
+  "creates_events": true,
   "type": "check"
 }

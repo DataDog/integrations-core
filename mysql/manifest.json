@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0.0",
-  "creates_events": false,
+  "creates_events": true,
   "name": "MySQL",
   "display_name": "MySQL",
   "metric_to_check": "mysql.replication.slaves_connected",

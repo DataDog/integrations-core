@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "name": "Apache",
   "display_name": "Apache",
-  "creates_events": false,
+  "creates_events": true,
   "metric_to_check": "apache.net.bytes",
   "support": "core",
   "supported_os": [

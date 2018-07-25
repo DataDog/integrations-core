@@ -4,7 +4,7 @@
   "name": "amazon_eks",
   "display_name": "Amazon EKS",
   "short_description": "Amazon EKS is a managed service that makes it easy for you to run Kubernetes on AWS without needing to install and operate your own Kubernetes clusters",
-  "creates_events": false,
+  "creates_events": true,
   "guid": "9bc1f66e-de05-4460-b082-783c45a07355",
   "support": "core",
   "supported_os": [

@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "tomcat",
   "display_name": "Tomcat",
-  "creates_events": false,
+  "creates_events": true,
   "metric_to_check": "tomcat.threads.max",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
   "support": "core",

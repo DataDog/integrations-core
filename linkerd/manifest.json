@@ -6,7 +6,7 @@
   "short_description": "Monitor your services health with metrics from linkerd.",
   "metric_prefix": "linkerd.",
   "metric_to_check": "linkerd.rt.client.connections",
-  "creates_events": false,
+  "creates_events": true,
   "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
   "support": "core",
   "type": "check",

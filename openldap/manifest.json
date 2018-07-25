@@ -17,5 +17,5 @@
   "doc_link": "https://docs.datadoghq.com/integrations/openldap/",
   "aliases":[],
   "is_public": true,
-  "creates_events": false
+  "creates_events": true
 }

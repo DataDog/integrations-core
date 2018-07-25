@@ -1,5 +1,5 @@
 {
-  "creates_events": false,
+  "creates_events": true,
   "description": "Collect and graph Microsoft Active Directory metrics",
   "display_name": "Active Directory",
   "maintainer": "help@datadoghq.com",

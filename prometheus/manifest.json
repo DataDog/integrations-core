@@ -12,5 +12,5 @@
   "doc_link": "https://docs.datadoghq.com/integrations/prometheus/",
   "is_public": true,
   "display_name": "Prometheus",
-  "creates_events": false
+  "creates_events": true
 }

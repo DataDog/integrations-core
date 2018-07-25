@@ -18,7 +18,7 @@
   "type": "check",
   "doc_link": "https://docs.datadoghq.com/integrations/system_core/",
   "is_public": true,
-  "creates_events": false,
+  "creates_events": true,
   "aliases": [
     "/integrations/systemcore"
   ]
