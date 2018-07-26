@@ -50,7 +50,7 @@ Reload supervisord.
 
 #### Connect the Agent
 
-Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
+Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample supervisord.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -135,3 +135,4 @@ Need help? Contact [Datadog Support][6].
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor/
 [8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

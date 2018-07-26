@@ -29,7 +29,7 @@ Restart the DataNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Edit the `hdfs_datanode.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample hdfs_datanode.d/conf.yaml][102] for all available configuration options:
+Edit the `hdfs_datanode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][1012]. See the [sample hdfs_datanode.d/conf.yaml][102] for all available configuration options:
 
 ```
 init_config:
@@ -79,3 +79,4 @@ Need help? Contact [Datadog Support][106].
 [109]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [1010]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
 [1011]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
+[1012]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

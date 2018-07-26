@@ -15,7 +15,7 @@ The Elasticsearch check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][11] to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample elastic.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -120,3 +120,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [8]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
 [9]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

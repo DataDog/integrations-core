@@ -39,7 +39,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][2] at the root of your Agent's configuration directory,
+Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][2] at the root of your [Agent's configuration directory][11],
 
 #### Prepare IIS
 
@@ -162,3 +162,4 @@ Need help? Contact [Datadog Support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [8]: https://docs.datadoghq.com/help/
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

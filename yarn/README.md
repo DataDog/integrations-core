@@ -18,7 +18,7 @@ The YARN check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][12].
 
     ```yaml
     	init_config:
@@ -72,3 +72,4 @@ Need help? Contact [Datadog Support][6].
 [9]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

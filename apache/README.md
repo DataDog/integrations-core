@@ -17,7 +17,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][13] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -116,3 +116,4 @@ Returns CRITICAL if the Agent cannot connect to the configured `apache_status_ur
 [10]: https://www.datadoghq.com/blog/collect-apache-performance-metrics/
 [11]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog/
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
+[13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

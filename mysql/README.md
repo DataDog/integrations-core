@@ -21,7 +21,7 @@ The MySQL check is included in the [Datadog Agent][13] package, so you don't nee
 
 ### Configuration
 
-Edit `conf.d/mysql.d/conf.yaml` in the root of your Agent's configuration directory in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
+Edit `conf.d/mysql.d/conf.yaml` in the root of your [Agent's configuration directory][31] in order to connect the Agent to your MySQL server. You will begin collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection) right away. See the [sample configuration file][16] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -378,3 +378,4 @@ Read our [series of blog posts][29] about monitoring MySQL with Datadog.
 [28]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
 [29]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics/
 [30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
+[31]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

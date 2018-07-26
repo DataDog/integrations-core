@@ -13,7 +13,7 @@ The SNMP check is included in the [Datadog Agent][1] package, so you don't need 
 
 The SNMP check doesn't collect anything by default; you have to tell it specifically what to collect.
 
-Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
+Here's an example of `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample snmp.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -184,3 +184,4 @@ Need help? Contact [Datadog Support][5].
 [8]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
 [9]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
 [10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

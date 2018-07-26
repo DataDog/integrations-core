@@ -13,7 +13,7 @@ The Nagios check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
+Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample nagios.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -76,3 +76,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/nagios-monitoring/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

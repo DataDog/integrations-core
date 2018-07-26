@@ -21,7 +21,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][24] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample tomcat.d/conf.yaml][17] for all available configuration options.
 
 2. [Restart the Agent][16]
@@ -347,3 +347,4 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 [21]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [22]: https://www.datadoghq.com/blog/monitor-tomcat-metrics/
 [23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
+[24]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
