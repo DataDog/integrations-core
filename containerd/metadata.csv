@@ -1,0 +1,100 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+containerd.blkio_io_svc_bytes_recursive,gauge,,bytes,,The blkio io service bytes recursive,0,containerd, blkio service bytes recursive
+containerd.blkio_io_svc_recursive_total,gauge,,bytes,,The blkio io served recursive,0,containerd, blkio serviced recursive total
+containerd.cpu_kernel,gauge,,nanoseconds,,The total kernel cpu time,0,containerd,cpu kernel
+containerd.cpu_throttled_time,gauge,,nanoseconds,,The total cpu throttled time,0,containerd,cpu throttled time
+containerd.cpu_total,gauge,,nanoseconds,,The total cpu time,0,containerd,cpu total
+containerd.cpu_user,gauge,,nanoseconds,,The total user cpu time,0,containerd,cpu user
+containerd.hugetlb_failcnt_total,gauge,,bytes,,The hugetlb failcnt,0,containerd, hugetbl failcount total
+containerd.hugetlb_max,gauge,,bytes,,The hugetlb maximum usage,0,containerd, hugetlb maximum usage
+containerd.hugetlb_usage,gauge,,bytes,,The hugetlb usage,0,containerd, hugetlb usage
+containerd.mem_active_anon,gauge,,bytes,,The active_anon amount,0,containerd, active_anon
+containerd.mem_active_file,gauge,,bytes,,The active_file amount,0,containerd, active_file 
+containerd.mem_cache,gauge,,bytes,,The cache amount used,0,containerd, cache amount
+containerd.mem_dirty,gauge,,bytes,,The dirty amount,0,containerd, mem dirty
+containerd.mem_hierarchical_memory_limit,gauge,,bytes,,The hierarchical_mem_limit amount,0,containerd, hierarchical_memory_limit
+containerd.mem_hierarchical_memsw_limit,gauge,,bytes,,The hierarchical_memsw_limit amount,0,containerd, hierarchical_memsw_limit
+containerd.mem_inactive_anon,gauge,,bytes,,The inactive_anon amount,0,containerd, mem_inactive_anon
+containerd.mem_inactive_file,gauge,,bytes,,The inactive_file amount,0,containerd, mem_inactive_file
+containerd.mem_kernel_failcnt_total,gauge,,bytes,,The kernel failcnt,0,containerd, mem_kernel_failcnt_total
+containerd.mem_kernel_limit,gauge,,bytes,,The kernel limit,0,containerd, mem_kernel_limit
+containerd.mem_kernel_max,gauge,,bytes,,The kernel maximum usage,0,containerd, mem_kernel_max
+containerd.mem_kernel_usage,gauge,,bytes,,The kernel usage,0,containerd, mem_kernel_usage
+containerd.mem_kerneltcp_failcnt_total,gauge,,bytes,,The kerneltcp failcnt,0,containerd, mem_kerneltcp_failcnt_total
+containerd.mem_kerneltcp_limit,gauge,,bytes,,The kerneltcp limit,0,containerd, mem_kerneltcp_limit
+containerd.mem_kerneltcp_max,gauge,,bytes,,The kerneltcp maximum usage,0,containerd, mem_kerneltcp_max
+containerd.mem_kerneltcp_usage,gauge,,bytes,,The kerneltcp usage,0,containerd, mem_kerneltcp_usage
+containerd.mem_mapped_file,gauge,,bytes,,The mapped_file amount used,0,containerd, mem_mapped_file
+containerd.mem_oom_total,count,,,,The number of times a container has received an oom event,0,containerd, count mem_oom_total
+containerd.mem_pgfault,gauge,,bytes,,The pgfault amount,0,containerd, mem_pgfault
+containerd.mem_pgmajfault,gauge,,bytes,,The pgmajfault amount,0,containerd, mem_pgmajfault
+containerd.mem_pgpgin,gauge,,bytes,,The pgpgin amount,0,containerd,mem_pgpgin
+containerd.mem_pgpgout,gauge,,bytes,,The pgpgout amount,0,containerd,mem_pgpgout
+containerd.mem_rss,gauge,,bytes,,The rss amount used,0,containerd, mem_rss
+containerd.mem_rss_huge,gauge,,bytes,,The rss_huge amount used,0,containerd, mem_rss_huge
+containerd.mem_swap_failcnt_total,gauge,,bytes,,The swap failcnt,0,containerd, mem_swap_failcnt_total
+containerd.mem_swap_limit,gauge,,bytes,,The swap limit,0,containerd,mem_swap_limit
+containerd.mem_swap_max,gauge,,bytes,,The swap maximum usage,0,containerd,mem_swap_max
+containerd.mem_swap_usage,gauge,,bytes,,The swap usage,0,containerd,mem_swap_usage
+containerd.mem_total_active_anon,gauge,,bytes,,The total_active_anon amount,0,containerd,mem_total_active_anon
+containerd.mem_total_active_file,gauge,,bytes,,The total_active_file amount,0,containerd,mem_total_active_file
+containerd.mem_total_cache,gauge,,bytes,,The total_cache amount used,0,containerd,mem_total_cache
+containerd.mem_total_dirty,gauge,,bytes,,The total_dirty amount,0,containerd,mem_total_dirty
+containerd.mem_total_inactive_anon,gauge,,bytes,,The total_inactive_anon amount,0,containerd,mem_total_inactive_anon
+containerd.mem_total_inactive_file,gauge,,bytes,,The total_inactive_file amount,0,containerd,mem_total_inactive_file
+containerd.mem_total_mapped_file,gauge,,bytes,,The total_mapped_file amount used,0,containerd,mem_total_mapped_file
+containerd.mem_total_pgfault,gauge,,bytes,,The total_pgfault amount,0,containerd,mem_total_pgfault
+containerd.mem_total_pgmajfault,gauge,,bytes,,The total_pgmajfault amount,0,containerd,mem_total_pgmajfault
+containerd.mem_total_pgpgin,gauge,,bytes,,The total_pgpgin amount,0,containerd,mem_total_pgpgin
+containerd.mem_total_pgpgout,gauge,,bytes,,The total_pgpgout amount,0,containerd,mem_total_pgpgout
+containerd.mem_total_rss,gauge,,bytes,,The total_rss amount used,0,containerd,mem_total_rss
+containerd.mem_total_rss_huge,gauge,,bytes,,The total_rss_huge amount used,0,containerd,mem_total_rss_huge
+containerd.memory_total_unevictable,gauge,,bytes,,The total_unevictable amount,0,containerd,memory_total_unevictable
+containerd.mem_total_writeback,gauge,,bytes,,The total_writeback amount,0,containerd,mem_total_writeback
+containerd.mem_unevictable,gauge,,bytes,,The unevictable amount,0,containerd,mem_unevictable
+containerd.mem_usage_failcnt_total,gauge,,,,The usage failcnt,0,containerd,mem_usage_failcnt_total
+containerd.mem_usage_limit,gauge,,bytes,,The memory limit,0,containerd,mem_usage_limit
+containerd.mem_usage_max,gauge,,bytes,,The memory maximum usage,0,containerd,mem_usage_max
+containerd.mem_usage,gauge,,bytes,,The memory usage,0,containerd,mem_usage
+containerd.mem_writeback,gauge,,bytes,,The writeback amount,0,containerd,mem_writeback
+containerd.per_cpu,gauge,,nanoseconds,,The total cpu time per cpu,0,containerd,time per_cpu
+containerd.pids_current,gauge,,,,The current number of pids,0,containerd,number of pids
+containerd.pids_limit,gauge,,,,The limit to the number of pids allowed,0,containerd,pids_limit
+containerd.go.goroutines,gauge,,,,Number of goroutines that currently exist,0,containerd,number of goroutines
+containerd.go_memstats_alloc,gauge,,bytes,,Number of bytes allocated and still in use,0,containerd,go_memstats_alloc
+containerd.go_memstats_alloc_bytes_total,gauge,,bytes,,Total number of bytes allocated even if freed,0,containerd,go_memstats_alloc_bytes_total
+containerd.go.memstats_buck_hash_sys,gauge,,bytes,,Number of bytes used by the profiling bucket hash table,0,containerd,memstats_buck_hash_sys
+containerd.go.memstats_frees_total,count,,,,Total number of frees,0,containerd,memstats_frees_total
+containerd.go.memstats_gc_cpu_fraction,gauge,,fractions,,The fraction of this program's available CPU time used by the GC since the program started,0,containerd,memstats_gc_cpu_fraction
+containerd.go.memstats_gc_sys,gauge,,bytes,,Number of bytes used for garbage collection system metadata,0,containerd,memstats_gc_sys
+containerd.go.memstats_heap_alloc,gauge,,bytes,,Number of heap bytes allocated and still in use,0,containerd,memstats_heap_alloc
+containerd.go.memstats_heap_idle,gauge,,bytes,,Number of heap bytes waiting to be used,0,containerd,memstats_heap_idle
+containerd.go.memstats_heap_inuse,gauge,,bytes,,Number of heap bytes that are in use,0,containerd,memstats_heap_inuse
+containerd.go.memstats_heap_objects,gauge,,,,Number of allocated objects,0,containerd,memstats_heap_objects
+containerd.go.memstats_heap_released,gauge,,bytes,,Number of heap bytes released to OS,0,containerd,memstats_heap_released
+containerd.go.memstats_heap_sys,gauge,,bytes,,Number of heap bytes obtained from system,0,containerd,memstats_heap_sys
+containerd.go.memstats_last_gc_time_seconds,gauge,,seconds,,Number of seconds since 1970 of last garbage collection,0,containerd,memstats_last_gc_time_seconds
+containerd.go.memstats_lookups_total,count,,,,Total number of pointer lookups,0,containerd,memstats_lookups_total
+containerd.go.memstats_mallocs_total,count,,,,Total number of mallocs,0,containerd,memstats_mallocs_total
+containerd.go.memstats_mcache_inuse,gauge,,bytes,,Number of bytes in use by mcache structures,0,containerd,memstats_mcache_inuse
+containerd.go.memstats_mcache_sys,gauge,,bytes,,Number of bytes used for mcache structures obtained from system,0,containerd,memstats_mcache_sys
+containerd.go.memstats_mspan_inuse,gauge,,bytes,,Number of bytes in use by mspan structures,0,containerd,memstats_mspan_inuse
+containerd.go.memstats_mspan_sys,gauge,,bytes,,Number of bytes used for mspan structures obtained from system,0,containerd,memstats_mspan_sys
+containerd.go.memstats_next_gc,gauge,,bytes,,Number of heap bytes when next garbage collection will take place,0,containerd,go_memstats_next_gc_bytes
+containerd.go.memstats_other_sys,gauge,,bytes,,Number of bytes used for other system allocations,0,containerd,memstats_other_sys
+containerd.go.memstats_stack_inuse,gauge,,bytes,,Number of bytes in use by the stack allocator,0,containerd,memstats_stack_inuse
+containerd.go.memstats_stack_sys,gauge,,bytes,,Number of bytes obtained from system for stack allocator,0,containerd,memstats_stack_sys
+containerd.go.memstats_sys,gauge,,bytes,,Number of bytes obtained from system,0,containerd,memstats_sys
+containerd.go.threads,gauge,,threads,,Number of OS threads created,0,containerd,threads
+containerd.grpc.server_handled_total,count,,,,Total number of RPCs completed on the server regardless of success or failure,0,containerd,server_handled_total
+containerd.grpc.server_msg_received_total,count,,messages,,Total number of RPC stream messages received on the server,0,containerd,server_msg_received_total
+containerd.grpc.server_msg_sent_total,count,,messages,,Total number of gRPC stream messages sent by the server,0,containerd,server_msg_sent_total
+containerd.grpc.server_started_total,count,,,,Total number of RPCs started on the server,0,containerd,server_started_total
+containerd.http_request_duration_microseconds,gauge,,bytes,,The HTTP request latencies in microseconds,0,containerd,http_request_duration_microseconds
+containerd.http.requests_total,count,,requests,,Total number of HTTP requests made,0,containerd,http.requests_total
+containerd.process.cpu_seconds_total,count,,seconds,,Total user and system CPU time spent in seconds,0,containerd,cpu_seconds_total
+containerd.process.max_fds,gauge,,files,,Maximum number of open file descriptors,0,containerd,max_fds
+containerd.process.open_fds,gauge,,files,,Number of open file descriptors,0,containerd,open_fds
+containerd.process.resident_memory,gauge,,bytes,,Resident memory size in bytes,0,containerd,resident_memory
+containerd.process.start_time_seconds,gauge,,seconds,,Start time of the process since unix epoch in seconds,0,containerd,start_time_seconds
+containerd.process.virtual_memory,gauge,,bytes,,Virtual memory size in bytes,0,containerd,virtual_memory
