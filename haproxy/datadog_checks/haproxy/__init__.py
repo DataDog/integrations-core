@@ -1,6 +1,8 @@
-from . import haproxy
-
-HAProxy = haproxy.HAProxy
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .haproxy import HAProxy
 
 
 __all__ = [
