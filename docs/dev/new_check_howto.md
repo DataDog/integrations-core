@@ -319,7 +319,7 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | `manifest_version`  | String          | Mandatory          |                                                                                                                                                                                                                                    |
 | `name`              | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                           |
 | `public_title`      | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> Integration`                                                                                              |
-| `short_description` | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page.                                                                                                          |
+| `short_description` | String          | Mandatory          | This text -Maximum 80 characters- appears at the top of the integration tile as well as the integration's rollover text on the integrations page.                                                                                  |
 | `support`           | String          | Mandatory          |                                                                                                                                                                                                                                    |
 | `supported_os`      | Array of String | Mandatory          | List of supported OSs. Choose between `linux`,`mac_os`, and `windows`.                                                                                                                                                             |
 | `type`              | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                                 |
@@ -337,17 +337,17 @@ Find below the complete list of mandatory and optional attributes for your `mani
 
 Our example check doesn't send any metrics, so in this case we will leave it empty but find below the description for each column of your `metadata.csv` file:
 
-| Column name     | Description                                                                                                                                                                     |
-| ----            | ------                                                                                                                                                                          |
-| `metric_name`   | Name of the metric.                                                                                                                                                             |
-| `metric_type`   | [Type of the metric][10].                                                                                                                                                       |
-| `interval`      | Interval of collection of the metric in second.                                                                                                                                 |
-| `unit_name`     | Unit of the metric. [Complete list of unit supported][11].                                                                                                                      |
-| `per_unit_name` | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
-| `description`   | Description of the metric.                                                                                                                                                      |
-| `orientation`   | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
-| `integration`   | Name of the integration that emits the metric.                                                                                                                                  |
-| `short_name`    | Unique ID for the metric.                                                                                                                                                       |
+| Column name     | Mandatory/Optional | Description                                                                                                                                                                     |
+| ---             | ----               | ----                                                                                                                                                                            |
+| `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                             |
+| `metric_type`   | Mandatory          | [Type of the metric][10].                                                                                                                                                       |
+| `interval`      | Optional           | Interval of collection of the metric in second.                                                                                                                                 |
+| `unit_name`     | Optional           | Unit of the metric. [Complete list of unit supported][11].                                                                                                                      |
+| `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
+| `description`   | Mandatory          | Description of the metric.                                                                                                                                                      |
+| `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
+| `integration`   | Mandatory          | Name of the integration that emits the metric.                                                                                                                                  |
+| `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                              |
 
 
 #### service_checks.json
