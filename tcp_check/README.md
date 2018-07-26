@@ -14,7 +14,7 @@ The TCP check is included in the [Datadog Agent][1] package, so you don't need t
 
 ### Configuration
 
-Edit the `tcp_check.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample tcp_check.d/conf.yaml][2] for all available configuration options:
+Edit the `tcp_check.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample tcp_check.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -70,3 +70,4 @@ Need help? Contact [Datadog Support][7].
 [6]: https://app.datadoghq.com/monitors#/create
 [7]: https://docs.datadoghq.com/help/
 [9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tcp_check/images/netgraphs.png
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

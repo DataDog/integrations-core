@@ -13,7 +13,7 @@ The Zookeeper check is included in the [Datadog Agent][13] package, so you don't
 
 ### Configuration
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][21] to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample zk.d/conf.yaml][14] for all available configuration options.
 
 2. [Restart the Agent][15]
@@ -143,3 +143,4 @@ Need help? Contact [Datadog Support][18].
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [18]: https://docs.datadoghq.com/help/
 [20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
+[21]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

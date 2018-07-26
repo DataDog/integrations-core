@@ -12,7 +12,7 @@ The HTTP check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample http_check.d/conf.yaml][2] for all available configuration options:
+Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample http_check.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -116,3 +116,4 @@ Need help? Contact [Datadog Support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [8]: https://app.datadoghq.com/monitors#/create
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

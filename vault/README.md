@@ -11,7 +11,7 @@ The Vault check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
-1. Edit the `vault.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vault performance data.
+1. Edit the `vault.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your vault performance data.
   See the [sample vault.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4]
@@ -55,3 +55,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

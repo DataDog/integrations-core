@@ -11,7 +11,7 @@ The Windows Event Log check is included in the [Datadog Agent][1] package, so yo
 
 ### Configuration
 
-Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options:
+Edit the `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][10]. See the [sample win32_event_log.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -63,3 +63,4 @@ Need help? Contact [Datadog Support][5].
 [7]: https://www.datadoghq.com/blog/monitoring-windows-server-2012/
 [8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics/
 [9]: https://www.datadoghq.com/blog/windows-server-monitoring/
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

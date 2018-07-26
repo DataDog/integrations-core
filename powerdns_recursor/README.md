@@ -38,7 +38,7 @@ Restart the recursor to enable the statistics API.
 
 #### Connect the Agent
 
-1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7].
 	See the [sample powerdns_recursor.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -78,3 +78,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

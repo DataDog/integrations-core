@@ -11,7 +11,7 @@ The system swap check is included in the [Datadog Agent][1] package, so you don'
 
 ### Configuration
 
-1. Edit the `system_swap.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample system_swap.d/conf.yaml][2] for all available configuration options:
+1. Edit the `system_swap.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample system_swap.d/conf.yaml][2] for all available configuration options:
 
     ```
     # This check takes no initial configuration
@@ -46,3 +46,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/system_swap/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

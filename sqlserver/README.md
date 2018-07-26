@@ -27,7 +27,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
         GRANT VIEW SERVER STATE to datadog;
     ```
 
-2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
+2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][13].
     See the [sample sqlserver.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -89,3 +89,4 @@ Need help? Contact [Datadog Support][6].
 [10]: https://www.datadoghq.com/blog/sql-server-performance/
 [11]: https://www.datadoghq.com/blog/sql-server-metrics/
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
+[13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

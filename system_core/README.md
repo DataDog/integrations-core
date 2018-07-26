@@ -13,7 +13,7 @@ The system_core check is included in the [Datadog Agent][1] package, so you don'
 
 ### Configuration
 
-1. Edit the `system_core.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample system_core.d/conf.yaml][2] for all available configuration options:
+1. Edit the `system_core.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample system_core.d/conf.yaml][2] for all available configuration options:
 
     ```
     init_config:
@@ -53,3 +53,4 @@ Need help? Contact [Datadog Support][6].
 [5]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/system_core/images/syscoredash.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

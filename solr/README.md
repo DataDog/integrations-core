@@ -15,7 +15,7 @@ This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat serv
 
 ### Configuration
 
-Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample solr.d/conf.yaml][3] for all available configuration options:
+Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample solr.d/conf.yaml][3] for all available configuration options:
 
 ```
 instances:
@@ -270,3 +270,4 @@ You may use the `attribute` filter as follow:
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
 [8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

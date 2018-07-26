@@ -16,7 +16,7 @@ The MongoDB check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `mongo.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your MongoDB [metrics](#metric-collection) and [logs](#log-collection).  See the [sample mongo.yaml][2] for all available configuration options.
+Edit the `mongo.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][12] to start collecting your MongoDB [metrics](#metric-collection) and [logs](#log-collection).  See the [sample mongo.yaml][2] for all available configuration options.
 
 #### Prepare MongoDB
 
@@ -149,3 +149,4 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [9]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger/
 [10]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap/
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
