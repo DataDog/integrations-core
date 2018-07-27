@@ -17,7 +17,7 @@
     "source control",
     "issue tracking"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
+  "metric_prefix": "gitlab.", // is this valid see metadata file?
   "is_public": true,
   "creates_events": false,
   "type": "check"

@@ -17,7 +17,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/go_expvar/",
+  "metric_prefix": "go_expvar.",
   "is_public": true,
   "creates_events": false,
   "aliases": [

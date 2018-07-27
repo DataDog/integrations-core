@@ -15,7 +15,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/btrfs/",
+  "metric_prefix": "btrfs.",
   "is_public": true,
   "creates_events": false
 }

@@ -19,6 +19,6 @@
     "api"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kong/",
+  "metric_prefix": "kong.",
   "is_public": true
 }

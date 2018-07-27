@@ -19,6 +19,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/elasticsearch/",
+  "metric_prefix": "elasticsearch.",
   "is_public": true
 }

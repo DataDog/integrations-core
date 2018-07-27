@@ -1,6 +1,5 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "cassandra",
   "display_name": "Cassandra",
@@ -17,6 +16,6 @@
   "public_title": "Datadog-Cassandra Integration",
   "categories":["data store", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/cassandra/",
+  "metric_prefix": "cassandra.",
   "is_public": true
 }

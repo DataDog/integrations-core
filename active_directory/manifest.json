@@ -17,7 +17,6 @@
     "os & system",
     "log collection"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/active_directory/",
   "is_public": true,
   "type": "check"
 }

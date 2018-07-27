@@ -15,7 +15,7 @@
     "processing"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/gearmand/",
+  "metric_prefix": "gearmand.",
   "is_public": true,
   "creates_events": false,
   "aliases": [

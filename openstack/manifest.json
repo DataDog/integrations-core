@@ -14,7 +14,7 @@
   "public_title": "Datadog-OpenStack Integration",
   "categories":["cloud"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/openstack/",
+  "metric_prefix": "openstack.",
   "is_public": true,
   "creates_events": false
 }

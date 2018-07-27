@@ -16,6 +16,6 @@
   "public_title": "Datadog-Tomcat Integration",
   "categories":["web", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tomcat/",
+  "metric_prefix": "tomcat.",
   "is_public": true
 }

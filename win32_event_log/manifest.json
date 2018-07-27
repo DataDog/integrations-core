@@ -14,7 +14,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/win32_event_log/",
+  "metric_prefix": "win32_event_log.", // is this valid? no metadata?
   "is_public": true,
   "creates_events": true
 }

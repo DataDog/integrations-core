@@ -19,6 +19,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/rabbitmq/",
+  "metric_prefix": "rabbitmq.",
   "is_public": true
 }

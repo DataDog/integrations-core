@@ -16,6 +16,6 @@
   "public_title": "Datadog-Yarn Integration",
   "categories":["processing"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/yarn/",
+  "metric_prefix": "yarn.",
   "is_public": true
 }

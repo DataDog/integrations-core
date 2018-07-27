@@ -14,7 +14,7 @@
   "public_title": "Datadog-Disk Integration",
   "categories":["os & system"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/disk/",
+  "metric_prefix": "system.",
   "is_public": true,
   "creates_events": false
 

@@ -14,7 +14,7 @@
   "public_title": "Datadog-Solr Integration",
   "categories":["data store", "search"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/solr/",
+  "metric_prefix": "solr.",
   "is_public": true,
   "creates_events": false
 }

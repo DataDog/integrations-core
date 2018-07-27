@@ -18,6 +18,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",
+  "metric_prefix": "gunicorn.",
   "is_public": true
 }

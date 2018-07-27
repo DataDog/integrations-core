@@ -19,6 +19,6 @@
     "containers"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kubernetes_state/",
+  "metric_prefix": "kubernetes_state.",
   "is_public": true
 }

@@ -16,7 +16,7 @@
   "categories": [
     "monitoring"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/agent_metrics/",
+  "metric_prefix": "datadog.agent.", // Is this good?
   "is_public": true,
   "creates_events": false
 }

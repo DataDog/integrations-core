@@ -14,7 +14,7 @@
   "public_title": "Datadog-Kyoto Tycoon Integration",
   "categories":["data store"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kyototycoon/",
+  "metric_prefix": "kyototycoon.",
   "is_public": true,
   "creates_events": false
 }

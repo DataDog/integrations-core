@@ -19,7 +19,6 @@ ATTRIBUTES = {
         'categories',
         'creates_events',
         'display_name',
-        'doc_link',
         'guid',
         'is_public',
         'maintainer',
@@ -404,15 +403,6 @@ def verify(fix, include_extras):
                         failed -= 1
                     else:
                         display_queue.append((echo_failure, output))
-
-                # doc_link
-                doc_link = decoded.get('doc_link')
-                if not doc_link or not isinstance(doc_link, string_types):
-                    failed += 1
-                    display_queue.append((echo_failure, '  required non-null string: doc_link'))
-                elif not doc_link.startswith('https://docs.datadoghq.com/integrations/'):
-                    failed += 1
-                    display_queue.append((echo_failure, '  invalid `doc_link`: {}'.format(doc_link)))
 
             # See if anything happened
             if len(display_queue) > 1:

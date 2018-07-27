@@ -17,7 +17,7 @@
     "network"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/network/",
+  "metric_prefix": "system.", // is this valid see metadata file?
   "is_public": true,
   "creates_events": false
 }

@@ -18,7 +18,7 @@
     "orchestration"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/ecs_fargate/",
+  "metric_prefix": "ecs.",
   "is_public": true,
   "creates_events": false
 }

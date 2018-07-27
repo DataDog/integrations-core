@@ -20,7 +20,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mesos_master/",
+  "metric_prefix": "mesos.",
   "is_public": true,
   "aliases": [
     "/integrations/mesos/"

@@ -18,6 +18,6 @@
     "notification"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/nagios/",
+  "metric_prefix": "nagios.", // is this valid? no metrics in metadata file?
   "is_public": true
 }

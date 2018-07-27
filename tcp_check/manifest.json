@@ -17,7 +17,7 @@
     "web"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tcp_check/",
+  "metric_prefix": "network.", // is this valid?
   "is_public": true,
   "creates_events": false,
   "aliases": [

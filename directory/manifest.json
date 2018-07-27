@@ -16,7 +16,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/directory/",
+  "metric_prefix": "system.", // Is this correct
   "is_public": true,
   "creates_events": false
 }

@@ -17,6 +17,6 @@
     "configuration & deployment"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/teamcity/",
+  "metric_prefix": "teamcity.", // is this valid? no metrics in metadata?
   "is_public": true
 }

@@ -18,7 +18,7 @@
     "caching"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mcache/",
+  "metric_prefix": "memcache.",
   "is_public": true,
   "aliases": [
     "/integrations/memcached"

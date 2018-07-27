@@ -15,7 +15,7 @@
   "public_title": "Datadog-CouchDB Integration",
   "categories":["data store"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/couch/",
+  "metric_prefix": "couch.",
   "aliases":["/integrations/couchdb"],
   "is_public": true,
   "creates_events": false

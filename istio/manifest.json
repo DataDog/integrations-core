@@ -18,6 +18,5 @@
   "public_title": "Datadog-Istio Integration",
   "categories":["data store"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/istio/",
   "is_public": true
 }

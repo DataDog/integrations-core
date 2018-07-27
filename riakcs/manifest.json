@@ -16,7 +16,7 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/riakcs/",
+  "metric_prefix": "riakcs.",
   "is_public": true,
   "creates_events": false
 }

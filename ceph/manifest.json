@@ -18,6 +18,6 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/ceph/",
+  "metric_prefix": "ceph.",
   "is_public": true
 }

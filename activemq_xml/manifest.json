@@ -17,7 +17,7 @@
     "messaging"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/activemq_xml/",
+  "metric_prefix": "activemq.",
   "is_public": true,
   "creates_events": false
 }

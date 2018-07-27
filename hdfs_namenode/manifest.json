@@ -15,6 +15,6 @@
   "public_title": "Datadog-HDFS Namenode Integration",
   "categories":["processing", "os & system"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/hdfs_namenode/",
+  "metric_prefix": "hdfs.", // is this valid?
   "is_public": true
 }

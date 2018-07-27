@@ -17,7 +17,7 @@
   ],
   "type": "check",
   "aliases":["/logs/log_collection/fluentd"],
-  "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
+  "metric_prefix": "fluentd.",
   "is_public": true,
   "creates_events": false
 }

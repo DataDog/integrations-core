@@ -18,7 +18,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/supervisord/",
+  "metric_prefix": "supervisord.",
   "is_public": true,
   "aliases": [
     "/integrations/supervisor"

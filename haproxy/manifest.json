@@ -18,7 +18,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/haproxy/",
+  "metric_prefix": "haproxy.",
   "is_public": true,
   "creates_events": true,
   "metric_to_check": "haproxy.frontend.bytes.in_rate"

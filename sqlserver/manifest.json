@@ -16,6 +16,6 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/sqlserver/",
+  "metric_prefix": "sqlserver.",
   "is_public": true
 }

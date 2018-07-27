@@ -16,6 +16,6 @@
   "public_title": "Datadog-Consul Integration",
   "categories":["containers", "orchestration", "configuration & deployment", "notification", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/consul/",
+  "metric_prefix": "consul.",
   "is_public": true
 }

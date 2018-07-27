@@ -19,7 +19,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/zk/",
+  "metric_prefix": "zookeeper.",
   "is_public": true,
   "aliases": [
     "/integrations/zookeeper"

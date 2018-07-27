@@ -19,6 +19,6 @@
     "orchestration"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mesos_slave/",
+  "metric_prefix": "mesos.",
   "is_public": true
 }

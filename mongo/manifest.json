@@ -19,7 +19,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mongo/",
+  "metric_prefix": "mongodb.",
   "is_public": true,
   "aliases": [
     "/integrations/mongodb"

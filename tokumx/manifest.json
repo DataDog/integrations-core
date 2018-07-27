@@ -16,7 +16,7 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tokumx/",
+  "metric_prefix": "tokumx.",
   "is_public": true,
   "creates_events": true
 }

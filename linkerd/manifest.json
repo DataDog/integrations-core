@@ -10,7 +10,6 @@
   "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
   "support": "core",
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/linkerd/",
   "supported_os": [
     "linux",
     "mac_os",

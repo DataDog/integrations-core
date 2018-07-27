@@ -16,7 +16,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/system_swap/",
+  "metric_prefix": "system.", // is this valid?
   "is_public": true,
   "creates_events": false
 }

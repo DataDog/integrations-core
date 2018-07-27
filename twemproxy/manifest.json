@@ -16,7 +16,7 @@
     "web"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/twemproxy/",
+  "metric_prefix": "twemproxy.",
   "is_public": true,
   "creates_events": false
 }

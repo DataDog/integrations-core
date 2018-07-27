@@ -15,6 +15,6 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/linux_proc_extras/",
+  "metric_prefix": "linux_proc_extras.", // no metrics? is this valid?
   "is_public": true
 }

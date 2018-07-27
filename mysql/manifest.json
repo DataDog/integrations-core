@@ -20,6 +20,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mysql/",
+  "metric_prefix": "mysql.",
   "is_public": true
 }

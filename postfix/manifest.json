@@ -15,7 +15,7 @@
     "Collaboration"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/postfix/",
+  "metric_prefix": "postfix.",
   "is_public": true,
   "creates_events": false
 }

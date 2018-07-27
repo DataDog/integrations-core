@@ -18,6 +18,6 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/riak/",
+  "metric_prefix": "riak.",
   "is_public": true
 }

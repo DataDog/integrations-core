@@ -14,7 +14,7 @@
   "public_title": "Datadog-NTP Integration",
   "categories":["web", "network"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/ntp/",
+  "metric_prefix": "ntp.",
   "is_public": true,
   "creates_events": false
 }

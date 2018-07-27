@@ -18,7 +18,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/docker_daemon/",
+  "metric_prefix": "docker.", // is this correct?
   "is_public": true,
   "aliases": [
     "/integrations/docker"

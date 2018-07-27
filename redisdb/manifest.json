@@ -20,7 +20,7 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/redisdb/",
+  "metric_prefix": "redis.",
   "aliases": [
     "/integrations/redis/"
   ],

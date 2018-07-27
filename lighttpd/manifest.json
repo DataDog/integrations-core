@@ -14,7 +14,7 @@
   "public_title": "Datadog-Lighttpd Integration",
   "categories":["web"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/lighttpd/",
+  "metric_prefix": "lighttpd.",
   "is_public": true,
   "creates_events": false
 }

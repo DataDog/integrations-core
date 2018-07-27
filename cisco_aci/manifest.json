@@ -16,6 +16,6 @@
   "public_title": "Datadog-CiscoACI Integration",
   "categories":["network"],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/cisco_aci/",
+  "metric_prefix": "cisco_aci.",
   "is_public": true
 }

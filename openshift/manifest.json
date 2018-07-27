@@ -16,7 +16,6 @@
     "containers",
     "orchestration"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/openshift/",
   "type": "check",
   "is_public": true
 }

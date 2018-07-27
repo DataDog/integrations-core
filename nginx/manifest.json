@@ -19,6 +19,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/nginx/",
+  "metric_prefix": "nginx.",
   "is_public": true
 }

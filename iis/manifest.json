@@ -1,6 +1,5 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "iis",
   "display_name": "IIS",
@@ -18,6 +17,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/iis/",
+  "metric_prefix": "iis.",
   "is_public": true
 }

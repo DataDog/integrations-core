@@ -13,7 +13,7 @@
   "public_title": "Datadog-Go-Metro Integration",
   "categories":["languages", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/go-metro/",
+  "metric_prefix": "go-metro.", // is this valid see metadata file?
   "is_public": true,
   "creates_events": false
 }

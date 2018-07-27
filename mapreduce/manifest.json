@@ -16,6 +16,6 @@
   "public_title": "Datadog-Map Reduce Integration",
   "categories":["processing"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mapreduce/",
+  "metric_prefix": "mapreduce.",
   "is_public": true
 }

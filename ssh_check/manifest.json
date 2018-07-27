@@ -16,7 +16,7 @@
     "network"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/ssh_check/",
+  "metric_prefix": "sftp.", // is this valid?
   "is_public": true,
   "creates_events": false,
   "aliases": [

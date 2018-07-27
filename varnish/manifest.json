@@ -1,6 +1,5 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "varnish",
   "display_name": "Varnish",
@@ -17,6 +16,6 @@
   "public_title": "Datadog-Varnish Integration",
   "categories":["web", "caching", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/varnish/",
+  "metric_prefix": "varnish.",
   "is_public": true
 }
