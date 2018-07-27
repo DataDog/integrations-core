@@ -12,6 +12,7 @@ from urlparse import urljoin
 # project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.config import is_affirmative
 
 # 3p
 import requests
@@ -151,10 +152,10 @@ class ConsulCheck(AgentCheck):
             return False
 
     def _check_for_leader_change(self, instance, instance_state):
-        perform_new_leader_checks = instance.get('new_leader_checks',
-                                                 self.init_config.get('new_leader_checks', False))
-        perform_self_leader_check = instance.get('self_leader_check',
-                                                 self.init_config.get('self_leader_check', False))
+        perform_new_leader_checks = is_affirmative(instance.get('new_leader_checks',
+                                                 self.init_config.get('new_leader_checks', False)))
+        perform_self_leader_check = is_affirmative(instance.get('self_leader_check',
+                                                 self.init_config.get('self_leader_check', False)))
 
         if perform_new_leader_checks and perform_self_leader_check:
             self.log.warn('Both perform_self_leader_check and perform_new_leader_checks are set, '
@@ -270,10 +271,10 @@ class ConsulCheck(AgentCheck):
             self.gauge("consul.peers", len(peers), tags=main_tags + ["mode:leader"])
 
         service_check_tags = main_tags + ['consul_url:{0}'.format(instance.get('url'))]
-        perform_catalog_checks = instance.get('catalog_checks',
-                                              self.init_config.get('catalog_checks'))
-        perform_network_latency_checks = instance.get('network_latency_checks',
-                                                      self.init_config.get('network_latency_checks'))
+        perform_catalog_checks = is_affirmative(instance.get('catalog_checks',
+                                              self.init_config.get('catalog_checks')))
+        perform_network_latency_checks = is_affirmative(instance.get('network_latency_checks',
+                                                      self.init_config.get('network_latency_checks')))
 
         try:
             # Make service checks from health checks for all services in catalog
