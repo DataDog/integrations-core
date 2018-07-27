@@ -425,6 +425,7 @@ kube_pod_container_status_waiting_reason{container="hello",namespace="default",p
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998400-rb8bs",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="ErrImagePull"} 0
+kube_pod_container_status_waiting_reason{container="hello",namespace="default",pod="hello-1509998460-tzh8k",reason="CrashLoopBackOff"} 1
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ContainerCreating"} 0
 kube_pod_container_status_waiting_reason{container="kube-addon-manager",namespace="kube-system",pod="kube-addon-manager-minikube",reason="ErrImagePull"} 0
 kube_pod_container_status_waiting_reason{container="kube-state-metrics",namespace="default",pod="jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj",reason="ContainerCreating"} 0
