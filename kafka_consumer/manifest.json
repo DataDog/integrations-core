@@ -5,7 +5,7 @@
   "display_name": "Kafka Consumer",
   "creates_events": true,
   "metric_to_check": "kafka.consumer_lag",
-  "short_description": "Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.",
+  "short_description": "Collect metrics for Kafka consumers.",
   "support": "core",
   "supported_os": [
     "linux",

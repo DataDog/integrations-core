@@ -43,7 +43,7 @@ OPTIONAL_ATTRIBUTES = [
     'version'
 ]
 
-ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
+ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES + OPTIONAL_ATTRIBUTES
 
 
 def parse_version_parts(version):
@@ -93,10 +93,10 @@ def verify(fix, include_extras):
 
             # attributes are valid
             attrs = set(decoded)
-            for attr in attrs - ALL_ATTRIBUTES:
+            for attr in attrs - set(ALL_ATTRIBUTES):
                 failed += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is invalid'.format(attr)))
-            for attr in REQUIRED_ATTRIBUTES - attrs:
+            for attr in set(REQUIRED_ATTRIBUTES) - attrs:
                 failed += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
