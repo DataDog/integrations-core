@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from collections import defaultdict
 import re
 import time
+from collections import defaultdict
+from copy import deepcopy
 
 import redis
 
@@ -237,34 +238,41 @@ class Redis(AgentCheck):
             else:
                 l_tags = list(tags)
 
-                for key_pattern in key_list:
-                    if re.search(r"(?<!\\)[*?[]", key_pattern):
-                        keys = conn.scan_iter(match=key_pattern)
-                    else:
-                        keys = [key_pattern, ]
+                num_databases = int(conn.config_get('databases').get('databases', 1))
+                new_instance = deepcopy(instance)
 
-                    for key in keys:
-                        try:
-                            key_type = conn.type(key)
-                        except redis.ResponseError:
-                            self.log.info("key {} on remote server; skipping".format(key))
-                            continue
-                        key_tags = l_tags + ['key:' + key]
+                for i in range(num_databases):
+                    new_instance['db'] = i
+                    db_conn = self._get_conn(new_instance)
 
-                        if key_type == 'list':
-                            self.gauge('redis.key.length', conn.llen(key), tags=key_tags)
-                        elif key_type == 'set':
-                            self.gauge('redis.key.length', conn.scard(key), tags=key_tags)
-                        elif key_type == 'zset':
-                            self.gauge('redis.key.length', conn.zcard(key), tags=key_tags)
-                        elif key_type == 'hash':
-                            self.gauge('redis.key.length', conn.hlen(key), tags=key_tags)
+                    for key_pattern in key_list:
+                        if re.search(r"(?<!\\)[*?[]", key_pattern):
+                            keys = db_conn.scan_iter(match=key_pattern)
                         else:
-                            # If the type is unknown, it might be because the key doesn't exist,
-                            # which can be because the list is empty. So always send 0 in that case.
-                            if instance.get("warn_on_missing_keys", True):
-                                self.warning("{0} key not found in redis".format(key))
-                            self.gauge('redis.key.length', 0, tags=key_tags)
+                            keys = [key_pattern, ]
+
+                        for key in keys:
+                            try:
+                                key_type = db_conn.type(key)
+                            except redis.ResponseError:
+                                self.log.info("key {} on remote server; skipping".format(key))
+                                continue
+                            key_tags = l_tags + ['key:' + key]
+
+                            if key_type == 'list':
+                                self.gauge('redis.key.length', db_conn.llen(key), tags=key_tags)
+                            elif key_type == 'set':
+                                self.gauge('redis.key.length', db_conn.scard(key), tags=key_tags)
+                            elif key_type == 'zset':
+                                self.gauge('redis.key.length', db_conn.zcard(key), tags=key_tags)
+                            elif key_type == 'hash':
+                                self.gauge('redis.key.length', db_conn.hlen(key), tags=key_tags)
+                            else:
+                                # If the type is unknown, it might be because the key doesn't exist,
+                                # which can be because the list is empty. So always send 0 in that case.
+                                if instance.get("warn_on_missing_keys", True):
+                                    self.warning("{0} key not found in redis".format(key))
+                                self.gauge('redis.key.length', 0, tags=key_tags)
 
         self._check_replication(info, tags)
         if instance.get("command_stats", False):

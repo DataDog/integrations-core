@@ -34,6 +34,9 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     """
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     db.flushdb()
+    db.lpush("test_list", 1)
+    db.lpush("test_list", 2)
+    db.lpush("test_list", 3)
     db.set("key1", "value")
     db.set("key2", "value")
     db.setex("expirekey", "expirevalue", 1000)
@@ -52,8 +55,10 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     for name in aggregator.metric_names:
         if name in DB_TAGGED_METRICS:
             aggregator.assert_metric(name, tags=expected_db)
-        else:
+        elif name != 'redis.key.length':
             aggregator.assert_metric(name, tags=expected)
+
+    aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected + ['key:test_list'])
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
