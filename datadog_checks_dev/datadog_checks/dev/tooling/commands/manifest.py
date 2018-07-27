@@ -14,7 +14,7 @@ from ..constants import get_root
 from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
-REQUIRED_ATTRIBUTES = [
+REQUIRED_ATTRIBUTES = {
     'categories',
     'creates_events',
     'display_name',
@@ -30,18 +30,18 @@ REQUIRED_ATTRIBUTES = [
     'support',
     'supported_os',
     'type'
-]
+}
 
-OPTIONAL_ATTRIBUTES = [
+OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
     'package_deps',
+    'version',
     # Move these two below to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',
-    'version'
-]
+}
 
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES + OPTIONAL_ATTRIBUTES
 
@@ -93,10 +93,10 @@ def verify(fix, include_extras):
 
             # attributes are valid
             attrs = set(decoded)
-            for attr in attrs - set(ALL_ATTRIBUTES):
+            for attr in sorted(attrs - ALL_ATTRIBUTES):
                 failed += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is invalid'.format(attr)))
-            for attr in set(REQUIRED_ATTRIBUTES) - attrs:
+            for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
                 failed += 1
                 display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
