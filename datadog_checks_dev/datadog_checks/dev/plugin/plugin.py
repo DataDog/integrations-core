@@ -14,4 +14,4 @@ try:
 except ImportError:
     @pytest.fixture
     def aggregator():
-        raise ImportError('datadog_checks_base is not installed!')
+        raise ImportError('datadog-checks-base is not installed!')
