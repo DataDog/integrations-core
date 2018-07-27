@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ssh_check",
-  "display_name": "SSH Check",
+  "display_name": "SSH",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",
   "supported_os": [

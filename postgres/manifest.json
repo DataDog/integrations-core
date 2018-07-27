@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "postgres",
-  "display_name": "Postgres",
+  "display_name": "PostgreSQL",
   "creates_events": false,
   "metric_to_check": "postgresql.connections",
   "short_description": "Collect a wealth of database performance and health metrics.",

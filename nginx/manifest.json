@@ -3,7 +3,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "nginx",
-  "display_name": "Nginx",
+  "display_name": "NGINX",
   "metric_to_check": "nginx.net.connections",
   "short_description": "Monitor connection and request metrics. Get more metrics with NGINX Plus.",
   "support": "core",

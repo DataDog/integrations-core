@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "win32_event_log",
-  "display_name": "Win 32 event log",
+  "display_name": "Win32",
   "short_description": "Send Windows events to your Datadog event stream.",
   "support": "core",
   "supported_os": [

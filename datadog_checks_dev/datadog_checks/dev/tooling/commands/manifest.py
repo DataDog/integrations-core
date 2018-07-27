@@ -14,36 +14,36 @@ from ..constants import get_root
 from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
-ATTRIBUTES = {
-    "mandatory": [
-        'categories',
-        'creates_events',
-        'display_name',
-        'guid',
-        'is_public',
-        'maintainer',
-        'manifest_version',
-        # 'metric_to_check',
-        # 'metric_prefix',
-        'name',
-        'public_title',
-        'short_description',
-        'support',
-        'supported_os',
-        'type'
-    ],
-    "optional": [
-        'aliases',
-        'description',
-        'is_beta',
-        'package_deps',
-        'use_omnibus_reqs',
-        # Move these two below to mandatory when all integration are fixed
-        'metric_to_check',
-        'metric_prefix',
-        'version'
-    ]
-}
+REQUIRED_ATTRIBUTES = [
+    'categories',
+    'creates_events',
+    'display_name',
+    'guid',
+    'is_public',
+    'maintainer',
+    'manifest_version',
+    # 'metric_to_check',
+    # 'metric_prefix',
+    'name',
+    'public_title',
+    'short_description',
+    'support',
+    'supported_os',
+    'type'
+]
+
+OPTIONAL_ATTRIBUTES = [
+    'aliases',
+    'description',
+    'is_beta',
+    'package_deps',
+    # Move these two below to mandatory when all integration are fixed
+    'metric_to_check',
+    'metric_prefix',
+    'version'
+]
+
+ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 
 def parse_version_parts(version):
@@ -92,17 +92,13 @@ def verify(fix, include_extras):
                 continue
 
             # attributes are valid
-            all_mandatory_attrs = list(ATTRIBUTES["mandatory"])
-            all_attributes = list(ATTRIBUTES["mandatory"] + ATTRIBUTES["optional"])
-            for attr in decoded.keys():
-                if attr in all_mandatory_attrs:
-                    all_mandatory_attrs.remove(attr)
-                if attr not in all_attributes:
-                    display_queue.append((echo_failure, '  Attribute {} is not valid, it should be one of: {}'.format(
-                        attr, all_attributes)))
-            if len(all_mandatory_attrs) > 0:
-                for attr in all_mandatory_attrs:
-                    display_queue.append((echo_failure, '  Attribute {} is mandatory'.format(attr)))
+            attrs = set(decoded)
+            for attr in attrs - ALL_ATTRIBUTES:
+                failed += 1
+                display_queue.append((echo_failure, '  Attribute `{}` is invalid'.format(attr)))
+            for attr in REQUIRED_ATTRIBUTES - attrs:
+                failed += 1
+                display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
             # guid
             guid = decoded.get('guid')
@@ -181,33 +177,6 @@ def verify(fix, include_extras):
                         else:
                             display_queue.append((echo_failure, output))
 
-                    if 'max_agent_version' in decoded:
-                        failed += 1
-                        output = '  outdated field: max_agent_version'
-
-                        if fix:
-                            del decoded['max_agent_version']
-
-                            display_queue.append((echo_warning, output))
-                            display_queue.append((echo_success, '  removed field: max_agent_version'))
-
-                            failed -= 1
-                        else:
-                            display_queue.append((echo_failure, output))
-
-                    if 'min_agent_version' in decoded:
-                        failed += 1
-                        output = '  outdated field: min_agent_version'
-
-                        if fix:
-                            del decoded['min_agent_version']
-
-                            display_queue.append((echo_warning, output))
-                            display_queue.append((echo_success, '  removed field: min_agent_version'))
-
-                            failed -= 1
-                        else:
-                            display_queue.append((echo_failure, output))
                 elif about_exists:
                     failed += 1
                     output = '  outdated `manifest_version`: {}'.format(manifest_version)
@@ -223,14 +192,6 @@ def verify(fix, include_extras):
                         if 'version' in decoded:
                             del decoded['version']
                             display_queue.append((echo_success, '  removed field: version'))
-
-                        if 'max_agent_version' in decoded:
-                            del decoded['max_agent_version']
-                            display_queue.append((echo_success, '  removed field: max_agent_version'))
-
-                        if 'min_agent_version' in decoded:
-                            del decoded['min_agent_version']
-                            display_queue.append((echo_success, '  removed field: min_agent_version'))
 
                         failed -= 1
                     else:
@@ -285,6 +246,9 @@ def verify(fix, include_extras):
             if not short_description or not isinstance(short_description, string_types):
                 failed += 1
                 display_queue.append((echo_failure, '  required non-null string: short_description'))
+            if len(short_description) > 80:
+                failed += 1
+                display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
 
             # support
             correct_support = 'contrib' if root_name == 'extras' else 'core'

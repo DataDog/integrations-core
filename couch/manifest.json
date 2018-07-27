@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.0.0",
   "name": "couch",
-  "display_name": "Couch",
+  "display_name": "CouchDB",
   "support": "core",
   "supported_os": [
     "linux",

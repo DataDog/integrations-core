@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "wmi_check",
-  "display_name": "WMI Check",
+  "display_name": "WMI",
   "short_description": "Collect and graph any WMI metrics.",
   "support": "core",
   "supported_os": [

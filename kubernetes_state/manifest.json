@@ -12,7 +12,6 @@
     "linux",
     "mac_os"
   ],
-  "use_omnibus_reqs": true,
   "public_title": "Datadog-Kubernetes State Integration",
   "categories": [
     "orchestration",

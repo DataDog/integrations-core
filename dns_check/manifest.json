@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "dns_check",
-  "display_name": "DNS Check",
+  "display_name": "DNS",
   "short_description": "Monitor the resolvablity of and lookup times for any DNS record.",
   "support": "core",
   "supported_os": [

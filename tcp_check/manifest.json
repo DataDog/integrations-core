@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "tcp_check",
-  "display_name": "TCP Check",
+  "display_name": "TCP",
   "short_description": "Monitor TCP connectivity to remote hosts.",
   "support": "core",
   "supported_os": [

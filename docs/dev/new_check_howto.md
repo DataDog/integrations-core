@@ -311,8 +311,7 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | ------              | ----            | ------             | ---------                                                                                                                                                                                                                          |
 | `categories`        | Array of String | Mandatory          | Integration categories used on the [Public documentation Integrations page][12].                                                                                                                                                   |
 | `creates_events`    | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                             |
-| `display_name`      | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the[Public documentation Integrations page][12]                                                                                            |
-| `doc_link`          | String          | Mandatory          | Link to the documentation page of the integration. Format is `https://docs.datadoghq.com/integrations/<INTEGRATION_NAME>`                                                                                                          |
+| `display_name`      | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the[Public documentation Integrations page][12]                                                                                            |                                                                                                        |
 | `guid`              | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][13]                                                                                                                                                                               |
 | `is_public`         | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                                  |
 | `maintainer`        | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                             |
@@ -321,14 +320,13 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | `public_title`      | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> Integration`                                                                                              |
 | `short_description` | String          | Mandatory          | This text -Maximum 80 characters- appears at the top of the integration tile as well as the integration's rollover text on the integrations page.                                                                                  |
 | `support`           | String          | Mandatory          |                                                                                                                                                                                                                                    |
-| `supported_os`      | Array of String | Mandatory          | List of supported OSs. Choose between `linux`,`mac_os`, and `windows`.                                                                                                                                                             |
+| `supported_os`      | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                             |
 | `type`              | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                                 |
 | `aliases`           | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                               |
 | `description`       | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                                  |
 | `is_beta`           | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                                        |
 | `package_deps`      | String          | Optional           |                                                                                                                                                                                                                                    |
-| `use_omnibus_reqs`  | Boolean         | Optional           |                                                                                                                                                                                                                                    |
-| `metric_to_check`   | String          | Optional           | The presence of this metric is the determiner of if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
+| `metric_to_check`   | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
 | `metric_prefix`     | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                                         |
 | `version`           | String          | Optional           |                                                                                                                                                                                                                                    |
 
@@ -342,7 +340,7 @@ Our example check doesn't send any metrics, so in this case we will leave it emp
 | `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                             |
 | `metric_type`   | Mandatory          | [Type of the metric][10].                                                                                                                                                       |
 | `interval`      | Optional           | Interval of collection of the metric in second.                                                                                                                                 |
-| `unit_name`     | Optional           | Unit of the metric. [Complete list of unit supported][11].                                                                                                                      |
+| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][11].                                                                                                                      |
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
 | `description`   | Mandatory          | Description of the metric.                                                                                                                                                      |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
@@ -370,15 +368,15 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 
 Find below the description for each attributes -each one of them is mandatory- of your `service_checks.json` file:
 
-| Attribute       | Description                                                                                |
-| ----            | ----                                                                                       |
-| `agent_version` | Minimum Agent version supported.                                                           |
-| `integration`   | Integration name.                                                                          |
-| `check`         | Name of the Service Check                                                                  |
-| `statuses`      | Different status of the service check. To choose between: `ok`, `warning`, and `critical`. |
-| `groups`        | [Tags][14] sent with the service check.                                                    |
-| `name`          | Displayed name of the Service Check.                                                       |
-| `description`   | Description of the Service Check                                                           |
+| Attribute       | Description                                                                                                              |
+| ----            | ----                                                                                                                     |
+| `agent_version` | Minimum Agent version supported.                                                                                         |
+| `integration`   | Integration name.                                                                                                        |
+| `check`         | Name of the Service Check                                                                                                |
+| `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
+| `groups`        | [Tags][14] sent with the service check.                                                                                  |
+| `name`          | Displayed name of the Service Check.                                                                                     |
+| `description`   | Description of the Service Check                                                                                         |
 
 
 

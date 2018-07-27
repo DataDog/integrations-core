@@ -2,7 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "pdh_check",
-  "display_name": "Pdh Check",
+  "display_name": "PDH",
   "short_description": "Collect and graph any Windows PDH metrics.",
   "support": "core",
   "supported_os": [
