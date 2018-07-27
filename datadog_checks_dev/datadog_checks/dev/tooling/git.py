@@ -1,15 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 import os
 
 from .constants import get_root
+from .utils import parse_pr_number
 from ..subprocess import run_command
 from ..utils import chdir
-
-# match something like `(#1234)` and return `1234` in a group
-PR_REG = re.compile(r'\(#(\d+)\)')
 
 
 def get_current_branch():
@@ -22,6 +19,18 @@ def get_current_branch():
         return run_command(command, capture='out').stdout.strip()
 
 
+def files_changed():
+    """
+    Return the list of file changed in the current branch compared to `master`
+    """
+    with chdir(get_root()):
+        result = run_command('git diff --name-only master...', capture='out')
+    changed_files = result.stdout.splitlines()
+
+    # Remove empty lines
+    return [f for f in changed_files if f]
+
+
 def parse_pr_numbers(git_log_lines):
     """
     Parse PR numbers from commit messages. At GitHub those have the format:
@@ -32,9 +41,9 @@ def parse_pr_numbers(git_log_lines):
     """
     prs = []
     for line in git_log_lines:
-        match = re.search(PR_REG, line)
-        if match:
-            prs.append(match.group(1))
+        pr_number = parse_pr_number(line)
+        if pr_number:
+            prs.append(pr_number)
     return prs
 
 

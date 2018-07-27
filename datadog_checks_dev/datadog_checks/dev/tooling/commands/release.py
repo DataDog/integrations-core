@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple
+import time
+from collections import OrderedDict, namedtuple
 from datetime import datetime
 
 import click
 from semver import parse_version_info
-from six import StringIO
+from six import StringIO, iteritems
 
 from .dep import freeze as dep_freeze
 from .utils import (
@@ -19,19 +20,37 @@ from ..constants import (
 from ..git import (
     get_current_branch, parse_pr_numbers, get_diff, git_tag, git_commit
 )
-from ..github import from_contributor, get_changelog_types, get_pr
+from ..github import from_contributor, get_changelog_types, get_pr, get_pr_from_hash
 from ..release import (
     get_agent_requirement_line, get_release_tag_string, update_agent_requirements,
     update_version_module
 )
-from ..utils import get_version_string
+from ..trello import TrelloClient
+from ..utils import (
+    get_current_agent_version, get_version_string, format_commit_id, parse_pr_number
+)
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import (
-    chdir, remove_path, stream_file_lines, write_file, write_file_lines
+    basepath, chdir, ensure_unicode, get_next, remove_path, stream_file_lines,
+    write_file, write_file_lines
 )
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
+
+
+def validate_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+
+    try:
+        parts = value.split('.')
+        if len(parts) == 2:
+            parts.append('0')
+        version_info = parse_version_info('.'.join(parts))
+        return '{}.{}'.format(version_info.major, version_info.minor)
+    except ValueError:
+        raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
 @click.group(
@@ -161,6 +180,230 @@ def changes(ctx, check):
             echo_warning('WARNING! Too many changelog labels attached: {}\n'.format(', '.join(changelog_types)))
         else:
             echo_success('{}\n'.format(changelog_types[0]))
+
+
+@release.command(
+    context_settings=CONTEXT_SETTINGS,
+    short_help='Create a Trello card for each change that needs to be tested'
+)
+@click.option('--start', 'start_id', help='The PR number or commit hash to start at')
+@click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
+@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.pass_context
+def testable(ctx, start_id, agent_version, dry_run):
+    """Create a Trello card for each change that needs to be tested for
+    the next release. Run via `ddev -x release testable` to force the use
+    of the current directory.
+
+    To avoid GitHub's public API rate limits, you need to set
+    `github.user`/`github.token` in your config file or use the
+    `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
+
+    \b
+    To use Trello:
+    1. Go to `https://trello.com/app-key` and copy your API key.
+    2. Run `ddev config set trello.key` and paste your API key.
+    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
+       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
+       Authorize access and copy your token.
+    4. Run `ddev config set trello.token` and paste your token.
+    """
+    root = get_root()
+    repo = basepath(root)
+    if repo not in ('integrations-core', 'datadog-agent'):
+        abort('Repo `{}` is unsupported.'.format(repo))
+
+    if agent_version:
+        current_agent_version = agent_version
+    else:
+        echo_waiting('Finding the current minor release of the Agent... ', nl=False)
+        current_agent_version = get_current_agent_version()
+        echo_success(current_agent_version)
+
+    current_release_branch = '{}.x'.format(current_agent_version)
+    echo_info(
+        'Branch `{}` will be compared to `master`.'.format(current_release_branch)
+    )
+
+    echo_waiting('Getting diff... ', nl=False)
+    diif_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
+
+    with chdir(root):
+        result = run_command(diif_command.format(current_release_branch), capture=True)
+        if result.code:
+            origin_release_branch = 'origin/{}'.format(current_release_branch)
+            echo_failure('failed!')
+            echo_waiting(
+                'Local branch `{}` might not exist, trying `{}`... '.format(
+                    current_release_branch, origin_release_branch
+                ),
+                nl=False
+            )
+
+            result = run_command(diif_command.format(origin_release_branch), capture=True)
+            if result.code:
+                abort('Unable to get the diif.')
+            else:
+                echo_success('success!')
+        else:
+            echo_success('success!')
+
+    # [(commit_hash, commit_subject), ...]
+    diff_data = [
+        tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())
+    ]
+    num_changes = len(diff_data)
+
+    if dry_run:
+        for _, commit_subject in diff_data:
+            echo_info(commit_subject)
+        return
+
+    if repo == 'integrations-core':
+        options = OrderedDict((
+            ('1', 'Integrations'),
+            ('2', 'Containers'),
+            ('s', 'Skip'),
+            ('q', 'Quit'),
+        ))
+    else:
+        options = OrderedDict((
+            ('1', 'Agent'),
+            ('2', 'Containers'),
+            ('s', 'Skip'),
+            ('q', 'Quit'),
+        ))
+    default_option = get_next(options)
+    options_prompt = 'Choose an option (default {}): '.format(options[default_option])
+    options_text = '\n' + '\n'.join(
+        '{} - {}'.format(key, value) for key, value in iteritems(options)
+    )
+
+    commit_ids = set()
+    user_config = ctx.obj
+    trello = TrelloClient(user_config)
+    found_start_id = False
+
+    for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
+        commit_id = parse_pr_number(commit_subject)
+        if commit_id:
+            pr_data = get_pr(commit_id, user_config)
+        else:
+            try:
+                pr_data = get_pr_from_hash(commit_hash, repo, user_config).get('items', [{}])[0]
+            # Commit to master
+            except IndexError:
+                pr_data = {
+                    'number': commit_hash,
+                    'html_url': 'https://github.com/DataDog/{}/commit/{}'.format(repo, commit_hash),
+                }
+            commit_id = str(pr_data.get('number', ''))
+
+        if commit_id and commit_id in commit_ids:
+            echo_info('Already seen PR #{}, skipping it.'.format(commit_id))
+            continue
+        commit_ids.add(commit_id)
+
+        if start_id and not found_start_id:
+            if start_id == commit_id or start_id == commit_hash:
+                found_start_id = True
+            else:
+                echo_info(
+                    'Looking for {}, skipping {}.'.format(
+                        format_commit_id(start_id), format_commit_id(commit_id)
+                    )
+                )
+                continue
+
+        pr_url = pr_data.get('html_url', 'https://github.com/DataDog/{}/pull/{}'.format(repo, commit_id))
+        pr_title = pr_data.get('title', commit_subject)
+        pr_author = pr_data.get('user', {}).get('login', '')
+        pr_body = pr_data.get('body', '')
+
+        finished = False
+        choice_error = ''
+        progress_status = '({} of {}) '.format(i, num_changes)
+        indent = ' ' * len(progress_status)
+
+        while not finished:
+            echo_success('\n{}{}'.format(progress_status, pr_title))
+
+            echo_success('Url: ', nl=False, indent=indent)
+            echo_info(pr_url)
+
+            echo_success('Author: ', nl=False, indent=indent)
+            echo_info(pr_author)
+
+            # Ensure Unix lines feeds just in case
+            echo_info(pr_body.strip('\r'), indent=indent)
+
+            echo_info(options_text)
+
+            if choice_error:
+                echo_warning(choice_error)
+
+            echo_waiting(options_prompt, nl=False)
+
+            # Terminals are odd and sometimes produce an erroneous null byte
+            choice = '\x00'
+            while choice == '\x00':
+                choice = click.getchar().strip()
+                try:
+                    choice = ensure_unicode(choice)
+                except UnicodeDecodeError:
+                    choice = repr(choice)
+
+            if not choice:
+                choice = default_option
+
+            if choice not in options:
+                echo_info(choice)
+                choice_error = u'`{}` is not a valid option.'.format(choice)
+                continue
+            else:
+                choice_error = ''
+
+            value = options[choice]
+            echo_info(value)
+
+            if value == 'Skip':
+                echo_info('Skipped {}'.format(format_commit_id(commit_id)))
+                break
+            elif value == 'Quit':
+                echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
+                return
+            else:
+                creation_attempts = 3
+                for attempt in range(3):
+                    rate_limited, error, response = trello.create_card(
+                        value,
+                        pr_title,
+                        'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+                    )
+                    if rate_limited:
+                        wait_time = 10
+                        echo_warning(
+                            'Attempt {} of {}: A rate limit in effect, retrying in {} '
+                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                        )
+                        time.sleep(wait_time)
+                    elif error:
+                        if attempt + 1 == creation_attempts:
+                            echo_failure('Error: {}'.format(error))
+                            break
+
+                        wait_time = 2
+                        echo_warning(
+                            'Attempt {} of {}: An error has occurred, retrying in {} '
+                            'seconds...'.format(attempt + 1, creation_attempts, wait_time)
+                        )
+                        time.sleep(wait_time)
+                    else:
+                        echo_success('Created card: ', nl=False)
+                        echo_info(response.json().get('url'))
+                        break
+
+            finished = True
 
 
 @release.command(
