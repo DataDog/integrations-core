@@ -39,10 +39,10 @@ jobs:
   include:
     - stage: test_changed
       script:
-       - ddev dep verify
-       - ddev manifest verify --include-extras
-       - ddev test
-       - ddev test --bench || true
+        - ddev dep verify
+        - ddev manifest verify --include-extras
+        - ddev test
+        - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base
       script:
@@ -51,7 +51,7 @@ jobs:
         - travis_retry ddev test ${CHECK}
         - ddev test ${CHECK} --bench || true
     - stage: test
-      env: CHECK=datadog_checks_dev
+      env: CHECK=datadog_checks_dev PYTHON3=true
     - stage: test
       env: CHECK=active_directory
     - stage: test
@@ -193,6 +193,7 @@ jobs:
 before_install:
   - chmod +x .travis/prepare.sh
   - .travis/prepare.sh
+  - PATH="$PATH:$(pyenv root)/versions/3.6/bin"
 install:
   - pip install -U pip setuptools
   - pip install ./datadog_checks_dev[cli]
