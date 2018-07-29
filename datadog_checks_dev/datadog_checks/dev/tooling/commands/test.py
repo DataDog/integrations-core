@@ -68,7 +68,7 @@ def test(checks, bench, every):
                 env_list = [e.strip() for e in env_list.splitlines()]
 
                 if bench:
-                    benches = [e for e in env_list if e.startswith('bench')]
+                    benches = [e for e in env_list if 'bench' in e]
                     if benches:
                         wait_text = 'Running benchmarks for `{}`'.format(check)
                         echo_waiting(wait_text)
@@ -78,7 +78,7 @@ def test(checks, bench, every):
                         if result.code:
                             abort('Failed!', code=result.code)
                 else:
-                    non_benches = [e for e in env_list if not e.startswith('bench')]
+                    non_benches = [e for e in env_list if 'bench' not in e]
                     if non_benches:
                         wait_text = 'Running tests for `{}`'.format(check)
                         echo_waiting(wait_text)
