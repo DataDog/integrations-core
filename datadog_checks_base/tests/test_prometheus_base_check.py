@@ -12,7 +12,7 @@ def test_rate_override():
     check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_namespace="foo")
 
     processed_type_overrides = check.scrapers_map[endpoint].type_overrides
-    assert cmp(expected_type_overrides, processed_type_overrides) == 0
+    assert expected_type_overrides == processed_type_overrides
     assert ["test_rate"] == check.scrapers_map[endpoint].rate_metrics
 
 

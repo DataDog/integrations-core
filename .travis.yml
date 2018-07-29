@@ -44,7 +44,7 @@ jobs:
         - ddev test
         - ddev test --bench || true
     - stage: test
-      env: CHECK=datadog_checks_base
+      env: CHECK=datadog_checks_base PYTHON3=true
       script:
         - ddev dep verify
         - ddev manifest verify --include-extras

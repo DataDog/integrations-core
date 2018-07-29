@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
+from six import iteritems
+
 from datadog_checks.checks import AgentCheck
 from .sampler import WMISampler
 
@@ -174,7 +176,7 @@ class WinWMICheck(AgentCheck):
                 except TagQueryUniquenessFailure:
                     continue
 
-            for wmi_property, wmi_value in wmi_obj.iteritems():
+            for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
                 if wmi_property not in (map(str.lower,wmi_sampler.property_names)):

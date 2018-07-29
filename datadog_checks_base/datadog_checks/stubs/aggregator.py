@@ -3,8 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict, namedtuple
 
+from six import iteritems
+
+from ..utils.common import ensure_unicode
+
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
+
+
+def normalize_tags(tags):
+    # The base class ensures the Agent receives bytes, so to avoid
+    # prefacing our asserted tags like b'foo:bar' we'll convert back.
+    if tags:
+        return sorted(ensure_unicode(tag) for tag in tags)
+    return tags
 
 
 class AggregatorStub(object):
@@ -16,7 +28,10 @@ class AggregatorStub(object):
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = range(7)
 
     def __init__(self):
-        self.reset()
+        self._metrics = defaultdict(list)
+        self._asserted = set()
+        self._service_checks = defaultdict(list)
+        self._events = []
 
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
@@ -68,13 +83,14 @@ class AggregatorStub(object):
         Assert a metric was processed by this stub
         """
         self._asserted.add(name)
+        tags = normalize_tags(tags)
 
         candidates = []
         for metric in self._metrics.get(name, []):
             if value is not None and metric.type != self.COUNTER and value != metric.value:
                 continue
 
-            if tags and sorted(tags) != sorted(metric.tags):
+            if tags and tags != normalize_tags(metric.tags):
                 continue
 
             if hostname and hostname != metric.hostname:
@@ -101,12 +117,13 @@ class AggregatorStub(object):
         """
         Assert a service check was processed by this stub
         """
+        tags = normalize_tags(tags)
         candidates = []
-        for sc in aggregator.service_checks(name):
+        for sc in self.service_checks(name):
             if status is not None and status != sc.status:
                 continue
 
-            if tags and sorted(tags) != sorted(sc.tags):
+            if tags and tags != normalize_tags(sc.tags):
                 continue
 
             if hostname is not None and hostname != sc.hostname:
@@ -125,7 +142,7 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_all_metrics_covered(self):
-        assert aggregator.metrics_asserted_pct >= 100.0
+        assert self.metrics_asserted_pct >= 100.0
 
     def reset(self):
         """
@@ -137,12 +154,12 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
-        assert aggregator.metrics_asserted_pct >= 100.0
+        assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
         not_asserted = []
-        for mname, metric in aggregator._metrics.iteritems():
-            if mname not in aggregator._asserted:
+        for mname, metric in iteritems(self._metrics):
+            if mname not in self._asserted:
                 not_asserted.append(metric)
         return not_asserted
 
@@ -153,7 +170,7 @@ class AggregatorStub(object):
         """
         if len(self._metrics) == 0:
             return 100.0
-        return len(self._asserted) / float(len(self._metrics)) * 100.0
+        return len(self._asserted) // float(len(self._metrics)) * 100.0
 
     @property
     def metric_names(self):

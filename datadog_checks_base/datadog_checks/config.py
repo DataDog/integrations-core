@@ -11,7 +11,7 @@ def is_affirmative(value):
     if isinstance(value, str):
         return value.lower() in {'yes', 'true', '1', 'y', 'on'}
 
-    # use object's implementation of `__nonzero__`, it's faster than cast.
+    # use object's implementation of `__bool__`, it's faster than cast.
     # None -> False, 0 -> False, 1 -> True, etc.
     return not not value
 
