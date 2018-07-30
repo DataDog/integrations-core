@@ -153,9 +153,9 @@ class ConsulCheck(AgentCheck):
 
     def _check_for_leader_change(self, instance, instance_state):
         perform_new_leader_checks = is_affirmative(instance.get('new_leader_checks',
-                                                 self.init_config.get('new_leader_checks', False)))
+                                                                self.init_config.get('new_leader_checks', False)))
         perform_self_leader_check = is_affirmative(instance.get('self_leader_check',
-                                                 self.init_config.get('self_leader_check', False)))
+                                                                self.init_config.get('self_leader_check', False)))
 
         if perform_new_leader_checks and perform_self_leader_check:
             self.log.warn('Both perform_self_leader_check and perform_new_leader_checks are set, '
@@ -272,9 +272,9 @@ class ConsulCheck(AgentCheck):
 
         service_check_tags = main_tags + ['consul_url:{0}'.format(instance.get('url'))]
         perform_catalog_checks = is_affirmative(instance.get('catalog_checks',
-                                              self.init_config.get('catalog_checks')))
+                                                             self.init_config.get('catalog_checks')))
         perform_network_latency_checks = is_affirmative(instance.get('network_latency_checks',
-                                                      self.init_config.get('network_latency_checks')))
+                                                                     self.init_config.get('network_latency_checks')))
 
         try:
             # Make service checks from health checks for all services in catalog
