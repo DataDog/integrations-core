@@ -302,7 +302,6 @@ The `logos` folder must contain **three** images with filenames and sizes that m
 
 Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. 
 
-
 #### manifest.json
 
 Find below the complete list of mandatory and optional attributes for your `manifest.json` file:
@@ -330,7 +329,6 @@ Find below the complete list of mandatory and optional attributes for your `mani
 | `metric_prefix`     | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                                         |
 | `version`           | String          | Optional           |                                                                                                                                                                                                                                    |
 
-
 #### metadata.csv
 
 Our example check doesn't send any metrics, so in this case we will leave it empty but find below the description for each column of your `metadata.csv` file:
@@ -346,7 +344,6 @@ Our example check doesn't send any metrics, so in this case we will leave it emp
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
 | `integration`   | Mandatory          | Name of the integration that emits the metric.                                                                                                                                  |
 | `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                              |
-
 
 #### service_checks.json
 
@@ -377,8 +374,6 @@ Find below the description for each attributesâ€”each one of them is mandatoryâ€
 | `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
 | `name`          | Displayed name of the Service Check.                                                                                     |
 | `description`   | Description of the Service Check                                                                                         |
-
-
 
 ### Building
 
