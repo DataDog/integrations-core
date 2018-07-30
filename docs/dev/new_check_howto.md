@@ -91,7 +91,7 @@ Checks are organized in regular Python packages under the `datadog_checks` names
 
 ### Implement check logic
 
-Let's say we want to collect a service check named `my_check` that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string, and `CRITICAL` if we can't reach the page at all.
+Let's say we want to collect a Service Check named `my_check` that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string, and `CRITICAL` if we can't reach the page at all.
 
 The code would look like this:
 
@@ -309,9 +309,9 @@ Find below the complete list of mandatory and optional attributes for your `mani
 
 | Attribute           | Type            | Mandatory/Optional | Description                                                                                                                                                                                                                        |
 | ------              | ----            | ------             | ---------                                                                                                                                                                                                                          |
-| `categories`        | Array of String | Mandatory          | Integration categories used on the [Public documentation Integrations page][12].                                                                                                                                                   |
+| `categories`        | Array of String | Mandatory          | Integration categories used on the [public documentation Integrations page][12].                                                                                                                                                   |
 | `creates_events`    | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                             |
-| `display_name`      | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the[Public documentation Integrations page][12]                                                                                            |                                                                                                        |
+| `display_name`      | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation Integrations page][12]                                                                                            |                                                                                                        |
 | `guid`              | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][13]                                                                                                                                                                               |
 | `is_public`         | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                                  |
 | `maintainer`        | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                             |
@@ -339,7 +339,7 @@ Our example check doesn't send any metrics, so in this case we will leave it emp
 | ---             | ----               | ----                                                                                                                                                                            |
 | `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                             |
 | `metric_type`   | Mandatory          | [Type of the metric][10].                                                                                                                                                       |
-| `interval`      | Optional           | Interval of collection of the metric in second.                                                                                                                                 |
+| `interval`      | Optional           | Collection interval of the metric in second.                                                                                                                                 |
 | `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][11].                                                                                                                      |
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
 | `description`   | Mandatory          | Description of the metric.                                                                                                                                                      |
@@ -366,7 +366,7 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 ]
 ```
 
-Find below the description for each attributes -each one of them is mandatory- of your `service_checks.json` file:
+Find below the description for each attributes—each one of them is mandatory—of your `service_checks.json` file:
 
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |
@@ -374,7 +374,7 @@ Find below the description for each attributes -each one of them is mandatory- o
 | `integration`   | Integration name.                                                                                                        |
 | `check`         | Name of the Service Check                                                                                                |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
-| `groups`        | [Tags][14] sent with the service check.                                                                                  |
+| `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
 | `name`          | Displayed name of the Service Check.                                                                                     |
 | `description`   | Description of the Service Check                                                                                         |
 
