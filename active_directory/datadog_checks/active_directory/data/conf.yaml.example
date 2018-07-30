@@ -3,6 +3,8 @@ init_config:
 instances:
   # "." means the current host
   - host: .
+  # username: my_username
+  # password: my_password
   #
   #   The additional metrics is a list of additional counters to collect.  The
   #   list is formatted as follows:
@@ -18,6 +20,13 @@ instances:
   #   
   #   additional_metrics:
   #     - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+  #   
+  # tags:
+  #   - optional:tag_1
+  # 
+  # `counter_data_types` allows the precision with which counters are queried on a per_metric basis
+  # counter_data_types:
+  #   - active_directory.dra.inbound.bytes.total,int
 
 ## Log Section (Available for Agent >=6.0)
 #logs:
