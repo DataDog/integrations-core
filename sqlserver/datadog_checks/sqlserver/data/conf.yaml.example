@@ -15,11 +15,6 @@ init_config:
     #
     # - name: sqlserver.clr.execution
     #   counter_name: CLR Execution
-    #
-    # You can also use the object_name.
-    #
-    # - name: sqlserver.cache.hit_ratio
-    #   object_name: Cache Hit Ratio
 
     # The counter_name field uses the counter name of SQL server database objects
     # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
@@ -40,6 +35,14 @@ init_config:
     #   counter_name: Commit table entries
     #   instance_name: ALL
     #   tag_by: db
+
+    # You can also query by the object_name. Since there may be multiple instances
+    # associated with these queries, they also require instance_name set to ALL and
+    # a tag_by identifier.
+    - name: sqlserver.cache.hit_ratio
+      object_name: SQLServer:Columnstore
+      instance_name: ALL
+      tag_by : db
 
     # the default table from which counters are drawn is the sys.dm_os_performance_counters
     # table.  This integration also supports
