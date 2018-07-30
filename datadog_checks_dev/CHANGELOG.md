@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.3.0 / 2018-07-30
+
+* [Added] Allow passing --build to compose up. See [#1962](https://github.com/DataDog/integrations-core/pull/1962).
+* [Fixed] When setting repo paths do not resolve home. See [#1953](https://github.com/DataDog/integrations-core/pull/1953).
+* [Added] Add command to create Trello test cards from Agent release diffs. See [#1934](https://github.com/DataDog/integrations-core/pull/1934).
+* [Added] Add openldap to the list of agent integrations. See [#1923](https://github.com/DataDog/integrations-core/pull/1923).
+* [Added] Update dep tooling to support environment markers. See [#1921](https://github.com/DataDog/integrations-core/pull/1921).
+
 ## 0.2.2 / 2018-07-19
 
 * [Fixed] Relax condition error handling to allow more time. See [#1914](https://github.com/DataDog/integrations-core/pull/1914).
