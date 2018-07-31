@@ -10,10 +10,10 @@ Runs against AppVeyor's SQLServer setups with their default configurations
 """
 
 
-def test_check_2012(aggregator, spin_up_sqlserver, get_config, get_sql2012_instance):
-    get_config['instances'] = get_sql2012_instance
-    sqlserver_check = SQLServer(conftest.CHECK_NAME, get_config, {}, [get_sql2012_instance])
-    sqlserver_check.check(get_sql2012_instance)
+def test_check_linux(aggregator, spin_up_sqlserver, get_config, get_linux_instance):
+    get_config['instances'] = get_linux_instance
+    sqlserver_check = SQLServer(conftest.CHECK_NAME, get_config, {}, [get_linux_instance])
+    sqlserver_check.check(get_linux_instance)
 
     # Check custom metrics
     aggregator.assert_metric('sqlserver.clr.execution', count=1)
@@ -21,8 +21,8 @@ def test_check_2012(aggregator, spin_up_sqlserver, get_config, get_sql2012_insta
 
     # Make sure ALL custom metric is tagged by database
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
-    custom_tags = get_sql2012_instance.get('tags', [])
-    expected_tags = custom_tags + ['host:{}'.format(get_sql2012_instance.get('host')), 'db:master']
+    custom_tags = get_linux_instance.get('tags', [])
+    expected_tags = custom_tags + ['host:{}'.format(get_linux_instance.get('host')), 'db:master']
     for mname in conftest.EXPECTED_METRICS:
         aggregator.assert_metric(mname, count=1)
     aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.OK, tags=expected_tags)

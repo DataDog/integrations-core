@@ -50,17 +50,13 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd sqlserver
-<<<<<<< HEAD
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install -r requirements.txt)
-=======
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
->>>>>>> Remove rake stuff
   - cd ..
   - cd windows_service
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
-  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
+  - ps: (& "$env:PYTHON/Sscripts/pip.exe" install .)
   - cd ..
 build: off
 test_script:
