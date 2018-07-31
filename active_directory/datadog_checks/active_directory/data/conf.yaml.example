@@ -3,7 +3,6 @@ init_config:
 instances:
   # "." means the current host
   - host: .
-  # Specify a <username> and <password> to authenticate the connectino to the host.
   # username: my_username
   # password: my_password
   #
