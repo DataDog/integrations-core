@@ -3,6 +3,7 @@ init_config:
 instances:
   # "." means the current host
   - host: .
+  # Specify a <username> and <password> to authenticate the connectino to the host.
   # username: my_username
   # password: my_password
   #
@@ -24,9 +25,11 @@ instances:
   # tags:
   #   - optional:tag_1
   # 
-  # `counter_data_types` allows the precision with which counters are queried on a per_metric basis
+  # `counter_data_types` allows the precision with which counters are queried on a per metric basis
   # counter_data_types:
+  #   - <metric_name>,<data_type>
   #   - active_directory.dra.inbound.bytes.total,int
+  #   - active_directory.ldap.bind_time,float
 
 ## Log Section (Available for Agent >=6.0)
 #logs:
