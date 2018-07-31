@@ -82,7 +82,8 @@ def get_sql2014_instance():
 @pytest.fixture
 def get_linux_instance():
     return {
-        'host': '{},1433'.format('sqlserver_latest'),
+        'host': '{},1433'.format(HOST),
+        'connector': 'odbc',
         'driver': "ODBC Driver 17 for SQL Server",
         'username': 'SA',
         'password': 'Password123',

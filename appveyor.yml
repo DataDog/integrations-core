@@ -56,7 +56,7 @@ install:
   - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
   - cd wmi_check
-  - ps: (& "$env:PYTHON/Sscripts/pip.exe" install .)
+  - ps: (& "$env:PYTHON/Scripts/pip.exe" install .)
   - cd ..
 build: off
 test_script:
