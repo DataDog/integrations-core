@@ -16,25 +16,37 @@ instances:
   #   tags:
   #     - instance:foo
 
-  #   <<<Note>>> The Envoy admin endpoint does not support auth until:
-  #   https://github.com/envoyproxy/envoy/issues/2763
-  #   For an alternative, see:
-  #   https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+  # You can also whitelist/blacklist metrics using regular expressions.
+  # The filtering occurs before tag extraction, so you have the option
+  # to have certain tags decide whether or not to keep or ignore metrics.
+  # For an exhaustive list of all metrics and tags, please see:
+  # https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
   #
-  #   If the stats page is behind basic auth:
-  #   username: USERNAME
-  #   password: PASSWORD
-
-  #   The (optional) verify_ssl parameter will instruct the check to validate SSL
-  #   certificates when connecting to Envoy. Defaulting to true, set to false if
-  #   you want to disable SSL certificate validation.
+  # metric_whitelist:
+  #   - cluster\.(in|out)\..*
   #
-  #   verify_ssl: true
+  # metric_blacklist:
+  #   - ^http\..*
 
-  #   The (optional) skip_proxy parameter will bypass any proxy
-  #   settings enabled and attempt to reach Envoy directly.
+  # <<<Note>>> The Envoy admin endpoint does not support auth until:
+  # https://github.com/envoyproxy/envoy/issues/2763
+  # For an alternative, see:
+  # https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
   #
-  #   skip_proxy: false
+  # If the stats page is behind basic auth:
+  # username: USERNAME
+  # password: PASSWORD
 
-  #   If you need to specify a custom timeout in seconds (default is 20):
-  #   timeout: 20
+  # The (optional) verify_ssl parameter will instruct the check to validate SSL
+  # certificates when connecting to Envoy. Defaulting to true, set to false if
+  # you want to disable SSL certificate validation.
+  #
+  # verify_ssl: true
+
+  # The (optional) skip_proxy parameter will bypass any proxy
+  # settings enabled and attempt to reach Envoy directly.
+  #
+  # skip_proxy: false
+
+  # If you need to specify a custom timeout in seconds (default is 20):
+  # timeout: 20
