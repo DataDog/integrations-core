@@ -28,6 +28,7 @@ EXPECTED_METRICS = [
 def get_config():
     return {
         'init_config': {
+            'connector': 'odbc',
             'custom_metrics': [
                 {
                     'name': 'sqlserver.clr.execution',
@@ -90,7 +91,7 @@ def get_linux_instance():
     }
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def spin_up_sqlserver():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
