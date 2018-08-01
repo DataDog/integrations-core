@@ -18,7 +18,7 @@ except: # noqa: E722
     if platform.system() != 'Windows':
         pass
 
-from utils import requires_windows
+from .utils import requires_windows
 
 @pytest.fixture
 def Aggregator():

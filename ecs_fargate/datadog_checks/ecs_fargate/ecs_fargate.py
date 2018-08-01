@@ -1,12 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# 3rd party
 import requests
+from six import iteritems
 
-# project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
@@ -90,7 +88,7 @@ class FargateCheck(AgentCheck):
                 if label in label_whitelist or label not in LABEL_BLACKLIST:
                     container_tags[c_id].append(label + ':' + value)
 
-            if container['Limits']['CPU'] > 0:
+            if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
         try:
@@ -121,25 +119,47 @@ class FargateCheck(AgentCheck):
             self.log.warning(msg, exc_info=True)
 
         for container_id, container_stats in stats.iteritems():
-            # CPU metrics
             tags = container_tags[container_id]
-            self.rate('ecs.fargate.cpu.system', container_stats['cpu_stats']['system_cpu_usage'], tags)
-            self.rate('ecs.fargate.cpu.user', container_stats['cpu_stats']['cpu_usage']['total_usage'], tags)
+
+            # CPU metrics
+            cpu_stats = container_stats.get('cpu_stats', {})
+
+            value = cpu_stats.get('system_cpu_usage')
+            if value is not None:
+                self.rate('ecs.fargate.cpu.system', value, tags)
+
+            value = cpu_stats.get('cpu_usage', {}).get('total_usage')
+            if value is not None:
+                self.rate('ecs.fargate.cpu.user', value, tags)
+
             # Memory metrics
+            memory_stats = container_stats.get('memory_stats', {})
+
             for metric in MEMORY_GAUGE_METRICS:
-                value = container_stats['memory_stats']['stats'][metric]
-                if value < CGROUP_NO_VALUE:
+                value = memory_stats.get('stats', {}).get(metric)
+                if value is not None and value < CGROUP_NO_VALUE:
                     self.gauge('ecs.fargate.mem.' + metric, value, tags)
             for metric in MEMORY_RATE_METRICS:
-                value = container_stats['memory_stats']['stats'][metric]
-                self.rate('ecs.fargate.mem.' + metric, value, tags)
-            self.gauge('ecs.fargate.mem.max_usage', container_stats['memory_stats']['max_usage'], tags)
-            self.gauge('ecs.fargate.mem.usage', container_stats['memory_stats']['usage'], tags)
-            self.gauge('ecs.fargate.mem.limit', container_stats['memory_stats']['limit'], tags)
+                value = memory_stats.get('stats', {}).get(metric)
+                if value is not None:
+                    self.rate('ecs.fargate.mem.' + metric, value, tags)
+
+            value = memory_stats.get('max_usage')
+            if value is not None:
+                self.gauge('ecs.fargate.mem.max_usage', value, tags)
+
+            value = memory_stats.get('usage')
+            if value is not None:
+                self.gauge('ecs.fargate.mem.usage', value, tags)
+
+            value = memory_stats.get('limit')
+            if value is not None:
+                self.gauge('ecs.fargate.mem.limit', value, tags)
+
             # I/O metrics
-            for blkio_cat, metric_name in IO_METRICS.iteritems():
+            for blkio_cat, metric_name in iteritems(IO_METRICS):
                 read_counter = write_counter = 0
-                for blkio_stat in container_stats["blkio_stats"][blkio_cat]:
+                for blkio_stat in container_stats.get("blkio_stats", {}).get(blkio_cat, []):
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:

@@ -10,6 +10,8 @@ import copy
 import traceback
 import unicodedata
 
+from six import iteritems, text_type
+
 try:
     import datadog_agent
     from ..log import init_logging
@@ -38,7 +40,7 @@ class AgentCheck(object):
         args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
         """
         self.metrics = defaultdict(list)
-        self.check_id = ''
+        self.check_id = b''
         self.instances = kwargs.get('instances', [])
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
@@ -78,7 +80,7 @@ class AgentCheck(object):
         self._deprecations = {
             'increment': [
                 False,
-                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use " +
+                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use "
                 "`AgentCheck.gauge` or `AgentCheck.count` instead, with a different metric name",
             ],
             'device_name': [
@@ -124,7 +126,7 @@ class AgentCheck(object):
 
         tags = self._normalize_tags(tags, device_name)
         if hostname is None:
-            hostname = ""
+            hostname = b''
 
         aggregator.submit_metric(self, self.check_id, mtype, name, float(value), tags, hostname)
 
@@ -176,9 +178,9 @@ class AgentCheck(object):
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in event.items():
+        for key, value in list(iteritems(event)):
             # transform the unicode objects to plain strings with utf-8 encoding
-            if isinstance(value, unicode):
+            if isinstance(value, text_type):
                 try:
                     event[key] = event[key].encode('utf-8')
                 except UnicodeError:
@@ -190,7 +192,7 @@ class AgentCheck(object):
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = str(event['aggregation_key'])
+            event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -209,7 +211,7 @@ class AgentCheck(object):
         :param fix_case A boolean, indicating whether to make sure that
                         the metric name returned is in underscore_case
         """
-        if isinstance(metric, unicode):
+        if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
         else:
             metric_name = metric
@@ -301,7 +303,7 @@ class AgentCheck(object):
     def run(self):
         try:
             self.check(copy.deepcopy(self.instances[0]))
-            result = ''
+            result = b''
 
         except Exception as e:
             result = json.dumps([
