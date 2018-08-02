@@ -6,12 +6,10 @@ import random
 from requests import Request, Session
 import base64
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from urllib import unquote
-from OpenSSL.crypto import FILETYPE_PEM, load_privatekey, sign
 
 from .exceptions import APIParsingException, ConfigurationException
 
@@ -37,8 +35,7 @@ class SessionWrapper:
         self.cert_key = None
         self.cert_key = cert_key
         if cert_key:
-            self.cert_key = load_privatekey(FILETYPE_PEM, cert_key)
-            # self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password, backend=default_backend())
+            self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password, backend=default_backend())
 
     def send(self, req):
         req.headers['Cookie'] = self.apic_cookie
@@ -49,19 +46,16 @@ class SessionWrapper:
 
     def make_request(self, path):
         url = "{}{}".format(self.aci_url, path)
-        req = Request('get', url)
+        req = Request('GET', url)
 
         payload = '{}{}'.format(req.method, req.url.replace(self.aci_url, ''))
         payload = unquote(payload)
 
-        # signature = self.cert_key.sign(payload,
-        #                                padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
-        #                                            salt_length=padding.PSS.MAX_LENGTH),
-        #                                hashes.SHA256())
-        signature = base64.b64encode(sign(self.cert_key, payload, 'sha256'))
+        signature = self.cert_key.sign(payload,
+                                       padding.PKCS1v15(),
+                                       hashes.SHA256())
 
-        # signature = base64.b64encode(signature)
-
+        signature = base64.b64encode(signature)
 
         prepped_request = req.prepare()
         if self.apic_cookie:
@@ -145,6 +139,7 @@ class Api:
                                                  verify=self.verify,
                                                  timeout=self.timeout,
                                                  appcenter=self.appcenter,
+                                                 username=self.username,
                                                  cert_key_password=self.cert_key_password,
                                                  log=self.log)
                 self.sessions.append(session_wrapper)
