@@ -87,7 +87,7 @@ jobs:
     - stage: test
       env: CHECK=elastic
     - stage: test
-      env: CHECK=envoy
+      env: CHECK=envoy PYTHON3=true
     - stage: test
       env: CHECK=exchange_server
     - stage: test
@@ -183,7 +183,7 @@ jobs:
     - stage: test
       env: CHECK=varnish
     - stage: test
-      env: CHECK=vault
+      env: CHECK=vault PYTHON3=true
     - stage: test
       env: CHECK=vsphere
     - stage: test
