@@ -115,6 +115,10 @@ instances:
     # Optional, timeout in seconds for the connection and each command run
     # command_timeout: 30
     # database: my_database # Optional, defaults to "master"
+
+    # Optional, set `auto_detect_databases` to yes to automatically detect and monitor all databases
+    # auto_detect_databases: no
+
     tags:
       - optional_tag
 

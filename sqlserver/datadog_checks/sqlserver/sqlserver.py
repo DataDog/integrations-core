@@ -450,6 +450,22 @@ class SQLServer(AgentCheck):
         else:
             self.log.debug("Skipping check")
 
+    def detect_all_databases(self, instance):
+        detected_databases = []
+        # Detect all databases if flag is enabled
+        cursor = self.get_cursor(instance, self.DEFAULT_DB_KEY, self.DEFAULT_DATABASE)
+        try:
+            cursor.execute(DATABASE_EXISTS_QUERY)
+            for row in cursor:
+                detected_databases.append(row.name)            
+        except Exception, e:
+            self.log.error("Failed to detect database: %s" % (e))
+            return detected_databases
+        finally:
+            self.close_cursor(cursor)
+
+        return detected_databases
+
     def do_perf_counter_check(self, instance):
         """
         Fetch the metrics from the sys.dm_os_performance_counters table
@@ -457,37 +473,46 @@ class SQLServer(AgentCheck):
         custom_tags = instance.get('tags', [])
         if custom_tags is None:
             custom_tags = []
-        instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
+        detected_databases = []
+        auto_detect_databases = instance.get('auto_detect_databases', False)
+        if auto_detect_databases:
+            detected_databases = self.detect_all_databases(instance)
+            instance['tags'].append("auto_detected_db:{}".format(detected_databases))
+        else:
+            detected_databases.append(None)
 
-        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
-            # if the server was down at check __init__ key could be missing.
-            if instance_key not in self.instances_metrics:
-                self._make_metric_list_to_collect(instance, self.custom_metrics)
-            metrics_to_collect = self.instances_metrics[instance_key]
+        for dbname in detected_databases:
+            instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY, dbname)
 
-            with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
+            with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
+                # if the server was down at check __init__ key could be missing.
+                if instance_key not in self.instances_metrics:
+                    self._make_metric_list_to_collect(instance, self.custom_metrics)
+                metrics_to_collect = self.instances_metrics[instance_key]
 
-                simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
-                fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
-                waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
-                vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
-                clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
+                with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
 
-                for metric in metrics_to_collect:
-                    try:
-                        if type(metric) is SqlSimpleMetric:
-                            metric.fetch_metric(cursor, simple_rows, custom_tags)
-                        elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
-                            metric.fetch_metric(cursor, fraction_results, custom_tags)
-                        elif type(metric) is SqlOsWaitStat:
-                            metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
-                        elif type(metric) is SqlIoVirtualFileStat:
-                            metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
-                        elif type(metric) is SqlOsMemoryClerksStat:
-                            metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+                    simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
+                    fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
+                    waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
+                    vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
+                    clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
 
-                    except Exception as e:
-                        self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
+                    for metric in metrics_to_collect:
+                        try:
+                            if type(metric) is SqlSimpleMetric:
+                                metric.fetch_metric(cursor, simple_rows, custom_tags)
+                            elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
+                                metric.fetch_metric(cursor, fraction_results, custom_tags)
+                            elif type(metric) is SqlOsWaitStat:
+                                metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
+                            elif type(metric) is SqlIoVirtualFileStat:
+                                metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
+                            elif type(metric) is SqlOsMemoryClerksStat:
+                                metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+
+                        except Exception as e:
+                            self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
 
     def do_stored_procedure_check(self, instance, proc):
         """
