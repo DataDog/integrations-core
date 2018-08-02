@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict, namedtuple
 
-from six import iteritems
+from six import binary_type, iteritems
 
-from ..utils.common import ensure_unicode
+from ..utils.common import ensure_bytes, ensure_unicode
 
 MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
@@ -46,20 +46,55 @@ class AggregatorStub(object):
         """
         Return the metrics received under the given name
         """
-        return self._metrics.get(name, [])
+        return [
+            MetricStub(
+                ensure_unicode(stub.name),
+                stub.type,
+                stub.value,
+                normalize_tags(stub.tags),
+                ensure_unicode(stub.hostname)
+            )
+            for stub in self._metrics.get(ensure_bytes(name), [])
+        ]
 
     def service_checks(self, name):
         """
         Return the service checks received under the given name
         """
-        return self._service_checks.get(name, [])
+        return [
+            ServiceCheckStub(
+                ensure_unicode(stub.check_id),
+                ensure_unicode(stub.name),
+                stub.status,
+                normalize_tags(stub.tags),
+                ensure_unicode(stub.hostname),
+                ensure_unicode(stub.message)
+            )
+            for stub in self._service_checks.get(ensure_bytes(name), [])
+        ]
 
     @property
     def events(self):
         """
         Return all events
         """
-        return self._events
+        all_events = [
+            {ensure_unicode(key): value for key, value in iteritems(ev)}
+            for ev in self._events
+        ]
+
+        for ev in all_events:
+            to_decode = []
+            for key, value in iteritems(ev):
+                if isinstance(value, binary_type) and key != 'host':
+                    to_decode.append(key)
+            for key in to_decode:
+                ev[key] = ensure_unicode(ev[key])
+
+            if ev.get('tags'):
+                ev['tags'] = [ensure_unicode(tag) for tag in ev['tags']]
+
+        return all_events
 
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
         """
@@ -68,7 +103,7 @@ class AggregatorStub(object):
         self._asserted.add(metric_name)
 
         candidates = []
-        for metric in self._metrics.get(metric_name, []):
+        for metric in self.metrics(metric_name):
             if tag in metric.tags:
                 candidates.append(metric)
 
@@ -86,11 +121,11 @@ class AggregatorStub(object):
         tags = normalize_tags(tags)
 
         candidates = []
-        for metric in self._metrics.get(name, []):
+        for metric in self.metrics(name):
             if value is not None and metric.type != self.COUNTER and value != metric.value:
                 continue
 
-            if tags and tags != normalize_tags(metric.tags):
+            if tags and tags != metric.tags:
                 continue
 
             if hostname and hostname != metric.hostname:
@@ -123,7 +158,7 @@ class AggregatorStub(object):
             if status is not None and status != sc.status:
                 continue
 
-            if tags and tags != normalize_tags(sc.tags):
+            if tags and tags != sc.tags:
                 continue
 
             if hostname is not None and hostname != sc.hostname:
@@ -177,14 +212,14 @@ class AggregatorStub(object):
         """
         Return all the metric names we've seen so far
         """
-        return self._metrics.keys()
+        return [ensure_unicode(name) for name in self._metrics.keys()]
 
     @property
     def service_check_names(self):
         """
         Return all the service checks names seen so far
         """
-        return self._service_checks.keys()
+        return [ensure_unicode(name) for name in self._service_checks.keys()]
 
 
 # Use the stub as a singleton

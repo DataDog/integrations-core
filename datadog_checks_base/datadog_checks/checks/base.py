@@ -128,7 +128,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = b''
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, float(value), tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
