@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from urllib import unquote
 
-from .exceptions import APIParsingException, ConfigurationException
+from .exceptions import APIParsingException, ConfigurationException, APIConnectionException
 
 
 class SessionWrapper:
@@ -72,12 +72,12 @@ class SessionWrapper:
             response.raise_for_status()
         except Exception as e:
             self.log.warning("Error making request: {}".format(e))
-            raise
+            raise APIConnectionException("Error making request: {}".format(e))
         try:
             return response.json()
         except Exception as e:
             self.log.warning("Exception in json parsing, returning nothing: {}".format(e))
-            raise
+            raise APIParsingException("Error parsing request: {}".format(e))
 
 
 class Api:
