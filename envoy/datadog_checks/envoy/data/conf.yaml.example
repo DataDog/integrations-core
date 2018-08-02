@@ -22,11 +22,19 @@ instances:
   # For an exhaustive list of all metrics and tags, please see:
   # https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
   #
+  # If you surround patterns by quotes, be sure to
+  # escape backslashes with an extra backslash.
+  #
   # metric_whitelist:
   #   - cluster\.(in|out)\..*
   #
   # metric_blacklist:
   #   - ^http\..*
+  #
+  # Results are cached by default to decrease CPU utilization, at
+  # the expense of some memory. Disable by setting this to false.
+  #
+  # cache_metrics: true
 
   # <<<Note>>> The Envoy admin endpoint does not support auth until:
   # https://github.com/envoyproxy/envoy/issues/2763

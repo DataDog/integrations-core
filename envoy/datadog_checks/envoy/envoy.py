@@ -21,8 +21,13 @@ class Envoy(AgentCheck):
         self.unknown_tags = defaultdict(int)
         self.whitelist = None
         self.blacklist = None
+
+        # The memory implications here are unclear to me. We may want a bloom filter
+        # or a data structure that expires elements based on inactivity.
         self.whitelisted_metrics = set()
         self.blacklisted_metrics = set()
+
+        self.caching_metrics = None
 
     def check(self, instance):
         custom_tags = instance.get('tags', [])
@@ -49,6 +54,9 @@ class Envoy(AgentCheck):
         if self.blacklist is None:
             blacklist = set(re.sub(r'^envoy\\?\.', '', s, 1) for s in instance.get('metric_blacklist', []))
             self.blacklist = [re.compile(pattern) for pattern in blacklist]
+
+        if self.caching_metrics is None:
+            self.caching_metrics = instance.get('cache_metrics', True)
 
         try:
             response = requests.get(
@@ -112,23 +120,25 @@ class Envoy(AgentCheck):
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=custom_tags)
 
     def whitelisted_metric(self, metric):
-        if metric in self.whitelisted_metrics:
-            return True
-        elif metric in self.blacklisted_metrics:
-            return False
-        elif self.whitelist:
+        if self.caching_metrics:
+            if metric in self.whitelisted_metrics:
+                return True
+            elif metric in self.blacklisted_metrics:
+                return False
+
+        if self.whitelist:
             whitelisted = any(pattern.search(metric) for pattern in self.whitelist)
             if self.blacklist:
                 whitelisted = whitelisted or not any(pattern.search(metric) for pattern in self.blacklist)
 
-            if whitelisted:
+            if self.caching_metrics and whitelisted:
                 self.whitelisted_metrics.add(metric)
 
             return whitelisted
         elif self.blacklist:
             blacklisted = any(pattern.search(metric) for pattern in self.blacklist)
 
-            if blacklisted:
+            if self.caching_metrics and blacklisted:
                 self.blacklisted_metrics.add(metric)
 
             return not blacklisted
