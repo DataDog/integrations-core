@@ -9,15 +9,6 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
-### Configuration
-
-1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][14] to start collecting your Envoy performance data.
-  See the [sample envoy.d/conf.yaml][4] for all available configuration options.
-
-2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
-
-3. [Restart the Agent][3]
-
 #### via Istio
 
 If you are using Envoy as part of [Istio][6], to access Envoy's [admin endpoint][5] you need to set Istio's [proxyAdminPort][7].
@@ -91,6 +82,55 @@ static_resources:
             port_value: 8001
 ```
 
+### Configuration
+
+1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][14] to start collecting your Envoy performance data.
+  See the [sample envoy.d/conf.yaml][4] for all available configuration options.
+
+2. Check if the Datadog Agent can access Envoy's [admin endpoint][5].
+
+3. [Restart the Agent][3]
+
+Setting | Description
+--- | ---
+`stats_url` | (REQUIRED) The admin stats endpoint, e.g. `http://localhost:80/stats`. Add a `?usedonly` on the end if you wish to ignore unused metrics instead of reporting them as `0`.
+`tags` | A list of custom tags to apply to this instance.
+`metric_whitelist` | A list of regular expressions.
+`metric_blacklist` | A list of regular expressions.
+`cache_metrics` | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).
+`username` | The username to authenticate with if behind basic auth.
+`password` | The password to authenticate with if behind basic auth.
+`verify_ssl` | This will instruct the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.
+`skip_proxy` | If `true`, the check will bypass any proxy settings enabled and attempt to reach Envoy directly.
+`timeout` | A custom timeout for network requests in seconds (default is 20).
+
+#### Metric filtering
+
+Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, the blacklist will be applied as long as it doesn't conflict with the whitelist.
+
+The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][15]. Let's walk through an example of Envoy metric tagging!
+
+```python
+...
+'cluster.grpc.success': {
+    'tags': (
+        ('cluster_name', ),
+        ('grpc_service', 'grpc_method', ),
+        (),
+    ),
+    ...
+},
+...
+```
+
+Here there are `3` tag sequences: `('cluster_name')`, `('grpc_service', 'grpc_method')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are of course `3`: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, so when you put it all together, you'd get:
+
+`cluster.<cluster_name>.grpc.<grpc_service>.<grpc_method>.success`
+
+Now, say you only care about the cluster name and grpc service, you can add this to your whitelist:
+
+`^cluster\.(cluster5|cluster7)\.grpc\.serviceXYZ\.`
+
 ### Validation
 
 [Run the Agent's `status` subcommand][8] and look for `envoy` under the Checks section.
@@ -130,3 +170,4 @@ Need help? Contact [Datadog Support][11].
 [11]: https://docs.datadoghq.com/help/
 [13]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
 [14]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[15]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
