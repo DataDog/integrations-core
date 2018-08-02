@@ -368,7 +368,6 @@ class SQLServer(AgentCheck):
         self.log.debug("Connection string (before password) {}".format(conn_str))
         if password:
             conn_str += 'PWD={};'.format(password)
-
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, instance=None, conn_key=None, db_name=None):
