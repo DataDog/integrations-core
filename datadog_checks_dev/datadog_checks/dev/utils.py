@@ -116,7 +116,7 @@ def remove_path(path):
     except (FileNotFoundError, OSError):
         try:
             os.remove(path)
-        except (FileNotFoundError, OSError, PermissionError) as e:
+        except (FileNotFoundError, OSError, PermissionError):
             pass
 
 
