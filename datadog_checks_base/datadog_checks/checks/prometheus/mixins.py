@@ -498,7 +498,7 @@ class PrometheusScraperMixin(object):
             - call check method with the same name as the metric
             - log some info if none of the above worked
 
-        `metric_transformers` fix me
+        `metric_transformers` is a dict of <metric name>:<function to run when the metric name is encountered>
         """
         # If targeted metric, store labels
         self._store_labels(message, scraper_config)
