@@ -68,6 +68,8 @@ def clean_package(d, detect_project=True, force_clean_root=False):
     patterns = ALL_PATTERNS.copy()
 
     removed_root_dirs = set()
+    if detect_project:
+        patterns.remove('*.egg-info')
 
     patterns_to_remove = DELETE_EVERYWHERE
     if force_clean_root:
