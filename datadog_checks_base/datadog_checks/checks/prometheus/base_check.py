@@ -5,8 +5,6 @@ from .mixins import PrometheusScraperMixin
 from ..base import AgentCheck
 from ...errors import CheckException
 
-from six import string_types
-
 
 class GenericPrometheusCheck(PrometheusScraperMixin, AgentCheck):
     """

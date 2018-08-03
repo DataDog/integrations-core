@@ -153,11 +153,13 @@ class PrometheusScraperMixin(object):
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
-        config['send_histograms_buckets'] = is_affirmative(instance.get('send_histograms_buckets', is_affirmative(default_instance.get('send_histograms_buckets', True))))
+        config['send_histograms_buckets'] = is_affirmative(instance.get('send_histograms_buckets',
+                                                           default_instance.get('send_histograms_buckets', True)))
 
         # If you want to send `counter` metrics as monotonic counts, set this value to True.
         # Set to False if you want to instead send those metrics as `gauge`.
-        config['send_monotonic_counter'] = is_affirmative(instance.get('send_monotonic_counter', is_affirmative(default_instance.get('send_monotonic_counter', False))))
+        config['send_monotonic_counter'] = is_affirmative(instance.get('send_monotonic_counter',
+                                                          default_instance.get('send_monotonic_counter', False)))
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
@@ -182,7 +184,8 @@ class PrometheusScraperMixin(object):
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
         # Add a 'health' service check for the prometheus endpoint
-        config['health_service_check'] = is_affirmative(instance.get('health_service_check', is_affirmative(default_instance.get('health_service_check', True))))
+        config['health_service_check'] = is_affirmative(instance.get('health_service_check',
+                                                        default_instance.get('health_service_check', True)))
 
         # Can either be only the path to the certificate and thus you should specify the private key
         # or it can be the path to a file containing both the certificate & the private key
