@@ -4,6 +4,7 @@
 
 # project
 from datadog_checks.checks.prometheus import PrometheusScraper
+from datadog_checks.config import _is_affirmative
 from tagger import get_tags
 
 # check
@@ -203,6 +204,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         instance = kwargs.get('instance')
         if instance:
             self.instance_tags = instance.get('tags', [])
+            self._force_text_format = _is_affirmative(instance.get('cadvisor_metrics_force_text', False))
 
         super(CadvisorPrometheusScraper, self).process(endpoint, **kwargs)
 

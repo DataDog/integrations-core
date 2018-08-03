@@ -21,6 +21,13 @@ instances:
     # cadvisor metrics collection
     # cadvisor_metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
     #
+    # Kubelets affected by https://github.com/kubernetes/kubernetes/issues/64137#issuecomment-394342449
+    # will generate a very large protobuf payload that might trigger OOM during parsing. As a mitigation
+    # strategy, set this option to True to switch to the text format and filter the input, at the cost
+    # of an added CPU usage.
+    #
+    # cadvisor_metrics_force_text: True
+    #
     # url of the kubelet metrics prometheus endpoint
     # Pass an empty string to disable kubelet metrics collection
     # kubelet_metrics_endpoint: http://10.8.0.1:10255/metrics
