@@ -11,11 +11,14 @@ MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
 
 
-def normalize_tags(tags):
+def normalize_tags(tags, sort=False):
     # The base class ensures the Agent receives bytes, so to avoid
     # prefacing our asserted tags like b'foo:bar' we'll convert back.
     if tags:
-        return sorted(ensure_unicode(tag) for tag in tags)
+        if sort:
+            return sorted(ensure_unicode(tag) for tag in tags)
+        else:
+            return [ensure_unicode(tag) for tag in tags]
     return tags
 
 
@@ -92,7 +95,7 @@ class AggregatorStub(object):
                 ev[key] = ensure_unicode(ev[key])
 
             if ev.get('tags'):
-                ev['tags'] = [ensure_unicode(tag) for tag in ev['tags']]
+                ev['tags'] = normalize_tags(ev['tags'])
 
         return all_events
 
@@ -118,14 +121,14 @@ class AggregatorStub(object):
         Assert a metric was processed by this stub
         """
         self._asserted.add(name)
-        tags = normalize_tags(tags)
+        tags = normalize_tags(tags, sort=True)
 
         candidates = []
         for metric in self.metrics(name):
             if value is not None and metric.type != self.COUNTER and value != metric.value:
                 continue
 
-            if tags and tags != metric.tags:
+            if tags and tags != sorted(metric.tags):
                 continue
 
             if hostname and hostname != metric.hostname:
@@ -152,13 +155,13 @@ class AggregatorStub(object):
         """
         Assert a service check was processed by this stub
         """
-        tags = normalize_tags(tags)
+        tags = normalize_tags(tags, sort=True)
         candidates = []
         for sc in self.service_checks(name):
             if status is not None and status != sc.status:
                 continue
 
-            if tags and tags != sc.tags:
+            if tags and tags != sorted(sc.tags):
                 continue
 
             if hostname is not None and hostname != sc.hostname:
