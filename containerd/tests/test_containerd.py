@@ -32,16 +32,15 @@ def mock_containerd_out():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'containerd-out.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    containerd_out = mock.patch(
+    with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),
             headers={'Content-Type': "text/plain"}
         )
-    )
-    yield containerd_out.start()
-    containerd_out.stop()
+    ) as containerd_out:
+        yield containerd_out
 
 
 def test_check_containerd(aggregator, mock_containerd_out):

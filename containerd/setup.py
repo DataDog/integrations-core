@@ -17,12 +17,7 @@ with open(path.join(HERE, "datadog_checks", "containerd", "__about__.py")) as f:
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-
-# Parse requirements
-def get_requirements(fpath):
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
-        return f.readlines()
-
+CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
     name='datadog-containerd',
@@ -49,13 +44,11 @@ setup(
     packages=['datadog_checks.containerd'],
 
     # Run-time dependencies
-    install_requires=get_requirements('requirements.in')+[
-        'datadog-checks-base',
-    ],
+    install_requires=[CHECKS_BASE_REQ],
+
     setup_requires=['pytest-runner', ],
-    tests_require=get_requirements('requirements-dev.txt'),
+    tests_require=[CHECKS_BASE_REQ],
 
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.containerd': ['conf.yaml.example']},
     include_package_data=True,
 )
