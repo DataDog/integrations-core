@@ -7,19 +7,13 @@ try:
     from checks import (
         UnknownFormatError,
         PrometheusFormat,
-        PrometheusCheck
     )
 except ImportError:
     from .mixins import PrometheusFormat, UnknownFormatError
-    from .prometheus_base import PrometheusCheck
     from .base_check import GenericPrometheusCheck
-
-from .base_check import PrometheusScraper
 
 __all__ = [
     'PrometheusFormat',
     'UnknownFormatError',
-    'PrometheusCheck',
     'GenericPrometheusCheck',
-    'PrometheusScraper',
 ]
