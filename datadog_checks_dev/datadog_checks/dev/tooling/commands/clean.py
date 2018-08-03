@@ -54,11 +54,15 @@ def clean(ctx, check, compiled_only, all_matches, verbose):
     else:
         path = os.getcwd()
 
+
+    if path == resolve_path(get_root()):
+        is_root = True
+
     echo_waiting('Cleaning `{}`...'.format(path))
     if compiled_only:
-        removed_paths = remove_compiled_scripts(path, detect_project=not all_matches)
+        removed_paths = remove_compiled_scripts(path, detect_project=not all_matches, is_root=is_root)
     else:
-        removed_paths = clean_package(path, detect_project=not all_matches)
+        removed_paths = clean_package(path, detect_project=not all_matches, is_root=is_root)
 
     if verbose:
         if removed_paths:

@@ -29,7 +29,7 @@ DELETE_EVERYWHERE = {
 ALL_PATTERNS = DELETE_IN_ROOT | DELETE_EVERYWHERE
 
 
-def remove_compiled_scripts(d, detect_project=True):
+def remove_compiled_scripts(d, detect_project=True, is_root=False):
     removed = set()
 
     for root, _, files in generate_walker(d, detect_project):
@@ -62,13 +62,16 @@ def find_globs(walker, patterns, matches):
         matches.update(sub_files)
 
 
-def clean_package(d, detect_project=True):
+def clean_package(d, detect_project=True, is_root=False):
     removed = set()
     patterns = ALL_PATTERNS.copy()
-    if detect_project:
-        patterns.remove('*.egg-info')
 
     removed_root_dirs = set()
+
+    patterns_to_remove = DELETE_EVERYWHERE
+    if is_root:
+        patterns_to_remove = ALL_PATTERNS
+
     for pattern in patterns:
         for path in iglob(join(d, pattern)):
             removed.add(path)
@@ -76,7 +79,7 @@ def clean_package(d, detect_project=True):
                 removed_root_dirs.add(path)
                 find_globs(os.walk(path), DELETE_EVERYWHERE, removed)
 
-    find_globs(generate_walker(d, detect_project, removed_root_dirs), DELETE_EVERYWHERE, removed)
+    find_globs(generate_walker(d, detect_project, removed_root_dirs), patterns_to_remove, removed)
 
     removed = sorted(removed)
 
