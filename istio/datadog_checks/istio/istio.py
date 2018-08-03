@@ -61,10 +61,10 @@ class Istio(PrometheusCheck):
         self._scrapers[endpoint] = scraper
         scraper.NAMESPACE = self.MESH_NAMESPACE
         scraper.metrics_mapper = {
-            'istio_request_count': 'request.count',
-            'istio_request_duration': 'request.duration',
-            'istio_request_size': 'request.size',
-            'istio_response_size': 'response.size',
+            'istio_requests_total': 'request.count',
+            'istio_request_duration_seconds': 'request.duration',
+            'istio_request_bytes': 'request.size',
+            'istio_response_bytes': 'response.size',
         }
         scraper.label_to_hostname = endpoint
         scraper = self._shared_scraper_config(scraper, instance)
