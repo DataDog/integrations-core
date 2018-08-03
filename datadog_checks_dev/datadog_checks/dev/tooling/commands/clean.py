@@ -53,10 +53,8 @@ def clean(ctx, check, compiled_only, all_matches, verbose):
             )
     else:
         path = os.getcwd()
-
-
-    if path == resolve_path(get_root()):
-        is_root = True
+        if path == resolve_path(get_root()):
+            is_root = True
 
     echo_waiting('Cleaning `{}`...'.format(path))
     if compiled_only:
