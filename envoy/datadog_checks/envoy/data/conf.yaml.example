@@ -19,7 +19,7 @@ instances:
   # You can also whitelist/blacklist metrics using regular expressions.
   # The filtering occurs before tag extraction, so you have the option
   # to have certain tags decide whether or not to keep or ignore metrics.
-  # For an exhaustive list of all metrics and tags, please see:
+  # For an exhaustive list of all metrics and tags, see:
   # https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
   #
   # If you surround patterns by quotes, be sure to
@@ -45,13 +45,13 @@ instances:
   # username: USERNAME
   # password: PASSWORD
 
-  # The (optional) verify_ssl parameter will instruct the check to validate SSL
+  # The (optional) verify_ssl parameter instructs the check to validate SSL
   # certificates when connecting to Envoy. Defaulting to true, set to false if
   # you want to disable SSL certificate validation.
   #
   # verify_ssl: true
 
-  # The (optional) skip_proxy parameter will bypass any proxy
+  # The (optional) skip_proxy parameter bypasses any proxy
   # settings enabled and attempt to reach Envoy directly.
   #
   # skip_proxy: false

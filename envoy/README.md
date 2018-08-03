@@ -100,13 +100,13 @@ Setting | Description
 `cache_metrics` | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).
 `username` | The username to authenticate with if behind basic auth.
 `password` | The password to authenticate with if behind basic auth.
-`verify_ssl` | This will instruct the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.
-`skip_proxy` | If `true`, the check will bypass any proxy settings enabled and attempt to reach Envoy directly.
+`verify_ssl` | This instructs the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.
+`skip_proxy` | If `true`, the check bypasses any proxy settings enabled and attempt to reach Envoy directly.
 `timeout` | A custom timeout for network requests in seconds (default is 20).
 
 #### Metric filtering
 
-Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, the blacklist will be applied as long as it doesn't conflict with the whitelist.
+Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, the blacklist is applied as long as it doesn't conflict with the whitelist.
 
 The filtering occurs before tag extraction, so you have the option to have certain tags decide whether or not to keep or ignore metrics. An exhaustive list of all metrics and tags can be found in [metrics.py][15]. Let's walk through an example of Envoy metric tagging!
 
@@ -123,11 +123,11 @@ The filtering occurs before tag extraction, so you have the option to have certa
 ...
 ```
 
-Here there are `3` tag sequences: `('cluster_name')`, `('grpc_service', 'grpc_method')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are of course `3`: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, so when you put it all together, you'd get:
+Here there are `3` tag sequences: `('cluster_name')`, `('grpc_service', 'grpc_method')`, and empty `()`. The number of sequences corresponds exactly to how many metric parts there are. For this metric, there are `3` parts: `cluster`, `grpc`, and `success`. Envoy separates everything with a `.`, hence the final metric name would be:
 
 `cluster.<cluster_name>.grpc.<grpc_service>.<grpc_method>.success`
 
-Now, say you only care about the cluster name and grpc service, you can add this to your whitelist:
+If you care only about the cluster name and grpc service, you would add this to your whitelist:
 
 `^cluster\.(cluster5|cluster7)\.grpc\.serviceXYZ\.`
 
