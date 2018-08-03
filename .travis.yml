@@ -16,6 +16,7 @@ git:
 branches:
   only:
     - master
+    - rish/prometheus_rework
 env:
   global:
     - SKIP_CLEANUP=true
