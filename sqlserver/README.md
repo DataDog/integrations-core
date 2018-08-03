@@ -18,7 +18,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 ### Configuration
 
-1. Create a read-only user to connect to your server:
+1. Create a read-only login to connect to your server:
 
     ```
         CREATE LOGIN datadog WITH PASSWORD = 'YOUR_PASSWORD';
@@ -35,8 +35,8 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
         instances:
           - host: <SQL_HOST>,<SQL_PORT>
-            username: <SQL_ADMIN_USER>
-            password: <SQL_ADMIN_PASSWORD>
+            username: datadog
+            password: <YOUR_PASSWORD>
             connector: odbc # alternative is 'adodbapi'
             driver: SQL Server
     ```
