@@ -8,7 +8,6 @@ import click
 from .utils import (
     CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 )
-from ..utils import is_affirmative
 from ..clean import clean_package, remove_compiled_scripts
 from ..constants import get_root
 from ...utils import dir_exists, resolve_path, basepath
@@ -37,10 +36,10 @@ from ...utils import dir_exists, resolve_path, basepath
     '--force', '-f',
     is_flag=True,
     help=(
-        "When run at the root of the project, "
-        "it will ignore most build and testing artifacts, "
-        "like .tox and build directories. "
-        "Force it to remove these."
+        'When run at the root of the project, '
+        'it will ignore most build and testing artifacts, '
+        'like .tox and build directories. '
+        'Force it to remove these.'
     )
 )
 @click.option('--verbose', '-v', is_flag=True, help='Shows removed paths.')
@@ -71,12 +70,12 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
                 force_clean_root = True
             else:
                 echo_warning(
-                    "You are running this from the root of the integrations project"
-                    "Should we remove everything, including: "
-                    ".cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info"
-                    "You can also use --force or -f to bypass this input"
+                    'You are running this from the root of the integrations project. '
+                    'Should we remove everything, including: '
+                    '.cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info? '
+                    'You can also use --force or -f to bypass this input.'
                 )
-                force_clean_root = click.confirm('Do you want to continue')
+                force_clean_root = click.confirm('Do you want to continue?')
 
     echo_waiting('Cleaning `{}`...'.format(path))
     if compiled_only:
