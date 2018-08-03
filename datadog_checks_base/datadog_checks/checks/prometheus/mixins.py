@@ -518,12 +518,12 @@ class PrometheusScraperMixin(object):
         except KeyError:
             if metric_transformers is not None:
                 if message.name in metric_transformers:
-                    #try:
+                    try:
                         # Get the transformer function for this specific metric
                         transformer = metric_transformers[message.name]
                         transformer(message, scraper_config)
-                    #except Exception as err:
-                    #    self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
+                    except Exception as err:
+                        self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
                 else:
                     self.log.debug("Unable to handle metric: {0} - error: No handler function named '{0}' defined".format(message.name))
             else:
