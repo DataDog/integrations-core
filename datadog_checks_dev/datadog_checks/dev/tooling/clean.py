@@ -18,6 +18,7 @@ DELETE_IN_ROOT = {
     'build',
     'dist',
     '*.egg-info',
+    '.benchmarks'
 }
 DELETE_EVERYWHERE = {
     '__pycache__',
@@ -29,7 +30,7 @@ DELETE_EVERYWHERE = {
 ALL_PATTERNS = DELETE_IN_ROOT | DELETE_EVERYWHERE
 
 
-def remove_compiled_scripts(d, detect_project=True, is_root=False):
+def remove_compiled_scripts(d, detect_project=True):
     removed = set()
 
     for root, _, files in generate_walker(d, detect_project):
@@ -62,14 +63,14 @@ def find_globs(walker, patterns, matches):
         matches.update(sub_files)
 
 
-def clean_package(d, detect_project=True, is_root=False):
+def clean_package(d, detect_project=True, force_clean_root=False):
     removed = set()
     patterns = ALL_PATTERNS.copy()
 
     removed_root_dirs = set()
 
     patterns_to_remove = DELETE_EVERYWHERE
-    if is_root:
+    if force_clean_root:
         patterns_to_remove = ALL_PATTERNS
 
     for pattern in patterns:

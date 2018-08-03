@@ -109,3 +109,10 @@ def load_manifest(check_name):
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path))
     return {}
+
+
+def is_affirmative(value):
+    """
+    Attempt to convert different type of values to a meaningful boolean
+    """
+    return value.lower() in {'yes', 'true', '1', 'y'}
