@@ -40,6 +40,52 @@ Configuration Options:
 
 [Restart the Agent][3] to start sending PHP-FPM metrics to Datadog.
 
+#### Multiple pools
+
+It is also possible to monitor multiple PHP-FPM pools using the same proxy server, a common scenario when running on Kubernetes.
+
+To do so, modify each instance's `php-fpm.conf`. Here is an example:
+
+Instance 1
+
+```
+...
+pm.status_path = /status1
+ping.path = /ping1
+...
+```
+
+Instance 2
+
+```
+...
+pm.status_path = /status2
+ping.path = /ping2
+...
+```
+
+Then you must modify your server's routes. Here is an example Nginx configuration:
+
+```
+server {
+    ...
+
+    location ~ ^/(status1|ping1)$ {
+        access_log off;
+        fastcgi_pass instance1_ip:instance1_port;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ ^/(status2|ping2)$ {
+        access_log off;
+        fastcgi_pass instance2_ip:instance2_port;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `php_fpm` under the Checks section.
