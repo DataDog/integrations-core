@@ -136,21 +136,19 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         if CadvisorPrometheusScraper._is_container_metric(labels):
             return CadvisorPrometheusScraper._get_container_id(labels)
 
-    @staticmethod
-    def _get_pod_uid(labels):
+    def _get_pod_uid(self, labels):
         """
         Return the id of a pod
         :param labels:
         :return: str or None
         """
-        pod_id = CadvisorPrometheusScraper._get_container_label(labels, "id")
-        if pod_id:
-            for part in pod_id.split('/'):
-                if part.startswith('pod'):
-                    return part[3:]
+        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
+        namespace = CadvisorPrometheusScraper._get_container_label(labels, "namespace")
+        print(pod_name, namespace)
+        # get pod list
+        return self.pod_list_utils.get_uid_by_namespace(namespace, pod_name)
 
-    @staticmethod
-    def _get_pod_uid_if_pod_metric(labels):
+    def _get_pod_uid_if_pod_metric(self, labels):
         """
         Checks the labels indicate a pod metric,
         then extract the pod uid from them.
@@ -158,7 +156,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         :return str or None
         """
         if CadvisorPrometheusScraper._is_pod_metric(labels):
-            return CadvisorPrometheusScraper._get_pod_uid(labels)
+            return self._get_pod_uid(labels)
 
     def _is_pod_host_networked(self, pod_uid):
         """
@@ -198,7 +196,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
 
     def process(self, endpoint, **kwargs):
         self.pod_list = kwargs.get('pod_list')
-        self.container_filter = kwargs.get('container_filter')
+        self.pod_list_utils = kwargs.get('pod_list_utils')
 
         instance = kwargs.get('instance')
         if instance:
@@ -208,7 +206,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
 
         # Free up memory
         self.pod_list = None
-        self.container_filter = None
+        self.pod_list_utils = None
 
     @staticmethod
     def _sum_values_by_context(message, uid_from_labels):
@@ -247,7 +245,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         metrics = self._sum_values_by_context(message, self._get_container_id_if_container_metric)
         for c_id, metric in metrics.iteritems():
             pod_uid = self._get_pod_uid(metric.label)
-            if self.container_filter.is_excluded(c_id, pod_uid):
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
             tags = get_tags('docker://%s' % c_id, True)
@@ -298,7 +296,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if not c_name:
                 continue
             pod_uid = self._get_pod_uid(metric.label)
-            if self.container_filter.is_excluded(c_id, pod_uid):
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
             tags = get_tags('docker://%s' % c_id, True)
@@ -332,7 +330,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         for c_id, metric in metrics.iteritems():
             limit = getattr(metric, METRIC_TYPES[message.type]).value
             pod_uid = self._get_pod_uid(metric.label)
-            if self.container_filter.is_excluded(c_id, pod_uid):
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
             tags = get_tags('docker://%s' % c_id, True)

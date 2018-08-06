@@ -72,12 +72,12 @@ def is_static_pending_pod(pod):
         return False
 
 
-class ContainerFilter(object):
+class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to
     send metrics for a given container.
     Results and podlist are cached between calls to avoid the repeated python-go switching
-    cost (filter called once per prometheus metric), hence the ContainerFilter object MUST
+    cost (filter called once per prometheus metric), hence the PodListUtils object MUST
     be re-created at every check run.
 
     Containers that are part of a static pod are not filtered, as we cannot curently
@@ -87,14 +87,19 @@ class ContainerFilter(object):
         self.containers = {}
         self.static_pod_uids = set()
         self.cache = {}
+        self.pod_uid_by_name_hash = {}
 
         pods = podlist.get('items') or []
 
         for pod in pods:
+            metadata = pod.get("metadata", {})
+            uid = metadata.get("uid")
+            self.pod_uid_by_name_hash[metadata.get("namespace") + "." + metadata.get("name")] = uid
+
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             if is_static_pending_pod(pod):
-                self.static_pod_uids.add(pod.get("metadata", {}).get("uid"))
+                self.static_pod_uids.add(uid)
 
             for ctr in pod.get('status', {}).get('containerStatuses', []):
                 cid = ctr.get('containerID')
@@ -106,6 +111,17 @@ class ContainerFilter(object):
                     # re-register without the scheme
                     short_cid = cid.split("://", 1)[-1]
                     self.containers[short_cid] = ctr
+
+    def get_uid_by_namespace(self, namespace, name):
+        """
+        Get the pod uid from its name and namespace concatenation
+
+        :param namespace: the namespace the pod is in
+        :param name: the pod name
+        :return: str or None
+        """
+        if name and namespace:
+            return self.pod_uid_by_name_hash.get(namespace + "." + name, None)
 
     def is_excluded(self, cid, pod_uid=None):
         """

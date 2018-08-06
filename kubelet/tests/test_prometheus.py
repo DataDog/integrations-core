@@ -9,6 +9,7 @@ from collections import namedtuple
 import pytest
 from datadog_checks.kubelet import KubeletCheck
 from datadog_checks.kubelet.prometheus import CadvisorPrometheusScraper
+from datadog_checks.kubelet.common import PodListUtils
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -39,7 +40,9 @@ def check():
 @pytest.fixture
 def cadvisor_scraper(check):
     scraper = CadvisorPrometheusScraper(check)
-    scraper.pod_list = json.loads(mock_from_file('pods.json'))
+    pod_list = json.loads(mock_from_file('pods.json'))
+    scraper.pod_list = pod_list
+    scraper.pod_list_utils = PodListUtils(pod_list)
 
     return scraper
 
@@ -139,16 +142,14 @@ def test_get_container_id():
     assert CadvisorPrometheusScraper._get_container_id([]) is None
 
 
-def test_get_pod_uid():
+def test_get_pod_uid(monkeypatch, cadvisor_scraper):
     labels = [
         Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
-                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
+        Label("namespace", value="default"),
+        Label("pod_name", value="datadog-agent-jbm2k")
     ]
-    assert CadvisorPrometheusScraper._get_pod_uid(labels) == "260c2b1d43b094af6d6b4ccba082c2db"
-    assert CadvisorPrometheusScraper._get_pod_uid([]) is None
+    assert cadvisor_scraper._get_pod_uid(labels) == "c2319815-10d0-11e8-bd5a-42010af00137"
+    assert cadvisor_scraper._get_pod_uid([]) is None
 
 
 def test_is_pod_host_networked(monkeypatch, cadvisor_scraper):
@@ -162,20 +163,16 @@ def test_get_pod_by_metric_label(monkeypatch, cadvisor_scraper):
     assert len(cadvisor_scraper.pod_list) == 4
     kube_proxy = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod260c2b1d43b094af6d6b4ccba082c2db/"
-                    "0bce0ef7e6cd073e8f9cec3027e1c0057ce1baddce98113d742b816726a95ab1"),
+        Label("namespace", value="kube-system"),
+        Label("pod_name", value="kube-proxy-gke-haissam-default-pool-be5066f1-wnvn")
     ])
     fluentd = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "pod2edfd4d9-10ce-11e8-bd5a-42010af00137/"
-                    "7990c0e549a1a578b1313475540afc53c91081c32e735564da6244ddf0b86030"),
+        Label("namespace", value="kube-system"),
+        Label("pod_name", value="fluentd-gcp-v2.0.10-9q9t4")
     ])
-    assert kube_proxy["metadata"]["name"] == "kube-proxy-gke-haissam-default-pool-be5066f1-wnvn"
-    assert fluentd["metadata"]["name"] == "fluentd-gcp-v2.0.10-9q9t4"
+    assert kube_proxy["metadata"]["uid"] == "260c2b1d43b094af6d6b4ccba082c2db"
+    assert fluentd["metadata"]["uid"] == "2edfd4d9-10ce-11e8-bd5a-42010af00137"
 
 
 def test_get_kube_container_name():
