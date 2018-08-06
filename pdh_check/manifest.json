@@ -12,7 +12,7 @@
   "metric_to_check": "pdh.system.file_read_per_se",
   "name": "pdh_check",
   "public_title": "Datadog-Pdh Check Integration",
-  "short_description": "Collect and graph any Windows PDH metrics.",
+  "short_description": "Collect and graph any Windows Performance Counters.",
   "support": "core",
   "supported_os": [
     "windows"
