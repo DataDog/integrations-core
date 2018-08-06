@@ -18,7 +18,7 @@
     "network"
   ],
   "type": "check",
-  "metric_prefix": "snmp.", // no metric in metadata?
+  "metric_prefix": "snmp.",
   "is_public": true,
   "creates_events": false
 }

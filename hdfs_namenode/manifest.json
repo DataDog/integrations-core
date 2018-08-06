@@ -15,6 +15,6 @@
   "public_title": "Datadog-HDFS Namenode Integration",
   "categories":["processing", "os & system"],
   "type":"check",
-  "metric_prefix": "hdfs.", // is this valid?
+  "metric_prefix": "hdfs.",
   "is_public": true
 }

@@ -18,6 +18,6 @@
     "notification"
   ],
   "type": "check",
-  "metric_prefix": "nagios.", // is this valid? no metrics in metadata file?
+  "metric_prefix": "nagios.",
   "is_public": true
 }

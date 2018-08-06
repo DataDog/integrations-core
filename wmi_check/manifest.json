@@ -14,7 +14,7 @@
     "monitoring"
   ],
   "type": "check",
-  "metric_prefix": "wmi_check.", // is this valid? no metadata?
+  "metric_prefix": "wmi.",
   "is_public": true,
   "creates_events": false,
   "aliases": [

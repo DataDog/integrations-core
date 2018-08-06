@@ -15,7 +15,7 @@
     "os & system"
   ],
   "type": "check",
-  "metric_prefix": "windows_service.", // is this valid? no metadata?
+  "metric_prefix": "windows_service.",
   "is_public": true,
   "aliases": [
     "/integrations/winservices"

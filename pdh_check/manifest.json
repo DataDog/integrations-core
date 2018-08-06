@@ -12,7 +12,7 @@
   "public_title": "Datadog-Pdh Check Integration",
   "categories":["os & system"],
   "type":"check",
-  "metric_prefix": "pdh_check.", // no metric in metadatafile?
+  "metric_prefix": "pdh_check.",
   "is_public": true,
   "creates_events": false
 }

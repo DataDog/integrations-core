@@ -17,7 +17,7 @@
     "web"
   ],
   "type": "check",
-  "metric_prefix": "network.", // is this valid?
+  "metric_prefix": "network.",
   "is_public": true,
   "creates_events": false,
   "aliases": [

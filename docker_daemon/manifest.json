@@ -18,7 +18,7 @@
     "log collection"
   ],
   "type": "check",
-  "metric_prefix": "docker.", // is this correct?
+  "metric_prefix": "docker.",
   "is_public": true,
   "aliases": [
     "/integrations/docker"

@@ -16,6 +16,6 @@
   "categories":["data store"],
   "type":"check",
   "metric_prefix": "couchbase.",
-  "creates_events": true,
+  "creates_events": true, // set to False in dogweb/integration/couchbase/config.py
   "is_public": true
 }

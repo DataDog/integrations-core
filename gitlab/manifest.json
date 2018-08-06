@@ -17,7 +17,7 @@
     "source control",
     "issue tracking"
   ],
-  "metric_prefix": "gitlab.", // is this valid see metadata file?
+  "metric_prefix": "gitlab.",
   "is_public": true,
   "creates_events": false,
   "type": "check"

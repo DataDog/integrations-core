@@ -9,7 +9,7 @@
   "public_title": "Datadog-Prometheus Integration",
   "categories": ["monitoring"],
   "type": "check",
-  "metric_prefix": "prometheus.", // no metrics in metadata?
+  "metric_prefix": "prometheus.",
   "is_public": true,
   "display_name": "Prometheus",
   "creates_events": false

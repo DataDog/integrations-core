@@ -16,7 +16,7 @@
     "os & system"
   ],
   "type": "check",
-  "metric_prefix": "system.", // is this valid? see metadata?
+  "metric_prefix": "system.",
   "is_public": true,
   "creates_events": false
 }

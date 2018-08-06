@@ -14,7 +14,7 @@
     "os & system"
   ],
   "type": "check",
-  "metric_prefix": "win32_event_log.", // is this valid? no metadata?
+  "metric_prefix": "win32_event_log.",
   "is_public": true,
   "creates_events": true
 }

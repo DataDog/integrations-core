@@ -15,6 +15,6 @@
     "os & system"
   ],
   "type": "check",
-  "metric_prefix": "linux_proc_extras.", // no metrics? is this valid?
+  "metric_prefix": "system.",
   "is_public": true
 }

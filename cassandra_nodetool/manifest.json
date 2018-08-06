@@ -18,6 +18,6 @@
     "data store"
   ],
   "type": "check",
-  "metric_prefix": "cassandra.nodetool.", // is this good?
+  "metric_prefix": "cassandra.",
   "is_public": true
 }

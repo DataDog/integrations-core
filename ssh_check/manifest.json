@@ -16,7 +16,7 @@
     "network"
   ],
   "type": "check",
-  "metric_prefix": "sftp.", // is this valid?
+  "metric_prefix": "ssh.",
   "is_public": true,
   "creates_events": false,
   "aliases": [
