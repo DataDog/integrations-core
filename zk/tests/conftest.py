@@ -4,8 +4,6 @@
 import os
 import sys
 import time
-import subprocess
-import socket
 import pytest
 from datadog_checks.dev import docker_run, RetryError
 from datadog_checks.utils.common import get_docker_hostname
