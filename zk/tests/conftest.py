@@ -5,9 +5,11 @@ import os
 import sys
 import time
 import subprocess
-import requests
+import socket
 import pytest
 from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.zk import ZookeeperCheck
+from datadog_checks.zk.zk import ZKConnectionFailure
 
 CHECK_NAME = 'zk'
 HOST = get_docker_hostname()
@@ -104,12 +106,21 @@ def spin_up_zk():
         'docker-compose', '-f', os.path.join(HERE, 'compose', 'zk.yaml')
     ]
     subprocess.check_call(args + ["up", "-d"], env=env)
-    sys.stderr.write("Waiting for ZK to boot")
-    for _ in xrange(2):
+    sys.stderr.write("Waiting for ZK to boot...\n")
+    booted = False
+    for _ in xrange(3):
         try:
-            res = requests.get(URL)
-            res.raise_for_status()
-        except Exception:
+            out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
+            out.seek(0)
+            if out.readline() != 'imok':
+                raise ZKConnectionFailure()
+            booted = True
+        except ZKConnectionFailure:
             time.sleep(1)
+
+    if not booted:
+        raise Exception("Zookeeper failed to boot!")
+
+    sys.stderr.write("ZK boot complete.\n")
     yield
     subprocess.check_call(args + ["down"], env=env)
