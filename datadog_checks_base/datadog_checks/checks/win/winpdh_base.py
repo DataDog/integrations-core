@@ -1,21 +1,16 @@
-# Unless explicitly stated otherwise all files in this repository are licensed
-# under the Apache License Version 2.0.
-# This product includes software developed at Datadog (https://www.datadoghq.com/).
-# Copyright 2017 Datadog, Inc.
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import win32wnet
+from six import iteritems
 
-# toolkit
-from datadog_checks.checks import AgentCheck
-
-# project
-from datadog_checks.utils.containers import hash_mutable
-
-#  datadog
 try:
     from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 except ImportError:
-    from .winpdh_stub import WinPDHCounter,DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 
-import win32wnet
+from ..base import AgentCheck
+from ...utils.containers import hash_mutable
 
 int_types = [
     "int",
@@ -27,6 +22,7 @@ double_types = [
     "double",
     "float",
 ]
+
 
 class PDHBaseCheck(AgentCheck):
     """
@@ -40,6 +36,7 @@ class PDHBaseCheck(AgentCheck):
         self._counters = {}
         self._metrics = {}
         self._tags = {}
+        key = None
 
         try:
             for instance in instances:
@@ -71,15 +68,15 @@ class PDHBaseCheck(AgentCheck):
                         self.log.error("Failed to make remote connection %s" % str(e))
                         return
 
-                ## counter_data_types allows the precision with which counters are queried
-                ## to be configured on a per-metric basis. In the metric instance, precision
-                ## should be specified as
-                ## counter_data_types:
-                ## - iis.httpd_request_method.get,int
-                ## - iis.net.bytes_rcvd,float
-                ##
-                ## the above would query the counter associated with iis.httpd_request_method.get
-                ## as an integer (LONG) and iis.net.bytes_rcvd as a double
+                # counter_data_types allows the precision with which counters are queried
+                # to be configured on a per-metric basis. In the metric instance, precision
+                # should be specified as
+                # counter_data_types:
+                # - iis.httpd_request_method.get,int
+                # - iis.net.bytes_rcvd,float
+                #
+                # the above would query the counter associated with iis.httpd_request_method.get
+                # as an integer (LONG) and iis.net.bytes_rcvd as a double
                 datatypes = {}
                 precisions = instance.get('counter_data_types')
                 if precisions is not None:
@@ -108,8 +105,15 @@ class PDHBaseCheck(AgentCheck):
                     precision = datatypes.get(dd_name)
 
                     try:
-                        obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision=precision)
-                    except Exception as e:
+                        obj = WinPDHCounter(
+                            counterset,
+                            counter_name,
+                            self.log,
+                            inst_name,
+                            machine_name=remote_machine,
+                            precision=precision
+                        )
+                    except Exception:
                         self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
                         self.log.warning("Datadog Agent will not report %s" % dd_name)
                         continue
@@ -122,15 +126,27 @@ class PDHBaseCheck(AgentCheck):
                 addl_metrics = instance.get('additional_metrics')
                 if addl_metrics is not None:
                     for counterset, inst_name, counter_name, dd_name, mtype in addl_metrics:
-                        if inst_name.lower() == "none" or len(inst_name) == 0 or inst_name == "*" or inst_name.lower() == "all":
+                        if (
+                            inst_name.lower() == "none"
+                            or len(inst_name) == 0
+                            or inst_name == "*"
+                            or inst_name.lower() == "all"
+                        ):
                             inst_name = None
                         m = getattr(self, mtype.lower())
 
                         precision = datatypes.get(dd_name)
 
                         try:
-                            obj = WinPDHCounter(counterset, counter_name, self.log, inst_name, machine_name = remote_machine, precision = precision)
-                        except Exception as e:
+                            obj = WinPDHCounter(
+                                counterset,
+                                counter_name,
+                                self.log,
+                                inst_name,
+                                machine_name=remote_machine,
+                                precision=precision
+                            )
+                        except Exception:
                             self.log.warning("Couldn't create counter %s\%s" % (counterset, counter_name))
                             self.log.warning("Datadog Agent will not report %s" % dd_name)
                             continue
@@ -143,7 +159,7 @@ class PDHBaseCheck(AgentCheck):
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        if not self._metrics.get(key):
+        if key is None or not self._metrics.get(key):
             raise AttributeError('No valid counters to collect')
 
     def check(self, instance):
@@ -152,7 +168,7 @@ class PDHBaseCheck(AgentCheck):
         for inst_name, dd_name, metric_func, counter in self._metrics[key]:
             try:
                 vals = counter.get_all_values()
-                for instance_name, val in vals.iteritems():
+                for instance_name, val in iteritems(vals):
                     tags = []
                     if key in self._tags:
                         tags = list(self._tags[key])
@@ -164,4 +180,3 @@ class PDHBaseCheck(AgentCheck):
             except Exception as e:
                 # don't give up on all of the metrics because one failed
                 self.log.error("Failed to get data for %s %s: %s" % (inst_name, dd_name, str(e)))
-                pass

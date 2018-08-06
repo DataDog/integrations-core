@@ -16,7 +16,7 @@ The Agent Metrics check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set the masters to monitor.
+1. Edit the `agent_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8], to point to your server and port, set the masters to monitor.
 
     See the [sample agent_metrics.d/conf.yaml][2] for all available configuration options.
 
@@ -45,3 +45,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
 [5]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

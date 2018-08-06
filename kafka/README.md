@@ -22,7 +22,7 @@ The check collects metrics via JMX, so you'll need a JVM on each kafka node so t
 
 ### Configuration
 
-Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your Agent's configuration directory.
+Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your [Agent's configuration directory][31].
 
 #### Metric Collection
 
@@ -132,3 +132,4 @@ Returns `OK` otherwise.
 [28]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics/
 [29]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog/
 [30]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
+[31]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

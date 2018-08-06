@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from collections import defaultdict
 
 import requests
@@ -18,6 +19,15 @@ class Envoy(AgentCheck):
         super(Envoy, self).__init__(name, init_config, agentConfig, instances)
         self.unknown_metrics = defaultdict(int)
         self.unknown_tags = defaultdict(int)
+        self.whitelist = None
+        self.blacklist = None
+
+        # The memory implications here are unclear to me. We may want a bloom filter
+        # or a data structure that expires elements based on inactivity.
+        self.whitelisted_metrics = set()
+        self.blacklisted_metrics = set()
+
+        self.caching_metrics = None
 
     def check(self, instance):
         custom_tags = instance.get('tags', [])
@@ -36,6 +46,17 @@ class Envoy(AgentCheck):
         verify_ssl = instance.get('verify_ssl', True)
         proxies = self.get_instance_proxy(instance, stats_url)
         timeout = int(instance.get('timeout', 20))
+
+        if self.whitelist is None:
+            whitelist = set(re.sub(r'^envoy\\?\.', '', s, 1) for s in instance.get('metric_whitelist', []))
+            self.whitelist = [re.compile(pattern) for pattern in whitelist]
+
+        if self.blacklist is None:
+            blacklist = set(re.sub(r'^envoy\\?\.', '', s, 1) for s in instance.get('metric_blacklist', []))
+            self.blacklist = [re.compile(pattern) for pattern in blacklist]
+
+        if self.caching_metrics is None:
+            self.caching_metrics = instance.get('cache_metrics', True)
 
         try:
             response = requests.get(
@@ -67,9 +88,11 @@ class Envoy(AgentCheck):
             except ValueError:
                 continue
 
+            if not self.whitelisted_metric(envoy_metric):
+                continue
+
             try:
                 metric, tags, method = parse_metric(envoy_metric)
-                tags.extend(custom_tags)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
                     self.log.debug('Unknown metric `{}`'.format(envoy_metric))
@@ -83,6 +106,8 @@ class Envoy(AgentCheck):
                     self.unknown_tags[tag] += 1
                 continue
 
+            tags.extend(custom_tags)
+
             try:
                 value = int(value)
                 get_method(self, method)(metric, value, tags=tags)
@@ -93,3 +118,29 @@ class Envoy(AgentCheck):
                     self.gauge(metric, value, tags=tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=custom_tags)
+
+    def whitelisted_metric(self, metric):
+        if self.caching_metrics:
+            if metric in self.whitelisted_metrics:
+                return True
+            elif metric in self.blacklisted_metrics:
+                return False
+
+        if self.whitelist:
+            whitelisted = any(pattern.search(metric) for pattern in self.whitelist)
+            if self.blacklist:
+                whitelisted = whitelisted or not any(pattern.search(metric) for pattern in self.blacklist)
+
+            if self.caching_metrics and whitelisted:
+                self.whitelisted_metrics.add(metric)
+
+            return whitelisted
+        elif self.blacklist:
+            blacklisted = any(pattern.search(metric) for pattern in self.blacklist)
+
+            if self.caching_metrics and blacklisted:
+                self.blacklisted_metrics.add(metric)
+
+            return not blacklisted
+        else:
+            return True

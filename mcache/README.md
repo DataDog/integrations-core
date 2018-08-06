@@ -11,7 +11,7 @@ The memcache check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-1. Edit the `mcache.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `mcache.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10].
   See the [sample mcache.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -70,3 +70,4 @@ Need help? Contact [Datadog Support][6].
 [7]: https://www.datadoghq.com/blog/speed-up-web-applications-memcached/
 [8]: https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd/
 [9]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached/
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

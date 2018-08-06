@@ -45,6 +45,7 @@ def compose_file_active(compose_file):
 @contextmanager
 def docker_run(
     compose_file=None,
+    build=False,
     service_name=None,
     up=None,
     down=None,
@@ -59,6 +60,8 @@ def docker_run(
     :param compose_file: A path to a Docker compose file. A custom tear
                          down is not required when using this.
     :type compose_file: ``str``
+    :param build: Whether or not to build images for when ``compose_file`` is provided.
+    :type build: ``bool``
     :param service_name: Optional name for when ``compose_file`` is provided.
     :type service_name: ``str``
     :param up: A custom spin up callable.
@@ -84,7 +87,7 @@ def docker_run(
     if compose_file is not None:
         if not isinstance(compose_file, string_types):
             raise TypeError('The path to the compose file must be a string.')
-        spin_up = ComposeFileUp(compose_file, service_name=service_name)
+        spin_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
         if down is not None:
             if not callable(down):
                 raise TypeError('The custom tear down must be callable.')
@@ -131,10 +134,15 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, service_name=None):
+    def __init__(self, compose_file, build=False, service_name=None):
         self.compose_file = compose_file
+        self.build = build
         self.service_name = service_name
         self.command = ['docker-compose', '-f', self.compose_file, 'up', '-d']
+
+        if self.build:
+            self.command.append('--build')
+
         if self.service_name:
             self.command.append(self.service_name)
 

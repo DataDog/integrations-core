@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+from six import string_types
+
 try:
     # Agent6
     from _util import get_subprocess_output as subprocess_output
@@ -38,7 +40,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True):
     """
 
     cmd_args = []
-    if isinstance(command, basestring):
+    if isinstance(command, string_types):
         for arg in command.split():
             cmd_args.append(arg)
     elif hasattr(type(command), '__iter__'):

@@ -28,7 +28,7 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][4] package, 
 
 ### Configuration
 
-Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Consul [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][13] to start collecting your Consul [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample consul.d/conf.yaml][2] for all available configuration options.
 
 #### Metric Collection
@@ -170,3 +170,4 @@ Need help? Contact [Datadog Support][9].
 [10]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [11]: https://engineering.datadoghq.com/consul-at-datadog/
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png
+[13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

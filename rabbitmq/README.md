@@ -18,7 +18,7 @@ The RabbitMQ check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your RabbitMQ [metrics](#metric-collection) and [logs](#log-collection). See the [sample rabbitmq.yaml][3] for all available configuration options.
+Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][14] to start collecting your RabbitMQ [metrics](#metric-collection) and [logs](#log-collection). See the [sample rabbitmq.yaml][3] for all available configuration options.
 
 #### Prepare RabbitMQ
 
@@ -154,3 +154,4 @@ Returns CRITICAL if the Agent cannot connect to rabbitmq to collect metrics, oth
 [11]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/
 [12]: https://app.datadoghq.com/account/settings#integrations/rabbitmq
 [13]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
+[14]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

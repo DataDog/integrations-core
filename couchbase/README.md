@@ -22,7 +22,7 @@ The Couchbase check is included in the [Datadog Agent][2] package, so you don't 
 
 ### Configuration
 
-1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Couchbase performance data.  
+1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10] to start collecting your Couchbase performance data.  
 	See the [sample couchbase.d/conf.yaml][3] for all available configuration options.
 
 ```
@@ -82,3 +82,4 @@ Need help? Contact [Datadog Support][7].
 [6]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog/
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

@@ -1,8 +1,8 @@
-from . import mysql
-
-MySql = mysql.MySql
-
-__version__ = "1.2.0"
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from .__about__ import __version__
+from .mysql import MySql
 
 __all__ = [
     '__version__',

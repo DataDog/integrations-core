@@ -7,6 +7,8 @@
 
 # Documentation
 /docs/             @DataDog/baklava @DataDog/agent-integrations
+*.md               @DataDog/baklava @DataDog/agent-integrations                          
+manifest.json      @DataDog/baklava @DataDog/agent-integrations
 
 # Container monitoring
 /docker_daemon/    @DataDog/kenafeh @DataDog/agent-integrations

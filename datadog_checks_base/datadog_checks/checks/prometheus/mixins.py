@@ -6,15 +6,19 @@ from fnmatch import fnmatchcase
 import logging
 import requests
 from urllib3 import disable_warnings
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import InsecureRequestWarning
 from collections import defaultdict
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from ...utils.prometheus import metrics_pb2
 from math import isnan, isinf
 from prometheus_client.parser import text_fd_to_metric_families
 
-# toolkit
-from .. import AgentCheck
+from six import PY3, iteritems, string_types
+
+from ..base import AgentCheck
+
+if PY3:
+    long = int
 
 
 class PrometheusFormat:
@@ -255,10 +259,10 @@ class PrometheusScraperMixin(object):
         :return: value of the metric_name matched by the labels
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
-        expected_labels = set([(k, v) for k, v in _metric["labels"].iteritems()
+        expected_labels = set([(k, v) for k, v in iteritems(_metric["labels"])
                                if k not in PrometheusScraperMixin.UNWANTED_LABELS])
         for elt in messages[metric_name]:
-            current_labels = set([(k, v) for k, v in elt["labels"].iteritems()
+            current_labels = set([(k, v) for k, v in iteritems(elt["labels"])
                                   if k not in PrometheusScraperMixin.UNWANTED_LABELS])
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
@@ -285,10 +289,10 @@ class PrometheusScraperMixin(object):
             # in the case of quantiles and buckets, they need to be grouped by labels
             if obj_map[_m] in ['summary', 'histogram'] and len(_obj.metric) > 0:
                 _label_exists = False
-                _metric_minus = {k:v for k,v in _metric['labels'].items() if k not in ['quantile', 'le']}
+                _metric_minus = {k: v for k, v in list(iteritems(_metric['labels'])) if k not in ['quantile', 'le']}
                 _metric_idx = 0
                 for mls in _obj.metric:
-                    _tmp_lbl = {idx.name:idx.value for idx in mls.label}
+                    _tmp_lbl = {idx.name: idx.value for idx in mls.label}
                     if _metric_minus == _tmp_lbl:
                         _label_exists = True
                         break
@@ -352,7 +356,7 @@ class PrometheusScraperMixin(object):
                 self._dry_run = False
             elif not self._watched_labels:
                 # build the _watched_labels set
-                for metric, val in self.label_joins.iteritems():
+                for metric, val in iteritems(self.label_joins):
                     self._watched_labels.add(val['label_to_match'])
 
             for metric in self.parse_metric_family(response):
@@ -361,8 +365,8 @@ class PrometheusScraperMixin(object):
             # Set dry run off
             self._dry_run = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in self._label_mapping.items():
-                for key, val in mapping.items():
+            for metric, mapping in list(iteritems(self._label_mapping)):
+                for key, val in list(iteritems(mapping)):
                     if key not in self._active_label_mapping[metric]:
                         del self._label_mapping[metric][key]
             self._active_label_mapping = {}
@@ -495,12 +499,12 @@ class PrometheusScraperMixin(object):
                                 'encoding=delimited'
         headers.update(self.extra_headers)
         cert = None
-        if isinstance(self.ssl_cert, basestring):
+        if isinstance(self.ssl_cert, string_types):
             cert = self.ssl_cert
-            if isinstance(self.ssl_private_key, basestring):
+            if isinstance(self.ssl_private_key, string_types):
                 cert = (self.ssl_cert, self.ssl_private_key)
         verify = True
-        if isinstance(self.ssl_ca_cert, basestring):
+        if isinstance(self.ssl_ca_cert, string_types):
             verify = self.ssl_ca_cert
         elif self.ssl_ca_cert is False:
             disable_warnings(InsecureRequestWarning)

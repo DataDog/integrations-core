@@ -67,7 +67,6 @@ class GoExpvar(AgentCheck):
 
     def _get_data(self, url, instance):
         ssl_params = {
-            'ssl': instance.get('ssl'),
             'ssl_keyfile': instance.get('ssl_keyfile'),
             'ssl_certfile': instance.get('ssl_certfile'),
             'ssl_verify': instance.get('ssl_verify'),

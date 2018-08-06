@@ -23,14 +23,15 @@ Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
 from copy import deepcopy
-from itertools import izip
-import pywintypes
 
 import pythoncom
+import pywintypes
+from six import iteritems, string_types
+from six.moves import zip
 from win32com.client import Dispatch
 
-from datadog_checks.utils.timeout import TimeoutException, timeout
 from .counter_type import UndefinedCalculator, get_calculator, get_raw
+from ....utils.timeout import TimeoutException, timeout
 
 
 class CaseInsensitiveDict(dict):
@@ -91,7 +92,7 @@ class WMISampler(object):
 
     def __init__(self, logger, class_name, property_names, filters="", host="localhost",
                  namespace="root\\cimv2", provider=None,
-                 username="", password="", and_props=[], timeout_duration=10):
+                 username="", password="", and_props=None, timeout_duration=10):
         self.logger = logger
 
         # Connection information
@@ -124,7 +125,7 @@ class WMISampler(object):
         self.class_name = class_name
         self.property_names = property_names
         self.filters = filters
-        self._and_props = and_props
+        self._and_props = and_props if and_props is not None else []
         self._timeout_duration = timeout_duration
         self._query = timeout(timeout_duration)(self._query)
 
@@ -244,8 +245,7 @@ class WMISampler(object):
 
         if self.is_raw_perf_class:
             # Format required
-            for previous_wmi_object, current_wmi_object in \
-                    izip(self._previous_sample, self._current_sample):
+            for previous_wmi_object, current_wmi_object in zip(self._previous_sample, self._current_sample):
                 formatted_wmi_object = self._format_property_values(
                     previous_wmi_object,
                     current_wmi_object
@@ -309,7 +309,7 @@ class WMISampler(object):
         """
         formatted_wmi_object = CaseInsensitiveDict()
 
-        for property_name, property_raw_value in current.iteritems():
+        for property_name, property_raw_value in iteritems(current):
             counter_type = self._property_counter_types.get(property_name)
             property_formatted_value = property_raw_value
 
@@ -378,7 +378,7 @@ class WMISampler(object):
                 if isinstance(value, tuple):
                     oper = value[0]
                     value = value[1]
-                elif isinstance(value, basestring) and '%' in value:
+                elif isinstance(value, string_types) and '%' in value:
                     oper = 'LIKE'
                 else:
                     oper = '='
@@ -398,9 +398,9 @@ class WMISampler(object):
                             bool_op = ' AND '
                             break
 
-                    clause = bool_op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) if isinstance(v,tuple)
-                                          else '{0} = \'{1}\''.format(k,v)
-                                          for k,v in internal_filter])
+                    clause = bool_op.join(['{0} {1} \'{2}\''.format(k, v[0], v[1]) if isinstance(v, tuple)
+                                          else '{0} = \'{1}\''.format(k, v)
+                                          for k, v in internal_filter])
 
                     if bool_op.strip() == 'OR':
                         wql += "( {clause} )".format(
@@ -429,13 +429,12 @@ class WMISampler(object):
                 more=build_where_clause(fltr)
             )
 
-
         if not filters:
             return ""
 
         return " WHERE {clause}".format(clause=build_where_clause(filters))
 
-    def _query(self): # pylint: disable=E0202
+    def _query(self):  # pylint: disable=E0202
         """
         Query WMI using WMI Query Language (WQL) & parse the results.
 
