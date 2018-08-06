@@ -227,7 +227,8 @@ class ZookeeperCheck(AgentCheck):
             gauge_name = 'zookeeper.instances.%s' % k
             self.gauge(gauge_name, v)
 
-    def _send_command(self, command, host, port, timeout):
+    @staticmethod
+    def _send_command(command, host, port, timeout):
         sock = socket.socket()
         sock.settimeout(timeout)
         buf = StringIO()
