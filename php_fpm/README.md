@@ -33,6 +33,7 @@ Configuration Options:
 
 * `status_url` (Required) - URL for the PHP FPM status page defined in the fpm pool config file (pm.status_path)
 * `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
+* `use_fastcgi` (Optional) - Communicate directly with PHP-FPM using FastCGI
 * `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
 * `user` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
@@ -44,27 +45,7 @@ Configuration Options:
 
 It is also possible to monitor multiple PHP-FPM pools using the same proxy server, a common scenario when running on Kubernetes.
 
-To do so, modify each instance's `php-fpm.conf`. Here is an example:
-
-Instance 1
-
-```
-...
-pm.status_path = /status1
-ping.path = /ping1
-...
-```
-
-Instance 2
-
-```
-...
-pm.status_path = /status2
-ping.path = /ping2
-...
-```
-
-Then you must modify your server's routes. Here is an example Nginx configuration:
+To do so, you can modify your server's routes to point to different PHP-FPM instances. Here is an example Nginx configuration:
 
 ```
 server {
@@ -85,6 +66,8 @@ server {
     }
 }
 ```
+
+If you find this approach too tedious at scale, setting `use_fastcgi` to `true` instructs the check to bypass any proxy servers and communicate directly with PHP-FPM using FastCGI. The default port is `9000` for when omitted from `status_url` or `ping_url`.
 
 ### Validation
 

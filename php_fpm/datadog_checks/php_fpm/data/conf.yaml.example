@@ -5,6 +5,8 @@ instances:
     status_url: http://localhost/status
     # Get a reliable service check of your FPM pool with that one
     ping_url: http://localhost/ping
+    # Communicate directly with PHP-FPM using FastCGI
+    use_fastcgi: false
     # Set the expected reply to the ping.
     ping_reply: pong
     # These 2 URLs should follow the options from your FPM pool
