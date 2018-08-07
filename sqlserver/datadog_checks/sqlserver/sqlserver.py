@@ -357,7 +357,7 @@ class SQLServer(AgentCheck):
             conn_str = 'DSN={};'.format(dsn)
 
         if driver:
-            conn_str += 'DRIVER={{}};'.format(driver)
+            conn_str += 'DRIVER={};'.format(driver)
         if host:
             conn_str += 'Server={};'.format(host)
         if database:

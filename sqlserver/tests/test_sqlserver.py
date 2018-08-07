@@ -1,80 +1,51 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
-import conftest
-from datadog_checks.sqlserver.sqlserver import SQLServer
-"""
-Runs against AppVeyor's SQLServer setups with their default configurations
-"""
-
-'''
-def test_check_no_connection(aggregator, get_config):
-    invalid_instance = {
-        'host': '(local)\SQL2012SP1',
-        'username': 'sa',
-        'password': 'InvalidPassword',
-        'timeout': 1,
-        'tags': ['optional:tag1'],
-    }
-    get_config['instances'] = invalid_instance
-    sqlserver_check = SQLServer(conftest.CHECK_NAME, get_config, {}, [invalid_instance])
-    sqlserver_check.check(invalid_instance)
-
-    with pytest.raises(Exception) as excinfo:
-        sqlserver_check.check(invalid_instance)
-    assert excinfo.value.args[0] == 'Unable to connect to SQL Server'
-    aggregator.assert_service_checkl('sqlserver.can_connect', status=sqlserver_check.CRITICAL,
-                                     tags=['host:(local)\SQL2012SP1', 'db:master', 'optional:tag1'])
-'''
+from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
 
-def test_check_2012(aggregator, get_sql2012_instance):
-    sqlserver_check = SQLServer(conftest.CHECK_NAME, {}, {}, [get_sql2012_instance])
-    sqlserver_check.check(get_sql2012_instance)
+CHECK_NAME = 'sqlserver'
+EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS]
 
-    # Make sure ALL custom metric is tagged by database
+
+@pytest.mark.docker
+def test_check_invalid_password(aggregator, init_config, instance_docker, sqlserver):
+    instance_docker['password'] = 'FOO'
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+
+    with pytest.raises(SQLConnectionError) as excinfo:
+        sqlserver_check.check(instance_docker)
+        assert excinfo.value.args[0] == 'Unable to connect to SQL Server'
+    aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.CRITICAL,
+                                    tags=['host:localhost,1433', 'db:master', 'optional:tag1'])
+
+
+@pytest.mark.docker
+def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+    sqlserver_check.check(instance_docker)
+    expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
+    _assert_metrics(aggregator, expected_tags)
+
+
+def test_check_2017(aggregator, init_config, instance_2017):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_2017])
+    sqlserver_check.check(instance_2017)
+    expected_tags = instance_2017.get('tags', []) + ['host:(local)\SQL2017', 'db:master']
+    _assert_metrics(aggregator, expected_tags)
+
+
+def _assert_metrics(aggregator, expected_tags):
+    """
+    Boilerplate asserting all the expected metrics and service checks.
+    Make sure ALL custom metric is tagged by database.
+    """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
-    custom_tags = get_sql2012_instance.get('tags', [])
-    expected_tags = custom_tags + ['host:{}'.format(get_sql2012_instance.get('host')), 'db:master']
-    for mname in conftest.EXPECTED_METRICS:
+    for mname in EXPECTED_METRICS:
         aggregator.assert_metric(mname, count=1)
-    aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.OK, tags=expected_tags)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
     aggregator.assert_all_metrics_covered
-
-
-'''
-
-    @attr('fixme')
-    def test_check_2008(self):
-        config = copy.deepcopy(CONFIG)
-        config['instances'] = [SQL2008_INSTANCE]
-        self._test_check(config)
-
-    def test_check_2012(self):
-        config = copy.deepcopy(CONFIG)
-        config['instances'] = [SQL2012_INSTANCE]
-        self._test_check(config)
-
-    @attr('fixme')
-    def test_check_2014(self):
-        config = copy.deepcopy(CONFIG)
-        config['instances'] = [SQL2014_INSTANCE]
-        self._test_check(config)
-
-'''
-
-'''
-def test_check_linux(aggregator, spin_up_sqlserver, get_linux_instance):
-    sqlserver_check = SQLServer(conftest.CHECK_NAME, {}, {}, [get_linux_instance])
-    sqlserver_check.check(get_linux_instance)
-
-    # Make sure ALL custom metric is tagged by database
-    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
-    custom_tags = get_linux_instance.get('tags', [])
-    expected_tags = custom_tags + ['host:{}'.format(get_linux_instance.get('host')), 'db:master']
-    for mname in conftest.EXPECTED_METRICS:
-        aggregator.assert_metric(mname, count=1)
-    aggregator.assert_service_check('sqlserver.can_connect', status=sqlserver_check.OK, tags=expected_tags)
-    aggregator.assert_all_metrics_covered
-'''
