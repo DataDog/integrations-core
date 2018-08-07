@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 import logging
-import os
 import re
 import json
 import copy
