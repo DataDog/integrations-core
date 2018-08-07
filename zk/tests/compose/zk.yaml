@@ -3,7 +3,5 @@ version: '3.5'
 services:
   zk:
     image: "zookeeper:${ZK_VERSION}"
-    environment:
-      - "ZOO_TICK_TIME=2000"
     ports:
       - "12181:2181"
