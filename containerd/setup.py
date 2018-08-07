@@ -46,9 +46,6 @@ setup(
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
 
-    setup_requires=['pytest-runner', ],
-    tests_require=[CHECKS_BASE_REQ],
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
