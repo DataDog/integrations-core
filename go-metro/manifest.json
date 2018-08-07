@@ -8,7 +8,7 @@
   "guid": "6d00688b-32b1-4755-98cd-44bd1bd40428",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.1.1",
+  "manifest_version": "1.0.0",
   "metric_prefix": "system.",
   "metric_to_check": "system.net.tcp.rtt",
   "name": "go-metro",
