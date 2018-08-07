@@ -103,7 +103,7 @@ def sqlserver():
     def condition():
         sys.stderr.write("Waiting for SQLServer to boot...\n")
         booted = False
-        for _ in xrange(5):
+        for _ in xrange(10):
             try:
                 pyodbc.connect(conn, timeout=30)
                 booted = True
