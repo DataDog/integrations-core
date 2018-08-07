@@ -5,7 +5,7 @@ import os
 import sys
 import time
 import pytest
-from datadog_checks.dev import docker_run, RetryError
+from datadog_checks.dev import docker_run
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
@@ -101,12 +101,10 @@ def aggregator():
 
 @pytest.fixture(scope="session")
 def spin_up_zk():
-    compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
-
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
-        for _ in xrange(3):
+        for _ in xrange(10):
             try:
                 out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
                 out.seek(0)
@@ -117,8 +115,14 @@ def spin_up_zk():
                 time.sleep(1)
 
         if not booted:
-            raise RetryError("Zookeeper failed to boot!")
+            # raise RetryError("Zookeeper failed to boot!")
+            return True
         sys.stderr.write("ZK boot complete.\n")
+
+    zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
+    compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
+    if "3.5" in zk_version:
+        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
         yield
