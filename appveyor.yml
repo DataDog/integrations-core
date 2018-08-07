@@ -25,6 +25,7 @@ services:
   - iis
   # - mssql2008r2sp2 # FIXME: re-enable when we can launch multiple mssql instances at once
   - mssql2012sp1
+  - mssql2017
   # - mssql2014 # FIXME: re-enable when we can launch multiple mssql instances at once
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
