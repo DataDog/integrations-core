@@ -37,4 +37,4 @@ mv $LATEST_TAG_LINK $LINK_DIR/$TIMESTAMP.$LATEST_TAG_LINK
 git add $LINK_DIR/$TIMESTAMP.$LATEST_TAG_LINK
 
 # Commit it to the git repo.
-git commit -m "Add latest tag link metadata."
+git commit -S -m "Add latest tag link metadata."
