@@ -3,11 +3,8 @@
 # Bail on failure.
 set -e -x
 
-# Get the email address associated with the GPG key.
-GPG_EMAIL=trishank.kuppusamy@datadoghq.com
-
-# Get the GPG keyid associated with exactly the given email address.
-KEYID=$(gpg --fingerprint --with-colon "<$GPG_EMAIL>" | grep '^pub' | cut -d: -f5)
+# Get the keyid of the GPG key on Yubikey.
+KEYID=$(gpg --card-status | grep 'sec>' | awk '{print $2}' | cut -f2 -d/)
 
 # The fixed, hidden directory in the git repo where link metadata are kept.
 LINK_DIR=.links
