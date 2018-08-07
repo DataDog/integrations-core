@@ -1,5 +1,11 @@
 # CHANGELOG - pgbouncer
 
+## 1.3.0 / 2018-08-07
+
+* [Added] Add the ability to specify 'use_cached' connections in config. See [#2000](https://github.com/DataDog/integrations-core/pull/2000). Thanks [kellydunn](https://github.com/kellydunn).
+* [Changed] Rename dependency psycopg2 to pyscopg2-binary. See [#1842](https://github.com/DataDog/integrations-core/pull/1842).
+* [Changed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+
 ## 1.2.1 / 2018-06-07
 
 * [Security] Update psycopg2 for security fixes. See [#1538](https://github.com/DataDog/integrations-core/pull/1538).
