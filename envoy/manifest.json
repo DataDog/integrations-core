@@ -13,7 +13,7 @@
   "metric_to_check": "envoy.stats.overflow",
   "name": "envoy",
   "public_title": "Datadog-Envoy Integration",
-  "short_description": "Envoy is an open source edge and service proxy, designed for cloud-native applications.",
+  "short_description": "Envoy is an open source edge and service proxy",
   "support": "core",
   "supported_os": [
     "linux",

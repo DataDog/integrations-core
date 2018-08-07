@@ -18,5 +18,5 @@
   "supported_os": [
     "linux"
   ],
-  "type": "check",
+  "type": "check"
 }

@@ -15,7 +15,7 @@
   "metric_prefix": "vault.",
   "name": "vault",
   "public_title": "Datadog-Vault Integration",
-  "short_description": "Vault is a tool for secrets management, encryption as a service, and privileged access management.",
+  "short_description": "Vault is a secrets management service application",
   "support": "core",
   "supported_os": [
     "linux",
