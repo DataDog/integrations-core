@@ -7,6 +7,7 @@ import psycopg2 as pg
 import psycopg2.extras as pgextras
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
 from datadog_checks.errors import CheckException
 
 
@@ -206,7 +207,7 @@ class PgBouncer(AgentCheck):
         password = instance.get('password', '')
         tags = instance.get('tags', [])
         database_url = instance.get('database_url')
-        use_cached = instance.get('use_cached', True)
+        use_cached = is_affirmative(instance.get('use_cached', True))
 
         if database_url:
             key = database_url
