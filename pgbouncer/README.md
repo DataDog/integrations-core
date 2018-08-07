@@ -18,20 +18,24 @@ To capture PGBouncer metrics you need to install the Datadog Agent on your PGBou
     ```
     CREATE USER datadog WITH PASSWORD '<YOUR_PASSWORD>';
     GRANT SELECT ON pg_stat_database TO datadog;
+    ```
 
+    Check if the datadog user has been correctly created with this command:
+    
+    ```
     psql -h localhost -U datadog postgres -c "SELECT * FROM pg_stat_database LIMIT(1);"  <br/> && \
     echo -e "\e[0;32mPostgres connection - OK\e[0m" || \ ||  <br/>echo -e "\e[0;31mCannot connect to Postgres\e[0m"
     ```
 
-    When prompted for a password, enter your `<YOUR_PASSWORD`.
+    When prompted for a password, enter your `<YOUR_PASSWORD>`.
 
-2. In your PGBouncer userlist.txt file add:
+2. In your PGBouncer `userlist.txt` file add:
   
     ```
-      "datadog" "<YOUR_PASSWORD>"
+    "datadog" "<YOUR_PASSWORD>"
     ```
 
-3. In your PGBouncer pgbouncer.ini file add `datadog` as `stats_user`​ or `admin_user`, for example:
+3. In your PGBouncer `pgbouncer.ini` file add `datadog` as `stats_user`​ or `admin_user`, for example:
 
     ```
     stats_users = datadog
