@@ -27,10 +27,10 @@ psycopg2-binary==2.7.4
 pyasn1==0.4.2
 pycparser==2.18
 pycryptodomex==3.4.7
-pymongo==3.5.1
+pymongo==3.7.1
 pymysql==0.8.0
 pyodbc==4.0.13; sys_platform == 'win32'
-pyro4==4.36; sys_platform == 'win32'
+pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
