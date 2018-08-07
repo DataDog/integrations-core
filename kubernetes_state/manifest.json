@@ -1,23 +1,23 @@
 {
+  "categories": [
+    "orchestration",
+    "containers"
+  ],
+  "creates_events": false,
+  "display_name": "Kubernetes State",
+  "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "kubernetes_state",
-  "display_name": "Kubernetes State",
-  "creates_events": false,
+  "metric_prefix": "kubernetes_state.",
   "metric_to_check": "kubernetes_state.container.running",
+  "name": "kubernetes_state",
+  "public_title": "Datadog-Kubernetes State Integration",
   "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and more.",
-  "guid": "fa0e4395-3eae-4df8-88f2-9d7075c21a2d",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "public_title": "Datadog-Kubernetes State Integration",
-  "categories": [
-    "orchestration",
-    "containers"
-  ],
-  "type": "check",
-  "metric_prefix": "kubernetes_state.",
-  "is_public": true
+  "type": "check"
 }

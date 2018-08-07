@@ -1,20 +1,20 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": true,
+  "display_name": "Win32",
+  "guid": "b04d6f04-947c-4068-b73d-f861adc39959",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "win32_event_log.",
   "name": "win32_event_log",
-  "display_name": "Win32",
+  "public_title": "Datadog-Win 32 event log Integration",
   "short_description": "Send Windows events to your Datadog event stream.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "guid": "b04d6f04-947c-4068-b73d-f861adc39959",
-  "public_title": "Datadog-Win 32 event log Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "metric_prefix": "win32_event_log.",
-  "is_public": true,
-  "creates_events": true
+  "type": "check"
 }

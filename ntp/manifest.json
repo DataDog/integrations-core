@@ -1,8 +1,18 @@
 {
+  "categories": [
+    "web",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "NTP",
+  "guid": "9d105f8c-7fd3-48d7-a5d1-1cc386ec0367",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "ntp.",
+  "metric_to_check": "ntp.offset",
   "name": "ntp",
-  "display_name": "NTP",
+  "public_title": "Datadog-NTP Integration",
   "short_description": "Get alerts when your hosts drift out of sync with your chosen NTP server.",
   "support": "core",
   "supported_os": [
@@ -10,11 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "9d105f8c-7fd3-48d7-a5d1-1cc386ec0367",
-  "public_title": "Datadog-NTP Integration",
-  "categories":["web", "network"],
-  "type":"check",
-  "metric_prefix": "ntp.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

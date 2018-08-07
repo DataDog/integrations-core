@@ -1,8 +1,17 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "System Swap",
+  "guid": "4b3dcc12-7bc9-474a-960f-14680eb587a3",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "system.",
+  "metric_to_check": "system.swap.swapped_in",
   "name": "system_swap",
-  "display_name": "System Swap",
+  "public_title": "Datadog-System Swap Integration",
   "short_description": "Adds some optional swap memory checks.",
   "support": "core",
   "supported_os": [
@@ -10,13 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "4b3dcc12-7bc9-474a-960f-14680eb587a3",
-  "public_title": "Datadog-System Swap Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "metric_prefix": "system.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

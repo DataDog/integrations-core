@@ -1,8 +1,17 @@
 {
+  "categories": [
+    "web"
+  ],
+  "creates_events": false,
+  "display_name": "Twemproxy",
+  "guid": "a5cca58a-9984-4226-ad1c-8dff73c9d6ac",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "twemproxy.",
+  "metric_to_check": "twemproxy.total_connections",
   "name": "twemproxy",
-  "display_name": "Twemproxy",
+  "public_title": "Datadog-Twemproxy Integration",
   "short_description": "Visualize twemproxy performance and correlate with the rest of your applications",
   "support": "core",
   "supported_os": [
@@ -10,13 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "a5cca58a-9984-4226-ad1c-8dff73c9d6ac",
-  "public_title": "Datadog-Twemproxy Integration",
-  "categories": [
-    "web"
-  ],
-  "type": "check",
-  "metric_prefix": "twemproxy.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

@@ -1,10 +1,17 @@
 {
+  "categories": [
+    "processing"
+  ],
+  "creates_events": false,
+  "display_name": "MapReduce",
+  "guid": "1c143492-84ac-42d2-89d5-a45c718092b0",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "mapreduce",
-  "display_name": "MapReduce",
-  "creates_events": false,
+  "metric_prefix": "mapreduce.",
   "metric_to_check": "mapreduce.job.elapsed_time.avg",
+  "name": "mapreduce",
+  "public_title": "Datadog-Map Reduce Integration",
   "short_description": "Monitor the status and duration of map and reduce tasks.",
   "support": "core",
   "supported_os": [
@@ -12,10 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "1c143492-84ac-42d2-89d5-a45c718092b0",
-  "public_title": "Datadog-Map Reduce Integration",
-  "categories":["processing"],
-  "type":"check",
-  "metric_prefix": "mapreduce.",
-  "is_public": true
+  "type": "check"
 }

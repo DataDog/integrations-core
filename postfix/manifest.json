@@ -1,21 +1,22 @@
 {
+  "categories": [
+    "Collaboration"
+  ],
+  "creates_events": false,
+  "display_name": "Postfix",
+  "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "postfix.",
+  "metric_to_check": "postfix.queue.size",
   "name": "postfix",
-  "display_name": "Postfix",
+  "public_title": "Datadog-Postfix Integration",
   "short_description": "Monitor the size of all your Postfix queues.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "guid": "7f03c5b7-ee54-466e-8854-5896d62c82b4",
-  "public_title": "Datadog-Postfix Integration",
-  "categories": [
-    "Collaboration"
-  ],
-  "type": "check",
-  "metric_prefix": "postfix.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

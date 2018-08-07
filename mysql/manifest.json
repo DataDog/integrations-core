@@ -1,25 +1,25 @@
 {
-  "manifest_version": "1.0.0",
+  "categories": [
+    "data store",
+    "log collection"
+  ],
   "creates_events": false, // set to true in dogweb
-  "name": "MySQL",
+  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
   "display_name": "MySQL",
+  "guid": "056bfc7f-4775-4581-9442-502078593d10",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "mysql.",
   "metric_to_check": "mysql.replication.slaves_connected",
+  "name": "MySQL",
+  "public_title": "Datadog-MySQL Integration",
+  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "maintainer": "help@datadoghq.com",
-  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
-  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
-  "guid": "056bfc7f-4775-4581-9442-502078593d10",
-  "public_title": "Datadog-MySQL Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "metric_prefix": "mysql.",
-  "is_public": true
+  "type": "check"
 }

@@ -1,10 +1,17 @@
 {
+  "categories": [
+    "processing"
+  ],
+  "creates_events": false,
+  "display_name": "Spark",
+  "guid": "f7a5a40f-f73c-465a-be8f-b2b371c706a2",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "spark",
-  "display_name": "Spark",
-  "creates_events": false,
+  "metric_prefix": "spark.",
   "metric_to_check": "spark.job.count",
+  "name": "spark",
+  "public_title": "Datadog-Spark Integration",
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
   "supported_os": [
@@ -12,12 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "f7a5a40f-f73c-465a-be8f-b2b371c706a2",
-  "public_title": "Datadog-Spark Integration",
-  "categories": [
-    "processing"
-  ],
-  "type": "check",
-  "metric_prefix": "spark.",
-  "is_public": true
+  "type": "check"
 }

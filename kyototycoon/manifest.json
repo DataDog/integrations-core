@@ -1,8 +1,17 @@
 {
+  "categories": [
+    "data store"
+  ],
+  "creates_events": false,
+  "display_name": "Kyoto Tycoon",
+  "guid": "2661668b-d804-4c8d-96a7-8019525add8c",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "kyototycoon.",
+  "metric_to_check": "kyototycoon.serv_conn_count",
   "name": "kyototycoon",
-  "display_name": "Kyoto Tycoon",
+  "public_title": "Datadog-Kyoto Tycoon Integration",
   "short_description": "Track get, set, and delete operations; monitor replication lag.",
   "support": "core",
   "supported_os": [
@@ -10,11 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "2661668b-d804-4c8d-96a7-8019525add8c",
-  "public_title": "Datadog-Kyoto Tycoon Integration",
-  "categories":["data store"],
-  "type":"check",
-  "metric_prefix": "kyototycoon.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

@@ -1,20 +1,21 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "Nfsstat",
+  "guid": "9f2fe3a7-ae19-4da9-a253-ae817a5557ab",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "system.",
+  "metric_to_check": "system.nfs.ops",
   "name": "nfsstat",
-  "display_name": "Nfsstat",
+  "public_title": "Datadog-Nfsstat Integration",
   "short_description": "nfsstat gets nfsiostat-sysstat metrics.",
-  "guid": "9f2fe3a7-ae19-4da9-a253-ae817a5557ab",
   "support": "core",
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-Nfsstat Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "metric_prefix": "system.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

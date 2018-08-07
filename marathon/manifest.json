@@ -1,20 +1,23 @@
 {
+  "categories": [
+    "configuration & deployment",
+    "containers"
+  ],
+  "creates_events": false,
+  "display_name": "Marathon",
+  "guid": "6af353ff-ecca-420a-82c0-a0e84cf0a35e",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "marathon",
-  "display_name": "Marathon",
-  "creates_events": false,
+  "metric_prefix": "marathon.",
   "metric_to_check": "marathon.cpus",
+  "name": "marathon",
+  "public_title": "Datadog-Marathon Integration",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "guid": "6af353ff-ecca-420a-82c0-a0e84cf0a35e",
-  "public_title": "Datadog-Marathon Integration",
-  "categories":["configuration & deployment", "containers"],
-  "type":"check",
-  "metric_prefix": "marathon.",
-  "is_public": true
+  "type": "check"
 }

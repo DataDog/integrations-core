@@ -1,8 +1,21 @@
 {
+  "aliases": [
+    "/integrations/goexpvar"
+  ],
+  "categories": [
+    "languages",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "Go-Expvar",
+  "guid": "33557f7a-5f24-43f3-9551-78432894e539",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "go_expvar.",
+  "metric_to_check": "go_expvar.memstats.alloc",
   "name": "go_expvar",
-  "display_name": "Go-Expvar",
+  "public_title": "Datadog-Go-Expvar Integration",
   "short_description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
   "support": "core",
   "supported_os": [
@@ -10,17 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "33557f7a-5f24-43f3-9551-78432894e539",
-  "public_title": "Datadog-Go-Expvar Integration",
-  "categories": [
-    "languages",
-    "log collection"
-  ],
-  "type": "check",
-  "metric_prefix": "go_expvar.",
-  "is_public": true,
-  "creates_events": false,
-  "aliases": [
-    "/integrations/goexpvar"
-  ]
+  "type": "check"
 }

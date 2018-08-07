@@ -1,8 +1,18 @@
 {
+  "categories": [
+    "monitoring",
+    "notification",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "SNMP",
+  "guid": "080bb566-d1c8-428c-9d85-71cc2cdf393c",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "snmp.",
   "name": "snmp",
-  "display_name": "SNMP",
+  "public_title": "Datadog-SNMP Integration",
   "short_description": "Collect SNMP metrics from your network devices.",
   "support": "core",
   "supported_os": [
@@ -10,15 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "080bb566-d1c8-428c-9d85-71cc2cdf393c",
-  "public_title": "Datadog-SNMP Integration",
-  "categories": [
-    "monitoring",
-    "notification",
-    "network"
-  ],
-  "type": "check",
-  "metric_prefix": "snmp.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

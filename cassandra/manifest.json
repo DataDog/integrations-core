@@ -1,10 +1,18 @@
 {
+  "categories": [
+    "data store",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "Cassandra",
+  "guid": "03ba454d-425c-4f61-9e9c-54682c3ebce5",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "cassandra",
-  "display_name": "Cassandra",
-  "creates_events": false,
+  "metric_prefix": "cassandra.",
   "metric_to_check": "cassandra.max_row_size",
+  "name": "cassandra",
+  "public_title": "Datadog-Cassandra Integration",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",
   "support": "core",
   "supported_os": [
@@ -12,10 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "03ba454d-425c-4f61-9e9c-54682c3ebce5",
-  "public_title": "Datadog-Cassandra Integration",
-  "categories":["data store", "log collection"],
-  "type":"check",
-  "metric_prefix": "cassandra.",
-  "is_public": true
+  "type": "check"
 }

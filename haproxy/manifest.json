@@ -1,25 +1,25 @@
 {
-  "manifest_version": "1.0.0",
-  "name": "haproxy",
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "creates_events": true,
+  "description": "The HAProxy integration helps to collect performance and availability metrics from HAProxy instances.",
   "display_name": "HAProxy",
-  "support": "core",
+  "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "haproxy.",
+  "metric_to_check": "haproxy.frontend.bytes.in_rate",
+  "name": "haproxy",
+  "public_title": "Datadog-HAProxy Integration",
+  "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "short_description": "Monitor key metrics for requests, responses, errors, bytes served, and more.",
-  "description": "The HAProxy integration helps to collect performance and avaialbility metrics from HAProxy instances.",
-  "guid": "cd935030-131f-4545-8b6a-a4ca21b8565b",
-  "public_title": "Datadog-HAProxy Integration",
-  "categories": [
-    "web",
-    "log collection"
-  ],
-  "type": "check",
-  "metric_prefix": "haproxy.",
-  "is_public": true,
-  "creates_events": true,
-  "metric_to_check": "haproxy.frontend.bytes.in_rate"
+  "type": "check"
 }

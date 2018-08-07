@@ -1,28 +1,28 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "mesos_master",
-  "display_name": "Mesos Master",
-  "creates_events": false,
-  "metric_to_check": "mesos.framework.cpu",
-  "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
+  "aliases": [
+    "/integrations/mesos/"
   ],
-  "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc",
-  "public_title": "Datadog-Mesos Master Integration",
   "categories": [
     "configuration & deployment",
     "containers",
     "orchestration",
     "log collection"
   ],
-  "type": "check",
-  "metric_prefix": "mesos.",
+  "creates_events": false,
+  "display_name": "Mesos Master",
+  "guid": "f807f479-33f6-4c45-9c11-04ee2473acdc",
   "is_public": true,
-  "aliases": [
-    "/integrations/mesos/"
-  ]
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "mesos.",
+  "metric_to_check": "mesos.framework.cpu",
+  "name": "mesos_master",
+  "public_title": "Datadog-Mesos Master Integration",
+  "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
+  "type": "check"
 }

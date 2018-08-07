@@ -1,26 +1,26 @@
 {
+  "aliases": [
+    "/integrations/memcached"
+  ],
+  "categories": [
+    "web",
+    "caching"
+  ],
+  "creates_events": false,
+  "display_name": "Memcached",
+  "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "mcache",
-  "display_name": "Memcached",
-  "creates_events": false,
+  "metric_prefix": "memcache.",
   "metric_to_check": "memcache.bytes",
+  "name": "mcache",
+  "public_title": "Datadog-Memcache Integration",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "guid": "b1c4033c-bf96-4456-be63-e74ff171f991",
-  "public_title": "Datadog-Memcache Integration",
-  "categories": [
-    "web",
-    "caching"
-  ],
-  "type": "check",
-  "metric_prefix": "memcache.",
-  "is_public": true,
-  "aliases": [
-    "/integrations/memcached"
-  ]
+  "type": "check"
 }

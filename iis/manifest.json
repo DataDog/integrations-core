@@ -1,22 +1,22 @@
 {
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "IIS",
+  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "iis",
-  "display_name": "IIS",
-  "creates_events": false,
+  "metric_prefix": "iis.",
   "metric_to_check": "iis.uptime",
+  "name": "iis",
+  "public_title": "Datadog-IIS Integration",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "guid": "6ad932f0-8816-467a-8860-72af44d4f3ba",
-  "public_title": "Datadog-IIS Integration",
-  "categories": [
-    "web",
-    "log collection"
-  ],
-  "type": "check",
-  "metric_prefix": "iis.",
-  "is_public": true
+  "type": "check"
 }

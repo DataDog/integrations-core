@@ -1,9 +1,17 @@
 {
+  "categories": [
+    "data store"
+  ],
+  "creates_events": true, // set to False in dogweb/integration/couchbase/config.py
+  "display_name": "Couchbase",
+  "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "display_name": "Couchbase",
-  "name": "couchbase",
+  "metric_prefix": "couchbase.",
   "metric_to_check": "couchbase.ram.used",
+  "name": "couchbase",
+  "public_title": "Datadog-CouchBase Integration",
   "short_description": "Track and graph your Couchbase activity and performance metrics.",
   "support": "core",
   "supported_os": [
@@ -11,11 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
-  "public_title": "Datadog-CouchBase Integration",
-  "categories":["data store"],
-  "type":"check",
-  "metric_prefix": "couchbase.",
-  "creates_events": true, // set to False in dogweb/integration/couchbase/config.py
-  "is_public": true
+  "type": "check"
 }

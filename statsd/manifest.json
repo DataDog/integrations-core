@@ -1,8 +1,16 @@
 {
+  "categories": [
+    "monitoring"
+  ],
+  "creates_events": false,
+  "display_name": "StatsD",
+  "guid": "4830acf3-626b-42ff-a1db-3f37babd0ae6",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "statsd.",
   "name": "statsd",
-  "display_name": "StatsD",
+  "public_title": "Datadog-StatsD Integration",
   "short_description": "Monitor the availability of StatsD servers and track metric counts.",
   "support": "core",
   "supported_os": [
@@ -10,13 +18,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "4830acf3-626b-42ff-a1db-3f37babd0ae6",
-  "public_title": "Datadog-StatsD Integration",
-  "categories": [
-    "monitoring"
-  ],
-  "type": "check",
-  "metric_prefix": "statsd.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

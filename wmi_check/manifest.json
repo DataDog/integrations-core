@@ -1,23 +1,23 @@
 {
+  "aliases": [
+    "/integrations/wmi"
+  ],
+  "categories": [
+    "monitoring"
+  ],
+  "creates_events": false,
+  "display_name": "WMI",
+  "guid": "d70f5c68-873d-436e-bddb-dbb3e107e3b5",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "wmi.",
   "name": "wmi_check",
-  "display_name": "WMI",
+  "public_title": "Datadog-WMI Check Integration",
   "short_description": "Collect and graph any WMI metrics.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "guid": "d70f5c68-873d-436e-bddb-dbb3e107e3b5",
-  "public_title": "Datadog-WMI Check Integration",
-  "categories": [
-    "monitoring"
-  ],
-  "type": "check",
-  "metric_prefix": "wmi.",
-  "is_public": true,
-  "creates_events": false,
-  "aliases": [
-    "/integrations/wmi"
-  ]
+  "type": "check"
 }

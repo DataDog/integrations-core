@@ -1,8 +1,18 @@
 {
+  "categories": [
+    "web",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "Network",
+  "guid": "43631795-8a1f-404d-83ae-397639a84050",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "system.",
+  "metric_to_check": "system.net.bytes_rcvd",
   "name": "network",
-  "display_name": "Network",
+  "public_title": "Datadog-Network Integration",
   "short_description": "Track bytes and packets in/out, connection states, round trip times, and more.",
   "support": "core",
   "supported_os": [
@@ -10,14 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "43631795-8a1f-404d-83ae-397639a84050",
-  "public_title": "Datadog-Network Integration",
-  "categories": [
-    "web",
-    "network"
-  ],
-  "type": "check",
-  "metric_prefix": "system.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

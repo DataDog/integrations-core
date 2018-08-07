@@ -1,8 +1,17 @@
 {
+  "categories": [
+    "web"
+  ],
+  "creates_events": false,
+  "display_name": "Lighttpd",
+  "guid": "01dcfe7a-7a56-4388-a388-799ee6daaaab",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "lighttpd.",
+  "metric_to_check": "lighttpd.net.bytes",
   "name": "lighttpd",
-  "display_name": "Lighttpd",
+  "public_title": "Datadog-Lighttpd Integration",
   "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
   "support": "core",
   "supported_os": [
@@ -10,11 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "01dcfe7a-7a56-4388-a388-799ee6daaaab",
-  "public_title": "Datadog-Lighttpd Integration",
-  "categories":["web"],
-  "type":"check",
-  "metric_prefix": "lighttpd.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

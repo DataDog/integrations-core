@@ -1,21 +1,24 @@
 {
-  "manifest_version": "1.0.0",
-  "name": "squid",
+  "categories": [
+    "web",
+    "caching"
+  ],
+  "creates_events": false,
   "display_name": "Squid",
-  "short_description": "Track metrics from your squid-cache servers with Datadog",
   "guid": "e7d4b233-b32a-46f9-8cb2-c582ee8fd251",
-  "support": "core",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "squid.",
+  "metric_to_check": "squid.cpu_time",
+  "name": "squid",
+  "public_title": "Datadog-Squid Integration",
+  "short_description": "Track metrics from your squid-cache servers with Datadog",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "metric_prefix": "squid.",
-  "metric_to_check": "squid.cpu_time",
-  "public_title": "Datadog-Squid Integration",
-  "categories": ["web", "caching"],
-  "type": "check",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

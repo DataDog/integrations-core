@@ -1,10 +1,21 @@
 {
+  "aliases": [
+    "/integrations/powerdns"
+  ],
+  "categories": [
+    "web",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "PowerDNS",
+  "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "powerdns_recursor",
-  "display_name": "PowerDNS",
-  "creates_events": false,
+  "metric_prefix": "powerdns.",
   "metric_to_check": "powerdns.recursor.cache_entries",
+  "name": "powerdns_recursor",
+  "public_title": "Datadog-Power DNS Recursor Integration",
   "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",
   "support": "core",
   "supported_os": [
@@ -12,11 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "ae533b67-a2af-45ce-8e23-235acb3a3893",
-  "public_title": "Datadog-Power DNS Recursor Integration",
-  "categories":["web", "network"],
-  "type":"check",
-  "metric_prefix": "powerdns.",
-  "is_public": true,
-  "aliases":["/integrations/powerdns"]
+  "type": "check"
 }

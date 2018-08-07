@@ -1,20 +1,23 @@
 {
+  "categories": [
+    "data store"
+  ],
+  "creates_events": false,
+  "display_name": "PGBouncer",
+  "guid": "51386802-4502-4991-b592-27eff1ca111c",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "pgbouncer.",
+  "metric_to_check": "pgbouncer.stats.transactions_per_second",
   "name": "pgbouncer",
-  "display_name": "PGBouncer",
+  "package_deps": false,
+  "public_title": "Datadog-PGBouncer Integration",
   "short_description": "Track connection pool metrics and monitor traffic to and from your application.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "package_deps": false,
-  "guid": "51386802-4502-4991-b592-27eff1ca111c",
-  "public_title": "Datadog-PGBouncer Integration",
-  "categories":["data store"],
-  "type":"check",
-  "metric_prefix": "pgbouncer.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

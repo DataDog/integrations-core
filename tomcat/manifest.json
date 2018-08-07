@@ -1,10 +1,18 @@
 {
+  "categories": [
+    "web",
+    "log collection"
+  ],
+  "creates_events": false,
+  "display_name": "Tomcat",
+  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "tomcat",
-  "display_name": "Tomcat",
-  "creates_events": false,
+  "metric_prefix": "tomcat.",
   "metric_to_check": "tomcat.threads.max",
+  "name": "tomcat",
+  "public_title": "Datadog-Tomcat Integration",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",
   "support": "core",
   "supported_os": [
@@ -12,10 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "60f37d34-3bb7-43c9-9b52-2659b8898997",
-  "public_title": "Datadog-Tomcat Integration",
-  "categories":["web", "log collection"],
-  "type":"check",
-  "metric_prefix": "tomcat.",
-  "is_public": true
+  "type": "check"
 }

@@ -1,8 +1,17 @@
 {
+  "categories": [
+    "processing",
+    "messaging"
+  ],
+  "creates_events": false,
+  "display_name": "ActiveMQ",
+  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "activemq.",
   "name": "activemq",
-  "display_name": "ActiveMQ",
+  "public_title": "Datadog-ActiveMQ Integration",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [
@@ -10,11 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
-  "public_title": "Datadog-ActiveMQ Integration",
-  "categories":["processing", "messaging"],
-  "type":"check",
-  "metric_prefix": "activemq.",
-  "is_public": true,
-  "creates_events": false
+  "type": "check"
 }

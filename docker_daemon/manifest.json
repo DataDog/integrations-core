@@ -1,26 +1,26 @@
 {
+  "aliases": [
+    "/integrations/docker"
+  ],
+  "categories": [
+    "containers",
+    "log collection"
+  ],
+  "creates_events": true,
+  "display_name": "Docker",
+  "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "docker_daemon",
-  "display_name": "Docker",
-  "creates_events": true,
+  "metric_prefix": "docker.",
   "metric_to_check": "docker.cpu.usage",
+  "name": "docker_daemon",
+  "public_title": "Datadog-Docker Integration",
   "short_description": "Correlate container performance with that of the services running inside them.",
-  "guid": "08ee2733-0441-4438-8af8-e2f6fb926772",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "public_title": "Datadog-Docker Integration",
-  "categories": [
-    "containers",
-    "log collection"
-  ],
-  "type": "check",
-  "metric_prefix": "docker.",
-  "is_public": true,
-  "aliases": [
-    "/integrations/docker"
-  ]
+  "type": "check"
 }

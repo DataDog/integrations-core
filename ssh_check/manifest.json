@@ -1,8 +1,19 @@
 {
+  "aliases": [
+    "/integrations/ssh"
+  ],
+  "categories": [
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "SSH",
+  "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "ssh.",
   "name": "ssh_check",
-  "display_name": "SSH",
+  "public_title": "Datadog-SSH Check Integration",
   "short_description": "Monitor SSH connectivity and SFTP latency.",
   "support": "core",
   "supported_os": [
@@ -10,16 +21,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "4eb195ef-554f-4cc2-80af-8f286c631fa8",
-  "public_title": "Datadog-SSH Check Integration",
-  "categories": [
-    "network"
-  ],
-  "type": "check",
-  "metric_prefix": "ssh.",
-  "is_public": true,
-  "creates_events": false,
-  "aliases": [
-    "/integrations/ssh"
-  ]
+  "type": "check"
 }
