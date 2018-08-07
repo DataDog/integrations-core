@@ -87,14 +87,17 @@ class PodListUtils(object):
         self.containers = {}
         self.static_pod_uids = set()
         self.cache = {}
-        self.pod_uid_by_name_hash = {}
+        self.pod_uid_by_name_tuple = {}
+        self.container_id_by_name_tuple = {}
 
         pods = podlist.get('items') or []
 
         for pod in pods:
             metadata = pod.get("metadata", {})
             uid = metadata.get("uid")
-            self.pod_uid_by_name_hash[metadata.get("namespace") + "." + metadata.get("name")] = uid
+            namespace = metadata.get("namespace")
+            pod_name = metadata.get("name")
+            self.pod_uid_by_name_tuple[(namespace, pod_name)] = uid
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -106,22 +109,26 @@ class PodListUtils(object):
                 if not cid:
                     continue
                 self.containers[cid] = ctr
-                if "://" in cid:
-                    # cAdvisor pushes cids without orchestrator scheme
-                    # re-register without the scheme
-                    short_cid = cid.split("://", 1)[-1]
-                    self.containers[short_cid] = ctr
+                self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
 
-    def get_uid_by_namespace(self, namespace, name):
+    def get_uid_by_name_tuple(self, name_tuple):
         """
-        Get the pod uid from its name and namespace concatenation
+        Get the pod uid from the tuple namespace and name
 
-        :param namespace: the namespace the pod is in
-        :param name: the pod name
+        :param name_tuple: (pod_namespace, pod_name)
         :return: str or None
         """
-        if name and namespace:
-            return self.pod_uid_by_name_hash.get(namespace + "." + name, None)
+        return self.pod_uid_by_name_tuple.get(name_tuple, None)
+
+    def get_cid_by_name_tuple(self, name_tuple):
+        """
+        Get the container id (with runtime scheme) from the tuple namespace,
+        name and container name
+
+        :param name_tuple: (pod_namespace, pod_name, container_name)
+        :return: str or None
+        """
+        return self.container_id_by_name_tuple.get(name_tuple, None)
 
     def is_excluded(self, cid, pod_uid=None):
         """

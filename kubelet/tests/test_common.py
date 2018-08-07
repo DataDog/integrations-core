@@ -25,7 +25,6 @@ def test_container_filter(monkeypatch):
     monkeypatch.setattr('datadog_checks.kubelet.common.is_excluded', is_excluded)
 
     long_cid = "docker://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
-    short_cid = "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
     ctr_name = "datadog-agent"
     ctr_image = "datadog/agent-dev:haissam-tagger-pod-entity"
 
@@ -33,9 +32,8 @@ def test_container_filter(monkeypatch):
     pod_list_utils = PodListUtils(pods)
 
     assert pod_list_utils is not None
-    assert len(pod_list_utils.containers) == 5 * 2
+    assert len(pod_list_utils.containers) == 5
     assert long_cid in pod_list_utils.containers
-    assert short_cid in pod_list_utils.containers
     is_excluded.assert_not_called()
 
     # Test cid == None
@@ -55,7 +53,7 @@ def test_container_filter(monkeypatch):
 
     # Test existing unfiltered container
     is_excluded.reset_mock()
-    assert pod_list_utils.is_excluded(short_cid) is False
+    assert pod_list_utils.is_excluded(long_cid) is False
     is_excluded.assert_called_once()
     is_excluded.assert_called_with(ctr_name, ctr_image)
 
@@ -65,7 +63,7 @@ def test_container_filter(monkeypatch):
     # Test existing filtered container
     is_excluded.reset_mock()
     is_excluded.return_value = True
-    assert pod_list_utils.is_excluded(short_cid) is True
+    assert pod_list_utils.is_excluded(long_cid) is True
     is_excluded.assert_called_once()
     is_excluded.assert_called_with(ctr_name, ctr_image)
 

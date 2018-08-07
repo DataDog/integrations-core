@@ -40,7 +40,7 @@ def check():
 @pytest.fixture
 def cadvisor_scraper(check):
     scraper = CadvisorPrometheusScraper(check)
-    pod_list = json.loads(mock_from_file('pods.json'))
+    pod_list = json.loads(mock_from_file('podlist_containerd.json'))
     scraper.pod_list = pod_list
     scraper.pod_list_utils = PodListUtils(pod_list)
 
@@ -129,50 +129,49 @@ def test_get_container_label():
     assert CadvisorPrometheusScraper._get_container_label([], "not-in") is None
 
 
-def test_get_container_id():
+def test_get_container_id(cadvisor_scraper):
     labels = [
         Label("container_name", value="datadog-agent"),
-        Label("id",
-              value="/kubepods/burstable/"
-                    "podc2319815-10d0-11e8-bd5a-42010af00137/"
-                    "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"),
+        Label("namespace", value="default"),
+        Label("pod_name", value="datadog-agent-pbqt2"),
+        Label("container_name", value="datadog-agent"),
     ]
-    container_id = CadvisorPrometheusScraper._get_container_id(labels)
-    assert container_id == "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
-    assert CadvisorPrometheusScraper._get_container_id([]) is None
+    container_id = cadvisor_scraper._get_container_id(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+    assert cadvisor_scraper._get_container_id([]) is None
 
 
-def test_get_pod_uid(monkeypatch, cadvisor_scraper):
+def test_get_pod_uid(cadvisor_scraper):
     labels = [
         Label("container_name", value="POD"),
         Label("namespace", value="default"),
-        Label("pod_name", value="datadog-agent-jbm2k")
+        Label("pod_name", value="datadog-agent-pbqt2"),
     ]
-    assert cadvisor_scraper._get_pod_uid(labels) == "c2319815-10d0-11e8-bd5a-42010af00137"
+    assert cadvisor_scraper._get_pod_uid(labels) == "b66c40af-997d-11e8-96a3-42010a840157"
     assert cadvisor_scraper._get_pod_uid([]) is None
 
 
-def test_is_pod_host_networked(monkeypatch, cadvisor_scraper):
+def test_is_pod_host_networked(cadvisor_scraper):
     assert len(cadvisor_scraper.pod_list) == 4
     assert cadvisor_scraper._is_pod_host_networked("not-here") is False
-    assert cadvisor_scraper._is_pod_host_networked('260c2b1d43b094af6d6b4ccba082c2db') is True
-    assert cadvisor_scraper._is_pod_host_networked('2edfd4d9-10ce-11e8-bd5a-42010af00137') is False
+    assert cadvisor_scraper._is_pod_host_networked('8abf1ed0-94c4-11e8-96a3-42010a840157') is True
+    assert cadvisor_scraper._is_pod_host_networked('b66c40af-997d-11e8-96a3-42010a840157') is False
 
 
-def test_get_pod_by_metric_label(monkeypatch, cadvisor_scraper):
+def test_get_pod_by_metric_label(cadvisor_scraper):
     assert len(cadvisor_scraper.pod_list) == 4
     kube_proxy = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("namespace", value="kube-system"),
-        Label("pod_name", value="kube-proxy-gke-haissam-default-pool-be5066f1-wnvn")
+        Label("pod_name", value="kube-proxy-2d2bq")
     ])
     fluentd = cadvisor_scraper._get_pod_by_metric_label([
         Label("container_name", value="POD"),
         Label("namespace", value="kube-system"),
-        Label("pod_name", value="fluentd-gcp-v2.0.10-9q9t4")
+        Label("pod_name", value="fluentd-gcp-v3.0.0-z55q5")
     ])
-    assert kube_proxy["metadata"]["uid"] == "260c2b1d43b094af6d6b4ccba082c2db"
-    assert fluentd["metadata"]["uid"] == "2edfd4d9-10ce-11e8-bd5a-42010af00137"
+    assert kube_proxy["metadata"]["uid"] == "8abf1ed0-94c4-11e8-96a3-42010a840157"
+    assert fluentd["metadata"]["uid"] == "fe3d57c4-94c4-11e8-96a3-42010a840157"
 
 
 def test_get_kube_container_name():

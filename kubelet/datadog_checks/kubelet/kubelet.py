@@ -282,7 +282,7 @@ class KubeletCheck(AgentCheck, CadvisorScraper):
 
                 for ctr_status in pod['status'].get('containerStatuses', []):
                     if ctr_status.get('name') == c_name:
-                        # it is already prefixed with 'docker://'
+                        # it is already prefixed with 'runtime://'
                         cid = ctr_status.get('containerID')
                         break
                 if not cid:

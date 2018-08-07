@@ -112,29 +112,29 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if label.name == l_name:
                 return label.value
 
-    @staticmethod
-    def _get_container_id(labels):
+    def _get_container_id(self, labels):
         """
         Should only be called on a container-scoped metric
-        as it doesn't do any validation of the container id.
-        It simply returns the last part of the cgroup hierarchy.
+        It gets the container id from the podlist using the metrics labels
+
         :param labels
         :return str or None
         """
-        container_id = CadvisorPrometheusScraper._get_container_label(labels, "id")
-        if container_id:
-            return container_id.split('/')[-1]
+        namespace = CadvisorPrometheusScraper._get_container_label(labels, "namespace")
+        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
+        container_name = CadvisorPrometheusScraper._get_container_label(labels, "container_name")
+        return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
 
-    @staticmethod
-    def _get_container_id_if_container_metric(labels):
+    def _get_container_id_if_container_metric(self, labels):
         """
         Checks the labels indicate a container metric,
         then extract the container id from them.
+
         :param labels
         :return str or None
         """
         if CadvisorPrometheusScraper._is_container_metric(labels):
-            return CadvisorPrometheusScraper._get_container_id(labels)
+            return self._get_container_id(labels)
 
     def _get_pod_uid(self, labels):
         """
@@ -142,11 +142,9 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         :param labels:
         :return: str or None
         """
-        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
         namespace = CadvisorPrometheusScraper._get_container_label(labels, "namespace")
-        print(pod_name, namespace)
-        # get pod list
-        return self.pod_list_utils.get_uid_by_namespace(namespace, pod_name)
+        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
+        return self.pod_list_utils.get_uid_by_name_tuple((namespace, pod_name))
 
     def _get_pod_uid_if_pod_metric(self, labels):
         """
@@ -248,7 +246,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags('docker://%s' % c_id, True)
+            tags = get_tags(c_id, True)
             tags += self.instance_tags
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
@@ -299,7 +297,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags('docker://%s' % c_id, True)
+            tags = get_tags(c_id, True)
             tags += self.instance_tags
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
@@ -333,7 +331,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = get_tags('docker://%s' % c_id, True)
+            tags = get_tags(c_id, True)
             tags += self.instance_tags
 
             if m_name:
