@@ -13,7 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "elasticsearch.",
-  "metric_to_check": "elasticsearch.fs.total.disk_reads",
+  "metric_to_check": "elasticsearch.search.query.total",
   "name": "elastic",
   "public_title": "Datadog-ElasticSearch Integration",
   "short_description": "Monitor overall cluster status down to JVM heap usage and everything in between.",

@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "tokumx.",
-  "metric_to_check": "tokumx.stats.idx.count",
+  "metric_to_check": "tokumx.uptime",
   "name": "tokumx",
   "public_title": "Datadog-Tokumx Integration",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",

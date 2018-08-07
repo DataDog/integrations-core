@@ -10,6 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "aspdotnet.",
+  "metric_to_check": "aspdotnet.request.wait_time",
   "name": "aspdotnet",
   "public_title": "Datadog-ASP.NET Integration",
   "short_description": "Track your ASP.NET service metrics in real time",

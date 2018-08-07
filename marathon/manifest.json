@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "marathon.",
-  "metric_to_check": "marathon.cpus",
+  "metric_to_check": "marathon.apps",
   "name": "marathon",
   "public_title": "Datadog-Marathon Integration",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",

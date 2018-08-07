@@ -12,7 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "php_fpm.",
-  "metric_to_check": "php_fpm.processes.active",
+  "metric_to_check": "php_fpm.processes.total",
   "name": "php_fpm",
   "public_title": "Datadog-PHP FPM Integration",
   "short_description": "Monitor process states, slow requests, and accepted requests.",

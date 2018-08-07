@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "cassandra.",
-  "metric_to_check": "cassandra.nodetool.status.owns",
+  "metric_to_check": "cassandra.nodetool.status.status",
   "name": "cassandra_nodetool",
   "public_title": "Datadog-Cassandra Nodetool Integration",
   "short_description": "monitor cassandra using the nodetool utility",

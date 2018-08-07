@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "kong.",
-  "metric_to_check": "kong.table.count",
+  "metric_to_check": "kong.total_requests",
   "name": "kong",
   "public_title": "Datadog-Kong Integration",
   "short_description": "Track total requests, response codes, client connections, and more.",

@@ -15,7 +15,6 @@
   "metric_prefix": "postgresql.",
   "metric_to_check": "postgresql.connections",
   "name": "postgres",
-  "package_deps": false,
   "public_title": "Datadog-Postgres SQL Integration",
   "short_description": "Collect a wealth of database performance and health metrics.",
   "support": "core",

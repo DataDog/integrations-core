@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "mysql.",
-  "metric_to_check": "mysql.replication.slaves_connected",
+  "metric_to_check": "mysql.net.connections",
   "name": "MySQL",
   "public_title": "Datadog-MySQL Integration",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",

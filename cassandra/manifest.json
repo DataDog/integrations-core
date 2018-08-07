@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "cassandra.",
-  "metric_to_check": "cassandra.max_row_size",
+  "metric_to_check": "cassandra.load.count",
   "name": "cassandra",
   "public_title": "Datadog-Cassandra Integration",
   "short_description": "Track cluster performance, capacity, overall health, and much more.",

@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "lighttpd.",
-  "metric_to_check": "lighttpd.net.bytes",
+  "metric_to_check": "lighttpd.performance.uptime",
   "name": "lighttpd",
   "public_title": "Datadog-Lighttpd Integration",
   "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",

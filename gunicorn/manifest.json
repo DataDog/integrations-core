@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "gunicorn.",
-  "metric_to_check": "gunicorn.request.duration.avg",
+  "metric_to_check": "gunicorn.workers",
   "name": "gunicorn",
   "public_title": "Datadog-Gunicorn Integration",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",

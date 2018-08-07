@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "hdfs.",
-  "metric_to_check": "hdfs.datanode.dfs_used",
+  "metric_to_check": "hdfs.datanode.dfs_capacity",
   "name": "hdfs_datanode",
   "public_title": "Datadog-HDFS Datanode Integration",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",

@@ -9,6 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "dotnetclr.",
+  "metric_to_check": "dotnetclr.memory.time_in_gc",
   "name": "dotnetclr",
   "public_title": "Datadog-.NET CLR Integration",
   "short_description": "Visualize and monitor Dotnetclr states",

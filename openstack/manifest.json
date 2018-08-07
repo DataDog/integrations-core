@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "openstack.",
-  "metric_to_check": "openstack.nova.running_vms",
+  "metric_to_check": "openstack.nova.hypervisor_load.1",
   "name": "openstack",
   "public_title": "Datadog-OpenStack Integration",
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",

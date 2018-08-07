@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "mesos.",
-  "metric_to_check": "mesos.state.task.cpu",
+  "metric_to_check": "mesos.stats.uptime_secs",
   "name": "mesos_slave",
   "public_title": "Datadog-Mesos Slave Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",

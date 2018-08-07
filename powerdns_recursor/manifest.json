@@ -13,7 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "powerdns.",
-  "metric_to_check": "powerdns.recursor.cache_entries",
+  "metric_to_check": "powerdns.recursor.questions",
   "name": "powerdns_recursor",
   "public_title": "Datadog-Power DNS Recursor Integration",
   "short_description": "Keep an eye on strange traffic to and from your PowerDNS recursors.",

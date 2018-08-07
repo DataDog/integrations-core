@@ -9,6 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "statsd.",
+  "metric_to_check": "statsd.counters.count",
   "name": "statsd",
   "public_title": "Datadog-StatsD Integration",
   "short_description": "Monitor the availability of StatsD servers and track metric counts.",

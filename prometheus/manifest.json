@@ -8,7 +8,6 @@
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "metric_prefix": "prometheus.",
   "name": "prometheus",
   "public_title": "Datadog-Prometheus Integration",
   "short_description": "Prometheus is an open source monitoring system for timeseries metric data",

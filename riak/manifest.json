@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "riak.",
-  "metric_to_check": "riak.node_gets",
+  "metric_to_check": "riak.memory_processes",
   "name": "riak",
   "public_title": "Datadog-Riak Integration",
   "short_description": "Track node, vnode and ring performance metrics for RiakKV or RiakTS.",

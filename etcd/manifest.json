@@ -12,7 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "etcd.",
-  "metric_to_check": "etcd.self.send.bandwidthrate",
+  "metric_to_check": "etcd.store.watchers",
   "name": "etcd",
   "public_title": "Datadog-etcd Integration",
   "short_description": "Track writes, updates, deletes, inter-node latencies, and more Etcd metrics.",

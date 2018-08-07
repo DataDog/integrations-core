@@ -14,7 +14,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "redis.",
-  "metric_to_check": "redis.cpu.user",
+  "metric_to_check": "redis.net.clients",
   "name": "redisdb",
   "public_title": "Datadog-RedisDB Integration",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",

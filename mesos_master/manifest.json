@@ -15,7 +15,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "mesos.",
-  "metric_to_check": "mesos.framework.cpu",
+  "metric_to_check": "mesos.role.mem",
   "name": "mesos_master",
   "public_title": "Datadog-Mesos Master Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",

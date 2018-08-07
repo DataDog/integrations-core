@@ -22,8 +22,6 @@ REQUIRED_ATTRIBUTES = {
     'is_public',
     'maintainer',
     'manifest_version',
-    # 'metric_to_check',
-    # 'metric_prefix',
     'name',
     'public_title',
     'short_description',
@@ -36,8 +34,6 @@ OPTIONAL_ATTRIBUTES = {
     'aliases',
     'description',
     'is_beta',
-    'package_deps',
-    'version',
     # Move these two below to mandatory when all integration are fixed
     'metric_to_check',
     'metric_prefix',

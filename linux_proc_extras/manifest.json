@@ -9,6 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "system.",
+  "metric_to_check": "system.inodes.total",
   "name": "linux_proc_extras",
   "public_title": "Datadog-Linux Proc Extras Integration",
   "short_description": "Visualize and monitor linux_proc_extras states.",

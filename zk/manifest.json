@@ -14,7 +14,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "zookeeper.",
-  "metric_to_check": "zookeeper.bytes_sent",
+  "metric_to_check": "zookeeper.connections",
   "name": "zk",
   "public_title": "Datadog-Zookeeper Integration",
   "short_description": "Track client connections and latencies, and know when requests are backing up.",

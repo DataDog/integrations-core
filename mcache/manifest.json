@@ -13,7 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "memcache.",
-  "metric_to_check": "memcache.bytes",
+  "metric_to_check": "memcache.uptime",
   "name": "mcache",
   "public_title": "Datadog-Memcache Integration",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",

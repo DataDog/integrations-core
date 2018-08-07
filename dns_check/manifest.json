@@ -12,7 +12,7 @@
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "metric_prefix": "dns_check.",
+  "metric_prefix": "dns.",
   "metric_to_check": "dns.response_time",
   "name": "dns_check",
   "public_title": "Datadog-DNS Check Integration",

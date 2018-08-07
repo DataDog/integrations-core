@@ -12,7 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "fluentd.",
-  "metric_to_check": "fluentd.retry_count",
+  "metric_to_check": "fluentd.buffer_queue_length",
   "name": "fluentd",
   "public_title": "Datadog-FluentD Integration",
   "short_description": "Monitor buffer queues and retry counts for each Fluentd plugin you've enabled.",

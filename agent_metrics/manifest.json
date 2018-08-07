@@ -9,6 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "datadog.agent.",
+  "metric_to_check": "datadog.agent.collector.cpu.used",
   "name": "agent_metrics",
   "public_title": "Datadog-Agent Metrics Integration",
   "short_description": "agent_metrics description.",

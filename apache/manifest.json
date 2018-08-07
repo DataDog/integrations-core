@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "apache.",
-  "metric_to_check": "apache.net.bytes",
+  "metric_to_check": "apache.performance.busy_workers",
   "name": "Apache",
   "public_title": "Datadog-Apache Integration",
   "short_description": "Track requests per second, bytes served, worker threads, uptime, and more.",

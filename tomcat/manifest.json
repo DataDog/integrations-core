@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "tomcat.",
-  "metric_to_check": "tomcat.threads.max",
+  "metric_to_check": "tomcat.threads.count",
   "name": "tomcat",
   "public_title": "Datadog-Tomcat Integration",
   "short_description": "Track requests per second, bytes served, cache hits, servlet metrics, and more.",

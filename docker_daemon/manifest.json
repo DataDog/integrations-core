@@ -13,7 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "docker.",
-  "metric_to_check": "docker.cpu.usage",
+  "metric_to_check": "docker.containers.running",
   "name": "docker_daemon",
   "public_title": "Datadog-Docker Integration",
   "short_description": "Correlate container performance with that of the services running inside them.",
