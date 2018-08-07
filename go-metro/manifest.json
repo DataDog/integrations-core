@@ -7,7 +7,6 @@
   "supported_os": [
     "linux"
   ],
-  "version": "1.0.0",
   "guid": "6d00688b-32b1-4755-98cd-44bd1bd40428",
   "public_title": "Datadog-Go-Metro Integration",
   "categories":["languages", "log collection"],
