@@ -9,7 +9,7 @@
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "0.1.1",
-  "metric_prefix": "go-metro.",
+  "metric_prefix": "system.",
   "metric_to_check": "system.net.tcp.rtt",
   "name": "go-metro",
   "public_title": "Datadog-Go-Metro Integration",
@@ -19,5 +19,4 @@
     "linux"
   ],
   "type": "check",
-  "version": "1.0.0"
 }

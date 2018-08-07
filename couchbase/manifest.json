@@ -2,7 +2,7 @@
   "categories": [
     "data store"
   ],
-  "creates_events": true, // set to False in dogweb/integration/couchbase/config.py
+  "creates_events": false,
   "display_name": "Couchbase",
   "guid": "ba7ce7de-4fcb-4418-8c90-329baa6a5d59",
   "is_public": true,
