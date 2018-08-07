@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "go_expvar",
+  "display_name": "Go-Expvar",
   "short_description": "Collect expvar-instrumented metrics and memory stats from your Go service.",
   "support": "core",
   "supported_os": [
@@ -16,9 +17,9 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/go_expvar/",
+  "metric_prefix": "go_expvar.",
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases": [
     "/integrations/goexpvar"
   ]

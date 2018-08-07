@@ -17,7 +17,5 @@
   "type":"check",
   "metric_prefix": "couchbase.",
   "creates_events": true,
-  "doc_link": "https://docs.datadoghq.com/integrations/couchbase/",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

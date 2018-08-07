@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "btrfs",
+  "display_name": "Btrfs",
   "short_description": "Monitor usage on Btrfs volumes so you can respond before they fill up.",
   "support": "core",
   "supported_os": [
@@ -14,7 +15,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/btrfs/",
+  "metric_prefix": "btrfs.",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

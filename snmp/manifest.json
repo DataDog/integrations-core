@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "snmp",
+  "display_name": "SNMP",
   "short_description": "Collect SNMP metrics from your network devices.",
   "support": "core",
   "supported_os": [
@@ -17,7 +18,7 @@
     "network"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/snmp/",
+  "metric_prefix": "snmp.", // no metric in metadata?
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

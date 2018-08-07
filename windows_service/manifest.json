@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "windows_service",
   "display_name": "Windows Service",
-  "creates_events": true,
+  "creates_events": false,
   "short_description": "Monitor the state of your Windows services.",
   "support": "core",
   "supported_os": [
@@ -15,9 +15,8 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/windows_service/",
+  "metric_prefix": "windows_service.", // is this valid? no metadata?
   "is_public": true,
-  "has_logo": true,
   "aliases": [
     "/integrations/winservices"
   ]

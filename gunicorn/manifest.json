@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "gunicorn",
   "display_name": "Gunicorn",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "gunicorn.request.duration.avg",
   "short_description": "Monitor request rates and durations, log-message rates, and worker processes.",
   "support": "core",
@@ -18,7 +18,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/gunicorn/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "gunicorn.",
+  "is_public": true
 }

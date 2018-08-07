@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "spark",
   "display_name": "Spark",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "spark.job.count",
   "short_description": "Track failed task rates, shuffled bytes, and much more.",
   "support": "core",
@@ -18,7 +18,6 @@
     "processing"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/spark/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "spark.",
+  "is_public": true
 }

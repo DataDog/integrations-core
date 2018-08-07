@@ -11,7 +11,6 @@
     "linux",
     "mac_os"
   ],
-  "version": "1.0.0",
   "public_title": "Datadog-Amazon-EKS Integration",
   "categories": [
     "aws",
@@ -19,8 +18,7 @@
     "orchestration",
     "log collection"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/amazon_eks/",
+  "metric_prefix": "aws.", // is this good?
   "type": "check",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

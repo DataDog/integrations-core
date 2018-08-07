@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "gitlab",
+  "display_name": "Gitlab",
   "short_description": "Track all your Gitlab metrics with Datadog",
   "guid": "1cab328c-5560-4737-ad06-92ebc54af901",
   "support": "core",
@@ -16,8 +17,8 @@
     "source control",
     "issue tracking"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
+  "metric_prefix": "gitlab.", // is this valid see metadata file?
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "type": "check"
 }

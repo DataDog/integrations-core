@@ -1,10 +1,9 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "iis",
   "display_name": "IIS",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "iis.uptime",
   "short_description": "Track total or per-site metrics and monitor each site's up/down status.",
   "support": "core",
@@ -18,7 +17,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/iis/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "iis.",
+  "is_public": true
 }

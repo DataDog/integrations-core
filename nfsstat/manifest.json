@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "nfsstat",
+  "display_name": "Nfsstat",
   "short_description": "nfsstat gets nfsiostat-sysstat metrics.",
   "guid": "9f2fe3a7-ae19-4da9-a253-ae817a5557ab",
   "support": "core",
@@ -13,7 +14,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/nfsstat/",
+  "metric_prefix": "system.", // is this valid see metadata file?
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

@@ -16,8 +16,6 @@
   "categories": [
     "os & system"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/exchange_server/",
   "type": "check",
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

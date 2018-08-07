@@ -1,6 +1,10 @@
 {
+  "creates_events": false,
+  "description": "Collect and graph Microsoft Active Directory metrics",
+  "display_name": "Active Directory",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "active_directory.",
   "name": "active_directory",
   "short_description": "Collect and graph Microsoft Active Directory metrics",
   "support": "core",
@@ -13,8 +17,6 @@
     "os & system",
     "log collection"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/active_directory/",
   "is_public": true,
-  "has_logo": true,
   "type": "check"
 }

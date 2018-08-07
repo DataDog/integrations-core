@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "mcache",
   "display_name": "Memcached",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "memcache.bytes",
   "short_description": "Track memory use, hits, misses, evictions, fill percent, and more.",
   "support": "core",
@@ -18,9 +18,8 @@
     "caching"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mcache/",
+  "metric_prefix": "memcache.",
   "is_public": true,
-  "has_logo": true,
   "aliases": [
     "/integrations/memcached"
   ]

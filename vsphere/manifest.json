@@ -16,8 +16,7 @@
   "public_title": "Datadog-vSphere Integration",
   "categories":["cloud"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/vsphere/",
+  "metric_prefix": "vsphere.",
   "is_public": true,
-  "has_logo": true,
   "aliases":["/integrations/vmware/"]
 }

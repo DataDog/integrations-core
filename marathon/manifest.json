@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "marathon",
   "display_name": "Marathon",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "marathon.cpus",
   "short_description": "Track application metrics: required memory and disk, instance count, and more.",
   "support": "core",
@@ -15,7 +15,6 @@
   "public_title": "Datadog-Marathon Integration",
   "categories":["configuration & deployment", "containers"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/marathon/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "marathon.",
+  "is_public": true
 }

@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "hdfs_datanode",
   "display_name": "HDFS Datanode",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "hdfs.datanode.dfs_used",
   "short_description": "Track cluster disk usage, volume failures, dead DataNodes, and more.",
   "support": "core",
@@ -15,7 +15,6 @@
   "public_title": "Datadog-HDFS Datanode Integration",
   "categories":["processing", "os & system"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/hdfs_datanode/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "hdfs.", // is this valid?
+  "is_public": true
 }

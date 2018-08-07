@@ -1,10 +1,9 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
+  "creates_events": true,
   "manifest_version": "1.0.0",
   "name": "consul",
   "display_name": "Consul",
-  "creates_events": true,
   "metric_to_check": "consul.peers",
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",
@@ -17,7 +16,6 @@
   "public_title": "Datadog-Consul Integration",
   "categories":["containers", "orchestration", "configuration & deployment", "notification", "log collection"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/consul/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "consul.",
+  "is_public": true
 }

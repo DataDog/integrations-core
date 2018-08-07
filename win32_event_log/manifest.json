@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "win32_event_log",
+  "display_name": "Win32",
   "short_description": "Send Windows events to your Datadog event stream.",
   "support": "core",
   "supported_os": [
@@ -13,7 +14,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/win32_event_log/",
+  "metric_prefix": "win32_event_log.", // is this valid? no metadata?
   "is_public": true,
-  "has_logo": true
+  "creates_events": true
 }

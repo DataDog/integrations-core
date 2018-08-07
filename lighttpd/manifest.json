@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "lighttpd",
+  "display_name": "Lighttpd",
   "short_description": "Track uptime, bytes served, requests per second, response codes, and more.",
   "support": "core",
   "supported_os": [
@@ -13,7 +14,7 @@
   "public_title": "Datadog-Lighttpd Integration",
   "categories":["web"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/lighttpd/",
+  "metric_prefix": "lighttpd.",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

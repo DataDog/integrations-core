@@ -19,7 +19,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kubernetes/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "kubernetes.",
+  "is_public": true
 }

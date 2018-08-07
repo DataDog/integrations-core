@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "http_check",
+  "display_name": "HTTP",
   "short_description": "Monitor any HTTP service for bad responses, soon-to-expire SSL certs, and more.",
   "support": "core",
   "supported_os": [
@@ -13,8 +14,8 @@
   "public_title": "Datadog-HTTP Check Integration",
   "categories":["web", "network"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/http_check/",
+  "metric_prefix": "network.", // not sure see metadata file?
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases":["/integrations/httpcheck"]
 }

@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "supervisord",
   "display_name": "Supervisord",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "supervisord.process.count",
   "short_description": "Monitor the status, uptime, and number of supervisor-managed processes.",
   "support": "core",
@@ -18,9 +18,8 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/supervisord/",
+  "metric_prefix": "supervisord.",
   "is_public": true,
-  "has_logo": true,
   "aliases": [
     "/integrations/supervisor"
   ]

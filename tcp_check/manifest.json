@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "tcp_check",
+  "display_name": "TCP",
   "short_description": "Monitor TCP connectivity to remote hosts.",
   "support": "core",
   "supported_os": [
@@ -16,9 +17,9 @@
     "web"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tcp_check/",
+  "metric_prefix": "network.", // is this valid?
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases": [
     "/guides/network_checks",
     "/integrations/tcpcheck"

@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "sqlserver",
   "display_name": "SQL Server",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "sqlserver.stats.connections",
   "short_description": "Collect important SQL Server performance and health metrics.",
   "support": "core",
@@ -16,7 +16,6 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/sqlserver/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "sqlserver.",
+  "is_public": true
 }

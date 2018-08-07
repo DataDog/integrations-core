@@ -1,10 +1,9 @@
 {
   "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
   "manifest_version": "1.0.0",
   "name": "redisdb",
   "display_name": "RedisDB",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "redis.cpu.user",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
   "support": "core",
@@ -21,10 +20,9 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/redisdb/",
+  "metric_prefix": "redis.",
   "aliases": [
     "/integrations/redis/"
   ],
-  "is_public": true,
-  "has_logo": true
+  "is_public": true
 }

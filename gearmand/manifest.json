@@ -1,7 +1,8 @@
 {
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "gearmand",
+  "name": "gearmand", 
+  "display_name": "Gearman",
   "short_description": "Track the number of jobs queued and running - in total or by task.",
   "support": "core",
   "supported_os": [
@@ -14,9 +15,9 @@
     "processing"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/gearmand/",
+  "metric_prefix": "gearmand.",
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases": [
     "/integrations/gearman"
   ]

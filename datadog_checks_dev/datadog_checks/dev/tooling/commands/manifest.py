@@ -14,6 +14,37 @@ from ..constants import get_root
 from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
+REQUIRED_ATTRIBUTES = {
+    'categories',
+    'creates_events',
+    'display_name',
+    'guid',
+    'is_public',
+    'maintainer',
+    'manifest_version',
+    # 'metric_to_check',
+    # 'metric_prefix',
+    'name',
+    'public_title',
+    'short_description',
+    'support',
+    'supported_os',
+    'type'
+}
+
+OPTIONAL_ATTRIBUTES = {
+    'aliases',
+    'description',
+    'is_beta',
+    'package_deps',
+    'version',
+    # Move these two below to mandatory when all integration are fixed
+    'metric_to_check',
+    'metric_prefix',
+}
+
+ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
+
 
 def parse_version_parts(version):
     return (
@@ -59,6 +90,15 @@ def verify(fix, include_extras):
                 for display, message in display_queue:
                     display(message)
                 continue
+
+            # attributes are valid
+            attrs = set(decoded)
+            for attr in sorted(attrs - ALL_ATTRIBUTES):
+                failed += 1
+                display_queue.append((echo_failure, '  Attribute `{}` is invalid'.format(attr)))
+            for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
+                failed += 1
+                display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
 
             # guid
             guid = decoded.get('guid')
@@ -137,33 +177,6 @@ def verify(fix, include_extras):
                         else:
                             display_queue.append((echo_failure, output))
 
-                    if 'max_agent_version' in decoded:
-                        failed += 1
-                        output = '  outdated field: max_agent_version'
-
-                        if fix:
-                            del decoded['max_agent_version']
-
-                            display_queue.append((echo_warning, output))
-                            display_queue.append((echo_success, '  removed field: max_agent_version'))
-
-                            failed -= 1
-                        else:
-                            display_queue.append((echo_failure, output))
-
-                    if 'min_agent_version' in decoded:
-                        failed += 1
-                        output = '  outdated field: min_agent_version'
-
-                        if fix:
-                            del decoded['min_agent_version']
-
-                            display_queue.append((echo_warning, output))
-                            display_queue.append((echo_success, '  removed field: min_agent_version'))
-
-                            failed -= 1
-                        else:
-                            display_queue.append((echo_failure, output))
                 elif about_exists:
                     failed += 1
                     output = '  outdated `manifest_version`: {}'.format(manifest_version)
@@ -179,14 +192,6 @@ def verify(fix, include_extras):
                         if 'version' in decoded:
                             del decoded['version']
                             display_queue.append((echo_success, '  removed field: version'))
-
-                        if 'max_agent_version' in decoded:
-                            del decoded['max_agent_version']
-                            display_queue.append((echo_success, '  removed field: max_agent_version'))
-
-                        if 'min_agent_version' in decoded:
-                            del decoded['min_agent_version']
-                            display_queue.append((echo_success, '  removed field: min_agent_version'))
 
                         failed -= 1
                     else:
@@ -241,6 +246,9 @@ def verify(fix, include_extras):
             if not short_description or not isinstance(short_description, string_types):
                 failed += 1
                 display_queue.append((echo_failure, '  required non-null string: short_description'))
+            if len(short_description) > 80:
+                failed += 1
+                display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
 
             # support
             correct_support = 'contrib' if root_name == 'extras' else 'core'
@@ -359,32 +367,6 @@ def verify(fix, include_extras):
                         failed -= 1
                     else:
                         display_queue.append((echo_failure, output))
-
-                # has_logo
-                default_has_logo = True
-                has_logo = decoded.get('has_logo')
-                if not isinstance(has_logo, bool):
-                    failed += 1
-                    output = '  required boolean: has_logo'
-
-                    if fix:
-                        decoded['has_logo'] = default_has_logo
-
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `has_logo`: {}'.format(default_has_logo)))
-
-                        failed -= 1
-                    else:
-                        display_queue.append((echo_failure, output))
-
-                # doc_link
-                doc_link = decoded.get('doc_link')
-                if not doc_link or not isinstance(doc_link, string_types):
-                    failed += 1
-                    display_queue.append((echo_failure, '  required non-null string: doc_link'))
-                elif not doc_link.startswith('https://docs.datadoghq.com/integrations/'):
-                    failed += 1
-                    display_queue.append((echo_failure, '  invalid `doc_link`: {}'.format(doc_link)))
 
             # See if anything happened
             if len(display_queue) > 1:

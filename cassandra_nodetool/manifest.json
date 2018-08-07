@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "cassandra_nodetool",
   "display_name": "Cassandra Nodetool",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "cassandra.nodetool.status.owns",
   "short_description": "monitor cassandra using the nodetool utility",
   "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
@@ -18,7 +18,6 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/cassandra_nodetool/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "cassandra.nodetool.", // is this good?
+  "is_public": true
 }

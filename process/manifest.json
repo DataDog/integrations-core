@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "process",
+  "display_name": "Process",
   "short_description": "Capture metrics and monitor the status of running processes.",
   "support": "core",
   "supported_os": [
@@ -15,7 +16,7 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/process/",
+  "metric_prefix": "system.", // is this valid? see metadata?
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

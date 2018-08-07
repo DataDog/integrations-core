@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "system_core",
+  "display_name": "System Core",
   "short_description": "Collect the number of CPU cores and CPU times on a host",
   "support": "core",
   "supported_os": [
@@ -15,9 +16,9 @@
     "os & system"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/system_core/",
+  "metric_prefix": "system.", // is this valid?
   "is_public": true,
-  "has_logo": true,
+  "creates_events": false,
   "aliases": [
     "/integrations/systemcore"
   ]

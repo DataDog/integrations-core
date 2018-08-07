@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "riakcs",
+  "display_name": "Riak CS",
   "short_description": "Track the rate and mean latency of GETs, PUTs, DELETEs, and other operations.",
   "support": "core",
   "supported_os": [
@@ -15,7 +16,7 @@
     "data store"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/riakcs/",
+  "metric_prefix": "riakcs.",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

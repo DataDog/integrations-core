@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "network",
+  "display_name": "Network",
   "short_description": "Track bytes and packets in/out, connection states, round trip times, and more.",
   "support": "core",
   "supported_os": [
@@ -16,7 +17,7 @@
     "network"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/network/",
+  "metric_prefix": "system.", // is this valid see metadata file?
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

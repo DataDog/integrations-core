@@ -2,6 +2,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "fluentd",
+  "display_name": "FluentD",
   "short_description": "Monitor buffer queues and retry counts for each Fluentd plugin you've enabled.",
   "support": "core",
   "supported_os": [
@@ -16,7 +17,7 @@
   ],
   "type": "check",
   "aliases":["/logs/log_collection/fluentd"],
-  "doc_link": "https://docs.datadoghq.com/integrations/fluentd/",
+  "metric_prefix": "fluentd.",
   "is_public": true,
-  "has_logo": true
+  "creates_events": false
 }

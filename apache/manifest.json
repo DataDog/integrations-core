@@ -20,7 +20,6 @@
     "log collection"
   ],
   "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/apache/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "apache.",
+  "is_public": true
 }

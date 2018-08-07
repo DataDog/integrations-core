@@ -3,7 +3,7 @@
   "manifest_version": "1.0.0",
   "name": "yarn",
   "display_name": "Yarn",
-  "creates_events": true,
+  "creates_events": false,
   "metric_to_check": "yarn.metrics.total_nodes",
   "short_description": "Collect cluster-wide health metrics and track application progress.",
   "support": "core",
@@ -16,7 +16,6 @@
   "public_title": "Datadog-Yarn Integration",
   "categories":["processing"],
   "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/yarn/",
-  "is_public": true,
-  "has_logo": true
+  "metric_prefix": "yarn.",
+  "is_public": true
 }
