@@ -14,7 +14,6 @@ from ..constants import get_root
 from ...compat import JSONDecodeError
 from ...utils import basepath, file_exists, read_file, write_file
 
-
 def parse_version_parts(version):
     return (
         [int(v) for v in version.split('.') if v.isdigit()]
