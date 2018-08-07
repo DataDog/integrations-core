@@ -1,23 +1,21 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "exchange_server",
-  "display_name": "Exchange Server",
-  "short_description": "Collect and graph Microsoft exchange server metrics",
-  "support": "core",
-  "creates_events": false,
-  "metric_to_check": "exchange.processor.cpu_user",
-  "metric_prefix": "exchange.",
-  "supported_os": [
-    "windows"
-  ],
-  "guid": "7bc177b0-b07d-4a83-921f-9cd8deef039b",
-  "public_title": "Datadog-Exchange Server Integration",
   "categories": [
     "os & system"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/exchange_server/",
-  "type": "check",
+  "creates_events": false,
+  "display_name": "Exchange Server",
+  "guid": "7bc177b0-b07d-4a83-921f-9cd8deef039b",
   "is_public": true,
-  "has_logo": true
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "exchange.",
+  "metric_to_check": "exchange.processor.cpu_user",
+  "name": "exchange_server",
+  "public_title": "Datadog-Microsoft Exchange Server Integration",
+  "short_description": "Collect and graph Microsoft Exchange Server metrics",
+  "support": "core",
+  "supported_os": [
+    "windows"
+  ],
+  "type": "check"
 }

@@ -1,25 +1,25 @@
 {
+  "categories": [
+    "aws",
+    "containers",
+    "orchestration"
+  ],
+  "creates_events": false,
+  "display_name": "Amazon Fargate",
+  "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "ecs.",
+  "metric_to_check": "ecs.fargate.cpu.user",
   "name": "ecs_fargate",
-  "display_name": "Amazon Fargate",
+  "public_title": "Datadog-ECS-Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
-  "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-ECS-Fargate Integration",
-  "categories": [
-    "aws",
-    "containers",
-    "orchestration"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/ecs_fargate/",
-  "is_public": true,
-  "has_logo": true,
-  "creates_events": true
+  "type": "check"
 }

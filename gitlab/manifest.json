@@ -1,23 +1,25 @@
 {
+  "categories": [
+    "collaboration",
+    "source control",
+    "issue tracking"
+  ],
+  "creates_events": false,
+  "display_name": "Gitlab",
+  "guid": "1cab328c-5560-4737-ad06-92ebc54af901",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "gitlab.",
+  "metric_to_check": "go_gc_duration_seconds",
   "name": "gitlab",
+  "public_title": "Datadog-Gitlab Integration",
   "short_description": "Track all your Gitlab metrics with Datadog",
-  "guid": "1cab328c-5560-4737-ad06-92ebc54af901",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Gitlab Integration",
-  "categories": [
-    "collaboration",
-    "source control",
-    "issue tracking"
-  ],
-  "doc_link": "https://docs.datadoghq.com/integrations/gitlab/",
-  "is_public": true,
-  "has_logo": true,
   "type": "check"
 }

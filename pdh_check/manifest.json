@@ -1,17 +1,21 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "PDH",
+  "guid": "D09B3410-00A0-4789-ABD7-7740C3FE211F",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "pdh.",
+  "metric_to_check": "pdh.system.file_read_per_se",
   "name": "pdh_check",
+  "public_title": "Datadog-Pdh Check Integration",
   "short_description": "Collect and graph any Windows PDH metrics.",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "guid": "D09B3410-00A0-4789-ABD7-7740C3FE211F",
-  "public_title": "Datadog-Pdh Check Integration",
-  "categories":["os & system"],
-  "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/pdh_check/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

@@ -1,7 +1,21 @@
 {
+  "aliases": [
+    "/guides/network_checks",
+    "/integrations/tcpcheck"
+  ],
+  "categories": [
+    "network",
+    "web"
+  ],
+  "creates_events": false,
+  "display_name": "TCP",
+  "guid": "c514029e-0ed8-4c9f-abe5-2fd4096726ba",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "network.",
   "name": "tcp_check",
+  "public_title": "Datadog-TCP Check Integration",
   "short_description": "Monitor TCP connectivity to remote hosts.",
   "support": "core",
   "supported_os": [
@@ -9,18 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "c514029e-0ed8-4c9f-abe5-2fd4096726ba",
-  "public_title": "Datadog-TCP Check Integration",
-  "categories": [
-    "network",
-    "web"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tcp_check/",
-  "is_public": true,
-  "has_logo": true,
-  "aliases": [
-    "/guides/network_checks",
-    "/integrations/tcpcheck"
-  ]
+  "type": "check"
 }

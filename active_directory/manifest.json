@@ -1,20 +1,23 @@
 {
+  "categories": [
+    "os & system",
+    "log collection"
+  ],
+  "creates_events": false,
+  "description": "Collect and graph Microsoft Active Directory metrics",
+  "display_name": "Active Directory",
+  "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "active_directory.",
+  "metric_to_check": "active_directory.dra.inbound.objects.persec",
   "name": "active_directory",
+  "public_title": "Datadog-Active Directory Integration",
   "short_description": "Collect and graph Microsoft Active Directory metrics",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "guid": "ba667ff3-cf6a-458c-aa4b-1172f33de562",
-  "public_title": "Datadog-Active Directory Integration",
-  "categories": [
-    "os & system",
-    "log collection"
-  ],
-  "doc_link": "https://docs.datadoghq.com/integrations/active_directory/",
-  "is_public": true,
-  "has_logo": true,
   "type": "check"
 }

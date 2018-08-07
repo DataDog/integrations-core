@@ -1,7 +1,18 @@
 {
+  "categories": [
+    "processing",
+    "messaging"
+  ],
+  "creates_events": false,
+  "display_name": "ActiveMQ XML",
+  "guid": "0433d687-68d3-42db-ad5c-6c232d881619",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "activemq.",
+  "metric_to_check": "activemq.queue.size",
   "name": "activemq_xml",
+  "public_title": "Datadog-ActiveMQ XML Integration",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
   "support": "core",
   "supported_os": [
@@ -9,14 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "0433d687-68d3-42db-ad5c-6c232d881619",
-  "public_title": "Datadog-ActiveMQ XML Integration",
-  "categories": [
-    "processing",
-    "messaging"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/activemq_xml/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

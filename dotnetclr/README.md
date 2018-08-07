@@ -2,10 +2,10 @@
 
 ## Overview
 
-Get metrics from dotnetclr service in real time to:
+Get metrics from Dotnetclr service in real time to:
 
-* Visualize and monitor dotnetclr states
-* Be notified about dotnetclr failovers and events.
+* Visualize and monitor Dotnetclr states
+* Be notified about Dotnetclr failovers and events.
 
 ## Installation
 
@@ -13,7 +13,7 @@ The Dotnetclr check is included in the [Datadog Agent][1] package, so you don't 
 
 ## Configuration
 
-1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your dotnetclr performance data.
+1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your Dotnetclr performance data.
     See the [sample dotnetclr.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][5]
