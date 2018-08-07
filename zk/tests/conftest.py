@@ -104,7 +104,7 @@ def spin_up_zk():
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
-        for _ in xrange(10):
+        for _ in xrange(3):
             try:
                 out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
                 out.seek(0)
