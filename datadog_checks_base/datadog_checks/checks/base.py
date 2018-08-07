@@ -106,7 +106,6 @@ class AgentCheck(object):
 
     def get_instance_proxy(self, instance, uri, proxies=None):
         proxies = proxies if proxies is not None else self.proxies.copy()
-        proxies['no'] = os.getenv('no_proxy', os.getenv('NO_PROXY', None))
 
         deprecated_skip = instance.get('no_proxy', None)
         skip = (
