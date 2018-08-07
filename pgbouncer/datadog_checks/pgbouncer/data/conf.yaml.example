@@ -5,6 +5,7 @@ instances:
 #     port: 15433
 #     username: my_username
 #     password: my_password
+#     use_cached: True
 #     tags:
 #       - optional_tag1
 #       - optional_tag2
