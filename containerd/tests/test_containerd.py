@@ -21,13 +21,6 @@ NAMESPACE = 'containerd'
 
 
 @pytest.fixture()
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture()
 def mock_containerd_out():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'containerd-out.txt')
     with open(f_name, 'r') as f:
