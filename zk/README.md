@@ -94,9 +94,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 ## Data Collected
 ### Metrics
 
-As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of
-zookeeper stats. This check first parses the `stat` admin command for a version
-number. If the zookeeper version supports `mntr`, it is also parsed.
+As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of zookeeper stats. This check first parses the `stat` admin command for a version number. If the zookeeper version supports `mntr`, it is also parsed.
 
 Duplicate information is being reported by both `mntr` and `stat`: the duplicated
  `stat` metrics are only kept for backward compatibility.
