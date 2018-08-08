@@ -36,6 +36,7 @@ def spin_up_elastic():
     yield
     subprocess.check_call(args + ["down"])
 
+
 @pytest.fixture
 def aggregator():
     from datadog_checks.stubs import aggregator
