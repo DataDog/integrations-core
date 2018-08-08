@@ -32,10 +32,10 @@ def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
     _assert_metrics(aggregator, expected_tags)
 
 
-def test_check_2017(aggregator, init_config, instance_2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_2017])
-    sqlserver_check.check(instance_2017)
-    expected_tags = instance_2017.get('tags', []) + ['host:(local)\SQL2017', 'db:master']
+def test_check_2017(aggregator, init_config, instance_sql2017):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_sql2017])
+    sqlserver_check.check(instance_sql2017)
+    expected_tags = instance_sql2017.get('tags', []) + ['host:(local)\SQL2017', 'db:master']
     _assert_metrics(aggregator, expected_tags)
 
 
