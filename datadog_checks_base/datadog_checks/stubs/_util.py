@@ -5,8 +5,10 @@
 import subprocess
 import tempfile
 
+
 class SubprocessOutputEmptyError(Exception):
     pass
+
 
 def subprocess_output(command, raise_on_empty_output):
     """

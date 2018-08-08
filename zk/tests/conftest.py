@@ -4,10 +4,12 @@
 import os
 import sys
 import time
-import subprocess
-import requests
 import pytest
+from datadog_checks.dev import docker_run, RetryError
 from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.zk import ZookeeperCheck
+from datadog_checks.zk.zk import ZKConnectionFailure
+
 
 CHECK_NAME = 'zk'
 HOST = get_docker_hostname()
@@ -97,19 +99,37 @@ def aggregator():
     return aggregator
 
 
+def get_version():
+    zk_version = os.environ.get("ZK_VERSION")
+    version = [int(k) for k in zk_version.split(".")]
+    if len(version) == 2:
+        version += [0]
+    return version
+
+
 @pytest.fixture(scope="session")
 def spin_up_zk():
-    env = os.environ
-    args = [
-        'docker-compose', '-f', os.path.join(HERE, 'compose', 'zk.yaml')
-    ]
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    sys.stderr.write("Waiting for ZK to boot")
-    for _ in xrange(2):
-        try:
-            res = requests.get(URL)
-            res.raise_for_status()
-        except Exception:
-            time.sleep(1)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
+    def condition():
+        sys.stderr.write("Waiting for ZK to boot...\n")
+        booted = False
+        for _ in xrange(10):
+            try:
+                out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
+                out.seek(0)
+                if out.readline() != 'imok':
+                    raise ZKConnectionFailure()
+                booted = True
+                break
+            except ZKConnectionFailure:
+                time.sleep(1)
+
+        if not booted:
+            raise RetryError("Zookeeper failed to boot!")
+        sys.stderr.write("ZK boot complete.\n")
+
+    compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
+    if get_version() >= [3, 5, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
+
+    with docker_run(compose_file, conditions=[condition]):
+        yield

@@ -22,7 +22,7 @@ The Spark check is included in the [Datadog Agent][1] package, so you don't need
 
 ### Configuration
 
-1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][11].
     See the [sample spark.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -88,3 +88,4 @@ To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][6] t
 [8]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [9]: https://www.datadoghq.com/blog/monitoring-spark/
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

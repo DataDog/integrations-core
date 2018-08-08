@@ -11,8 +11,10 @@ from datadog_checks.checks.prometheus import PrometheusCheck
 
 
 METRIC_TYPES = ['counter', 'gauge']
-WHITELISTED_WAITING_REASONS = ['ErrImagePull', 'ImagePullBackoff', 'CrashLoopBackoff']
-WHITELISTED_TERMINATED_REASONS = ['OOMKilled', 'ContainerCannotRun', 'Error']
+
+# As case can vary depending on Kubernetes versions, we match the lowercase string
+WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff']
+WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 
 class KubernetesState(PrometheusCheck):
@@ -370,7 +372,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in WHITELISTED_WAITING_REASONS:
+                    if label.value.lower() in WHITELISTED_WAITING_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
@@ -388,7 +390,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in WHITELISTED_TERMINATED_REASONS:
+                    if label.value.lower() in WHITELISTED_TERMINATED_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True

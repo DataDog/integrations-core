@@ -17,7 +17,7 @@ The Ceph check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory.
+Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][8].
 See the [sample ceph.d/conf.yaml][2] for all available configuration options:
 
 ```yaml
@@ -105,3 +105,4 @@ Need help? Contact [Datadog Support][5].
 [5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-ceph-datadog/
 [7]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
+[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

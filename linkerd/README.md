@@ -12,7 +12,7 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9].
 See [sample linkerd.d/conf.yaml][3] for all available configuration options.
 
 ### Validation
@@ -56,3 +56,4 @@ Need help? Contact [Datadog Support][8].
 [6]: https://twitter.github.io/finagle/guide/Metrics.html
 [7]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

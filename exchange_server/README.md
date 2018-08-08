@@ -1,4 +1,4 @@
-# exchange_check Integration
+# Microsoft Exchange Server Integration
 
 ## Overview
 
@@ -13,7 +13,7 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 ### Configuration
 
-1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Exchange Server performance data.  
+1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your Exchange Server performance data.  
   ```yaml
   init_config:
 
@@ -63,3 +63,4 @@ The Exchange server check does not include any service checks at this time.
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/metadata.csv
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

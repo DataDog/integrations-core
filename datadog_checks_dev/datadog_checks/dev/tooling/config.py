@@ -19,6 +19,8 @@ CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
 SECRET_KEYS = {
     'github.token',
     'pypi.pass',
+    'trello.key',
+    'trello.token',
 }
 
 DEFAULT_CONFIG = OrderedDict([
@@ -31,6 +33,10 @@ DEFAULT_CONFIG = OrderedDict([
     ('pypi', OrderedDict((
         ('user', ''),
         ('pass', ''),
+    ))),
+    ('trello', OrderedDict((
+        ('key', ''),
+        ('token', ''),
     ))),
 ])
 

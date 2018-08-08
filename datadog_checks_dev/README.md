@@ -16,40 +16,41 @@ and is available on Linux, macOS, and Windows, and supports Python 2.7/3.5+ and 
 **Table of Contents**
 
 - [Management](#management)
-  * [Installation](#installation)
-  * [Usage](#usage)
-    + [Clean](#clean)
-    + [Config](#config)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Clean](#clean)
+    - [Config](#config)
       - [Find](#find)
       - [Restore](#restore)
       - [Set](#set)
       - [Show](#show)
       - [Update](#update)
-    + [Dep](#dep)
+    - [Dep](#dep)
       - [Freeze](#freeze)
       - [Pin](#pin)
       - [Resolve](#resolve)
       - [Verify](#verify)
-    + [Manifest](#manifest)
+    - [Manifest](#manifest)
       - [Set](#set-1)
       - [Verify](#verify-1)
-    + [Release](#release)
+    - [Release](#release)
       - [Changelog](#changelog)
       - [Freeze](#freeze-1)
       - [Make](#make)
       - [Show](#show-1)
-        * [Changes](#changes)
-        * [Ready](#ready)
+        - [Changes](#changes)
+        - [Ready](#ready)
       - [Tag](#tag)
+      - [Testable](#testable)
       - [Upload](#upload)
-    + [Test](#test)
+    - [Test](#test)
 - [Development](#development)
-  * [Installation](#installation-1)
-  * [Usage](#usage-1)
-    + [Fixtures](#fixtures)
+  - [Installation](#installation-1)
+  - [Usage](#usage-1)
+    - [Fixtures](#fixtures)
       - [Aggregator](#aggregator)
       - [Mocker](#mocker)
-    + [Utilities](#utilities)
+    - [Utilities](#utilities)
       - [Subprocess commands](#subprocess-commands)
       - [Temporary directories](#temporary-directories)
 
@@ -347,6 +348,7 @@ Commands:
   make       Release a single check
   show       Show release information
   tag        Tag the git repo with the current release of a check
+  testable   Create a Trello card for each change that needs to be tested
   upload     Build and upload a check to PyPI
 ```
 
@@ -461,6 +463,35 @@ Options:
   --push / --no-push
   -n, --dry-run
   -h, --help          Show this message and exit.
+```
+
+##### Testable
+
+```console
+$ ddev release testable -h
+Usage: ddev release testable [OPTIONS]
+
+  Create a Trello card for each change that needs to be tested for the next
+  release. Run via `ddev -x release testable` to force the use of the
+  current directory.
+
+  To avoid GitHub's public API rate limits, you need to set
+  `github.user`/`github.token` in your config file or use the
+  `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
+
+  To use Trello:
+  1. Go to `https://trello.com/app-key` and copy your API key.
+  2. Run `ddev config set trello.key` and paste your API key.
+  3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
+     where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
+     Authorize access and copy your token.
+  4. Run `ddev config set trello.token` and paste your token.
+
+Options:
+  --start TEXT   The PR number or commit hash to start at
+  --since TEXT   The version of the Agent to compare
+  -n, --dry-run  Only show the changes
+  -h, --help     Show this message and exit.
 ```
 
 ##### Upload

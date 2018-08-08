@@ -1,19 +1,23 @@
 {
+  "categories": [
+    "containers",
+    "network"
+  ],
+  "creates_events": false,
+  "display_name": "Kube Proxy",
+  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "kubeproxy.",
   "name": "kube_proxy",
+  "public_title": "Datadog-Kube Proxy Integration",
   "short_description": "kube_proxy description.",
-  "guid": "5cdc0363-a0df-469b-8346-2da4ab84128b",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Kube Proxy Integration",
-  "categories": ["containers", "network"],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kube_proxy/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

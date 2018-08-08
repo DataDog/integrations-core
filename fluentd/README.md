@@ -16,7 +16,7 @@ The Fluentd check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][18] to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 #### Prepare Fluentd
@@ -150,3 +150,4 @@ Need help? Contact [Datadog Support][7].
 [15]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
 [16]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [17]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
+[18]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

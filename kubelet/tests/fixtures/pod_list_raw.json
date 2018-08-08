@@ -1572,7 +1572,7 @@
                   "env":[
                      {
                         "name":"DD_API_KEY",
-                        "value":"bc1eaef59375be0b869efd4adcf433dc"
+                        "value":"foobar"
                      },
                      {
                         "name":"KUBERNETES",

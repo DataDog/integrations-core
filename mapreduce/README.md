@@ -16,7 +16,7 @@ The Mapreduce check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-Edit the `mapreduce.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to point to your server and port, set the masters to monitor. See the [sample mapreduce.d/conf.yaml][2] for all available configuration options.
+Edit the `mapreduce.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][11] to point to your server and port, set the masters to monitor. See the [sample mapreduce.d/conf.yaml][2] for all available configuration options.
 
 ### Validation
 
@@ -61,3 +61,4 @@ Need help? Contact [Datadog Support][5].
 [8]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mapreduce/images/mapreduce_dashboard.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

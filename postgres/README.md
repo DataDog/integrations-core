@@ -17,7 +17,7 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
-Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
+Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][25] to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
 
 #### Prepare Postgres
 
@@ -221,3 +221,4 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 [22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
 [23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/
 [24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
+[25]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

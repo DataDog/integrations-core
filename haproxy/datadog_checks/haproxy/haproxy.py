@@ -237,6 +237,9 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
 
+        # First initialize here so that it is defined whether or not we enter the for loop
+        line_tags = list(custom_tags)
+
         # Skip the first line, go backwards to set back_or_front
         for line in data[:0:-1]:
             if not line.strip():

@@ -22,7 +22,7 @@ If your service doesn't already listen for HTTP requests (via the http package),
 
 #### Connect the Agent
 
-1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
+1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][12]. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
 
     ```yaml
         init_config:
@@ -80,3 +80,4 @@ Need help? Contact [Datadog Support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

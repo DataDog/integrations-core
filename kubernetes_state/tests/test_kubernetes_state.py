@@ -91,6 +91,7 @@ TAGS = {
     ],
     NAMESPACE + '.container.status_report.count.waiting': [
         'reason:CrashLoopBackoff',
+        'reason:CrashLoopBackOff',
         'reason:ErrImagePull',
         'reason:ImagePullBackoff'
     ]

@@ -4,7 +4,7 @@
 
 
 def get_hostname():
-    return "stubbed.hostname"
+    return b'stubbed.hostname'
 
 
 def log(*args, **kwargs):

@@ -1,17 +1,22 @@
 {
+  "categories": [
+    "web",
+    "languages"
+  ],
+  "creates_events": false,
+  "display_name": "ASP.NET",
+  "guid": "475b0c6c-02e5-49ef-806b-9fab377f0839",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "aspdotnet.",
+  "metric_to_check": "aspdotnet.request.wait_time",
   "name": "aspdotnet",
+  "public_title": "Datadog-ASP.NET Integration",
   "short_description": "Track your ASP.NET service metrics in real time",
-  "guid": "475b0c6c-02e5-49ef-806b-9fab377f0839",
   "support": "core",
   "supported_os": [
     "windows"
   ],
-  "public_title": "Datadog-ASP.NET Integration",
-  "categories": ["web", "languages"],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/aspdotnet/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

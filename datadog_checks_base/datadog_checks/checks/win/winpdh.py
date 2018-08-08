@@ -1,33 +1,34 @@
-# Unless explicitly stated otherwise all files in this repository are licensed
-# under the Apache License Version 2.0.
-# This product includes software developed at Datadog (https://www.datadoghq.com/).
-# Copyright 2017 Datadog, Inc.
-
-from collections import defaultdict
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from collections import defaultdict
+
 import win32pdh
-import _winreg
+from six import iteritems, text_type
+from six.moves import winreg
 
 DATA_TYPE_INT = win32pdh.PDH_FMT_LONG
 DATA_TYPE_DOUBLE = win32pdh.PDH_FMT_DOUBLE
 DATA_POINT_INTERVAL = 0.10
 SINGLE_INSTANCE_KEY = "__single_instance"
 
+
 class WinPDHCounter(object):
     # store the dictionary of pdh counter names
     pdh_counter_dict = defaultdict(list)
     _use_en_counter_names = False
 
-    def __init__(self, class_name, counter_name, log, instance_name = None, machine_name = None, precision=None):
+    def __init__(self, class_name, counter_name, log, instance_name=None, machine_name=None, precision=None):
         self.logger = log
 
+        class_name_index_list = []
         try:
             self._get_counter_dictionary()
             class_name_index_list = WinPDHCounter.pdh_counter_dict[class_name]
-        except WindowsError as e:
+        except WindowsError:
             WinPDHCounter._use_en_counter_names = True
             self.logger.warning("Unable to get counter translations; attempting default English names")
-            pass
         except Exception as e:
             self.logger.error("Exception loading counter strings %s", str(e))
             raise
@@ -40,7 +41,9 @@ class WinPDHCounter(object):
                 self._class_name = class_name
             else:
                 if len(class_name_index_list) > 1:
-                    self.logger.warning("Class %s had multiple (%d) indices, using first" % (class_name, len(class_name_index_list)))
+                    self.logger.warning(
+                        "Class %s had multiple (%d) indices, using first" % (class_name, len(class_name_index_list))
+                    )
                 self._class_name = win32pdh.LookupPerfNameByIndex(None, int(class_name_index_list[0]))
 
         self._is_single_instance = False
@@ -51,7 +54,9 @@ class WinPDHCounter(object):
             self._precision = win32pdh.PDH_FMT_DOUBLE
         else:
             self._precision = precision
-        counters, instances = win32pdh.EnumObjectItems(None, machine_name, self._class_name, win32pdh.PERF_DETAIL_WIZARD)
+        counters, instances = win32pdh.EnumObjectItems(
+            None, machine_name, self._class_name, win32pdh.PERF_DETAIL_WIZARD
+        )
         if instance_name is None and len(instances) > 0:
             for inst in instances:
                 path = self._make_counter_path(machine_name, counter_name, inst, counters)
@@ -59,23 +64,24 @@ class WinPDHCounter(object):
                     continue
                 try:
                     self.counterdict[inst] = win32pdh.AddCounter(self.hq, path)
-                except: # noqa: E722
+                except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
                         self._class_name, self._counter_name))
                 try:
-                    self.logger.debug("Path: %s\n" % unicode(path))
-                except: # noqa: E722
+                    self.logger.debug("Path: %s\n" % text_type(path))
+                except:  # noqa: E722
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Failed to log path")
-                    pass
         else:
             if instance_name is not None:
                 # check to see that it's valid
                 if len(instances) <= 0:
-                    self.logger.error("%s doesn't seem to be a multi-instance counter, but asked for specific instance %s" % (
-                        class_name, instance_name
-                    ))
+                    self.logger.error(
+                        "%s doesn't seem to be a multi-instance counter, but asked for specific instance %s" % (
+                            class_name, instance_name
+                        )
+                    )
                     raise AttributeError("%s is not a multi-instance counter" % class_name)
                 if instance_name not in instances:
                     self.logger.error("%s is not a counter instance in %s" % (
@@ -87,15 +93,14 @@ class WinPDHCounter(object):
                 self.logger.warning("Empty path returned")
             else:
                 try:
-                    self.logger.debug("Path: %s\n" % unicode(path))
-                except: # noqa: E722
+                    self.logger.debug("Path: %s\n" % text_type(path))
+                except:  # noqa: E722
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Failed to log path")
-                    pass
                 try:
                     self.counterdict[SINGLE_INSTANCE_KEY] = win32pdh.AddCounter(self.hq, path)
-                except: # noqa: E722
+                except:  # noqa: E722
                     self.logger.fatal("Failed to create counter.  No instances of %s\%s" % (
                         self._class_name, counter_name))
                     raise
@@ -128,21 +133,18 @@ class WinPDHCounter(object):
         # names in the class "network interface"
         win32pdh.CollectQueryData(self.hq)
 
-        for inst, counter_handle in self.counterdict.iteritems():
+        for inst, counter_handle in iteritems(self.counterdict):
             try:
                 t, val = win32pdh.GetFormattedCounterValue(counter_handle, self._precision)
                 ret[inst] = val
-            except Exception as e:
+            except Exception:
                 # exception usually means self type needs two data points to calculate. Wait
                 # a bit and try again
                 time.sleep(DATA_POINT_INTERVAL)
                 win32pdh.CollectQueryData(self.hq)
                 # if we get exception self time, just return it up
-                try:
-                    t, val = win32pdh.GetFormattedCounterValue(counter_handle, self._precision)
-                    ret[inst] = val
-                except Exception as e:
-                    raise e
+                t, val = win32pdh.GetFormattedCounterValue(counter_handle, self._precision)
+                ret[inst] = val
         return ret
 
     def _get_counter_dictionary(self):
@@ -154,8 +156,8 @@ class WinPDHCounter(object):
             return
 
         try:
-            val, t = _winreg.QueryValueEx(_winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
-        except: # noqa: E722
+            val, t = winreg.QueryValueEx(winreg.HKEY_PERFORMANCE_DATA, "Counter 009")
+        except:  # noqa: E722
             self.logger.error("Windows error; performance counters not found in registry")
             self.logger.error("Performance counters may need to be rebuilt.")
             raise
@@ -185,14 +187,14 @@ class WinPDHCounter(object):
             idx += 2
 
     def _make_counter_path(self, machine_name, counter_name, instance_name, counters):
-        '''
+        """
         When handling non english versions, the counters don't work quite as documented.
         This is because strings like "Bytes Sent/sec" might appear multiple times in the
         english master, and might not have mappings for each index.
 
         Search each index, and make sure the requested counter name actually appears in
         the list of available counters; that's the counter we'll use.
-        '''
+        """
         path = ""
         if WinPDHCounter._use_en_counter_names:
             '''
@@ -202,7 +204,7 @@ class WinPDHCounter(object):
             try:
                 path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, counter_name))
                 self.logger.debug("Successfully created English-only path")
-            except Exception as e: # noqa: E722
+            except Exception as e:  # noqa: E722
                 self.logger.warning("Unable to create English-only path %s" % str(e))
                 raise
             return path
@@ -218,12 +220,11 @@ class WinPDHCounter(object):
             # check to see if this counter is in the list of counters for this class
             if c not in counters:
                 try:
-                    self.logger.debug("Index %s counter %s not in counter list" % (index, unicode(c)))
-                except: # noqa: E722
+                    self.logger.debug("Index %s counter %s not in counter list" % (index, text_type(c)))
+                except:  # noqa: E722
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
                     self.logger.debug("Index %s not in counter list" % index)
-                    pass
 
                 continue
 
@@ -232,10 +233,9 @@ class WinPDHCounter(object):
                 path = win32pdh.MakeCounterPath((machine_name, self._class_name, instance_name, None, 0, c))
                 self.logger.debug("Successfully created path %s" % index)
                 break
-            except: # noqa: E722
+            except:  # noqa: E722
                 try:
-                    self.logger.info("Unable to make path with counter %s, trying next available" % unicode(c))
-                except: # noqa: E722
+                    self.logger.info("Unable to make path with counter %s, trying next available" % text_type(c))
+                except:  # noqa: E722
                     self.logger.info("Unable to make path with counter index %s, trying next available" % index)
-                    pass
         return path

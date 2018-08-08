@@ -13,7 +13,7 @@ The Kubelet check is included in the [Datadog Agent][3] package, so you don't ne
 
 ## Configuration
 
-Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to your server and port, set tags to send along with metrics.
+Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4], to point to your server and port, set tags to send along with metrics.
 
 ## Validation
 
@@ -52,3 +52,4 @@ The check will still be able to collect:
 [1]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [2]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
 [3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

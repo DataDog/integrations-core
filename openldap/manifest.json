@@ -1,20 +1,24 @@
 {
+  "aliases": [],
+  "categories": [
+    "data store"
+  ],
+  "creates_events": false,
+  "display_name": "OpenLDAP",
+  "guid": "ec61c06d-a870-4183-8a27-c66db1fc47cc",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "openldap.",
+  "metric_to_check": "openldap.connections.current",
   "name": "openldap",
-  "short_description": "The OpenLDAP integration collect metrics from your OpenLDAP server using the cn=monitor backend",
+  "public_title": "Datadog-OpenLDAP Integration",
+  "short_description": "Collect metrics from your OpenLDAP server using the cn=monitor backend",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "guid": "ec61c06d-a870-4183-8a27-c66db1fc47cc",
-  "public_title": "Datadog-OpenLDAP Integration",
-  "categories":["data store"],
-  "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/openldap/",
-  "aliases":[],
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }
