@@ -11,36 +11,60 @@ The PgBouncer check is included in the [Datadog Agent][1] package, so you don't 
 
 ### Configuration
 
-Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
+To capture PGBouncer metrics you need to install the Datadog Agent on your PGBouncer server.
 
-```
-init_config:
+1. Create a read-only datadog user with proper access to your PostgreSQL Server. Start psql on your PostgreSQL database and run:
 
-instances:
-  - host: localhost
-    port: 15433
-    username: <YOUR_USERNAME>
-    password: <YOUR_PASSWORD>
-#   tags:
-#     - env:prod
-  - database_url: postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>:<DB_PORT>/dbname?sslmode=require
-#   tags:
-#     - role:main
-```
+    ```
+    CREATE USER datadog WITH PASSWORD '<YOUR_PASSWORD>';
+    GRANT SELECT ON pg_stat_database TO datadog;
+    ```
 
-**Note**: `database_url` parameter value should point to PgBouncer stats database.
+    Check if the datadog user has been correctly created with this command:
+    
+    ```
+    psql -h localhost -U datadog postgres -c "SELECT * FROM pg_stat_database LIMIT(1);"  <br/> && \
+    echo -e "\e[0;32mPostgres connection - OK\e[0m" || \ ||  <br/>echo -e "\e[0;31mCannot connect to Postgres\e[0m"
+    ```
 
-In your PgBouncer userlist.txt file add
-```
-  "datadog" "<your_pass>"
-```
+    When prompted for a password, enter your `<YOUR_PASSWORD>`.
 
-Next, in your PgBouncer pgbouncer.ini file add
-```
-stats_users = datadog
-```
+2. In your PGBouncer `userlist.txt` file add:
+  
+    ```
+    "datadog" "<YOUR_PASSWORD>"
+    ```
 
-[Restart the Agent][3] to start sending PgBouncer metrics to Datadog.
+3. In your PGBouncer `pgbouncer.ini` file add `datadog` as `stats_user`​ or `admin_user`, for example:
+
+    ```
+    stats_users = datadog
+    ```
+
+4. Configure the Agent to connect to PGBouncer: 
+  Edit the `pgbouncer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. 
+  See the [sample pgbouncer.d/conf.yaml][2] for all available configuration options:
+
+    ```
+      init_config:
+
+      instances:
+        - host: localhost
+          port: 15433
+          username: <YOUR_USERNAME>
+          password: <YOUR_PASSWORD>
+          tags:
+            - optional_tag1
+            - optional_tag2
+        - database_url: postgresql://user:pass@host:5432/dbname?sslmode=require
+          tags:
+            - optional_tag3
+            - optional_tag4  
+    ```
+
+    **Note**: `database_url` parameter value should point to PgBouncer stats database.
+
+5. [Restart the Agent][3] to start sending PgBouncer metrics to Datadog.
 
 ### Validation
 
@@ -48,6 +72,7 @@ stats_users = datadog
 
 ## Data Collected
 ### Metrics
+
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 Note: Not all metrics are available with all versions of PgBouncer.
