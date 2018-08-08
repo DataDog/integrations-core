@@ -5,6 +5,7 @@ boto==2.46.1
 cffi==1.11.5
 cryptography==2.3
 cx_oracle==6.0.1
+ddtrace==0.12.1
 dnspython==1.12.0
 enum34==1.1.6
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
