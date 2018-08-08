@@ -59,34 +59,9 @@ def init_config():
 @pytest.fixture
 def instance_sql2008():
     return {
-        'host': '({})\SQL2008R2SP2'.format(HOST),
+        'host': '(local)\SQL2008R2SP2',
         'username': 'sa',
         'password': 'Password12!',
-    }
-
-
-@pytest.fixture
-def instance_sql2012():
-    return {
-        'host': '({})\SQL2012SP1'.format(HOST),
-        'username': 'sa',
-        'password': 'Password12!',
-    }
-
-
-@pytest.fixture
-def instance_sql2014():
-    return {
-        'host': '({})\SQL2014'.format(HOST),
-        'username': 'sa',
-        'password': 'Password12!',
-    }
-
-
-@pytest.fixture
-def instance_sql2017():
-    return {
-        'connection_string': 'Server=(local)\SQL2017;Database=master;User ID=sa;Password=Password12!'
     }
 
 
