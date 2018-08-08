@@ -19,7 +19,7 @@ The Zookeeper check is included in the [Datadog Agent][13] package, so you don't
 2. [Restart the Agent][15]
 
 ### Zookeepr Whitelist
-Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][22]) that whitelists [4 letter word commands][23]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][22]) that whitelists [4 letter word commands][23]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
 #### Metric Collection
 
@@ -94,9 +94,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 ## Data Collected
 ### Metrics
 
-As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of
-zookeeper stats. This check first parses the `stat` admin command for a version
-number. If the zookeeper version supports `mntr`, it is also parsed.
+As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of zookeeper stats. This check first parses the `stat` admin command for a version number. If the zookeeper version supports `mntr`, it is also parsed.
 
 Duplicate information is being reported by both `mntr` and `stat`: the duplicated
  `stat` metrics are only kept for backward compatibility.

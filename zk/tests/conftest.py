@@ -99,26 +99,37 @@ def aggregator():
     return aggregator
 
 
+def get_version():
+    zk_version = os.environ.get("ZK_VERSION")
+    version = [int(k) for k in zk_version.split(".")]
+    if len(version) == 2:
+        version += [0]
+    return version
+
+
 @pytest.fixture(scope="session")
 def spin_up_zk():
-    compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
-
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
-        for _ in xrange(3):
+        for _ in xrange(10):
             try:
                 out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
                 out.seek(0)
                 if out.readline() != 'imok':
                     raise ZKConnectionFailure()
                 booted = True
+                break
             except ZKConnectionFailure:
                 time.sleep(1)
 
         if not booted:
             raise RetryError("Zookeeper failed to boot!")
         sys.stderr.write("ZK boot complete.\n")
+
+    compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
+    if get_version() >= [3, 5, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
         yield
