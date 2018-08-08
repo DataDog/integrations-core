@@ -37,7 +37,7 @@ instances:
 
 **Note**:
 
-* If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
+* If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster - e.g. if you use a hosted Elasticsearch - set `cluster_stats` to true.
 
 * To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
@@ -89,7 +89,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes — red, yellow, or green.
+The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes - red, yellow, or green.
 
 ### Service checks
 

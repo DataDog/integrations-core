@@ -19,7 +19,7 @@ Any recent version of macOS comes with Python pre-installed; however, it might b
 
 #### Option 1: Install Python with Homebrew
 
-[`Homebrew`][3] is a package manager for macOS that makes a lot easier installing software on macOS, specially from the command line. Follow the "Doing it Right" instructions in [the Hitchhiker’s Guide to Python][4].
+[`Homebrew`][3] is a package manager for macOS that makes a lot easier installing software on macOS, specially from the command line. Follow the "Doing it Right" instructions in [the Hitchhiker's Guide to Python][4].
 
 #### Option 2: Install Python with miniconda
 
@@ -41,7 +41,7 @@ Each integration has its own set of dependencies that must be added to Python in
 
 ### Virtualenv and Virtualenvwrapper
 
-We recommend using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker’s Guide to Python describing how to set up these two tools.
+We recommend using [Virtualenv][8] to manage Python virtual environments, and [virtualenvwrapper][9] to make the process smoother. There's a [comprehensive guide][10] in the Hitchhiker's Guide to Python describing how to set up these two tools.
 
 ### Miniconda
 

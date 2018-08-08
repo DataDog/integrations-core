@@ -265,7 +265,7 @@ By default, our integration pipeline support the following conversion patterns:
 
   ```
   %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
+  %d [%t] %-5p %c - %m%n
   ```
 
 Make sure you clone and edit the [integration pipeline][19] if you have a different format.

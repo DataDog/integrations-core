@@ -16,7 +16,7 @@ The Go Expvar check is packaged with the Agent, so [install the Agent][2] anywhe
 ### Configuration
 #### Prepare your Go service
 
-If your Go service doesn't use the [expvar package][3] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar — i.e. you only want to collect your service's memory metrics — import the package using the blank identifier (`import _ "expvar"`).
+If your Go service doesn't use the [expvar package][3] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar - i.e. you only want to collect your service's memory metrics - import the package using the blank identifier (`import _ "expvar"`).
 
 If your service doesn't already listen for HTTP requests (via the http package), [make it listen][4] locally, just for the Datadog Agent.
 
