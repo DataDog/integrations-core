@@ -8,7 +8,7 @@ import time
 import pytest
 import requests
 
-from .common import HERE, URL
+from .common import HERE, URL, get_es_version
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -16,6 +16,10 @@ def spin_up_elastic():
     args = [
         'docker-compose', '-f', os.path.join(HERE, 'compose', 'elastic.yaml')
     ]
+    env = os.environ
+    env['ELASTIC_CONFIG'] = "dummy=true"
+    if get_es_version() >= [6, 3, 0]:
+        env['ELASTIC_CONFIG'] = "xpack.monitoring.collection.enabled=true"
     subprocess.check_call(args + ["up", "-d"])
     print("Waiting for ES to boot...")
 
@@ -31,7 +35,6 @@ def spin_up_elastic():
     requests.put(URL, '/datadog/')
     yield
     subprocess.check_call(args + ["down"])
-
 
 @pytest.fixture
 def aggregator():

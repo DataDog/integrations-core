@@ -79,9 +79,11 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
 
 By default, not all of the following metrics are sent by the Agent. To send all metrics, configure flags in `elastic.yaml` as shown above.
 
-* `pshard_states` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
+* `pshard_stats` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
 * `index_stats` sends **elasticsearch.index.\*** metrics
 * `pending_task_stats` sends **elasticsearch.pending_\*** metrics
+
+As of version >=6.3.0, you will have to set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect some metrics (for example, pshard or index related metrics). See [Elasticsearch release notes - monitoring section][12].
 
 ### Metrics
 
@@ -121,3 +123,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [9]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/
 [10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
 [11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[12]: https://www.elastic.co/guide/en/elasticsearch/reference/current/release-notes-6.3.0.html

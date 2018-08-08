@@ -373,7 +373,7 @@ class ESCheck(AgentCheck):
         "elasticsearch.thread_pool.bulk.rejected": ("rate", "thread_pool.bulk.rejected"),
     }
 
-    ADDITIONAL_METRICS_POST_6_3 = { # bulk queue was renamed to write queue post 6.3
+    ADDITIONAL_METRICS_POST_6_3 = {
         "elasticsearch.thread_pool.write.active": ("gauge", "thread_pool.write.active"),
         "elasticsearch.thread_pool.write.threads": ("gauge", "thread_pool.write.threads"),
         "elasticsearch.thread_pool.write.queue": ("gauge", "thread_pool.write.queue"),
