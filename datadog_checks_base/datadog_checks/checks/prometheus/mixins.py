@@ -155,6 +155,10 @@ class PrometheusScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         self._text_filter_blacklist = []
 
+        # Force the data format to plain text, in order to use the _text_filter_blacklist feature
+        # 6.5.0 will be text-only anyway
+        self._force_text_format = False
+
     def parse_metric_family(self, response):
         """
         Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
@@ -468,7 +472,7 @@ class PrometheusScraperMixin(object):
         except AttributeError as err:
             self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
 
-    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None):
+    def poll(self, endpoint, headers=None):
         """
         Polls the metrics from the prometheus metrics endpoint provided.
         Defaults to the protobuf format, but can use the formats specified by
@@ -481,7 +485,6 @@ class PrometheusScraperMixin(object):
         The caller needs to close the requests.Response
 
         :param endpoint: string url endpoint
-        :param pFormat: the preferred format defined in PrometheusFormat
         :param headers: extra headers
         :return: requests.Response
         """
@@ -489,10 +492,12 @@ class PrometheusScraperMixin(object):
             headers = {}
         if 'accept-encoding' not in headers:
             headers['accept-encoding'] = 'gzip'
-        if pFormat == PrometheusFormat.PROTOBUF:
+
+        if not self._force_text_format:
             headers['accept'] = 'application/vnd.google.protobuf; ' \
                                 'proto=io.prometheus.client.MetricFamily; ' \
                                 'encoding=delimited'
+
         headers.update(self.extra_headers)
         cert = None
         if isinstance(self.ssl_cert, basestring):
@@ -506,7 +511,8 @@ class PrometheusScraperMixin(object):
             disable_warnings(InsecureRequestWarning)
             verify = False
         try:
-            response = requests.get(endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify)
+            stream = True if self._force_text_format is True else False
+            response = requests.get(endpoint, headers=headers, stream=stream, timeout=self.prometheus_timeout, cert=cert, verify=verify)
         except requests.exceptions.SSLError:
             self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
             raise
