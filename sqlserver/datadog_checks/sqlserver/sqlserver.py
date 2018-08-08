@@ -39,6 +39,10 @@ COUNTER_TYPE_QUERY = '''select distinct cntr_type
                         from sys.dm_os_performance_counters
                         where counter_name = ?;'''
 
+COUNTER_TYPE_QUERY = '''select distinct cntr_type
+                        from sys.dm_os_performance_counters
+                        where counter_name = ?;'''
+
 BASE_NAME_QUERY = '''select distinct counter_name
                      from sys.dm_os_performance_counters
                      where (counter_name=? or counter_name=?
@@ -48,7 +52,7 @@ INSTANCES_QUERY = '''select instance_name
                      from sys.dm_os_performance_counters
                      where counter_name=? and instance_name!='_Total';'''
 
-VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name
+VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_name, object_name
                           from sys.dm_os_performance_counters
                           where counter_name in (%s)
                           order by cntr_type;'''
@@ -506,7 +510,7 @@ class SQLServer(AgentCheck):
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 
-                    if row.type.lower() in self.proc_type_mapping:
+                    if row.type in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags)
                     else:
                         self.log.warning('%s is not a recognised type from procedure %s, metric %s'
@@ -650,6 +654,7 @@ class SqlServerMetric(object):
         self.base_name = base_name
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
+        self.object_name = cfg_instance.get('object_name', '')
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -667,7 +672,7 @@ class SqlSimpleMetric(SqlServerMetric):
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
-            select counter_name, instance_name, cntr_value
+            select counter_name, instance_name, object_name, cntr_value
             from sys.dm_os_performance_counters where counter_name in (%s)
             ''' % placeholders
 
@@ -677,22 +682,24 @@ class SqlSimpleMetric(SqlServerMetric):
         return rows
 
     def fetch_metric(self, cursor, rows, tags):
-        for counter_name_long, instance_name_long, cntr_value in rows:
+        for counter_name_long, instance_name_long, object_name, cntr_value in rows:
             counter_name = counter_name_long.strip()
             instance_name = instance_name_long.strip()
+            object_name = object_name.strip()
             if counter_name.strip() == self.sql_name:
                 matched = False
+                metric_tags = list(tags)
+
                 if self.instance == ALL_INSTANCES and instance_name != "_Total":
                     matched = True
-                else:
-                    if instance_name == self.instance:
+                elif instance_name == self.instance:
+                    if not self.object_name or object_name == self.object_name:
                         matched = True
+
                 if matched:
-                    metric_tags = tags
                     if self.instance == ALL_INSTANCES:
-                        metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
-                    self.report_function(self.datadog_name, cntr_value,
-                                        tags=metric_tags)
+                        metric_tags.append('{}:{}'.format(self.tag_by, instance_name.strip()))
+                    self.report_function(self.datadog_name, cntr_value, tags=metric_tags)
                     if self.instance != ALL_INSTANCES:
                         break
 
@@ -709,8 +716,8 @@ class SqlFractionMetric(SqlServerMetric):
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         results = defaultdict(list)
-        for counter_name, cntr_type, cntr_value, instance_name in rows:
-            rowlist = [cntr_type, cntr_value, instance_name.strip()]
+        for counter_name, cntr_type, cntr_value, instance_name, object_name in rows:
+            rowlist = [cntr_type, cntr_value, instance_name.strip(), object_name.strip()]
             logger.debug("Adding new rowlist %s", str(rowlist))
             results[counter_name.strip()].append(rowlist)
         return results
@@ -739,11 +746,19 @@ class SqlFractionMetric(SqlServerMetric):
             ctype = row[0]
             cval = row[1]
             inst = row[2]
+            object_name = row[3]
 
             if inst in done_instances:
                 continue
 
-            if self.instance != ALL_INSTANCES and inst != self.instance:
+            if (
+                self.instance != ALL_INSTANCES
+                and inst != self.instance
+                and (
+                    not self.object_name
+                    or object_name != self.object_name
+                )
+            ):
                 done_instances.append(inst)
                 continue
 
