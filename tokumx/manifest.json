@@ -1,7 +1,17 @@
 {
+  "categories": [
+    "data store"
+  ],
+  "creates_events": true,
+  "display_name": "Tokumx",
+  "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "tokumx.",
+  "metric_to_check": "tokumx.uptime",
   "name": "tokumx",
+  "public_title": "Datadog-Tokumx Integration",
   "short_description": "Track metrics for opcounters, replication lag, cache table size, and more.",
   "support": "core",
   "supported_os": [
@@ -9,13 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "7785939b-bfb6-4d3e-acc2-94c1f5fb33e7",
-  "public_title": "Datadog-Tokumx Integration",
-  "categories": [
-    "data store"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/tokumx/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

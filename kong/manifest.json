@@ -1,10 +1,18 @@
 {
+  "categories": [
+    "web",
+    "api"
+  ],
+  "creates_events": false,
+  "display_name": "Kong",
+  "guid": "f1098d6f-b393-4374-81c0-47c0a142aeef",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "kong.",
+  "metric_to_check": "kong.total_requests",
   "name": "kong",
-  "display_name": "Kong",
-  "creates_events": true,
-  "metric_to_check": "kong.table.count",
+  "public_title": "Datadog-Kong Integration",
   "short_description": "Track total requests, response codes, client connections, and more.",
   "support": "core",
   "supported_os": [
@@ -12,14 +20,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "f1098d6f-b393-4374-81c0-47c0a142aeef",
-  "public_title": "Datadog-Kong Integration",
-  "categories": [
-    "web",
-    "api"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kong/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

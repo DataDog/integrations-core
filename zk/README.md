@@ -18,6 +18,9 @@ The Zookeeper check is included in the [Datadog Agent][13] package, so you don't
 
 2. [Restart the Agent][15]
 
+### Zookeepr Whitelist
+Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][22]) that whitelists [4 letter word commands][23]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+
 #### Metric Collection
 
 *  Add this configuration block to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
@@ -144,3 +147,5 @@ Need help? Contact [Datadog Support][18].
 [18]: https://docs.datadoghq.com/help/
 [20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
 [21]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[22]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
+[23]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw

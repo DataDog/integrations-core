@@ -1,24 +1,23 @@
 {
+  "categories": [
+    "data store"
+  ],
+  "creates_events": false,
+  "display_name": "Cassandra Nodetool",
+  "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "cassandra.",
+  "metric_to_check": "cassandra.nodetool.status.status",
   "name": "cassandra_nodetool",
-  "display_name": "Cassandra Nodetool",
-  "creates_events": true,
-  "metric_to_check": "cassandra.nodetool.status.owns",
+  "public_title": "Datadog-Cassandra Nodetool Integration",
   "short_description": "monitor cassandra using the nodetool utility",
-  "guid": "00e4a8bd-8ec2-4bb4-b725-6aaa91618d13",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Cassandra Nodetool Integration",
-  "categories": [
-    "data store"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/cassandra_nodetool/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

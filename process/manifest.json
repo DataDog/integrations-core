@@ -1,7 +1,17 @@
 {
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "Process",
+  "guid": "1675eced-b435-464a-8f84-f65e438f838e",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "system.",
+  "metric_to_check": "system.processes.cpu.pct",
   "name": "process",
+  "public_title": "Datadog-Processes Integration",
   "short_description": "Capture metrics and monitor the status of running processes.",
   "support": "core",
   "supported_os": [
@@ -9,13 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "1675eced-b435-464a-8f84-f65e438f838e",
-  "public_title": "Datadog-Processes Integration",
-  "categories": [
-    "os & system"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/process/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

@@ -1,11 +1,21 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "creates_events": "true",
-  "manifest_version": "1.0.0",
-  "name": "consul",
-  "display_name": "Consul",
+  "categories": [
+    "containers",
+    "orchestration",
+    "configuration & deployment",
+    "notification",
+    "log collection"
+  ],
   "creates_events": true,
+  "display_name": "Consul",
+  "guid": "ec1e9fac-a339-49a3-b501-60656d2a5671",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "consul.",
   "metric_to_check": "consul.peers",
+  "name": "consul",
+  "public_title": "Datadog-Consul Integration",
   "short_description": "Alert on Consul health checks, see service-to-node mappings, and much more.",
   "support": "core",
   "supported_os": [
@@ -13,11 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "ec1e9fac-a339-49a3-b501-60656d2a5671",
-  "public_title": "Datadog-Consul Integration",
-  "categories":["containers", "orchestration", "configuration & deployment", "notification", "log collection"],
-  "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/consul/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

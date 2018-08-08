@@ -1,4 +1,4 @@
-# exchange_check Integration
+# Microsoft Exchange Server Integration
 
 ## Overview
 

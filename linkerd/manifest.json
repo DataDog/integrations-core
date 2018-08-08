@@ -1,25 +1,23 @@
 {
+  "categories": [
+    "web"
+  ],
+  "creates_events": false,
+  "display_name": "Linkerd",
+  "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "linkerd",
-  "display_name": "Linkerd",
-  "short_description": "Monitor your services health with metrics from linkerd.",
   "metric_prefix": "linkerd.",
   "metric_to_check": "linkerd.rt.client.connections",
-  "creates_events": false,
-  "guid": "9aa60dff-4baf-4112-9177-f9c3814dd513",
+  "name": "linkerd",
+  "public_title": "Datadog-Linkerd Integration",
+  "short_description": "Monitor your services health with metrics from linkerd.",
   "support": "core",
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/linkerd/",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Linkerd Integration",
-  "categories": [
-    "web"
-  ],
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }
