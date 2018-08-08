@@ -115,8 +115,7 @@ def spin_up_zk():
                 time.sleep(1)
 
         if not booted:
-            # raise RetryError("Zookeeper failed to boot!")
-            return True
+            raise RetryError("Zookeeper failed to boot!")
         sys.stderr.write("ZK boot complete.\n")
 
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
