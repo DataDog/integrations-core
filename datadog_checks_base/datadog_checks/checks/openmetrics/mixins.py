@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from fnmatch import fnmatchcase
-import logging
+from ...errors import CheckException
 import requests
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -17,9 +17,10 @@ from six import PY3, iteritems, string_types
 
 from ..base import AgentCheck
 
+from datadog_checks.config import is_affirmative
+
 if PY3:
     long = int
-
 
 class PrometheusFormat:
     """
@@ -29,50 +30,84 @@ class PrometheusFormat:
     PROTOBUF = "PROTOBUF"
     TEXT = "TEXT"
 
-
 class UnknownFormatError(TypeError):
     pass
 
-
-class PrometheusScraperMixin(object):
+class OpenMetricsScraperMixin(object):
     # pylint: disable=E1101
     # This class is not supposed to be used by itself, it provides scraping behavior but
     # need to be within a check in the end
 
-    UNWANTED_LABELS = ["le", "quantile"]  # are specifics keys for prometheus itself
+    UNWANTED_LABELS = ['le', 'quantile']  # are specifics keys for prometheus itself
     REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
 
     def __init__(self, *args, **kwargs):
-        super(PrometheusScraperMixin, self).__init__(*args, **kwargs)
-
-        # The scraper needs its own logger
-        self.log = logging.getLogger(__name__)
+        # Initialize AgentCheck's base class
+        super(OpenMetricsScraperMixin, self).__init__(*args, **kwargs)
 
         # message.type is the index in this array
         # see: https://github.com/prometheus/client_model/blob/master/ruby/lib/prometheus/client/model/metrics.pb.rb
         self.METRIC_TYPES = ['counter', 'gauge', 'summary', 'untyped', 'histogram']
 
+    def create_scraper_configuration(self, instance=None):
+
+        # We can choose to create a default mixin configuration for an empty instance
+        if instance is None:
+            instance = {}
+
+        # Create an empty configuration
+        config = {}
+
+        # Set the endpoint
+        endpoint = instance.get('prometheus_url')
+        if instance and endpoint is None:
+            raise CheckException("You have to define a prometheus_url for each prometheus instance")
+
+        config['prometheus_url'] = endpoint
+
         # `NAMESPACE` is the prefix metrics will have. Need to be hardcoded in the
         # child check class.
-        self.NAMESPACE = ''
+        namespace = instance.get('namespace')
+        # Check if we have a namespace
+        if instance and namespace is None:
+            if self.default_namespace is None:
+                raise CheckException("You have to define a namespace for each prometheus check")
+            namespace = self.default_namespace
+
+        config['NAMESPACE'] = namespace
+
+        # Retrieve potential default instance settings for the namespace
+        default_instance = self.default_instances.get(namespace, {})
 
         # `metrics_mapper` is a dictionary where the keys are the metrics to capture
         # and the values are the corresponding metrics names to have in datadog.
         # Note: it is empty in the parent class but will need to be
         # overloaded/hardcoded in the final check not to be counted as custom metric.
-        self.metrics_mapper = {}
+
+        # Metrics are preprocessed if no mapping
+        metrics_mapper = {}
+        # We merge list and dictionaries from optional defaults & instance settings
+        metrics = default_instance.get('metrics', []) + instance.get('metrics', [])
+        for metric in metrics:
+            if isinstance(metric, string_types):
+                metrics_mapper[metric] = metric
+            else:
+                metrics_mapper.update(metric)
+
+        config['metrics_mapper'] = metrics_mapper
 
         # `rate_metrics` contains the metrics that should be sent as rates
-        self.rate_metrics = []
+        config['rate_metrics'] = self._extract_rate_metrics(default_instance.get('type_overrides', []))
+        config['rate_metrics'].extend(self._extract_rate_metrics(instance.get('type_overrides', [])))
 
         # `_metrics_wildcards` holds the potential wildcards to match for metrics
-        self._metrics_wildcards = None
+        config['_metrics_wildcards'] = None
 
         # `prometheus_metrics_prefix` allows to specify a prefix that all
         # prometheus metrics should have. This can be used when the prometheus
         # endpoint we are scrapping allows to add a custom prefix to it's
         # metrics.
-        self.prometheus_metrics_prefix = ''
+        config['prometheus_metrics_prefix'] = instance.get('prometheus_metrics_prefix', default_instance.get('prometheus_metrics_prefix', ''))
 
         # `label_joins` holds the configuration for extracting 1:1 labels from
         # a target metric to all metric matching the label, example:
@@ -82,7 +117,8 @@ class PrometheusScraperMixin(object):
         #         'labels_to_get': ['node', 'host_ip']
         #     }
         # }
-        self.label_joins = {}
+        config['label_joins'] = default_instance.get('label_joins', {})
+        config['label_joins'].update(instance.get('label_joins', {}))
 
         # `_label_mapping` holds the additionals label info to add for a specific
         # label value, example:
@@ -91,7 +127,7 @@ class PrometheusScraperMixin(object):
         #         'dd-agent-9s1l1': [("node","yolo"),("host_ip","yey")]
         #     }
         # }
-        self._label_mapping = {}
+        config['_label_mapping'] = {}
 
         # `_active_label_mapping` holds a dictionary of label values found during the run
         # to cleanup the label_mapping of unused values, example:
@@ -100,66 +136,89 @@ class PrometheusScraperMixin(object):
         #         'dd-agent-9s1l1': True
         #     }
         # }
-        self._active_label_mapping = {}
+        config['_active_label_mapping'] = {}
 
         # `_watched_labels` holds the list of label to watch for enrichment
-        self._watched_labels = set()
+        config['_watched_labels'] = set()
 
-        self._dry_run = True
+        config['_dry_run'] = True
 
         # Some metrics are ignored because they are duplicates or introduce a
         # very high cardinality. Metrics included in this list will be silently
         # skipped without a 'Unable to handle metric' debug line in the logs
-        self.ignore_metrics = []
+        config['ignore_metrics'] = []
+
+        # If you want to send the buckets as tagged values when dealing with histograms,
+        # set send_histograms_buckets to True, set to False otherwise.
+        config['send_histograms_buckets'] = is_affirmative(instance.get('send_histograms_buckets',
+                                                           default_instance.get('send_histograms_buckets', True)))
+
+        # If you want to send `counter` metrics as monotonic counts, set this value to True.
+        # Set to False if you want to instead send those metrics as `gauge`.
+        config['send_monotonic_counter'] = is_affirmative(instance.get('send_monotonic_counter',
+                                                          default_instance.get('send_monotonic_counter', False)))
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
         # when sending the gauges.
-        self.labels_mapper = {}
+        config['labels_mapper'] = default_instance.get('labels_mapper', {})
+        config['labels_mapper'].update(instance.get('labels_mapper', {}))
 
         # `exclude_labels` is an array of labels names to exclude. Those labels
         # will just not be added as tags when submitting the metric.
-        self.exclude_labels = []
+        config['exclude_labels'] = default_instance.get('exclude_labels', []) + instance.get('exclude_labels', [])
 
         # `type_overrides` is a dictionary where the keys are prometheus metric names
         # and the values are a metric type (name as string) to use instead of the one
         # listed in the payload. It can be used to force a type on untyped metrics.
         # Note: it is empty in the parent class but will need to be
         # overloaded/hardcoded in the final check not to be counted as custom metric.
-        self.type_overrides = {}
+        config['type_overrides'] = default_instance.get('type_overrides', {})
+        config['type_overrides'].update(instance.get('type_overrides', {}))
 
         # Some metrics are retrieved from differents hosts and often
         # a label can hold this information, this transfers it to the hostname
-        self.label_to_hostname = None
+        config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
-        # Add a "health" service check for the prometheus endpoint
-        self.health_service_check = False
+        # Add a 'health' service check for the prometheus endpoint
+        config['health_service_check'] = is_affirmative(instance.get('health_service_check',
+                                                        default_instance.get('health_service_check', True)))
 
         # Can either be only the path to the certificate and thus you should specify the private key
         # or it can be the path to a file containing both the certificate & the private key
-        self.ssl_cert = None
+        config['ssl_cert'] = instance.get('ssl_cert', default_instance.get('ssl_cert', None))
 
         # Needed if the certificate does not include the private key
         #
         # /!\ The private key to your local certificate must be unencrypted.
         # Currently, Requests does not support using encrypted keys.
-        self.ssl_private_key = None
+        config['ssl_private_key'] = instance.get('ssl_private_key', default_instance.get('ssl_private_key', None))
 
         # The path to the trusted CA used for generating custom certificates
-        self.ssl_ca_cert = None
+        config['ssl_ca_cert'] = instance.get('ssl_ca_cert', default_instance.get('ssl_ca_cert', None))
 
         # Extra http headers to be sent when polling endpoint
-        self.extra_headers = {}
+        config['extra_headers'] = default_instance.get('extra_headers', {})
+        config['extra_headers'].update(instance.get('extra_headers', {}))
 
         # Timeout used during the network request
-        self.prometheus_timeout = 10
+        config['prometheus_timeout'] = instance.get('prometheus_timeout', default_instance.get('prometheus_timeout', 10))
+
+        # Authentication used when polling endpoint
+        config['username'] = instance.get('username', default_instance.get('username', None))
+        config['password'] = instance.get('password', default_instance.get('password', None))
+
+        # Custom tags that will be sent with each metric
+        config['custom_tags'] = instance.get('tags', [])
 
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
-        self._text_filter_blacklist = []
+        config['_text_filter_blacklist'] = []
 
-    def parse_metric_family(self, response):
+        return config
+
+    def parse_metric_family(self, response, scraper_config):
         """
         Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
 
@@ -185,11 +244,11 @@ class PrometheusScraperMixin(object):
 
                 message = metrics_pb2.MetricFamily()
                 message.ParseFromString(msg_buf)
-                message.name = self.remove_metric_prefix(message.name)
+                message.name = self._remove_metric_prefix(message.name, scraper_config)
 
                 # Lookup type overrides:
-                if self.type_overrides and message.name in self.type_overrides:
-                    new_type = self.type_overrides[message.name]
+                if scraper_config['type_overrides'] and message.name in scraper_config['type_overrides']:
+                    new_type = scraper_config['type_overrides'][message.name]
                     if new_type in self.METRIC_TYPES:
                         message.type = self.METRIC_TYPES.index(new_type)
                     else:
@@ -198,8 +257,8 @@ class PrometheusScraperMixin(object):
 
         elif 'text/plain' in response.headers['Content-Type']:
             input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE)
-            if self._text_filter_blacklist:
-                input_gen = self._text_filter_input(input_gen)
+            if scraper_config['_text_filter_blacklist']:
+                input_gen = self._text_filter_input(input_gen, scraper_config)
 
             messages = defaultdict(list)  # map with the name of the element (before the labels)
             # and the list of occurrences with labels and values
@@ -207,18 +266,18 @@ class PrometheusScraperMixin(object):
             obj_map = {}  # map of the types of each metrics
             obj_help = {}  # help for the metrics
             for metric in text_fd_to_metric_families(input_gen):
-                metric.name = self.remove_metric_prefix(metric.name)
-                metric_name = "%s_bucket" % metric.name if metric.type == "histogram" else metric.name
-                metric_type = self.type_overrides.get(metric_name, metric.type)
-                if metric_type == "untyped" or metric_type not in self.METRIC_TYPES:
+                metric.name = self._remove_metric_prefix(metric.name, scraper_config)
+                metric_name = '{}_bucket'.format(metric.name) if metric.type == 'histogram' else metric.name
+                metric_type = scraper_config['type_overrides'].get(metric_name, metric.type)
+                if metric_type == 'untyped' or metric_type not in self.METRIC_TYPES:
                     continue
 
                 for sample in metric.samples:
-                    if (sample[0].endswith("_sum") or sample[0].endswith("_count")) and \
-                            metric_type in ["histogram", "summary"]:
-                        messages[sample[0]].append({"labels": sample[1], 'value': sample[2]})
+                    if (sample[0].endswith('_sum') or sample[0].endswith('_count')) and \
+                            metric_type in ['histogram', 'summary']:
+                        messages[sample[0]].append({'labels': sample[1], 'value': sample[2]})
                     else:
-                        messages[metric_name].append({"labels": sample[1], 'value': sample[2]})
+                        messages[metric_name].append({'labels': sample[1], 'value': sample[2]})
 
                 obj_map[metric.name] = metric_type
                 obj_help[metric.name] = metric.documentation
@@ -230,7 +289,7 @@ class PrometheusScraperMixin(object):
             raise UnknownFormatError('Unsupported content-type provided: {}'.format(
                 response.headers['Content-Type']))
 
-    def _text_filter_input(self, input_gen):
+    def _text_filter_input(self, input_gen, scraper_config):
         """
         Filters out the text input line by line to avoid parsing and processing
         metrics we know we don't want to process. This only works on `text/plain`
@@ -239,15 +298,16 @@ class PrometheusScraperMixin(object):
         :output: generator of filtered lines
         """
         for line in input_gen:
-            for item in self._text_filter_blacklist:
+            for item in scraper_config['_text_filter_blacklist']:
                 if item in line:
                     break
             else:
                 # No blacklist matches, passing the line through
                 yield line
 
-    def remove_metric_prefix(self, metric):
-        return metric[len(self.prometheus_metrics_prefix):] if metric.startswith(self.prometheus_metrics_prefix) else metric
+    def _remove_metric_prefix(self, metric, scraper_config):
+        prometheus_metrics_prefix = scraper_config['prometheus_metrics_prefix']
+        return metric[len(prometheus_metrics_prefix):] if metric.startswith(prometheus_metrics_prefix) else metric
 
     @staticmethod
     def get_metric_value_by_labels(messages, _metric, _m, metric_suffix):
@@ -260,15 +320,23 @@ class PrometheusScraperMixin(object):
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
         expected_labels = set([(k, v) for k, v in iteritems(_metric["labels"])
-                               if k not in PrometheusScraperMixin.UNWANTED_LABELS])
+                               if k not in OpenMetricsScraperMixin.UNWANTED_LABELS])
         for elt in messages[metric_name]:
             current_labels = set([(k, v) for k, v in iteritems(elt["labels"])
-                                  if k not in PrometheusScraperMixin.UNWANTED_LABELS])
+                                  if k not in OpenMetricsScraperMixin.UNWANTED_LABELS])
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
-                return float(elt["value"])
+                return float(elt['value'])
 
-        raise AttributeError("cannot find expected labels for metric %s with suffix %s" % (metric_name, metric_suffix))
+        raise AttributeError("cannot find expected labels for metric {} with suffix {}".format(metric_name, metric_suffix))
+
+    def _extract_rate_metrics(self, type_overrides):
+        rate_metrics = []
+        for metric in type_overrides:
+            if type_overrides[metric] == 'rate':
+                rate_metrics.append(metric)
+                type_overrides[metric] = 'gauge'
+        return rate_metrics
 
     def _extract_metric_from_map(self, _m, messages, obj_map, obj_help):
         """
@@ -345,35 +413,35 @@ class PrometheusScraperMixin(object):
                         _l.value = _metric['labels'][lbl]
         return _obj
 
-    def scrape_metrics(self, endpoint):
+    def scrape_metrics(self, scraper_config):
         """
         Poll the data from prometheus and return the metrics as a generator.
         """
-        response = self.poll(endpoint)
+        response = self.poll(scraper_config)
         try:
             # no dry run if no label joins
-            if not self.label_joins:
-                self._dry_run = False
-            elif not self._watched_labels:
+            if not scraper_config['label_joins']:
+                scraper_config['_dry_run'] = False
+            elif not scraper_config['_watched_labels']:
                 # build the _watched_labels set
-                for metric, val in iteritems(self.label_joins):
-                    self._watched_labels.add(val['label_to_match'])
+                for metric, val in iteritems(scraper_config['label_joins']):
+                    scraper_config['_watched_labels'].add(val['label_to_match'])
 
-            for metric in self.parse_metric_family(response):
+            for metric in self.parse_metric_family(response, scraper_config):
                 yield metric
 
             # Set dry run off
-            self._dry_run = False
+            scraper_config['_dry_run'] = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in list(iteritems(self._label_mapping)):
+            for metric, mapping in scraper_config['_label_mapping'].items():
                 for key, val in list(iteritems(mapping)):
-                    if key not in self._active_label_mapping[metric]:
-                        del self._label_mapping[metric][key]
-            self._active_label_mapping = {}
+                    if key not in scraper_config['_active_label_mapping'][metric]:
+                        del scraper_config['_label_mapping'][metric][key]
+            scraper_config['_active_label_mapping'] = {}
         finally:
             response.close()
 
-    def process(self, endpoint, **kwargs):
+    def process(self, scraper_config, metric_transformers=None):
         """
         Polls the data from prometheus and pushes them as gauges
         `endpoint` is the metrics endpoint to use to poll metrics from Prometheus
@@ -381,98 +449,91 @@ class PrometheusScraperMixin(object):
         Note that if the instance has a 'tags' attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
-        instance = kwargs.get('instance')
-        if instance:
-            kwargs['custom_tags'] = instance.get('tags', [])
+        for metric in self.scrape_metrics(scraper_config):
+            self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
 
-        for metric in self.scrape_metrics(endpoint):
-            self.process_metric(metric, **kwargs)
-
-    def store_labels(self, message):
+    def _store_labels(self, message, scraper_config):
         # If targeted metric, store labels
-        if message.name in self.label_joins:
-            matching_label = self.label_joins[message.name]['label_to_match']
+        if message.name in scraper_config['label_joins']:
+            matching_label = scraper_config['label_joins'][message.name]['label_to_match']
             for metric in message.metric:
                 labels_list = []
                 matching_value = None
                 for label in metric.label:
                     if label.name == matching_label:
                         matching_value = label.value
-                    elif label.name in self.label_joins[message.name]['labels_to_get']:
+                    elif label.name in scraper_config['label_joins'][message.name]['labels_to_get']:
                         labels_list.append((label.name, label.value))
                 try:
-                    self._label_mapping[matching_label][matching_value] = labels_list
+                    scraper_config['_label_mapping'][matching_label][matching_value] = labels_list
                 except KeyError:
                     if matching_value is not None:
-                        self._label_mapping[matching_label] = {matching_value: labels_list}
+                        scraper_config['_label_mapping'][matching_label] = {matching_value: labels_list}
 
-    def join_labels(self, message):
+    def _join_labels(self, message, scraper_config):
         # Filter metric to see if we can enrich with joined labels
-        if self.label_joins:
+        if scraper_config['label_joins']:
             for metric in message.metric:
                 for label in metric.label:
-                    if label.name in self._watched_labels:
+                    if label.name in scraper_config['_watched_labels']:
                         # Set this label value as active
-                        if label.name not in self._active_label_mapping:
-                            self._active_label_mapping[label.name] = {}
-                        self._active_label_mapping[label.name][label.value] = True
+                        if label.name not in scraper_config['_active_label_mapping']:
+                            scraper_config['_active_label_mapping'][label.name] = {}
+                        scraper_config['_active_label_mapping'][label.name][label.value] = True
                         # If mapping found add corresponding labels
                         try:
-                            for label_tuple in self._label_mapping[label.name][label.value]:
+                            for label_tuple in scraper_config['_label_mapping'][label.name][label.value]:
                                 extra_label = metric.label.add()
                                 extra_label.name, extra_label.value = label_tuple
                         except KeyError:
                             pass
 
-    def process_metric(self, message, **kwargs):
+    def process_metric(self, message, scraper_config, metric_transformers=None):
         """
         Handle a prometheus metric message according to the following flow:
-            - search self.metrics_mapper for a prometheus.metric <--> datadog.metric mapping
+            - search scraper_config['metrics_mapper'] for a prometheus.metric <--> datadog.metric mapping
             - call check method with the same name as the metric
             - log some info if none of the above worked
 
-        `send_histograms_buckets` is used to specify if yes or no you want to send the buckets as tagged values when dealing with histograms.
+        `metric_transformers` is a dict of <metric name>:<function to run when the metric name is encountered>
         """
-
         # If targeted metric, store labels
-        self.store_labels(message)
+        self._store_labels(message, scraper_config)
 
-        if message.name in self.ignore_metrics:
+        if message.name in scraper_config['ignore_metrics']:
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels
-        self.join_labels(message)
+        self._join_labels(message, scraper_config)
 
-        send_histograms_buckets = kwargs.get('send_histograms_buckets', True)
-        send_monotonic_counter = kwargs.get('send_monotonic_counter', False)
-        custom_tags = kwargs.get('custom_tags')
-        ignore_unmapped = kwargs.get('ignore_unmapped', False)
+        if scraper_config['_dry_run']:
+            return
 
         try:
-            if not self._dry_run:
-                try:
-                    self._submit(self.metrics_mapper[message.name], message, send_histograms_buckets, send_monotonic_counter, custom_tags)
-                except KeyError:
-                    if not ignore_unmapped:
-                        # call magic method (non-generic check)
-                        handler = getattr(self, message.name)  # Lookup will throw AttributeError if not found
-                        try:
-                            handler(message, **kwargs)
-                        except Exception as err:
-                            self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
-                    else:
-                        # build the wildcard list if first pass
-                        if self._metrics_wildcards is None:
-                            self._metrics_wildcards = [x for x in self.metrics_mapper.keys() if '*' in x]
-                        # try matching wildcard (generic check)
-                        for wildcard in self._metrics_wildcards:
-                            if fnmatchcase(message.name, wildcard):
-                                self._submit(message.name, message, send_histograms_buckets, send_monotonic_counter, custom_tags)
+            metric = scraper_config['metrics_mapper'][message.name]
+            self._submit(metric, message, scraper_config)
+        except KeyError:
+            if metric_transformers is not None:
+                if message.name in metric_transformers:
+                    try:
+                        # Get the transformer function for this specific metric
+                        transformer = metric_transformers[message.name]
+                        transformer(message, scraper_config)
+                    except Exception as err:
+                        self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
+                else:
+                    self.log.debug("Unable to handle metric: {0} - error: No handler function named '{0}' defined".format(message.name))
+            else:
+                # build the wildcard list if first pass
+                if scraper_config['_metrics_wildcards'] is None:
+                    scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'].keys() if '*' in x]
 
-        except AttributeError as err:
-            self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
+                # try matching wildcard (generic check)
+                for wildcard in scraper_config['_metrics_wildcards']:
+                    if fnmatchcase(message.name, wildcard):
+                        self._submit(message.name, message, scraper_config)
 
-    def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None):
+    def poll(self, scraper_config, pFormat=PrometheusFormat.PROTOBUF, headers=None):
         """
         Polls the metrics from the prometheus metrics endpoint provided.
         Defaults to the protobuf format, but can use the formats specified by
@@ -489,6 +550,46 @@ class PrometheusScraperMixin(object):
         :param headers: extra headers
         :return: requests.Response
         """
+        endpoint = scraper_config.get('prometheus_url')
+
+        # Should we send a service check for when we make a request
+        health_service_check = scraper_config['health_service_check']
+        service_check_name = '{}{}'.format(scraper_config['NAMESPACE'], '.prometheus.health')
+        service_check_tags = scraper_config['custom_tags'] + ['endpoint:' + endpoint]
+        try:
+            response = self.send_request(endpoint, scraper_config, pFormat, headers)
+        except requests.exceptions.SSLError:
+            self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
+            raise
+        except IOError:
+            if health_service_check:
+                self.service_check(
+                    service_check_name,
+                    AgentCheck.CRITICAL,
+                    tags=service_check_tags
+                )
+            raise
+        try:
+            response.raise_for_status()
+            if health_service_check:
+                self.service_check(
+                    service_check_name,
+                    AgentCheck.OK,
+                    tags=service_check_tags
+                )
+            return response
+        except requests.HTTPError:
+            response.close()
+            if health_service_check:
+                self.service_check(
+                    service_check_name,
+                    AgentCheck.CRITICAL,
+                    tags=service_check_tags
+                )
+            raise
+
+    def send_request(self, endpoint, scraper_config, pFormat=PrometheusFormat.PROTOBUF, headers=None):
+        # Determine the headers
         if headers is None:
             headers = {}
         if 'accept-encoding' not in headers:
@@ -497,51 +598,31 @@ class PrometheusScraperMixin(object):
             headers['accept'] = 'application/vnd.google.protobuf; ' \
                                 'proto=io.prometheus.client.MetricFamily; ' \
                                 'encoding=delimited'
-        headers.update(self.extra_headers)
+        headers.update(scraper_config['extra_headers'])
+
+        # Determine the SSL verification settings
         cert = None
-        if isinstance(self.ssl_cert, string_types):
-            cert = self.ssl_cert
-            if isinstance(self.ssl_private_key, string_types):
-                cert = (self.ssl_cert, self.ssl_private_key)
+        if isinstance(scraper_config['ssl_cert'], string_types):
+            if isinstance(scraper_config['ssl_private_key'], string_types):
+                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
+            else:
+                cert = scraper_config['ssl_cert']
         verify = True
-        if isinstance(self.ssl_ca_cert, string_types):
-            verify = self.ssl_ca_cert
-        elif self.ssl_ca_cert is False:
+        if isinstance(scraper_config['ssl_ca_cert'], string_types):
+            verify = scraper_config['ssl_ca_cert']
+        elif scraper_config['ssl_ca_cert'] is False:
             disable_warnings(InsecureRequestWarning)
             verify = False
-        try:
-            response = requests.get(endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify)
-        except requests.exceptions.SSLError:
-            self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
-            raise
-        except IOError:
-            if self.health_service_check:
-                self._submit_service_check(
-                    "{}{}".format(self.NAMESPACE, ".prometheus.health"),
-                    AgentCheck.CRITICAL,
-                    tags=["endpoint:" + endpoint]
-                )
-            raise
-        try:
-            response.raise_for_status()
-            if self.health_service_check:
-                self._submit_service_check(
-                    "{}{}".format(self.NAMESPACE, ".prometheus.health"),
-                    AgentCheck.OK,
-                    tags=["endpoint:" + endpoint]
-                )
-            return response
-        except requests.HTTPError:
-            response.close()
-            if self.health_service_check:
-                self._submit_service_check(
-                    "{}{}".format(self.NAMESPACE, ".prometheus.health"),
-                    AgentCheck.CRITICAL,
-                    tags=["endpoint:" + endpoint]
-                )
-            raise
 
-    def _submit(self, metric_name, message, send_histograms_buckets=True, send_monotonic_counter=False, custom_tags=None, hostname=None):
+        # Determine the authentication settings
+        username = scraper_config['username']
+        password = scraper_config['password']
+        auth = (username, password) if username is not None and password is not None else None
+
+        return requests.get(endpoint, headers=headers, stream=False, timeout=scraper_config['prometheus_timeout'],
+                            cert=cert, verify=verify, auth=auth)
+
+    def _submit(self, metric_name, message, scraper_config, hostname=None):
         """
         For each metric in the message, report it as a gauge with all labels as tags
         except if a labels dict is passed, in which case keys are label names we'll extract
@@ -556,105 +637,111 @@ class PrometheusScraperMixin(object):
         """
         if message.type < len(self.METRIC_TYPES):
             for metric in message.metric:
-                custom_hostname = self._get_hostname(hostname, metric)
+                custom_hostname = self._get_hostname(hostname, metric, scraper_config)
                 if message.type == 0:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
                     if self._is_value_valid(val):
-                        if send_monotonic_counter:
-                            self._submit_monotonic_count(metric_name, val, metric, custom_tags, custom_hostname)
+                        # Determine the tags to send
+                        tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=custom_hostname)
+                        metric_name_with_namespace = '{}.{}'.format(scraper_config['NAMESPACE'], metric_name)
+                        if scraper_config['send_monotonic_counter']:
+                            self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                         else:
-                            self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                            self.gauge(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                     else:
                         self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
                 elif message.type == 4:
-                    self._submit_gauges_from_histogram(metric_name, metric, send_histograms_buckets, custom_tags, custom_hostname)
+                    self._submit_gauges_from_histogram(metric_name, metric, scraper_config, hostname=custom_hostname)
                 elif message.type == 2:
-                    self._submit_gauges_from_summary(metric_name, metric, custom_tags, custom_hostname)
+                    self._submit_gauges_from_summary(metric_name, metric, scraper_config, hostname=custom_hostname)
                 else:
                     val = getattr(metric, self.METRIC_TYPES[message.type]).value
                     if self._is_value_valid(val):
-                        if message.name in self.rate_metrics:
-                            self._submit_rate(metric_name, val, metric, custom_tags, custom_hostname)
+                        tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=custom_hostname)
+                        metric_name_with_namespace = '{}.{}'.format(scraper_config['NAMESPACE'], metric_name)
+                        if message.name in scraper_config['rate_metrics']:
+                            self.rate(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                         else:
-                            self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
+                            self.gauge(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                     else:
                         self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
-
         else:
             self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))
 
-    def _get_hostname(self, hostname, metric):
+    def _get_hostname(self, hostname, metric, scraper_config):
         """
         If hostname is None, look at label_to_hostname setting
         """
-        if hostname is None and self.label_to_hostname is not None:
+        if hostname is None and scraper_config['label_to_hostname'] is not None:
             for label in metric.label:
-                if label.name == self.label_to_hostname:
+                if label.name == scraper_config['label_to_hostname']:
                     return label.value
 
         return hostname
 
-    def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
-        """
-        Format the finalized tags
-        This is generally a noop, but it can be used to hook into _submit_gauge and change the tags before sending
-        """
-        return _tags
-
-    def _submit_gauges_from_summary(self, name, metric, custom_tags=None, hostname=None):
+    def _submit_gauges_from_summary(self, metric_name, metric, scraper_config, hostname=None):
         """
         Extracts metrics from a prometheus summary metric and sends them as gauges
         """
-        if custom_tags is None:
-            custom_tags = []
         # summaries do not have a value attribute
         val = getattr(metric, self.METRIC_TYPES[2]).sample_count
         if self._is_value_valid(val):
-            self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+            tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname)
+            self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
         else:
-            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+            self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
         val = getattr(metric, self.METRIC_TYPES[2]).sample_sum
         if self._is_value_valid(val):
-            self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+            tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
+            self.gauge('{}.{}.sum'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
         else:
-            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
+            self.log.debug("Metric value is not supported for metric {}.sum.".format(metric_name))
         for quantile in getattr(metric, self.METRIC_TYPES[2]).quantile:
             val = quantile.value
             limit = quantile.quantile
             if self._is_value_valid(val):
-                self._submit_gauge("{}.quantile".format(name), val, metric, custom_tags=custom_tags+["quantile:{}".format(limit)], hostname=hostname)
+                tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname) + ['quantile:{}'.format(limit)]
+                self.gauge('{}.{}.quantile'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
             else:
-                self.log.debug("Metric value is not supported for metric {}.quantile.".format(name))
+                self.log.debug("Metric value is not supported for metric {}.quantile.".format(metric_name))
 
-    def _submit_gauges_from_histogram(self, name, metric, send_histograms_buckets=True, custom_tags=None, hostname=None):
+    def _submit_gauges_from_histogram(self, metric_name, metric, scraper_config, hostname=None):
         """
         Extracts metrics from a prometheus histogram and sends them as gauges
         """
-        if custom_tags is None:
-            custom_tags = []
         # histograms do not have a value attribute
         val = getattr(metric, self.METRIC_TYPES[4]).sample_count
         if self._is_value_valid(val):
-            self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+            tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
+            self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
         else:
-            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+            self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
         val = getattr(metric, self.METRIC_TYPES[4]).sample_sum
         if self._is_value_valid(val):
-            self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
+            tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname)
+            self.gauge('{}.{}.sum'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
         else:
-            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
-        if send_histograms_buckets:
+            self.log.debug("Metric value is not supported for metric {}.sum.".format(metric_name))
+        if scraper_config['send_histograms_buckets']:
             for bucket in getattr(metric, self.METRIC_TYPES[4]).bucket:
                 val = bucket.cumulative_count
                 limit = bucket.upper_bound
                 if self._is_value_valid(val):
-                    self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags+["upper_bound:{}".format(limit)], hostname=hostname)
+                    tags = self._metric_tags(metric_name, val, metric, scraper_config, hostname=hostname) + ['upper_bound:{}'.format(limit)]
+                    self.gauge('{}.{}.count'.format(scraper_config['NAMESPACE'], metric_name), val, tags=tags, hostname=hostname)
                 else:
-                    self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+                    self.log.debug("Metric value is not supported for metric {}.count.".format(metric_name))
+
+    def _metric_tags(self, metric_name, val, metric, scraper_config, hostname=None):
+        custom_tags = scraper_config['custom_tags']
+        _tags = list(custom_tags)
+        for label in metric.label:
+            if label.name not in scraper_config['exclude_labels']:
+                tag_name = label.name
+                if label.name in scraper_config['labels_mapper']:
+                    tag_name = scraper_config['labels_mapper'][label.name]
+                _tags.append('{}:{}'.format(tag_name, label.value))
+        return self._finalize_tags_to_submit(_tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname)
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
-
-    def set_prometheus_timeout(self, instance, default_value=10):
-        """ extract `prometheus_timeout` directly from the instance configuration """
-        self.prometheus_timeout = instance.get('prometheus_timeout', default_value)

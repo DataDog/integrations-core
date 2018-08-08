@@ -1,4 +1,4 @@
-from datadog_checks.checks.prometheus import GenericPrometheusCheck
+from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 def test_rate_override():
     endpoint = "none"
@@ -9,11 +9,11 @@ def test_rate_override():
     }
     expected_type_overrides = {"test_rate": "gauge"}
 
-    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_namespace="foo")
+    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_namespace="foo")
 
-    processed_type_overrides = check.scrapers_map[endpoint].type_overrides
+    processed_type_overrides = check.config_map[endpoint]['type_overrides']
     assert expected_type_overrides == processed_type_overrides
-    assert ["test_rate"] == check.scrapers_map[endpoint].rate_metrics
+    assert ["test_rate"] == check.config_map[endpoint]['rate_metrics']
 
 
 def test_timeout_override():
@@ -27,12 +27,12 @@ def test_timeout_override():
     }
 
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace'}
-    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
-    assert check.get_scraper(instance).prometheus_timeout == 30
+    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    assert check.get_scraper_config(instance)['prometheus_timeout'] == 30
 
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'prometheus_timeout': 5}
-    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
-    assert check.get_scraper(instance).prometheus_timeout == 5
+    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    assert check.get_scraper_config(instance)['prometheus_timeout'] == 5
 
 def test_label_to_hostname_override():
     endpoint = "none"
@@ -45,5 +45,5 @@ def test_label_to_hostname_override():
     }
 
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace'}
-    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
-    assert check.get_scraper(instance).label_to_hostname == 'node'
+    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    assert check.get_scraper_config(instance)['label_to_hostname'] == 'node'
