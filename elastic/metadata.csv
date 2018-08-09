@@ -193,6 +193,10 @@ elasticsearch.thread_pool.snapshot.active,gauge,,thread,,The number of active th
 elasticsearch.thread_pool.snapshot.queue,gauge,,thread,,The number of queued threads in the snapshot pool.,0,elasticsearch,queued snapshot threads
 elasticsearch.thread_pool.snapshot.threads,gauge,,thread,,The total number of threads in the snapshot pool.,0,elasticsearch,total snapshot threads
 elasticsearch.thread_pool.snapshot.rejected,gauge,,thread,,The number of rejected threads in the snapshot pool.,0,elasticsearch,rejected snapshot threads
+elasticsearch.thread_pool.write.active,gauge,,thread,,The number of active threads in the write pool.,0,elasticsearch,active write threads
+elasticsearch.thread_pool.write.queue,gauge,,thread,,The number of queued threads in the write pool.,0,elasticsearch,queued write threads
+elasticsearch.thread_pool.write.threads,gauge,,thread,,The total number of threads in the write pool.,0,elasticsearch,total write threads
+elasticsearch.thread_pool.write.rejected,gauge,,thread,,The number of rejected threads in the write pool.,0,elasticsearch,rejected write threads
 elasticsearch.transport.rx_count,gauge,,packet,,The total number of packets received in cluster communication.,0,elasticsearch,transport packets received
 elasticsearch.transport.rx_size,gauge,,byte,,The total size of data received in cluster communication.,0,elasticsearch,transport bytes received
 elasticsearch.transport.server_open,gauge,,connection,,The number of connections opened for cluster communication.,0,elasticsearch,transport open connections
