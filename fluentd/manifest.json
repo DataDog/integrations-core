@@ -6,7 +6,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "FluentD",
+  "display_name": "fluentd",
   "guid": "68100352-b993-43e6-9dc8-5ecd498e160b",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
