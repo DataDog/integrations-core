@@ -7,7 +7,7 @@
     "log collection"
   ],
   "creates_events": true,
-  "display_name": "Mongo",
+  "display_name": "MongoDB",
   "guid": "d51c342e-7a02-4611-a47f-1e8eade5735c",
   "is_public": true,
   "maintainer": "help@datadoghq.com",

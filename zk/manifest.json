@@ -8,7 +8,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "Zookeeper",
+  "display_name": "ZooKeeper",
   "guid": "5519c110-5183-438e-85ad-63678c072ac7",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
@@ -16,7 +16,7 @@
   "metric_prefix": "zookeeper.",
   "metric_to_check": "zookeeper.connections",
   "name": "zk",
-  "public_title": "Datadog-Zookeeper Integration",
+  "public_title": "Datadog-ZooKeeper Integration",
   "short_description": "Track client connections and latencies, and know when requests are backing up.",
   "support": "core",
   "supported_os": [
