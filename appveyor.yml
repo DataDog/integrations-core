@@ -23,6 +23,8 @@ cache:
   - C:\projects\integrations-core\embedded
 services:
   - iis
+  # We can't start more than one MSSQL instance to avoid conflicts on TCP port 1433. The only workaround to test a check
+  # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at a time
   - mssql2008r2sp2
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
@@ -58,9 +60,9 @@ install:
   - cd ..
 build: off
 test_script:
-  # - ddev test datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service
-  - ddev test sqlserver
-  # - bundle exec rake ci:run[wmi_check]
+  - ddev test datadog_checks_base datadog_checks_tests_helper aspdotnet active_directory dotnetclr exchange_server iis pdh_check sqlserver windows_service
+  - bundle exec rake ci:run[wmi_check]
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# Uncomment the following to enable RDP connection into the builder and debug a build
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

@@ -68,6 +68,38 @@ Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, o
 ## Troubleshooting
 Need help? Contact [Datadog Support][6].
 
+## Development
+
+Please refer to the [main documentation][14] for more details about how to test and develop Agent based integrations.
+
+### Testing Guidelines
+
+#### Windows
+
+To run the tests on Windows, an instance of MSSQL is expected to run on the host. The name of the database instance
+and the credentials reflect what we have on the CI environment, so that might not work out of the box on a local
+development environment.
+
+#### Linux
+
+On Linux, a Docker container running a MSSQL instance is automatically started before running the tests. We use unixODBC
+and [FreeTDS][] to talk to the database so, depending on the Linux distribution, you need to install additional dependencies
+on your local dev environment before running the tests. For example these are the installation steps for Ubuntu 14.04:
+
+```
+sudo apt-get install unixodbc unixodbc-dev tdsodbc
+```
+
+#### OSX
+
+Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][]. You can
+use homebrew to install the required packages:
+
+```
+brew install unixodbc
+brew install freetds --with-unixodbc
+```
+
 ## Further Reading
 
 * [Monitor your Azure SQL Databases with Datadog][7]
@@ -90,3 +122,4 @@ Need help? Contact [Datadog Support][6].
 [11]: https://www.datadoghq.com/blog/sql-server-metrics/
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [13]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[14]: https://docs.datadoghq.com/developers/integrations/
