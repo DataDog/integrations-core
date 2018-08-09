@@ -138,10 +138,6 @@ class ESCheck(AgentCheck):
         "elasticsearch.transport.rx_size": ("gauge", "transport.rx_size_in_bytes"),
         "elasticsearch.transport.tx_size": ("gauge", "transport.tx_size_in_bytes"),
         "elasticsearch.transport.server_open": ("gauge", "transport.server_open"),
-        "elasticsearch.thread_pool.bulk.active": ("gauge", "thread_pool.bulk.active"),
-        "elasticsearch.thread_pool.bulk.threads": ("gauge", "thread_pool.bulk.threads"),
-        "elasticsearch.thread_pool.bulk.queue": ("gauge", "thread_pool.bulk.queue"),
-        "elasticsearch.thread_pool.bulk.rejected": ("rate", "thread_pool.bulk.rejected"),
         "elasticsearch.thread_pool.flush.active": ("gauge", "thread_pool.flush.active"),
         "elasticsearch.thread_pool.flush.threads": ("gauge", "thread_pool.flush.threads"),
         "elasticsearch.thread_pool.flush.queue": ("gauge", "thread_pool.flush.queue"),
@@ -368,6 +364,20 @@ class ESCheck(AgentCheck):
         "elasticsearch.fs.total.disk_writes": ("rate", "fs.io_stats.total.write_operations"),
         "elasticsearch.fs.total.disk_read_size_in_bytes": ("gauge", "fs.io_stats.total.read_kilobytes"),
         "elasticsearch.fs.total.disk_write_size_in_bytes": ("gauge", "fs.io_stats.total.write_kilobytes"),
+    }
+
+    ADDITIONAL_METRICS_PRE_6_3 = {
+        "elasticsearch.thread_pool.bulk.active": ("gauge", "thread_pool.bulk.active"),
+        "elasticsearch.thread_pool.bulk.threads": ("gauge", "thread_pool.bulk.threads"),
+        "elasticsearch.thread_pool.bulk.queue": ("gauge", "thread_pool.bulk.queue"),
+        "elasticsearch.thread_pool.bulk.rejected": ("rate", "thread_pool.bulk.rejected"),
+    }
+
+    ADDITIONAL_METRICS_POST_6_3 = {
+        "elasticsearch.thread_pool.write.active": ("gauge", "thread_pool.write.active"),
+        "elasticsearch.thread_pool.write.threads": ("gauge", "thread_pool.write.threads"),
+        "elasticsearch.thread_pool.write.queue": ("gauge", "thread_pool.write.queue"),
+        "elasticsearch.thread_pool.write.rejected": ("rate", "thread_pool.write.rejected"),
     }
 
     CLUSTER_HEALTH_METRICS = {
@@ -667,6 +677,11 @@ class ESCheck(AgentCheck):
 
         if version < [5, 0, 0]:
             stats_metrics.update(self.ADDITIONAL_METRICS_PRE_5_0_0)
+
+        if version >= [6, 3, 0]:
+            stats_metrics.update(self.ADDITIONAL_METRICS_POST_6_3)
+        else:
+            stats_metrics.update(self.ADDITIONAL_METRICS_PRE_6_3)
 
         pshard_stats_metrics.update(additional_metrics)
 

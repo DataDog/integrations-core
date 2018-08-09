@@ -47,3 +47,14 @@ INDEX_METRICS_MOCK_DATA = [{
         "pri.store.size": "10.5"
     },
 ]
+
+
+def get_es_version():
+    version = os.environ.get("ELASTIC_VERSION")
+    dd_versions = {'0_90': [0, 90, 13], '1_0': [1, 0, 3], '1_1': [1, 1, 2], '1_2': [1, 2, 4]}
+    if version is None:
+        return [6, 0, 1]
+    if '_' in version:
+        return dd_versions[version]
+    else:
+        return [int(k) for k in version.split(".")]
