@@ -39,10 +39,6 @@ COUNTER_TYPE_QUERY = '''select distinct cntr_type
                         from sys.dm_os_performance_counters
                         where counter_name = ?;'''
 
-COUNTER_TYPE_QUERY = '''select distinct cntr_type
-                        from sys.dm_os_performance_counters
-                        where counter_name = ?;'''
-
 BASE_NAME_QUERY = '''select distinct counter_name
                      from sys.dm_os_performance_counters
                      where (counter_name=? or counter_name=?
@@ -510,7 +506,7 @@ class SQLServer(AgentCheck):
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
 
-                    if row.type in self.proc_type_mapping:
+                    if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags)
                     else:
                         self.log.warning('%s is not a recognised type from procedure %s, metric %s'
