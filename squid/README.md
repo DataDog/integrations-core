@@ -50,7 +50,7 @@ Returns CRITICAL if the Agent cannot connect to Squid to collect metrics, otherw
 
 ## Troubleshooting
 
-If you have any questions about Datadog or a use case our [Docs][5] didn’t mention, we’d love to help! Here’s how you can reach out to us:
+If you have any questions about Datadog or a use case our [Docs][5] didn't mention, we'd love to help! Here's how you can reach out to us:
 
 ### Visit the Knowledge Base
 

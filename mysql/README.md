@@ -170,7 +170,7 @@ See our [sample mysql.yaml][16] for all available configuration options, includi
           # log_processing_rules:
           #   - type: multi_line
           #     name: new_log_start_with_date
-          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
     ```
     See our [sample mysql.yaml][16] for all available configuration options, including those for custom metrics.
 
@@ -354,7 +354,7 @@ Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherw
 * [How to collect metrics from custom MySQL queries][25]
 * [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][26]
 * [How can I collect more metrics from my SQL Server integration?][27]
-* [Database user lacks privileges][28]
+* [Database user lacks privileges][28]
 
 ## Further Reading
 Read our [series of blog posts][29] about monitoring MySQL with Datadog.

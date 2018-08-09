@@ -80,7 +80,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
                 metric_type: gauge
               MemoryPercentUsage:
                 alias: activemq.broker.memory_pct
-                metric_type: gauge
+                metric_type: gauge
       ```
 
 3. [Restart the agent][109]

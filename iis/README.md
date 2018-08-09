@@ -32,7 +32,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
   [X] Default Document               Web-Default-Doc        Installed
   [X] Directory Browsing             Web-Dir-Browsing       Installed
   [X] HTTP Errors                    Web-Http-Errors        Installed
-  [X] Static Content                 Web-Static-Content     Installed
+  [X] Static Content                 Web-Static-Content     Installed
   ```
 
   You can add the missing features with `install-windowsfeature web-common-http`. This requires a restart of the system to work properly.
@@ -72,9 +72,9 @@ instances:
   #   - dev.example.com
 ```
 
-To collect metrics on a per-site basis, you *must* use the `sites` option. The Agent collects metrics for each site you list and tags them with the site name — `iis.net.num_connections` tagged with `site:example.com`, and `iis.net.num_connections` tagged with `site:dev.example.com`.
+To collect metrics on a per-site basis, you *must* use the `sites` option. The Agent collects metrics for each site you list and tags them with the site name - `iis.net.num_connections` tagged with `site:example.com`, and `iis.net.num_connections` tagged with `site:dev.example.com`.
 
-If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites — `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
+If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites - `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
 
 You can also monitor sites on remote IIS servers. See the [sample iis.d/conf.yaml][3] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 
@@ -96,7 +96,7 @@ Here's an example of configuration that would check the current machine and a re
 - host: MYREMOTESERVER
   username: MYREMOTESERVER\fred
   password: mysecretpassword
-  is_2008: false
+  is_2008: false
 ```
 
 * `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
@@ -123,7 +123,7 @@ Here's an example of configuration that would check the current machine and a re
          path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
          service: myservice
          source: iis
-         sourcecategory: http_web_access
+         sourcecategory: http_web_access
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.

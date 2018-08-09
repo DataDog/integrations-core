@@ -253,13 +253,13 @@ You may use the `attribute` filter as follow:
 
 ```
 ...
-    attribute:
+    attribute:
           myJmxfetch:
             alias: your_metric_name
             metric_type: gauge
             values:
               "false": 0
-              "true": 1
+              "true": 1
 ```
 
 
