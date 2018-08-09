@@ -7,14 +7,35 @@ import time
 
 import requests
 from flup.client.fcgi_app import FCGIApp
-from six import StringIO, iteritems
+from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.utils.headers import headers
 
+# Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
+
+# Flup as of 1.0.3 is not fully compatible with Python 3 yet.
+# This fixes that for our use case.
+# https://hg.saddi.com/flup-py3.0/file/tip/flup/client/fcgi_app.py
+if PY3:
+    import socket
+
+    def get_connection(self):
+        if self._connect is not None:
+            if isinstance(self._connect, string_types):
+                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                sock.connect(self._connect)
+            elif hasattr(socket, 'create_connection'):
+                sock = socket.create_connection(self._connect)
+            else:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect(self._connect)
+            return sock
+    FCGIApp._getConnection = get_connection
+
 
 DEFAULT_TIMEOUT = 20
 
@@ -147,7 +168,7 @@ class PHPFPMCheck(AgentCheck):
             # TODO: adding the 'full' parameter gets you per-process detailed
             # information, which could be nice to parse and output as metrics
             if use_fastcgi:
-                response = self.request_fastcgi(ping_url)
+                response = self.request_fastcgi(ping_url).decode('utf-8')
             else:
                 resp = requests.get(ping_url, auth=auth, timeout=timeout,
                                     headers=headers(self.agentConfig, http_host=http_host),
