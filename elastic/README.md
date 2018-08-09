@@ -83,7 +83,7 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 * `index_stats` sends **elasticsearch.index.\*** metrics
 * `pending_task_stats` sends **elasticsearch.pending_\*** metrics
 
-As of version >=6.3.0, you will have to set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect some metrics (for example, pshard or index related metrics). See [Elasticsearch release notes - monitoring section][12].
+For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][12].
 
 ### Metrics
 
