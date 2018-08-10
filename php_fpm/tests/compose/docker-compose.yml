@@ -3,6 +3,8 @@ version: '3'
 services:
   php:
     image: php:7-fpm
+    ports:
+        - "9000:9000"
     volumes:
         - ./app:/app
         - ./php-fpm.conf:/usr/local/etc/php-fpm.d/php-fpm.conf

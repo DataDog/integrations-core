@@ -4,6 +4,10 @@ services:
 language: python
 python:
   - '2.7.15'
+addons:
+  apt:
+    packages:
+      - tdsodbc
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -153,7 +157,7 @@ jobs:
     - stage: test
       env: CHECK=pgbouncer
     - stage: test
-      env: CHECK=php_fpm
+      env: CHECK=php_fpm PYTHON3=true
     - stage: test
       env: CHECK=postgres
     - stage: test
@@ -168,6 +172,8 @@ jobs:
       env: CHECK=riak
     - stage: test
       env: CHECK=spark
+    - stage: test
+      env: CHECK=sqlserver
     - stage: test
       env: CHECK=ssh_check
     - stage: test
