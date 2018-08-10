@@ -1,15 +1,13 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-# stdlib
 import os
 import shutil
 import tempfile
 
 import pytest
 
-# project
+from datadog_checks.dev.utils import create_file, temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
 
 CHECK_NAME = 'directory'
@@ -81,13 +79,6 @@ def get_config_stubs(dir_name, filegauges=False):
     ]
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-    aggregator.reset()
-    return aggregator
-
-
 def setup_module(module):
     """
     Generate a directory with a file structure for tests
@@ -95,7 +86,7 @@ def setup_module(module):
     module.temp_dir = tempfile.mkdtemp()
 
     # Create 10 files
-    for i in xrange(0, 10):
+    for i in range(0, 10):
         open(temp_dir + "/file_" + str(i), 'a').close()
 
     # Add 2 '.log' files
@@ -106,12 +97,25 @@ def setup_module(module):
     os.makedirs(str(temp_dir) + "/subfolder")
 
     # Create 5 subfiles
-    for i in xrange(0, 5):
+    for i in range(0, 5):
         open(temp_dir + "/subfolder" + '/file_' + str(i), 'a').close()
 
 
 def tearDown_module(module):
     shutil.rmtree(temp_dir)
+
+
+def test_exclude_dirs(aggregator):
+    with temp_directory() as td:
+        exclude = ['node_modules', 'vendor']
+        instance = {'directory': td, 'recursive': True, 'countonly': True, 'exclude_dirs': exclude}
+
+        for ed in exclude:
+            create_file(os.path.join(td, ed, 'file'))
+
+        dir_check.check(instance)
+
+    assert len(aggregator.metric_names) == 1
 
 
 def test_directory_metrics(aggregator):
@@ -124,10 +128,6 @@ def test_directory_metrics(aggregator):
     # Try all the configurations in countonly mode as well
     for stub in countonly_stubs:
         stub['countonly'] = True
-
-    config = {
-        'instance': config_stubs + countonly_stubs
-    }
 
     for config in config_stubs:
         aggregator.reset()
@@ -168,10 +168,6 @@ def test_file_metrics(aggregator):
     """
     config_stubs = get_config_stubs(temp_dir, filegauges=True)
 
-    config = {
-        'instances': config_stubs
-    }
-
     for config in config_stubs:
         aggregator.reset()
         dir_check.check(config)
@@ -184,7 +180,7 @@ def test_file_metrics(aggregator):
         for mname in FILE_METRICS:
             if config.get('pattern') != "file_*":
                 # 2 '*.log' files in 'temp_dir'
-                for i in xrange(1, 3):
+                for i in range(1, 3):
                     file_tag = [
                         filetagname + ":%s" % os.path.normpath(
                             temp_dir + "/log_" + str(i) + ".log")
@@ -196,7 +192,7 @@ def test_file_metrics(aggregator):
 
             if config.get('pattern') != "*.log":
                 # Files in 'temp_dir'
-                for i in xrange(0, 10):
+                for i in range(0, 10):
                     file_tag = [
                         filetagname + ":%s" % os.path.normpath(
                             temp_dir + "/file_" + str(i))
@@ -209,7 +205,7 @@ def test_file_metrics(aggregator):
             if not config.get('pattern'):
                 # Files in 'temp_dir/subfolder'
                 if config.get('recursive'):
-                    for i in xrange(0, 5):
+                    for i in range(0, 5):
                         file_tag = [
                             filetagname + ":%s" % os.path.normpath(
                                 temp_dir + "/subfolder" + "/file_" + str(i))
@@ -227,7 +223,7 @@ def test_file_metrics(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_non_existent_directory(aggregator):
+def test_non_existent_directory():
     """
     Missing or inaccessible directory coverage.
     """
@@ -236,7 +232,7 @@ def test_non_existent_directory(aggregator):
         dir_check.check(config)
 
 
-def test_non_existent_directory_ignore_missing(aggregator):
+def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory',
               'ignore_missing': True}
     dir_check.check(config)

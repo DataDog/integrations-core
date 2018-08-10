@@ -14,21 +14,10 @@ from datadog_checks.elastic import ESCheck
 from .common import (
     BAD_CONFIG, CHECK_NAME, CLUSTER_TAG, CONF_HOSTNAME,
     CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER,
-    INDEX_METRICS_MOCK_DATA
+    INDEX_METRICS_MOCK_DATA, get_es_version
 )
 
 log = logging.getLogger('test_elastic')
-
-
-def get_es_version():
-    version = os.environ.get("ELASTIC_VERSION")
-    dd_versions = {'0_90': [0, 90, 13], '1_0': [1, 0, 3], '1_1': [1, 1, 2], '1_2': [1, 2, 4]}
-    if version is None:
-        return [6, 0, 1]
-    if '_' in version:
-        return dd_versions[version]
-    else:
-        return [int(k) for k in version.split(".")]
 
 
 def test_bad_port():
@@ -70,6 +59,11 @@ def test_check(aggregator):
     es_version = elastic_check._get_es_version(instance)
 
     assert es_version == get_es_version()
+
+    if es_version >= [6, 3, 0]:
+        expected_metrics.update(ESCheck.ADDITIONAL_METRICS_POST_6_3)
+    else:
+        expected_metrics.update(ESCheck.ADDITIONAL_METRICS_PRE_6_3)
 
     if es_version < [5, 0, 0]:
         expected_metrics.update(ESCheck.ADDITIONAL_METRICS_PRE_5_0_0)

@@ -51,19 +51,19 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── MANIFEST.in
     ├── README.md
     ├── datadog_checks
-    │   ├── __init__.py
-    │   └── foo_check
-    │       └── data
-    │           └── conf.yaml.example
-    │       ├── __about__.py
-    │       ├── __init__.py
-    │       └── foo_check.py
+    │   ├── __init__.py
+    │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
+    │       ├── __about__.py
+    │       ├── __init__.py
+    │       └── foo_check.py
     ├── images
-    │   └── snapshot.png
+    │   └── snapshot.png
     ├── logos
-    │   ├── avatars-bot.png
-    │   ├── saas_logos-bot.png
-    │   └── saas_logos-small.png
+    │   ├── avatars-bot.png
+    │   ├── saas_logos-bot.png
+    │   └── saas_logos-small.png
     ├── manifest.json
     ├── metadata.csv
     ├── requirements-dev.txt
@@ -72,9 +72,9 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── service_checks.json
     ├── setup.py
     ├── tests
-    │   ├── __init__.py
-    │   ├── conftest.py
-    │   └── test_check.py
+    │   ├── __init__.py
+    │   ├── conftest.py
+    │   └── test_check.py
     └── tox.ini
 ```
 
@@ -361,7 +361,7 @@ Our check sends a Service Check, so we need to add it to the `service_checks.jso
 ]
 ```
 
-Find below the description for each attributes—each one of them is mandatory—of your `service_checks.json` file:
+Find below the description for each attributes-each one of them is mandatory-of your `service_checks.json` file:
 
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |

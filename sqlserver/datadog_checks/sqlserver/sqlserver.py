@@ -1,16 +1,16 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2018
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 '''
 Check the performance counters from SQL Server
-
-See http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-values-from-sys-dm-os-performance-counters.aspx
-for information on how to report the metrics available in the sys.dm_os_performance_counters table
+For information on how to report the metrics available in the sys.dm_os_performance_counters table see
+http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-values-from-sys-dm-os-performance-counters.aspx  # noqa: E501
 '''
 # stdlib
 import traceback
 from contextlib import contextmanager
 from collections import defaultdict
+
 # 3rd party
 import adodbapi
 try:
@@ -18,10 +18,9 @@ try:
 except ImportError:
     pyodbc = None
 
-from config import _is_affirmative
-
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -61,6 +60,7 @@ DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
 DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
 DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
 
+
 class SQLConnectionError(Exception):
     """
     Exception raised for SQL instance connection issues
@@ -91,6 +91,8 @@ class SQLServer(AgentCheck):
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '')  # BULK_COUNT
     ]
     valid_connectors = ['adodbapi']
+    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL']
+    default_adoprovider = 'SQLOLEDB'
     if pyodbc is not None:
         valid_connectors.append('odbc')
     valid_tables = [
@@ -112,14 +114,21 @@ class SQLServer(AgentCheck):
         self.do_check = {}
         self.proc_type_mapping = {
             'gauge': self.gauge,
-            'rate' : self.rate,
+            'rate': self.rate,
             'histogram': self.histogram
         }
+        self.adoprovider = self.default_adoprovider
 
         self.connector = init_config.get('connector', 'adodbapi')
-        if not self.connector.lower() in self.valid_connectors:
-            self.log.error("Invalid database connector %s, defaulting to adodbapi" % self.connector)
+        if self.connector.lower() not in self.valid_connectors:
+            self.log.error("Invalid database connector {}, defaulting to adodbapi".format(self.connector))
             self.connector = 'adodbapi'
+
+        self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
+        if self.adoprovider.upper() not in self.valid_adoproviders:
+            self.log.error("Invalid ADODB provider string {}, defaulting to {}".format(self.adoprovider,
+                                                                                       self.default_adoprovider))
+            self.adoprovider = self.default_adoprovider
 
         # Pre-process the list of metrics to collect
         self.custom_metrics = init_config.get('custom_metrics', [])
@@ -138,20 +147,21 @@ class SQLServer(AgentCheck):
                             self._make_metric_list_to_collect(instance, self.custom_metrics)
                 else:
                     # How much do we care that the DB doesn't exist?
-                    ignore = _is_affirmative(instance.get("ignore_missing_database", False))
+                    ignore = is_affirmative(instance.get("ignore_missing_database", False))
                     if ignore is not None and ignore:
                         # not much : we expect it. leave checks disabled
                         self.do_check[instance_key] = False
-                        self.log.warning("Database %s does not exist. Disabling checks for this instance." % (context))
+                        self.log.warning("Database {} does not exist. "
+                                         "Disabling checks for this instance.".format(context))
                     else:
                         # yes we do. Keep trying
-                        self.log.error("Database %s does not exist. Fix issue and restart agent" % (context))
+                        self.log.error("Database {} does not exist. Fix issue and restart agent".format(context))
 
             except SQLConnectionError:
                 self.log.exception("Skipping SQL Server instance")
                 continue
             except Exception as e:
-                self.log.exception("INitialization exception %s", str(e))
+                self.log.exception("INitialization exception {}".format(str(e)))
                 continue
 
     def _check_db_exists(self, instance):
@@ -162,7 +172,7 @@ class SQLServer(AgentCheck):
         """
 
         dsn, host, username, password, database, driver = self._get_access_info(instance, self.DEFAULT_DB_KEY)
-        context = "%s - %s" % (host, database)
+        context = "{} - {}".format(host, database)
         if self.existing_databases is None:
             cursor = self.get_cursor(instance, None, self.DEFAULT_DATABASE)
 
@@ -173,7 +183,7 @@ class SQLServer(AgentCheck):
                     self.existing_databases[row.name] = True
 
             except Exception, e:
-                self.log.error("Failed to check if database %s exists: %s" % (database, e))
+                self.log.error("Failed to check if database {} exists: {}".format(database, e))
                 return False, context
             finally:
                 self.close_cursor(cursor)
@@ -204,26 +214,26 @@ class SQLServer(AgentCheck):
             except SQLConnectionError:
                 raise
             except Exception:
-                self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+                self.log.warning("Can't load the metric {}, ignoring".format(name), exc_info=True)
                 continue
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for row in custom_metrics:
             db_table = row.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in self.valid_tables:
-                self.log.error('%s has an invalid table name: %s', row['name'], db_table)
+                self.log.error('{} has an invalid table name: {}'.format(row['name'], db_table))
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
                 user_type = row.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', row['name'], user_type)
+                    self.log.error('{} has an invalid metric type: {}'.format(row['name'], user_type))
                 sql_type = None
                 try:
                     if user_type is None:
                         sql_type, base_name = self.get_sql_type(instance, row['counter_name'])
                 except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
+                    self.log.warning("Can't load the metric {}, ignoring".format(row['name']), exc_info=True)
                     continue
 
                 metrics_to_collect.append(self.typed_metric(instance,
@@ -237,12 +247,12 @@ class SQLServer(AgentCheck):
             else:
                 for column in row['columns']:
                     metrics_to_collect.append(self.typed_metric(instance,
-                                                            row,
-                                                            db_table,
-                                                            base_name,
-                                                            None,
-                                                            sql_type,
-                                                            column))
+                                                                row,
+                                                                db_table,
+                                                                base_name,
+                                                                None,
+                                                                sql_type,
+                                                                column))
 
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
         self.instances_metrics[instance_key] = metrics_to_collect
@@ -251,7 +261,7 @@ class SQLServer(AgentCheck):
         wait_stat_metrics = []
         vfs_metrics = []
         clerk_metrics = []
-        self.log.debug("metrics to collect %s", str(metrics_to_collect))
+        self.log.debug("metrics to collect {}".format(str(metrics_to_collect)))
         for m in metrics_to_collect:
             if type(m) is SqlSimpleMetric:
                 self.log.debug("Adding simple metric %s", m.sql_name)
@@ -261,13 +271,13 @@ class SQLServer(AgentCheck):
                 fraction_metrics.append(m.sql_name)
                 fraction_metrics.append(m.base_name)
             elif type(m) is SqlOsWaitStat:
-                self.log.debug("Adding SqlOsWaitStat metric %s", m.sql_name)
+                self.log.debug("Adding SqlOsWaitStat metric {}".format(m.sql_name))
                 wait_stat_metrics.append(m.sql_name)
             elif type(m) is SqlIoVirtualFileStat:
-                self.log.debug("Adding SqlIoVirtualFileStat metric %s", m.sql_name)
+                self.log.debug("Adding SqlIoVirtualFileStat metric {}".format(m.sql_name))
                 vfs_metrics.append(m.sql_name)
             elif type(m) is SqlOsMemoryClerksStat:
-                self.log.debug("Adding SqlOsMemoryClerksStat metric %s", m.sql_name)
+                self.log.debug("Adding SqlOsMemoryClerksStat metric {}".format(m.sql_name))
                 clerk_metrics.append(m.sql_name)
 
         self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"] = simple_metrics
@@ -309,17 +319,25 @@ class SQLServer(AgentCheck):
 
         return cls(self._get_connector(instance), cfg_inst, base_name, metric_type, column, self.log)
 
-
     def _get_connector(self, instance):
         connector = instance.get('connector', self.connector)
         if connector != self.connector:
-            if not connector.lower() in self.valid_connectors:
-                self.log.warning("Invalid database connector %s using default %s" ,
-                     connector, self.connector)
+            if connector.lower() not in self.valid_connectors:
+                self.log.warning("Invalid database connector {} using default {}".format(connector, self.connector))
                 connector = self.connector
             else:
-                self.log.debug("Overriding default connector for %s with %s", instance['host'], connector)
+                self.log.debug("Overriding default connector for {} with {}".format(instance['host'], connector))
         return connector
+
+    def _get_adoprovider(self, instance):
+        provider = instance.get('adoprovider', self.default_adoprovider)
+        if provider != self.adoprovider:
+            if provider.upper() not in self.valid_adoproviders:
+                self.log.warning("Invalid ADO provider %s using default %s", provider, self.adoprovider)
+                provider = self.adoprovider
+            else:
+                self.log.debug("Overriding default ADO provider for %s with %s", instance['host'], provider)
+        return provider
 
     def _get_access_info(self, instance, db_key, db_name=None):
         ''' Convenience method to extract info from instance
@@ -343,7 +361,7 @@ class SQLServer(AgentCheck):
         ''' Return a key to use for the connection cache
         '''
         dsn, host, username, password, database, driver = self._get_access_info(instance, db_key, db_name)
-        return '%s:%s:%s:%s:%s:%s' % (dsn, host, username, password, database, driver)
+        return '{}:{}:{}:{}:{}:{}'.format(dsn, host, username, password, database, driver)
 
     def _conn_string_odbc(self, db_key, instance=None, conn_key=None, db_name=None):
         ''' Return a connection string to use with odbc
@@ -355,21 +373,20 @@ class SQLServer(AgentCheck):
 
         conn_str = ''
         if dsn:
-            conn_str = 'DSN=%s;' % (dsn)
+            conn_str = 'DSN={};'.format(dsn)
 
         if driver:
-            conn_str += 'DRIVER={%s};' % (driver)
+            conn_str += 'DRIVER={};'.format(driver)
         if host:
-            conn_str += 'Server=%s;' % (host)
+            conn_str += 'Server={};'.format(host)
         if database:
-            conn_str += 'Database=%s;' % (database)
+            conn_str += 'Database={};'.format(database)
 
         if username:
-            conn_str += 'UID=%s;' % (username)
-        self.log.debug("Connection string (before password) %s" , conn_str)
+            conn_str += 'UID={};'.format(username)
+        self.log.debug("Connection string (before password) {}".format(conn_str))
         if password:
-            conn_str += 'PWD=%s;' % (password)
-
+            conn_str += 'PWD={};'.format(password)
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, instance=None, conn_key=None, db_name=None):
@@ -379,16 +396,17 @@ class SQLServer(AgentCheck):
             _, host, username, password, database, _ = self._get_access_info(instance, db_key, db_name)
         elif conn_key:
             _, host, username, password, database, _ = conn_key.split(":")
-        conn_str = 'Provider=SQLOLEDB;Data Source=%s;Initial Catalog=%s;' \
-            % (host, database)
+
+        p = self._get_adoprovider(instance)
+        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(p, host, database)
+
         if username:
-            conn_str += 'User ID=%s;' % (username)
+            conn_str += 'User ID={};'.format(username)
         if password:
-            conn_str += 'Password=%s;' % (password)
+            conn_str += 'Password={};'.format(password)
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
-
 
     @contextmanager
     def get_managed_cursor(self, instance, db_key, db_name=None):
@@ -403,10 +421,14 @@ class SQLServer(AgentCheck):
         Cursor are cached in the self.connections dict
         '''
         conn_key = self._conn_key(instance, db_key, db_name)
-
-        conn = self.connections[conn_key]['conn']
-        cursor = conn.cursor()
-        return cursor
+        try:
+            conn = self.connections[conn_key]['conn']
+        except KeyError:
+            # We catch KeyError to avoid leaking the auth info used to compose the key
+            # FIXME: we should find a better way to compute unique keys to map opened connections other than
+            # using auth info in clear text!
+            raise SQLConnectionError("Cannot find an opened connection for host: {}".format(instance.get('host')))
+        return conn.cursor()
 
     def get_sql_type(self, instance, counter_name):
         '''
@@ -419,8 +441,7 @@ class SQLServer(AgentCheck):
             cursor.execute(COUNTER_TYPE_QUERY, (counter_name,))
             (sql_type,) = cursor.fetchone()
             if sql_type == PERF_LARGE_RAW_BASE:
-                self.log.warning("Metric %s is of type Base and shouldn't be reported this way",
-                                counter_name)
+                self.log.warning("Metric {} is of type Base and shouldn't be reported this way".format(counter_name))
             base_name = None
             if sql_type in [PERF_AVERAGE_BULK, PERF_RAW_LARGE_FRACTION]:
                 # This is an ugly hack. For certains type of metric (PERF_RAW_LARGE_FRACTION
@@ -434,9 +455,9 @@ class SQLServer(AgentCheck):
                 try:
                     cursor.execute(BASE_NAME_QUERY, candidates)
                     base_name = cursor.fetchone().counter_name.strip()
-                    self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
+                    self.log.debug("Got base metric: {} for metric: {}".format(base_name, counter_name))
                 except Exception as e:
-                    self.log.warning("Could not get counter_name of base for metric: %s", e)
+                    self.log.warning("Could not get counter_name of base for metric: {}".format(e))
 
         return sql_type, base_name
 
@@ -458,7 +479,7 @@ class SQLServer(AgentCheck):
         if custom_tags is None:
             custom_tags = []
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
-
+        instance_by_key = self.instances_per_type_metrics[instance_key]
         with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
             # if the server was down at check __init__ key could be missing.
             if instance_key not in self.instances_metrics:
@@ -466,12 +487,21 @@ class SQLServer(AgentCheck):
             metrics_to_collect = self.instances_metrics[instance_key]
 
             with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
-
-                simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
-                fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
-                waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
-                vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
-                clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
+                simple_rows = SqlSimpleMetric.fetch_all_values(cursor,
+                                                               instance_by_key["SqlSimpleMetric"],
+                                                               self.log)
+                fraction_results = SqlFractionMetric.fetch_all_values(cursor,
+                                                                      instance_by_key["SqlFractionMetric"],
+                                                                      self.log)
+                waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor,
+                                                                              instance_by_key["SqlOsWaitStat"],
+                                                                              self.log)
+                vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor,
+                                                                           instance_by_key["SqlIoVirtualFileStat"],
+                                                                           self.log)
+                clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor,
+                                                                                instance_by_key["SqlOsMemoryClerksStat"],  # noqa: E501
+                                                                                self.log)
 
                 for metric in metrics_to_collect:
                     try:
@@ -487,7 +517,7 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
 
                     except Exception as e:
-                        self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
+                        self.log.warning("Could not fetch metric {} : {}".format(metric.datadog_name, e))
 
     def do_stored_procedure_check(self, instance, proc):
         """
@@ -509,16 +539,17 @@ class SQLServer(AgentCheck):
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags)
                     else:
-                        self.log.warning('%s is not a recognised type from procedure %s, metric %s'
-                                         % (row.type, proc, row.metric))
+                        self.log.warning('{} is not a recognised type from procedure {}, metric {}'.format(row.type,
+                                                                                                           proc,
+                                                                                                           row.metric))
 
             except Exception, e:
-                self.log.warning("Could not call procedure %s: %s" % (proc, e))
+                self.log.warning("Could not call procedure {}: {}".format(proc, e))
 
             self.close_cursor(cursor)
             self.close_db_connections(instance, self.DEFAULT_DB_KEY)
         else:
-            self.log.info("Skipping call to %s due to only_if" % (proc))
+            self.log.info("Skipping call to {} due to only_if".format(proc))
 
     def proc_check_guard(self, instance, sql):
         """
@@ -534,7 +565,7 @@ class SQLServer(AgentCheck):
             result = cursor.fetchone()
             should_run = result[0] == 1
         except Exception, e:
-            self.log.error("Failed to run proc_only_if sql %s : %s" % (sql, e))
+            self.log.error("Failed to run proc_only_if sql {} : {}".format(sql, e))
 
         self.close_cursor(cursor)
         self.close_db_connections(instance, self.PROC_GUARD_DB_KEY)
@@ -549,7 +580,7 @@ class SQLServer(AgentCheck):
         try:
             cursor.close()
         except Exception as e:
-            self.log.warning("Could not close adodbapi cursor\n{0}".format(e))
+            self.log.warning("Could not close adodbapi cursor\n{}".format(e))
 
     def close_db_connections(self, instance, db_key, db_name=None):
         """
@@ -592,8 +623,8 @@ class SQLServer(AgentCheck):
         if custom_tags is None:
             custom_tags = []
         service_check_tags = [
-            'host:%s' % host,
-            'db:%s' % database
+            'host:{}'.format(host),
+            'db:{}'.format(database)
         ]
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
@@ -605,7 +636,7 @@ class SQLServer(AgentCheck):
             if self._get_connector(instance) == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, instance=instance, db_name=db_name)
                 # autocommit: true disables implicit transaction
-                rawconn = adodbapi.connect(cs, {'timeout':timeout, 'autocommit':True})
+                rawconn = adodbapi.connect(cs, {'timeout': timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, instance=instance, db_name=db_name)
                 rawconn = pyodbc.connect(cs, timeout=timeout)
@@ -623,8 +654,8 @@ class SQLServer(AgentCheck):
 
                 self.connections[conn_key]['conn'] = rawconn
         except Exception as e:
-            cx = "%s - %s" % (host, database)
-            message = "Unable to connect to SQL Server for instance %s." % cx
+            cx = "{} - {}".format(host, database)
+            message = "Unable to connect to SQL Server for instance {}.".format(cx)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=message)
 
@@ -633,7 +664,7 @@ class SQLServer(AgentCheck):
             if password is not None:
                 tracebk = tracebk.replace(password, "*" * 6)
 
-            cxn_failure_exp = SQLConnectionError("%s \n %s" % (message, tracebk))
+            cxn_failure_exp = SQLConnectionError("{} \n {}".format(message, tracebk))
             raise cxn_failure_exp
 
 
@@ -733,7 +764,7 @@ class SqlFractionMetric(SqlServerMetric):
         We cache the list of instance so that we don't have to look it up every time
         '''
         if self.sql_name not in results:
-            self.log.warning("Couldn't find %s in results", self.sql_name)
+            self.log.warning("Couldn't find {} in results".format(self.sql_name))
             return
 
         results_list = results[self.sql_name]
@@ -758,7 +789,7 @@ class SqlFractionMetric(SqlServerMetric):
                 done_instances.append(inst)
                 continue
 
-            #find the next row which has the same instance
+            # find the next row which has the same instance
             cval2 = None
             ctype2 = None
             for second_row in results_list[:ndx+1]:
@@ -767,7 +798,7 @@ class SqlFractionMetric(SqlServerMetric):
                     ctype2 = second_row[0]
 
             if cval2 is None:
-                self.log.warning("Couldn't find second value for %s", self.sql_name)
+                self.log.warning("Couldn't find second value for {}".format(self.sql_name))
                 continue
             done_instances.append(inst)
             if ctype < ctype2:
@@ -779,7 +810,7 @@ class SqlFractionMetric(SqlServerMetric):
 
             metric_tags = tags
             if self.instance == ALL_INSTANCES:
-                metric_tags = metric_tags + ['%s:%s' % (self.tag_by, inst.strip())]
+                metric_tags = metric_tags + ['{}:{}'.format(self.tag_by, inst.strip())]
             self.report_fraction(value, base, metric_tags)
 
     def report_fraction(self, value, base, metric_tags):
@@ -787,8 +818,9 @@ class SqlFractionMetric(SqlServerMetric):
             result = value / float(base)
             self.report_function(self.datadog_name, result, tags=metric_tags)
         except ZeroDivisionError:
-            self.log.debug("Base value is 0, won't report metric %s for tags %s",
-                           self.datadog_name, metric_tags)
+            self.log.debug("Base value is 0, won't report metric {} for tags {}".format(self.datadog_name,
+                                                                                        metric_tags))
+
 
 class SqlIncrFractionMetric(SqlFractionMetric):
 
@@ -802,10 +834,9 @@ class SqlIncrFractionMetric(SqlFractionMetric):
                 result = diff_value / float(diff_base)
                 self.report_function(self.datadog_name, result, tags=metric_tags)
             except ZeroDivisionError:
-                self.log.debug("Base value is 0, won't report metric %s for tags %s",
-                               self.datadog_name, metric_tags)
+                self.log.debug("Base value is 0, won't report metric {} for tags {}".format(self.datadog_name,
+                                                                                            metric_tags))
         self.past_values[key] = (value, base)
-
 
 
 class SqlOsWaitStat(SqlServerMetric):
@@ -818,8 +849,8 @@ class SqlOsWaitStat(SqlServerMetric):
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
-            select * from sys.dm_os_wait_stats where wait_type in (%s)
-            ''' % placeholders
+            select * from sys.dm_os_wait_stats where wait_type in ({})
+            '''.format(placeholders)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -834,13 +865,14 @@ class SqlOsWaitStat(SqlServerMetric):
                 value = row[value_column_index]
                 break
         if value is None:
-            self.log.debug("Didn't find %s %s", self.sql_name, self.column)
+            self.log.debug("Didn't find {} {}".format(self.sql_name, self.column))
             return
 
-        self.log.debug("Value for %s %s is %d", self.sql_name, self.column, value)
+        self.log.debug("Value for {} {} is {}".format(self.sql_name, self.column, value))
         metric_tags = tags
-        metric_name = '%s.%s' % (self.datadog_name, self.column)
+        metric_name = '{}.{}'.format(self.datadog_name, self.column)
         self.report_function(metric_name, value, tags=metric_tags)
+
 
 class SqlIoVirtualFileStat(SqlServerMetric):
 
@@ -857,12 +889,10 @@ class SqlIoVirtualFileStat(SqlServerMetric):
 
     def __init__(self, connector,  cfg_instance, base_name,
                  report_function, column, logger):
-        super(SqlIoVirtualFileStat, self).__init__(connector, cfg_instance,
-                                              base_name, report_function, column,
-                                              logger)
+        super(SqlIoVirtualFileStat, self).__init__(connector, cfg_instance, base_name, report_function, column, logger)
         self.dbid = self.cfg_instance.get('database_id', None)
         self.fid = self.cfg_instance.get('file_id', None)
-        self.pvs_vals = defaultdict(lambda:None)
+        self.pvs_vals = defaultdict(lambda: None)
 
     def fetch_metric(self, cursor, rows, columns, tags):
         dbid_ndx = columns.index("database_id")
@@ -884,11 +914,12 @@ class SqlIoVirtualFileStat(SqlServerMetric):
             report_value = value - self.pvs_vals[dbid, fid]
             self.pvs_vals[dbid, fid] = value
             metric_tags = tags
-            metric_tags = metric_tags + ['database_id:%s' % (str(dbid).strip())]
-            metric_tags = metric_tags + ['file_id:%s' % (str(fid).strip())]
-            metric_name = '%s.%s' % (self.datadog_name, self.column)
+            metric_tags = metric_tags + ['database_id:{}'.format(str(dbid).strip())]
+            metric_tags = metric_tags + ['file_id:{}'.format(str(fid).strip())]
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, report_value,
                                  tags=metric_tags)
+
 
 class SqlOsMemoryClerksStat(SqlServerMetric):
 
@@ -900,8 +931,8 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
         placeholder = '?'
         placeholders = ', '.join(placeholder for unused in counters_list)
         query_base = '''
-            select * from sys.dm_os_memory_clerks where type in (%s)
-            ''' % placeholders
+            select * from sys.dm_os_memory_clerks where type in ({})
+            '''.format(placeholders)
         cursor.execute(query_base, counters_list)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -920,7 +951,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
                 continue
 
             metric_tags = tags
-            metric_tags = metric_tags + ['memory_node_id:%s' % (str(node_id))]
-            metric_name = '%s.%s' % (self.datadog_name, self.column)
+            metric_tags = metric_tags + ['memory_node_id:{}'.format(str(node_id))]
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val,
                                  tags=metric_tags)

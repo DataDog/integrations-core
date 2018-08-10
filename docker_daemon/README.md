@@ -70,7 +70,7 @@ docker run -d --name dd-agent \
   -v /proc/:/host/proc/:ro \
   -v /cgroup/:/host/sys/fs/cgroup:ro \
   -e API_KEY={YOUR API KEY} \
-  datadog/docker-dd-agent:latest
+  datadog/docker-dd-agent:latest
 ```
 
 #### Alpine Linux based container
@@ -85,7 +85,7 @@ docker run -d --name dd-agent \
   -v /proc/:/host/proc/:ro \
   -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
   -e API_KEY={YOUR API KEY} \
-  datadog/docker-dd-agent:latest-alpine
+  datadog/docker-dd-agent:latest-alpine
 ```
 
 #### Image versioning

@@ -6,7 +6,7 @@
     "web"
   ],
   "creates_events": false,
-  "display_name": "PHP FPM",
+  "display_name": "PHP-FPM",
   "guid": "47f2c337-83ac-4767-b460-1927d8343764",
   "is_public": true,
   "maintainer": "help@datadoghq.com",

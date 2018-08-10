@@ -4,7 +4,7 @@
     "log collection"
   ],
   "creates_events": false,
-  "display_name": "NGINX",
+  "display_name": "Nginx",
   "guid": "88620208-3919-457c-ba51-d844d09ac97f",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
