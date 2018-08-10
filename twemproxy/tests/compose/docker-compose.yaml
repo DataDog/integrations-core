@@ -1,0 +1,108 @@
+version: '2'
+services:
+
+  redis1:
+    image: redis
+    ports:
+      - "6101:6379"
+
+  redis2:
+    image: redis
+    ports:
+      - "6102:6379"
+
+
+  etcd0:
+    image: quay.io/coreos/etcd:v2.2.0
+    volumes:
+      - /usr/share/ca-certificates/:/etc/ssl/certs
+    ports:
+       - 4001:4001
+       - 2380:2380
+       - 2379:2379
+    command: |
+            -name etcd0
+            -advertise-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001,http://$DOCKER_ADDR:2379,http://$DOCKER_ADDR:4001
+            -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001
+            -initial-advertise-peer-urls http://0.0.0.0:2380
+            -listen-peer-urls http://0.0.0.0:2380
+            -initial-cluster-token etcd-cluster-1
+            -initial-cluster etcd0=http://0.0.0.0:2380
+            -initial-cluster-state new
+
+
+    twemproxy:
+      image: jgoodall/twemproxy
+      ports:
+        - 6100:6100
+        - 6222:6222
+
+  # ## Config Servers
+  # config01:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # config02:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # config03:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27017 --bind_ip=0.0.0.0 --configsvr --replSet configserver --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  #
+  # ## Shards
+  # shard01a:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --noprealloc --smallfiles --oplogSize 16
+  #   ports:
+  #     - "27018:27018"
+  #   volumes:
+  #     - ./scripts:/scripts
+  # shard01b:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27018 --bind_ip=0.0.0.0 --shardsvr --replSet shard01 --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # shard02a:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27019 --bind_ip=0.0.0.0 --shardsvr --replSet shard02 --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # shard02b:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27019 --bind_ip=0.0.0.0 --shardsvr --replSet shard02 --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # shard03a:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27020 --bind_ip=0.0.0.0 --shardsvr --replSet shard03 --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  # shard03b:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongod --port 27020 --bind_ip=0.0.0.0 --shardsvr --replSet shard03 --noprealloc --smallfiles --oplogSize 16
+  #   volumes:
+  #     - ./scripts:/scripts
+  #
+  # ## Router
+  # router:
+  #   image: mongo:$MONGO_VERSION
+  #   command: mongos --port 27017 --bind_ip=0.0.0.0 --configdb configserver/config01:27017,config02:27017,config03:27017
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./scripts:/scripts
+  #   depends_on:
+  #     - config01
+  #     - config02
+  #     - config03
+  #     - shard01a
+  #     - shard01b
+  #     - shard02a
+  #     - shard02b
+  #     - shard03a
+  #     - shard03b

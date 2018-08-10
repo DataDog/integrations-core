@@ -9,7 +9,7 @@ import socket
 import simplejson as json
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 GLOBAL_STATS = set([
     'curr_connections',
@@ -48,6 +48,7 @@ SERVER_STATS_RATES = set([
     'server_err',
     'server_eof'
 ])
+
 
 class Twemproxy(AgentCheck):
     """Tracks twemproxy metrics via the stats monitoring port
@@ -123,7 +124,7 @@ class Twemproxy(AgentCheck):
 
     def _get_data(self, instance):
         host = instance.get('host')
-        port = int(instance.get('port', 2222)) # 2222 is default
+        port = int(instance.get('port', 2222))  # 2222 is default
         tags = instance.get('tags', [])
         if tags is None:
             tags = []
