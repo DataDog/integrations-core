@@ -88,7 +88,7 @@ sudo apt-get install unixodbc unixodbc-dev tdsodbc
 
 #### OSX
 
-Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][]. You can use [homebrew][16] to install the required packages:
+Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][15]. You can use [homebrew][16] to install the required packages:
 
 ```
 brew install unixodbc
