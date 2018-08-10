@@ -5,14 +5,14 @@ init_config:
 
 instances:
   
-  ## proc_name - mandatory - string 
+  ## @param proc_name - mandatory - string 
   ## The name of the gunicorn process. For the following gunicorn server
   ##
   ##   gunicorn --name <WEB_APP> <WEB_APP>_config.ini
 
   # - proc_name: <WEB_APP>
   
-  ## tags - optional - list of key:value element
+  ## @param tags - optional - list of key:value element
   ## List of tags to attach to every metrics, events and service checks emitted by this integration.
   ## Learn more about tagging: https://docs.datadoghq.com/tagging/
   
@@ -23,38 +23,38 @@ instances:
 
 #logs:
 
-    ## type - mandatory - string
+    ## @param type - mandatory - string
     ## Type of log input source, to choose between tcp / udp / file / journald / docker
     
     # - type: file
 
-    ## path - mandatory - string
+    ## @param path - mandatory - string
     ## If type is file, enter the file path to gather logs from
     
     #   path: <FILE_PATH>
 
-    ## port - mandatory -  integer
+    ## @param port - mandatory -  integer
     ## If type is udp/tcp, enter the port to listen to
     
     #   port: <PORT_NUMBER>
 
-    ## service - mandatory - string
+    ## @param service - mandatory - string
     ## Name of the service owning the log, allows binding logs and Traces 
     ## coming from the same <SERVICE>. 
     
     #   service: <SERVICE>
 
-    ## source - mandatory - string
+    ## @param source - mandatory - string
     ## Attribute that defines which integration is sending the logs
     
     #   source: <SOURCE_NAME>
     
-    ## sourcecategory - optional - coma separated list of strings 
+    ## @param sourcecategory - optional - coma separated list of strings 
     ## Multiple value attribute. Can be used to refine the source attribtue
     
     #   sourcecategory: <SOURCE_CATEGORY>
 
-    ## tags - optional - list of key:value element
+    ## @param tags - optional - list of key:value element
     ## List of tags to attach to every logs gathered by this integration.
     
     #   tags:

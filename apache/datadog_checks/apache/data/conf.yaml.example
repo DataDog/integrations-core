@@ -2,41 +2,41 @@ init_config:
 
 instances:
     
-    ## apache_status_url - mandatory - string  
+    ## @param apache_status_url - mandatory - string  
     ## Status url of your Apache server.
   
   - apache_status_url: http://localhost/server-status?auto
 
-    ## apache_user - optional - string
+    ## @param apache_user - optional - string
     ## <USERNAME> for the Apache status endpoint authentication.
     
     # apache_user: <USERNAME>
 
-    ## apache_password - optional - string
+    ## @param apache_password - optional - string
     ## <PASSWORD> for the Apache status endpoint authentication.
     
     # apache_password: <PASSWORD>
 
-    ## tags - optional - list of key:value element
+    ## @param tags - optional - list of key:value element
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     
     # tags:
     #   - <KEY>:<VALUE>
 
-    ## disable_ssl_validation - optional - boolean - default: false
+    ## @param disable_ssl_validation - optional - boolean - default: false
     ## Instructs the check to skip the validation of the SSL certificate of the URL being tested.
     ## Defaults to false, set to true if you want to disable SSL certificate validation.
 
     # disable_ssl_validation: false
 
-    ## connect_timeout - optional - integer 
+    ## @param connect_timeout - optional - integer 
     ## Overrides the default connection timeout value, and fails the check if the time to establish the (TCP) connection 
     ## exceeds the connect_timeout value (in seconds)
     
     # connect_timeout: <VALUE_IN_SECOND>
     
-    ## receive_timeout - optional - integer 
+    ## @param receive_timeout - optional - integer 
     ## Overrides the default received timeout value, and fails the check if the time to receive 
     ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
     
@@ -47,38 +47,38 @@ instances:
 
 #logs:
 
-    ## type - mandatory - string
+    ## @param type - mandatory - string
     ## Type of log input source, to choose between tcp / udp / file / journald / docker
     
     # - type: file
 
-    ## path - mandatory - string
+    ## @param path - mandatory - string
     ## If type is file, enter the file path to gather logs from
     
     #   path: <FILE_PATH>
 
-    ## port - mandatory -  integer
+    ## @param port - mandatory -  integer
     ## If type is udp/tcp, enter the port to listen to
     
     #   port: <PORT_NUMBER>
 
-    ## service - mandatory - string
+    ## @param service - mandatory - string
     ## Name of the service owning the log, allows binding logs and Traces 
     ## coming from the same <SERVICE>. 
     
     #   service: <SERVICE>
 
-    ## source - mandatory - string
+    ## @param source - mandatory - string
     ## Attribute that defines which integration is sending the logs
     
     #   source: <SOURCE_NAME>
     
-    ## sourcecategory - optional - coma separated list of strings 
+    ## @param sourcecategory - optional - coma separated list of strings 
     ## Multiple value attribute. Can be used to refine the source attribtue
     
     #   sourcecategory: <SOURCE_CATEGORY>
 
-    ## tags - optional - list of key:value element
+    ## @param tags - optional - list of key:value element
     ## List of tags to attach to every logs gathered by this integration.
     
     #   tags:
