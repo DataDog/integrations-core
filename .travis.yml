@@ -187,6 +187,8 @@ jobs:
     - stage: test
       env: CHECK=teamcity
     - stage: test
+      env: CHECK=twemproxy
+    - stage: test
       env: CHECK=varnish
     - stage: test
       env: CHECK=vault PYTHON3=true
