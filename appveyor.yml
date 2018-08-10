@@ -24,7 +24,8 @@ cache:
 services:
   - iis
   # We can't start more than one MSSQL instance to avoid conflicts on TCP port 1433. The only workaround to test a check
-  # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at a time
+  # against multiple versions is letting the test code to start/stop the corresponding services so that they run one at
+  # a time. See https://www.appveyor.com/docs/services-databases/ for details.
   - mssql2008r2sp2
 install:
   # Use the 64-bit ruby so that all the Powershell classes are accessible when running shell commands from ruby
