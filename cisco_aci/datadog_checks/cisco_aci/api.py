@@ -10,8 +10,6 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 from six.moves.urllib.parse import unquote
 
-
-
 from .exceptions import APIParsingException, ConfigurationException, APIConnectionException
 
 
