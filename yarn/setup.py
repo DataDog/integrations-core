@@ -56,7 +56,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.yarn'],
+    packages=['datadog_checks', 'datadog_checks.yarn'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

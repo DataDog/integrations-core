@@ -49,7 +49,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.ntp'],
+    packages=['datadog_checks', 'datadog_checks.ntp'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

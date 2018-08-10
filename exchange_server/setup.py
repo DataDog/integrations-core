@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.exchange_server'],
+    packages=['datadog_checks', 'datadog_checks.exchange_server'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

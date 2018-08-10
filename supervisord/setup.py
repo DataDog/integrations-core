@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.supervisord'],
+    packages=['datadog_checks', 'datadog_checks.supervisord'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

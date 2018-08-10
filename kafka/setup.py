@@ -52,7 +52,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.kafka'],
+    packages=['datadog_checks', 'datadog_checks.kafka'],
 
     # Run-time dependencies
     install_requires=['datadog_checks_base'],

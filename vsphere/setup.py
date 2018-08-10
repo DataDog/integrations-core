@@ -47,7 +47,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=['datadog_checks.vsphere'],
+    packages=['datadog_checks', 'datadog_checks.vsphere'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

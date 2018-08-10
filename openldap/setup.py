@@ -46,7 +46,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['datadog_checks.openldap'],
+    packages=['datadog_checks', 'datadog_checks.openldap'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

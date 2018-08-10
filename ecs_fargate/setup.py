@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.ecs_fargate'],
+    packages=['datadog_checks', 'datadog_checks.ecs_fargate'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

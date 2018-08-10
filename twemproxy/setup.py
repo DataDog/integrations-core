@@ -54,7 +54,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.twemproxy'],
+    packages=['datadog_checks', 'datadog_checks.twemproxy'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],

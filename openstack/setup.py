@@ -56,7 +56,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.openstack'],
+    packages=['datadog_checks', 'datadog_checks.openstack'],
 
     # Run-time dependencies
 

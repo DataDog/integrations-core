@@ -55,7 +55,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.disk'],
+    packages=['datadog_checks', 'datadog_checks.disk'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
