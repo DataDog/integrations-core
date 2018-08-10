@@ -1,40 +1,112 @@
 instances:
+
+    ## host - mandatory - string
+    ## Cassandra hostname to connect to.
   - host: localhost
+
+    ## port - mandatory - integer
+    ## Cassandra port to connect to.
     port: 7199
+
+    ##  cassandra_aliasing - mandatory - boolean
+    ## Description of this parameter
     cassandra_aliasing: true
-    # Tags are used to be able to filter and aggregate metrics properly, in all the charts.
-    #
-    # The 'environment' tag depends on the <cluster_name> in Cassandra configuration:
-    #   - if the environment information (eg 'prod' or 'test') is included in the <cluster_name>, just use <cluster_name>.
-    #   - otherwise it's good to add the information to the 'environment' tag (eg 'prod-<cluster_name>').
-    # This will prevent aggregating metrics matchingly named clusters in distinct environments.
-    #
-    # The 'datacenter' tag should be the name of the Cassandra data center the node belongs to.
+
+    ## tags - optional - list of key:value element
+    ## List of tags to attach to every metrics, events and service checks emitted by this integration.
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+
     # tags:
-    #   environment: default_environment
-    #   datacenter: default_datacenter
+    #   - <KEY>:<VALUE>
     
-    # user: username
-    # password: password
-    # process_name_regex: .*process_name.* # Instead of specifying a host, and port. The agent can connect using the attach api.
-                                           # This requires the JDK to be installed and the path to tools.jar to be set below.
-    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar # To be set when process_name_regex is set
+    ## user - optional - string
+    ## <USERNAME> for the Cassandra status endpoint authentication.
+    
+    # user: <USERNAME>
+
+    ## password - optional - string
+    ## <PASSWORD> for the Cassandra status endpoint authentication.
+
+    # password: <PASSWORD>
+
+    ## process_name_regex - optional - string
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+
+    # process_name_regex: .*<PROCESS_NAME>.* 
+
+    ## tools_jar_path - optional - string
+    ## Needs to be set when process_name_regex is set
+
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar 
+    
+    ## name - optional - string 
+    ## Description of the parameter 
+
     # name: cassandra_instance
-    # java_bin_path: /path/to/java # Optional, should be set if the agent cannot find your java executable
-    # java_options: "-Xmx200m -Xms50m" # Optional, Java JVM options
-    # trust_store_path: /path/to/trustStore.jks # Optional, should be set if ssl is enabled
-    # trust_store_password: password
+
+    ## java_bin_path - optional - string
+    ## Should be set if the agent cannot find your java executable
+
+    # java_bin_path: <JAVA_PATH>
+
+    ## java_options - optional - string
+    ## Java JVM options
+    
+    # java_options: "-Xmx200m -Xms50m"
+    
+    ## trust_store_path - optional - string
+    ## If ssl is enabled, set the path to your trustStore
+    
+    # trust_store_path: <TRUSTSTORE_PATH>.jks
+
+    ## trust_store_password - optional - string
+    ## If ssl is enabled, set your <PASSWORD> here.
+    
+    # trust_store_password: <PASSWORD>
 
 ## Log Section (Available for Agent >=6.0)
 
 #logs:
 
-    # - type : (mandatory) type of log input source (tcp / udp / file)
-    #   port / path : (mandatory) Set port if type is tcp or udp. Set path if type is file
-    #   service : (mandatory) name of the service owning the log
-    #   source : (mandatory) attribute that defines which integration is sending the logs
-    #   sourcecategory : (optional) Multiple value attribute. Can be used to refine the source attribtue
-    #   tags: (optional) add tags to each logs collected
+    ## type - mandatory - string
+    ## Type of log input source, to choose between tcp / udp / file / journald / docker
+    
+    # - type: file
+
+    ## path - mandatory - string
+    ## If type is file, enter the file path to gather logs from
+    
+    #   path: <FILE_PATH>
+
+    ## port - mandatory -  integer
+    ## If type is udp/tcp, enter the port to listen to
+    
+    #   port: <PORT_NUMBER>
+
+    ## service - mandatory - string
+    ## Name of the service owning the log, allows binding logs and Traces 
+    ## coming from the same <SERVICE>. 
+    
+    #   service: <SERVICE>
+
+    ## source - mandatory - string
+    ## Attribute that defines which integration is sending the logs
+    
+    #   source: <SOURCE_NAME>
+    
+    ## sourcecategory - optional - coma separated list of strings 
+    ## Multiple value attribute. Can be used to refine the source attribtue
+    
+    #   sourcecategory: <SOURCE_CATEGORY>
+
+    ## tags - optional - list of key:value element
+    ## List of tags to attach to every logs gathered by this integration.
+    
+    #   tags:
+    #   - <KEY>:<VALUE>
+
+    ## Gathering all your Cassandra logs
     
     # - type: file
     #   path: /var/log/cassandra/*.log
@@ -44,13 +116,22 @@ instances:
     
     
 init_config:
+
+  ## is_jmx - optional - boolean
+  ## Specify if this configuration file is for a JMX integration
+   
   is_jmx: true
+  
+  ## collect_default_metrics - mandatory - boolean
+  ## Whether or not this check should collect all default metrics
+
   collect_default_metrics: true
 
-  # List of metrics to be collected by the integration
-  # Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  # Agent 5: Customize all your metrics below
-  # Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+  ## List of metrics to be collected by the integration
+  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  ## Agent 5: Customize all your metrics below
+  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+
   conf:
     - include:
         domain: org.apache.cassandra.metrics
