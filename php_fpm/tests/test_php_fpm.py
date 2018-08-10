@@ -67,6 +67,29 @@ def test_status(check, instance, aggregator, ping_url_tag, php_fpm_instance):
     aggregator.assert_service_check('php_fpm.can_ping', status=check.OK, tags=expected_tags)
 
 
+@pytest.mark.integration
+def test_status_fastcgi(check, instance_fastcgi, aggregator, ping_url_tag_fastcgi, php_fpm_instance):
+    instance_fastcgi['tags'] = ['cluster:forums']
+    check.check(instance_fastcgi)
+
+    metrics = [
+        'php_fpm.listen_queue.size',
+        'php_fpm.processes.idle',
+        'php_fpm.processes.active',
+        'php_fpm.processes.total',
+        'php_fpm.requests.slow',
+        'php_fpm.requests.accepted',
+        'php_fpm.processes.max_reached',
+    ]
+
+    expected_tags = ['cluster:forums', 'pool:www']
+    for metric in metrics:
+        aggregator.assert_metric(metric, tags=expected_tags)
+
+    expected_tags = [ping_url_tag_fastcgi, 'cluster:forums']
+    aggregator.assert_service_check('php_fpm.can_ping', status=check.OK, tags=expected_tags)
+
+
 def test_should_not_retry(check, instance):
     """
     backoff only works when response code is 503, otherwise the error
@@ -75,7 +98,7 @@ def test_should_not_retry(check, instance):
     with mock.patch('datadog_checks.php_fpm.php_fpm.requests') as r:
         r.get.side_effect = FooException("Generic http error here")
         with pytest.raises(FooException):
-            check._process_status(instance['status_url'], None, [], None, 10, True)
+            check._process_status(instance['status_url'], None, [], None, 10, True, False)
 
 
 def test_should_bail_out(check, instance):
@@ -91,7 +114,7 @@ def test_should_bail_out(check, instance):
             mock.MagicMock(status_code=200),
         ]
         with pytest.raises(FooException):
-            check._process_status(instance['status_url'], None, [], None, 10, True)
+            check._process_status(instance['status_url'], None, [], None, 10, True, False)
 
 
 def test_backoff_success(check, instance, aggregator, payload):
@@ -106,5 +129,5 @@ def test_backoff_success(check, instance, aggregator, payload):
             mock.MagicMock(status_code=503),
             mock.MagicMock(status_code=200, **attrs),
         ]
-        pool_name = check._process_status(instance['status_url'], None, [], None, 10, True)
+        pool_name = check._process_status(instance['status_url'], None, [], None, 10, True, False)
         assert pool_name == 'www'
