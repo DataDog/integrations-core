@@ -171,6 +171,13 @@ class KubernetesState(PrometheusCheck):
         if hostname_override:
             self.label_to_hostname = 'node'
 
+        self.send_pod_phase_service_checks = instances[0].get("send_pod_phase_service_checks", True)
+        self._deprecations["send_pod_phase_service_checks"] = [
+            False,
+            "DEPRECATION NOTICE: pod phase service checks are deprecated. Please set "
+            "`send_pod_phase_service_checks` to false and rely on corresponding gauges instead",
+        ]
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
         if endpoint is None:
@@ -350,9 +357,13 @@ class KubernetesState(PrometheusCheck):
         status_phase_counter = Counter()
 
         for metric in message.metric:
-            self._condition_to_tag_check(metric, check_basename, self.pod_phase_to_status,
-                                         tags=[self._label_to_tag("pod", metric.label),
-                                               self._label_to_tag("namespace", metric.label)] + self.custom_tags)
+            if self.send_pod_phase_service_checks:
+                self._log_deprecation('send_pod_phase_service_checks')
+                self._condition_to_tag_check(
+                    metric, check_basename, self.pod_phase_to_status,
+                    tags=[self._label_to_tag("pod", metric.label), self._label_to_tag("namespace", metric.label)]
+                    + self.custom_tags
+                )
 
             # Counts aggregated cluster-wide to avoid no-data issues on pod churn,
             # pod granularity available in the service checks
