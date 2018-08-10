@@ -32,6 +32,7 @@ def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
     _assert_metrics(aggregator, expected_tags)
 
 
+@pytest.mark.local
 def test_check_local(aggregator, init_config, instance_sql2008):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_sql2008])
     sqlserver_check.check(instance_sql2008)

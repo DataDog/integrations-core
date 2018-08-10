@@ -399,10 +399,14 @@ class SQLServer(AgentCheck):
         Cursor are cached in the self.connections dict
         '''
         conn_key = self._conn_key(instance, db_key, db_name)
-
-        conn = self.connections[conn_key]['conn']
-        cursor = conn.cursor()
-        return cursor
+        try:
+            conn = self.connections[conn_key]['conn']
+        except KeyError:
+            # We catch KeyError to avoid leaking the auth info used to compose the key
+            # FIXME: we should find a better way to compute unique keys to map opened connections other than
+            # using auth info in clear text!
+            raise SQLConnectionError("Cannot find an opened connection for host: {}".format(instance.get('host')))
+        return conn.cursor()
 
     def get_sql_type(self, instance, counter_name):
         '''
