@@ -72,12 +72,12 @@ def is_static_pending_pod(pod):
         return False
 
 
-class ContainerFilter(object):
+class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to
     send metrics for a given container.
     Results and podlist are cached between calls to avoid the repeated python-go switching
-    cost (filter called once per prometheus metric), hence the ContainerFilter object MUST
+    cost (filter called once per prometheus metric), hence the PodListUtils object MUST
     be re-created at every check run.
 
     Containers that are part of a static pod are not filtered, as we cannot curently
@@ -87,25 +87,48 @@ class ContainerFilter(object):
         self.containers = {}
         self.static_pod_uids = set()
         self.cache = {}
+        self.pod_uid_by_name_tuple = {}
+        self.container_id_by_name_tuple = {}
 
         pods = podlist.get('items') or []
 
         for pod in pods:
+            metadata = pod.get("metadata", {})
+            uid = metadata.get("uid")
+            namespace = metadata.get("namespace")
+            pod_name = metadata.get("name")
+            self.pod_uid_by_name_tuple[(namespace, pod_name)] = uid
+
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             if is_static_pending_pod(pod):
-                self.static_pod_uids.add(pod.get("metadata", {}).get("uid"))
+                self.static_pod_uids.add(uid)
 
             for ctr in pod.get('status', {}).get('containerStatuses', []):
                 cid = ctr.get('containerID')
                 if not cid:
                     continue
                 self.containers[cid] = ctr
-                if "://" in cid:
-                    # cAdvisor pushes cids without orchestrator scheme
-                    # re-register without the scheme
-                    short_cid = cid.split("://", 1)[-1]
-                    self.containers[short_cid] = ctr
+                self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
+
+    def get_uid_by_name_tuple(self, name_tuple):
+        """
+        Get the pod uid from the tuple namespace and name
+
+        :param name_tuple: (pod_namespace, pod_name)
+        :return: str or None
+        """
+        return self.pod_uid_by_name_tuple.get(name_tuple, None)
+
+    def get_cid_by_name_tuple(self, name_tuple):
+        """
+        Get the container id (with runtime scheme) from the tuple namespace,
+        name and container name
+
+        :param name_tuple: (pod_namespace, pod_name, container_name)
+        :return: str or None
+        """
+        return self.container_id_by_name_tuple.get(name_tuple, None)
 
     def is_excluded(self, cid, pod_uid=None):
         """

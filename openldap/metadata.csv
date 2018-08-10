@@ -1,0 +1,21 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+openldap.bind_time,gauge,,second,,Time it takes the check to bind to the OpenLDAP server,-1,openldap,bind time
+openldap.connections.current,gauge,,connection,,Current number of active connections,0,openldap,curr conns
+openldap.connections.max_file_descriptors,gauge,,file,,Maximum number of file descriptors,0,openldap,max file desc
+openldap.connections.total,count,,connection,,Total number of connections since the server started,0,openldap,total conns
+openldap.operations.completed.total,count,,operation,,Total number of operations completed by the server,0,openldap,total ops completed
+openldap.operations.initiated.total,count,,operation,,Total number of operations initiated by the server,0,openldap,total ops initiated
+openldap.operations.completed,count,,operation,,Number of operations completed by the server tagged by operation type,0,openldap,ops completed
+openldap.operations.initiated,count,,operation,,Number of operations initiated by the server tagged by operation type,0,openldap,ops initiated
+openldap.statistics.bytes,count,,byte,,Number of bytes sent by the server,0,openldap,bytes
+openldap.statistics.entries,count,,entry,,Number of entries sent by the server,0,openldap,entries
+openldap.statistics.pdu,count,,packet,,Number of PDU packets sent by the server,0,openldap,pdu
+openldap.statistics.referrals,count,,message,,Number of referrals sent by the server,0,openldap,referrals
+openldap.threads,gauge,,thread,,Number of threads started by the server tagged by state,0,openldap,threads
+openldap.threads.max,gauge,,thread,,Maximum number of threads as configured,0,openldap,max threads
+openldap.threads.max_pending,gauge,,thread,,Maximum number of pending threads,0,openldap,max pending threads
+openldap.uptime,gauge,,second,,Uptime of the server,0,openldap,uptime
+openldap.waiter.read,gauge,,worker,,Number of current read waiters,0,openldap,read waiter
+openldap.waiter.write,gauge,,worker,,Number of current writer waiters,0,openldap,write waiter
+openldap.query.duration,gauge,,second,,Time it takes to execute the query,-1,openldap,query duration
+openldap.query.entries,gauge,,entry,,Number of entries returned by the query,0,openldap,query entries

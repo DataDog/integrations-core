@@ -1,21 +1,23 @@
 {
+  "categories": [
+    "monitoring"
+  ],
+  "creates_events": false,
+  "display_name": "Agent Metrics",
+  "guid": "032333e3-5272-4044-90d5-a05997667513",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "datadog.agent.",
+  "metric_to_check": "datadog.agent.collector.cpu.used",
   "name": "agent_metrics",
+  "public_title": "Datadog-Agent Metrics Integration",
   "short_description": "agent_metrics description.",
-  "type": "check",
-  "guid": "032333e3-5272-4044-90d5-a05997667513",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Agent Metrics Integration",
-  "categories": [
-    "monitoring"
-  ],
-  "doc_link": "https://docs.datadoghq.com/integrations/agent_metrics/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

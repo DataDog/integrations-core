@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check collects resource usage metrics from your vSphere cluster—CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
+This check collects resource usage metrics from your vSphere cluster-CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
 ## Setup
 ### Installation
@@ -15,7 +15,7 @@ The vSphere check is included in the [Datadog Agent][1] package, so you don't ne
 
 In the Administration section of vCenter, add a read-only user called datadog-readonly.
 
-Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample vsphere.d/conf.yaml][2] for all available configuration options:
+Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][9]. See the [sample vsphere.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -28,6 +28,8 @@ instances:
 ```
 
 [Restart the Agent][3] to start sending vSphere metrics and events to Datadog.
+
+**Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. You will have to update your `<VCENTER_HOSTNAME>` accordingly.
 
 #### Configuration Options
 
@@ -90,4 +92,5 @@ See our [blog post][7] on monitoring vSphere environments with Datadog.
 [5]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [6]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
 [7]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/vmware/vsphere_graph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

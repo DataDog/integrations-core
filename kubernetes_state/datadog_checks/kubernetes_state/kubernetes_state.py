@@ -6,18 +6,15 @@ import re
 import time
 from collections import defaultdict, Counter
 
-try:
-    # Agent5 compatibility layer
-    from datadog_checks.errors import CheckException
-    from datadog_checks.checks.prometheus import PrometheusCheck
-except ImportError:
-    from checks import CheckException
-    from checks.prometheus_check import PrometheusCheck
+from datadog_checks.errors import CheckException
+from datadog_checks.checks.prometheus import PrometheusCheck
 
 
 METRIC_TYPES = ['counter', 'gauge']
-WHITELISTED_WAITING_REASONS = ['ErrImagePull', 'ImagePullBackoff', 'CrashLoopBackoff']
-WHITELISTED_TERMINATED_REASONS = ['OOMKilled', 'ContainerCannotRun', 'Error']
+
+# As case can vary depending on Kubernetes versions, we match the lowercase string
+WHITELISTED_WAITING_REASONS = ['errimagepull', 'imagepullbackoff', 'crashloopbackoff']
+WHITELISTED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
 
 class KubernetesState(PrometheusCheck):
@@ -375,7 +372,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in WHITELISTED_WAITING_REASONS:
+                    if label.value.lower() in WHITELISTED_WAITING_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
@@ -393,7 +390,7 @@ class KubernetesState(PrometheusCheck):
             skip_metric = False
             for label in metric.label:
                 if label.name == "reason":
-                    if label.value in WHITELISTED_TERMINATED_REASONS:
+                    if label.value.lower() in WHITELISTED_TERMINATED_REASONS:
                         tags.append(self._format_tag(label.name, label.value))
                     else:
                         skip_metric = True
@@ -470,6 +467,7 @@ class KubernetesState(PrometheusCheck):
         """ The ready status of a cluster node. v1.0+"""
         base_check_name = self.NAMESPACE + '.node'
         metric_name = self.NAMESPACE + '.nodes.by_condition'
+        by_condition_counter = Counter()
 
         for metric in message.metric:
             self._condition_to_tag_check(metric, base_check_name, self.condition_to_status_positive,
@@ -481,7 +479,10 @@ class KubernetesState(PrometheusCheck):
                 self._label_to_tag("condition", metric.label),
                 self._label_to_tag("status", metric.label)
             ] + self.custom_tags
-            self.count(metric_name, metric.gauge.value, tags)
+            by_condition_counter[tuple(sorted(tags))] += metric.gauge.value
+
+        for tags, count in by_condition_counter.iteritems():
+            self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, message, **kwargs):
         """ The ready status of a cluster node (legacy)"""

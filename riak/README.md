@@ -13,7 +13,7 @@ The Riak check is included in the [Datadog Agent][1] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9].
 	See the [sample riak.yaml][2] for all available configuration options:
 
     ```yaml
@@ -52,4 +52,5 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
 [6]: https://docs.datadoghq.com/help/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/riak/riak_graph.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

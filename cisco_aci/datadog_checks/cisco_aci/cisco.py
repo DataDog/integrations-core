@@ -38,7 +38,7 @@ class CiscoACICheck(AgentCheck):
         self.external_host_tags = {}
         self._api_cache = {}
         self.check_tags = ['cisco']
-        self.tagger = CiscoTags(self)
+        self.tagger = CiscoTags(log=self.log)
 
     def check(self, instance):
         self.log.info("Starting Cisco Check")
@@ -107,7 +107,7 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            capacity = Capacity(self, api, instance)
+            capacity = Capacity(api, instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
             capacity.collect()
         except Exception as e:
             self.log.error('capacity collection failed: {}'.format(e))

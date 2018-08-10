@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from setuptools import setup, find_packages
+from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
 
@@ -31,13 +31,14 @@ setup(
     name='datadog_checks_base',
     description='The Datadog Check Toolkit',
     long_description=LONG_DESC,
+    long_description_content_type='text/markdown',
     keywords='datadog agent checks',
     url='https://github.com/DataDog/integrations-core',
     author='Datadog',
     author_email='packages@datadoghq.com',
     license='BSD',
 
-    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -47,9 +48,8 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
 
-    packages=find_packages(),
+    packages=['datadog_checks'],
+    include_package_data=True,
 
     install_requires=[],
-
-    tests_require=['pytest<4', ],
 )

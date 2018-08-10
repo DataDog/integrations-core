@@ -16,13 +16,13 @@ The Go Expvar check is packaged with the Agent, so [install the Agent][2] anywhe
 ### Configuration
 #### Prepare your Go service
 
-If your Go service doesn't use the [expvar package][3] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar — i.e. you only want to collect your service's memory metrics — import the package using the blank identifier (`import _ "expvar"`).
+If your Go service doesn't use the [expvar package][3] already, you'll need to import it (`import "expvar"`). If you don't want to instrument your own metrics with expvar - i.e. you only want to collect your service's memory metrics - import the package using the blank identifier (`import _ "expvar"`).
 
 If your service doesn't already listen for HTTP requests (via the http package), [make it listen][4] locally, just for the Datadog Agent.
 
 #### Connect the Agent
 
-1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
+1. Edit the file `go_expvar.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][12]. See the [sample go_expvar.d/conf.yaml][5] for all available configuration options.
 
     ```yaml
         init_config:
@@ -79,4 +79,5 @@ Need help? Contact [Datadog Support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog/
-[11]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/goexpvar/go_graph.png
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

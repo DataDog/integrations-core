@@ -1,33 +1,25 @@
 {
-  "manifest_version": "1.0.0",
-  "creates_events": "false",
-  "name": "MySQL",
-  "display_name": "MySQL",
+  "categories": [
+    "data store",
+    "log collection"
+  ],
   "creates_events": true,
-  "metric_to_check": "mysql.replication.slaves_connected",
+  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
+  "display_name": "MySQL",
+  "guid": "056bfc7f-4775-4581-9442-502078593d10",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "mysql.",
+  "metric_to_check": "mysql.net.connections",
+  "name": "MySQL",
+  "public_title": "Datadog-MySQL Integration",
+  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "maintainer": "help@datadoghq.com",
-  "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
-  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
-  "resources": {
-    "small": "resources/small_mysql.png",
-    "bot": "resources/bot_mysql.png",
-    "monitor_editor": "resources/monitor_mysql.png",
-    "my_image": "resources/mysql.png"
-  },
-  "guid": "056bfc7f-4775-4581-9442-502078593d10",
-  "public_title": "Datadog-MySQL Integration",
-  "categories": [
-    "data store",
-    "log collection"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mysql/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

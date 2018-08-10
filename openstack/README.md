@@ -72,7 +72,7 @@ To capture OpenStack metrics you need to [install the Agent][1] on your hosts ru
 
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
-3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
+3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][11]. See the [sample openstack.d/conf.yaml][2] for all available configuration options.
 
 4. [Restart the Agent][3]
 
@@ -129,4 +129,5 @@ See also our blog posts:
 [7]: https://www.datadoghq.com/blog/openstack-monitoring-nova/
 [8]: https://www.datadoghq.com/blog/install-openstack-in-two-commands/
 [9]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones/
-[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/openstack/openstack.png
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

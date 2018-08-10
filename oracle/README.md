@@ -1,5 +1,7 @@
 # Oracle Integration
 
+![Oracle Dashboard][9]
+
 ## Overview
 
 Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
@@ -70,7 +72,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 ### Configuration
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][2] for all available configuration options.
+Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][10] to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][2] for all available configuration options.
 
 Configuration Options:
 
@@ -106,3 +108,5 @@ Need help? Contact [Datadog Support][8].
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

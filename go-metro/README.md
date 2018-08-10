@@ -9,7 +9,7 @@ This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. 
 ## Setup
 ### Installation
 
-The TCP RTT check—also known as [go-metro][1]—is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
+The TCP RTT check-also known as [go-metro][1]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
 
 Debian-based systems should use one of the following:
 

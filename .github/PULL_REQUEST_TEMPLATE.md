@@ -11,7 +11,7 @@ What inspired you to submit this pull request?
 - [ ] PR has a [meaningful title](https://github.com/DataDog/integrations-core/blob/master/CONTRIBUTING.md#pull-request-title) or PR has the `no-changelog` label attached
 - [ ] Feature or bugfix has tests
 - [ ] Git history is clean
-- [ ] If PR impacts documentation, docs team has been notified or an issue has been opened on the [documentation repo](https://github.com/DataDog/documentation/issues/new)
+- [ ] If PR impacts documentation, docs team has been notified or an issue has been opened on the [documentation repo](https://github.com/DataDog/documentation/issues/new)
 
 ### Additional Notes
 

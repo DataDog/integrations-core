@@ -4,6 +4,8 @@
 
 The ActiveMQ check lets you collect metrics for brokers and queues, producers and consumers, and more.
 
+**Note**: If you are running a ActiveMQ version older than 5.8.0, refer to [Agent 5.10.x released sample files][110].
+
 ## Setup
 ### Installation
 
@@ -14,7 +16,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 ### Configuration
 
 1. **Make sure that [JMX Remote is enabled][103] on your ActiveMQ server.**
-2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
+2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][111]. See the [sample activemq.d/conf.yaml][104] for all available configuration options.
 
       ```yaml
       instances:
@@ -78,7 +80,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
                 metric_type: gauge
               MemoryPercentUsage:
                 alias: activemq.broker.memory_pct
-                metric_type: gauge
+                metric_type: gauge
       ```
 
 3. [Restart the agent][109]
@@ -115,3 +117,5 @@ Need help? Contact [Datadog Support][107].
 [107]: https://docs.datadoghq.com/help/
 [108]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance/
 [109]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[110]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
+[111]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

@@ -1,5 +1,7 @@
 # RiakCS Check
 
+![RiakCS Dashboard][8]
+
 ## Overview
 
 Capture RiakCS metrics in Datadog to:
@@ -14,7 +16,7 @@ The RiakCS check is included in the [Datadog Agent][1] package, so you don't nee
 
 ### Configuration
 
-1. Edit the `riakcs.yamld/conf.` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the `riakcs.yamld/conf.` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9].
     See the [sample riakcs.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -63,3 +65,5 @@ To get a better idea of how (or why) to monitor Riak CS performance and availabi
 [5]: https://github.com/DataDog/integrations-core/blob/master/riakcs/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability/
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riakcs/images/riakcs_dashboard.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

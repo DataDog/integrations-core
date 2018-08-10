@@ -51,19 +51,19 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── MANIFEST.in
     ├── README.md
     ├── datadog_checks
-    │   ├── __init__.py
-    │   └── foo_check
-    │       └── data
-    │           └── conf.yaml.example
-    │       ├── __about__.py
-    │       ├── __init__.py
-    │       └── foo_check.py
+    │   ├── __init__.py
+    │   └── foo_check
+    │       └── data
+    │           └── conf.yaml.example
+    │       ├── __about__.py
+    │       ├── __init__.py
+    │       └── foo_check.py
     ├── images
-    │   └── snapshot.png
+    │   └── snapshot.png
     ├── logos
-    │   ├── avatars-bot.png
-    │   ├── saas_logos-bot.png
-    │   └── saas_logos-small.png
+    │   ├── avatars-bot.png
+    │   ├── saas_logos-bot.png
+    │   └── saas_logos-small.png
     ├── manifest.json
     ├── metadata.csv
     ├── requirements-dev.txt
@@ -72,9 +72,9 @@ Answer the questions when prompted. Once done, you should end up with something 
     ├── service_checks.json
     ├── setup.py
     ├── tests
-    │   ├── __init__.py
-    │   ├── conftest.py
-    │   └── test_check.py
+    │   ├── __init__.py
+    │   ├── conftest.py
+    │   └── test_check.py
     └── tox.ini
 ```
 
@@ -91,7 +91,7 @@ Checks are organized in regular Python packages under the `datadog_checks` names
 
 ### Implement check logic
 
-Let's say we want to collect a service check named `my_check` that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string, and `CRITICAL` if we can't reach the page at all.
+Let's say we want to collect a Service Check named `my_check` that sends `OK` when we are able to find a certain string in the body of a web page, `WARNING` if we can access the page but can't find the string, and `CRITICAL` if we can't reach the page at all.
 
 The code would look like this:
 
@@ -300,9 +300,52 @@ The `logos` folder must contain **three** images with filenames and sizes that m
 
 ### Metadata
 
-Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. Our example check doesn't send any metrics however, so in this case we will leave it empty.
+Review the contents of `manifest.json` and `metadata.csv`. The metadata catalog is not currently automatically generated, so filling it out manually is a crucial part of the release process. 
 
-Our check sends a Service Check though, so we need to add it to the `service_checks.json` file:
+#### manifest.json
+
+Find below the complete list of mandatory and optional attributes for your `manifest.json` file:
+
+| Attribute           | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
+| ------              | ----            | ------             | ---------                                                                                                                                                                                                                |
+| `categories`        | Array of String | Mandatory          | Integration categories used on the [public documentation Integrations page][12].                                                                                                                                         |
+| `creates_events`    | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
+| `display_name`      | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation Integrations page][12]                                                                                 |
+| `guid`              | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][13]                                                                                                                                                                     |
+| `is_public`         | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
+| `maintainer`        | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
+| `manifest_version`  | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
+| `name`              | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
+| `public_title`      | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> Integration`.                                                                                   |
+| `short_description` | String          | Mandatory          | This text -Maximum 80 characters- appears at the top of the integration tile as well as the integration's rollover text on the integrations page.                                                                        |
+| `support`           | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
+| `supported_os`      | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |
+| `type`              | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                       |
+| `aliases`           | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                     |
+| `description`       | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                        |
+| `is_beta`           | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                              |
+| `metric_to_check`   | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
+| `metric_prefix`     | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
+
+#### metadata.csv
+
+Our example check doesn't send any metrics, so in this case we will leave it empty but find below the description for each column of your `metadata.csv` file:
+
+| Column name     | Mandatory/Optional | Description                                                                                                                                                                     |
+| ---             | ----               | ----                                                                                                                                                                            |
+| `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                             |
+| `metric_type`   | Mandatory          | [Type of the metric][10].                                                                                                                                                       |
+| `interval`      | Optional           | Collection interval of the metric in second.                                                                                                                                    |
+| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][11].                                                                                                                     |
+| `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
+| `description`   | Mandatory          | Description of the metric.                                                                                                                                                      |
+| `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
+| `integration`   | Mandatory          | Name of the integration that emits the metric.                                                                                                                                  |
+| `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                              |
+
+#### service_checks.json
+
+Our check sends a Service Check, so we need to add it to the `service_checks.json` file:
 
 ```json
 [
@@ -317,6 +360,18 @@ Our check sends a Service Check though, so we need to add it to the `service_che
     }
 ]
 ```
+
+Find below the description for each attributes-each one of them is mandatory-of your `service_checks.json` file:
+
+| Attribute       | Description                                                                                                              |
+| ----            | ----                                                                                                                     |
+| `agent_version` | Minimum Agent version supported.                                                                                         |
+| `integration`   | Integration name.                                                                                                        |
+| `check`         | Name of the Service Check                                                                                                |
+| `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
+| `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
+| `name`          | Displayed name of the Service Check.                                                                                     |
+| `description`   | Description of the Service Check                                                                                         |
 
 ### Building
 
@@ -337,3 +392,8 @@ python setup.py bdist_wheel
 [6]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [7]: https://github.com/DataDog/integrations-extras
 [9]: https://packaging.python.org/tutorials/distributing-packages/
+[10]: https://docs.datadoghq.com/developers/metrics/#metric-types
+[11]: https://docs.datadoghq.com/developers/metrics/#units
+[12]: https://docs.datadoghq.com/integrations/
+[13]: https://www.uuidgenerator.net/
+[14]: https://docs.datadoghq.com/getting_started/tagging/

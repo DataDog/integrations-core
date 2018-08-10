@@ -142,8 +142,9 @@ instances:
     # allow_redirects: true
 
 
-    # The (optional) include_default_header parameter instructs the check to include the default headers.
-    # Default headers can be found at https://github.com/DataDog/dd-agent/blob/5.10.0/util.py#L58-L67
+    # The (optional) include_default_headers parameter instructs the check to include the default headers.
+    # Default headers can be found at:
+    # https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/utils/headers.py
     #
     # Defaults to true.
     #

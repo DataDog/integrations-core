@@ -1,3 +1,5 @@
+# Amazon EKS Integration
+
 ![EKS Dashboard][1]
 
 ## Overview
@@ -37,7 +39,7 @@ Need help? Contact [Datadog Support][9].
 * [Monitor Amazon EKS with Datadog][10]
 
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/a30e284214e465844d18b7ac06c7c2b1dab8b43a/amazon_eks/images/eks_screenboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/kubernetes/
 [3]: https://docs.datadoghq.com/integrations/amazon_web_services/
 [4]: https://docs.datadoghq.com/integrations/amazon_ec2/

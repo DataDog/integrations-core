@@ -4,3 +4,5 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
+uptime==3.0.1 \
+    --hash=sha256:7c300254775b807ce46e3dcbcda30aa3b9a204b9c57a7ac1e79ee6dbe3942973

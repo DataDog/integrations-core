@@ -14,7 +14,7 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 
 ### Configuration
 
-1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Couchbase performance data.
+1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Couchbase performance data.
     See the [sample dns_check.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -67,3 +67,4 @@ Need help? Contact [Datadog Support][6].
 [4]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/dns_check/metadata.csv
 [6]: https://docs.datadoghq.com/help/
+[7]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

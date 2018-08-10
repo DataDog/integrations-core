@@ -1,17 +1,21 @@
 {
+  "categories": [
+    "containers"
+  ],
+  "creates_events": false,
+  "display_name": "Kubelet",
+  "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.2.0",
+  "metric_prefix": "kubernetes.",
+  "metric_to_check": "kubernetes.cpu.usage.total",
   "name": "kubelet",
+  "public_title": "Datadog-Kubelet Integration",
   "short_description": "Collects container stats from kubelet.",
-  "guid": "55039e21-7e89-41fb-968c-ab8bf8f25da0",
   "support": "core",
   "supported_os": [
     "linux"
   ],
-  "public_title": "Datadog-Kubelet Integration",
-  "categories": ["containers"],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kubelet/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

@@ -1,11 +1,21 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
-  "manifest_version": "1.0.0",
-  "name": "postgres",
+  "aliases": [
+    "/integrations/postgresql"
+  ],
+  "categories": [
+    "data store",
+    "log collection"
+  ],
+  "creates_events": false,
   "display_name": "Postgres",
-  "creates_events": true,
+  "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "postgresql.",
   "metric_to_check": "postgresql.connections",
+  "name": "postgres",
+  "public_title": "Datadog-Postgres SQL Integration",
   "short_description": "Collect a wealth of database performance and health metrics.",
   "support": "core",
   "supported_os": [
@@ -13,13 +23,5 @@
     "mac_os",
     "windows"
   ],
-  "package_deps": false,
-  "guid": "e9ca29d5-5b4f-4478-8989-20d89afda0c9",
-  "public_title": "Datadog-Postgres SQL Integration",
-  "categories":["data store", "log collection"],
-  "type":"check",
-  "doc_link": "https://docs.datadoghq.com/integrations/postgres/",
-  "is_public": true,
-  "has_logo": true,
-  "aliases":["/integrations/postgresql"]
+  "type": "check"
 }

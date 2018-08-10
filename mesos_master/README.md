@@ -1,5 +1,7 @@
 # Mesos_master Check
 
+![Mesos master Dashboard][106]
+
 ## Overview
 
 This check collects metrics from Mesos masters for:
@@ -93,3 +95,4 @@ Need help? Contact [Datadog Support][103].
 [103]: https://docs.datadoghq.com/help/
 [104]: https://www.datadoghq.com/blog/deploy-datadog-dcos/
 [105]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
+[106]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png

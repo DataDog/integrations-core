@@ -1,26 +1,24 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "amazon_eks",
-  "display_name": "Amazon EKS",
-  "short_description": "Amazon EKS is a managed service that makes it easy for you to run Kubernetes on AWS without needing to install and operate your own Kubernetes clusters",
-  "creates_events": false,
-  "guid": "9bc1f66e-de05-4460-b082-783c45a07355",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "version": "1.0.0",
-  "public_title": "Datadog-Amazon-EKS Integration",
   "categories": [
     "aws",
     "containers",
     "orchestration",
     "log collection"
   ],
-  "doc_link": "https://docs.datadoghq.com/integrations/amazon_eks/",
-  "type": "check",
+  "creates_events": false,
+  "display_name": "Amazon EKS",
+  "guid": "9bc1f66e-de05-4460-b082-783c45a07355",
   "is_public": true,
-  "has_logo": true
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "aws.eks.",
+  "name": "amazon_eks",
+  "public_title": "Datadog-Amazon-EKS Integration",
+  "short_description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
+  "type": "check"
 }

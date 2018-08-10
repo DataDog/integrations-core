@@ -10,12 +10,10 @@ try:
     # it's used below.  noqa to suppress that error.
     from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture, initialize_pdh_tests  # noqa: F401
 
-except: # noqa: E722
-    import platform
-    if platform.system() != 'Windows':
-        pass
+except ImportError: # noqa: E722
+    pass
 
-from utils import requires_windows
+from .utils import requires_windows
 
 @pytest.fixture
 def Aggregator():
@@ -68,7 +66,7 @@ def test_multi_instance_counter(Aggregator, pdh_mocks_fixture):
     c = PDHBaseCheck("testcheck", {}, {}, [instance], MULTI_INSTANCE_COUNTER)
     c.check(instance)
     for t in ['instance:0', 'instance:1', 'instance:_Total']:
-        Aggregator.assert_metric("test.processor_time", tags=['%s' % t], count = 1)
+        Aggregator.assert_metric("test.processor_time", tags=['%s' % t], count=1)
     assert Aggregator.metrics_asserted_pct == 100.0
 
 @requires_windows # noqa: F811

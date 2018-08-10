@@ -1,5 +1,7 @@
 # Agent Check: Cassandra Nodetool
 
+![Cassandra default dashboard][10]
+
 ## Overview
 
 This check collects metrics for your Cassandra cluster that are not available through [jmx integration][1].
@@ -12,7 +14,7 @@ The Cassandra Nodetool check is included in the [Datadog Agent][2] package, so y
 
 ### Configuration
 
-Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your Agent's configuration directory.
+Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][11].
 See the [sample cassandra_nodetool.d/conf.yaml][3] for all available configuration options:
 
 ```yaml
@@ -76,3 +78,5 @@ Need help? Contact [Datadog Support][6].
 [7]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [8]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [9]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

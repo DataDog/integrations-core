@@ -12,57 +12,64 @@ class Capacity:
     Collect capacity metrics from the APIC
     """
 
-    def __init__(self, check, api, instance):
-        self.check = check
+    def __init__(self, api, instance, check_tags=None, gauge=None, log=None):
         self.api = api
         self.instance = instance
         self.user_tags = instance.get('tags', [])
-        self.check_tags = check.check_tags
+        self.check_tags = check_tags
+        if not self.check_tags:
+            self.check_tags = []
 
         # grab some functions from the check
-        self.gauge = check.gauge
-        self.log = check.log
+        self.gauge = gauge
+        self.log = log
 
     def collect(self):
         self.log.info("collecting capacity data")
         try:
-            self.get_contexts()
+            self._get_contexts()
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             # all should fail independently
             pass
         try:
-            self.get_apic_capacity_limits()
+            self._get_apic_capacity_limits()
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             # all should fail independently
             pass
         try:
-            self.get_apic_capacity_metrics()
+            self._get_apic_capacity_metrics()
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             # all should fail independently
             pass
         try:
-            self.get_eqpt_capacity()
+            self._get_eqpt_capacity()
         except exceptions.APIConnectionException, exceptions.APIParsingException:
             # all should fail independently
             pass
         self.log.info("finished collecting capacity data")
 
-    def get_eqpt_capacity(self):
+    def _get_eqpt_capacity(self):
         for c, metric_dict in aci_metrics.EQPT_CAPACITY_METRICS.iteritems():
             data = self.api.get_eqpt_capacity(c)
             for d in data:
-                dn = d.get('attributes', {}).get('dn', '')
-                children = d.get('children', [])
+                dn = d.get('attributes', {}).get('dn')
+                if not dn:
+                    continue
                 tags = helpers.parse_capacity_tags(dn)
+                tags += self.user_tags + self.check_tags
                 hostname = helpers.get_hostname_from_dn(dn)
+                children = d.get('children', [])
                 for child in children:
-                    attr = child.get(c, {}).get('attributes', {})
+                    child_attrs = child.get(c, {}).get('attributes')
+                    if not child_attrs or type(child_attrs) is not dict:
+                        continue
                     for cisco_metric, dd_metric in metric_dict.iteritems():
-                        value = attr.get(cisco_metric, 0)
-                        tags += self.user_tags + self.check_tags
+                        value = child_attrs.get(cisco_metric)
+                        if not value:
+                            continue
                         self.gauge(dd_metric, value, tags=tags, hostname=hostname)
 
-    def get_contexts(self):
+    def _get_contexts(self):
         for c, metric_dict in aci_metrics.CAPACITY_CONTEXT_METRICS.iteritems():
             dd_metric = metric_dict.get("metric_name")
             utilized_metric_name = dd_metric + ".utilized"
@@ -75,15 +82,17 @@ class Capacity:
             data = self.api.get_capacity_contexts(c)
             for d in data:
                 attr = d.get('ctxClassCnt', {}).get('attributes', {})
+                value = attr.get('count')
+                if not value:
+                    continue
                 dn = attr.get('dn', '')
                 tags = helpers.parse_capacity_tags(dn)
                 hostname = helpers.get_hostname_from_dn(dn)
-                value = attr.get('count', 0)
                 tags += self.check_tags + self.user_tags
                 self.gauge(utilized_metric_name, value, tags=tags, hostname=hostname)
                 self.gauge(limit_metric_name, limit_value, tags=tags, hostname=hostname)
 
-    def get_apic_capacity_limits(self):
+    def _get_apic_capacity_limits(self):
         tags = self.user_tags + self.check_tags
         data = self.api.get_apic_capacity_limits()
         for d in data:
@@ -94,7 +103,7 @@ class Capacity:
             if dd_metric:
                 self.gauge(dd_metric, value, tags=tags)
 
-    def get_apic_capacity_metrics(self):
+    def _get_apic_capacity_metrics(self):
         tags = self.user_tags + self.check_tags
         for c, opts in aci_metrics.APIC_CAPACITY_METRICS.iteritems():
             dd_metric = opts.get("metric_name")
@@ -104,6 +113,7 @@ class Capacity:
                 self.gauge(dd_metric, value, tags=tags)
             else:
                 for d in data:
-                    attr = d.get('moCount', {}).get('attributes', {})
-                    value = attr.get('count', 0)
+                    value = d.get('moCount', {}).get('attributes', {}).get('count')
+                    if not value:
+                        continue
                     self.gauge(dd_metric, value, tags=tags)

@@ -13,7 +13,7 @@ The network check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][10].
   See the [sample network.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -61,4 +61,5 @@ The Network check does not include any service checks at this time.
 [5]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [6]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
 [8]: https://docs.datadoghq.com/monitors/monitor_types/network
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/network/netdashboard.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
+[10]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

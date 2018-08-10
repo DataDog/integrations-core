@@ -1,5 +1,7 @@
 # HDFS NameNode Integration
 
+![HDFS Dashboard][11]
+
 ## Overview
 
 Monitor your primary _and_ standby HDFS NameNodes to know when your cluster falls into a precarious state: when you're down to one NameNode remaining, or when it's time to add more capacity to the cluster. This Agent check collects metrics for remaining capacity, corrupt/missing blocks, dead DataNodes, filesystem load, under-replicated blocks, total volume failures (across all DataNodes), and many more.
@@ -27,7 +29,7 @@ Restart the NameNode process to enable the JMX interface.
 
 #### Connect the Agent
 
-Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample hdfs_namenode.d/conf.yaml][2] for all available configuration options:
+Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][12]. See the [sample hdfs_namenode.d/conf.yaml][2] for all available configuration options:
 
 ```
 init_config:
@@ -77,3 +79,5 @@ Need help? Contact [Datadog Support][6].
 [8]: https://www.datadoghq.com/blog/monitor-hadoop-metrics/
 [9]: https://www.datadoghq.com/blog/collecting-hadoop-metrics/
 [10]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog/
+[11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
+[12]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

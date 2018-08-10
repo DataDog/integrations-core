@@ -178,7 +178,7 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
         check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
 
-    # Make sure we submit the summed rates correctly:
+    # Make sure we submit the summed rates correctly for containers:
     # - fluentd-gcp-v2.0.10-9q9t4 uses two cpus, we need to sum (1228.32 + 825.32) * 10**9 = 2053640000000
     # - demo-app-success-c485bc67b-klj45 is mono-threaded, we submit 7.756358313 * 10**9 = 7756358313
     #
@@ -192,6 +192,39 @@ def test_prometheus_cpu_summed(monkeypatch, aggregator):
     bad_calls = [
         mock.call('kubernetes.cpu.usage.total', 1228320000000.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
         mock.call('kubernetes.cpu.usage.total', 825320000000.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
+    ]
+    for c in bad_calls:
+        assert c not in check.rate.mock_calls
+
+
+def test_prometheus_net_summed(monkeypatch, aggregator):
+    check = mock_kubelet_check(monkeypatch, [{}])
+    monkeypatch.setattr(check, 'rate', mock.Mock())
+
+    with mock.patch("datadog_checks.kubelet.prometheus.get_tags", side_effect=mocked_get_tags):
+        check.check({"cadvisor_metrics_endpoint": "http://dummy", "kubelet_metrics_endpoint": ""})
+
+    # Make sure we submit the summed rates correctly for pods:
+    # - dd-agent-q6hpw has two interfaces, we need to sum (1.2638051777 + 2.2638051777) * 10**10 = 35276103554
+    # - fluentd-gcp-v2.0.10-9q9t4 has one interface only, we submit 5.8107648 * 10**07 = 58107648
+    #
+    calls = [
+        mock.call('kubernetes.network.rx_bytes', 35276103554.0, ['pod_name:dd-agent-q6hpw']),
+        mock.call('kubernetes.network.rx_bytes', 58107648.0, ['pod_name:fluentd-gcp-v2.0.10-9q9t4']),
+    ]
+    check.rate.assert_has_calls(calls, any_order=True)
+
+    bad_calls = [
+        # Make sure the per-interface metrics are not submitted
+        mock.call('kubernetes.network.rx_bytes', 12638051777.0, ['pod_name:dd-agent-q6hpw']),
+        mock.call('kubernetes.network.rx_bytes', 22638051777.0, ['pod_name:dd-agent-q6hpw']),
+        # Make sure hostNetwork pod metrics are not submitted, test with and without sum to be sure
+        mock.call('kubernetes.network.rx_bytes', (4917138204.0 + 698882782.0),
+                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
+        mock.call('kubernetes.network.rx_bytes', 4917138204.0,
+                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
+        mock.call('kubernetes.network.rx_bytes', 698882782.0,
+                  ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn']),
     ]
     for c in bad_calls:
         assert c not in check.rate.mock_calls
@@ -235,6 +268,12 @@ def mocked_get_tags(entity, _):
         ],
         "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
             "pod_name=demo-app-success-c485bc67b-klj45"
+        ],
+        "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": [
+            'pod_name:dd-agent-q6hpw'
+        ],
+        "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": [
+            'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
         ]
     }
     return tag_store.get(entity, [])
@@ -259,7 +298,7 @@ def test_report_container_spec_metrics(monkeypatch):
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
-    check.container_filter = mock.Mock(**attrs)
+    check.pod_list_utils = mock.Mock(**attrs)
 
     pod_list = check.retrieve_pod_list()
 

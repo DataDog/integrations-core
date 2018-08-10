@@ -4,6 +4,7 @@
 
 # stdlib
 from contextlib import closing
+from collections import OrderedDict
 
 # 3rd party
 import jaydebeapi as jdb
@@ -53,6 +54,13 @@ class Oracle(AgentCheck):
         'Temp Space Used':                  'oracle.temp_space_used',
     }
 
+    PROCESS_METRICS = OrderedDict([
+        ('PGA_USED_MEM', 'oracle.process.pga_used_memory'),
+        ('PGA_ALLOC_MEM', 'oracle.process.pga_allocated_memory'),
+        ('PGA_FREEABLE_MEM', 'oracle.process.pga_freeable_memory'),
+        ('PGA_MAX_MEM', 'oracle.process.pga_maximum_memory')
+    ])
+
     def check(self, instance):
         self.use_oracle_client = True
         server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
@@ -71,6 +79,7 @@ class Oracle(AgentCheck):
 
         with closing(self._get_connection(server, user, password, service, jdbc_driver, tags)) as con:
             self._get_sys_metrics(con, tags)
+            self._get_process_metrics(con, tags)
             self._get_tablespace_metrics(con, tags)
             self._get_custom_metrics(con, custom_queries, tags)
 
@@ -229,6 +238,23 @@ class Oracle(AgentCheck):
                 metric_value = row[1]
                 if metric_name in self.SYS_METRICS:
                     self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
+
+    def _get_process_metrics(self, con, tags):
+        if tags is None:
+            tags = []
+
+        query = "SELECT PROGRAM, {} FROM GV$PROCESS".format(','.join(self.PROCESS_METRICS.keys()))
+        with closing(con.cursor()) as cur:
+            cur.execute(query)
+            for row in cur.fetchall():
+
+                # Oracle program name
+                program_tag = ['program:{}'.format(row[0])]
+
+                # Get the metrics
+                for i, metric_name in enumerate(self.PROCESS_METRICS.values(), 1):
+                    metric_value = row[i]
+                    self.gauge(metric_name, metric_value, tags=tags + program_tag)
 
     def _get_tablespace_metrics(self, con, tags):
         if tags is None:

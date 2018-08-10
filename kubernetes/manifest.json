@@ -1,25 +1,24 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "manifest_version": "1.0.0",
-  "name": "kubernetes",
-  "display_name": "Kubernetes",
-  "creates_events": true,
-  "metric_to_check": "kubernetes.cpu.usage.total",
-  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
-  "guid": "eb31452b-d681-4823-87cc-2ef114559edf",
-  "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os"
-  ],
-  "public_title": "Datadog-Kubernetes Integration",
   "categories": [
     "orchestration",
     "containers",
     "log collection"
   ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/kubernetes/",
+  "creates_events": true,
+  "display_name": "Kubernetes",
+  "guid": "eb31452b-d681-4823-87cc-2ef114559edf",
   "is_public": true,
-  "has_logo": true
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "kubernetes.",
+  "metric_to_check": "kubernetes.cpu.usage.total",
+  "name": "kubernetes",
+  "public_title": "Datadog-Kubernetes Integration",
+  "short_description": "Capture Pod scheduling events, track the status of your Kubelets, and much more.",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os"
+  ],
+  "type": "check"
 }

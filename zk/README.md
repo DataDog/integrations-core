@@ -13,10 +13,13 @@ The Zookeeper check is included in the [Datadog Agent][13] package, so you don't
 
 ### Configuration
 
-1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][21] to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample zk.d/conf.yaml][14] for all available configuration options.
 
 2. [Restart the Agent][15]
+
+### Zookeepr Whitelist
+As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][22]) that whitelists [4 letter word commands][23]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
 #### Metric Collection
 
@@ -91,9 +94,7 @@ Make sure you clone and edit the integration pipeline if you have a different fo
 ## Data Collected
 ### Metrics
 
-As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of
-zookeeper stats. This check first parses the `stat` admin command for a version
-number. If the zookeeper version supports `mntr`, it is also parsed.
+As of zookeeper 3.4.0, the `mntr` admin command is provided for easy parsing of zookeeper stats. This check first parses the `stat` admin command for a version number. If the zookeeper version supports `mntr`, it is also parsed.
 
 Duplicate information is being reported by both `mntr` and `stat`: the duplicated
  `stat` metrics are only kept for backward compatibility.
@@ -142,4 +143,7 @@ Need help? Contact [Datadog Support][18].
 [16]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [17]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [18]: https://docs.datadoghq.com/help/
-[20]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/zookeeper/zookeepergraph.png
+[20]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
+[21]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[22]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
+[23]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw

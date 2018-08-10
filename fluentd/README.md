@@ -16,7 +16,7 @@ The Fluentd check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][18] to start collecting your FluentD [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample fluentd.d/conf.yaml][2] for all available configuration options.
 
 #### Prepare Fluentd
@@ -52,7 +52,63 @@ In your fluentd configuration file, add a `monitor_agent` source:
 
 #### Log Collection
 
-Follow [those instructions][4] to forward logs to Datadog with Fluentd.
+As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][10] to forward the logs directly from FluentD to your Datadog account. 
+
+##### Add metadata to your logs
+
+Proper metadata (including hostname and source) is the key to unlocking the full potential of your logs in Datadog. By default, the hostname and timestamp fields should be properly remapped via the [remapping for reserved attributes][12].
+
+##### Source and Custom tags
+
+Add the `ddsource` attribute with [the name of the log integration][16] in your logs in order to trigger the [integration automatic setup][13] in Datadog.
+[Host tags][15] are automatically set on your logs if there is a matching hostname in your [infrastructure list][14]. Use the `ddtags` attribute to add custom tags to your logs:
+
+Setup Example:
+
+```
+# Match events tagged with "datadog.**" and
+# send them to Datadog
+<match datadog.**>
+
+  @type datadog
+  @id awesome_agent
+  api_key <your_api_key>
+
+  # Optional
+  include_tag_key true
+  tag_key 'tag'
+
+  # Optional tags
+  dd_source '<INTEGRATION_NAME>' 
+  dd_tags '<KEY1:VALUE1>,<KEY2:VALUE2>'
+  dd_sourcecategory '<SOURCE_CATEGORY>'
+
+</match>
+```
+
+##### Kubernetes and Docker tags
+
+Datadog tags are critical to be able to jump from one part of the product to another. Having the right metadata associated with your logs is therefore important in jumping from a container view or any container metrics to the most related logs.
+
+If your logs contain any of the following attributes, these attributes are automatically added as Datadog tags on your logs:
+
+* `kubernetes.container_image`
+* `kubernetes.container_name`
+* `kubernetes.namespace_name`
+* `kubernetes.pod_name`
+* `docker.container_id`
+
+While the Datadog Agent collects Docker and Kubernetes metadata automatically, FluentD requires a plugin for this. We recommend using [fluent-plugin-kubernetes_metadata_filter][17] to collect this metadata.
+
+Configuration example:
+
+```
+# Collect metadata for logs tagged with "kubernetes.**"
+ <filter kubernetes.*>
+   type kubernetes_metadata
+ </filter>
+```
+
 
 ### Validation
 
@@ -79,13 +135,19 @@ Need help? Contact [Datadog Support][7].
 
 * [How to monitor Fluentd with Datadog][8]
 
-
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[4]: https://docs.datadoghq.com/logs/log_collection/fluentd/
 [5]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/monitor-fluentd-datadog/
-[9]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/fluentd/snapshot-fluentd.png
+[9]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
+[10]: http://www.rubydoc.info/gems/fluent-plugin-datadog/
+[11]: https://docs.datadoghq.com/logs/#edit-reserved-attributes
+[13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[14]: https://app.datadoghq.com/infrastructure
+[15]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
+[16]: https://docs.datadoghq.com/integrations/#cat-log-collection
+[17]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
+[18]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

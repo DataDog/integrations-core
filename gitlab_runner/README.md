@@ -17,7 +17,7 @@ The Gitlab Runner check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory, to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check.
+Edit the `gitlab_runner.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8], to point to the Runner's Prometheus metrics endpoint and to the Gitlab master to have a service check.
 See the [sample gitlab_runner.d/conf.yaml][2] for all available configuration options.
 
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
@@ -48,3 +48,4 @@ Need help? Contact [Datadog Support][5].
 [4]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/metadata.csv
 [5]: https://docs.datadoghq.com/help/
 [7]: https://docs.gitlab.com/runner/monitoring/README.html
+[8]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

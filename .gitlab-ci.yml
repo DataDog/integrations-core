@@ -1,0 +1,5 @@
+test:
+  only:
+    - master
+  script: if [ -n "$DD_TEST_CMD" ] ; then eval "$DD_TEST_CMD" ; else echo "skipping, DD_TEST_CMD is not set" ; fi
+  tags: [ "runner:main", "size:large" ]

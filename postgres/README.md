@@ -17,7 +17,7 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
-Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
+Edit the `postgres.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][25] to start collecting your PostgreSQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample postgres.d/conf.yaml][14] for all available configuration options.
 
 #### Prepare Postgres
 
@@ -78,10 +78,10 @@ PostgreSQL default logging is to stderr and logs do not include detailed informa
                             # can be absolute or relative to PGDATA
   log_filename = 'pg.log'   #log file name, can include pattern
   log_statement = 'all'     #log all queries
-  log_line_prefix= ‘%m [%p] %d %a %u %h %c ‘
+  log_line_prefix= '%m [%p] %d %a %u %h %c '
   log_file_mode = 0644
   ## For Windows
-  #log_destination = ‘eventlog’
+  #log_destination = 'eventlog'
   ```
 
 * Collecting logs is disabled by default in the Datadog Agent, you need to enable it in datadog.yaml:
@@ -168,12 +168,14 @@ custom_metrics:
     relation: false
 ```
 
-The example above will run two queries in PostgreSQL:
+The example above runs two queries in PostgreSQL:
 
 * `SELECT relname, SUM(idx_scan) as idx_scan_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_scan_count_by_table`.
 * `SELECT relname, SUM(idx_tup_read) as idx_read_count FROM pg_stat_all_indexes GROUP BY relname;` will generate a rate metric `postgresql.idx_read_count_by_table`.
 
-Both metrics will use the tags `table` and `schema` with values from the results in the `relname` and `schemaname` columns respectively. e.g. `table: <relname>`
+Both metrics use the tags `table` and `schema` with values from the results in the `relname` and `schemaname` columns respectively. e.g. `table: <relname>`
+
+N.B.: **If you're using Agent version 5**, `SUM()` needs to be mapped as `int` using `::bigint`. If not the metrics won't be collected. `SUM()` retrieves a numeric type which is mapped as Decimal type by Python so it has to be mapped as an `int` to be collected.
 
 ##### Example 2
 
@@ -218,4 +220,5 @@ You should also check the `/var/log/datadog/collector.log` file for more informa
 [21]: https://www.datadoghq.com/blog/postgresql-monitoring/
 [22]: https://www.datadoghq.com/blog/postgresql-monitoring-tools/
 [23]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/
-[24]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/postgresql/pggraph.png
+[24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
+[25]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

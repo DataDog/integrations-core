@@ -1,0 +1,11 @@
+[
+	{
+		"agent_version": "6.3.3",
+		"integration":"openldap",
+		"check": "openldap.can_connect",
+		"statuses": ["ok", "critical"],
+		"groups": ["url"],
+		"name": "Can Connect",
+		"description": "Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, `OK` otherwise."
+	}
+]

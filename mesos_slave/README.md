@@ -1,5 +1,7 @@
 # Mesos_slave Integration
 
+![Mesos Slave Dashboard][5]
+
 ## Overview
 
 This Agent check collects metrics from Mesos slaves for:
@@ -82,7 +84,7 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
 }
 ```
 
-Unless you want to configure a custom `mesos_slave.d/conf.yaml`—perhaps you need to set `disable_ssl_validation: true`—you don't need to do anything after installing the Agent.
+Unless you want to configure a custom `mesos_slave.d/conf.yaml`-perhaps you need to set `disable_ssl_validation: true`-you don't need to do anything after installing the Agent.
 
 ### Validation
 #### DC/OS
@@ -133,3 +135,4 @@ Need help? Contact [Datadog Support][4].
 [2]: https://hub.docker.com/r/datadog/agent/tags/
 [3]: https://github.com/DataDog/integrations-core/blob/master/mesos_slave/metadata.csv
 [4]: https://docs.datadoghq.com/help/
+[5]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_slave/images/mesos_dashboard.png

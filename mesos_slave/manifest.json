@@ -1,25 +1,24 @@
 {
+  "categories": [
+    "configuration & deployment",
+    "containers",
+    "orchestration"
+  ],
+  "creates_events": false,
+  "display_name": "Mesos Slave",
+  "guid": "14d0267e-9989-4d09-8362-9319958e858e",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
+  "metric_prefix": "mesos.",
+  "metric_to_check": "mesos.stats.uptime_secs",
   "name": "mesos_slave",
-  "display_name": "Mesos Slave",
-  "creates_events": true,
-  "metric_to_check": "mesos.state.task.cpu",
+  "public_title": "Datadog-Mesos Slave Integration",
   "short_description": "Track cluster resource usage, master and slave counts, tasks statuses, and more.",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os"
   ],
-  "guid": "14d0267e-9989-4d09-8362-9319958e858e",
-  "public_title": "Datadog-Mesos Slave Integration",
-  "categories": [
-    "configuration & deployment",
-    "containers",
-    "orchestration"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/mesos_slave/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

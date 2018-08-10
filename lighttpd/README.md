@@ -15,7 +15,7 @@ In addition, install `mod_status` on your Lighttpd servers.
 
 ### Configuration
 
-1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
+1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][9].
 	See the [sample lighttpd.d/conf.yaml][2] for all available configuration options:
 
     ```yaml
@@ -63,4 +63,5 @@ To get a better idea of how (or why) to monitor Lighttpd web server metrics with
 [5]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv
 [6]: https://docs.datadoghq.com/help/
 [7]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics/
-[8]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/lighttpd/lighttpddashboard.png
+[8]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard.png
+[9]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

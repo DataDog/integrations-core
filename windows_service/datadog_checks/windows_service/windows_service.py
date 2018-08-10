@@ -1,25 +1,29 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 """ Collect status information for Windows services
 """
-# project
-from checks import AgentCheck
-from checks.winwmi_check import WinWMICheck
-from utils.containers import hash_mutable
-from utils.timeout import TimeoutException
+
+from datadog_checks.checks.win.wmi import WinWMICheck
+from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.utils.timeout import TimeoutException
 
 
 class WindowsService(WinWMICheck):
     STATE_TO_VALUE = {
-        'Stopped': AgentCheck.CRITICAL,
-        'Start Pending': AgentCheck.WARNING,
-        'Stop Pending': AgentCheck.WARNING,
-        'Running': AgentCheck.OK,
-        'Continue Pending': AgentCheck.WARNING,
-        'Pause Pending': AgentCheck.WARNING,
-        'Paused': AgentCheck.WARNING,
-        'Unknown': AgentCheck.UNKNOWN
+        'Stopped': WinWMICheck.CRITICAL,
+        'Start Pending': WinWMICheck.WARNING,
+        'Stop Pending': WinWMICheck.WARNING,
+        'Running': WinWMICheck.OK,
+        'Continue Pending': WinWMICheck.WARNING,
+        'Pause Pending': WinWMICheck.WARNING,
+        'Paused': WinWMICheck.WARNING,
+        'Unknown': WinWMICheck.UNKNOWN
     }
     NAMESPACE = "root\\CIMV2"
     CLASS = "Win32_Service"
+    SERVICE_CHECK_NAME = 'windows_service.state'
 
     def __init__(self, name, init_config, agentConfig, instances):
         WinWMICheck.__init__(self, name, init_config, agentConfig, instances)
@@ -34,7 +38,7 @@ class WindowsService(WinWMICheck):
 
         instance_hash = hash_mutable(instance)
         instance_key = self._get_instance_key(host, self.NAMESPACE, self.CLASS, instance_hash)
-        tags = [] if (host == "localhost" or host == ".") else [u'host:{0}'.format(host)]
+        tags = [] if (host == "localhost" or host == ".") else [u'host:{}'.format(host)]
         tags.extend(custom_tags)
 
         if len(services) == 0:
@@ -88,12 +92,10 @@ class WindowsService(WinWMICheck):
                 except KeyError:
                     pass
 
-            status = self.STATE_TO_VALUE.get(wmi_obj["state"], AgentCheck.UNKNOWN)
-            self.service_check("windows_service.state", status,
-                        tags=tags + ['service:{0}'.format(sc_name)])
+            status = self.STATE_TO_VALUE.get(wmi_obj["state"], WinWMICheck.UNKNOWN)
+            self.service_check("windows_service.state", status, tags=tags + ['service:{}'.format(sc_name)])
             self.log.debug("service state for %s %s" % (sc_name, str(status)))
 
         for lsvc, svc in specific_services.items():
-            self.service_check("windows_service.state", AgentCheck.CRITICAL,
-                        tags=tags + ['service:{0}'.format(svc)])
-            self.log.debug("service state for %s %s" % (svc, str(AgentCheck.CRITICAL)))
+            self.service_check("windows_service.state", WinWMICheck.CRITICAL, tags=tags + ['service:{}'.format(svc)])
+            self.log.debug("service state for %s %s" % (svc, str(WinWMICheck.CRITICAL)))

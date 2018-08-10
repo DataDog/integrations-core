@@ -1,42 +1,56 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import subprocess
 import os
 import time
 
 import pytest
 import redis
 
+from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from .common import HOST, PORT, MASTER_PORT, REPLICA_PORT, PASSWORD
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def wait_for_cluster(master, replica):
-    """
-    Wait for the slave to connect to the master
-    """
-    attempts = 0
-    while True:
-        if attempts > 10:
-            return False
+class CheckCluster(LazyFunction):
+    def __init__(self, master_data, replica_data, attempts=60, wait=1):
+        self.master_data = master_data
+        self.replica_data = replica_data
+        self.attempts = attempts
+        self.wait = wait
 
-        try:
-            up = master.ping() and replica.ping() and \
-                 master.info().get('connected_slaves') and replica.info().get('master_link_status') != "down"
+    def __call__(self):
+        """Wait for the slave to connect to the master"""
+        master = redis.Redis(**self.master_data)
+        replica = redis.Redis(**self.replica_data)
 
-            if up:
-                print replica.info()
-                return True
+        for _ in range(self.attempts):
+            try:
+                if (
+                    master.ping()
+                    and replica.ping()
+                    and master.info().get('connected_slaves')
+                    and replica.info().get('master_link_status') != 'down'
+                ):
+                    break
+            except redis.ConnectionError:
+                pass
 
-        except redis.ConnectionError:
-            attempts += 1
-            time.sleep(1)
+            time.sleep(self.wait)
+        else:
+            raise RetryError(
+                'Redis cluster boot timed out!\n'
+                'Master: {}\n'
+                'Replica: {}'.format(
+                    master,
+                    replica
+                )
+            )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def redis_auth():
     """
     Start a standalone redis server requiring authentication before running a
@@ -44,19 +58,14 @@ def redis_auth():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-    env = os.environ
-    env['REDIS_CONFIG'] = os.path.join(HERE, 'config', 'auth.conf')
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', 'standalone.compose')
-    ]
-
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
+    with docker_run(
+        os.path.join(HERE, 'compose', 'standalone.compose'),
+        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'auth.conf')}
+    ):
+        yield
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def redis_cluster():
     """
     Start a cluster with one master, one replica and one unhealthy replica and
@@ -64,19 +73,16 @@ def redis_cluster():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-    args = [
-        "docker-compose",
-        "-f", os.path.join(HERE, 'compose', '1m-2s.compose')
-    ]
-
-    subprocess.check_call(args + ["up", "-d"])
-    # wait for the cluster to be up before yielding
-    master = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
-    replica = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)
-    if not wait_for_cluster(master, replica):
-        raise Exception("Redis cluster boot timed out!")
-    yield
-    subprocess.check_call(args + ["down"])
+    with docker_run(
+        os.path.join(HERE, 'compose', '1m-2s.compose'),
+        conditions=[
+            CheckCluster(
+                {'port': MASTER_PORT, 'db': 14, 'host': HOST},
+                {'port': REPLICA_PORT, 'db': 14, 'host': HOST},
+            )
+        ]
+    ):
+        yield
 
 
 @pytest.fixture
@@ -92,6 +98,7 @@ def redis_instance():
         'host': HOST,
         'port': PORT,
         'password': PASSWORD,
+        'keys': ['test_*'],
         'tags': ["foo:bar"]
     }
 

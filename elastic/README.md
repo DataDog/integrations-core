@@ -1,6 +1,6 @@
 # Elasticsearch Integration
 
-![Elasitc search graph][10]
+![Elasitc search dashboard][10]
 
 ## Overview
 
@@ -15,7 +15,7 @@ The Elasticsearch check is included in the [Datadog Agent][1] package, so you do
 
 ### Configuration
 
-1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
+1. Edit the `elastic.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][11] to start collecting your Elasticsearch [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample elastic.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3]
@@ -37,7 +37,7 @@ instances:
 
 **Note**:
 
-* If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster — e.g. if you use a hosted Elasticsearch — set `cluster_stats` to true.
+* If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster - e.g. if you use a hosted Elasticsearch - set `cluster_stats` to true.
 
 * To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
@@ -79,9 +79,11 @@ Finally, [Restart the Agent][3] to begin sending Elasticsearch metrics to Datado
 
 By default, not all of the following metrics are sent by the Agent. To send all metrics, configure flags in `elastic.yaml` as shown above.
 
-* `pshard_states` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
+* `pshard_stats` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
 * `index_stats` sends **elasticsearch.index.\*** metrics
 * `pending_task_stats` sends **elasticsearch.pending_\*** metrics
+
+For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][12].
 
 ### Metrics
 
@@ -89,7 +91,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes — red, yellow, or green.
+The Elasticsearch check emits an event to Datadog each time the overall status of your Elasticsearch cluster changes - red, yellow, or green.
 
 ### Service checks
 
@@ -119,4 +121,6 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [7]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
 [8]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics/
 [9]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics/
-[10]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/elasticsearch/elasticsearchgraph.png
+[10]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
+[11]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory
+[12]: https://www.elastic.co/guide/en/elasticsearch/reference/current/release-notes-6.3.0.html

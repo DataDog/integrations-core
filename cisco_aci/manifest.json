@@ -1,10 +1,17 @@
 {
+  "categories": [
+    "network"
+  ],
+  "creates_events": true,
+  "display_name": "Cisco ACI",
+  "guid": "8a20f56b-2e25-4a0b-a252-f5187dddeeef",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "cisco_aci",
-  "display_name": "Cisco ACI",
-  "creates_events": true,
+  "metric_prefix": "cisco_aci.",
   "metric_to_check": "cisco_aci.fabric.node.health.cur",
+  "name": "cisco_aci",
+  "public_title": "Datadog-CiscoACI Integration",
   "short_description": "Track Cisco ACI performance and usage.",
   "support": "core",
   "supported_os": [
@@ -12,11 +19,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "8a20f56b-2e25-4a0b-a252-f5187dddeeef",
-  "public_title": "Datadog-CiscoACI Integration",
-  "categories":["networking"],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/cisco_aci/",
-  "is_public": true,
-  "has_logo": false
+  "type": "check"
 }

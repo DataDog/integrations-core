@@ -20,7 +20,7 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 ### Configuration
 
-Edit the `cassandra.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cassandra [metrics](#metric-collection) and [logs](#log-collection).
+Edit the `cassandra.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][1012] to start collecting your Cassandra [metrics](#metric-collection) and [logs](#log-collection).
 See the [sample cassandra.d/conf.yaml][103] for all available configuration options.
 
 #### Metric Collection
@@ -90,4 +90,5 @@ Need help? Contact [Datadog Support][107].
 [108]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics/
 [109]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics/
 [1010]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog/
-[1011]: https://raw.githubusercontent.com/DataDog/documentation/master/src/images/integrations/cassandra/cassandra.png
+[1011]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
+[1012]: https://docs.datadoghq.com/agent/faq/agent-configuration-files/#agent-configuration-directory

@@ -1,0 +1,22 @@
+{
+  "categories": [
+    "containers",
+    "orchestration"
+  ],
+  "creates_events": false,
+  "display_name": "OpenShift",
+  "guid": "ea7f642f-263f-4ed1-8da0-9bb96c7df1f0",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "openshift.",
+  "metric_to_check": "openshift.clusterquota.cpu.used",
+  "name": "openshift",
+  "public_title": "Datadog-OpenShift Integration",
+  "short_description": "The Kubernetes platform for big ideas",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "type": "check"
+}

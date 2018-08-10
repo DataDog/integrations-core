@@ -9,6 +9,8 @@ import copy
 import traceback
 import unicodedata
 
+from six import iteritems, text_type
+
 try:
     import datadog_agent
     from ..log import init_logging
@@ -37,7 +39,7 @@ class AgentCheck(object):
         args: `name`, `init_config`, `agentConfig` (deprecated), `instances`
         """
         self.metrics = defaultdict(list)
-        self.check_id = ''
+        self.check_id = b''
         self.instances = kwargs.get('instances', [])
         self.name = kwargs.get('name', '')
         self.init_config = kwargs.get('init_config', {})
@@ -77,7 +79,7 @@ class AgentCheck(object):
         self._deprecations = {
             'increment': [
                 False,
-                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use " +
+                "DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please use "
                 "`AgentCheck.gauge` or `AgentCheck.count` instead, with a different metric name",
             ],
             'device_name': [
@@ -89,6 +91,11 @@ class AgentCheck(object):
                 False,
                 "DEPRECATION NOTICE: `in_developer_mode` is deprecated, please stop using it.",
             ],
+            'no_proxy': [
+                False,
+                "DEPRECATION NOTICE: The `no_proxy` config option has been renamed "
+                "to `skip_proxy` and will be removed in a future release.",
+            ],
         }
 
     @property
@@ -96,10 +103,18 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
-    def get_instance_proxy(self, instance, uri):
-        proxies = self.proxies.copy()
+    def get_instance_proxy(self, instance, uri, proxies=None):
+        proxies = proxies if proxies is not None else self.proxies.copy()
 
-        skip = is_affirmative(instance.get('no_proxy', not self._use_agent_proxy))
+        deprecated_skip = instance.get('no_proxy', None)
+        skip = (
+            is_affirmative(instance.get('skip_proxy', not self._use_agent_proxy)) or
+            is_affirmative(deprecated_skip)
+        )
+
+        if deprecated_skip is not None:
+            self._log_deprecation('no_proxy')
+
         return config_proxy_skip(proxies, uri, skip)
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
@@ -109,9 +124,9 @@ class AgentCheck(object):
 
         tags = self._normalize_tags(tags, device_name)
         if hostname is None:
-            hostname = ""
+            hostname = b''
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, float(value), tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, ensure_bytes(name), float(value), tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
@@ -161,9 +176,9 @@ class AgentCheck(object):
 
     def event(self, event):
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in event.items():
+        for key, value in list(iteritems(event)):
             # transform the unicode objects to plain strings with utf-8 encoding
-            if isinstance(value, unicode):
+            if isinstance(value, text_type):
                 try:
                     event[key] = event[key].encode('utf-8')
                 except UnicodeError:
@@ -175,7 +190,7 @@ class AgentCheck(object):
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = str(event['aggregation_key'])
+            event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
         aggregator.submit_event(self, self.check_id, event)
 
     # TODO(olivier): implement service_metadata if it's worth it
@@ -194,7 +209,7 @@ class AgentCheck(object):
         :param fix_case A boolean, indicating whether to make sure that
                         the metric name returned is in underscore_case
         """
-        if isinstance(metric, unicode):
+        if isinstance(metric, text_type):
             metric_name = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
         else:
             metric_name = metric
@@ -286,7 +301,7 @@ class AgentCheck(object):
     def run(self):
         try:
             self.check(copy.deepcopy(self.instances[0]))
-            result = ''
+            result = b''
 
         except Exception as e:
             result = json.dumps([

@@ -52,13 +52,16 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             'container_scrape_error'
         ]
 
+        # Filter out system slices to reduce CPU and memory usage of the check
+        self._text_filter_blacklist = ["container_name=\"\""]
+
         # these are filled by container_<metric-name>_usage_<metric-unit>
         # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
         self.fs_usage_bytes = {}
         self.mem_usage_bytes = {}
 
     @staticmethod
-    def _is_container_metric(metric):
+    def _is_container_metric(labels):
         """
         Return whether a metric is about a container or not.
         It can be about pods, or even higher levels in the cgroup hierarchy
@@ -68,16 +71,16 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         """
         for lbl in CONTAINER_LABELS:
             if lbl == 'container_name':
-                for ml in metric.label:
+                for ml in labels:
                     if ml.name == lbl:
                         if ml.value == '' or ml.value == 'POD':
                             return False
-            if lbl not in [ml.name for ml in metric.label]:
+            if lbl not in [ml.name for ml in labels]:
                 return False
         return True
 
     @staticmethod
-    def _is_pod_metric(metric):
+    def _is_pod_metric(labels):
         """
         Return whether a metric is about a pod or not.
         It can be about containers, pods, or higher levels in the cgroup hierarchy
@@ -85,7 +88,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         :param metric
         :return bool
         """
-        for ml in metric.label:
+        for ml in labels:
             if ml.name == 'container_name' and ml.value == 'POD':
                 return True
             # container_cpu_usage_seconds_total has an id label that is a cgroup path
@@ -109,31 +112,49 @@ class CadvisorPrometheusScraper(PrometheusScraper):
             if label.name == l_name:
                 return label.value
 
-    @staticmethod
-    def _get_container_id(labels):
+    def _get_container_id(self, labels):
         """
         Should only be called on a container-scoped metric
-        as it doesn't do any validation of the container id.
-        It simply returns the last part of the cgroup hierarchy.
+        It gets the container id from the podlist using the metrics labels
+
         :param labels
         :return str or None
         """
-        container_id = CadvisorPrometheusScraper._get_container_label(labels, "id")
-        if container_id:
-            return container_id.split('/')[-1]
+        namespace = CadvisorPrometheusScraper._get_container_label(labels, "namespace")
+        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
+        container_name = CadvisorPrometheusScraper._get_container_label(labels, "container_name")
+        return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
 
-    @staticmethod
-    def _get_pod_uid(labels):
+    def _get_container_id_if_container_metric(self, labels):
+        """
+        Checks the labels indicate a container metric,
+        then extract the container id from them.
+
+        :param labels
+        :return str or None
+        """
+        if CadvisorPrometheusScraper._is_container_metric(labels):
+            return self._get_container_id(labels)
+
+    def _get_pod_uid(self, labels):
         """
         Return the id of a pod
         :param labels:
         :return: str or None
         """
-        pod_id = CadvisorPrometheusScraper._get_container_label(labels, "id")
-        if pod_id:
-            for part in pod_id.split('/'):
-                if part.startswith('pod'):
-                    return part[3:]
+        namespace = CadvisorPrometheusScraper._get_container_label(labels, "namespace")
+        pod_name = CadvisorPrometheusScraper._get_container_label(labels, "pod_name")
+        return self.pod_list_utils.get_uid_by_name_tuple((namespace, pod_name))
+
+    def _get_pod_uid_if_pod_metric(self, labels):
+        """
+        Checks the labels indicate a pod metric,
+        then extract the pod uid from them.
+        :param labels
+        :return str or None
+        """
+        if CadvisorPrometheusScraper._is_pod_metric(labels):
+            return self._get_pod_uid(labels)
 
     def _is_pod_host_networked(self, pod_uid):
         """
@@ -173,7 +194,7 @@ class CadvisorPrometheusScraper(PrometheusScraper):
 
     def process(self, endpoint, **kwargs):
         self.pod_list = kwargs.get('pod_list')
-        self.container_filter = kwargs.get('container_filter')
+        self.pod_list_utils = kwargs.get('pod_list_utils')
 
         instance = kwargs.get('instance')
         if instance:
@@ -183,51 +204,80 @@ class CadvisorPrometheusScraper(PrometheusScraper):
 
         # Free up memory
         self.pod_list = None
-        self.container_filter = None
+        self.pod_list_utils = None
+
+    @staticmethod
+    def _sum_values_by_context(message, uid_from_labels):
+        """
+        Iterates over all metrics in a message and sums the values
+        matching the same uid. Modifies the metric family in place.
+        :param message: prometheus metric family
+        :param uid_from_labels: function mapping a metric.label to a unique context id
+        :return: dict with uid as keys, metric object references as values
+        """
+        seen = {}
+        metric_type = METRIC_TYPES[message.type]
+        for metric in message.metric:
+            uid = uid_from_labels(metric.label)
+            if not uid:
+                metric.Clear()  # Ignore this metric message
+                continue
+            # Sum the counter value accross all contexts
+            if uid not in seen:
+                seen[uid] = metric
+            else:
+                getattr(seen[uid], metric_type).value += getattr(metric, metric_type).value
+                metric.Clear()  # Ignore this metric message
+
+        return seen
 
     def _process_container_rate(self, metric_name, message):
-        """Takes a simple metric about a container, reports it as a rate."""
+        """
+        Takes a simple metric about a container, reports it as a rate.
+        If several series are found for a given container, values are summed before submission.
+        """
         if message.type >= len(METRIC_TYPES):
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
             return
 
-        for metric in message.metric:
-            if self._is_container_metric(metric):
-                c_id = self._get_container_id(metric.label)
-                pod_uid = self._get_pod_uid(metric.label)
-                if self.container_filter.is_excluded(c_id, pod_uid):
-                    continue
+        metrics = self._sum_values_by_context(message, self._get_container_id_if_container_metric)
+        for c_id, metric in metrics.iteritems():
+            pod_uid = self._get_pod_uid(metric.label)
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
+                continue
 
-                tags = get_tags('docker://%s' % c_id, True)
-                tags += self.instance_tags
+            tags = get_tags(c_id, True)
+            tags += self.instance_tags
 
-                # FIXME we are forced to do that because the Kubelet PodList isn't updated
-                # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
-                pod = self._get_pod_by_metric_label(metric.label)
-                if pod is not None and is_static_pending_pod(pod):
-                    tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_kube_container_name(metric.label)
-                    tags = list(set(tags))
+            # FIXME we are forced to do that because the Kubelet PodList isn't updated
+            # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
+            pod = self._get_pod_by_metric_label(metric.label)
+            if pod is not None and is_static_pending_pod(pod):
+                tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                tags += self._get_kube_container_name(metric.label)
+                tags = list(set(tags))
 
-                val = getattr(metric, METRIC_TYPES[message.type]).value
+            val = getattr(metric, METRIC_TYPES[message.type]).value
 
-                self.check.rate(metric_name, val, tags)
+            self.check.rate(metric_name, val, tags)
 
     def _process_pod_rate(self, metric_name, message):
-        """Takes a simple metric about a pod, reports it as a rate."""
+        """
+        Takes a simple metric about a pod, reports it as a rate.
+        If several series are found for a given pod, values are summed before submission.
+        """
         if message.type >= len(METRIC_TYPES):
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
             return
 
-        for metric in message.metric:
-            if self._is_pod_metric(metric):
-                pod_uid = self._get_pod_uid(metric.label)
-                if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
-                    continue
-                tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
-                tags += self.instance_tags
-                val = getattr(metric, METRIC_TYPES[message.type]).value
-                self.check.rate(metric_name, val, tags)
+        metrics = self._sum_values_by_context(message, self._get_pod_uid_if_pod_metric)
+        for pod_uid, metric in metrics.iteritems():
+            if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
+                continue
+            tags = get_tags('kubernetes_pod://%s' % pod_uid, True)
+            tags += self.instance_tags
+            val = getattr(metric, METRIC_TYPES[message.type]).value
+            self.check.rate(metric_name, val, tags)
 
     def _process_usage_metric(self, m_name, message, cache):
         """
@@ -237,31 +287,31 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         """
         # track containers that still exist in the cache
         seen_keys = {k: False for k in cache}
-        for metric in message.metric:
-            if self._is_container_metric(metric):
-                c_id = self._get_container_id(metric.label)
-                c_name = self._get_container_label(metric.label, 'name')
-                if not c_name:
-                    continue
-                pod_uid = self._get_pod_uid(metric.label)
-                if self.container_filter.is_excluded(c_id, pod_uid):
-                    continue
 
-                tags = get_tags('docker://%s' % c_id, True)
-                tags += self.instance_tags
+        metrics = self._sum_values_by_context(message, self._get_container_id_if_container_metric)
+        for c_id, metric in metrics.iteritems():
+            c_name = self._get_container_label(metric.label, 'name')
+            if not c_name:
+                continue
+            pod_uid = self._get_pod_uid(metric.label)
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
+                continue
 
-                # FIXME we are forced to do that because the Kubelet PodList isn't updated
-                # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
-                pod = self._get_pod_by_metric_label(metric.label)
-                if pod is not None and is_static_pending_pod(pod):
-                    tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
-                    tags += self._get_kube_container_name(metric.label)
-                    tags = list(set(tags))
+            tags = get_tags(c_id, True)
+            tags += self.instance_tags
 
-                val = getattr(metric, METRIC_TYPES[message.type]).value
-                cache[c_name] = (val, tags)
-                seen_keys[c_name] = True
-                self.check.gauge(m_name, val, tags)
+            # FIXME we are forced to do that because the Kubelet PodList isn't updated
+            # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
+            pod = self._get_pod_by_metric_label(metric.label)
+            if pod is not None and is_static_pending_pod(pod):
+                tags += get_tags('kubernetes_pod://%s' % pod["metadata"]["uid"], True)
+                tags += self._get_kube_container_name(metric.label)
+                tags = list(set(tags))
+
+            val = getattr(metric, METRIC_TYPES[message.type]).value
+            cache[c_name] = (val, tags)
+            seen_keys[c_name] = True
+            self.check.gauge(m_name, val, tags)
 
         # purge the cache
         for k, seen in seen_keys.iteritems():
@@ -274,48 +324,35 @@ class CadvisorPrometheusScraper(PrometheusScraper):
         and optionally checks in the given cache if there's a usage
         for each metric in the message and reports the usage_pct
         """
-        for metric in message.metric:
-            if self._is_container_metric(metric):
-                limit = getattr(metric, METRIC_TYPES[message.type]).value
-                c_id = self._get_container_id(metric.label)
-                pod_uid = self._get_pod_uid(metric.label)
-                if self.container_filter.is_excluded(c_id, pod_uid):
+        metrics = self._sum_values_by_context(message, self._get_container_id_if_container_metric)
+        for c_id, metric in metrics.iteritems():
+            limit = getattr(metric, METRIC_TYPES[message.type]).value
+            pod_uid = self._get_pod_uid(metric.label)
+            if self.pod_list_utils.is_excluded(c_id, pod_uid):
+                continue
+
+            tags = get_tags(c_id, True)
+            tags += self.instance_tags
+
+            if m_name:
+                self.check.gauge(m_name, limit, tags)
+
+            if pct_m_name and limit > 0:
+                c_name = self._get_container_label(metric.label, 'name')
+                if not c_name:
                     continue
-
-                tags = get_tags('docker://%s' % c_id, True)
-                tags += self.instance_tags
-
-                if m_name:
-                    self.check.gauge(m_name, limit, tags)
-
-                if pct_m_name and limit > 0:
-                    c_name = self._get_container_label(metric.label, 'name')
-                    if not c_name:
-                        continue
-                    usage, tags = cache.get(c_name, (None, None))
-                    if usage:
-                        self.check.gauge(pct_m_name, float(usage / float(limit)), tags)
-                    else:
-                        self.log.debug("No corresponding usage found for metric %s and "
-                                       "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
+                usage, tags = cache.get(c_name, (None, None))
+                if usage:
+                    self.check.gauge(pct_m_name, float(usage / float(limit)), tags)
+                else:
+                    self.log.debug("No corresponding usage found for metric %s and "
+                                   "container %s, skipping usage_pct for now." % (pct_m_name, c_name))
 
     def container_cpu_usage_seconds_total(self, message, **_):
         metric_name = self.NAMESPACE + '.cpu.usage.total'
-        cpu_usage_sum = {}
-
         for metric in message.metric:
-            c_id = self._get_container_id(metric.label)
-            if not c_id:
-                continue
             # Convert cores in nano cores
             metric.counter.value *= 10. ** 9
-            # Sum the counter value accross all cores
-            if c_id not in cpu_usage_sum:
-                cpu_usage_sum[c_id] = metric
-            else:
-                cpu_usage_sum[c_id].counter.value += metric.counter.value
-                metric.Clear()  # Ignore this metric message
-
         self._process_container_rate(metric_name, message)
 
     def container_fs_reads_bytes_total(self, message, **_):

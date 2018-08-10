@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from mock import patch
 import logging
 import os
 import socket
@@ -12,21 +13,11 @@ import requests
 from datadog_checks.elastic import ESCheck
 from .common import (
     BAD_CONFIG, CHECK_NAME, CLUSTER_TAG, CONF_HOSTNAME,
-    CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER
+    CONFIG, HOST, PASSWORD, PORT, TAGS, URL, USER,
+    INDEX_METRICS_MOCK_DATA, get_es_version
 )
 
 log = logging.getLogger('test_elastic')
-
-
-def get_es_version():
-    version = os.environ.get("ELASTIC_VERSION")
-    dd_versions = {'0_90': [0, 90, 13], '1_0': [1, 0, 3], '1_1': [1, 1, 2], '1_2': [1, 2, 4]}
-    if version is None:
-        return [6, 0, 1]
-    if '_' in version:
-        return dd_versions[version]
-    else:
-        return [int(k) for k in version.split(".")]
 
 
 def test_bad_port():
@@ -68,6 +59,11 @@ def test_check(aggregator):
     es_version = elastic_check._get_es_version(instance)
 
     assert es_version == get_es_version()
+
+    if es_version >= [6, 3, 0]:
+        expected_metrics.update(ESCheck.ADDITIONAL_METRICS_POST_6_3)
+    else:
+        expected_metrics.update(ESCheck.ADDITIONAL_METRICS_PRE_6_3)
 
     if es_version < [5, 0, 0]:
         expected_metrics.update(ESCheck.ADDITIONAL_METRICS_PRE_5_0_0)
@@ -274,3 +270,44 @@ def test_health_event(aggregator):
                                                               + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+def mock_output(*args, **kwargse):
+    if "/_cat/indices" in args[0]:
+        return INDEX_METRICS_MOCK_DATA
+    else:
+        return {}
+
+
+@patch('datadog_checks.elastic.elastic.ESCheck._get_data', side_effect=mock_output)
+def test_get_index_metrics(mock_output, aggregator):
+    dummy_tags = ['elastique:recherche']
+    config = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags, "index_stats": True}
+
+    elastic_check = ESCheck(CHECK_NAME, {}, {})
+    elastic_check.check(config)
+    tags = ['url:http://localhost:9200', 'elastique:recherche']
+    aggregator.assert_metric('elasticsearch.pending_tasks_priority_high', value=0.0, tags=tags, count=1)
+    aggregator.assert_metric('elasticsearch.index.health', value=0.0, tags=tags + ['index_name:index_1'], count=1)
+    aggregator.assert_metric('elasticsearch.index.health', value=0.0, tags=tags + ['index_name:index_2'], count=1)
+    aggregator.assert_metric('elasticsearch.index.store_size', value=29.2, tags=tags + ['index_name:index_1'], count=1)
+    aggregator.assert_metric('elasticsearch.index.store_size', value=31.7, tags=tags + ['index_name:index_2'], count=1)
+    aggregator.assert_metric('elasticsearch.index.primary_store_size', value=9.7, tags=tags + ['index_name:index_1'],
+                             count=1)
+    aggregator.assert_metric('elasticsearch.index.primary_store_size', value=10.5, tags=tags + ['index_name:index_2'])
+    aggregator.assert_metric('elasticsearch.index.primary_shards', value=1.0, tags=tags + ['index_name:index_1'],
+                             count=1)
+    aggregator.assert_metric('elasticsearch.index.primary_shards', value=1.0, tags=tags + ['index_name:index_2'])
+    aggregator.assert_metric('elasticsearch.pending_tasks_priority_urgent', value=0.0, tags=tags, count=1)
+    aggregator.assert_metric('elasticsearch.pending_tasks_time_in_queue', value=0.0, tags=tags, count=1)
+    aggregator.assert_metric('elasticsearch.index.docs.deleted', value=0.0, tags=tags + ['index_name:index_1'], count=1)
+    aggregator.assert_metric('elasticsearch.index.docs.deleted', value=0.0, tags=tags + ['index_name:index_2'])
+    aggregator.assert_metric('elasticsearch.index.docs.count', value=66354395.0, tags=tags + ['index_name:index_1'],
+                             count=1)
+    aggregator.assert_metric('elasticsearch.index.docs.count', value=50678201.0, tags=tags + ['index_name:index_2'])
+    aggregator.assert_metric('elasticsearch.pending_tasks_total', value=0.0, tags=tags, count=1)
+    aggregator.assert_metric('elasticsearch.index.replica_shards', value=2.0, tags=tags + ['index_name:index_1'],
+                             count=1)
+    aggregator.assert_metric('elasticsearch.index.replica_shards', value=2.0, tags=tags + ['index_name:index_2'])
+
+    aggregator.assert_all_metrics_covered()
