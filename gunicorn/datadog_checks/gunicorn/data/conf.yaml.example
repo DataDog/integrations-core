@@ -1,18 +1,22 @@
-# NB: This check requires the python environment on which gunicorn runs to
-# have the `setproctitle` module installed (https://pypi.python.org/pypi/setproctitle/)
+## NB: This check requires the python environment on which gunicorn runs to
+## have the `setproctitle` module installed (https://pypi.python.org/pypi/setproctitle/)
 
 init_config:
 
 instances:
-  # The name of the gunicorn process. For the following gunicorn server ...
-  #
-  #    gunicorn --name my_web_app my_web_app_config.ini
-  #
-  #  ... we'd use the name `my_web_app`.
-  #
-  # - proc_name: my_web_app
-  #   tags:
-  #     - optional:tag1
+  
+  ## proc_name - mandatory - string 
+  ## The name of the gunicorn process. For the following gunicorn server
+  ##
+  ##   gunicorn --name <WEB_APP> <WEB_APP>_config.ini
+
+  # - proc_name: <WEB_APP>
+  
+  ## tags - optional - list of key:value element
+  ## List of tags to attach to every metrics, events and service checks emitted by this integration.
+    
+  # tags:
+  #   - <KEY>:<VALUE>
   
 ## Log section (Available for Agent >=6.0)
 #logs:
