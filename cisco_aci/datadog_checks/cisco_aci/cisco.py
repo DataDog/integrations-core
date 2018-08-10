@@ -59,7 +59,7 @@ class CiscoACICheck(AgentCheck):
 
         cert_key = instance.get('cert_key')
         if not cert_key and instance.get('cert_key_path'):
-            with open(instance.get('cert_key_path'), 'r') as f:
+            with open(instance.get('cert_key_path'), 'rb') as f:
                 cert_key = f.read()
 
         cert_name = instance.get('cert_name')

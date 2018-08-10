@@ -6,10 +6,11 @@ import random
 from requests import Request, Session
 import base64
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
-from urllib import unquote
+from six.moves.urllib.parse import unquote
+
+
 
 from .exceptions import APIParsingException, ConfigurationException, APIConnectionException
 
@@ -32,7 +33,6 @@ class SessionWrapper:
         else:
             self.certDn = 'uni/userext/user-{}/usercert-{}'.format(username, cert_name)
 
-        self.cert_key = None
         self.cert_key = cert_key
         if cert_key:
             self.cert_key = serialization.load_pem_private_key(cert_key, password=cert_key_password, backend=default_backend())
@@ -143,8 +143,6 @@ class Api:
                                                  cert_key_password=self.cert_key_password,
                                                  log=self.log)
                 self.sessions.append(session_wrapper)
-            else:
-                session_wrapper.apic_cookie = self.apic_cookie
 
     def password_login(self):
         # this is a path for testing, allowing the object to be patched with fake request responses
