@@ -43,6 +43,8 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
     See the [example check configuration][2] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][17].
+
 3. [Restart the Agent][3] to start sending SQL Server metrics to Datadog.
 
 ### Validation
@@ -120,3 +122,4 @@ brew install freetds --with-unixodbc
 [14]: https://docs.datadoghq.com/developers/integrations/
 [15]: http://www.freetds.org/
 [16]: https://brew.sh/
+[17]: https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017 
