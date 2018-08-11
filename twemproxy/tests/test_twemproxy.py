@@ -4,6 +4,7 @@ import pytest
 import logging
 import socket
 import time
+import requests
 
 from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.twemproxy import Twemproxy
@@ -84,11 +85,13 @@ def spin_up_twemproxy():
         if not wait_for_cluster():
             raise Exception("The cluster never came up")
     except Exception:
-        # cleanup_twemproxy(args, env)
+        cleanup_twemproxy(args, env)
         raise
 
+    time.sleep(15)
+
     yield
-    # cleanup_twemproxy(args, env)
+    cleanup_twemproxy(args, env)
 
 
 def cleanup_twemproxy(args, env):
@@ -96,15 +99,14 @@ def cleanup_twemproxy(args, env):
 
 
 def wait_for_cluster():
-    # url = "http://{}:{}".format(HOST, PORT)
-    for _ in xrange(0, 5):
+    for _ in xrange(0, 10):
         res = None
         try:
             socket.getaddrinfo(HOST, PORT, 0, 0, socket.IPPROTO_TCP)
             return True
         except Exception as e:
             log.debug("exception: {0} res: {1}".format(e, res))
-            time.sleep(2)
+            time.sleep(5)
 
     return False
 
@@ -118,7 +120,19 @@ def _wait_for_it_script():
     return os.path.abspath(dir)
 
 
-def test_check(check, spin_up_twemproxy, aggregator):
+@pytest.fixture
+def setup_request():
+    """
+    A request needs to be made in order for some of the data to be seeded
+    """
+    url = "http://{}:{}".format(HOST, PORT)
+    try:
+        requests.get(url)
+    except Exception:
+        pass
+
+
+def test_check(check, spin_up_twemproxy, setup_request, aggregator):
     instance = {
         'host': get_docker_hostname(),
         'port': 6222,
