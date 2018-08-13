@@ -90,7 +90,7 @@ class Nginx(AgentCheck):
         funcs = {
             'gauge': self.gauge,
             'rate': self.rate,
-            'count': self.count
+            'count': self.monotonic_count
         }
         conn = None
         handled = None
