@@ -105,7 +105,6 @@ class Twemproxy(AgentCheck):
         self.log.debug(u"Twemproxy `response`: {0}".format(response))
 
         if not response:
-            self.log.warning(u"No response received from twemproxy: {}.".format(instance))
             self.log.warning(u"No response received from twemproxy.")
             return
 
