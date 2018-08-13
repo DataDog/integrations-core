@@ -12,3 +12,15 @@ solr.search_handler.timeouts,gauge,10,timeout,second,Number of responses per sec
 solr.search_handler.time,gauge,10,,,The sum of all request processing times (in milliseconds) per second.,0,solr,search time
 solr.search_handler.avg_time_per_req,gauge,10,millisecond,request,The average time per request.,-1,solr,search time per req
 solr.search_handler.avg_requests_per_sec,gauge,10,request,second,The average number of requests per second.,1,solr,search reqs per sec
+solr.documentCache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,doc cache gets
+solr.documentCache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,doc cache hits
+solr.documentCache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,doc cache sets
+solr.documentCache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,doc cache evictions
+solr.queryResultCache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,query result cache gets
+solr.queryResultCache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,query result cache hits
+solr.queryResultCache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,query result cache sets
+solr.queryResultCache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,query result cache evictions
+solr.filterCache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,filter cache gets
+solr.filterCache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,filter cache hits
+solr.filterCache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,filter cache sets
+solr.filterCache.evictions,gauge,10,eviction,second,The total number of cache evictions per second.,-1,solr,filter cache evictions
