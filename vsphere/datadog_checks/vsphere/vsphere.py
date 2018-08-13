@@ -532,7 +532,7 @@ class VSphereCheck(AgentCheck):
         self.cache_times[i_key][MORLIST][LAST] = time.time()
 
     @atomic_method
-    def _cache_morlist_process_atomic(self, instance, mor):
+    def _cache_morlist_process_atomic(self, instance, query_specs):
         """ Process one item of the self.morlist_raw list by querying the available
         metrics for this MOR and then putting it in self.morlist
         """
@@ -543,31 +543,16 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
-        custom_tags = instance.get('tags', [])
 
-        self.log.debug(
-            "job_atomic: Querying available metrics"
-            " for MOR {0} (type={1})".format(mor['mor'], mor['mor_type'])
-        )
-
-        mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-
-        available_metrics = perfManager.QueryAvailablePerfMetric(
-            mor['mor'], intervalId=mor['interval'])
-
-        mor['metrics'] = self._compute_needed_metrics(instance, available_metrics)
-
-        mor_name = str(mor['mor'])
-        if mor_name in self.morlist[i_key]:
-            # Was already here last iteration
-            self.morlist[i_key][mor_name]['metrics'] = mor['metrics']
-        else:
-            self.morlist[i_key][mor_name] = mor
-
-        self.morlist[i_key][mor_name]['last_seen'] = time.time()
+        res = perfManager.QueryPerf(query_specs)
+        for mor_perfs in res:
+            mor_name = str(mor_perfs.entity)
+            available_metrics = [value.id for value in mor_perfs.value]
+            self.morlist[i_key][mor_name]['metrics'] = self._compute_needed_metrics(instance, available_metrics)
+            self.morlist[i_key][mor_name]['last_seen'] = time.time()
 
         # ## <TEST-INSTRUMENTATION>
-        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=custom_tags)
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', t.total(), tags=instance.get('tags', []))
         # ## </TEST-INSTRUMENTATION>
 
     def _cache_morlist_process(self, instance):
@@ -583,10 +568,21 @@ class VSphereCheck(AgentCheck):
 
         processed = 0
         for resource_type in RESOURCE_TYPE_METRICS:
+            query_specs = []
             for i in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
-                    self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, mor))
+                    mor_name = str(mor["mor"])
+                    mor["interval"] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
+                    if mor_name not in self.morlist[i_key]:
+                        self.morlist[i_key][mor_name] = mor
+                        self.morlist[i_key][mor_name]["last_seen"] = time.time()
+
+                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec.entity = mor["mor"]
+                    query_spec.intervalId = mor["interval"]
+                    query_spec.maxSample = 1
+                    query_specs.append(query_spec)
 
                     processed += 1
                     if processed == batch_size:
@@ -594,6 +590,9 @@ class VSphereCheck(AgentCheck):
                 except (IndexError, KeyError):
                     self.log.debug("No more work to process in morlist_raw")
                     break
+
+            if query_specs:
+                self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, query_specs))
 
             if processed == batch_size:
                 break
