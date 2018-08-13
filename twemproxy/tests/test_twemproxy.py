@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import subprocess
 import pytest
 import logging
 import socket
