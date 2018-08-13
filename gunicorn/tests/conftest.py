@@ -19,7 +19,6 @@ log = logging.getLogger('test_gunicorn')
 @pytest.fixture(scope="session")
 def setup_gunicorn(request):
     gunicorn_tmpdir = tempfile.mkdtemp()
-    log.warning(gunicorn_tmpdir)
     app_dir = os.path.join(gunicorn_tmpdir, 'app')
     venv_dir = os.path.join(gunicorn_tmpdir, 'venv')
     os.mkdir(app_dir)
