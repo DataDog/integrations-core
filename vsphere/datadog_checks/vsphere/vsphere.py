@@ -544,6 +544,9 @@ class VSphereCheck(AgentCheck):
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
 
+        # With QueryPerf, we can get metric information about several MORs at once. Let's use it
+        # to avoid making one API call per object, even if we also get metrics values that are useless for now.
+        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.html#queryStats
         res = perfManager.QueryPerf(query_specs)
         for mor_perfs in res:
             mor_name = str(mor_perfs.entity)
@@ -568,6 +571,7 @@ class VSphereCheck(AgentCheck):
 
         for resource_type in RESOURCE_TYPE_METRICS:
             query_specs = []
+            # Batch size can prevent querying large payloads at once if the environment is too large
             for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
@@ -718,6 +722,8 @@ class VSphereCheck(AgentCheck):
 
         custom_tags = instance.get('tags', [])
         vm_count = 0
+
+        # Request metrics for several objects at once. We can limit the number of objects with batch_size
         query_specs = []
         for i in xrange(n_mors / batch_size):
             for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
