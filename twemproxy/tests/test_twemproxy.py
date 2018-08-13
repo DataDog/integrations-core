@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 import subprocess
 import pytest
@@ -144,9 +148,9 @@ def test_check(check, spin_up_twemproxy, setup_request, aggregator):
     for stat in GLOBAL_STATS:
         aggregator.assert_metric("twemproxy.{}".format(stat), at_least=0)
     for stat in POOL_STATS:
-        aggregator.assert_metric("twemproxy.{}".format(stat), at_least=1, count=1)
+        aggregator.assert_metric("twemproxy.{}".format(stat), count=1)
     for stat in SERVER_STATS:
-        aggregator.assert_metric("twemproxy.{}".format(stat), at_least=1, count=2)
+        aggregator.assert_metric("twemproxy.{}".format(stat), count=2)
 
     # Test service check
     aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK,
