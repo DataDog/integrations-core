@@ -566,10 +566,9 @@ class VSphereCheck(AgentCheck):
 
         batch_size = self.init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
 
-        processed = 0
         for resource_type in RESOURCE_TYPE_METRICS:
             query_specs = []
-            for i in xrange(batch_size):
+            for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
                     mor_name = str(mor["mor"])
@@ -584,19 +583,12 @@ class VSphereCheck(AgentCheck):
                     query_spec.maxSample = 1
                     query_specs.append(query_spec)
 
-                    processed += 1
-                    if processed == batch_size:
-                        break
                 except (IndexError, KeyError):
                     self.log.debug("No more work to process in morlist_raw")
                     break
 
             if query_specs:
                 self.pool.apply_async(self._cache_morlist_process_atomic, args=(instance, query_specs))
-
-            if processed == batch_size:
-                break
-        return
 
     def _vacuum_morlist(self, instance):
         """ Check if self.morlist doesn't have some old MORs that are gone, ie
@@ -719,29 +711,30 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Not collecting metrics for this instance, nothing to do yet: {0}".format(i_key))
             return
 
+        batch_size = self.init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
         mors = self.morlist[i_key].items()
-        self.log.debug("Collecting metrics of %d mors" % len(mors))
-
-        vm_count = 0
+        n_mors = len(mors)
+        self.log.debug("Collecting metrics of %d mors" % n_mors)
 
         custom_tags = instance.get('tags', [])
-
+        vm_count = 0
         query_specs = []
-        for mor_name, mor in mors:
-            if mor['mor_type'] == 'vm':
-                vm_count += 1
-            if 'metrics' not in mor or not mor['metrics']:
-                continue
+        for i in xrange(n_mors / batch_size):
+            for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
+                if mor['mor_type'] == 'vm':
+                    vm_count += 1
+                if 'metrics' not in mor or not mor['metrics']:
+                    continue
 
-            query_spec = vim.PerformanceManager.QuerySpec()
-            query_spec.entity = mor["mor"]
-            query_spec.intervalId = mor["interval"]
-            query_spec.metricId = mor["metrics"]
-            query_spec.maxSample = 1
-            query_specs.append(query_spec)
+                query_spec = vim.PerformanceManager.QuerySpec()
+                query_spec.entity = mor["mor"]
+                query_spec.intervalId = mor["interval"]
+                query_spec.metricId = mor["metrics"]
+                query_spec.maxSample = 1
+                query_specs.append(query_spec)
 
-        if query_specs:
-            self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
+            if query_specs:
+                self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
 
         self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
 
