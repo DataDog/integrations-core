@@ -14,7 +14,7 @@ import time
 import psutil
 
 # project
-from checks import AgentCheck
+from datadog_checks.checks import AgentCheck
 
 
 class GUnicornCheck(AgentCheck):
