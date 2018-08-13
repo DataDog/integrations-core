@@ -11,6 +11,7 @@ import time
 import requests
 
 from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev import docker_run
 from datadog_checks.twemproxy import Twemproxy
 
 
@@ -70,30 +71,20 @@ def spin_up_twemproxy(request):
     up.
     """
 
-    env = os.environ
+    env = {}
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     env['DOCKER_COMPOSE_FILE'] = compose_file
     env['DOCKER_ADDR'] = get_docker_hostname()
     env['WAIT_FOR_IT_SCRIPT_PATH'] = _wait_for_it_script()
-    env['SETUP_SCRIPT_PATH'] = os.path.join(HERE, 'compose', 'setup.sh')
+    env['SETUP_SCRIPT_PATH'] = os.path.join(HERE, 'compose', 'setup.py')
 
-    args = [
-        "docker-compose",
-        "-f", compose_file
-    ]
-
-    def finalizer():
-        cleanup_twemproxy(args, env)
-    request.addfinalizer(finalizer)
-
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    if not wait_for_cluster():
-        raise Exception("The cluster never came up")
-    time.sleep(15)
-
-    yield
+    with docker_run(compose_file, env_vars=env):
+        if not wait_for_cluster():
+            raise Exception("The cluster never came up")
+        time.sleep(15)
+        yield
 
 
 def cleanup_twemproxy(args, env):
