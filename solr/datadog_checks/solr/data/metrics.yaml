@@ -40,16 +40,16 @@ jmx_metrics:
         - searcher
       attribute:
         cumulative_lookups:
-          alias: solr.documentCache.lookups
+          alias: solr.document_cache.lookups
           metric_type: counter
         cumulative_hits:
-          alias: solr.documentCache.hits
+          alias: solr.document_cache.hits
           metric_type: counter
         cumulative_inserts:
-          alias: solr.documentCache.inserts
+          alias: solr.document_cache.inserts
           metric_type: counter
         cumulative_evictions:
-          alias: solr.documentCache.evictions
+          alias: solr.document_cache.evictions
           metric_type: counter
 
   - include:
@@ -59,16 +59,16 @@ jmx_metrics:
         - searcher
       attribute:
         cumulative_lookups:
-          alias: solr.queryResultCache.lookups
+          alias: solr.query_result_cache.lookups
           metric_type: counter
         cumulative_hits:
-          alias: solr.queryResultCache.hits
+          alias: solr.query_result_cache.hits
           metric_type: counter
         cumulative_inserts:
-          alias: solr.queryResultCache.inserts
+          alias: solr.query_result_cache.inserts
           metric_type: counter
         cumulative_evictions:
-          alias: solr.queryResultCache.evictions
+          alias: solr.query_result_cache.evictions
           metric_type: counter
 
   - include:
@@ -78,16 +78,16 @@ jmx_metrics:
         - searcher
       attribute:
         cumulative_lookups:
-          alias: solr.filterCache.lookups
+          alias: solr.filter_cache.lookups
           metric_type: counter
         cumulative_hits:
-          alias: solr.filterCache.hits
+          alias: solr.filter_cache.hits
           metric_type: counter
         cumulative_inserts:
-          alias: solr.filterCache.inserts
+          alias: solr.filter_cache.inserts
           metric_type: counter
         cumulative_evictions:
-          alias: solr.filterCache.evictions
+          alias: solr.filter_cache.evictions
           metric_type: counter
 
   - include:
