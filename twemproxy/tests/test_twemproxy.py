@@ -87,10 +87,6 @@ def spin_up_twemproxy(request):
         yield
 
 
-def cleanup_twemproxy(args, env):
-    subprocess.check_call(args + ["down"], env=env)
-
-
 def wait_for_cluster():
     for _ in xrange(0, 10):
         res = None
