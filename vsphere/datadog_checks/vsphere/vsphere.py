@@ -764,13 +764,11 @@ class VSphereCheck(AgentCheck):
             self._cache_morlist_raw(instance)
         self._cache_morlist_process(instance)
         self._vacuum_morlist(instance)
-        time.sleep(10)
 
         # Second part: do the job
         self.collect_metrics(instance)
         self._query_event(instance)
 
-        time.sleep(10)
         # For our own sanity
         self._clean()
 
