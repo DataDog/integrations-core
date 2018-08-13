@@ -78,7 +78,7 @@ def spin_up_twemproxy(request):
     env['DOCKER_COMPOSE_FILE'] = compose_file
     env['DOCKER_ADDR'] = get_docker_hostname()
     env['WAIT_FOR_IT_SCRIPT_PATH'] = _wait_for_it_script()
-    env['SETUP_SCRIPT_PATH'] = os.path.join(HERE, 'compose', 'setup.py')
+    env['SETUP_SCRIPT_PATH'] = os.path.join(HERE, 'compose', 'setup.sh')
 
     with docker_run(compose_file, env_vars=env):
         if not wait_for_cluster():
