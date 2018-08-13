@@ -136,6 +136,8 @@ ZERO_METRICS = [
     NAMESPACE + '.daemonset.misscheduled',
     NAMESPACE + '.container.terminated',
     NAMESPACE + '.container.waiting',
+    NAMESPACE + '.endpoint.address_available',
+    NAMESPACE + '.endpoint.address_not_ready',
 ]
 
 
