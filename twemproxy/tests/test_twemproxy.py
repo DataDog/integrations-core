@@ -62,7 +62,7 @@ def check():
 
 
 @pytest.fixture(scope="session")
-def spin_up_twemproxy():
+def spin_up_twemproxy(request):
     """
     Start a cluster with one master, one replica and one unhealthy replica and
     stop it after the tests are done.
@@ -84,18 +84,16 @@ def spin_up_twemproxy():
         "-f", compose_file
     ]
 
-    try:
-        subprocess.check_call(args + ["up", "-d"], env=env)
-        if not wait_for_cluster():
-            raise Exception("The cluster never came up")
-    except Exception:
+    def finalizer():
         cleanup_twemproxy(args, env)
-        raise
+    request.addfinalizer(finalizer)
 
+    subprocess.check_call(args + ["up", "-d"], env=env)
+    if not wait_for_cluster():
+        raise Exception("The cluster never came up")
     time.sleep(15)
 
     yield
-    cleanup_twemproxy(args, env)
 
 
 def cleanup_twemproxy(args, env):
