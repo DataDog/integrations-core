@@ -11,8 +11,8 @@ import urlparse
 import requests
 
 # project
-from checks import AgentCheck
-from util import headers
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.headers import headers
 
 
 class Fluentd(AgentCheck):
