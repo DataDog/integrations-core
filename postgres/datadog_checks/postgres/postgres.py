@@ -316,11 +316,24 @@ SELECT s.schemaname,
         self.instance_metrics = {}
         self.bgw_metrics = {}
         self.archiver_metrics = {}
-        self.db_instance_metrics = []
         self.db_bgw_metrics = []
         self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
+        # keep track of host/port present in any configured instance
+        self._known_servers = set()
+
+    def _server_known(self, host, port):
+        """
+        Return whether the hostname and port combination was already seen
+        """
+        return (host, port) in self._known_servers
+
+    def _set_server_known(self, host, port):
+        """
+        Store the host/port combination for this server
+        """
+        self._known_servers.add((host, port))
 
     def _get_pg_attrs(self, instance):
         if _is_affirmative(instance.get('use_psycopg2', False)):
@@ -365,37 +378,47 @@ SELECT s.schemaname,
     def _is_10_or_above(self, key, db):
         return self._is_above(key, db, [10, 0, 0])
 
-    def _get_instance_metrics(self, key, db, database_size_metrics, with_default):
-        """Use either COMMON_METRICS or COMMON_METRICS + NEWER_92_METRICS
-        depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
+    def _get_instance_metrics(self, key, db, database_size_metrics, collect_default_db):
         """
-        # Extended 9.2+ metrics if needed
+        Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
+        version is 9.2 or later.
+
+        Store the list of metrics in the check instance to avoid rebuilding it at
+        every collection cycle.
+
+        In case we have multiple instances pointing to the same postgres server
+        monitoring different databases, we want to collect server metrics
+        only once. See https://github.com/DataDog/dd-agent/issues/1211
+        """
         metrics = self.instance_metrics.get(key)
 
         if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
-            sub_key = key[:2]
-            if sub_key in self.db_instance_metrics:
-                self.instance_metrics[key] = None
-                self.log.debug("Not collecting instance metrics for key: {0} as "
+            host, port, dbname = key
+            # check whether we already collected server-wide metrics for this
+            # postgres instance
+            if self._server_known(host, port):
+                # explicitly set instance metrics for this key to an empty list
+                # so we don't get here more than once
+                self.instance_metrics[key] = []
+                self.log.debug("Not collecting instance metrics for key: {} as "
                                "they are already collected by another instance".format(key))
                 return None
+            self._set_server_known(host, port)
 
-            self.db_instance_metrics.append(sub_key)
-
+            # select the right set of metrics to collect depending on postgres version
             if self._is_9_2_or_above(key, db):
                 self.instance_metrics[key] = dict(self.COMMON_METRICS, **self.NEWER_92_METRICS)
             else:
                 self.instance_metrics[key] = dict(self.COMMON_METRICS)
 
+            # add size metrics if needed
             if database_size_metrics:
                 self.instance_metrics[key] = dict(self.instance_metrics[key], **self.DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics.get(key)
 
+        # this will happen when the current key contains a postgres server that
+        # we already know, let's avoid to collect duplicates
         if not metrics:
             return None
 
@@ -408,8 +431,10 @@ SELECT s.schemaname,
             "  AND datname not ilike 'rdsadmin' ",
             'relation': False,
         }
-        if not with_default:
+
+        if not collect_default_db:
             res["query"] += "  AND datname not ilike 'postgres'"
+
         return res
 
     def _get_bgw_metrics(self, key, db):

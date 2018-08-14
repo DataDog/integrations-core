@@ -88,4 +88,4 @@ def test_get_instance_metrics_instance(check):
     another = ('localhost', '5432', 'FOO')
     res = check._get_instance_metrics(another, 'dbname', False, False)
     assert res is None
-    assert check.instance_metrics[another] is None
+    assert check.instance_metrics[another] == []
