@@ -97,6 +97,8 @@ jobs:
     - stage: test
       env: CHECK=exchange_server
     - stage: test
+      env: CHECK=fluentd
+    - stage: test
       env: CHECK=gitlab
     - stage: test
       env: CHECK=gunicorn
