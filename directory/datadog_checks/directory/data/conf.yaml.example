@@ -21,7 +21,8 @@ instances:
   # "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. The pattern will be matched against the files' absolute paths and relative paths in "directory". default "*"
   # "exclude_dirs" - a list of regular expressions used to blacklist directory names, e.g. node_modules, vendor
   # "dirs_patterns_full" - make exclude_dirs patterns operate on the full directory path (may be slightly slower), e.g. /path/to/node_modules, /path/to/vendor
-  # "recursive" - boolean, when true the stats will recurse into directories. default False
+  #                        Setting this option to False will exclude any directory in the traversal with the provided name.
+  #                        Setting this option to True will allow you to specify the absolute path. This ensures multiple directories with the same name aren't all excluded  # "recursive" - boolean, when true the stats will recurse into directories. default False
   # "countonly" - boolean, when true the stats will only count the number of files matching the pattern. Useful for very large directories. default False
   # "ignore_missing" - boolean, when true do not raise an exception on missing/inaccessible directories. default False
   - directory: "/path/to/directory"
