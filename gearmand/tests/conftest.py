@@ -19,9 +19,7 @@ def spin_up_gearmand(request):
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-
-    env = {}
-
+    
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file, env_vars=env):
