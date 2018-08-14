@@ -57,7 +57,7 @@ def create_venv(venv_dir):
 
 
 def get_venv_bin_path(venv_dir):
-    return os.path.join(venv_dir, 'Scripts')
+    return os.path.join(venv_dir, 'bin')
 
 
 def install_pip_packages(venv_bin_path):
