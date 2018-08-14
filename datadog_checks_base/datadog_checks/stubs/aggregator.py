@@ -205,9 +205,9 @@ class AggregatorStub(object):
         candidates = []
         self._asserted.add(metric_name)
 
-        for metric in aggregator._metrics[metric_name]:
+        for metric in self.metrics(metric_name):
             tags = metric.tags
-            gtags = [t for t in tags if t.startswith('type')]
+            gtags = [t for t in tags if t.startswith(tag_prefix)]
             if len(gtags) > 0:
                 candidates.append(metric)
 

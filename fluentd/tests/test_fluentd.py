@@ -58,13 +58,6 @@ def test_fluentd_with_tag_by_type(aggregator, spin_up_fluentd, check):
         aggregator.assert_metric(metric_name)
 
         aggregator.assert_metric_has_tag_prefix(metric_name, 'type')
-        # for metric in aggregator._metrics[metric_name]:
-        #     tags = metric.tags
-        #     gtags = [t for t in tags if t.startswith('type')]
-        #     if len(gtags) > 0:
-        #         assert True
-        #     else:
-        #         assert False
 
     sc_tags = ['fluentd_host:{}'.format(HOST), 'fluentd_port:24220']
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Fluentd.OK,
