@@ -2,21 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-import mock
-
-from datadog_checks.postgres import PostgreSql
 
 # Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
 
 KEY = ('localhost', '5432', 'dbname')
-
-
-@pytest.fixture
-def check():
-    check = PostgreSql('postgres', {}, {})
-    check._is_9_2_or_above = mock.MagicMock()
-    return check
 
 
 def test_get_instance_metrics_lt_92(check):
@@ -80,7 +70,7 @@ def test_get_instance_with_default(check):
 def test_get_instance_metrics_instance(check):
     """
     Test the caching system preventing instance metrics to be collected more than
-    once when two instances are configured for the same server but different database
+    once when two instances are configured for the same server but different databases
     """
     res = check._get_instance_metrics(KEY, 'dbname', False, False)
     assert res is not None
