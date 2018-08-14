@@ -19,23 +19,26 @@ instances:
   # "filetagname" - string, the name of the key for the tag used for each file, the value will be the filename. The resulting tag will be "<filetagname>:<filename>". defaults to "filename"
   # "filegauges" - boolean, when true stats will be an individual gauge per file (max. 20 files!) and not a histogram of the whole directory. default False
   # "pattern" - string, the `fnmatch` pattern to use when reading the "directory"'s files. The pattern will be matched against the files' absolute paths and relative paths in "directory". default "*"
-  # "exclude_dirs" - a list of regular expressions used to blacklist directory names
-  # "recursive" - boolean, when true the stats will recurse into directories. default False
+  # "exclude_dirs" - a list of regular expressions used to blacklist directory names, e.g. node_modules, vendor
+  # "dirs_patterns_full" - make exclude_dirs patterns operate on the full directory path (may be slightly slower), e.g. /path/to/node_modules, /path/to/vendor
+  #                        Setting this option to False will exclude any directory in the traversal with the provided name.
+  #                        Setting this option to True will allow you to specify the absolute path. This ensures multiple directories with the same name aren't all excluded  # "recursive" - boolean, when true the stats will recurse into directories. default False
   # "countonly" - boolean, when true the stats will only count the number of files matching the pattern. Useful for very large directories. default False
   # "ignore_missing" - boolean, when true do not raise an exception on missing/inaccessible directories. default False
   - directory: "/path/to/directory"
     # name: "tag_value"
     # dirtagname: "tag_dirname"
     # filetagname: "tag_filename"
-    # filegauges: False
+    # filegauges: false
     # pattern: "*.log"
     # exclude_dirs:
-    #   - __pycache__
-    #   - build
-    #   - node_modules
-    #   - vendor
-    # recursive: True
-    # countonly: False
-    # ignore_missing: False
+    #   - ^__pycache__$
+    #   - ^build$
+    #   - ^node_modules$
+    #   - ^vendor$
+    # dirs_patterns_full: false
+    # recursive: true
+    # countonly: false
+    # ignore_missing: false
     # tags:
     #   - optional:tag1

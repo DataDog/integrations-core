@@ -44,6 +44,7 @@ class DirectoryCheck(AgentCheck):
         pattern = instance.get('pattern')
         exclude_dirs = instance.get('exclude_dirs', [])
         exclude_dirs_pattern = re_compile('|'.join(exclude_dirs)) if exclude_dirs else None
+        dirs_patterns_full = is_affirmative(instance.get('dirs_patterns_full', False))
         recursive = is_affirmative(instance.get('recursive', False))
         dirtagname = instance.get('dirtagname', 'name')
         filetagname = instance.get('filetagname', 'filename')
@@ -71,6 +72,7 @@ class DirectoryCheck(AgentCheck):
             filegauges,
             pattern,
             exclude_dirs_pattern,
+            dirs_patterns_full,
             recursive,
             countonly,
             custom_tags
@@ -85,6 +87,7 @@ class DirectoryCheck(AgentCheck):
         filegauges,
         pattern,
         exclude_dirs_pattern,
+        dirs_patterns_full,
         recursive,
         countonly,
         tags
@@ -104,7 +107,10 @@ class DirectoryCheck(AgentCheck):
             directory_files += get_length(files)
 
             if exclude_dirs_pattern is not None:
-                dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d)]
+                if dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.path)]
+                else:
+                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.name)]
 
             for file_entry in files:
                 if pattern:
