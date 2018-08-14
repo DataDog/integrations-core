@@ -11,7 +11,6 @@ import sys
 import time
 
 from datadog_checks.dev import temp_dir
-from datadog_checks.dev.utils import ON_WINDOWS
 
 from common import FIXTURES, PROC_NAME
 
@@ -58,10 +57,7 @@ def create_venv(venv_dir):
 
 
 def get_venv_bin_path(venv_dir):
-    if ON_WINDOWS:
-        return os.path.join(venv_dir, 'Scripts')
-    else:
-        return os.path.join(venv_dir, 'bin')
+    return os.path.join(venv_dir, 'Scripts')
 
 
 def install_pip_packages(venv_bin_path):
