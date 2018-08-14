@@ -99,6 +99,8 @@ jobs:
     - stage: test
       env: CHECK=fluentd
     - stage: test
+      env: CHECK=gearmand
+    - stage: test
       env: CHECK=gitlab
     - stage: test
       env: CHECK=gunicorn
