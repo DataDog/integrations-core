@@ -11,7 +11,7 @@ The Solr check tracks the state and performance of a Solr cluster. It collects m
 
 The Solr check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Solr nodes.
 
-This check is JMX-based, so you'll need to enable JMX Remote on your Tomcat servers. Read the [JMX Check documentation][2] for more information on that.
+This check is JMX-based, so you'll need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][2] for more information on that.
 
 ### Configuration
 
@@ -19,13 +19,13 @@ Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [A
 
 ```
 instances:
-# location of tomcat
+  # location of tomcat
   - host: localhost
     port: 9999
 
-# if tomcat requires authentication
-#   user: <TOMCAT_USERNAME>
-#   password: <TOMCAT_PASSWORD>
+  # if tomcat requires authentication
+  #   user: <TOMCAT_USERNAME>
+  #   password: <TOMCAT_PASSWORD>
 
 init_config:
   conf:
