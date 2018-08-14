@@ -72,9 +72,6 @@ class KubernetesState(PrometheusCheck):
             'kube_node_status_capacity_nvidia_gpu_cards': 'node.gpu.cards_capacity',
             'kube_pod_container_status_terminated': 'container.terminated',
             'kube_pod_container_status_waiting': 'container.waiting',
-            'kube_persistentvolume_status_phase': 'persistentvolume.status',
-            'kube_persistentvolume_info': 'persistentvolume.info',
-            'kube_persistentvolumeclaim_info': 'persistentvolumeclaim.info',
             'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
             'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.request_storage_bytes',
             'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
@@ -165,6 +162,14 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_info': {
                 'label_to_match': 'pod',
                 'labels_to_get': ['node']
+            },
+            'kube_persistentvolume_info': {
+                'label_to_match': 'persistentvolume',
+                'labels_to_get': ['storageclass']
+            },
+            'kube_persistentvolumeclaim_info': {
+                'label_to_match': 'persistentvolumeclaim',
+                'labels_to_get': ['storageclass']
             }
         }
 
@@ -585,3 +590,18 @@ class KubernetesState(PrometheusCheck):
                 self.gauge(metric_base_name.format(resource, constraint), val, tags)
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
+
+    def kube_persistentvolume_phase(self, message, **kwargs):
+        """ The persistent volumes by phase. """
+        metric_name = self.NAMESPACE + '.persistentvolumes.by_phase'
+        by_phase_counter = Counter()
+
+        for metric in message.metric:
+            tags = [
+                self._label_to_tag("storageclass", metric.label),
+                self._label_to_tag("phase", metric.label)
+            ] + self.custom_tags
+            by_phase_counter[tuple(sorted(tags))] += metric.gauge.value
+
+        for tags, count in by_phase_counter.iteritems():
+            self.gauge(metric_name, count, tags=list(tags))
