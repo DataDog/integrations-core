@@ -15,8 +15,8 @@ import requests
 from requests.exceptions import RequestException
 
 # project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'rabbitmq'
 EXCHANGE_TYPE = 'exchanges'
@@ -145,7 +145,7 @@ class RabbitMQ(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.already_alerted = []
-        self.cached_vhosts = {} # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
+        self.cached_vhosts = {}  # this is used to send CRITICAL rabbitmq.aliveness check if the server goes down
 
     def _get_config(self, instance):
         # make sure 'rabbitmq_api_url' is present and get parameters
@@ -236,7 +236,7 @@ class RabbitMQ(AgentCheck):
                            limit_vhosts, custom_tags, auth=auth, ssl_verify=ssl_verify)
 
             self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags,
-                           auth=auth, ssl_verify=ssl_verify)
+                                      auth=auth, ssl_verify=ssl_verify)
 
             # Generate a service check from the aliveness API. In the case of an invalid response
             # code or unparseable JSON this check will send no data.
