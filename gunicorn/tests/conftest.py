@@ -2,14 +2,15 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import subprocess
-import pytest
-import os
-import tempfile
-import requests
-import shutil
 import logging
+import os
+import pytest
+import shutil
+import subprocess
+import sys
 import time
+
+from datadog_checks.dev import temp_dir
 
 from common import FIXTURES, PROC_NAME
 
@@ -18,54 +19,55 @@ log = logging.getLogger('test_gunicorn')
 
 @pytest.fixture(scope="session")
 def setup_gunicorn(request):
-    gunicorn_tmpdir = tempfile.mkdtemp()
-    app_dir = os.path.join(gunicorn_tmpdir, 'app')
-    venv_dir = os.path.join(gunicorn_tmpdir, 'venv')
+    with temp_dir() as tmpdir:
+        app_dir, venv_dir = create_dirs(tmpdir)
+
+        create_venv(venv_dir)
+
+        install_pip_packages(venv_dir)
+
+        conf_file = os.path.join(tmpdir, 'conf.py')
+        copy_config_files(conf_file, app_dir)
+
+        proc = start_gunicorn(venv_dir, conf_file)
+
+        def fin():
+            proc.terminate()
+        request.addfinalizer(fin)
+
+        time.sleep(15)
+
+        yield
+
+
+def create_dirs(tmpdir):
+    app_dir = os.path.join(tmpdir, 'app')
+    venv_dir = os.path.join(tmpdir, 'venv')
     os.mkdir(app_dir)
     os.mkdir(venv_dir)
 
-    venv_file_path = os.path.join(venv_dir, 'virtualenv.py')
+    return (app_dir, venv_dir)
 
-    with open(venv_file_path, 'w+') as f:
-        r = requests.get('https://raw.github.com/pypa/virtualenv/1.11.6/virtualenv.py')
-        f.write(r.text)
 
-    subprocess.check_call(['python', venv_file_path, '--no-site-packages', '--no-pip', '--no-setuptools', venv_dir])
+def create_venv(venv_dir):
+    cmd = [sys.executable, '-m', 'virtualenv', venv_dir]
+    subprocess.check_call(cmd)
 
-    venv_python_path = os.path.join(venv_dir, 'bin', 'python')
 
-    ez_setup_file_path = os.path.join(venv_dir, 'ez_setup.py')
-    get_pip_file_path = os.path.join(venv_dir, 'get-pip.py')
-
-    with open(ez_setup_file_path, 'w+') as f:
-        r = requests.get('https://bootstrap.pypa.io/ez_setup.py')
-        f.write(r.text)
-
-    subprocess.check_call([venv_python_path, ez_setup_file_path])
-
-    with open(get_pip_file_path, 'w+') as f:
-        r = requests.get('https://bootstrap.pypa.io/get-pip.py')
-        f.write(r.text)
-
-    subprocess.check_call([venv_python_path, get_pip_file_path])
-
-    venv_pip_path = os.path.join(venv_dir, 'bin', 'pip')
-
+def install_pip_packages(venv_dir):
     gunicorn_version = os.environ.get('GUNICORN_VERSION')
+    venv_pip_path = os.path.join(venv_dir, 'bin', 'pip')
 
     if gunicorn_version:
         gunicorn_install = 'gunicorn=={}'.format(gunicorn_version)
-
     else:
         gunicorn_install = 'gunicorn'
 
-    subprocess.check_call([venv_pip_path,
-                           'install',
-                           gunicorn_install,
-                           'gevent',
-                           'setproctitle'])
+    install_cmd = [venv_pip_path, 'install', gunicorn_install, 'gevent', 'setproctitle']
+    subprocess.check_call(install_cmd)
 
-    conf_file = os.path.join(gunicorn_tmpdir, 'conf.py')
+
+def copy_config_files(conf_file, app_dir):
     shutil.copyfile(os.path.join(FIXTURES, 'conf.py'), conf_file)
 
     with open(conf_file, 'a') as f:
@@ -75,19 +77,12 @@ def setup_gunicorn(request):
 
     shutil.copyfile(os.path.join(FIXTURES, 'app.py'), app_file)
 
+
+def start_gunicorn(venv_dir, conf_file):
     gunicorn_file_path = os.path.join(venv_dir, 'bin', 'gunicorn')
     args = [gunicorn_file_path,
             '--config={}'.format(conf_file),
             '--name={}'.format(PROC_NAME),
             'app:app']
 
-    proc = subprocess.Popen(args)
-
-    time.sleep(15)
-
-    def fin():
-        proc.terminate()
-        shutil.rmtree(gunicorn_tmpdir)
-    request.addfinalizer(fin)
-
-    yield
+    return subprocess.Popen(args)
