@@ -73,6 +73,7 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_container_status_terminated': 'container.terminated',
             'kube_pod_container_status_waiting': 'container.waiting',
             'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
+            'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.resource_requests_storage_bytes',
             'kube_pod_container_resource_limits_cpu_cores': 'container.cpu_limit',
             'kube_pod_container_resource_limits_memory_bytes': 'container.memory_limit',
             'kube_pod_container_resource_requests_cpu_cores': 'container.cpu_requested',
@@ -161,6 +162,10 @@ class KubernetesState(PrometheusCheck):
             'kube_pod_info': {
                 'label_to_match': 'pod',
                 'labels_to_get': ['node']
+            },
+            'kube_persistentvolumeclaim_info': {
+                'label_to_match': 'persistentvolumeclaim',
+                'labels_to_get': ['storageclass']
             }
         }
 

@@ -68,6 +68,7 @@ METRICS = [
     NAMESPACE + '.replicaset.replicas_desired',
     # persistentvolume claim
     NAMESPACE + '.persistentvolumeclaim.status',
+    NAMESPACE + '.persistentvolumeclaim.resource_requests_storage_bytes',
     # statefulset
     NAMESPACE + '.statefulset.replicas',
     NAMESPACE + '.statefulset.replicas_current',

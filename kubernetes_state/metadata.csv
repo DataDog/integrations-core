@@ -40,6 +40,7 @@ kubernetes_state.node.memory_capacity,gauge,,byte,,The total memory resources of
 kubernetes_state.node.pods_capacity,gauge,,,,The total pod resources of the node,0,kubernetes,k8s_state.node.pods_capacity
 kubernetes_state.node.gpu.cards_allocatable,gauge,,,,The GPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.gpu.cards_allocatable
 kubernetes_state.node.gpu.cards_capacity,gauge,,,,The total GPU resources of the node,0,kubernetes,k8s_state.node.gpu.cards_capacity
+kubernetes_state.persistentvolumeclaim.resource_requests_storage_bytes,gauge,,bytes,,The number of bytes requested by the pvc,-1,kubernetes,k8s_state.persistentvolumeclaim.resource_requests_storage_bytes
 kubernetes_state.persistentvolumeclaim.status,gauge,,,,The phase the persistent volume claim is currently in,-1,kubernetes,k8s_state.persistentvolumeclaim.status
 kubernetes_state.node.cpu_allocatable,gauge,,cpu,,The CPU resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.cpu_allocatable
 kubernetes_state.node.memory_allocatable,gauge,,byte,,The memory resources of a node that are available for scheduling,0,kubernetes,k8s_state.node.memory_allocatable
