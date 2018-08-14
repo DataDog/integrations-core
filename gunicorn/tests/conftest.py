@@ -11,6 +11,7 @@ import sys
 import time
 
 from datadog_checks.dev import temp_dir
+from datadog_checks.dev.utils import ON_WINDOWS
 
 from common import FIXTURES, PROC_NAME
 
@@ -24,12 +25,14 @@ def setup_gunicorn(request):
 
         create_venv(venv_dir)
 
-        install_pip_packages(venv_dir)
+        venv_bin_path = get_venv_bin_path(venv_dir)
+
+        install_pip_packages(venv_bin_path)
 
         conf_file = os.path.join(tmpdir, 'conf.py')
         copy_config_files(conf_file, app_dir)
 
-        proc = start_gunicorn(venv_dir, conf_file)
+        proc = start_gunicorn(venv_bin_path, conf_file)
 
         def fin():
             proc.terminate()
@@ -54,9 +57,17 @@ def create_venv(venv_dir):
     subprocess.check_call(cmd)
 
 
-def install_pip_packages(venv_dir):
+def get_venv_bin_path(venv_dir):
+    if ON_WINDOWS:
+        return os.path.join(venv_dir, 'Scripts')
+    else:
+        return os.path.join(venv_dir, 'bin')
+
+
+def install_pip_packages(venv_bin_path):
     gunicorn_version = os.environ.get('GUNICORN_VERSION')
-    venv_pip_path = os.path.join(venv_dir, 'bin', 'pip')
+
+    venv_pip_path = os.path.join(venv_bin_path, 'pip')
 
     if gunicorn_version:
         gunicorn_install = 'gunicorn=={}'.format(gunicorn_version)
@@ -78,8 +89,8 @@ def copy_config_files(conf_file, app_dir):
     shutil.copyfile(os.path.join(FIXTURES, 'app.py'), app_file)
 
 
-def start_gunicorn(venv_dir, conf_file):
-    gunicorn_file_path = os.path.join(venv_dir, 'bin', 'gunicorn')
+def start_gunicorn(venv_bin_path, conf_file):
+    gunicorn_file_path = os.path.join(venv_bin_path, 'gunicorn')
     args = [gunicorn_file_path,
             '--config={}'.format(conf_file),
             '--name={}'.format(PROC_NAME),
