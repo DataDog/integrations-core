@@ -100,6 +100,8 @@ class VSphereCheck(AgentCheck):
         self.jobs_status = {}
         self.exceptionq = Queue()
 
+        self.batch_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
+
         # Connections open to vCenter instances
         self.server_instances = {}
 
@@ -395,7 +397,25 @@ class VSphereCheck(AgentCheck):
 
     def _get_all_objs(self, server_instance, max_objects, regexes=None, include_only_marked=False, tags=None):
         """
-        Get all the vsphere objects associated with a given type
+        Explore vCenter infrastructure to discover hosts, virtual machines, etc. and compute their associated tags.
+        Start at the vCenter `rootFolder`, so as to collect every objet.
+
+        Example topology:
+            ```
+            rootFolder
+                - datacenter1
+                    - compute_resource1 == cluster
+                        - host1
+                        - host2
+                        - host3
+                    - compute_resource2
+                        - host5
+                            - vm1
+                            - vm2
+            ```
+
+        If it's a node we want to query metric for, it will be queued in `self.morlist_raw` that
+        will be processed by another job.
         """
         start = time.time()
         if tags is None:
@@ -547,6 +567,8 @@ class VSphereCheck(AgentCheck):
         # With QueryPerf, we can get metric information about several MORs at once. Let's use it
         # to avoid making one API call per object, even if we also get metrics values that are useless for now.
         # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.html#queryStats
+        # query_specs is a list of QuerySpec objects.
+        # See https://code.vmware.com/apis/358/vsphere#/doc/vim.PerformanceManager.QuerySpec.html
         res = perfManager.QueryPerf(query_specs)
         for mor_perfs in res:
             mor_name = str(mor_perfs.entity)
@@ -567,11 +589,11 @@ class VSphereCheck(AgentCheck):
         if i_key not in self.morlist:
             self.morlist[i_key] = {}
 
-        batch_size = self.init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
-
         for resource_type in RESOURCE_TYPE_METRICS:
             query_specs = []
             # Batch size can prevent querying large payloads at once if the environment is too large
+            # If batch size is set to 0, process everything at once
+            batch_size = self.batch_size or len(self.morlist_raw[i_key][resource_type])
             for _ in xrange(batch_size):
                 try:
                     mor = self.morlist_raw[i_key][resource_type].pop()
@@ -615,7 +637,7 @@ class VSphereCheck(AgentCheck):
         # ## </TEST-INSTRUMENTATION>
 
         i_key = self._instance_key(instance)
-        self.log.info("Warming metrics metadata cache for instance {0}".format(i_key))
+        self.log.info("Warming metrics metadata cache for instance {}".format(i_key))
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
@@ -630,7 +652,7 @@ class VSphereCheck(AgentCheck):
             new_metadata[counter.key] = d
         self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
 
-        self.log.info("Finished metadata collection for instance {0}".format(i_key))
+        self.log.info("Finished metadata collection for instance {}".format(i_key))
         # Reset metadata
         self.metrics_metadata[i_key] = new_metadata
 
@@ -673,10 +695,7 @@ class VSphereCheck(AgentCheck):
                         continue
 
                     # Metric types are absolute, delta, and rate
-                    try:
-                        metric_name = self.metrics_metadata[i_key][result.id.counterId]['name']
-                    except KeyError:
-                        metric_name = None
+                    metric_name = self.metrics_metadata[i_key].get(result.id.counterId, {}).get('name')
 
                     if metric_name not in ALL_METRICS:
                         self.log.debug(u"Skipping unknown `%s` metric.", metric_name)
@@ -689,17 +708,17 @@ class VSphereCheck(AgentCheck):
                     instance_name = result.id.instance or "none"
                     value = self._transform_value(instance, result.id.counterId, result.value[0])
 
-                    tags = ['instance:%s' % instance_name]
+                    tags = ['instance:{}'.format(instance_name)]
                     if not mor['hostname']:  # no host tags available
                         tags.extend(mor['tags'])
 
                     # vsphere "rates" should be submitted as gauges (rate is
                     # precomputed).
                     self.gauge(
-                        "vsphere.%s" % metric_name,
+                        "vsphere.{}".format(metric_name),
                         value,
                         hostname=mor['hostname'],
-                        tags=['instance:%s' % instance_name] + custom_tags
+                        tags=['instance:{}'.format(instance_name)] + custom_tags
                     )
 
         # ## <TEST-INSTRUMENTATION>
@@ -712,40 +731,41 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         if i_key not in self.morlist:
-            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {0}".format(i_key))
+            self.log.debug("Not collecting metrics for this instance, nothing to do yet: {}".format(i_key))
             return
 
-        batch_size = self.init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
         mors = self.morlist[i_key].items()
         n_mors = len(mors)
-        self.log.debug("Collecting metrics of %d mors" % n_mors)
+        self.log.debug("Collecting metrics of %d mors", n_mors)
 
         custom_tags = instance.get('tags', [])
         vm_count = 0
 
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
+        # If batch_size is 0, process everything at once
+        batch_size = self.batch_size or n_mors
         query_specs = []
-        for i in xrange(n_mors / batch_size):
-            for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
-                if mor['mor_type'] == 'vm':
-                    vm_count += 1
-                if 'metrics' not in mor or not mor['metrics']:
-                    continue
+        if n_mors:
+            for i in xrange(n_mors / batch_size + 1):
+                for mor_name, mor in mors[i * batch_size:(i + 1) * batch_size]:
+                    if mor['mor_type'] == 'vm':
+                        vm_count += 1
+                    if 'metrics' not in mor or not mor['metrics']:
+                        continue
 
-                query_spec = vim.PerformanceManager.QuerySpec()
-                query_spec.entity = mor["mor"]
-                query_spec.intervalId = mor["interval"]
-                query_spec.metricId = mor["metrics"]
-                query_spec.maxSample = 1
-                query_specs.append(query_spec)
+                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec.entity = mor["mor"]
+                    query_spec.intervalId = mor["interval"]
+                    query_spec.metricId = mor["metrics"]
+                    query_spec.maxSample = 1
+                    query_specs.append(query_spec)
 
-            if query_specs:
-                self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
+                if query_specs:
+                    self.pool.apply_async(self._collect_metrics_atomic, args=(instance, query_specs))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:%s" % instance.get('name')] + custom_tags)
+        self.gauge('vsphere.vm.count', vm_count, tags=["vcenter_server:{}".format(instance.get('name'))] + custom_tags)
 
     def check(self, instance):
-
         if not self.pool_started:
             self.start_pool()
 
