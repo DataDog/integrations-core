@@ -20,7 +20,7 @@ instances:
 #    pid_file: STRING. A Pid file.
 #    exact_match: (optional) Boolean. Default value of True matches your search_string on proc.name().
 #                 If you want to match on a substring within proc.cmdline(), set this to False
-#                 https://docs.datadoghq.com/agent/faq/i-have-issues-with-my-process-check-it-doesn-t-find-my-processes/
+#                 https://docs.datadoghq.com/integrations/process/#configuration
 #    ignore_denied_access: (optional) Boolean. Default to True, when getting the number of files descriptors, dd-agent user might
 #    get a denied access. Set this to true to not issue a warning if that happens.
 #    thresholds: (optional) Two ranges: critical and warning
