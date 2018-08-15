@@ -11,6 +11,7 @@ from . import common, metrics
 
 log = logging.getLogger(__file__)
 
+
 def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     check.check(common.CONFIG)
 
