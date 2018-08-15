@@ -61,10 +61,13 @@ class Istio(PrometheusCheck):
         self._scrapers[endpoint] = scraper
         scraper.NAMESPACE = self.MESH_NAMESPACE
         scraper.metrics_mapper = {
+            # These metrics support Istio 1.0
             'istio_requests_total': 'request.count',
             'istio_request_duration_seconds': 'request.duration',
             'istio_request_bytes': 'request.size',
             'istio_response_bytes': 'response.size',
+
+            # These metrics support Istio 0.8
             'istio_request_count': 'request.count',
             'istio_request_duration': 'request.duration',
             'istio_request_size': 'request.size',
