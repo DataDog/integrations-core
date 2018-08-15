@@ -91,6 +91,10 @@ MESH_METRICS_MAPPER = {
     'istio_request_duration': 'request.duration',
     'istio_request_size': 'request.size',
     'istio_response_size': 'response.size',
+    'istio_requests_total': 'request.count',
+    'istio_request_duration_seconds': 'request.duration',
+    'istio_request_bytes': 'request.size',
+    'istio_response_bytes': 'response.size',
 }
 
 

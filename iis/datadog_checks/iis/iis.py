@@ -1,15 +1,10 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-'''
-Check the performance counters from IIS
-'''
-
-# project
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.win import PDHBaseCheck
 from datadog_checks.utils.containers import hash_mutable
+
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -21,6 +16,7 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "Files Sent/sec", "iis.net.files_sent", "gauge"],
     ["Web Service", None, "Files Received/sec", "iis.net.files_rcvd", "gauge"],
     ["Web Service", None, "Total Connection Attempts (all instances)", "iis.net.connection_attempts", "gauge"],
+    ["Web Service", None, "Connection Attempts/sec", "iis.net.connection_attempts_sec", "gauge"],
 
     # HTTP Methods
     ["Web Service", None, "Get Requests/sec", "iis.httpd_request_method.get", "gauge"],

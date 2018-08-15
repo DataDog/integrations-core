@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.3.1 / 2018-08-03
+
+* [Fixed] Fix clean command. See [#1992](https://github.com/DataDog/integrations-core/pull/1992).
+
 ## 0.3.0 / 2018-07-30
 
 * [Added] Allow passing --build to compose up. See [#1962](https://github.com/DataDog/integrations-core/pull/1962).

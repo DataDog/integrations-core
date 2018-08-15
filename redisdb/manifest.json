@@ -1,11 +1,22 @@
 {
-  "maintainer": "help@datadoghq.com",
-  "creates_events": "false",
-  "manifest_version": "1.0.0",
-  "name": "redisdb",
+  "aliases": [
+    "/integrations/redis/"
+  ],
+  "categories": [
+    "data store",
+    "caching",
+    "log collection"
+  ],
+  "creates_events": false,
   "display_name": "RedisDB",
-  "creates_events": true,
-  "metric_to_check": "redis.cpu.user",
+  "guid": "0e2f3ed1-d36b-47a4-b69c-fedb50adf240",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "redis.",
+  "metric_to_check": "redis.net.clients",
+  "name": "redisdb",
+  "public_title": "Datadog-RedisDB Integration",
   "short_description": "Track redis performance, memory use, blocked clients, evicted keys, and more.",
   "support": "core",
   "supported_os": [
@@ -13,18 +24,5 @@
     "mac_os",
     "windows"
   ],
-  "guid": "0e2f3ed1-d36b-47a4-b69c-fedb50adf240",
-  "public_title": "Datadog-RedisDB Integration",
-  "categories": [
-    "data store",
-    "caching",
-    "log collection"
-  ],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/redisdb/",
-  "aliases": [
-    "/integrations/redis/"
-  ],
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

@@ -65,6 +65,10 @@ class Istio(PrometheusCheck):
             'istio_request_duration_seconds': 'request.duration',
             'istio_request_bytes': 'request.size',
             'istio_response_bytes': 'response.size',
+            'istio_request_count': 'request.count',
+            'istio_request_duration': 'request.duration',
+            'istio_request_size': 'request.size',
+            'istio_response_size': 'response.size',
         }
         scraper.label_to_hostname = endpoint
         scraper = self._shared_scraper_config(scraper, instance)

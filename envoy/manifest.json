@@ -1,23 +1,24 @@
 {
+  "categories": [
+    "cloud",
+    "web"
+  ],
+  "creates_events": false,
   "display_name": "Envoy",
+  "guid": "007f4e6c-ac88-411e-ad81-f0272539b5ff",
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "envoy",
   "metric_prefix": "envoy.",
   "metric_to_check": "envoy.stats.overflow",
-  "creates_events": "false",
-  "short_description": "Envoy is an open source edge and service proxy, designed for cloud-native applications.",
-  "guid": "007f4e6c-ac88-411e-ad81-f0272539b5ff",
+  "name": "envoy",
+  "public_title": "Datadog-Envoy Integration",
+  "short_description": "Envoy is an open source edge and service proxy",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Envoy Integration",
-  "categories": ["cloud", "web"],
-  "type": "check",
-  "doc_link": "https://docs.datadoghq.com/integrations/envoy/",
-  "is_public": true,
-  "has_logo": true
+  "type": "check"
 }

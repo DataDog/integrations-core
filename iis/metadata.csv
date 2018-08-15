@@ -6,7 +6,8 @@ iis.net.bytes_total,gauge,,byte,second,The total number of bytes transferred per
 iis.net.num_connections,gauge,,connection,,The number of active connections,0,iis,net conns
 iis.net.files_sent,gauge,,file,second,The number of files sent per second,0,iis,net files sent
 iis.net.files_rcvd,gauge,,file,second,The number of files received per second,0,iis,net files rcvd
-iis.net.connection_attempts,gauge,,connection,second,The number of connection attempts per second,0,iis,net conn attempts
+iis.net.connection_attempts,gauge,,connection,,The number of connection attempts since service startup,0,iis,net conn attempts
+iis.net.connection_attempts_sec,gauge,,connection,second,The number of connection attempts per second,0,iis,net conn attempts sec
 iis.httpd_request_method.get,gauge,,request,second,The number of GET requests per second,0,iis,requests http get
 iis.httpd_request_method.post,gauge,,request,second,The number of POST requests per second,0,iis,requests http post
 iis.httpd_request_method.head,gauge,,request,second,The number of HEAD requests per second,0,iis,requests http head
