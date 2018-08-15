@@ -918,7 +918,7 @@ class SqlIoVirtualFileStat(SqlServerMetric):
 
             report_value = value - self.pvs_vals[dbid, fid]
             self.pvs_vals[dbid, fid] = value
-            metric_tags = ['database_id:{}'.format(str(dbid).strip())], 'file_id:{}'.format(str(fid).strip())]
+            metric_tags = ['database_id:{}'.format(str(dbid).strip()), 'file_id:{}'.format(str(fid).strip())]
             metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, report_value, tags=metric_tags)
