@@ -28,14 +28,15 @@ def spin_up_rabbitmq(request):
         env['RABBITMQ_VERSION'] = '3.6.0'
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    # def fake_down():
-    #     pass
+    def fake_down():
+        pass
 
     with docker_run(compose_file,
                     log_patterns='Server startup complete',
-                    # down=fake_down,
+                    down=fake_down,
                     env_vars=env):
         yield
+
 
 @pytest.fixture(scope="session")
 def setup_rabbitmq():

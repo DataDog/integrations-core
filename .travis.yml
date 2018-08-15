@@ -175,6 +175,8 @@ jobs:
     - stage: test
       env: CHECK=prometheus
     - stage: test
+      env: CHECK=rabbitmq
+    - stage: test
       env: CHECK=redisdb
     - stage: test
       env: CHECK=riak

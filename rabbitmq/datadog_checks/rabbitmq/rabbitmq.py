@@ -251,15 +251,24 @@ class RabbitMQ(AgentCheck):
             self.log.error(msg)
 
             # tag every vhost as CRITICAL or they would keep the latest value, OK, in case the RabbitMQ server goes down
-            self.log.error("error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s" % (base_url, self.cached_vhosts))
+            msg = "error while contacting rabbitmq (%s), setting aliveness to CRITICAL for vhosts: %s"
+            msg = msg % (base_url, self.cached_vhosts)
+            self.log.error(msg)
             for vhost in self.cached_vhosts.get(base_url, []):
-                self.service_check('rabbitmq.aliveness', AgentCheck.CRITICAL, ['vhost:%s' % vhost] + custom_tags, message=u"Could not contact aliveness API")
+                self.service_check('rabbitmq.aliveness',
+                                   AgentCheck.CRITICAL,
+                                   ['vhost:%s' % vhost] + custom_tags,
+                                   message=u"Could not contact aliveness API")
 
     def _get_data(self, url, auth=None, ssl_verify=True, proxies=None):
         if proxies is None:
             proxies = {}
         try:
-            r = requests.get(url, auth=auth, proxies=proxies, timeout=self.default_integration_http_timeout, verify=ssl_verify)
+            r = requests.get(url,
+                             auth=auth,
+                             proxies=proxies,
+                             timeout=self.default_integration_http_timeout,
+                             verify=ssl_verify)
             r.raise_for_status()
             return r.json()
         except RequestException as e:
@@ -328,7 +337,8 @@ class RabbitMQ(AgentCheck):
                 tags.append('%s_%s:%s' % (TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
+    def get_stats(self, instance, base_url, object_type, max_detailed,
+                  filters, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -360,9 +370,101 @@ class RabbitMQ(AgentCheck):
 
         """ data is a list of nodes or queues:
         data = [
-            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue1', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
-            {'status': 'running', 'node': 'rabbit@host, 'name': 'queue10', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
-            {'status': 'running', 'node': 'rabbit@host', 'name': 'queue11', 'consumers': 0, 'vhost': '/', 'backing_queue_status': {'q1': 0, 'q3': 0, 'q2': 0, 'q4': 0, 'avg_ack_egress_rate': 0.0, 'ram_msg_count': 0, 'ram_ack_count': 0, 'len': 0, 'persistent_count': 0, 'target_ram_count': 'infinity', 'next_seq_id': 0, 'delta': ['delta', 'undefined', 0, 'undefined'], 'pending_acks': 0, 'avg_ack_ingress_rate': 0.0, 'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0}, 'durable': True, 'idle_since': '2013-10-03 13:38:18', 'exclusive_consumer_tag': '', 'arguments': {}, 'memory': 10956, 'policy': '', 'auto_delete': False},
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue1',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host,
+                'name': 'queue10',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
+            {
+                'status': 'running',
+                'node': 'rabbit@host',
+                'name': 'queue11',
+                'consumers': 0,
+                'vhost': '/',
+                'backing_queue_status': {
+                    'q1': 0,
+                    'q3': 0,
+                    'q2': 0,
+                    'q4': 0,
+                    'avg_ack_egress_rate': 0.0,
+                    'ram_msg_count': 0,
+                    'ram_ack_count': 0,
+                    'len': 0,
+                    'persistent_count': 0,
+                    'target_ram_count': 'infinity',
+                    'next_seq_id': 0,
+                    'delta': ['delta', 'undefined', 0, 'undefined'],
+                    'pending_acks': 0,
+                    'avg_ack_ingress_rate': 0.0,
+                    'avg_egress_rate': 0.0,
+                    'avg_ingress_rate': 0.0
+                },
+                'durable': True,
+                'idle_since': '2013-10-03 13:38:18',
+                'exclusive_consumer_tag': '',
+                'arguments': {},
+                'memory': 10956,
+                'policy': '',
+                'auto_delete': False
+            },
             ...
         ]
         """
@@ -371,7 +473,11 @@ class RabbitMQ(AgentCheck):
                 "The maximum number of %s you can specify is %d." % (object_type, max_detailed))
 
         # a list of queues/nodes is specified. We process only those
-        data = self._filter_list(data, explicit_filters, regex_filters, object_type, instance.get("tag_families", False))
+        data = self._filter_list(data,
+                                 explicit_filters,
+                                 regex_filters,
+                                 object_type,
+                                 instance.get("tag_families", False))
 
         # if no filters are specified, check everything according to the limits
         if len(data) > ALERT_THRESHOLD * max_detailed:
@@ -380,19 +486,21 @@ class RabbitMQ(AgentCheck):
 
         if len(data) > max_detailed:
             # Display a warning in the info page
-            self.warning(
-                "Too many items to fetch. You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file or get in touch with Datadog Support" % object_type)
+            msg = ("Too many items to fetch. "
+                   "You must choose the %s you are interested in by editing the rabbitmq.yaml configuration file"
+                   "or get in touch with Datadog Support")
+            msg = msg % object_type
+            self.warning(msg)
 
         for data_line in data[:max_detailed]:
             # We truncate the list if it's above the limit
             self._get_metrics(data_line, object_type, custom_tags)
 
-
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
         if object_type is QUEUE_TYPE:
             self._get_queue_bindings_metrics(base_url, custom_tags, data, instance_proxy,
-                                            instance, object_type, auth, ssl_verify)
+                                             instance, object_type, auth, ssl_verify)
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
@@ -419,11 +527,13 @@ class RabbitMQ(AgentCheck):
             tags = self._get_tags(item, object_type, custom_tags)
             url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, urllib.quote_plus(vhost), urllib.quote_plus(item['name']))
             bindings_count = len(self._get_data(urlparse.urljoin(base_url, url), auth=auth,
-                    ssl_verify=ssl_verify, proxies=instance_proxy))
+                                 ssl_verify=ssl_verify, proxies=instance_proxy))
 
             self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
-    def get_connections_stat(self, instance, base_url, object_type, vhosts, limit_vhosts, custom_tags, auth=None, ssl_verify=True):
+    def get_connections_stat(self, instance, base_url,
+                             object_type, vhosts, limit_vhosts,
+                             custom_tags, auth=None, ssl_verify=True):
         """
         Collect metrics on currently open connection per vhost.
         """
@@ -438,7 +548,7 @@ class RabbitMQ(AgentCheck):
                 url = "vhosts/{}/{}".format(urllib.quote_plus(vhost), object_type)
                 try:
                     data += self._get_data(urlparse.urljoin(base_url, url), auth=auth,
-                                          ssl_verify=ssl_verify, proxies=instance_proxy)
+                                           ssl_verify=ssl_verify, proxies=instance_proxy)
                 except Exception as e:
                     # This will happen if there is no connection data to grab
                     self.log.debug("Couldn't grab connection data from vhost, {}: {}".format(vhost, e))
@@ -460,7 +570,9 @@ class RabbitMQ(AgentCheck):
             self.gauge('rabbitmq.connections', nb_conn, tags=['%s_vhost:%s' % (TAG_PREFIX, vhost)] + custom_tags)
 
         for conn_state, nb_conn in connection_states.iteritems():
-            self.gauge('rabbitmq.connections.state', nb_conn, tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
+            self.gauge('rabbitmq.connections.state',
+                       nb_conn,
+                       tags=['%s_conn_state:%s' % (TAG_PREFIX, conn_state)] + custom_tags)
 
     def alert(self, base_url, max_detailed, size, object_type, custom_tags):
         key = "%s%s" % (base_url, object_type)
@@ -511,7 +623,10 @@ class RabbitMQ(AgentCheck):
             path = u'aliveness-test/%s' % (urllib.quote_plus(vhost))
             aliveness_url = urlparse.urljoin(base_url, path)
             aliveness_proxy = self.get_instance_proxy(instance, aliveness_url)
-            aliveness_response = self._get_data(aliveness_url, auth=auth, ssl_verify=ssl_verify, proxies=aliveness_proxy)
+            aliveness_response = self._get_data(aliveness_url,
+                                                auth=auth,
+                                                ssl_verify=ssl_verify,
+                                                proxies=aliveness_proxy)
             message = u"Response from aliveness API: %s" % aliveness_response
 
             if aliveness_response.get('status') == 'ok':

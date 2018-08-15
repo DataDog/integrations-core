@@ -110,7 +110,7 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
-        if count:
+        if count is not None:
             assert len(candidates) == count
         else:
             assert len(candidates) >= at_least
@@ -211,7 +211,7 @@ class AggregatorStub(object):
             if len(gtags) > 0:
                 candidates.append(metric)
 
-        if count:
+        if count is not None:
             assert len(candidates) == count
         else:
             assert len(candidates) >= at_least
