@@ -229,7 +229,7 @@ def test_check_real_process(aggregator):
 
     instance = {
         'name': 'py',
-        'search_string': ['python'],
+        'search_string': ['.*python.*pytest'],
         'exact_match': False,
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
