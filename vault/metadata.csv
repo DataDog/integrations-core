@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+vault.is_leader,gauge,,,,1 if leader 0 otherwise,0,vault,Cluster leader
