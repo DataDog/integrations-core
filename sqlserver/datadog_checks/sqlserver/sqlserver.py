@@ -682,6 +682,7 @@ class SqlServerMetric(object):
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
         self.object_name = cfg_instance.get('object_name', '')
+        self.tags = cfg_instance.get('tags', [])
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -709,6 +710,8 @@ class SqlSimpleMetric(SqlServerMetric):
         return rows
 
     def fetch_metric(self, cursor, rows, tags):
+        tags = tags + self.tags
+
         for counter_name_long, instance_name_long, object_name, cntr_value in rows:
             counter_name = counter_name_long.strip()
             instance_name = instance_name_long.strip()
@@ -767,6 +770,8 @@ class SqlFractionMetric(SqlServerMetric):
             self.log.warning("Couldn't find {} in results".format(self.sql_name))
             return
 
+        tags = tags + self.tags
+
         results_list = results[self.sql_name]
         done_instances = []
         for ndx, row in enumerate(results_list):
@@ -808,9 +813,9 @@ class SqlFractionMetric(SqlServerMetric):
                 value = cval2
                 base = cval
 
-            metric_tags = tags
+            metric_tags = list(tags)
             if self.instance == ALL_INSTANCES:
-                metric_tags = metric_tags + ['{}:{}'.format(self.tag_by, inst.strip())]
+                metric_tags.append('{}:{}'.format(self.tag_by, inst.strip()))
             self.report_fraction(value, base, metric_tags)
 
     def report_fraction(self, value, base, metric_tags):
@@ -869,9 +874,8 @@ class SqlOsWaitStat(SqlServerMetric):
             return
 
         self.log.debug("Value for {} {} is {}".format(self.sql_name, self.column, value))
-        metric_tags = tags
         metric_name = '{}.{}'.format(self.datadog_name, self.column)
-        self.report_function(metric_name, value, tags=metric_tags)
+        self.report_function(metric_name, value, tags=tags + self.tags)
 
 
 class SqlIoVirtualFileStat(SqlServerMetric):
@@ -895,6 +899,7 @@ class SqlIoVirtualFileStat(SqlServerMetric):
         self.pvs_vals = defaultdict(lambda: None)
 
     def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
         dbid_ndx = columns.index("database_id")
         fileid_ndx = columns.index("file_id")
         column_ndx = columns.index(self.column)
@@ -913,12 +918,10 @@ class SqlIoVirtualFileStat(SqlServerMetric):
 
             report_value = value - self.pvs_vals[dbid, fid]
             self.pvs_vals[dbid, fid] = value
-            metric_tags = tags
-            metric_tags = metric_tags + ['database_id:{}'.format(str(dbid).strip())]
-            metric_tags = metric_tags + ['file_id:{}'.format(str(fid).strip())]
+            metric_tags = ['database_id:{}'.format(str(dbid).strip())], 'file_id:{}'.format(str(fid).strip())]
+            metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
-            self.report_function(metric_name, report_value,
-                                 tags=metric_tags)
+            self.report_function(metric_name, report_value, tags=metric_tags)
 
 
 class SqlOsMemoryClerksStat(SqlServerMetric):
@@ -939,6 +942,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
         return rows, columns
 
     def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
         type_column_index = columns.index("type")
         value_column_index = columns.index(self.column)
         memnode_index = columns.index("memory_node_id")
@@ -950,8 +954,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             if met_type != self.sql_name:
                 continue
 
-            metric_tags = tags
-            metric_tags = metric_tags + ['memory_node_id:{}'.format(str(node_id))]
+            metric_tags = ['memory_node_id:{}'.format(str(node_id))]
+            metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
-            self.report_function(metric_name, column_val,
-                                 tags=metric_tags)
+            self.report_function(metric_name, column_val, tags=metric_tags)

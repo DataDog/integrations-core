@@ -10,11 +10,13 @@ init_config:
   #
   # custom_metrics:
 
-    # This is a basic custom metric. There is not instance associated with
-    # this counter.
+    # This is a basic custom metric. There is no instance associated with
+    # this counter. You can specify optional tags to be sent.
     #
     # - name: sqlserver.clr.execution
     #   counter_name: CLR Execution
+    #   tags:
+    #     - tag_name:value
 
     # The counter_name field uses the counter name of SQL server database objects
     # https://docs.microsoft.com/en-us/sql/relational-databases/performance-monitor/sql-server-databases-object
@@ -102,9 +104,9 @@ instances:
 
   - host: HOST,PORT
 
-    # Optional. Choose the ADO provider.  Note that the (default) provider 
+    # Optional. Choose the ADO provider.  Note that the (default) provider
     # SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
-    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need 
+    # provider, set the adoprovider to "MSOLEDBSQL" below.  You will also need
     # to download the new provider from
     # https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
 
