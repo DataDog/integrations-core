@@ -9,6 +9,7 @@ import copy
 import traceback
 import unicodedata
 import os
+import numbers
 
 from six import iteritems, text_type
 
@@ -32,6 +33,8 @@ except ImportError:
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
 from ..utils.proxy import config_proxy_skip
+
+log = logging.getLogger(__name__)
 
 
 class AgentCheck(object):
@@ -345,7 +348,7 @@ class AgentCheck(object):
     def _collect_internal_stats(methods=None):
         current_process = psutil.Process(os.getpid())
 
-        methods = methods or DEFAULT_PSUTIL_METHODS
+        methods = methods or ['memory_info', 'io_counters']
         filtered_methods = [m for m in methods if hasattr(current_process, m)]
 
         stats = {}
