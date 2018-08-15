@@ -12,8 +12,8 @@ except ImportError:
     psutil = None
 
 # project
-from checks import AgentCheck
-from config import _is_affirmative
+from datadog_checks.checks import AgentCheck
+from datadog_checks.config import _is_affirmative
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -32,6 +32,7 @@ class UnsupportedMetricType(Exception):
     def __init__(self, metric_name, metric_type):
         message = 'Unsupported Metric Type for {0} : {1}'.format(metric_name, metric_type)
         Exception.__init__(self, message)
+
 
 class AgentMetrics(AgentCheck):
     """
