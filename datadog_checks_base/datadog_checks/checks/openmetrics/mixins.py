@@ -166,6 +166,11 @@ class OpenMetricsScraperMixin(object):
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
 
+        # In combination to label_as_hostname, allows to add a common suffix to the hostnames
+        # submitted. This can be used for instance to discriminate hosts between clusters.
+        config['label_to_hostname_suffix'] = instance.get('label_to_hostname_suffix', default_instance.get('label_to_hostname_suffix', None))
+
+
         # Add a 'health' service check for the prometheus endpoint
         config['health_service_check'] = is_affirmative(instance.get('health_service_check',
                                                         default_instance.get('health_service_check', True)))
@@ -483,7 +488,10 @@ class OpenMetricsScraperMixin(object):
         """
         if (hostname is None and scraper_config['label_to_hostname'] is not None and
                 scraper_config['label_to_hostname'] in sample[self.SAMPLE_LABELS]):
-                return sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
+                hostname = sample[self.SAMPLE_LABELS][scraper_config['label_to_hostname']]
+                suffix = scraper_config['label_to_hostname_suffix']
+                if suffix is not None:
+                    hostname += suffix
 
         return hostname
 

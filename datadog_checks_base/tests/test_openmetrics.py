@@ -187,6 +187,20 @@ def test_submit_gauge_with_labels_and_hostname_override(
         count=1,
     )
 
+    # also test with a hostname suffix
+    check2 = mocked_prometheus_check
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['label_to_hostname_suffix'] = '-cluster-blue'
+    metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
+    check2._submit(metric_name, ref_gauge, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.process.vm.bytes',
+        54927360.0,
+        tags=['my_1st_label:my_1st_label_value', 'node:foo'],
+        hostname="foo-cluster-blue",
+        count=1,
+    )
+
 
 def test_submit_gauge_with_labels_and_hostname_already_overridden(
     aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
