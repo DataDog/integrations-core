@@ -8,8 +8,6 @@ import json
 import copy
 import traceback
 import unicodedata
-import os
-import numbers
 
 from six import iteritems, text_type
 
@@ -25,16 +23,9 @@ try:
 except ImportError:
     from ..stubs import aggregator
 
-try:
-    import psutil
-except ImportError:
-    psutil = None
-
 from ..config import is_affirmative
 from ..utils.common import ensure_bytes
 from ..utils.proxy import config_proxy_skip
-
-log = logging.getLogger(__name__)
 
 
 class AgentCheck(object):
