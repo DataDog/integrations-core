@@ -678,16 +678,15 @@ SELECT s.schemaname,
 
         try:
             cursor = db.cursor()
-            server_metric_tags = instance_tags
-            results_len = self._query_scope(cursor, db_instance_metrics, key, db, server_metric_tags, relations,
+            results_len = self._query_scope(cursor, db_instance_metrics, key, db, instance_tags, relations,
                                             False, programming_error, relations_config)
             if results_len is not None:
                 self.gauge("postgresql.db.count", results_len,
-                           tags=[t for t in server_metric_tags if not t.startswith("db:")])
+                           tags=[t for t in instance_tags if not t.startswith("db:")])
 
-            self._query_scope(cursor, bgw_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
-            self._query_scope(cursor, archiver_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
 
             for scope in list(metric_scope) + custom_metrics:

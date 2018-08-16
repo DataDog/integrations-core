@@ -88,7 +88,6 @@ def test_can_connect_service_check(aggregator, check, postgres_standalone, pg_in
         'db:{}'.format(DB_NAME),
     ]
     check.check(pg_instance)
-    print(aggregator._service_checks)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
 
