@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
 import threading
+import re
 
 try:
     import psycopg2
@@ -358,7 +359,17 @@ SELECT s.schemaname,
             try:
                 version = map(int, result[0].split(' ')[0].split('.'))
             except Exception:
-                version = result[0]
+                # Postgres might be in beta, with format \d+beta\d+
+                version = list(re.match('(\d+)(beta)(\d+)', result[0]).groups())
+
+                # We found a valid beta version
+                if len(version) == 3:
+                    # Replace beta with a negative number to properly compare versions
+                    version[1] = -1
+                    version = map(int, version)
+                else:
+                    version = result[0]
+
             self.versions[key] = version
 
         self.service_metadata('version', self.versions[key])
