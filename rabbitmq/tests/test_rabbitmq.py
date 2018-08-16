@@ -173,41 +173,38 @@ def test_connections(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     aggregator.assert_metric('rabbitmq.connections', count=2)
 
     with closing(pika.BlockingConnection()), closing(pika.BlockingConnection()):
-        try:
-            aggregator.reset()
-            check.check(common.CONFIG)
-            aggregator.assert_metric('rabbitmq.connections',
-                                     tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
-                                     value=2, count=1)
-            aggregator.assert_metric('rabbitmq.connections', count=3)
-            aggregator.assert_metric('rabbitmq.connections.state',
-                                     tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"],
-                                     value=2, count=1)
+        aggregator.reset()
+        check.check(common.CONFIG)
+        aggregator.assert_metric('rabbitmq.connections',
+                                 tags=['rabbitmq_vhost:/', "tag1:1", "tag2"],
+                                 value=2, count=1)
+        aggregator.assert_metric('rabbitmq.connections', count=3)
+        aggregator.assert_metric('rabbitmq.connections.state',
+                                 tags=['rabbitmq_conn_state:running', "tag1:1", "tag2"],
+                                 value=2, count=1)
 
-            aggregator.reset()
-            check.check(common.CONFIG_DEFAULT_VHOSTS)
-            aggregator.assert_metric('rabbitmq.connections',
-                                     tags=['rabbitmq_vhost:/'],
-                                     value=2, count=1)
-            aggregator.assert_metric('rabbitmq.connections',
-                                     tags=['rabbitmq_vhost:test'],
-                                     value=0, count=1)
-            aggregator.assert_metric('rabbitmq.connections', count=2)
-            aggregator.assert_metric('rabbitmq.connections.state',
-                                     tags=['rabbitmq_conn_state:running'],
-                                     value=0, count=0)
+        aggregator.reset()
+        check.check(common.CONFIG_DEFAULT_VHOSTS)
+        aggregator.assert_metric('rabbitmq.connections',
+                                 tags=['rabbitmq_vhost:/'],
+                                 value=2, count=1)
+        aggregator.assert_metric('rabbitmq.connections',
+                                 tags=['rabbitmq_vhost:test'],
+                                 value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections', count=2)
+        aggregator.assert_metric('rabbitmq.connections.state',
+                                 tags=['rabbitmq_conn_state:running'],
+                                 value=0, count=0)
 
-            aggregator.reset()
-            check.check(common.CONFIG_TEST_VHOSTS)
-            aggregator.assert_metric('rabbitmq.connections',
-                                     tags=['rabbitmq_vhost:test'],
-                                     value=0, count=1)
-            aggregator.assert_metric('rabbitmq.connections',
-                                     tags=['rabbitmq_vhost:test2'],
-                                     value=0, count=1)
-            aggregator.assert_metric('rabbitmq.connections', count=2)
-            aggregator.assert_metric('rabbitmq.connections.state',
-                                     tags=['rabbitmq_conn_state:running'],
-                                     value=0, count=0)
-        except Exception as e:
-            raise e
+        aggregator.reset()
+        check.check(common.CONFIG_TEST_VHOSTS)
+        aggregator.assert_metric('rabbitmq.connections',
+                                 tags=['rabbitmq_vhost:test'],
+                                 value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections',
+                                 tags=['rabbitmq_vhost:test2'],
+                                 value=0, count=1)
+        aggregator.assert_metric('rabbitmq.connections', count=2)
+        aggregator.assert_metric('rabbitmq.connections.state',
+                                 tags=['rabbitmq_conn_state:running'],
+                                 value=0, count=0)
