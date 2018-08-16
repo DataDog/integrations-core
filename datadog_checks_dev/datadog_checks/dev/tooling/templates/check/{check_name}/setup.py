@@ -1,14 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. {year}
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
-from .utils import File
-
-TEMPLATE = """\
-from setuptools import setup
 from codecs import open  # To use a consistent encoding
 from os import path
+
+from setuptools import setup
 
 HERE = path.dirname(path.abspath(__file__))
 
@@ -22,7 +18,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog-checks-base'
 
 
 setup(
@@ -34,11 +30,11 @@ setup(
     keywords='datadog agent {check_name} check',
 
     # The project's main homepage.
-    url='https://github.com/DataDog/integrations-core',
+    url='https://github.com/DataDog/integrations-{repo_choice}',
 
     # Author details
-    author='Datadog',
-    author_email='packages@datadoghq.com',
+    author='{author}',
+    author_email='{email_packages}',
 
     # License
     license='BSD',
@@ -56,7 +52,7 @@ setup(
     ],
 
     # The package we're going to ship
-    packages=['datadog_checks.{check_name}'],
+    packages=['datadog_checks', 'datadog_checks.{check_name}'],
 
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
@@ -64,15 +60,3 @@ setup(
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
-"""
-
-
-class Setup(File):
-    def __init__(self, config):
-        super(Setup, self).__init__(
-            os.path.join(config['root'], 'setup.py'),
-            TEMPLATE.format(
-                check_name=config['check_name'],
-                check_name_cap=config['check_name_cap'],
-            )
-        )

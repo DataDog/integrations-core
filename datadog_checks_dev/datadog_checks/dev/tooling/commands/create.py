@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import uuid
 from collections import defaultdict
+from datetime import datetime
 
 import click
 
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success
 from ..constants import get_root
-from ..files import CHECK_FILES
+from ..create import create_template_files, get_valid_templates
 from ..utils import normalize_package_name
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
@@ -86,9 +88,15 @@ def display_path_tree(path_tree):
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a new integration')
 @click.argument('name')
+@click.option(
+    '--type', '-t', 'integration_type',
+    type=click.Choice(get_valid_templates()),
+    default='check',
+    help='The type of integration to create'
+)
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
-def create(ctx, name, dry_run):
+def create(ctx, name, integration_type, dry_run):
     """Create a new integration."""
     check_name = normalize_package_name(name)
     root = get_root()
@@ -98,15 +106,31 @@ def create(ctx, name, dry_run):
     if os.path.exists(check_dir):
         abort('Path `{}` already exists!'.format(check_dir))
 
+    repo_choice = ctx.obj['repo_choice']
+    if repo_choice == 'core':
+        author = 'Datadog'
+        email = 'help@datadoghq.com'
+        email_packages = 'packages@datadoghq.com'
+        support_type = 'core'
+    else:
+        author = 'U.N. Owen'
+        email = email_packages = 'friend@datadog.community'
+        support_type = 'contrib'
+
     config = {
-        'root': check_dir,
+        'author': author,
+        'check_class': '{}Check'.format(''.join(part.capitalize() for part in check_name.split('_'))),
         'check_name': check_name,
         'check_name_cap': check_name.capitalize(),
-        'check_class': '{}Check'.format(''.join(part.capitalize() for part in check_name.split('_'))),
-        'repo_choice': ctx.obj['repo_choice'],
+        'email': email,
+        'email_packages': email_packages,
+        'guid': uuid.uuid4(),
+        'repo_choice': repo_choice,
+        'support_type': support_type,
+        'year': str(datetime.now().year),
     }
 
-    files = [file(config) for file in CHECK_FILES]
+    files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace('{}{}'.format(root, path_sep), '', 1) for file in files]
 
     path_tree = tree()
