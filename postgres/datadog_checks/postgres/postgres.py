@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
+import threading
 
 try:
     import psycopg2
@@ -309,6 +310,10 @@ SELECT s.schemaname,
         'relation': False
     }
 
+    # keep track of host/port present in any configured instance
+    _known_servers = set()
+    _known_servers_lock = threading.RLock()
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.dbs = {}
@@ -320,20 +325,20 @@ SELECT s.schemaname,
         self.db_archiver_metrics = []
         self.replication_metrics = {}
         self.custom_metrics = {}
-        # keep track of host/port present in any configured instance
-        self._known_servers = set()
 
     def _server_known(self, host, port):
         """
         Return whether the hostname and port combination was already seen
         """
-        return (host, port) in self._known_servers
+        with PostgreSql._known_servers_lock:
+            return (host, port) in PostgreSql._known_servers
 
     def _set_server_known(self, host, port):
         """
         Store the host/port combination for this server
         """
-        self._known_servers.add((host, port))
+        with PostgreSql._known_servers_lock:
+            PostgreSql._known_servers.add((host, port))
 
     def _get_pg_attrs(self, instance):
         if _is_affirmative(instance.get('use_psycopg2', False)):
@@ -673,22 +678,15 @@ SELECT s.schemaname,
 
         try:
             cursor = db.cursor()
-
-            # server wide metrics aren't tagged anymore with instance tags, starting from Agent 6.0
-            if add_instance_tags_to_server_metrics():
-                server_metric_tags = instance_tags
-            else:
-                server_metric_tags = []
-
-            results_len = self._query_scope(cursor, db_instance_metrics, key, db, server_metric_tags, relations,
+            results_len = self._query_scope(cursor, db_instance_metrics, key, db, instance_tags, relations,
                                             False, programming_error, relations_config)
             if results_len is not None:
                 self.gauge("postgresql.db.count", results_len,
-                           tags=[t for t in server_metric_tags if not t.startswith("db:")])
+                           tags=[t for t in instance_tags if not t.startswith("db:")])
 
-            self._query_scope(cursor, bgw_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
-            self._query_scope(cursor, archiver_instance_metrics, key, db, server_metric_tags, relations,
+            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, relations,
                               False, programming_error, relations_config)
 
             for scope in list(metric_scope) + custom_metrics:
