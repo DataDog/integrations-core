@@ -5,7 +5,6 @@ init_config:
       keystone_server_url: "https://my-keystone-server.com:<port>/"
 
       # The hostname of this machine registered with Nova. 
-      # This is the host used to make queries against Nova with
       # Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
       # os_host: my_hostname
 
