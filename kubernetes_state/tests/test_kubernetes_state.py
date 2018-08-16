@@ -90,6 +90,7 @@ TAGS = {
         'namespace:kube-system'
     ],
     NAMESPACE + '.container.status_report.count.waiting': [
+        'reason:ContainerCreating',
         'reason:CrashLoopBackoff',  # Lowercase "off"
         'reason:CrashLoopBackOff',  # Uppercase "Off"
         'reason:ErrImagePull',
