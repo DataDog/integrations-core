@@ -70,8 +70,8 @@ class MongoDb(AgentCheck):
         "connections.available": GAUGE,
         "connections.current": GAUGE,
         "connections.totalCreated": GAUGE,
-        "cursors.timedOut": GAUGE,
-        "cursors.totalOpen": GAUGE,
+        "cursors.timedOut": GAUGE,                   # < 2.6
+        "cursors.totalOpen": GAUGE,                  # < 2.6
         "extra_info.heap_usage_bytes": RATE,
         "extra_info.page_faults": RATE,
         "fsyncLocked": GAUGE,
@@ -98,10 +98,10 @@ class MongoDb(AgentCheck):
         "mem.mappedWithJournal": GAUGE,
         "mem.resident": GAUGE,
         "mem.virtual": GAUGE,
-        "metrics.cursor.open.noTimeout": GAUGE,
-        "metrics.cursor.open.pinned": GAUGE,
-        "metrics.cursor.open.total": GAUGE,
-        "metrics.cursor.timedOut": RATE,
+        "metrics.cursor.open.noTimeout": GAUGE,    # >= 2.6
+        "metrics.cursor.open.pinned": GAUGE,       # >= 2.6
+        "metrics.cursor.open.total": GAUGE,        # >= 2.6
+        "metrics.cursor.timedOut": RATE,           # >= 2.6
         "metrics.document.deleted": RATE,
         "metrics.document.inserted": RATE,
         "metrics.document.returned": RATE,
