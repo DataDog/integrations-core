@@ -71,6 +71,10 @@ def atomic_method(method):
     return wrapper
 
 
+class ConnectionError(Exception):
+    pass
+
+
 class VSphereCheck(AgentCheck):
     """ Get performance metrics from a vCenter server and upload them to Datadog
     References:
@@ -222,22 +226,33 @@ class VSphereCheck(AgentCheck):
                            "verification. You cannot do both. Proceeding with "
                            "disabling ssl verification.")
 
-            try:
-                # Object returned by SmartConnect is a ServerInstance
-                #   https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
-                server_instance = connect.SmartConnect(
-                    host=instance.get('host'),
-                    user=instance.get('username'),
-                    pwd=instance.get('password'),
-                    sslContext=context if not ssl_verify or ssl_capath else None
-                )
-            except Exception as e:
-                err_msg = "Connection to %s failed: %s" % (instance.get('host'), e)
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                                   tags=service_check_tags, message=err_msg)
-                raise Exception(err_msg)
+        try:
+            # Object returned by SmartConnect is a ServerInstance
+            #   https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
+            server_instance = connect.SmartConnect(
+                host=instance.get('host'),
+                user=instance.get('username'),
+                pwd=instance.get('password'),
+                sslContext=context if not ssl_verify or ssl_capath else None
+            )
+        except Exception as e:
+            err_msg = "Connection to {} failed: {}".format(instance.get('host'), e)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                               tags=service_check_tags, message=err_msg)
+            raise ConnectionError(err_msg)
 
-            return server_instance
+        # Check that we have sufficient permission for the calls we need to make
+        try:
+            server_instance.CurrentTime()
+        except Exception:
+            err_msg = (
+                "A connection to {} can be made, but it appears the user {} doesn't have enough permissions"
+            ).format(instance.get('host'), instance.get('username'))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                               tags=service_check_tags, message=err_msg)
+            raise ConnectionError(err_msg)
+
+        return server_instance
 
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
