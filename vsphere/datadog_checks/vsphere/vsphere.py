@@ -203,16 +203,7 @@ class VSphereCheck(AgentCheck):
         now = time.time()
         return now - self.cache_times[i_key][entity][LAST] > self.cache_times[i_key][entity][INTERVAL]
 
-    def _get_server_instance(self, instance):
-        i_key = self._instance_key(instance)
-        tags = instance.get('tags', [])
-
-        service_check_tags = [
-            'vcenter_server:{0}'.format(instance.get('name')),
-            'vcenter_host:{0}'.format(instance.get('host')),
-        ] + tags
-        service_check_tags = list(set(service_check_tags))
-
+    def _smart_connect(self, instance, service_check_tags):
         # Check for ssl configs and generate an appropriate ssl context object
         ssl_verify = instance.get('ssl_verify', True)
         ssl_capath = instance.get('ssl_capath', None)
@@ -231,7 +222,6 @@ class VSphereCheck(AgentCheck):
                            "verification. You cannot do both. Proceeding with "
                            "disabling ssl verification.")
 
-        if i_key not in self.server_instances:
             try:
                 # Object returned by SmartConnect is a ServerInstance
                 #   https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
@@ -247,18 +237,29 @@ class VSphereCheck(AgentCheck):
                                    tags=service_check_tags, message=err_msg)
                 raise Exception(err_msg)
 
-            self.server_instances[i_key] = server_instance
+            return server_instance
+
+    def _get_server_instance(self, instance):
+        i_key = self._instance_key(instance)
+        tags = instance.get('tags', [])
+
+        service_check_tags = [
+            'vcenter_server:{0}'.format(instance.get('name')),
+            'vcenter_host:{0}'.format(instance.get('host')),
+        ] + tags
+        service_check_tags = list(set(service_check_tags))
+
+        if i_key not in self.server_instances:
+            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
         # Test if the connection is working
         try:
-            self.server_instances[i_key].RetrieveContent()
+            self.server_instances[i_key].CurrentTime()
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
                                tags=service_check_tags)
-        except Exception as e:
-            err_msg = "Connection to %s died unexpectedly: %s" % (instance.get('host'), e)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=err_msg)
-            raise Exception(err_msg)
+        except Exception:
+            # Try to reconnect. If the connection is definitely broken, this will send CRITICAL service check and raise
+            self.server_instances[i_key] = self._smart_connect(instance, service_check_tags)
 
         return self.server_instances[i_key]
 
