@@ -81,6 +81,7 @@ def setup_more(rabbitmq_admin_script):
                'queue',
                'name={}'.format(name)]
         subprocess.check_call(cmd)
+
         cmd = ['python',
                rabbitmq_admin_script,
                'declare',
@@ -88,6 +89,7 @@ def setup_more(rabbitmq_admin_script):
                'name={}'.format(name),
                'type=topic']
         subprocess.check_call(cmd)
+
         cmd = ['python',
                rabbitmq_admin_script,
                'declare',
@@ -97,6 +99,7 @@ def setup_more(rabbitmq_admin_script):
                'destination={}'.format(name),
                'routing_key={}'.format(name)]
         subprocess.check_call(cmd)
+
         cmd = ['python',
                rabbitmq_admin_script,
                'publish',
@@ -104,6 +107,7 @@ def setup_more(rabbitmq_admin_script):
                'routing_key={}'.format(name),
                'payload="hello, world"']
         subprocess.check_call(cmd)
+
         cmd = ['python',
                rabbitmq_admin_script,
                'publish',
@@ -114,7 +118,7 @@ def setup_more(rabbitmq_admin_script):
 
 
 def setup_more_with_vhosts(rabbitmq_admin_script):
-    for name in ['test1', 'test5', 'tralala', 'testaaaaa', 'bbbbbb']:
+    for name in ['test1', 'test5', 'tralala', 'testaaaaa', 'bbbbbbbb']:
         for vhost in ['myvhost', 'myothervhost']:
             cmd = ['python',
                    rabbitmq_admin_script,
@@ -123,6 +127,7 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
                    'queue',
                    'name={}'.format(name)]
             subprocess.check_call(cmd)
+
             cmd = ['python',
                    rabbitmq_admin_script,
                    '--vhost={}'.format(vhost),

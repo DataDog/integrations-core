@@ -23,15 +23,6 @@ E_METRICS = [
     'messages.publish_out.rate',
     'messages.return_unroutable.count',
     'messages.return_unroutable.rate',
-    # TODO: create a 'fake consumer' and get missing metrics
-    # 'messages.ack.count',
-    # 'messages.ack.rate',
-    # 'messages.deliver_get.count',
-    # 'messages.deliver_get.rate',
-    # 'messages.redeliver.count',
-    # 'messages.redeliver.rate',
-    # 'messages.publish.count',
-    # 'messages.publish.rate',
 ]
 
 Q_METRICS = [
@@ -46,6 +37,4 @@ Q_METRICS = [
     'messages_unacknowledged.rate',
     'messages.publish.count',
     'messages.publish.rate'
-    # TODO: create a 'fake consumer' and get missing metrics
-    # active_consumers, acks, delivers, redelivers
 ]

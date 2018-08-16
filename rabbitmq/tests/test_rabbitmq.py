@@ -36,7 +36,6 @@ def test_rabbitmq(aggregator, spin_up_rabbitmq, setup_rabbitmq, check):
     for mname in metrics.Q_METRICS:
         aggregator.assert_metric_has_tag('rabbitmq.queue.%s' %
                                          mname, 'rabbitmq_queue:test1', count=1)
-
     # Exchange attributes, should be only one exchange fetched
     for mname in metrics.E_METRICS:
         aggregator.assert_metric_has_tag('rabbitmq.exchange.%s' %
