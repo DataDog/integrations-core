@@ -4,6 +4,9 @@
 
 # stdlib
 import threading
+import os
+import numbers
+import logging
 
 # 3p
 try:
@@ -22,6 +25,8 @@ MAX_THREADS_COUNT = 50
 MAX_COLLECTION_TIME = 30
 MAX_EMIT_TIME = 5
 MAX_CPU_PCT = 10
+
+log = logging.getLogger(__name__)
 
 
 class UnsupportedMetricType(Exception):
@@ -64,9 +69,9 @@ class AgentMetrics(AgentCheck):
 
         names_to_metric_types = {}
         for i, m in enumerate(methods):
-            names_to_metric_types[AgentCheck._get_statistic_name_from_method(m)] = metric_types[i]
+            names_to_metric_types[AgentMetrics._get_statistic_name_from_method(m)] = metric_types[i]
 
-        stats = AgentCheck._collect_internal_stats(methods)
+        stats = AgentMetrics._collect_internal_stats(methods)
         return stats, names_to_metric_types
 
     def _send_single_metric(self, metric_name, metric_value, metric_type, tags=None):
@@ -161,3 +166,34 @@ class AgentMetrics(AgentCheck):
             except Exception as e:
                 self.log.debug("Couldn't compute cpu used by collector with values %s %s %s",
                                cpu_time, collection_time, str(e))
+
+    @staticmethod
+    def _get_statistic_name_from_method(method_name):
+        return method_name[4:] if method_name.startswith('get_') else method_name
+
+    @staticmethod
+    def _collect_internal_stats(methods=None):
+        current_process = psutil.Process(os.getpid())
+
+        methods = methods or ['memory_info', 'io_counters']
+        filtered_methods = [m for m in methods if hasattr(current_process, m)]
+
+        stats = {}
+
+        for method in filtered_methods:
+            # Go from `get_memory_info` -> `memory_info`
+            stat_name = AgentMetrics._get_statistic_name_from_method(method)
+            try:
+                raw_stats = getattr(current_process, method)()
+                try:
+                    stats[stat_name] = raw_stats._asdict()
+                except AttributeError:
+                    if isinstance(raw_stats, numbers.Number):
+                        stats[stat_name] = raw_stats
+                    else:
+                        log.warn("Could not serialize output of {0} to dict".format(method))
+
+            except psutil.AccessDenied:
+                log.warn("Cannot call psutil method {} : Access Denied".format(method))
+
+        return stats

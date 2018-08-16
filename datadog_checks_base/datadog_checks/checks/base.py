@@ -339,34 +339,3 @@ class AgentCheck(object):
             proxies['no'] = proxies.pop('no_proxy')
 
         return proxies if proxies else no_proxy_settings
-
-    @staticmethod
-    def _get_statistic_name_from_method(method_name):
-        return method_name[4:] if method_name.startswith('get_') else method_name
-
-    @staticmethod
-    def _collect_internal_stats(methods=None):
-        current_process = psutil.Process(os.getpid())
-
-        methods = methods or ['memory_info', 'io_counters']
-        filtered_methods = [m for m in methods if hasattr(current_process, m)]
-
-        stats = {}
-
-        for method in filtered_methods:
-            # Go from `get_memory_info` -> `memory_info`
-            stat_name = AgentCheck._get_statistic_name_from_method(method)
-            try:
-                raw_stats = getattr(current_process, method)()
-                try:
-                    stats[stat_name] = raw_stats._asdict()
-                except AttributeError:
-                    if isinstance(raw_stats, numbers.Number):
-                        stats[stat_name] = raw_stats
-                    else:
-                        log.warn("Could not serialize output of {0} to dict".format(method))
-
-            except psutil.AccessDenied:
-                log.warn("Cannot call psutil method {} : Access Denied".format(method))
-
-        return stats
