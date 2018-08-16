@@ -227,9 +227,11 @@ Usage: ddev create [OPTIONS] NAME
   Create a new integration.
 
 Options:
-  -t, --type [check]  The type of integration to create
-  -n, --dry-run       Only show what would be created
-  -h, --help          Show this message and exit.
+  -t, --type [check]   The type of integration to create
+  -l, --location TEXT  Where to create the integration
+  -q, --quiet          Show less output
+  -n, --dry-run        Only show what would be created
+  -h, --help           Show this message and exit.
 ```
 
 #### Dep

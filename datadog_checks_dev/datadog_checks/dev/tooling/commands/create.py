@@ -12,6 +12,7 @@ from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success
 from ..constants import get_root
 from ..create import create_template_files, get_valid_templates
 from ..utils import normalize_package_name
+from ...utils import resolve_path
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
@@ -94,17 +95,19 @@ def display_path_tree(path_tree):
     default='check',
     help='The type of integration to create'
 )
+@click.option('--location', '-l', help='Where to create the integration')
+@click.option('--quiet', '-q', is_flag=True, help='Show less output')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
-def create(ctx, name, integration_type, dry_run):
+def create(ctx, name, integration_type, location, quiet, dry_run):
     """Create a new integration."""
-    check_name = normalize_package_name(name)
-    root = get_root()
+    integration_name = normalize_package_name(name)
+    root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
-    check_dir = os.path.join(root, check_name)
-    if os.path.exists(check_dir):
-        abort('Path `{}` already exists!'.format(check_dir))
+    integration_dir = os.path.join(root, integration_name)
+    if os.path.exists(integration_dir):
+        abort('Path `{}` already exists!'.format(integration_dir))
 
     repo_choice = ctx.obj['repo_choice']
     if repo_choice == 'core':
@@ -119,9 +122,9 @@ def create(ctx, name, integration_type, dry_run):
 
     config = {
         'author': author,
-        'check_class': '{}Check'.format(''.join(part.capitalize() for part in check_name.split('_'))),
-        'check_name': check_name,
-        'check_name_cap': check_name.capitalize(),
+        'check_class': '{}Check'.format(''.join(part.capitalize() for part in integration_name.split('_'))),
+        'check_name': integration_name,
+        'check_name_cap': integration_name.capitalize(),
         'email': email,
         'email_packages': email_packages,
         'guid': uuid.uuid4(),
@@ -141,12 +144,18 @@ def create(ctx, name, integration_type, dry_run):
             branch = branch[part]
 
     if dry_run:
-        echo_info('Will create in `{}`:'.format(root))
-        display_path_tree(path_tree)
+        if quiet:
+            echo_info('Will create `{}`'.format(integration_dir))
+        else:
+            echo_info('Will create in `{}`:'.format(root))
+            display_path_tree(path_tree)
         return
 
     for file in files:
         file.write()
 
-    echo_info('Created in `{}`:'.format(root))
-    display_path_tree(path_tree)
+    if quiet:
+        echo_info('Created `{}`'.format(integration_dir))
+    else:
+        echo_info('Created in `{}`:'.format(root))
+        display_path_tree(path_tree)
