@@ -4,3 +4,13 @@
 #
 #    pip-compile --generate-hashes --output-file requirements.txt requirements.in
 #
+psutil==4.4.1 \
+    --hash=sha256:0876646748f3db5e1678a94ae3f68dcef3bd51e82b34f06109e6a28bcddc266c \
+    --hash=sha256:0f7f830db35c1baeb0131b2bba458b77f7db98944b2fedafc34922168e467d09 \
+    --hash=sha256:4e5cb45c9616dd855c07e538f523c838705ce7c24e021e645cdce4c7894e7209 \
+    --hash=sha256:7e77ec1a9c75a858781c1fb46fe81c999e1ae0e711198b4aaf59e5f5bd373b11 \
+    --hash=sha256:9da43dbf7c08f5c2a8e5e2c8792f5c438f52435677b1334e9653d23ea028f4f7 \
+    --hash=sha256:af337d186b07249b86f00a71b4cf6fcfa1964484fe5fb8a7b623f4559c2859c9 \
+    --hash=sha256:d8464100c62932eeeacce2be0a1041f68b3bfcc7be261cf9486c11ee98eaedd2 \
+    --hash=sha256:e4e9033ef5d775ef8a522750688161241e79c7d4669a05784a0a1a8d37dc8c3c \
+    --hash=sha256:fa4ad0533adef033bbcbac5e20d06e77f9aadf5d9c1596317d1b668f94b01b99
