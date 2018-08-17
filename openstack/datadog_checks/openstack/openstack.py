@@ -1233,7 +1233,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
-                    i_key, split_hostname_on_first_period=split_hostname_on_first_period, collect_all_tenants
+                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
                 )
 
                 host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
@@ -1382,9 +1382,10 @@ class OpenStackCheck(AgentCheck):
 
         return hostname
 
-    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period=False, collect_all_tenants):
+    def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
         servers = self.get_all_servers(
-            i_key, collect_all_tenants, filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
+            i_key, collect_all_tenants,
+            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
         )
         if self.exclude_server_id_rules:
             # Filter out excluded servers
