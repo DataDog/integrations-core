@@ -12,6 +12,8 @@ import requests
 import simplejson as json
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
+
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -218,7 +220,7 @@ class OpenStackScope(object):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", False)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
 
         auth_scope = cls.get_auth_scope(instance_config)
         identity = cls.get_user_identity(instance_config)
@@ -274,7 +276,7 @@ class OpenStackUnscoped(OpenStackScope):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", True)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
         _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
@@ -394,7 +396,7 @@ class OpenStackProjectScope(OpenStackScope):
         # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
         # It is still unclear when this happens, but for now the user can configure
         # `append_tenant_id` to manually add this suffix for downstream requests
-        if instance_config.get("append_tenant_id", False):
+        if is_affirmative(instance_config.get("append_tenant_id", False)):
             t_id = auth_scope["project"].get("id")
 
             assert (
@@ -529,7 +531,7 @@ class OpenStackCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self._ssl_verify = init_config.get("ssl_verify", True)
+        self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
 
@@ -553,7 +555,7 @@ class OpenStackCheck(AgentCheck):
 
         self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
 
-        skip_proxy = not init_config.get('use_agent_proxy', True)
+        skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
 
         self.backoff = {}
@@ -688,7 +690,7 @@ class OpenStackCheck(AgentCheck):
 
         # FIXME: (aaditya) Check all networks defaults to true
         # until we can reliably assign agents to networks to monitor
-        if self.init_config.get('check_all_networks', True):
+        if is_affirmative(self.init_config.get('check_all_networks', True)):
             all_network_ids = set(self.get_all_network_ids())
 
             # Filter out excluded networks
@@ -1185,7 +1187,7 @@ class OpenStackCheck(AgentCheck):
             custom_tags = []
         try:
             instance_scope = self.ensure_auth_scope(instance)
-            split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
+            split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1209,8 +1211,8 @@ class OpenStackCheck(AgentCheck):
 
                 self._send_api_service_checks(scope, custom_tags)
 
-                collect_all_projects = instance.get("collect_all_projects", False)
-                collect_all_tenants = instance.get('collect_all_tenants', False)
+                collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
+                collect_all_tenants = is_affirmative(instance.get('collect_all_tenants', False))
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
