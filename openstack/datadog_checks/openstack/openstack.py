@@ -396,7 +396,7 @@ class OpenStackProjectScope(OpenStackScope):
         # e.g. http://172.0.0.1:8774 rather than http://172.0.0.1:8774/<tenant_id>
         # It is still unclear when this happens, but for now the user can configure
         # `append_tenant_id` to manually add this suffix for downstream requests
-        if instance_config.get("append_tenant_id", False):
+        if is_affirmative(instance_config.get("append_tenant_id", False)):
             t_id = auth_scope["project"].get("id")
 
             assert (
