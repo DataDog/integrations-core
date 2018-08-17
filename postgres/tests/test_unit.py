@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+from mock import MagicMock
 
 # Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
@@ -79,3 +80,53 @@ def test_get_instance_metrics_instance(check):
     res = check._get_instance_metrics(another, 'dbname', False, False)
     assert res is None
     assert check.instance_metrics[another] == []
+
+
+def test__get_version(check):
+    """
+    Test _get_version() to make sure the check is properly parsing Postgres versions
+    """
+    db = MagicMock()
+
+    # Test #.#.# style versions
+    db.cursor().fetchone.return_value = ['9.5.3']
+    assert check._get_version('regular_version', db) == [9, 5, 3]
+
+    # Test #.# style versions
+    db.cursor().fetchone.return_value = ['10.2']
+    assert check._get_version('short_version', db) == [10, 2]
+
+    # Test #beta# style versions
+    db.cursor().fetchone.return_value = ['11beta3']
+    assert check._get_version('beta_version', db) == [11, -1, 3]
+
+
+def test__is_above(check):
+    """
+    Test _is_above() to make sure the check is properly determining order of versions
+    """
+    db = MagicMock()
+
+    # Test larger major versions
+    db.cursor().fetchone.return_value = ['10.5.4']
+    assert check._is_above('larger major', db, [9, 5, 4])
+
+    # Test minor version larger
+    db.cursor().fetchone.return_value = ['10.5.4']
+    assert check._is_above('larger_minor', db, [9, 8, 4])
+
+    # Test patch version larger
+    db.cursor().fetchone.return_value = ['10.5.4']
+    assert check._is_above('larger_patch', db, [9, 5, 8])
+
+    # Test same version, _is_above() returns True for greater than or equal to
+    db.cursor().fetchone.return_value = ['10.5.4']
+    assert check._is_above('same_version', db, [10, 5, 4])
+
+    # Test beta version above
+    db.cursor().fetchone.return_value = ['11beta4']
+    assert check._is_above('newer_beta_version', db, [11, -1, 3])
+
+    # Test beta version against official version
+    db.cursor().fetchone.return_value = ['11.0.0']
+    assert check._is_above('official_release', db, [11, -1, 3])
