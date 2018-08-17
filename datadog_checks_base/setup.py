@@ -51,5 +51,7 @@ setup(
     packages=['datadog_checks'],
     include_package_data=True,
 
-    install_requires=[],
+    extras_require={
+        'deps': get_requirements('requirements.in'),
+    },
 )
