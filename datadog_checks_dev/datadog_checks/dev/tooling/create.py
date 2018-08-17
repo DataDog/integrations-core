@@ -32,9 +32,13 @@ def create_template_files(template_name, new_root, config, read=False):
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             template_path = path_join(root, template_file)
+
+            file_path = template_path.replace(template_root, '')
+            file_path = '{}{}'.format(new_root, file_path.format(**config))
+
             files.append(
                 File(
-                    template_path.replace(template_root, new_root),
+                    file_path,
                     template_path,
                     config,
                     read=read
@@ -46,7 +50,7 @@ def create_template_files(template_name, new_root, config, read=False):
 
 class File(object):
     def __init__(self, file_path, template_path, config, read=False):
-        self.file_path = file_path.format(check_name=config['check_name'])
+        self.file_path = file_path
         self.template_path = template_path
         self.config = config
         self.binary = template_path.endswith(BINARY_EXTENSIONS)
