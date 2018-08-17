@@ -127,6 +127,15 @@ kube_deployment_status_replicas_updated{deployment="failingtest",namespace="defa
 kube_deployment_status_replicas_updated{deployment="jaundiced-numbat-kube-state-metrics",namespace="default"} 1
 kube_deployment_status_replicas_updated{deployment="kube-dns",namespace="kube-system"} 1
 kube_deployment_status_replicas_updated{deployment="tiller-deploy",namespace="kube-system"} 1
+# HELP kube_endpoint_address_available Number of addresses available in endpoint.
+# TYPE kube_endpoint_address_available gauge
+kube_endpoint_address_available{endpoint="test",namespace="default"} 0
+# HELP kube_endpoint_address_not_ready Number of addresses not ready in endpoint
+# TYPE kube_endpoint_address_not_ready gauge
+kube_endpoint_address_not_ready{endpoint="test",namespace="default"} 0
+# HELP kube_endpoint_created Unix creation timestamp
+# TYPE kube_endpoint_created gauge
+kube_endpoint_created{endpoint="test",namespace="default"} 1.513861395e+09
 # HELP kube_job_complete The job has completed its execution.
 # TYPE kube_job_complete gauge
 kube_job_complete{condition="false",job="hello-1509998340",namespace="default"} 0

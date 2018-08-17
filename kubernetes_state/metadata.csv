@@ -23,6 +23,9 @@ kubernetes_state.deployment.replicas_updated,gauge,,,,The number of updated repl
 kubernetes_state.deployment.replicas_desired,gauge,,,,The number of desired replicas per deployment,0,kubernetes,k8s_state.deployment.replicas_desired
 kubernetes_state.deployment.paused,gauge,,,,Whether a deployment is paused,0,kubernetes,k8s_state.deployment.paused
 kubernetes_state.deployment.rollingupdate.max_unavailable,gauge,,,,Maximum number of unavailable replicas during a rolling update,0,kubernetes,k8s_state.deployment.rollupdate.max_unavail
+kubernetes_state.endpoint.address_available,gauge,,,,Number of addresses available in endpoint,0,kubernetes,k8s_state.endpoint.address_avail
+kubernetes_state.endpoint.address_not_ready,gauge,,,,Number of addresses not ready in endpoint,-1,kubernetes,k8s_state.endpoint.address_not_ready
+kubernetes_state.endpoint.created,gauge,,,,Unix creation timestamp,0,kubernetes,k8s_state.endpoint.creation_time
 kubernetes_state.job.status.failed,counter,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
 kubernetes_state.job.status.succeeded,counter,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
 kubernetes_state.limitrange.cpu.min,gauge,,,,Minimum CPU request for this type,0,kubernetes,k8s_state.cpu.min

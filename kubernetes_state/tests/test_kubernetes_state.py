@@ -34,6 +34,10 @@ METRICS = [
     NAMESPACE + '.deployment.replicas_desired',
     NAMESPACE + '.deployment.paused',
     NAMESPACE + '.deployment.rollingupdate.max_unavailable',
+    # endpoints
+    NAMESPACE + '.endpoint.address_available',
+    NAMESPACE + '.endpoint.address_not_ready',
+    NAMESPACE + '.endpoint.created',
     # daemonsets
     NAMESPACE + '.daemonset.scheduled',
     NAMESPACE + '.daemonset.misscheduled',
@@ -132,6 +136,8 @@ ZERO_METRICS = [
     NAMESPACE + '.daemonset.misscheduled',
     NAMESPACE + '.container.terminated',
     NAMESPACE + '.container.waiting',
+    NAMESPACE + '.endpoint.address_available',
+    NAMESPACE + '.endpoint.address_not_ready',
 ]
 
 
