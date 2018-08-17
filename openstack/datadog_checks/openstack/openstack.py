@@ -1219,7 +1219,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor(split_hostname_on_first_period)
+                hyp = self.get_local_hypervisor()
 
                 project = self.get_scoped_project(scope)
 
@@ -1310,12 +1310,12 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self, split_hostname_on_first_period):
+    def get_local_hypervisor(self):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname(split_hostname_on_first_period)
+        host = self.get_my_hostname(False)
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
