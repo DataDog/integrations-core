@@ -1219,7 +1219,7 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to this (host, hypervisor, project)
                 # and it's guest servers
 
-                hyp = self.get_local_hypervisor(split_hostname_on_first_period)
+                hyp = self.get_local_hypervisor()
 
                 project = self.get_scoped_project(scope)
 
@@ -1233,10 +1233,10 @@ class OpenStackCheck(AgentCheck):
                 # Restrict monitoring to non-excluded servers
                 i_key = self._instance_key(instance)
                 servers = self.get_servers_managed_by_hypervisor(
-                    i_key, split_hostname_on_first_period, collect_all_tenants
+                    i_key, collect_all_tenants, split_hostname_on_first_period=split_hostname_on_first_period,
                 )
 
-                host_tags = self._get_tags_for_host(split_hostname_on_first_period)
+                host_tags = self._get_tags_for_host(split_hostname_on_first_period=split_hostname_on_first_period)
 
                 # Deep copy the cache so we can remove things from the Original during the iteration
                 server_cache_copy = copy.deepcopy(self.server_details_by_id)
@@ -1256,7 +1256,7 @@ class OpenStackCheck(AgentCheck):
                 else:
                     self.warning(
                         "Couldn't get hypervisor to monitor for host: %s"
-                        % self.get_my_hostname(split_hostname_on_first_period)
+                        % self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
                     )
 
             if projects:
@@ -1310,12 +1310,12 @@ class OpenStackCheck(AgentCheck):
         self.reset_backoff(instance)
 
     # Local Info accessors
-    def get_local_hypervisor(self, split_hostname_on_first_period):
+    def get_local_hypervisor(self):
         """
         Returns the hypervisor running on this host, and assumes a 1-1 between host and hypervisor
         """
         # Look up hypervisors available filtered by my hostname
-        host = self.get_my_hostname(split_hostname_on_first_period)
+        host = self.get_my_hostname()
         hyp = self.get_all_hypervisor_ids(filter_by_host=host)
         if hyp:
             return hyp[0]
@@ -1371,7 +1371,7 @@ class OpenStackCheck(AgentCheck):
 
         return None
 
-    def get_my_hostname(self, split_hostname_on_first_period):
+    def get_my_hostname(self, split_hostname_on_first_period=False):
         """
         Returns a best guess for the hostname registered with OpenStack for this host
         """
@@ -1382,9 +1382,10 @@ class OpenStackCheck(AgentCheck):
 
         return hostname
 
-    def get_servers_managed_by_hypervisor(self, i_key, split_hostname_on_first_period, collect_all_tenants):
+    def get_servers_managed_by_hypervisor(self, i_key, collect_all_tenants, split_hostname_on_first_period=False):
         servers = self.get_all_servers(
-            i_key, collect_all_tenants, filter_by_host=self.get_my_hostname(split_hostname_on_first_period)
+            i_key, collect_all_tenants,
+            filter_by_host=self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
         )
         if self.exclude_server_id_rules:
             # Filter out excluded servers
@@ -1395,8 +1396,8 @@ class OpenStackCheck(AgentCheck):
 
         return self.server_details_by_id
 
-    def _get_tags_for_host(self, split_hostname_on_first_period):
-        hostname = self.get_my_hostname(split_hostname_on_first_period)
+    def _get_tags_for_host(self, split_hostname_on_first_period=False):
+        hostname = self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
         tags = []
         if hostname in self._get_and_set_aggregate_list():
             tags.append('aggregate:{0}'.format(self._aggregate_list[hostname]['aggregate']))
