@@ -244,10 +244,10 @@ class VSphereCheck(AgentCheck):
         # Check that we have sufficient permission for the calls we need to make
         try:
             server_instance.CurrentTime()
-        except Exception:
+        except Exception as e:
             err_msg = (
-                "A connection to {} can be made, but it appears the user {} doesn't have enough permissions"
-            ).format(instance.get('host'), instance.get('username'))
+                "A connection to {} can be made, but it appears the user {} doesn't have enough permissions: {}"
+            ).format(instance.get('host'), instance.get('username'), e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=err_msg)
             raise ConnectionError(err_msg)
