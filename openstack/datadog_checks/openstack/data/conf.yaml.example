@@ -4,7 +4,8 @@ init_config:
       # Where your identity server lives. Note that the server must support Identity API v3
       keystone_server_url: "https://my-keystone-server.com:<port>/"
 
-      # The hostname of this machine registered with Nova. Defaults to socket.gethostname()
+      # The hostname of this machine registered with Nova. 
+      # Defaults to the Hostname detected by the Agent - https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
       # os_host: my_hostname
 
       # Nova API version to use - this check supports v2 and v2.1 (default)

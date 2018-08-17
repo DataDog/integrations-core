@@ -1271,10 +1271,6 @@ class OpenStackCheck(AgentCheck):
             if set_external_tags is not None:
                 set_external_tags(self.get_external_host_tags())
 
-            if projects:
-                # Ensure projects list and scoped project exists
-                self.get_stats_for_all_projects(projects)
-
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):
                 self.warning(
