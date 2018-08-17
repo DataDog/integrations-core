@@ -31,6 +31,37 @@ def test_check_docker(aggregator, init_config, instance_docker, sqlserver):
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
     _assert_metrics(aggregator, expected_tags)
 
+    # Test object_name granularity
+    aggregator.reset()
+
+    init_config_instance_name_only = {
+        'custom_metrics': [{
+            'name': 'sqlserver.cache.hit_ratio',
+            'counter_name': 'Cache Hit Ratio',
+            'instance_name': 'SQL Plans',
+        }]
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_instance_name_only, {}, [instance_docker])
+    sqlserver_check.check(instance_docker)
+
+    num_metrics_instance_name_only = len(aggregator.metrics('sqlserver.cache.hit_ratio'))
+    aggregator.reset()
+
+    init_config_object_name = {
+        'custom_metrics': [{
+            'name': 'sqlserver.cache.hit_ratio',
+            'counter_name': 'Cache Hit Ratio',
+            'instance_name': 'SQL Plans',
+            'object_name': 'SQLServer:Plan Cache',
+        }]
+    }
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, {}, [instance_docker])
+    sqlserver_check.check(instance_docker)
+
+    num_metrics_object_name = len(aggregator.metrics('sqlserver.cache.hit_ratio'))
+
+    assert num_metrics_object_name > num_metrics_instance_name_only
+
 
 @pytest.mark.local
 def test_check_local(aggregator, init_config, instance_sql2008):
