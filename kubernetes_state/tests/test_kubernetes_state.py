@@ -68,7 +68,7 @@ METRICS = [
     NAMESPACE + '.replicaset.replicas_desired',
     # persistentvolume claim
     NAMESPACE + '.persistentvolumeclaim.status',
-    NAMESPACE + '.persistentvolumeclaim.request_storage_bytes',
+    NAMESPACE + '.persistentvolumeclaim.request_storage',
     # statefulset
     NAMESPACE + '.statefulset.replicas',
     NAMESPACE + '.statefulset.replicas_current',
@@ -96,7 +96,7 @@ TAGS = {
         'reason:ErrImagePull',
         'reason:ImagePullBackoff'
     ],
-    NAMESPACE + '.persistentvolumeclaim.request_storage_bytes': [
+    NAMESPACE + '.persistentvolumeclaim.request_storage': [
         'storageclass:manual'
     ]
 }
