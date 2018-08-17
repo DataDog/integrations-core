@@ -115,10 +115,12 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
         support_type = 'core'
+        tox_base_dep = '../datadog_checks_base[deps]'
     else:
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
         support_type = 'contrib'
+        tox_base_dep = 'datadog-checks-base[deps]'
 
     config = {
         'author': author,
@@ -130,6 +132,7 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
         'guid': uuid.uuid4(),
         'repo_choice': repo_choice,
         'support_type': support_type,
+        'tox_base_dep': tox_base_dep,
         'year': str(datetime.now().year),
     }
 
