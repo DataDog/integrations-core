@@ -87,7 +87,7 @@ def display_path_tree(path_tree):
             echo_info(path)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a new integration')
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Create scaffolding for a new integration')
 @click.argument('name')
 @click.option(
     '--type', '-t', 'integration_type',
@@ -100,7 +100,7 @@ def display_path_tree(path_tree):
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
 def create(ctx, name, integration_type, location, quiet, dry_run):
-    """Create a new integration."""
+    """Create scaffolding for a new integration."""
     integration_name = normalize_package_name(name)
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
@@ -109,16 +109,25 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
     if os.path.exists(integration_dir):
         abort('Path `{}` already exists!'.format(integration_dir))
 
+    check_name_cap = integration_name if integration_name.count('_') else integration_name.capitalize()
     repo_choice = ctx.obj['repo_choice']
     if repo_choice == 'core':
         author = 'Datadog'
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
+        install_info = (
+            'The {} check is included in the [Datadog Agent][2] package, so you do not\n'
+            'need to install anything else on your server.'.format(check_name_cap)
+        )
         support_type = 'core'
         tox_base_dep = '../datadog_checks_base[deps]'
     else:
         author = 'U.N. Owen'
         email = email_packages = 'friend@datadog.community'
+        install_info = (
+            'The {} check is not included in the [Datadog Agent][2] package, so you will\n'
+            'need to install it yourself.'.format(check_name_cap)
+        )
         support_type = 'contrib'
         tox_base_dep = 'datadog-checks-base[deps]'
 
@@ -126,10 +135,11 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
         'author': author,
         'check_class': '{}Check'.format(''.join(part.capitalize() for part in integration_name.split('_'))),
         'check_name': integration_name,
-        'check_name_cap': integration_name.capitalize(),
+        'check_name_cap': check_name_cap,
         'email': email,
         'email_packages': email_packages,
         'guid': uuid.uuid4(),
+        'install_info': install_info,
         'repo_choice': repo_choice,
         'support_type': support_type,
         'tox_base_dep': tox_base_dep,

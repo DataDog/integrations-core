@@ -224,7 +224,7 @@ Options:
 $ ddev create -h
 Usage: ddev create [OPTIONS] NAME
 
-  Create a new integration.
+  Create scaffolding for a new integration.
 
 Options:
   -t, --type [check]   The type of integration to create
