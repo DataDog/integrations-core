@@ -237,6 +237,18 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     aggregator.assert_metric(NAMESPACE + '.pod.status_phase',
                              tags=['namespace:default', 'phase:Unknown', 'optional:tag1'], value=1)
 
+    # Persistentvolume counts
+    aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
+                             tags=['storageclass:local-data', 'phase:Available', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
+                             tags=['storageclass:local-data', 'phase:Bound', 'optional:tag1'], value=2)
+    aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
+                             tags=['storageclass:local-data', 'phase:Failed', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
+                             tags=['storageclass:local-data', 'phase:Pending', 'optional:tag1'], value=0)
+    aggregator.assert_metric(NAMESPACE + '.persistentvolumes.by_phase',
+                             tags=['storageclass:local-data', 'phase:Released', 'optional:tag1'], value=0)
+
     for metric in METRICS:
         aggregator.assert_metric(metric, hostname=HOSTNAMES.get(metric, None))
         for tag in TAGS.get(metric, []):

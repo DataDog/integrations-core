@@ -591,7 +591,7 @@ class KubernetesState(PrometheusCheck):
         else:
             self.log.error("Metric type %s unsupported for metric %s" % (message.type, message.name))
 
-    def kube_persistentvolume_phase(self, message, **kwargs):
+    def kube_persistentvolume_status_phase(self, message, **kwargs):
         """ The persistent volumes by phase. """
         metric_name = self.NAMESPACE + '.persistentvolumes.by_phase'
         by_phase_counter = Counter()
