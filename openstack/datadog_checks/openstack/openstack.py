@@ -220,7 +220,7 @@ class OpenStackScope(object):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", False)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
 
         auth_scope = cls.get_auth_scope(instance_config)
         identity = cls.get_user_identity(instance_config)
@@ -276,7 +276,7 @@ class OpenStackUnscoped(OpenStackScope):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = init_config.get("ssl_verify", True)
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
         _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
@@ -531,7 +531,7 @@ class OpenStackCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self._ssl_verify = init_config.get("ssl_verify", True)
+        self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
 
@@ -555,7 +555,7 @@ class OpenStackCheck(AgentCheck):
 
         self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
 
-        skip_proxy = not init_config.get('use_agent_proxy', True)
+        skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
 
         self.backoff = {}
@@ -690,7 +690,7 @@ class OpenStackCheck(AgentCheck):
 
         # FIXME: (aaditya) Check all networks defaults to true
         # until we can reliably assign agents to networks to monitor
-        if self.init_config.get('check_all_networks', True):
+        if is_affirmative(self.init_config.get('check_all_networks', True)):
             all_network_ids = set(self.get_all_network_ids())
 
             # Filter out excluded networks
