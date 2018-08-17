@@ -12,6 +12,8 @@ import requests
 import simplejson as json
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
+
 
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
@@ -1185,7 +1187,7 @@ class OpenStackCheck(AgentCheck):
             custom_tags = []
         try:
             instance_scope = self.ensure_auth_scope(instance)
-            split_hostname_on_first_period = instance.get('split_hostname_on_first_period', False)
+            split_hostname_on_first_period = is_affirmative(instance.get('split_hostname_on_first_period', False))
             if not instance_scope:
                 # Fast fail in the absence of an instance_scope
                 return
@@ -1209,8 +1211,8 @@ class OpenStackCheck(AgentCheck):
 
                 self._send_api_service_checks(scope, custom_tags)
 
-                collect_all_projects = instance.get("collect_all_projects", False)
-                collect_all_tenants = instance.get('collect_all_tenants', False)
+                collect_all_projects = is_affirmative(instance.get("collect_all_projects", False))
+                collect_all_tenants = is_affirmative(instance.get('collect_all_tenants', False))
 
                 self.log.debug("Running check with credentials: \n")
                 self.log.debug("Nova Url: %s", self.get_nova_endpoint())
