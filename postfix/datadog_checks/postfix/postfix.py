@@ -7,8 +7,8 @@
 import os
 
 # project
-from checks import AgentCheck
-from utils.subprocess_output import get_subprocess_output
+from datadog_checks.checks import AgentCheck
+from datadog_checks.utils.subprocess_output import get_subprocess_output
 
 class PostfixCheck(AgentCheck):
     """
