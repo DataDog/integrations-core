@@ -1,7 +1,4 @@
-# (C) Datadog, Inc. {year}
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-from codecs import open  # To use a consistent encoding
+{license_header}from codecs import open  # To use a consistent encoding
 from os import path
 
 from setuptools import setup
@@ -37,7 +34,7 @@ setup(
     author_email='{email_packages}',
 
     # License
-    license='BSD',
+    license='BSD-3-Clause',
 
     # See https://pypi.org/classifiers
     classifiers=[

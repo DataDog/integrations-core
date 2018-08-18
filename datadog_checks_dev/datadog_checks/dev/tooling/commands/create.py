@@ -116,8 +116,14 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
         email = 'help@datadoghq.com'
         email_packages = 'packages@datadoghq.com'
         install_info = (
-            'The {} check is included in the [Datadog Agent][2] package, so you do not\n'
-            'need to install anything else on your server.'.format(check_name_cap)
+            'The {check_name_cap} check is included in the [Datadog Agent][2] package, so you do not\n'
+            'need to install anything else on your server.'.format(check_name_cap=check_name_cap)
+        )
+        license_header = (
+            '# (C) Datadog, Inc. {year}\n'
+            '# All rights reserved\n'
+            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'
+            .format(year=str(datetime.now().year))
         )
         support_type = 'core'
         tox_base_dep = '../datadog_checks_base[deps]'
@@ -128,6 +134,7 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
             'The {} check is not included in the [Datadog Agent][2] package, so you will\n'
             'need to install it yourself.'.format(check_name_cap)
         )
+        license_header = ''
         support_type = 'contrib'
         tox_base_dep = 'datadog-checks-base[deps]'
 
@@ -139,11 +146,11 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
         'email': email,
         'email_packages': email_packages,
         'guid': uuid.uuid4(),
+        'license_header': license_header,
         'install_info': install_info,
         'repo_choice': repo_choice,
         'support_type': support_type,
         'tox_base_dep': tox_base_dep,
-        'year': str(datetime.now().year),
     }
 
     files = create_template_files(integration_type, root, config, read=not dry_run)

@@ -1,7 +1,4 @@
-# (C) Datadog, Inc. {year}
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.{check_name} import {check_class}
+{license_header}from datadog_checks.{check_name} import {check_class}
 
 
 def test_check(aggregator, instance):

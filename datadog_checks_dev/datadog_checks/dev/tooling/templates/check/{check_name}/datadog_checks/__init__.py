@@ -1,4 +1,1 @@
-# (C) Datadog, Inc. {year}
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-__path__ = __import__('pkgutil').extend_path(__path__, __name__)
+{license_header}__path__ = __import__('pkgutil').extend_path(__path__, __name__)
