@@ -89,6 +89,7 @@ Options:
 Commands:
   clean     Remove a project's build artifacts
   config    Manage the config file
+  create    Create scaffolding for a new integration
   dep       Manage dependencies
   manifest  Manage manifest files
   release   Manage the release of checks
@@ -227,11 +228,12 @@ Usage: ddev create [OPTIONS] NAME
   Create scaffolding for a new integration.
 
 Options:
-  -t, --type [check]   The type of integration to create
-  -l, --location TEXT  Where to create the integration
-  -q, --quiet          Show less output
-  -n, --dry-run        Only show what would be created
-  -h, --help           Show this message and exit.
+  -t, --type [check]      The type of integration to create
+  -l, --location TEXT     The directory where files will be written
+  -ni, --non-interactive  Disable prompting for fields
+  -q, --quiet             Show less output
+  -n, --dry-run           Only show what would be created
+  -h, --help              Show this message and exit.
 ```
 
 #### Dep

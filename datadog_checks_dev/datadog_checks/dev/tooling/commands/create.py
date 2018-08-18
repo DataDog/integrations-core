@@ -2,15 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import uuid
 from collections import defaultdict
-from datetime import datetime
 
 import click
 
 from .utils import CONTEXT_SETTINGS, abort, echo_info, echo_success
 from ..constants import get_root
-from ..create import create_template_files, get_valid_templates
+from ..create import construct_template_fields, create_template_files, get_valid_templates
 from ..utils import normalize_package_name
 from ...utils import resolve_path
 
@@ -95,12 +93,14 @@ def display_path_tree(path_tree):
     default='check',
     help='The type of integration to create'
 )
-@click.option('--location', '-l', help='Where to create the integration')
+@click.option('--location', '-l', help='The directory where files will be written')
+@click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
 @click.option('--quiet', '-q', is_flag=True, help='Show less output')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
-def create(ctx, name, integration_type, location, quiet, dry_run):
+def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
     """Create scaffolding for a new integration."""
+    repo_choice = ctx.obj['repo_choice']
     integration_name = normalize_package_name(name)
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
@@ -109,49 +109,14 @@ def create(ctx, name, integration_type, location, quiet, dry_run):
     if os.path.exists(integration_dir):
         abort('Path `{}` already exists!'.format(integration_dir))
 
-    check_name_cap = integration_name if integration_name.count('_') else integration_name.capitalize()
-    repo_choice = ctx.obj['repo_choice']
-    if repo_choice == 'core':
-        author = 'Datadog'
-        email = 'help@datadoghq.com'
-        email_packages = 'packages@datadoghq.com'
-        install_info = (
-            'The {check_name_cap} check is included in the [Datadog Agent][2] package, so you do not\n'
-            'need to install anything else on your server.'.format(check_name_cap=check_name_cap)
-        )
-        license_header = (
-            '# (C) Datadog, Inc. {year}\n'
-            '# All rights reserved\n'
-            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'
-            .format(year=str(datetime.now().year))
-        )
-        support_type = 'core'
-        tox_base_dep = '../datadog_checks_base[deps]'
-    else:
-        author = 'U.N. Owen'
-        email = email_packages = 'friend@datadog.community'
-        install_info = (
-            'The {} check is not included in the [Datadog Agent][2] package, so you will\n'
-            'need to install it yourself.'.format(check_name_cap)
-        )
-        license_header = ''
-        support_type = 'contrib'
-        tox_base_dep = 'datadog-checks-base[deps]'
+    template_fields = {}
+    if repo_choice != 'core' and not non_interactive:
+        template_fields['author'] = click.prompt('Your name')
+        template_fields['email'] = click.prompt('Your email')
+        template_fields['email_packages'] = template_fields['email']
+        click.echo()
 
-    config = {
-        'author': author,
-        'check_class': '{}Check'.format(''.join(part.capitalize() for part in integration_name.split('_'))),
-        'check_name': integration_name,
-        'check_name_cap': check_name_cap,
-        'email': email,
-        'email_packages': email_packages,
-        'guid': uuid.uuid4(),
-        'license_header': license_header,
-        'install_info': install_info,
-        'repo_choice': repo_choice,
-        'support_type': support_type,
-        'tox_base_dep': tox_base_dep,
-    }
+    config = construct_template_fields(integration_name, repo_choice, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
     file_paths = [file.file_path.replace('{}{}'.format(root, path_sep), '', 1) for file in files]

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from datetime import datetime
+from uuid import uuid4
 
 from ..utils import (
     create_file,
@@ -20,6 +22,55 @@ BINARY_EXTENSIONS = ('.png', )
 
 def get_valid_templates():
     return sorted(os.listdir(TEMPLATES_DIR))
+
+
+def construct_template_fields(integration_name, repo_choice, **kwargs):
+    check_name_cap = integration_name if integration_name.count('_') else integration_name.capitalize()
+
+    if repo_choice == 'core':
+        author = 'Datadog'
+        email = 'help@datadoghq.com'
+        email_packages = 'packages@datadoghq.com'
+        install_info = (
+            'The {check_name_cap} check is included in the [Datadog Agent][2] package, so you do not\n'
+            'need to install anything else on your server.'.format(check_name_cap=check_name_cap)
+        )
+        license_header = (
+            '# (C) Datadog, Inc. {year}\n'
+            '# All rights reserved\n'
+            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'
+            .format(year=str(datetime.now().year))
+        )
+        support_type = 'core'
+        tox_base_dep = '../datadog_checks_base[deps]'
+    else:
+        author = 'U.N. Owen'
+        email = email_packages = 'friend@datadog.community'
+        install_info = (
+            'The {} check is not included in the [Datadog Agent][2] package, so you will\n'
+            'need to install it yourself.'.format(check_name_cap)
+        )
+        license_header = ''
+        support_type = 'contrib'
+        tox_base_dep = 'datadog-checks-base[deps]'
+
+    config = {
+        'author': author,
+        'check_class': '{}Check'.format(''.join(part.capitalize() for part in integration_name.split('_'))),
+        'check_name': integration_name,
+        'check_name_cap': check_name_cap,
+        'email': email,
+        'email_packages': email_packages,
+        'guid': uuid4(),
+        'license_header': license_header,
+        'install_info': install_info,
+        'repo_choice': repo_choice,
+        'support_type': support_type,
+        'tox_base_dep': tox_base_dep,
+    }
+    config.update(kwargs)
+
+    return config
 
 
 def create_template_files(template_name, new_root, config, read=False):
