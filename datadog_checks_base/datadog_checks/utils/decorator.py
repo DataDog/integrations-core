@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from datadog_checks.config import is_affirmative
-from ddtrace import tracer
+from ddtrace import tracer, patch
 
 patch(requests=True)
 
