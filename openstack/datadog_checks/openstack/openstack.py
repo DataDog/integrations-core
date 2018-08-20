@@ -12,6 +12,7 @@ import requests
 import simplejson as json
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.config import is_affirmative
 from datadog_checks.utils.decorator import trace_func
 
 try:
