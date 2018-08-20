@@ -1,1 +1,2 @@
 datadog-checks-dev
+pika==0.10.0
